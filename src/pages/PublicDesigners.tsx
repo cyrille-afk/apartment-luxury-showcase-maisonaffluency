@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, Search, X, Layers, Instagram, Share2 } from "lucide-react";
+import { ChevronDown, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import Navigation from "@/components/Navigation";
@@ -13,6 +13,53 @@ import { trackCTA } from "@/lib/analytics";
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+// ─── Gallery room thumbnails (keyed by DB slug) ─────────────────────────────
+const CARD_THUMBNAILS: Record<string, string[]> = {
+  "adam-courts-okha": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085686/bedroom-alt_yk0j0d.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340485/AffluencySG_030_1_pncaim.jpg"],
+  "alexander-lamont": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773206399/AffluencySG_233-resized.jpg_scnulb.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774330072/AffluencySG_160_2_1_dwsgsn.jpg"],
+  "leo-aerts-alinea": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085743/dining-room_ey0bu5.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085856/intimate-lounge_tf4sm1.jpg"],
+  "apparatus-studio": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085919/small-room-personality_wvxz6y.png", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085690/bedroom-second_cyfmdj.jpg"],
+  "atelier-fevrier": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085716/bespoke-sofa_gxidtx.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772599861/IMG_2040_clunsw.jpg"],
+  "atelier-pendhapa": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085848/intimate-dining_ux4pee.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/v1774342970/6C3ABF9A-8DF6-4BAB-941D-A1343031CBBA_sw6tri.jpg"],
+  "bina-baitel": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087851/IMG_2133_wtxd62.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774336201/AffluencySG_191_2_jthubs.jpg"],
+  "bruno-de-maistre": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085726/boudoir_ll5spn.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg"],
+  "emmanuel-levet-stenne": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085743/dining-room_ey0bu5.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774330412/AffluencySG_107_2_s4nfeb.jpg"],
+  "entrelacs-creation": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085890/small-room-bedroom_mp8mdd.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/v1772085802/home-office-desk_g0ywv2.png"],
+  "felix-agostini": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_north,y_0,q_auto,f_auto/v1774348120/PHOTO-2024-11-15-15-13-10_rj8jic.jpg"],
+  "robicara": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340767/AffluencySG_178_1_esvjq2.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087460/AffluencySG_204_1_qbbpqb.jpg"],
+  "forest-giaconia": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085856/intimate-lounge_tf4sm1.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087851/IMG_2133_wtxd62.jpg"],
+  "garnier-linker": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772536395/AffluencySG_194-22.jpg_macpwj.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774336947/eaa39674-f12c-4297-8e77-3c4407f1dce9_oaceoq.jpg"],
+  "hamrei": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085864/intimate-table-detail_aqxvvm.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg"],
+  "jean-michel-frank": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/v1774343324/IMG_2491_cirrjv.jpg"],
+  "jeremy-maxwell-wintrebert": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085848/intimate-dining_ux4pee.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774338139/AffluencySG_131_1_fz2esj.jpg"],
+  "leo-sentou": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774339681/AffluencySG_191_3_1_r0dard.jpg"],
+  "kira": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085726/boudoir_ll5spn.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/v1774342944/IMG_2498_qwza44.jpg"],
+  "man-of-parts": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_north,q_auto,f_auto/v1772085907/small-room-chair_aobzyb.jpg"],
+  "milan-pekar": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774338136/AffluencySG_210_1_vdtca1.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085920/small-room-vase_s3nz5o.jpg"],
+  "nathalie-ziegler": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085726/boudoir_ll5spn.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/v1774343095/9105eaeb-d531-4e20-8efe-f1963c4e4356_n8wwgq.jpg"],
+  "olivia-cognet": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085877/living-room-hero_zxfcxl.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg"],
+  "pierre-bonnefille": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340153/AffluencySG_073_1_m4j7uv.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085533/art-master-bronze_hf6bad.jpg"],
+  "reda-amalou": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085890/small-room-bedroom_mp8mdd.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085919/small-room-personality_wvxz6y.png"],
+  "thierry-lemaire": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085716/bespoke-sofa_gxidtx.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085877/living-room-hero_zxfcxl.jpg"],
+  "tristan-auer": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085769/home-office-3_t39msw.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773200000/Screen_Shot_2026-03-11_at_11.11.33_AM_p0wtix.png"],
+};
+
+/** Parse names like "Atelier Février - Florian & Lisa Mukhia Pretet" into [displayName, parentLabel] */
+function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
+  // If DB has explicit founder → use it
+  if (item.founder && item.founder !== item.name) {
+    return { displayName: item.display_name || item.name, parentLabel: item.founder };
+  }
+  // If name contains " - " separator, split into atelier + designer(s)
+  const dashIdx = item.name.indexOf(" - ");
+  if (dashIdx > 0) {
+    const atelier = item.name.substring(0, dashIdx).trim();
+    const designer = item.name.substring(dashIdx + 3).trim();
+    return { displayName: item.display_name || designer, parentLabel: atelier };
+  }
+  return { displayName: item.display_name || item.name, parentLabel: null };
+}
 
 // ─── Sub-Designers Grid (for parent brands) ──────────────────────────────────
 function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: () => void }) {
@@ -189,7 +236,8 @@ function ParentBrandCard({
 
 // ─── Single Designer Card (portrait, with optional parent attribution) ───────
 function SingleDesignerCard({ item }: { item: Designer }) {
-  const hasParent = item.founder && item.founder !== item.name;
+  const { displayName, parentLabel } = parseDesignerDisplayName(item);
+  const thumbs = CARD_THUMBNAILS[item.slug] || [];
 
   return (
     <Link
@@ -214,23 +262,32 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 
         {/* Name overlay — top */}
         <div className="absolute inset-x-0 top-0 px-3 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-          {hasParent ? (
-            <>
-              <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
-                {item.display_name || item.name}
-              </p>
-              <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">
-                {item.founder}
-              </p>
-            </>
-          ) : (
-            <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
-              {item.display_name || item.name}
+          <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+            {displayName}
+          </p>
+          {parentLabel && (
+            <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">
+              {parentLabel}
             </p>
           )}
         </div>
 
-        {/* Badge removed — parent company already shown below designer name */}
+        {/* Gallery room thumbnails — bottom-right */}
+        {thumbs.length > 0 && (
+          <div className="absolute bottom-3 right-3 flex gap-1.5 z-10">
+            {thumbs.slice(0, 2).map((src, i) => (
+              <div
+                key={i}
+                className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                  <Plus className="w-2 h-2 text-white" />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Hover overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
