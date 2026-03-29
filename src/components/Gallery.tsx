@@ -812,21 +812,32 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </p>
                         <div className="flex-1 flex justify-end">
                           <div className="flex items-center gap-1">
-                            {([2, 4] as const).map((cols) => (
-                              <button
-                                key={cols}
-                                onClick={() => setGridCols(cols === 2 ? (gridCols <= 2 ? 1 : 2) : (gridCols >= 3 ? 4 : 3))}
-                                className={`flex items-center rounded p-0.5 transition-all ${
-                                  (cols === 2 && gridCols <= 2) || (cols === 4 && gridCols >= 3) ? 'opacity-100' : 'opacity-35 hover:opacity-60'
-                                }`}
-                                aria-label={cols === 2 ? 'Large grid (1–2 columns)' : 'Small grid (3–4 columns)'}
-                              >
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                  {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
-                                  {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
-                                </svg>
-                              </button>
-                            ))}
+                            {/* Left button: toggles between 1 and 2 columns, icon reflects current state */}
+                            <button
+                              onClick={() => setGridCols(gridCols <= 1 ? 2 : 1)}
+                              className={`flex items-center rounded p-0.5 transition-all ${gridCols <= 2 ? 'opacity-100' : 'opacity-35 hover:opacity-60'}`}
+                              aria-label={gridCols <= 1 ? 'Switch to 2 columns' : 'Switch to 1 column'}
+                            >
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                {gridCols <= 1
+                                  ? <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />
+                                  : (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)
+                                }
+                              </svg>
+                            </button>
+                            {/* Right button: toggles between 3 and 4 columns, icon reflects current state */}
+                            <button
+                              onClick={() => setGridCols(gridCols >= 4 ? 3 : 4)}
+                              className={`flex items-center rounded p-0.5 transition-all ${gridCols >= 3 ? 'opacity-100' : 'opacity-35 hover:opacity-60'}`}
+                              aria-label={gridCols >= 4 ? 'Switch to 3 columns' : 'Switch to 4 columns'}
+                            >
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                {gridCols >= 4
+                                  ? (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)
+                                  : (<><rect x="2" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1" fill="currentColor" /></>)
+                                }
+                              </svg>
+                            </button>
                           </div>
                         </div>
                       </div>
