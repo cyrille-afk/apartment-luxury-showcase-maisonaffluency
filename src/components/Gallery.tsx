@@ -942,7 +942,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             </button>
                             {/* Right button: toggles between 3 and 4 columns */}
                             <button
-                              onClick={() => setGridCols(gridCols >= 4 ? 3 : 4)}
+                              onClick={() => setGridCols(gridCols >= 4 ? 3 : gridCols === 3 ? 4 : 3)}
                               className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols >= 3 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
                               aria-label={gridCols >= 4 ? 'Switch to 3 columns' : 'Switch to 4 columns'}
                             >
