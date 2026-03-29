@@ -228,6 +228,112 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
+/** Desktop single-column carousel strip (mirrors mobile swipe UX) */
+const DesktopCarouselStrip = ({
+  section,
+  originalSectionIndex,
+  isInView,
+  hotspotCounts,
+  openLightbox,
+}: {
+  section: typeof galleryExperiences[number];
+  originalSectionIndex: number;
+  isInView: boolean;
+  hotspotCounts: Record<string, number>;
+  openLightbox: (sectionIndex: number, itemIndex: number) => void;
+}) => {
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const cardWidth = strip.scrollWidth / section.items.length;
+    const index = Math.round(strip.scrollLeft / cardWidth);
+    setActiveIdx(index);
+  }, [section.items.length]);
+
+  const scrollToIdx = (idx: number) => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const cardWidth = strip.scrollWidth / section.items.length;
+    strip.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 }}
+      className="hidden md:block"
+    >
+      <div
+        ref={stripRef}
+        onScroll={handleScroll}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+      >
+        {section.items.map((item, index) => (
+          <div
+            key={`${item.title}-${index}-desktop-strip`}
+            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10]"
+            onClick={() => openLightbox(originalSectionIndex, index)}
+          >
+            <img
+              src={item.image}
+              alt={`${item.title} — ${section.experience}`}
+              className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] rounded-sm"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-sm" />
+            {/* Title overlay */}
+            <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 pointer-events-none z-10">
+              <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                {item.title}
+              </p>
+            </div>
+            {/* Pulsating hotspot — first card */}
+            {index === 0 && (
+              <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]">
+                  <Plus className="w-2.5 h-2.5 text-white" />
+                  <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
+                </span>
+              </div>
+            )}
+            {/* Expand icon */}
+            <button
+              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+              className="absolute bottom-4 right-4 flex opacity-100 transition-opacity duration-300"
+              aria-label="View full image"
+            >
+              <span className="bg-black/60 text-white p-2 rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300">
+                <Maximize2 className="w-4 h-4" />
+              </span>
+            </button>
+          </div>
+        ))}
+      </div>
+      {/* Dot indicators */}
+      {section.items.length > 1 && (
+        <div className="flex justify-center gap-2 mt-3">
+          {section.items.map((_, dotIndex) => (
+            <button
+              key={dotIndex}
+              aria-label={`Go to photo ${dotIndex + 1}`}
+              onClick={() => scrollToIdx(dotIndex)}
+              className={`rounded-full transition-all duration-300 ${
+                activeIdx === dotIndex
+                  ? 'w-2 h-2 bg-primary'
+                  : 'w-2 h-2 bg-primary/30'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 interface GalleryProps {
   /** Trade mode: pass to GalleryHotspots as onAddToQuote */
   onHotspotAddToQuote?: (product: { product_name: string; designer_name: string | null; product_image_url: string | null; materials: string | null; dimensions: string | null }) => void;
