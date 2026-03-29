@@ -422,10 +422,11 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item }: { item: Designer }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number> }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
+  const fallbackGalleryIdx = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? null;
 
   return (
     <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
