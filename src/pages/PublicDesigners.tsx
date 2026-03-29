@@ -376,15 +376,17 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           )}
         </div>
 
-        {/* Share button — bottom-left */}
-        <button
-          onClick={(e) => handleDesignerShare(e, item, displayName)}
-          className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity"
-          aria-label={`Share ${displayName}`}
-        >
-          <Share2 className="h-3 w-3" />
-          <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
-        </button>
+        {/* Share button — bottom-left fallback when no thumbs */}
+        {thumbs.length === 0 && (
+          <button
+            onClick={(e) => handleDesignerShare(e, item, displayName)}
+            className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity"
+            aria-label={`Share ${displayName}`}
+          >
+            <Share2 className="h-3 w-3" />
+            <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
+          </button>
+        )}
 
         {/* Gallery room thumbnails — bottom-right with "on view" label above & share icon left */}
         {thumbs.length > 0 && (
