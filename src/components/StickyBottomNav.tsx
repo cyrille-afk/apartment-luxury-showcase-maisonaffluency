@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Image, Palette, Gem, Building2, MessageCircle } from "lucide-react";
+import { Image, Palette, Gem, MessageCircle } from "lucide-react";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
 
