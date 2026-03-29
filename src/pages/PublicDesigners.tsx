@@ -142,13 +142,10 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                   </div>
-                  <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                    <Layers className="h-2 w-2" />
-                    {parentName}
-                  </span>
                 </div>
-                <div className="px-2 py-1.5 bg-background">
-                  <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">{d.name}</p>
+                <div className="px-2 py-1.5 bg-background text-center">
+                  <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
+                  <p className="font-body text-[8px] text-muted-foreground/60 uppercase tracking-[0.1em] mt-0.5 line-clamp-1">{parentName}</p>
                 </div>
               </Link>
             ))}
