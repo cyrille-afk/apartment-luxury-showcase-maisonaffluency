@@ -559,12 +559,8 @@ function LetterGroup({
 // ─── Letter Carousel (horizontal swipe with dots) ────────────────────────────
 function LetterCarousel({
   designers,
-  openParent,
-  setOpenParent,
 }: {
   designers: Designer[];
-  openParent: string | null;
-  setOpenParent: (name: string | null) => void;
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
