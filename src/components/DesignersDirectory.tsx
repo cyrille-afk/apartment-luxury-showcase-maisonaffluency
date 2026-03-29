@@ -463,16 +463,17 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
               <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
               <div className="flex gap-1.5">
                 {thumbs.slice(0, 2).map((src, i) => {
-                  const galleryIdx = resolveThumbToGalleryIndex(src);
+                  const mappedGalleryIdx = resolveThumbToGalleryIndex(src);
+                  const resolvedGalleryIdx = mappedGalleryIdx ?? fallbackGalleryIdx;
                   return (
                     <button
                       key={i}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (galleryIdx !== null) {
+                        if (resolvedGalleryIdx !== null) {
                           // Store intent in sessionStorage so Gallery picks it up even if not yet mounted
-                          sessionStorage.setItem('openGalleryIndex', String(galleryIdx));
+                          sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
                           sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
                           sessionStorage.setItem('galleryFilterDesigner', item.name);
                           // Scroll to gallery section
@@ -484,7 +485,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
                           setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
                               detail: {
-                                index: galleryIdx,
+                                index: resolvedGalleryIdx,
                                 sourceId: `designer-card-${item.slug}`,
                                 filterDesigner: item.name,
                               },
