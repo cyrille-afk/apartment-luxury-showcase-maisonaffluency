@@ -660,8 +660,8 @@ export default function EditorialBiography({
       if (debugMediaOrder) debugEvents.push(`Leading text block (${leadingText.length} paragraph${leadingText.length > 1 ? "s" : ""})`);
 
       if (earlyMobileImage) {
-        // Show first two paragraphs before the image (place image after 2nd paragraph)
-        const splitAt = Math.min(2, leadingText.length);
+        // Show first paragraph before the image (place image after 1st paragraph)
+        const splitAt = Math.min(1, leadingText.length);
         elements.push(
           <div key="leading-text-before">
             {leadingText.slice(0, splitAt).map((p, pi) => (
