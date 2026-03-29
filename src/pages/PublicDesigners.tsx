@@ -586,7 +586,8 @@ function LetterCarousel({
     <div>
       <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
         <div className="flex -ml-4">
-          {cards.map(({ item, isAtelier }) => {
+          {designers.map((item) => {
+            const isAtelier = item.founder === item.name;
             const slideWidth = isAtelier
               ? "flex-[0_0_100%] md:flex-[0_0_40%] lg:flex-[0_0_40%]"
               : "flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%]";
@@ -594,7 +595,7 @@ function LetterCarousel({
             return (
               <div key={item.slug} className={`${slideWidth} min-w-0 pl-4`}>
                 {isAtelier ? (
-                  <ParentBrandCardWrapper
+                  <CarouselAtelierCard
                     item={item}
                     openParent={openParent}
                     setOpenParent={setOpenParent}
