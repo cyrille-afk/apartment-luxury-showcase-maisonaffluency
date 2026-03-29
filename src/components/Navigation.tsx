@@ -247,7 +247,7 @@ const Navigation = () => {
               </Button>
             </SheetTrigger>
             
-            <SheetContent side="left" className="w-full overflow-y-auto" aria-describedby={undefined}>
+            <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
               </div>
@@ -443,6 +443,36 @@ const Navigation = () => {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Sticky bottom toolbar — My Account / Wishlist / Contact Us */}
+              <div className="mt-auto sticky bottom-0 border-t border-border bg-muted/50 backdrop-blur-sm grid grid-cols-3 py-3">
+                <button
+                  onClick={() => { setIsOpen(false); user ? navigate("/trade") : setAuthGateOpen(true); }}
+                  className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">My Account</span>
+                </button>
+                <button
+                  onClick={() => { setIsOpen(false); navigate("/favorites"); }}
+                  className="relative flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
+                >
+                  <Heart className="h-5 w-5" />
+                  {favCount > 0 && (
+                    <span className="absolute -top-1 right-1/4 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-bold leading-none px-0.5">
+                      {favCount}
+                    </span>
+                  )}
+                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">Wishlist</span>
+                </button>
+                <button
+                  onClick={() => { setIsOpen(false); handleNavClick("#contact"); }}
+                  className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
+                >
+                  <Mail className="h-5 w-5" />
+                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">Contact Us</span>
+                </button>
               </div>
             </SheetContent>
           </Sheet>
