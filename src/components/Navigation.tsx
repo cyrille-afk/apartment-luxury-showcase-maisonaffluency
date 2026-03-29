@@ -227,11 +227,18 @@ const Navigation = () => {
             </SheetTrigger>
 
             {/* Brand — centered */}
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap pb-0.5">
-              <span className="font-brand text-[2rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                M <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
-              </span>
-            </button>
+            <div className="flex flex-col items-center pb-0.5">
+              <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
+                <span className="font-brand text-[2rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  M <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
+                </span>
+              </button>
+              <div className="flex items-center gap-2 -mt-0.5">
+                <span className="h-px w-5 bg-foreground" />
+                <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
+                <span className="h-px w-5 bg-foreground" />
+              </div>
+            </div>
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
