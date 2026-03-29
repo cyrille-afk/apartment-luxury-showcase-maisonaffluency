@@ -67,7 +67,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
 
   if (compact) {
     return (
-      <section ref={ref} id="apartment-tour" className="pt-4 md:pt-8 pb-2 md:pb-4 bg-white scroll-mt-32">
+      <section ref={ref} id="apartment-tour" className="pt-4 md:pt-8 pb-0 md:pb-0 bg-white scroll-mt-32">
         <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
