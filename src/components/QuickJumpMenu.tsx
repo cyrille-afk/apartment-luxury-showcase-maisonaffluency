@@ -18,7 +18,7 @@ const sections = [
   { id: "home", label: "Home", icon: Home },
   { id: "overview", label: "Overview", icon: FileText },
   { id: "gallery", label: "Gallery", icon: Image },
-  { id: "curating-team", label: "Team", icon: Users },
+  { id: "curating-team", label: "Curating Team", icon: Users },
   { id: "designers", label: "Designers", icon: Palette },
   { id: "collectibles", label: "Collectible Design", icon: Gem },
   { id: "details", label: "Trade", icon: FileText },
