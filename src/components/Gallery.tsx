@@ -275,7 +275,7 @@ const DesktopCarouselStrip = ({
         {section.items.map((item, index) => (
           <div
             key={`${item.title}-${index}-desktop-strip`}
-            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10]"
+            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10] shadow-[0_30px_70px_-10px_rgba(0,0,0,0.5)] rounded-sm"
             onClick={() => openLightbox(originalSectionIndex, index)}
           >
             <img
