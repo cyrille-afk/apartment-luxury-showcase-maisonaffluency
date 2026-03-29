@@ -727,7 +727,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           y: 0
         } : {}} transition={{
           duration: 0.8
-        }} className="mb-6 md:mb-10">
+        }} className="mb-2 md:mb-4">
             {activeCategory && (
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body mb-2">
                 {filteredExperiences.length} {filteredExperiences.length === 1 ? "scene" : "scenes"} · {activeCategory}
