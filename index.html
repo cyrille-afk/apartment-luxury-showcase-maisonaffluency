@@ -199,22 +199,29 @@
       })();
     </script>
 
-    <!-- Google Analytics - deferred to not block LCP, skipped if opted out -->
+    <!-- Google Analytics - deferred, blocked until GDPR consent -->
     <script>
+      window.__loadGA4 = function() {
+        if (window.__ga4Loaded) return;
+        window.__ga4Loaded = true;
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-HQEFDZDGTT';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-HQEFDZDGTT');
+        };
+      };
       window.addEventListener('load', function() {
         if (localStorage.getItem('ga_optout') === '1') return;
-        setTimeout(function() {
-          var s = document.createElement('script');
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-HQEFDZDGTT';
-          s.async = true;
-          document.head.appendChild(s);
-          s.onload = function() {
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-HQEFDZDGTT');
-          };
-        }, 3000);
+        var consent = localStorage.getItem('cookie_consent');
+        if (consent === 'accepted') {
+          setTimeout(window.__loadGA4, 3000);
+        }
       });
     </script>
     
