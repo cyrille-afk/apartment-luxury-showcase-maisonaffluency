@@ -2453,11 +2453,7 @@ function AlphaStrip({
                     <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{(() => { const count = getDesignerCount(brand.name); return count > 0 ? ` (${count})` : ""; })()}</span>
                     <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
                   </button>
-                ) : (
-                  <span className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-body text-[9px] uppercase tracking-[0.12em]">
-                    1 Designer
-                  </span>
-                )}
+                ) : null}
 
                 {/* Bottom-left: Share + Curators' Picks */}
                 <div className="absolute bottom-3 left-3 z-10 flex items-center gap-3">
