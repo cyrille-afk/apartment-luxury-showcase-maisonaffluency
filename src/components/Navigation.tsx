@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
@@ -106,6 +106,7 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
+  const [categoryPanelOpen, setCategoryPanelOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
@@ -268,69 +269,15 @@ const Navigation = () => {
                         style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
                       >
                         <button
-                          onClick={() => setCategoriesExpanded(!categoriesExpanded)}
+                          onClick={() => { setCategoryPanelOpen(true); setExpandedCategory(null); }}
                           className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                         >
                           <span className="flex items-center gap-1.5">
                             <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
                             All Categories
                           </span>
-                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${categoriesExpanded ? "rotate-90" : ""}`} />
+                          <ChevronRight className="h-4 w-4" />
                         </button>
-                        {categoriesExpanded && (
-                          <div className="mt-2">
-                            <div className="flex justify-end mb-3">
-                              <button
-                                onClick={() => {
-                                  window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                                }}
-                                className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
-                              >
-                                Clear All
-                              </button>
-                            </div>
-                            <div className="flex flex-col gap-0 ml-4 border-l border-border/30 pl-4">
-                              {CATEGORY_ORDER.map(cat => (
-                                <div key={cat} className="mb-3">
-                                  <button
-                                    onClick={() => setExpandedCategory(expandedCategory === cat ? null : cat)}
-                                    className="text-left font-body text-[15px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
-                                  >
-                                    {cat}
-                                    <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
-                                  </button>
-                                  {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
-                                    <div className="ml-4 space-y-0 border-l border-border/30 pl-4">
-                                      <button
-                                        onClick={() => {
-                                          setIsOpen(false);
-                                          window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                                          handleNavClick('#designers');
-                                        }}
-                                        className="block text-[12px] tracking-[0.15em] font-body text-foreground hover:text-primary transition-colors py-1.5 font-semibold"
-                                      >
-                                        All {cat}
-                                      </button>
-                                      {SUBCATEGORY_MAP[cat].map(sub => (
-                                        <button
-                                          key={sub}
-                                          onClick={() => { 
-                                            setIsOpen(false); 
-                                            window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); 
-                                            handleNavClick('#designers'); 
-                                          }}
-                                          className="block text-[12px] tracking-[0.15em] font-body text-foreground hover:text-[hsl(var(--accent))] transition-colors py-1.5 font-semibold"
-                                        >
-                                          {sub}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     )}
                   </Fragment>
@@ -458,6 +405,82 @@ const Navigation = () => {
                   <Mail className="h-5 w-5" />
                   <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">Contact Us</span>
                 </button>
+              </div>
+
+              {/* Category overlay panel — slides over the menu */}
+              <div
+                className={`absolute inset-0 bg-background z-10 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${categoryPanelOpen ? "translate-x-0" : "translate-x-full"}`}
+              >
+                {/* Dark header bar */}
+                <div className="bg-foreground text-background flex items-center px-4 py-3.5">
+                  <button
+                    onClick={() => setCategoryPanelOpen(false)}
+                    className="flex items-center gap-1 text-background/80 hover:text-background transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <span className="flex-1 text-center font-body text-sm uppercase tracking-[0.2em] font-semibold">
+                    All Categories
+                  </span>
+                  <div className="w-6" />
+                </div>
+
+                {/* Category list */}
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  <div className="flex justify-end mb-4">
+                    <button
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                        setCategoryPanelOpen(false);
+                        setIsOpen(false);
+                      }}
+                      className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1.5 rounded-full bg-background border border-border hover:border-foreground text-muted-foreground hover:text-foreground"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+
+                  {CATEGORY_ORDER.map(cat => (
+                    <div key={cat} className="border-b border-border/30">
+                      <button
+                        onClick={() => setExpandedCategory(expandedCategory === cat ? null : cat)}
+                        className="text-left font-body text-[15px] uppercase tracking-wide transition-colors py-3.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
+                      >
+                        {cat}
+                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
+                      </button>
+                      {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
+                        <div className="pb-3 space-y-0">
+                          <button
+                            onClick={() => {
+                              setCategoryPanelOpen(false);
+                              setIsOpen(false);
+                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                              handleNavClick('#designers');
+                            }}
+                            className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
+                          >
+                            All {cat}
+                          </button>
+                          {SUBCATEGORY_MAP[cat].map(sub => (
+                            <button
+                              key={sub}
+                              onClick={() => {
+                                setCategoryPanelOpen(false);
+                                setIsOpen(false);
+                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
+                                handleNavClick('#designers');
+                              }}
+                              className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
+                            >
+                              {sub}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
