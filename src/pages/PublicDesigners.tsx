@@ -272,7 +272,7 @@ function ParentBrandCard({
 function SingleDesignerCard({ item }: { item: Designer }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
-  const instagramLink = (item.links as any[])?.find((l: any) => l.type === "instagram")?.url;
+  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
 
   return (
     <Link
