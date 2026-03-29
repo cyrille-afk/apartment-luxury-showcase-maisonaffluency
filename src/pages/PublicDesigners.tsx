@@ -249,7 +249,7 @@ function ParentBrandCard({
         </div>
 
         {/* Origin label under badge */}
-        {item.source && (
+        {item.source && item.source !== "partner" && (
           <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 w-14 md:w-16 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest text-center">
             {item.source}
           </p>
