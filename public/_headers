@@ -24,8 +24,15 @@
 # HTML — always revalidate
 /index.html
   Cache-Control: no-cache
+  X-Robots-Tag: all
 /
   Cache-Control: no-cache
+  X-Robots-Tag: all
+
+# OG bridge files — allow crawlers
+/*.html
+  Cache-Control: no-cache
+  X-Robots-Tag: all
 
 # All pages — force revalidation, security & performance headers
 /*
