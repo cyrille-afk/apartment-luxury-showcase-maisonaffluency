@@ -1086,31 +1086,49 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
           {/* Mobile: Directory */}
           <div className="md:hidden">
-            {/* Mobile A-Z bar */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-3 mb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
-              {LETTERS.map((letter) => {
-                const isActive = activeLetters.has(letter);
-                return (
-                  <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
-                );
-              })}
-            </div>
+            {!filteredPicks && (
+              /* Mobile A-Z bar — hide when showing product picks */
+              <div className="flex items-center gap-1 overflow-x-auto pb-3 mb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
+                {LETTERS.map((letter) => {
+                  const isActive = activeLetters.has(letter);
+                  return (
+                    <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
+                  );
+                })}
+              </div>
+            )}
             {isLoading && (
               <div className="flex items-center justify-center py-32">
                 <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
             )}
-            {!isLoading && filteredItems.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-32 text-center">
-                <p className="font-body text-sm text-muted-foreground">{searchQuery ? "No designers match your search." : "Content coming soon."}</p>
-              </div>
-            )}
-            {!isLoading && alphaGroups.length > 0 && (
-              <div>
-                {alphaGroups.map(([letter, designers]) => (
-                  <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
-                ))}
-              </div>
+            {!isLoading && filteredPicks ? (
+              filteredPicks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-32 text-center">
+                  <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 grid-cols-2">
+                  {filteredPicks.map((pick) => (
+                    <PickCard key={pick.id} pick={pick} />
+                  ))}
+                </div>
+              )
+            ) : (
+              <>
+                {!isLoading && filteredItems.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-32 text-center">
+                    <p className="font-body text-sm text-muted-foreground">{searchQuery ? "No designers match your search." : "Content coming soon."}</p>
+                  </div>
+                )}
+                {!isLoading && alphaGroups.length > 0 && (
+                  <div>
+                    {alphaGroups.map(([letter, designers]) => (
+                      <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
