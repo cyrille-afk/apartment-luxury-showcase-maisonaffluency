@@ -963,7 +963,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           {/* Results count */}
           {(searchQuery || selectedCategory) && (
             <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
-              {totalCount} designer{totalCount !== 1 ? 's' : ''} found
+              {filteredPicks
+                ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
+                : `${totalCount} designer${totalCount !== 1 ? 's' : ''} found`}
               {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
               {selectedSubcategory && <span> · {selectedSubcategory}</span>}
             </p>
