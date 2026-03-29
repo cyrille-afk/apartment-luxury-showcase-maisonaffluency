@@ -628,8 +628,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
-  const hasFilter = !!(selectedCategory || selectedSubcategory);
-  const { data: fullPicks = [] } = useFullCuratorPicks(hasFilter);
   const [searchQuery, setSearchQuery] = useState("");
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
