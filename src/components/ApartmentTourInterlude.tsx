@@ -73,7 +73,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="flex flex-col md:flex-row gap-4 md:gap-8 items-start"
+            className="flex flex-col md:flex-row gap-4 md:gap-8 items-stretch md:items-start"
           >
             {/* Title — above video on mobile, left side on desktop */}
             <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
