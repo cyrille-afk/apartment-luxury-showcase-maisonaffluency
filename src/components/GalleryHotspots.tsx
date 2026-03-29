@@ -143,7 +143,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   useEffect(() => {
     const fetchDbPicks = async () => {
       const { data } = await supabase
-        .from("designer_curator_picks")
+        .from("designer_curator_picks_public")
         .select("title, edition, pdf_url");
       if (data) setDbPicks(data);
     };

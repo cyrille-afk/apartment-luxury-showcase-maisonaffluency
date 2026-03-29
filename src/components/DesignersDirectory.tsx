@@ -102,7 +102,7 @@ function useDesignerCategories() {
     queryKey: ["designer-category-map"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("designer_curator_picks")
+        .from("designer_curator_picks_public")
         .select("designer_id, category, subcategory, tags");
       if (error) throw error;
       return data || [];
