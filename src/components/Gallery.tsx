@@ -1182,8 +1182,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           className="absolute bottom-2 right-2 md:bottom-4 md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
-                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols >= 3 ? 'p-1.5' : 'p-2'}`}>
-                            <Maximize2 className={`${gridCols >= 3 ? 'w-3 h-3' : 'w-4 h-4'}`} />
+                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols === 2 ? 'p-1.5' : gridCols >= 3 ? 'p-1' : 'p-2'}`}>
+                            <Maximize2 className={`${gridCols === 2 ? 'w-3.5 h-3.5' : gridCols >= 3 ? 'w-2.5 h-2.5' : 'w-4 h-4'}`} />
                           </span>
                         </button>
                       </div>
