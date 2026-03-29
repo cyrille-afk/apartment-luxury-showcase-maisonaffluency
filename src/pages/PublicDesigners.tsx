@@ -934,6 +934,7 @@ const PublicDesigners = () => {
                   letter={letter}
                   designers={designers}
                   forceOpen={forcedLetters.has(letter)}
+                  parentDesignerCountByName={parentDesignerCountByName}
                 />
               ))}
             </div>
