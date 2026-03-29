@@ -398,13 +398,16 @@ const Navigation = () => {
                   )}
                   <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">Wishlist</span>
                 </button>
-                <button
-                  onClick={() => { setIsOpen(false); handleNavClick("#contact"); }}
+                <a
+                  href="https://wa.me/6591393850"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => { setIsOpen(false); trackCTA.whatsapp("Mobile Menu"); }}
                   className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
-                  <Mail className="h-5 w-5" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">Contact Us</span>
-                </button>
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">WhatsApp</span>
+                </a>
               </div>
 
               {/* Category overlay panel — slides over the menu */}
