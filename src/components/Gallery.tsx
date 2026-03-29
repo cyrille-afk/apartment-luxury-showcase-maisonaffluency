@@ -300,11 +300,14 @@ const DesktopCarouselStrip = ({
                 </span>
               </div>
             )}
-            {/* +3 more bubble on first photo */}
-            {index === 0 && section.items.length > 1 && (
-              <div className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full">
-                +{section.items.length - 1} more
-              </div>
+            {/* +N more bubble — shows remaining photos, clicks to next slide */}
+            {index < section.items.length - 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); scrollToIdx(index + 1); }}
+                className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full hover:bg-black/70 transition-all duration-300"
+              >
+                +{section.items.length - 1 - index} more
+              </button>
             )}
             {/* Expand icon */}
             <button
