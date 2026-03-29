@@ -581,7 +581,7 @@ function LetterCarousel({
 
             if (isAtelier) {
               return (
-                <div key={item.slug} className="flex-none w-[calc(50%-8px)] md:w-[calc(33.333%-14px)] lg:w-[calc(20%-16px)]">
+                <div key={item.slug} className="flex-none w-full md:w-[calc(66.666%-6px)] lg:w-[calc(40%-12px)]">
                   <ParentBrandCardWrapper
                     item={item}
                     openParent={openParent}
