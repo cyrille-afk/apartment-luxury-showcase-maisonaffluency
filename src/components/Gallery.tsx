@@ -717,8 +717,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     minDistance: minSwipeDistance,
   });
   return <>
-      <section id="gallery" ref={ref} className="pt-0 pb-16 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-white scroll-mt-24">
-        <div className="mx-auto max-w-7xl">
+       <section id="gallery" ref={ref} className="pt-0 pb-16 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-white scroll-mt-24">
+        <div className="mx-auto max-w-6xl">
           <motion.div initial={{
           opacity: 0,
           y: 30
