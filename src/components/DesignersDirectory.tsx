@@ -613,6 +613,57 @@ const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
   "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
 };
 
+// ─── Product Pick Card (shown when category filter is active) ────────────────
+const PickCard = ({ pick }: { pick: PickItem }) => {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (pick.designer_slug) navigate(`/designers/${pick.designer_slug}`);
+      }}
+      className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+    >
+      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+        {pick.image_url ? (
+          <img
+            src={pick.image_url}
+            alt={pick.title}
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+            <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+            {pick.title}
+          </p>
+          {pick.subtitle && (
+            <p className="font-body text-[10px] text-white/70 mt-0.5">{pick.subtitle}</p>
+          )}
+          <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
+            {pick.designer_name}
+          </p>
+        </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+          {pick.materials && (
+            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-2 max-w-[90%]">{pick.materials}</p>
+          )}
+          {pick.dimensions && (
+            <p className="font-body text-[10px] text-white/60 text-center mb-4">{pick.dimensions}</p>
+          )}
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+            View
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+};
+
 // ─── Main Directory Component ────────────────────────────────────────────────
 interface DesignersDirectoryProps {
   initialLetter?: string;
