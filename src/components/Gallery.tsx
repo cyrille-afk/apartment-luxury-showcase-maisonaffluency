@@ -998,42 +998,27 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                       </div>
                     </div>
-                    {/* Mobile: title left-aligned with share */}
-                    <div className="md:hidden flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
-                      <button
-                        onClick={() => {
-                          const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                          const titleSlug = slugify(firstItem?.title || '');
-                          const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                          const text = `${section.experience} — Maison Affluency`;
-                          window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                        }}
-                        className="p-1.5 text-foreground hover:text-primary transition-colors"
-                        aria-label={`Share ${section.experience}`}
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Mobile: title left-aligned with share */}
-                    <div className="md:hidden flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
-                      <button
-                        onClick={() => {
-                          const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                          const titleSlug = slugify(firstItem?.title || '');
-                          const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                          const text = `${section.experience} — Maison Affluency`;
-                          window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                        }}
-                        className="p-1.5 text-foreground hover:text-primary transition-colors"
-                        aria-label={`Share ${section.experience}`}
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
+                    {/* Mobile: title + subtitle centred with share */}
+                    <div className="md:hidden flex flex-col items-center text-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
+                        <button
+                          onClick={() => {
+                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
+                            const titleSlug = slugify(firstItem?.title || '');
+                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
+                            const text = `${section.experience} — Maison Affluency`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                          }}
+                          className="p-1.5 text-foreground hover:text-primary transition-colors"
+                          aria-label={`Share ${section.experience}`}
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {section.subtitle && (
+                        <p className="text-sm text-muted-foreground font-body italic mt-0.5">{section.subtitle}</p>
+                      )}
                     </div>
                     {/* Desktop: centred title + share, centred subtitle */}
                     <div className="hidden md:flex flex-col items-center text-center mb-3">
