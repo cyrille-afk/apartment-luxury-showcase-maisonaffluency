@@ -202,6 +202,7 @@ const App = () => {
                     <Toaster />
                     <Sonner />
                     <PageTracker />
+                    <CookieConsent />
                   </TooltipProvider>
                 </Suspense>
               )}
