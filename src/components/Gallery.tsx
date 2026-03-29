@@ -586,6 +586,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     if (!activeCategory) return galleryExperiences;
     return galleryExperiences.filter(section => section.categories.includes(activeCategory));
   }, [activeCategory]);
+
+  // Mobile section pill filter — null means "all"
+  const [mobileSectionIndex, setMobileSectionIndex] = useState<number | null>(null);
+  const mobilePillRef = useRef<HTMLDivElement>(null);
+
+  const mobileFilteredExperiences = useMemo(() => {
+    if (mobileSectionIndex === null) return filteredExperiences;
+    const section = filteredExperiences[mobileSectionIndex];
+    return section ? [section] : filteredExperiences;
+  }, [filteredExperiences, mobileSectionIndex]);
   // Track active dot per mobile scroll strip (one index per section)
   const [activeScrollIndices, setActiveScrollIndices] = useState<number[]>(
     galleryExperiences.map(() => 0)
@@ -857,9 +867,39 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             )}
           </motion.div>
 
+          {/* Mobile: horizontal pill bar for section filtering */}
+          <div className="md:hidden mb-4 -mx-4 px-4">
+            <div ref={mobilePillRef} className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 snap-x">
+              <button
+                onClick={() => setMobileSectionIndex(null)}
+                className={`shrink-0 snap-start font-body text-[10px] uppercase tracking-[0.12em] px-3.5 py-1.5 rounded-full border transition-all duration-200 ${
+                  mobileSectionIndex === null
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                }`}
+              >
+                All
+              </button>
+              {filteredExperiences.map((section, idx) => (
+                <button
+                  key={section.experience}
+                  onClick={() => setMobileSectionIndex(mobileSectionIndex === idx ? null : idx)}
+                  className={`shrink-0 snap-start font-body text-[10px] uppercase tracking-[0.12em] px-3.5 py-1.5 rounded-full border transition-all duration-200 whitespace-nowrap ${
+                    mobileSectionIndex === idx
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {section.experience}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {(() => {
             const firstHotspotSectionIdx = galleryExperiences.findIndex(s => !s.items.some(i => i.description));
-            return filteredExperiences.map((section, sectionIndex) => {
+            const displayExperiences = isMobile ? mobileFilteredExperiences : filteredExperiences;
+            return displayExperiences.map((section, sectionIndex) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
             return <div key={section.experience} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''}`}>
