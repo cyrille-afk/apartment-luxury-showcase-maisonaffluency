@@ -564,7 +564,13 @@ function LetterCarousel({
     align: "start",
     slidesToScroll: 5,
     containScroll: "trimSnaps",
-    dragFree: false,
+  });
+
+  // Filter out atelier items that would render as null (≤1 sub-designer handled by wrapper)
+  // Build flat list of renderable cards
+  const cards = designers.map((item) => {
+    const isAtelier = item.founder === item.name;
+    return { item, isAtelier };
   });
 
   // Find open parent for sub-grid rendering
@@ -572,26 +578,24 @@ function LetterCarousel({
 
   return (
     <div>
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
-          {designers.map((item) => {
-            const isAtelier = item.founder === item.name;
+      <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
+        <div className="flex -ml-4">
+          {cards.map(({ item, isAtelier }) => {
+            const slideWidth = isAtelier
+              ? "flex-[0_0_100%] md:flex-[0_0_40%] lg:flex-[0_0_40%]"
+              : "flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%]";
 
-            if (isAtelier) {
-              return (
-                <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_40%] lg:flex-[0_0_40%] min-w-0 pl-4 first:pl-0">
+            return (
+              <div key={item.slug} className={`${slideWidth} min-w-0 pl-4`}>
+                {isAtelier ? (
                   <ParentBrandCardWrapper
                     item={item}
                     openParent={openParent}
                     setOpenParent={setOpenParent}
                   />
-                </div>
-              );
-            }
-
-            return (
-              <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%] min-w-0 pl-4 first:pl-0">
-                <SingleDesignerCard item={item} />
+                ) : (
+                  <SingleDesignerCard item={item} />
+                )}
               </div>
             );
           })}
