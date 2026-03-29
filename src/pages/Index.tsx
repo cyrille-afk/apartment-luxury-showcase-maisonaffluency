@@ -417,12 +417,12 @@ const Index = () => {
 
         {showBelowFoldSections ? (
           <>
-            <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
+            <section id="overview" className="scroll-mt-20 md:scroll-mt-24 bg-white">
               <Suspense fallback={null}>
                 <ApartmentTourInterlude compact />
               </Suspense>
             </section>
-            <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
+            <section id="gallery" className="scroll-mt-20 md:scroll-mt-24 bg-white">
               <Suspense fallback={<SectionFallback />}>
                 <Gallery />
               </Suspense>
