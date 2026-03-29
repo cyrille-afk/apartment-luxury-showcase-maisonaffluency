@@ -644,11 +644,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         if (!map[cat]) map[cat] = new Set();
         map[cat].add(did);
       }
-      // Match subcategory by tags
+      // Match subcategory by tags, category, or subcategory field
       const tags = (pick.tags as string[]) || [];
+      const pickSub = (pick.subcategory as string) || "";
       for (const [subName, matchTags] of Object.entries(SUBCATEGORY_TO_TAGS)) {
         const matches = tags.some(t => matchTags.some(mt => t.toLowerCase() === mt.toLowerCase())) ||
-          matchTags.some(mt => cat?.toLowerCase() === mt.toLowerCase());
+          matchTags.some(mt => cat?.toLowerCase() === mt.toLowerCase()) ||
+          pickSub.toLowerCase() === subName.toLowerCase() ||
+          matchTags.some(mt => pickSub.toLowerCase() === mt.toLowerCase());
         if (matches) {
           if (!subMap[subName]) subMap[subName] = new Set();
           subMap[subName].add(did);
