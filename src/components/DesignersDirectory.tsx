@@ -1,11 +1,18 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Instagram, Share2, Plus, SlidersHorizontal } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import CategorySidebar from "@/components/CategorySidebar";
 import { trackCTA } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { withOgCacheBust } from "@/lib/whatsapp-share";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -89,6 +96,21 @@ const INSTAGRAM_LINKS: Record<string, string> = {
   "jean-michel-frank": "https://www.instagram.com/ecart.paris/",
 };
 
+// ─── Hook: fetch designer→category mapping from curator picks ────────────────
+function useDesignerCategories() {
+  return useQuery({
+    queryKey: ["designer-category-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designer_curator_picks")
+        .select("designer_id, category, subcategory, tags");
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
   if (item.founder && item.founder !== item.name) {
@@ -156,13 +178,7 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
                       <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                     </div>
                     {igUrl && (
-                      <a
-                        href={igUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all"
-                      >
+                      <a href={igUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all">
                         <Instagram className="h-2.5 w-2.5" />
                       </a>
                     )}
@@ -202,17 +218,7 @@ function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: s
 }
 
 // ─── Parent Brand Card ───────────────────────────────────────────────────────
-function ParentBrandCard({
-  item,
-  isOpen,
-  onToggle,
-  designerCount,
-}: {
-  item: Designer;
-  isOpen: boolean;
-  onToggle: () => void;
-  designerCount: number;
-}) {
+function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number }) {
   const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
 
   const handleShare = (e: React.MouseEvent) => {
@@ -234,68 +240,32 @@ function ParentBrandCard({
     <div className="col-span-2 md:col-span-2">
       <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[11/7]">
         {(item.hero_image_url || item.image_url) && (
-          <img
-            src={item.hero_image_url || item.image_url}
-            alt={item.name}
-            loading="lazy"
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover"
-          />
+          <img src={item.hero_image_url || item.image_url} alt={item.name} loading="lazy" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
         )}
-        <div className={`absolute inset-0 transition-all duration-300 ${
-          (item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"
-        }`} />
-
+        <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
         <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
           {item.logo_url ? (
             <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" />
           ) : (
-            <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">
-              {item.display_name || item.name}
-            </span>
+            <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{item.display_name || item.name}</span>
           )}
         </div>
-
         {instagramLink && (
-          <a
-            href={instagramLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`${item.name} on Instagram`}
-          >
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => e.stopPropagation()} aria-label={`${item.name} on Instagram`}>
             <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </a>
         )}
-
-        <button
-          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
-          className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
-        >
+        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all">
           <Layers className="h-3 w-3" />
-          <span className="font-body text-[9px] uppercase tracking-[0.12em]">
-            Designers{designerCount > 0 ? ` (${designerCount})` : ""}
-          </span>
+          <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
           <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
         </button>
-
-        <button
-          onClick={handleShare}
-          className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
-          aria-label={`Share ${item.name}`}
-        >
+        <button onClick={handleShare} className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity" aria-label={`Share ${item.name}`}>
           <Share2 className="h-3 w-3" />
           <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
         </button>
-
-        <Link
-          to={`/designers/${item.slug}`}
-          className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        >
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-            View Profile
-          </span>
+        <Link to={`/designers/${item.slug}`} className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
         </Link>
       </div>
     </div>
@@ -309,83 +279,41 @@ function SingleDesignerCard({ item }: { item: Designer }) {
   const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
 
   return (
-    <Link
-      to={`/designers/${item.slug}`}
-      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
-    >
+    <Link to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {instagramLink && (
-          <a
-            href={instagramLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`${item.name} on Instagram`}
-          >
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => e.stopPropagation()} aria-label={`${item.name} on Instagram`}>
             <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white drop-shadow-md" />
           </a>
         )}
         {item.image_url ? (
-          <img
-            src={item.image_url}
-            alt={item.name}
-            draggable={false}
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-            loading="lazy"
-          />
+          <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
-            <span className="font-display text-3xl text-muted-foreground/20">
-              {item.name.charAt(0)}
-            </span>
+            <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
           </div>
         )}
-
         <div className="absolute inset-x-0 top-0 px-3 pr-10 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-          <p className={`font-display text-white tracking-wide leading-tight drop-shadow-sm ${
-            displayName.length > 20 ? "text-[11px] md:text-xs" : "text-xs md:text-sm"
-          }`}>
-            {displayName}
-          </p>
-          {parentLabel && (
-            <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">
-              {parentLabel}
-            </p>
-          )}
+          <p className={`font-display text-white tracking-wide leading-tight drop-shadow-sm ${displayName.length > 20 ? "text-[11px] md:text-xs" : "text-xs md:text-sm"}`}>{displayName}</p>
+          {parentLabel && <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">{parentLabel}</p>}
         </div>
-
         {thumbs.length === 0 && (
-          <button
-            onClick={(e) => handleDesignerShare(e, item, displayName)}
-            className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity"
-            aria-label={`Share ${displayName}`}
-          >
+          <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
             <Share2 className="h-3 w-3" />
             <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
           </button>
         )}
-
         {thumbs.length > 0 && (
           <div className="absolute bottom-3 right-3 z-10 flex items-end gap-2">
-            <button
-              onClick={(e) => handleDesignerShare(e, item, displayName)}
-              className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity mb-1"
-              aria-label={`Share ${displayName}`}
-            >
+            <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity mb-1" aria-label={`Share ${displayName}`}>
               <Share2 className="h-3.5 w-3.5" />
               <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
             </button>
             <div className="flex flex-col items-center gap-1.5">
-              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">
-                ON VIEW
-              </span>
+              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
               <div className="flex gap-1.5">
                 {thumbs.slice(0, 2).map((src, i) => (
-                  <div
-                    key={i}
-                    className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
-                  >
+                  <div key={i} className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md">
                     <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
                     <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
                       <Plus className="w-2 h-2 text-white" />
@@ -396,11 +324,8 @@ function SingleDesignerCard({ item }: { item: Designer }) {
             </div>
           </div>
         )}
-
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-            View Portrait
-          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Portrait</span>
         </div>
       </div>
     </Link>
@@ -413,31 +338,14 @@ function CarouselDots({ count, selected, onSelect }: { count: number; selected: 
   return (
     <div className="flex justify-center gap-1.5 mt-3">
       {Array.from({ length: count }).map((_, i) => (
-        <button
-          key={i}
-          onClick={() => onSelect(i)}
-          className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-            i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"
-          }`}
-          aria-label={`Go to page ${i + 1}`}
-        />
+        <button key={i} onClick={() => onSelect(i)} className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"}`} aria-label={`Go to page ${i + 1}`} />
       ))}
     </div>
   );
 }
 
 // ─── Letter Group ────────────────────────────────────────────────────────────
-function LetterGroup({
-  letter,
-  designers,
-  forceOpen,
-  parentDesignerCountByName,
-}: {
-  letter: string;
-  designers: Designer[];
-  forceOpen?: boolean;
-  parentDesignerCountByName: Record<string, number>;
-}) {
+function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }: { letter: string; designers: Designer[]; forceOpen?: boolean; parentDesignerCountByName: Record<string, number> }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
@@ -450,70 +358,41 @@ function LetterGroup({
       <div className="flex items-center gap-3 mb-4 px-1">
         <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">
-          {designers.length}
-        </span>
+        <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">{designers.length}</span>
       </div>
-
       <AnimatePresence>
         {isRevealed ? (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
             {needsCarousel ? (
-              <LetterCarousel
-                letter={letter}
-                designers={designers}
-                openParent={openParent}
-                setOpenParent={setOpenParent}
-                parentDesignerCountByName={parentDesignerCountByName}
-              />
+              <LetterCarousel letter={letter} designers={designers} openParent={openParent} setOpenParent={setOpenParent} parentDesignerCountByName={parentDesignerCountByName} />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
                   const designerCount = parentDesignerCountByName[item.name] ?? 0;
                   const isParentBrand = item.founder === item.name && designerCount > 0;
-
                   if (isParentBrand) {
                     const isOpen = openParent === item.name;
                     return (
                       <React.Fragment key={item.slug}>
-                        <ParentBrandCard
-                          item={item}
-                          isOpen={isOpen}
-                          onToggle={() => setOpenParent(isOpen ? null : item.name)}
-                          designerCount={designerCount}
-                        />
+                        <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />
                         <AnimatePresence>
                           {isOpen && (
                             <div className="col-span-2 md:col-span-3 lg:col-span-5">
-                              <ParentSubGrid
-                                key={item.name}
-                                parentName={item.name}
-                                onClose={() => setOpenParent(null)}
-                              />
+                              <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} />
                             </div>
                           )}
                         </AnimatePresence>
                       </React.Fragment>
                     );
                   }
-
                   return <SingleDesignerCard key={item.slug} item={item} />;
                 })}
               </div>
             )}
           </motion.div>
         ) : (
-          <div
-            className="flex items-center justify-center py-12 text-muted-foreground/30"
-            style={{ minHeight: `${Math.ceil(designers.length / 5) * 280}px` }}
-          >
-            <span className="font-body text-xs tracking-widest uppercase">
-              {designers.length} designer{designers.length !== 1 ? "s" : ""}
-            </span>
+          <div className="flex items-center justify-center py-12 text-muted-foreground/30" style={{ minHeight: `${Math.ceil(designers.length / 5) * 280}px` }}>
+            <span className="font-body text-xs tracking-widest uppercase">{designers.length} designer{designers.length !== 1 ? "s" : ""}</span>
           </div>
         )}
       </AnimatePresence>
@@ -522,19 +401,7 @@ function LetterGroup({
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({
-  letter,
-  designers,
-  openParent,
-  setOpenParent,
-  parentDesignerCountByName,
-}: {
-  letter: string;
-  designers: Designer[];
-  openParent: string | null;
-  setOpenParent: (name: string | null) => void;
-  parentDesignerCountByName: Record<string, number>;
-}) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number> }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -544,7 +411,6 @@ function LetterCarousel({
     if (window.innerWidth >= 768) return 3;
     return 2;
   });
-
   const dragStartXRef = useRef(0);
   const dragStartScrollLeftRef = useRef(0);
   const didDragRef = useRef(false);
@@ -565,30 +431,23 @@ function LetterCarousel({
       const isParentBrand = item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
       return isParentBrand ? 2 : 1;
     };
-
     const pool = [...designers];
     const builtPages: Designer[][] = [];
-
     while (pool.length > 0) {
       const page: Designer[] = [];
       let usedSlots = 0;
-
       while (usedSlots < slotsPerPage && pool.length > 0) {
         const remaining = slotsPerPage - usedSlots;
         const nextIndex = pool.findIndex((candidate) => getSlotCost(candidate) <= remaining);
         if (nextIndex === -1) break;
-
         const [picked] = pool.splice(nextIndex, 1);
         if (!picked) break;
-
         page.push(picked);
         usedSlots += getSlotCost(picked);
       }
-
       if (page.length > 0) builtPages.push(page);
       else break;
     }
-
     return builtPages;
   }, [designers, parentDesignerCountByName, slotsPerPage]);
 
@@ -634,8 +493,7 @@ function LetterCarousel({
 
   const endDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
-    const viewport = viewportRef.current;
-    viewport?.releasePointerCapture?.(e.pointerId);
+    viewportRef.current?.releasePointerCapture?.(e.pointerId);
     setIsDragging(false);
   }, [isDragging]);
 
@@ -646,56 +504,24 @@ function LetterCarousel({
     didDragRef.current = false;
   }, []);
 
-  const openParentItem = openParent
-    ? designers.find(
-        (d) => d.name === openParent && d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0
-      )
-    : null;
-
-  const goPrev = useCallback(() => {
-    if (activePage > 0) scrollToPage(activePage - 1);
-  }, [activePage, scrollToPage]);
-
-  const goNext = useCallback(() => {
-    if (activePage < pages.length - 1) scrollToPage(activePage + 1);
-  }, [activePage, pages.length, scrollToPage]);
+  const openParentItem = openParent ? designers.find((d) => d.name === openParent && d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0) : null;
+  const goPrev = useCallback(() => { if (activePage > 0) scrollToPage(activePage - 1); }, [activePage, scrollToPage]);
+  const goNext = useCallback(() => { if (activePage < pages.length - 1) scrollToPage(activePage + 1); }, [activePage, pages.length, scrollToPage]);
 
   return (
     <div>
       <div className="relative group/carousel">
         {pages.length > 1 && activePage > 0 && (
-          <button
-            onClick={goPrev}
-            className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
-            aria-label="Previous page"
-          >
+          <button onClick={goPrev} className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Previous page">
             <ChevronLeft className="h-4 w-4 text-foreground" />
           </button>
         )}
-
         {pages.length > 1 && activePage < pages.length - 1 && (
-          <button
-            onClick={goNext}
-            className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
-            aria-label="Next page"
-          >
+          <button onClick={goNext} className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors" aria-label="Next page">
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         )}
-
-        <div
-          ref={viewportRef}
-          onScroll={handleScroll}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          onPointerLeave={endDrag}
-          onClickCapture={handleClickCapture}
-          className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
-        >
+        <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
@@ -703,20 +529,10 @@ function LetterCarousel({
                   {page.map((item) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
-
                     if (isParentBrand) {
                       const isOpen = openParent === item.name;
-                      return (
-                        <ParentBrandCard
-                          key={item.slug}
-                          item={item}
-                          isOpen={isOpen}
-                          onToggle={() => setOpenParent(isOpen ? null : item.name)}
-                          designerCount={designerCount}
-                        />
-                      );
+                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />;
                     }
-
                     return <SingleDesignerCard key={item.slug} item={item} />;
                   })}
                 </div>
@@ -726,32 +542,37 @@ function LetterCarousel({
         </div>
       </div>
       <CarouselDots count={pages.length} selected={activePage} onSelect={scrollToPage} />
-
       <AnimatePresence onExitComplete={() => {
         if (!openParent) {
           const el = document.getElementById(`alpha-${letter}`);
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }}>
-        {openParentItem && openParent && (
-          <ParentSubGrid
-            key={openParent}
-            parentName={openParent}
-            onClose={() => setOpenParent(null)}
-          />
-        )}
+        {openParentItem && openParent && <ParentSubGrid key={openParent} parentName={openParent} onClose={() => setOpenParent(null)} />}
       </AnimatePresence>
     </div>
   );
 }
 
+// ─── Subcategory tag matching helper ─────────────────────────────────────────
+const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
+  "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+  "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+  "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+  "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+  "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+  "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+  "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+  "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+  "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+  "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+  "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+};
+
 // ─── Main Directory Component ────────────────────────────────────────────────
 interface DesignersDirectoryProps {
-  /** Initial letter to jump to */
   initialLetter?: string;
-  /** Whether to show the header (title + description) */
   showHeader?: boolean;
-  /** Whether to show the Trade CTA at the bottom */
   showTradeCTA?: boolean;
 }
 
@@ -760,10 +581,97 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   showHeader = true,
   showTradeCTA = true,
 }) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { data: allDesigners = [], isLoading } = useAllDesigners();
+  const { data: curatorPicksData = [] } = useDesignerCategories();
   const [searchQuery, setSearchQuery] = useState("");
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
+
+  // Category/subcategory filter state
+  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
+    window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
+  }, []);
+
+  const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
+    setSelectedCategoryRaw(cat);
+    setSelectedSubcategoryRaw(null);
+    if (!skipBroadcast) broadcastFilter(cat, null);
+  }, [broadcastFilter]);
+
+  const setSelectedSubcategory = useCallback((sub: string | null) => {
+    setSelectedSubcategoryRaw(sub);
+    broadcastFilter(selectedCategory, sub);
+  }, [selectedCategory, broadcastFilter]);
+
+  // Listen for external filter sync
+  useEffect(() => {
+    const handleSync = (e: CustomEvent) => {
+      const { category, subcategory, source } = e.detail || {};
+      if (source === 'designers') return;
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+    };
+    const handleDesignerCategory = (e: CustomEvent) => {
+      const { category, subcategory } = e.detail || {};
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+      broadcastFilter(category || null, subcategory || null);
+    };
+    window.addEventListener('syncCategoryFilter', handleSync as EventListener);
+    window.addEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
+    return () => {
+      window.removeEventListener('syncCategoryFilter', handleSync as EventListener);
+      window.removeEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
+    };
+  }, [broadcastFilter]);
+
+  // Build designer→category mapping from curator picks
+  const designerIdsByCategory = useMemo(() => {
+    const map: Record<string, Set<string>> = {};
+    const subMap: Record<string, Set<string>> = {};
+
+    for (const pick of curatorPicksData) {
+      const did = pick.designer_id;
+      const cat = pick.category;
+      if (cat) {
+        if (!map[cat]) map[cat] = new Set();
+        map[cat].add(did);
+      }
+      // Match subcategory by tags
+      const tags = (pick.tags as string[]) || [];
+      for (const [subName, matchTags] of Object.entries(SUBCATEGORY_TO_TAGS)) {
+        const matches = tags.some(t => matchTags.some(mt => t.toLowerCase() === mt.toLowerCase())) ||
+          matchTags.some(mt => cat?.toLowerCase() === mt.toLowerCase());
+        if (matches) {
+          if (!subMap[subName]) subMap[subName] = new Set();
+          subMap[subName].add(did);
+        }
+      }
+    }
+    return { byCategory: map, bySubcategory: subMap };
+  }, [curatorPicksData]);
+
+  // Subcategory item counts
+  const itemCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const [sub, ids] of Object.entries(designerIdsByCategory.bySubcategory)) {
+      counts[sub] = ids.size;
+    }
+    return counts;
+  }, [designerIdsByCategory]);
+
+  const categories = useMemo(() => {
+    const ordered = CATEGORY_ORDER.filter(cat => SUBCATEGORY_MAP[cat]);
+    const extra = Object.keys(SUBCATEGORY_MAP).filter(cat => !CATEGORY_ORDER.includes(cat));
+    return [...ordered, ...extra];
+  }, []);
 
   // Jump to letter
   useEffect(() => {
@@ -777,14 +685,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, [initialLetter]);
 
   const items = useMemo(
-    () =>
-      allDesigners
-        .filter((d) => d.is_published)
-        .sort((a, b) => a.name.localeCompare(b.name)),
+    () => allDesigners.filter((d) => d.is_published).sort((a, b) => a.name.localeCompare(b.name)),
     [allDesigners]
   );
 
-  const filteredItems = useMemo(() => {
+  // Apply text search
+  const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return items;
     const q = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     return items.filter((d) => {
@@ -794,6 +700,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       return name.includes(q) || specialty.includes(q) || founder.includes(q);
     });
   }, [items, searchQuery]);
+
+  // Apply category/subcategory filter
+  const filteredItems = useMemo(() => {
+    if (!selectedCategory && !selectedSubcategory) return searchFiltered;
+
+    // Get designer IDs that match
+    let matchingIds: Set<string> | null = null;
+
+    if (selectedSubcategory) {
+      matchingIds = designerIdsByCategory.bySubcategory[selectedSubcategory] || new Set();
+    } else if (selectedCategory) {
+      matchingIds = designerIdsByCategory.byCategory[selectedCategory] || new Set();
+    }
+
+    if (!matchingIds) return searchFiltered;
+
+    return searchFiltered.filter((d) => matchingIds!.has(d.id));
+  }, [searchFiltered, selectedCategory, selectedSubcategory, designerIdsByCategory]);
 
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
@@ -834,111 +758,285 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const totalCount = filteredItems.length;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12">
-      {showHeader && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-8"
-        >
-          <div className="flex flex-wrap items-end gap-3 mb-2">
-            <h2 className="font-display text-3xl md:text-4xl tracking-wide">
-              Designers & Ateliers
-            </h2>
-            <span className="font-body text-sm text-muted-foreground mb-1">
-              {totalCount}
-            </span>
-          </div>
-          <p className="font-body text-sm text-muted-foreground max-w-2xl">
-            A curated directory of the ateliers and independent designers whose work defines our collection.
-          </p>
-        </motion.div>
-      )}
+    <div ref={sectionRef} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
+      {/* Gradient accent band */}
+      <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-jade via-jade-light to-accent opacity-80" />
 
-      {/* Sticky A-Z bar + Search */}
-      <div className="sticky top-16 z-20 bg-background pb-3 pt-2 border-b border-border/30 mb-6">
-        <div
-          ref={letterBarRef}
-          className="flex items-center gap-2 md:gap-3 lg:gap-4 overflow-x-auto pb-2"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}
-        >
-          {LETTERS.map((letter) => {
-            const isActive = activeLetters.has(letter);
-            return (
-              <button
-                key={letter}
-                onClick={() => jumpToLetter(letter)}
-                className={`flex-none font-serif text-base md:text-lg leading-none transition-all duration-200 ${
-                  isActive
-                    ? "text-foreground hover:text-primary cursor-pointer"
-                    : "text-foreground/25 cursor-default"
-                }`}
-              >
-                {letter}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="relative max-w-xs mt-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search designers…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-8 h-9 text-sm bg-background border-border rounded-full focus:border-primary/60 font-body"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {isLoading && (
-        <div className="flex items-center justify-center py-32">
-          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-        </div>
-      )}
-
-      {!isLoading && filteredItems.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-32 text-center">
-          <p className="font-body text-sm text-muted-foreground">
-            {searchQuery ? "No designers match your search." : "Content coming soon — we're curating this collection."}
-          </p>
-        </div>
-      )}
-
-      {!isLoading && alphaGroups.length > 0 && (
-        <div>
-          {alphaGroups.map(([letter, designers]) => (
-            <LetterGroup
-              key={letter}
-              letter={letter}
-              designers={designers}
-              forceOpen={forcedLetters.has(letter)}
-              parentDesignerCountByName={parentDesignerCountByName}
-            />
-          ))}
-        </div>
-      )}
-
-      {showTradeCTA && (
-        <div className="mt-16 text-center">
-          <Link
-            to="/trade"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-md hover:opacity-90 transition-opacity"
+      <div className="mx-auto max-w-6xl">
+        {/* Section Header — matching original "Designers & Makers" UI */}
+        {showHeader && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+            className="mb-12 md:mb-16 text-left"
           >
-            Join Our Trade Program
-          </Link>
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
+              <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
+                <img
+                  src="https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto,c_fill/v1774537853/02travel-look-samuel-tmagArticle_ocja5c.jpg"
+                  alt="Designers & Makers"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
+                    Designers & Makers{" "}
+                    <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">
+                      On View
+                    </span>
+                  </h2>
+                </div>
+                <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+                  Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
+                  their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
+                </p>
+                <button
+                  onClick={() => {
+                    const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
+                    const text = `Designers & Makers On View — Maison Affluency\n${shareUrl}`;
+                    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                    window.open(wa, "_blank", "noopener");
+                  }}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
+                  aria-label="Share Designers & Makers section"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  Share
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="relative">
+          {/* Mobile: Search + Filter row */}
+          <div className="flex flex-col gap-4 mb-5 md:mb-6 md:hidden">
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="order-first">
+                <Popover open={filterOpen} onOpenChange={(open) => {
+                  setFilterOpen(open);
+                  if (!open && selectedCategory) broadcastFilter(selectedCategory, selectedSubcategory);
+                }}>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
+                      <SlidersHorizontal className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
+                      {selectedCategory && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
+                      <div className="flex items-center gap-2">
+                        {selectedCategory && (
+                          <button onClick={() => setSelectedCategory(null)} className="px-3 py-1 rounded-full border border-[hsl(var(--gold))] bg-white text-xs font-body font-medium text-foreground shadow-sm hover:shadow-md transition-all duration-200">Clear</button>
+                        )}
+                        <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-full bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors" aria-label="Close filter">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      {categories.map((category) => (
+                        <div key={category}>
+                          <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                            <Checkbox
+                              checked={selectedCategory === category}
+                              onCheckedChange={() => {
+                                if (selectedCategory === category) setSelectedCategory(null, true);
+                                else setSelectedCategory(category, true);
+                              }}
+                            />
+                            <span className="text-sm text-foreground font-body">{category}</span>
+                          </label>
+                          {selectedCategory === category && SUBCATEGORY_MAP[category]?.length > 0 && (
+                            <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                              <button
+                                onClick={() => setSelectedSubcategory(null)}
+                                className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${!selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'}`}
+                              >
+                                All {category}
+                              </button>
+                              {SUBCATEGORY_MAP[category].map(sub => (
+                                <button
+                                  key={sub}
+                                  onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
+                                  className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'}`}
+                                >
+                                  {sub}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Designer..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 pr-7 h-8 text-[16px] bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Results count */}
+          {(searchQuery || selectedCategory) && (
+            <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
+              {totalCount} designer{totalCount !== 1 ? 's' : ''} found
+              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+              {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+            </p>
+          )}
+
+          {/* Desktop: Filter + Grid toggle + search */}
+          <div className="hidden md:flex items-center gap-2 mb-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-foreground text-foreground transition-colors relative"
+              aria-label="Filter"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="text-[11px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
+              {selectedCategory && (
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
+              )}
+            </button>
+            <div className="flex-1" />
+            {/* A-Z jump bar */}
+            <div
+              ref={letterBarRef}
+              className="flex items-center gap-1.5 lg:gap-2.5 overflow-x-auto"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}
+            >
+              {LETTERS.map((letter) => {
+                const isActive = activeLetters.has(letter);
+                return (
+                  <button
+                    key={letter}
+                    onClick={() => jumpToLetter(letter)}
+                    className={`flex-none font-serif text-sm md:text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}
+                  >
+                    {letter}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="relative w-56 ml-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Designer..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-8 h-9 text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop: Sidebar + Directory layout */}
+          <div className="hidden md:flex gap-6">
+            <CategorySidebar
+              activeCategory={selectedCategory}
+              activeSubcategory={selectedSubcategory}
+              onSelect={(cat, sub) => {
+                if (cat === null) {
+                  setSelectedCategory(null);
+                } else {
+                  setSelectedCategoryRaw(cat);
+                  if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                  broadcastFilter(cat, sub);
+                }
+              }}
+              itemCounts={itemCounts}
+              sectionLabel="all Designers"
+              onOpenChange={setSidebarOpen}
+              isOpen={sidebarOpen}
+            />
+            <div className="flex-1 min-w-0">
+              {isLoading && (
+                <div className="flex items-center justify-center py-32">
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              )}
+              {!isLoading && filteredItems.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-32 text-center">
+                  <p className="font-body text-sm text-muted-foreground">
+                    {searchQuery ? "No designers match your search." : "Content coming soon — we're curating this collection."}
+                  </p>
+                </div>
+              )}
+              {!isLoading && alphaGroups.length > 0 && (
+                <div>
+                  {alphaGroups.map(([letter, designers]) => (
+                    <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile: Directory */}
+          <div className="md:hidden">
+            {/* Mobile A-Z bar */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-3 mb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
+              {LETTERS.map((letter) => {
+                const isActive = activeLetters.has(letter);
+                return (
+                  <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-sm leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
+                );
+              })}
+            </div>
+            {isLoading && (
+              <div className="flex items-center justify-center py-32">
+                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            )}
+            {!isLoading && filteredItems.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-32 text-center">
+                <p className="font-body text-sm text-muted-foreground">{searchQuery ? "No designers match your search." : "Content coming soon."}</p>
+              </div>
+            )}
+            {!isLoading && alphaGroups.length > 0 && (
+              <div>
+                {alphaGroups.map(([letter, designers]) => (
+                  <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+
+        {showTradeCTA && (
+          <div className="mt-16 text-center">
+            <Link to="/trade" className="inline-flex items-center gap-2 px-8 py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-md hover:opacity-90 transition-opacity">
+              Join Our Trade Program
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
