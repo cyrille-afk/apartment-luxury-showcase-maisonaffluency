@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
@@ -44,11 +44,6 @@ const leftNavItems = [{
   mobileSubtitle: "On View",
   href: "#collectibles",
   icon: Gem,
-}, {
-  label: "Ateliers",
-  mobileLabel: "Ateliers & Partners",
-  href: "#brands",
-  icon: Building2,
 }];
 
 const rightNavItems = [{
@@ -133,7 +128,7 @@ const Navigation = () => {
       "curating-team": "#overview",
       designers: "#designers",
       collectibles: "#collectibles",
-      brands: "#brands",
+      
       details: "/trade/program",
       contact: "/trade/program",
     };
