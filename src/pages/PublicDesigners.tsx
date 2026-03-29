@@ -507,7 +507,7 @@ function LetterGroup({
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             {needsCarousel ? (
-              <LetterCarousel designers={designers} openParent={openParent} setOpenParent={setOpenParent} />
+              <LetterCarousel designers={designers} />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
@@ -568,14 +568,11 @@ function LetterCarousel({
     containScroll: "trimSnaps",
   });
 
-  // Find open parent for sub-grid rendering
-  const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
-
   return (
     <div>
       <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
         <div className="flex -ml-4">
-        {designers.map((item) => (
+          {designers.map((item) => (
             <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%] min-w-0 pl-4">
               <SingleDesignerCard item={item} />
             </div>
@@ -583,17 +580,6 @@ function LetterCarousel({
         </div>
       </div>
       <CarouselDots api={emblaApi} />
-
-      {/* Sub-grid below carousel when a parent is expanded */}
-      <AnimatePresence>
-        {openParentItem && openParent && (
-          <ParentSubGrid
-            key={openParent}
-            parentName={openParent}
-            onClose={() => setOpenParent(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
