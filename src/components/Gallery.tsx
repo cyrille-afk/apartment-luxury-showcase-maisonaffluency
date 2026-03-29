@@ -878,7 +878,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           }} className="mb-4 md:mb-6">
                 {/* Mobile: Interactive Gallery badge above first section title */}
                 {originalSectionIndex === 0 && (
-                  <div className="flex justify-start mb-2 md:hidden">
+                  <div className="flex justify-start mb-4 md:hidden">
                     <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-foreground font-body font-light">
                       <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
                         <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
@@ -886,6 +886,45 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       </span>
                       Interactive Gallery
                     </span>
+                  </div>
+                  {/* Mobile pill bar — section navigation */}
+                  <div className="md:hidden mb-6">
+                    <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-3">
+                      {galleryExperiences.map((exp, idx) => (
+                        <button
+                          key={exp.experience}
+                          onClick={() => {
+                            setActiveMobilePill(idx);
+                            const el = sectionRefs.current[idx];
+                            if (el) {
+                              const offset = 100;
+                              const top = el.getBoundingClientRect().top + window.scrollY - offset;
+                              window.scrollTo({ top, behavior: 'smooth' });
+                            }
+                          }}
+                          className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 ${
+                            activeMobilePill === idx
+                              ? 'bg-foreground text-background border-foreground'
+                              : 'bg-transparent text-foreground border-foreground/30 hover:border-foreground/60'
+                          }`}
+                        >
+                          {exp.experience}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Dot indicators for pill scrollability */}
+                    <div className="flex justify-center gap-1 mt-1">
+                      {galleryExperiences.map((_, idx) => (
+                        <span
+                          key={idx}
+                          className={`rounded-full transition-all duration-300 ${
+                            activeMobilePill === idx
+                              ? 'w-1.5 h-1.5 bg-foreground'
+                              : 'w-1 h-1 bg-foreground/25'
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
                 {originalSectionIndex === 0 ? (
