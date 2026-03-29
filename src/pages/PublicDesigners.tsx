@@ -171,7 +171,7 @@ function ParentBrandCard({
   onToggle: () => void;
   designerCount: number;
 }) {
-  const instagramLink = item.links?.find((l) => l.type === "instagram")?.url;
+  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
