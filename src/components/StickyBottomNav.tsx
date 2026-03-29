@@ -10,7 +10,7 @@ const sectionItems = [
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "designers", label: "Designers", icon: Palette },
   { id: "collectibles", label: "Collectibles", icon: Gem },
-  { id: "brands", label: "Ateliers", icon: Building2 },
+  
 ];
 
 const SCROLL_THRESHOLD = 1400;

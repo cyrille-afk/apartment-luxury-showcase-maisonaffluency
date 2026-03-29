@@ -44,11 +44,6 @@ const leftNavItems = [{
   mobileSubtitle: "On View",
   href: "#collectibles",
   icon: Gem,
-}, {
-  label: "Ateliers",
-  mobileLabel: "Ateliers & Partners",
-  href: "#brands",
-  icon: Building2,
 }];
 
 const rightNavItems = [{

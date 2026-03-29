@@ -33,7 +33,6 @@ const ContactInquiry = lazyRetry(() => import("@/components/ContactInquiry"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
 const DesignersDirectory = lazyRetry(() => import("@/components/DesignersDirectory"));
 const Collectibles = lazyRetry(() => import("@/components/Collectibles"));
-const BrandsAteliers = lazyRetry(() => import("@/components/BrandsAteliers"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
@@ -480,14 +479,6 @@ const Index = () => {
               />
             </Suspense>
 
-            <Suspense fallback={null}>
-              <ProductGrid sectionScope="ateliers" />
-            </Suspense>
-            <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-              <Suspense fallback={<SectionFallback />}>
-                <BrandsAteliers />
-              </Suspense>
-            </section>
             <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <DesignDetails />
