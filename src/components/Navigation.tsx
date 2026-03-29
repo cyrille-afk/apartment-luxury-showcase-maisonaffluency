@@ -35,13 +35,11 @@ const leftNavItems = [{
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
-  mobileSubtitle: "On View",
   href: "#designers",
   icon: Palette,
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
-  mobileSubtitle: "On View",
   href: "#collectibles",
   icon: Gem,
 }];
@@ -274,12 +272,7 @@ const Navigation = () => {
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
                       style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                     >
-                      <span className="flex flex-col">
-                        <span>{item.mobileLabel}</span>
-                        {item.mobileSubtitle && (
-                          <span className="text-[10px] tracking-[0.2em] text-[hsl(var(--gold))] font-normal normal-case italic">{item.mobileSubtitle}</span>
-                        )}
-                      </span>
+                      {item.mobileLabel}
                       <ChevronRight className="h-4 w-4" />
                     </button>
 
@@ -405,9 +398,9 @@ const Navigation = () => {
                   )}
                 </div>
 
-                {/* Trade Program & Contact — visually separated */}
+                {/* Trade Program — separated */}
                 <div 
-                  className="mt-6 pt-4 border-t border-border/50 space-y-0 animate-fade-in opacity-0"
+                  className="mt-6 pt-4 border-t border-border/50 animate-fade-in opacity-0"
                   style={{ animationDelay: `${(leftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   {rightNavItems.map((item) => (
@@ -420,7 +413,13 @@ const Navigation = () => {
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   ))}
+                </div>
 
+                {/* Contact Us — separate section */}
+                <div 
+                  className="mt-4 pt-4 border-t border-border/50 animate-fade-in opacity-0"
+                  style={{ animationDelay: `${(leftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
+                >
                   <button
                     onClick={() => setContactExpanded(!contactExpanded)}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
