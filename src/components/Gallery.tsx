@@ -833,6 +833,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   });
   return <>
        <section id="gallery" ref={ref} className="pt-0 pb-16 md:pt-0 md:pb-24 bg-white scroll-mt-24">
+        {/* Centred separator line */}
+        <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20 py-4 md:py-6">
+          <div className="mx-auto w-24 h-px bg-foreground/15" />
+        </div>
         <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
           <motion.div initial={{
           opacity: 0,
