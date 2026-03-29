@@ -607,7 +607,7 @@ function LetterCarousel({
           })}
         </div>
       </div>
-      <CarouselDots api={emblaApi} count={designers.length} />
+      <CarouselDots api={emblaApi} />
 
       {/* Sub-grid below carousel when a parent is expanded */}
       <AnimatePresence>
