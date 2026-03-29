@@ -221,7 +221,7 @@ function ParentBrandCard({
 
   return (
     <div className="col-span-2 md:col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[3/2]">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[14/9]">
         {/* Background image */}
         {(item.hero_image_url || item.image_url) && (
           <img
