@@ -38,6 +38,8 @@ const DesignerProfile = () => {
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const name = displayName(designer.name);
+  const firstLetter = designer.name.charAt(0).toUpperCase();
+  const backTo = `/designers?letter=${firstLetter}`;
 
   return (
     <>
