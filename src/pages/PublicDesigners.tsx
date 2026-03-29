@@ -390,30 +390,32 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 
         {/* Gallery room thumbnails — bottom-right with "on view" label above & share icon left */}
         {thumbs.length > 0 && (
-          <div className="absolute bottom-3 right-3 flex flex-col items-center gap-1.5 z-10">
-            <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">
-              ON VIEW
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => handleDesignerShare(e, item, displayName)}
-                className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity"
-                aria-label={`Share ${displayName}`}
-              >
-                <Share2 className="h-3.5 w-3.5" />
-                <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
-              </button>
-              {thumbs.slice(0, 2).map((src, i) => (
-                <div
-                  key={i}
-                  className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
-                >
-                  <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
-                    <Plus className="w-2 h-2 text-white" />
-                  </span>
-                </div>
-              ))}
+          <div className="absolute bottom-3 right-3 z-10 flex items-end gap-2">
+            <button
+              onClick={(e) => handleDesignerShare(e, item, displayName)}
+              className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity mb-1"
+              aria-label={`Share ${displayName}`}
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
+            </button>
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">
+                ON VIEW
+              </span>
+              <div className="flex gap-1.5">
+                {thumbs.slice(0, 2).map((src, i) => (
+                  <div
+                    key={i}
+                    className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
+                  >
+                    <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                      <Plus className="w-2 h-2 text-white" />
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
