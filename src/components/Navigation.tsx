@@ -220,7 +220,7 @@ const Navigation = () => {
           <div className="flex flex-col items-center ml-6">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
               <span className="font-brand text-[1.6rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
+                M <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
               </span>
             </button>
             <div className="flex items-center gap-2 mt-0.5">
