@@ -20,7 +20,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
-import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, buildDesignerOgUrl, shareOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -2199,6 +2199,26 @@ function ParentBrandSubDesignersGrid({ config, onClose }: { config: ParentBrandC
                     <Layers className="h-2 w-2" />
                     {config.pillLabel}
                   </span>
+                  {/* Share button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const ogUrl = buildDesignerOgUrl(d.name);
+                      const text = `${d.name} — ${config.pillLabel} · Maison Affluency`;
+                      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                        shareOnWhatsApp(`${text}\n${ogUrl}`);
+                      } else {
+                        navigator.clipboard.writeText(`${text}: ${ogUrl}`);
+                        import("sonner").then(({ toast }) => toast.success("Link copied"));
+                      }
+                    }}
+                    className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-1.5 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 hover:bg-white"
+                    aria-label={`Share ${d.name}`}
+                  >
+                    <Share2 className="h-2.5 w-2.5 text-foreground/70" />
+                    <span className="font-body text-[7px] uppercase tracking-[0.1em] text-foreground/70">Share</span>
+                  </button>
                 </div>
                 <div className="px-2 py-1.5 bg-background">
                   <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
