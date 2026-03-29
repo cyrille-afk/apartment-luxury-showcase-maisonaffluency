@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import Navigation from "@/components/Navigation";
@@ -693,47 +693,79 @@ function LetterCarousel({
       )
     : null;
 
+  const goPrev = useCallback(() => {
+    if (activePage > 0) scrollToPage(activePage - 1);
+  }, [activePage, scrollToPage]);
+
+  const goNext = useCallback(() => {
+    if (activePage < pages.length - 1) scrollToPage(activePage + 1);
+  }, [activePage, pages.length, scrollToPage]);
+
   return (
     <div>
-      <div
-        ref={viewportRef}
-        onScroll={handleScroll}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onPointerLeave={endDrag}
-        onClickCapture={handleClickCapture}
-        className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${
-          isDragging ? "cursor-grabbing" : "cursor-grab"
-        }`}
-      >
-        <div className="flex">
-          {pages.map((page, pageIndex) => (
-            <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-                {page.map((item) => {
-                  const designerCount = parentDesignerCountByName[item.name] ?? 0;
-                  const isParentBrand = item.founder === item.name && designerCount > 0;
+      <div className="relative group/carousel">
+        {/* Left arrow — desktop only */}
+        {pages.length > 1 && activePage > 0 && (
+          <button
+            onClick={goPrev}
+            className="hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4 text-foreground" />
+          </button>
+        )}
 
-                  if (isParentBrand) {
-                    const isOpen = openParent === item.name;
-                    return (
-                      <ParentBrandCard
-                        key={item.slug}
-                        item={item}
-                        isOpen={isOpen}
-                        onToggle={() => setOpenParent(isOpen ? null : item.name)}
-                        designerCount={designerCount}
-                      />
-                    );
-                  }
+        {/* Right arrow — desktop only */}
+        {pages.length > 1 && activePage < pages.length - 1 && (
+          <button
+            onClick={goNext}
+            className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4 text-foreground" />
+          </button>
+        )}
 
-                  return <SingleDesignerCard key={item.slug} item={item} />;
-                })}
+        <div
+          ref={viewportRef}
+          onScroll={handleScroll}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onPointerLeave={endDrag}
+          onClickCapture={handleClickCapture}
+          className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${
+            isDragging ? "cursor-grabbing" : "cursor-grab"
+          }`}
+        >
+          <div className="flex">
+            {pages.map((page, pageIndex) => (
+              <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+                  {page.map((item) => {
+                    const designerCount = parentDesignerCountByName[item.name] ?? 0;
+                    const isParentBrand = item.founder === item.name && designerCount > 0;
+
+                    if (isParentBrand) {
+                      const isOpen = openParent === item.name;
+                      return (
+                        <ParentBrandCard
+                          key={item.slug}
+                          item={item}
+                          isOpen={isOpen}
+                          onToggle={() => setOpenParent(isOpen ? null : item.name)}
+                          designerCount={designerCount}
+                        />
+                      );
+                    }
+
+                    return <SingleDesignerCard key={item.slug} item={item} />;
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
       <CarouselDots count={pages.length} selected={activePage} onSelect={scrollToPage} />
