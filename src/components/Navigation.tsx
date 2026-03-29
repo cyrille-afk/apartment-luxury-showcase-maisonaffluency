@@ -612,7 +612,7 @@ const Navigation = () => {
               ))}
             </div>
 
-            <div className="flex items-center gap-6 lg:gap-10">
+            <div className="flex items-center gap-6 lg:gap-10 border-l border-border/40 pl-6 lg:pl-10">
               {/* Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
