@@ -386,20 +386,27 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   useEffect(() => {
     const fetchDbCuratorPicks = async () => {
-      const { data } = await supabase
-        .from("designer_curator_picks_public")
-        .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,category,subcategory,pdf_url,pdf_urls,designer_id")
-        .not("image_url", "is", null);
+      const [{ data: picks }, { data: designers }] = await Promise.all([
+        supabase
+          .from("designer_curator_picks_public")
+          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,category,subcategory,pdf_url,pdf_urls,designer_id")
+          .not("image_url", "is", null),
+        supabase
+          .from("designers")
+          .select("id, name")
+      ]);
 
-      if (!data) return;
+      if (!picks) return;
 
-      const mapped: PublicLightboxItem[] = (data as any[]).map((p) => ({
+      const designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]));
+
+      const mapped: PublicLightboxItem[] = (picks as any[]).map((p) => ({
         id: p.id,
         title: p.title,
         subtitle: p.subtitle || null,
         image_url: p.image_url,
         hover_image_url: p.hover_image_url || null,
-        brand_name: p.designers?.name || "Unknown",
+        brand_name: designerMap.get(p.designer_id) || "Unknown",
         materials: p.materials || null,
         dimensions: p.dimensions || null,
         category: p.category || null,
