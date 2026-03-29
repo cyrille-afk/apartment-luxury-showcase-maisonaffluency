@@ -737,7 +737,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
                       const isOpen = openParent === item.name;
                       return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />;
                     }
-                    return <SingleDesignerCard key={item.slug} item={item} />;
+                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
                   })}
                 </div>
               </div>
@@ -840,6 +840,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
+  const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
   const [searchQuery, setSearchQuery] = useState("");
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
@@ -1286,7 +1287,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   {!isLoading && alphaGroups.length > 0 && (
                     <div>
                       {alphaGroups.map(([letter, designers]) => (
-                        <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                        <LetterGroup
+                          key={letter}
+                          letter={letter}
+                          designers={designers}
+                          forceOpen={forcedLetters.has(letter)}
+                          parentDesignerCountByName={parentDesignerCountByName}
+                          fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                        />
                       ))}
                     </div>
                   )}
@@ -1335,7 +1343,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 {!isLoading && alphaGroups.length > 0 && (
                   <div>
                     {alphaGroups.map(([letter, designers]) => (
-                      <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                      <LetterGroup
+                        key={letter}
+                        letter={letter}
+                        designers={designers}
+                        forceOpen={forcedLetters.has(letter)}
+                        parentDesignerCountByName={parentDesignerCountByName}
+                        fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                      />
                     ))}
                   </div>
                 )}
