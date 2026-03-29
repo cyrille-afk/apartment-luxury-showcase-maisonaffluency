@@ -367,7 +367,9 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 
         {/* Name overlay — top */}
         <div className="absolute inset-x-0 top-0 px-3 pr-10 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-          <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+          <p className={`font-display text-white tracking-wide leading-tight drop-shadow-sm ${
+            displayName.length > 20 ? "text-[11px] md:text-xs" : "text-xs md:text-sm"
+          }`}>
             {displayName}
           </p>
           {parentLabel && (
