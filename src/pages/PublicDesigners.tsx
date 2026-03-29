@@ -386,13 +386,20 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
         </button>
 
-        {/* Gallery room thumbnails — bottom-right with "on view" label */}
+        {/* Gallery room thumbnails — bottom-right with "on view" label above & share icon left */}
         {thumbs.length > 0 && (
-          <div className="absolute bottom-3 right-3 flex items-center gap-2 z-10">
+          <div className="absolute bottom-3 right-3 flex flex-col items-center gap-1 z-10">
             <span className="font-body text-[8px] uppercase tracking-[0.15em] text-white/90 drop-shadow-md">
               ON VIEW
             </span>
-            <div className="flex gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={(e) => handleDesignerShare(e, item, displayName)}
+                className="flex items-center justify-center text-white/80 hover:text-white transition-opacity"
+                aria-label={`Share ${displayName}`}
+              >
+                <Share2 className="h-3.5 w-3.5" />
+              </button>
               {thumbs.slice(0, 2).map((src, i) => (
                 <div
                   key={i}
