@@ -472,7 +472,9 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     const target = e.target as HTMLElement;
-    if (target.closest("a,button,input,textarea,select,[role='button']")) return;
+    // Only block drag-start from interactive controls on mouse.
+    // On touch, cards are links, so we must allow drag start for mobile swipe.
+    if (e.pointerType === "mouse" && target.closest("a,button,input,textarea,select,[role='button']")) return;
     const viewport = viewportRef.current;
     if (!viewport) return;
     setIsDragging(true);
@@ -521,7 +523,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         )}
-        <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
+        <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-x ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
