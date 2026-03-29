@@ -3,7 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
-import useEmblaCarousel from "embla-carousel-react";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import Navigation from "@/components/Navigation";
@@ -350,6 +349,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           <img
             src={item.image_url}
             alt={item.name}
+            draggable={false}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
             loading="lazy"
           />
@@ -408,7 +408,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
                     key={i}
                     className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
                   >
-                    <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
                     <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
                       <Plus className="w-2 h-2 text-white" />
                     </span>
@@ -431,33 +431,23 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 }
 
 // ─── Carousel Dots ───────────────────────────────────────────────────────────
-function CarouselDots({ api }: { api: any }) {
-  const [selected, setSelected] = useState(0);
-  const [snapCount, setSnapCount] = useState(0);
-
-  useEffect(() => {
-    if (!api) return;
-    const update = () => {
-      setSelected(api.selectedScrollSnap());
-      setSnapCount(api.scrollSnapList().length);
-    };
-    api.on("select", update);
-    api.on("reInit", update);
-    update();
-    return () => {
-      api.off("select", update);
-      api.off("reInit", update);
-    };
-  }, [api]);
-
-  if (snapCount <= 1) return null;
+function CarouselDots({
+  count,
+  selected,
+  onSelect,
+}: {
+  count: number;
+  selected: number;
+  onSelect: (index: number) => void;
+}) {
+  if (count <= 1) return null;
 
   return (
     <div className="flex justify-center gap-1.5 mt-3">
-      {Array.from({ length: snapCount }).map((_, i) => (
+      {Array.from({ length: count }).map((_, i) => (
         <button
           key={i}
-          onClick={() => api?.scrollTo(i)}
+          onClick={() => onSelect(i)}
           className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
             i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"
           }`}
@@ -562,24 +552,121 @@ function LetterCarousel({
 }: {
   designers: Designer[];
 }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    slidesToScroll: 5,
-    containScroll: "trimSnaps",
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [activePage, setActivePage] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [cardsPerPage, setCardsPerPage] = useState(() => {
+    if (typeof window === "undefined") return 5;
+    if (window.innerWidth >= 1024) return 5;
+    if (window.innerWidth >= 768) return 3;
+    return 2;
   });
+
+  const dragStartXRef = useRef(0);
+  const dragStartScrollLeftRef = useRef(0);
+  const didDragRef = useRef(false);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 1024) setCardsPerPage(5);
+      else if (window.innerWidth >= 768) setCardsPerPage(3);
+      else setCardsPerPage(2);
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const pages = useMemo(() => {
+    const result: Designer[][] = [];
+    for (let i = 0; i < designers.length; i += cardsPerPage) {
+      result.push(designers.slice(i, i + cardsPerPage));
+    }
+    return result;
+  }, [designers, cardsPerPage]);
+
+  useEffect(() => {
+    setActivePage((prev) => Math.min(prev, Math.max(0, pages.length - 1)));
+  }, [pages.length]);
+
+  const handleScroll = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const nextPage = Math.round(viewport.scrollLeft / Math.max(1, viewport.clientWidth));
+    setActivePage(Math.min(Math.max(nextPage, 0), Math.max(0, pages.length - 1)));
+  }, [pages.length]);
+
+  const scrollToPage = useCallback((index: number) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTo({ left: viewport.clientWidth * index, behavior: "smooth" });
+    setActivePage(index);
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    setIsDragging(true);
+    didDragRef.current = false;
+    dragStartXRef.current = e.clientX;
+    dragStartScrollLeftRef.current = viewport.scrollLeft;
+    viewport.setPointerCapture?.(e.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const delta = e.clientX - dragStartXRef.current;
+    if (Math.abs(delta) > 4) didDragRef.current = true;
+    viewport.scrollLeft = dragStartScrollLeftRef.current - delta;
+  }, [isDragging]);
+
+  const endDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const viewport = viewportRef.current;
+    viewport?.releasePointerCapture?.(e.pointerId);
+    setIsDragging(false);
+  }, [isDragging]);
+
+  const handleClickCapture = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!didDragRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    didDragRef.current = false;
+  }, []);
 
   return (
     <div>
-      <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-        <div className="flex -ml-4">
-          {designers.map((item) => (
-            <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%] min-w-0 pl-4">
-              <SingleDesignerCard item={item} />
+      <div
+        ref={viewportRef}
+        onScroll={handleScroll}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onPointerLeave={endDrag}
+        onClickCapture={handleClickCapture}
+        className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
+      >
+        <div className="flex">
+          {pages.map((page, pageIndex) => (
+            <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+                {page.map((item) => (
+                  <SingleDesignerCard key={item.slug} item={item} />
+                ))}
+              </div>
             </div>
           ))}
         </div>
       </div>
-      <CarouselDots api={emblaApi} />
+      <CarouselDots count={pages.length} selected={activePage} onSelect={scrollToPage} />
     </div>
   );
 }
