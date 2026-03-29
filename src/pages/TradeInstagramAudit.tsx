@@ -1,17 +1,20 @@
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useMemo, useState, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Instagram, ExternalLink, AlertTriangle, CheckCircle, XCircle, Search, ArrowLeft } from "lucide-react";
+import { Instagram, ExternalLink, AlertTriangle, CheckCircle, XCircle, Search, ArrowLeft, Pencil, Save, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 interface DesignerIG {
+  id: string;
   slug: string;
   name: string;
   display_name: string | null;
   founder: string | null;
   source: string;
+  links: any[];
   dbInstagram: string | null;
   fallbackInstagram: string | null;
   effectiveInstagram: string | null;
@@ -85,6 +88,7 @@ const TradeInstagramAudit = () => {
   const { isAdmin, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const queryClient = useQueryClient();
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["ig-audit-designers"],
@@ -93,7 +97,7 @@ const TradeInstagramAudit = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("slug, name, display_name, founder, source, links")
+        .select("id, slug, name, display_name, founder, source, links")
         .eq("is_published", true)
         .order("name");
       if (error) throw error;
@@ -109,11 +113,13 @@ const TradeInstagramAudit = () => {
       const isParent = d.founder === d.name || (!d.founder && !d.display_name);
 
       return {
+        id: d.id,
         slug: d.slug,
         name: d.name,
         display_name: d.display_name,
         founder: d.founder,
         source: d.source,
+        links: linksArr,
         dbInstagram: igFromDb,
         fallbackInstagram: igFromFallback,
         effectiveInstagram: igFromDb || igFromFallback || null,
@@ -122,6 +128,39 @@ const TradeInstagramAudit = () => {
       } as DesignerIG;
     });
   }, [designers]);
+
+  const handleSaveIg = useCallback(async (row: DesignerIG, newUrl: string) => {
+    const trimmed = newUrl.trim();
+    // Build updated links array
+    const existingLinks = Array.isArray(row.links) ? [...row.links] : [];
+    const igIdx = existingLinks.findIndex((l: any) => l.type?.toLowerCase() === "instagram");
+
+    if (trimmed) {
+      const entry = { type: "Instagram", url: trimmed };
+      if (igIdx >= 0) {
+        existingLinks[igIdx] = entry;
+      } else {
+        existingLinks.push(entry);
+      }
+    } else {
+      // Remove IG entry if URL cleared
+      if (igIdx >= 0) existingLinks.splice(igIdx, 1);
+    }
+
+    const { error } = await supabase
+      .from("designers")
+      .update({ links: existingLinks as any })
+      .eq("id", row.id);
+
+    if (error) {
+      toast.error(`Failed to update: ${error.message}`);
+      throw error;
+    }
+
+    toast.success(`Updated Instagram for ${row.display_name || row.name}`);
+    queryClient.invalidateQueries({ queryKey: ["ig-audit-designers"] });
+    queryClient.invalidateQueries({ queryKey: ["ig-missing-count"] });
+  }, [queryClient]);
 
   const filtered = useMemo(() => {
     let result = rows;
@@ -188,7 +227,7 @@ const TradeInstagramAudit = () => {
         <div>
           <h1 className="font-display text-xl md:text-2xl text-foreground">Instagram Audit</h1>
           <p className="font-body text-xs text-muted-foreground mt-0.5">
-            Visual map of all designer Instagram accounts — identify missing or incorrect links
+            Visual map of all designer Instagram accounts — click <Pencil className="inline h-3 w-3 mx-0.5" /> to edit
           </p>
         </div>
       </div>
@@ -258,7 +297,7 @@ const TradeInstagramAudit = () => {
       {/* Visual grid map */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
         {filtered.map((r) => (
-          <DesignerIGCard key={r.slug} row={r} />
+          <DesignerIGCard key={r.slug} row={r} onSave={handleSaveIg} />
         ))}
       </div>
 
@@ -286,7 +325,11 @@ function StatCard({ label, value, variant }: { label: string; value: number; var
   );
 }
 
-function DesignerIGCard({ row }: { row: DesignerIG }) {
+function DesignerIGCard({ row, onSave }: { row: DesignerIG; onSave: (row: DesignerIG, url: string) => Promise<void> }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editValue, setEditValue] = useState("");
+
   const handle = row.effectiveInstagram ? extractHandle(row.effectiveInstagram) : null;
 
   const borderColor =
@@ -312,6 +355,28 @@ function DesignerIGCard({ row }: { row: DesignerIG }) {
 
   const displayName = row.display_name || row.name;
 
+  const startEditing = () => {
+    setEditValue(row.dbInstagram || row.fallbackInstagram || "");
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+    setEditValue("");
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(row, editValue);
+      setEditing(false);
+    } catch {
+      // error already toasted
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className={`rounded-lg border ${borderColor} bg-card p-3 space-y-2 hover:shadow-md transition-shadow`}>
       {/* Header */}
@@ -326,26 +391,78 @@ function DesignerIGCard({ row }: { row: DesignerIG }) {
             </p>
           )}
         </div>
-        <StatusIcon className={`h-3 w-3 shrink-0 mt-0.5 ${statusColor}`} />
+        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+          {!editing && (
+            <button
+              onClick={startEditing}
+              className="p-0.5 rounded hover:bg-muted/50 transition-colors"
+              aria-label={`Edit Instagram for ${displayName}`}
+              title="Edit Instagram URL"
+            >
+              <Pencil className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
+          <StatusIcon className={`h-3 w-3 ${statusColor}`} />
+        </div>
       </div>
 
-      {/* IG handle */}
-      <div className="flex items-center gap-1.5">
-        <Instagram className="h-3 w-3 text-muted-foreground shrink-0" />
-        {handle ? (
-          <a
-            href={row.effectiveInstagram!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-body text-[10px] text-foreground hover:text-primary truncate flex items-center gap-1"
-          >
-            {handle}
-            <ExternalLink className="h-2.5 w-2.5 shrink-0 opacity-50" />
-          </a>
-        ) : (
-          <span className="font-body text-[10px] text-red-400 italic">No link</span>
-        )}
-      </div>
+      {/* Edit mode */}
+      {editing ? (
+        <div className="space-y-1.5">
+          <Input
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            placeholder="https://instagram.com/handle"
+            className="h-7 text-[10px] font-body px-2"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSave();
+              if (e.key === "Escape") cancelEditing();
+            }}
+          />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 transition-colors font-body text-[9px] uppercase tracking-[0.1em] disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Save className="h-2.5 w-2.5" />}
+              Save
+            </button>
+            <button
+              onClick={cancelEditing}
+              disabled={saving}
+              className="flex items-center gap-1 px-2 py-1 rounded bg-muted/30 text-muted-foreground hover:bg-muted/50 transition-colors font-body text-[9px] uppercase tracking-[0.1em] disabled:opacity-50"
+            >
+              <X className="h-2.5 w-2.5" />
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* IG handle display */
+        <div className="flex items-center gap-1.5">
+          <Instagram className="h-3 w-3 text-muted-foreground shrink-0" />
+          {handle ? (
+            <a
+              href={row.effectiveInstagram!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-body text-[10px] text-foreground hover:text-primary truncate flex items-center gap-1"
+            >
+              {handle}
+              <ExternalLink className="h-2.5 w-2.5 shrink-0 opacity-50" />
+            </a>
+          ) : (
+            <button
+              onClick={startEditing}
+              className="font-body text-[10px] text-red-400 italic hover:text-red-300 transition-colors cursor-pointer"
+            >
+              + Add link
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Source badge */}
       <div className="flex items-center gap-1.5">
