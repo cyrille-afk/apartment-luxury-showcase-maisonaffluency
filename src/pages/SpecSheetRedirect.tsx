@@ -47,7 +47,7 @@ export default function SpecSheetRedirect() {
 
     const resolve = async () => {
       const { data: rawPicks } = await supabase
-        .from("designer_curator_picks")
+        .from("designer_curator_picks_public")
         .select("title, pdf_url, image_url, materials, dimensions, designer_id")
         .not("pdf_url", "is", null);
 

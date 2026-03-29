@@ -387,8 +387,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   useEffect(() => {
     const fetchDbCuratorPicks = async () => {
       const { data } = await supabase
-        .from("designer_curator_picks")
-        .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,category,subcategory,pdf_url,pdf_urls,designers(name)")
+        .from("designer_curator_picks_public")
+        .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,category,subcategory,pdf_url,pdf_urls,designer_id")
         .not("image_url", "is", null);
 
       if (!data) return;
