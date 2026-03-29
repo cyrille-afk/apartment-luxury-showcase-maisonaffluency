@@ -216,7 +216,7 @@ const Navigation = () => {
   return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
-        <div className="flex h-24 items-center justify-center md:hidden relative">
+        <div className="flex h-24 items-end pb-2.5 justify-center md:hidden relative">
           <div className="flex flex-col items-center ml-6">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
               <span className="font-brand text-[1.6rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
@@ -230,10 +230,10 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Mobile account icon — right side */}
+          {/* Mobile account icon — right side, aligned with Since 2017 */}
           <button
             onClick={() => user ? navigate("/trade") : setAuthGateOpen(true)}
-            className="absolute right-0 p-2 text-foreground hover:text-primary transition-colors"
+            className="absolute right-0 bottom-2 p-2 text-foreground hover:text-primary transition-colors"
             aria-label={user ? "My Account" : "Sign In"}
           >
             <User className="h-5 w-5" />
@@ -242,7 +242,7 @@ const Navigation = () => {
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 absolute left-0 text-primary" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-12 w-12 absolute left-0 bottom-0 text-primary" aria-label="Toggle menu">
                 {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
               </Button>
             </SheetTrigger>
