@@ -256,26 +256,6 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 
 // ─── Letter Group with scroll-reveal ─────────────────────────────────────────
 
-/** Split designers into visual rows, accounting for parent brands spanning 2 cols */
-function buildRows(designers: Designer[], cols: number) {
-  const rows: Designer[][] = [];
-  let currentRow: Designer[] = [];
-  let usedCols = 0;
-
-  for (const d of designers) {
-    const span = d.founder === d.name ? 2 : 1;
-    if (usedCols + span > cols && currentRow.length > 0) {
-      rows.push(currentRow);
-      currentRow = [];
-      usedCols = 0;
-    }
-    currentRow.push(d);
-    usedCols += span;
-  }
-  if (currentRow.length > 0) rows.push(currentRow);
-  return rows;
-}
-
 function LetterGroup({
   letter,
   designers,
@@ -289,9 +269,6 @@ function LetterGroup({
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
   const [openParent, setOpenParent] = useState<string | null>(null);
-
-  // Build rows of 5 cols (desktop) to know where to insert sub-grids
-  const rows = useMemo(() => buildRows(designers, 5), [designers]);
 
   return (
     <div id={`alpha-${letter}`} className="scroll-mt-32 mb-6">
@@ -313,42 +290,37 @@ function LetterGroup({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
-            {rows.map((row, rowIdx) => {
-              // Check if this row contains the open parent
-              const rowHasOpenParent = openParent && row.some((d) => d.founder === d.name && d.name === openParent);
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+              {designers.map((item) => {
+                const isAtelier = item.founder === item.name;
 
-              return (
-                <div key={rowIdx}>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5 mb-4 md:mb-5">
-                    {row.map((item) => {
-                      const isAtelier = item.founder === item.name;
-                      if (isAtelier) {
-                        return (
-                          <ParentBrandCardWrapper
-                            key={item.slug}
-                            item={item}
-                            openParent={openParent}
-                            setOpenParent={setOpenParent}
-                          />
-                        );
-                      }
-                      return <SingleDesignerCard key={item.slug} item={item} />;
-                    })}
-                  </div>
-
-                  {/* Sub-designers grid — directly after the parent's row */}
-                  <AnimatePresence>
-                    {rowHasOpenParent && openParent && (
-                      <ParentSubGrid
-                        key={openParent}
-                        parentName={openParent}
-                        onClose={() => setOpenParent(null)}
+                if (isAtelier) {
+                  return (
+                    <React.Fragment key={item.slug}>
+                      <ParentBrandCardWrapper
+                        item={item}
+                        openParent={openParent}
+                        setOpenParent={setOpenParent}
                       />
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+                      {/* Sub-grid spans full width, placed right after parent in DOM = right below in grid */}
+                      <AnimatePresence>
+                        {openParent === item.name && (
+                          <div className="col-span-2 md:col-span-3 lg:col-span-5">
+                            <ParentSubGrid
+                              key={item.name}
+                              parentName={item.name}
+                              onClose={() => setOpenParent(null)}
+                            />
+                          </div>
+                        )}
+                      </AnimatePresence>
+                    </React.Fragment>
+                  );
+                }
+
+                return <SingleDesignerCard key={item.slug} item={item} />;
+              })}
+            </div>
           </motion.div>
         ) : (
           <div
