@@ -1,0 +1,1 @@
+UPDATE designers SET is_published = true WHERE id = '334658d1-59cb-47e9-ac6c-a5e6dc2bab8d';
