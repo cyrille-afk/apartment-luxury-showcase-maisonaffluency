@@ -332,27 +332,11 @@ const PublicDesignerProfile = () => {
         <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-8 md:space-y-12">
           <div className="flex items-center justify-between">
             <Link
-              to={(() => {
-                const fromSection = searchParams.get("from");
-                if (fromSection === "ateliers") {
-                  const expand = designer?.founder ? `?expand=${encodeURIComponent(designer.founder)}` : "";
-                  return `/${expand}#brands`;
-                }
-                if (fromSection === "designers") return "/#designers";
-                if (designer?.founder) {
-                  return `/?expand=${encodeURIComponent(designer.founder)}#brands`;
-                }
-                return "/#designers";
-              })()}
+              to={`/designers?letter=${encodeURIComponent(designer?.name?.[0]?.toUpperCase() || "A")}`}
               className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              {(() => {
-                const fromSection = searchParams.get("from");
-                if (fromSection === "ateliers") return "Ateliers";
-                if (fromSection === "designers") return "Designers";
-                return designer?.founder ? "Ateliers" : "Designers";
-              })()}
+              Designers
             </Link>
             <div className="md:hidden">
               <WhatsAppShareButton
