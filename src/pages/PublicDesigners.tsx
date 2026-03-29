@@ -617,33 +617,35 @@ function LetterCarousel({
 
     if (current.items.length > 0) staged.push(current);
 
-    // Rebalance adjacent pages to reduce visual blanks (keeps global order)
+    // Rebalance pages to reduce visual blanks:
+    // if the immediate next card doesn't fit (e.g. parent card = 2 slots),
+    // pull the first later card that does fit.
     for (let i = 0; i < staged.length - 1; i++) {
       const page = staged[i];
-      const nextPage = staged[i + 1];
-      if (!nextPage || nextPage.items.length === 0) continue;
-
       let remaining = slotsPerPage - page.usedSlots;
-      while (remaining > 0 && nextPage.items.length > 0) {
-        const candidate = nextPage.items[0];
-        const candidateCost = getSlotCost(candidate);
-        if (candidateCost > remaining) break;
+      if (remaining <= 0) continue;
 
-        page.items.push(candidate);
-        page.usedSlots += candidateCost;
-        remaining -= candidateCost;
+      for (let j = i + 1; j < staged.length && remaining > 0; j++) {
+        const donor = staged[j];
+        if (!donor || donor.items.length === 0) continue;
 
-        nextPage.items.shift();
-        nextPage.usedSlots -= candidateCost;
-      }
+        while (remaining > 0 && donor.items.length > 0) {
+          const candidateIndex = donor.items.findIndex((candidate) => getSlotCost(candidate) <= remaining);
+          if (candidateIndex === -1) break;
 
-      if (nextPage.items.length === 0) {
-        staged.splice(i + 1, 1);
-        i -= 1;
+          const [candidate] = donor.items.splice(candidateIndex, 1);
+          if (!candidate) break;
+
+          const candidateCost = getSlotCost(candidate);
+          page.items.push(candidate);
+          page.usedSlots += candidateCost;
+          donor.usedSlots -= candidateCost;
+          remaining -= candidateCost;
+        }
       }
     }
 
-    return staged.map((page) => page.items);
+    return staged.filter((page) => page.items.length > 0).map((page) => page.items);
   }, [designers, parentDesignerCountByName, slotsPerPage]);
 
   useEffect(() => {
