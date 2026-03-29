@@ -638,6 +638,26 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
+
+  // When category/subcategory is active, show product cards instead of designers
+  const filteredPicks = useMemo(() => {
+    if (!selectedCategory && !selectedSubcategory) return null;
+    if (!fullPicks.length) return null;
+    const matchPick = (pick: PickItem) => {
+      if (selectedSubcategory) {
+        const tags = SUBCATEGORY_TO_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag =>
+          pick.subcategory === tag ||
+          pick.category === tag ||
+          (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
+        );
+      }
+      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
+    };
+    return fullPicks.filter(matchPick);
+  }, [selectedCategory, selectedSubcategory, fullPicks]);
+
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
   }, []);
