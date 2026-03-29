@@ -789,6 +789,16 @@ const PublicDesigners = () => {
 
   const activeLetters = useMemo(() => new Set(alphaGroups.map(([l]) => l)), [alphaGroups]);
 
+  const parentDesignerCountByName = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const d of items) {
+      const founder = d.founder;
+      if (!founder || founder === d.name) continue;
+      counts[founder] = (counts[founder] || 0) + 1;
+    }
+    return counts;
+  }, [items]);
+
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
