@@ -624,6 +624,34 @@ function LetterCarousel({
   );
 }
 
+// ─── Carousel Atelier Card — renders parent or falls back to portrait ────────
+function CarouselAtelierCard({
+  item,
+  openParent,
+  setOpenParent,
+}: {
+  item: Designer;
+  openParent: string | null;
+  setOpenParent: (name: string | null) => void;
+}) {
+  const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
+  const isOpen = openParent === item.name;
+
+  // Single-designer brands: show as portrait card instead of empty space
+  if (subDesigners.length <= 1) {
+    return <SingleDesignerCard item={item} />;
+  }
+
+  return (
+    <ParentBrandCard
+      item={item}
+      isOpen={isOpen}
+      onToggle={() => setOpenParent(isOpen ? null : item.name)}
+      designerCount={subDesigners.length}
+    />
+  );
+}
+
 // Wrapper to handle designer count fetching for parent brands
 // Hides parent landscape card when ≤1 sub-designer (the sub already shows as portrait)
 function ParentBrandCardWrapper({
