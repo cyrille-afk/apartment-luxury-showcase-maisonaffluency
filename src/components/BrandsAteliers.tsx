@@ -2380,10 +2380,23 @@ function AlphaStrip({
           const hasBg = !!bg;
           const parentConfig = parentBrandConfigMap[brand.name];
           const isParentBrand = !!parentConfig;
+          const designerId = brandToDesignerMap[brand.name];
+          const profileSlug = parentConfig?.profileSlug || designerId || brand.id;
+          const instagramUrl = parentConfig?.instagram || brand.instagram;
+          const hasPicks = !!designerId;
+
+          // Object position for specific brands
+          const objectPos = brand.name === "Jindrich Halabala" ? "center center"
+            : brand.name === "Eric Schmitt Studio" ? "center 30%"
+            : brand.name === "Dagmar London" ? "center 45%"
+            : brand.name === "Robicara" ? "center 45%"
+            : brand.name === "Okha Design Studio" ? "center 30%"
+            : brand.name === "Sé Collections" ? "center center"
+            : brand.name === "Andrée Putman" ? "center 60%"
+            : "center top";
+
           return (
             <React.Fragment key={brand.name}>
-            {isParentBrand ? (
-              /* ── Parent Brand: inline card with expand toggle ── */
               <div
                 id={`brand-${brand.id}`}
                 className="group flex-none w-[80vw] md:w-[340px] snap-start border border-primary/40 ring-1 ring-primary/20 rounded-lg hover:border-primary/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden h-[280px] md:h-[300px]"
@@ -2394,47 +2407,67 @@ function AlphaStrip({
                     alt={brand.name}
                     loading="lazy"
                     aria-hidden="true"
-                    className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover object-[center_top]"
+                    className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover"
+                    style={{ objectPosition: objectPos }}
                   />
                 )}
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-all duration-300" />
-                {/* Atelier logo badge */}
+                <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/20 group-hover:bg-black/15" : "bg-card/80"}`} />
+
+                {brand.photoCredit && (
+                  <p className="absolute bottom-10 right-2 z-[4] text-[9px] text-white/40 font-body tracking-wider">
+                    Photo: {brand.photoCredit}
+                  </p>
+                )}
+
+                {/* Atelier logo badge — top-left */}
                 <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
                   <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
                 </div>
+
                 {/* Origin label centered under badge */}
                 <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 w-14 md:w-16 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest text-center">
                   {brand.origin}
                 </p>
-                {/* Instagram icon top-right */}
-                {parentConfig.instagram && (
-                <a
-                  href={parentConfig.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
-                  onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
-                  aria-label={`${brand.name} on Instagram`}
-                >
-                  <Instagram className="h-6 w-6 text-white" />
-                </a>
+
+                {/* Instagram icon — top-right */}
+                {instagramUrl && (
+                  <a
+                    href={instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
+                    aria-label={`${brand.name} on Instagram`}
+                  >
+                    <Instagram className="h-6 w-6 text-white" />
+                  </a>
                 )}
-                {/* Toggle sub-designers button */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
-                  className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
-                >
-                  <Layers className="h-3 w-3" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{(() => { const count = getDesignerCount(brand.name); return count > 0 ? ` (${count})` : ""; })()}</span>
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
-                </button>
-                {/* Share button — bottom left */}
-                <div className="absolute bottom-3 left-3 z-10">
+
+                {/* Bottom-right: Designers toggle (parent) or static label */}
+                {isParentBrand ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
+                    className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+                  >
+                    <Layers className="h-3 w-3" />
+                    <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{(() => { const count = getDesignerCount(brand.name); return count > 0 ? ` (${count})` : ""; })()}</span>
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
+                  </button>
+                ) : (
+                  <span className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-body text-[9px] uppercase tracking-[0.12em]">
+                    1 Designer
+                  </span>
+                )}
+
+                {/* Bottom-left: Share + Curators' Picks */}
+                <div className="absolute bottom-3 left-3 z-10 flex items-center gap-3">
+                  {/* Desktop share */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = buildParentBrandOgUrl(brand.name);
-                      navigator.clipboard.writeText(`${buildParentShareText(brand.name)}: ${url}`);
+                      const url = isParentBrand ? buildParentBrandOgUrl(brand.name) : `https://www.maisonaffluency.com/designers/${profileSlug}`;
+                      const text = isParentBrand ? buildParentShareText(brand.name) : `${brand.name} — Maison Affluency`;
+                      navigator.clipboard.writeText(`${text}: ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
@@ -2444,13 +2477,18 @@ function AlphaStrip({
                     <Share2 className="h-3 w-3" />
                     <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
                   </button>
+                  {/* Mobile WhatsApp */}
                   <WhatsAppShareButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = buildParentBrandOgUrl(brand.name);
-                      const msg = `${buildParentShareText(brand.name)}: ${url}`;
-                      const wa = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                      window.location.href = wa;
+                      if (isParentBrand) {
+                        const url = buildParentBrandOgUrl(brand.name);
+                        const msg = `${buildParentShareText(brand.name)}: ${url}`;
+                        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                      } else {
+                        const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
+                        shareProfileOnWhatsApp("atelier", brand.id, brand.name, featuredText);
+                      }
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     label={`Share ${brand.name} on WhatsApp`}
@@ -2458,10 +2496,21 @@ function AlphaStrip({
                     variant="glass"
                     className="md:hidden"
                   />
+                  {/* Curators' Picks gem */}
+                  {hasPicks && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
+                      className="flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
+                    >
+                      <Gem className="h-3.5 w-3.5 fill-accent text-accent" />
+                      <span className="hidden md:inline font-body text-[9px] uppercase tracking-[0.12em] text-white">Picks</span>
+                    </button>
+                  )}
                 </div>
-                {/* Hover overlay with View Profile */}
+
+                {/* Hover overlay — View Profile */}
                 <Link
-                  to={`/designers/${parentConfig.profileSlug}?from=ateliers`}
+                  to={`/designers/${profileSlug}?from=ateliers`}
                   className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 >
                   <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
@@ -2469,145 +2518,6 @@ function AlphaStrip({
                   </span>
                 </Link>
               </div>
-            ) : (
-            <div
-              id={`brand-${brand.id}`}
-              role="button"
-              tabIndex={0}
-              aria-expanded={expandedCard === brand.name}
-              aria-label={`${brand.name} — ${brand.origin}`}
-              onClick={() => setExpandedCard(expandedCard === brand.name ? null : brand.name)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedCard(expandedCard === brand.name ? null : brand.name); } }}
-              className={`group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden p-5 md:p-6 ${expandedCard === brand.name ? "min-h-[280px] md:min-h-[300px]" : "h-[280px] md:h-[300px]"}`}
-            >
-              {/* Lazy-loaded background image */}
-              {bg && (
-                <img
-                  src={bg}
-                  alt={`${brand.name} background`}
-                  loading="lazy"
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full pointer-events-none select-none"
-                  style={{
-                    objectFit: "cover",
-                    objectPosition: brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha Design Studio" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
-                  }}
-                />
-              )}
-              <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 group-hover:bg-black/25" : "bg-card/50 group-hover:bg-card/80"}`} />
-              {brand.photoCredit && (
-                <p className="absolute bottom-2 right-2 z-10 text-[9px] text-white/40 font-body tracking-wider">
-                  Photo: {brand.photoCredit}
-                </p>
-              )}
-              <div className={`relative z-10 pb-14 ${expandedCard === brand.name ? "" : "max-h-[calc(100%-3.5rem)] overflow-hidden"}`}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-2">
-                    {brand.instagram && (
-                      <a
-                        href={brand.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
-                        onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
-                        aria-label={`${brand.name} on Instagram`}
-                      >
-                        <svg className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <defs>
-                            <linearGradient id="instagram-gradient-strip" x1="0%" y1="100%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#f09433" />
-                              <stop offset="25%" stopColor="#e6683c" />
-                              <stop offset="50%" stopColor="#dc2743" />
-                              <stop offset="75%" stopColor="#cc2366" />
-                              <stop offset="100%" stopColor="#bc1888" />
-                            </linearGradient>
-                          </defs>
-                          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                        </svg>
-                      </a>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className={`font-serif text-lg md:text-xl transition-colors duration-300 mb-0.5 ${hasBg ? "text-white" : "text-foreground group-hover:text-primary"}`}>
-                        {brand.name}
-                      </h3>
-                      {brandDesignerNames[brand.name] && (
-                        <p className={`text-[9px] md:text-[10px] font-body italic tracking-wide mb-0.5 transition-colors duration-300 ${hasBg ? "text-white/60" : "text-muted-foreground/70"}`}>
-                          {brandDesignerNames[brand.name].join(" · ")}
-                        </p>
-                      )}
-                      <span className={`text-[10px] md:text-xs uppercase tracking-wider transition-colors duration-300 ${hasBg ? "text-white/80" : "text-muted-foreground"}`}>
-                        {brand.origin}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
-                  {brand.description}
-                </p>
-
-                {expandedCard === brand.name && brand.featuredItems.some(item => item.featured) && (
-                <div className="space-y-1 mb-3 pl-8 md:pl-0">
-                  <span className="text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 text-[hsl(var(--gold))]"><em>On View</em></span>
-                  <ul className="space-y-0.5">
-                    {brand.featuredItems.map((item, itemIndex) => (
-                      <li key={itemIndex}>
-                        {item.featured && item.galleryIndex !== undefined ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); scrollToGallery(item.galleryIndex!, brand.name); }}
-                            className={`text-xs md:text-sm font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation text-left ${hasBg ? "text-white" : "text-foreground"}`}
-                          >
-                            <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/40 group-hover/link:decoration-white" : "decoration-primary/40 group-hover/link:decoration-primary"}`}>
-                              {item.featured}
-                            </span>
-                            <svg className={`h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0 ${hasBg ? "text-white/80" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                          </button>
-                        ) : item.featured ? (
-                          <span className={`text-xs md:text-sm font-body transition-colors duration-300 ${hasBg ? "text-white/90" : "text-foreground"}`}>
-                            {item.featured}
-                          </span>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                )}
-              </div>
-
-               {/* Bottom bar */}
-              <div className={`absolute bottom-0 left-0 right-0 h-16 z-[5] pointer-events-none ${hasBg ? 'bg-gradient-to-t from-black/50 via-black/30 to-transparent' : 'bg-gradient-to-t from-background/60 via-background/30 to-transparent'}`} />
-              <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
-                <div className={`md:order-3 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
-                  <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
-                  className="md:order-1 flex items-center gap-2 md:gap-1.5 text-sm md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white whitespace-nowrap"
-                >
-                  <Gem className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-accent text-accent" />
-                  <span className="group-hover/picks:underline underline-offset-2">
-                    Curators' Picks
-                  </span>
-                </button>
-                <WhatsAppShareButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
-                    shareProfileOnWhatsApp("atelier", brand.id, brand.name, featuredText);
-                    trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
-                  }}
-                  label={`Share ${brand.name} on WhatsApp`}
-                  size="sm"
-                  variant={hasBg ? "glass" : "solid"}
-                  className="md:order-2"
-                />
-              </div>
-            </div>
-            )}
             </React.Fragment>
           );
         })}
