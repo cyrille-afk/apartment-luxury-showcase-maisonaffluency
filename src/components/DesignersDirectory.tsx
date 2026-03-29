@@ -383,14 +383,40 @@ function SingleDesignerCard({ item }: { item: Designer }) {
             <div className="flex flex-col items-center gap-1.5">
               <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
               <div className="flex gap-1.5">
-                {thumbs.slice(0, 2).map((src, i) => (
-                  <div key={i} className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md">
-                    <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
-                    <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
-                      <Plus className="w-2 h-2 text-white" />
-                    </span>
-                  </div>
-                ))}
+                {thumbs.slice(0, 2).map((src, i) => {
+                  const galleryIdx = resolveThumbToGalleryIndex(src);
+                  return (
+                    <button
+                      key={i}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (galleryIdx !== null) {
+                          // Scroll to gallery section, then dispatch lightbox open event
+                          const galleryEl = document.getElementById('gallery');
+                          if (galleryEl) {
+                            galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                          setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                              detail: {
+                                index: galleryIdx,
+                                sourceId: `designer-card-${item.slug}`,
+                                filterDesigner: item.name,
+                              },
+                            }));
+                          }, 500);
+                        }
+                      }}
+                      className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
+                    >
+                      <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
+                      <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                        <Plus className="w-2 h-2 text-white" />
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
