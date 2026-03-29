@@ -221,7 +221,7 @@ function ParentBrandCard({
 
   return (
     <div className="col-span-2 md:col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[14/9]">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[11/7]">
         {/* Background image */}
         {(item.hero_image_url || item.image_url) && (
           <img
@@ -595,26 +595,55 @@ function LetterCarousel({
 
   // Paginate by slots: parent brands take 2 slots, regular cards take 1
   const pages = useMemo(() => {
-    const result: Designer[][] = [];
-    let currentPage: Designer[] = [];
-    let usedSlots = 0;
+    const getSlotCost = (item: Designer) => {
+      const isParentBrand = item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
+      return isParentBrand ? 2 : 1;
+    };
+
+    const staged: { items: Designer[]; usedSlots: number }[] = [];
+    let current = { items: [] as Designer[], usedSlots: 0 };
 
     for (const item of designers) {
-      const isParentBrand = item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
-      const slotCost = isParentBrand ? 2 : 1;
+      const slotCost = getSlotCost(item);
 
-      if (usedSlots + slotCost > slotsPerPage && currentPage.length > 0) {
-        result.push(currentPage);
-        currentPage = [];
-        usedSlots = 0;
+      if (current.usedSlots + slotCost > slotsPerPage && current.items.length > 0) {
+        staged.push(current);
+        current = { items: [], usedSlots: 0 };
       }
 
-      currentPage.push(item);
-      usedSlots += slotCost;
+      current.items.push(item);
+      current.usedSlots += slotCost;
     }
 
-    if (currentPage.length > 0) result.push(currentPage);
-    return result;
+    if (current.items.length > 0) staged.push(current);
+
+    // Rebalance adjacent pages to reduce visual blanks (keeps global order)
+    for (let i = 0; i < staged.length - 1; i++) {
+      const page = staged[i];
+      const nextPage = staged[i + 1];
+      if (!nextPage || nextPage.items.length === 0) continue;
+
+      let remaining = slotsPerPage - page.usedSlots;
+      while (remaining > 0 && nextPage.items.length > 0) {
+        const candidate = nextPage.items[0];
+        const candidateCost = getSlotCost(candidate);
+        if (candidateCost > remaining) break;
+
+        page.items.push(candidate);
+        page.usedSlots += candidateCost;
+        remaining -= candidateCost;
+
+        nextPage.items.shift();
+        nextPage.usedSlots -= candidateCost;
+      }
+
+      if (nextPage.items.length === 0) {
+        staged.splice(i + 1, 1);
+        i -= 1;
+      }
+    }
+
+    return staged.map((page) => page.items);
   }, [designers, parentDesignerCountByName, slotsPerPage]);
 
   useEffect(() => {
@@ -637,6 +666,10 @@ function LetterCarousel({
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    const target = e.target as HTMLElement;
+    if (target.closest("a,button,input,textarea,select,[role='button']")) return;
+
     const viewport = viewportRef.current;
     if (!viewport) return;
 
