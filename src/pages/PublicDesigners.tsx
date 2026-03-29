@@ -243,29 +243,9 @@ const PublicDesigners = () => {
 
   const activeLetters = useMemo(() => new Set(alphaGroups.map(([l]) => l)), [alphaGroups]);
 
-  const toggleLetter = useCallback((letter: string) => {
-    setExpandedLetters((prev) => {
-      const next = new Set(prev);
-      if (next.has(letter)) {
-        next.delete(letter);
-      } else {
-        next.add(letter);
-      }
-      return next;
-    });
-  }, []);
-
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
-    // Expand if not already
-    setExpandedLetters((prev) => {
-      const next = new Set(prev);
-      next.add(letter);
-      return next;
-    });
-    setTimeout(() => {
-      document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
+    document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeLetters]);
 
   // When searching, auto-expand all matching letters
