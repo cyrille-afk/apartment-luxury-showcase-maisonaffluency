@@ -45,11 +45,15 @@ const CARD_THUMBNAILS: Record<string, string[]> = {
   "tristan-auer": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085769/home-office-3_t39msw.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773200000/Screen_Shot_2026-03-11_at_11.11.33_AM_p0wtix.png"],
 };
 
-/** Parse names like "Atelier Février - Florian & Lisa Mukhia Pretet" into [displayName, parentLabel] */
+/** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
-  // If DB has explicit founder → use it
+  // If DB has explicit founder that differs from name → use it as parent
   if (item.founder && item.founder !== item.name) {
     return { displayName: item.display_name || item.name, parentLabel: item.founder };
+  }
+  // If display_name is set and differs from name → name is the parent/atelier
+  if (item.display_name && item.display_name !== item.name) {
+    return { displayName: item.display_name, parentLabel: item.name };
   }
   // If name contains " - " separator, split into atelier + designer(s)
   const dashIdx = item.name.indexOf(" - ");
