@@ -573,13 +573,13 @@ function LetterCarousel({
   return (
     <div>
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4 md:gap-5">
+        <div className="flex">
           {designers.map((item) => {
             const isAtelier = item.founder === item.name;
 
             if (isAtelier) {
               return (
-                <div key={item.slug} className="flex-none w-full md:w-[calc(66.666%-6px)] lg:w-[calc(40%-12px)]">
+                <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_40%] lg:flex-[0_0_40%] min-w-0 pl-4 first:pl-0">
                   <ParentBrandCardWrapper
                     item={item}
                     openParent={openParent}
@@ -590,7 +590,7 @@ function LetterCarousel({
             }
 
             return (
-              <div key={item.slug} className="flex-none w-[calc(50%-8px)] md:w-[calc(33.333%-14px)] lg:w-[calc(20%-16px)]">
+              <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%] min-w-0 pl-4 first:pl-0">
                 <SingleDesignerCard item={item} />
               </div>
             );
