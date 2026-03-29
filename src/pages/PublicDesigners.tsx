@@ -396,8 +396,6 @@ const PublicDesigners = () => {
                   key={letter}
                   letter={letter}
                   designers={designers}
-                  isExpanded={expandedLetters.has(letter)}
-                  onToggle={() => toggleLetter(letter)}
                 />
               ))}
             </div>
