@@ -242,6 +242,7 @@ function ParentBrandCard({
 function SingleDesignerCard({ item }: { item: Designer }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
+  const instagramLink = (item.links as any[])?.find((l: any) => l.type === "instagram")?.url;
 
   return (
     <Link
@@ -249,6 +250,19 @@ function SingleDesignerCard({ item }: { item: Designer }) {
       className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+        {/* Instagram icon — top-right */}
+        {instagramLink && (
+          <a
+            href={instagramLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`${item.name} on Instagram`}
+          >
+            <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white drop-shadow-md" />
+          </a>
+        )}
         {item.image_url ? (
           <img
             src={item.image_url}
