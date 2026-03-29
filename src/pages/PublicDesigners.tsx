@@ -507,7 +507,7 @@ function LetterGroup({
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             {needsCarousel ? (
-              <LetterCarousel designers={designers} openParent={openParent} setOpenParent={setOpenParent} />
+              <LetterCarousel designers={designers} />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
@@ -559,12 +559,8 @@ function LetterGroup({
 // ─── Letter Carousel (horizontal swipe with dots) ────────────────────────────
 function LetterCarousel({
   designers,
-  openParent,
-  setOpenParent,
 }: {
   designers: Designer[];
-  openParent: string | null;
-  setOpenParent: (name: string | null) => void;
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
@@ -572,47 +568,18 @@ function LetterCarousel({
     containScroll: "trimSnaps",
   });
 
-  // Find open parent for sub-grid rendering
-  const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
-
   return (
     <div>
       <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
         <div className="flex -ml-4">
-          {designers.map((item) => {
-            const isAtelier = item.founder === item.name;
-            const slideWidth = isAtelier
-              ? "flex-[0_0_100%] md:flex-[0_0_40%] lg:flex-[0_0_40%]"
-              : "flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%]";
-
-            return (
-              <div key={item.slug} className={`${slideWidth} min-w-0 pl-4`}>
-                {isAtelier ? (
-                  <CarouselAtelierCard
-                    item={item}
-                    openParent={openParent}
-                    setOpenParent={setOpenParent}
-                  />
-                ) : (
-                  <SingleDesignerCard item={item} />
-                )}
-              </div>
-            );
-          })}
+          {designers.map((item) => (
+            <div key={item.slug} className="flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%] min-w-0 pl-4">
+              <SingleDesignerCard item={item} />
+            </div>
+          ))}
         </div>
       </div>
       <CarouselDots api={emblaApi} />
-
-      {/* Sub-grid below carousel when a parent is expanded */}
-      <AnimatePresence>
-        {openParentItem && openParent && (
-          <ParentSubGrid
-            key={openParent}
-            parentName={openParent}
-            onClose={() => setOpenParent(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
