@@ -254,7 +254,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(4);
 
   // Quote request dialog state (triggered from hotspot pins)
   const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
@@ -777,28 +777,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </span>
                         Interactive Gallery
                       </span>
-                      <button
-                        onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                        className="flex items-center rounded transition-all hover:opacity-70"
-                        aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-                      >
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                          {gridCols === 3 ? (
-                            <>
-                              <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="10" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="16" y="3" width="4" height="18" rx="1" fill="black" />
-                            </>
-                          ) : (
-                            <>
-                              <rect x="2" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="7.5" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="13" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="18.5" y="3" width="4" height="18" rx="0.5" fill="black" />
-                            </>
-                          )}
-                        </svg>
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {([1, 2, 3, 4] as const).map((cols) => (
+                          <button
+                            key={cols}
+                            onClick={() => setGridCols(cols)}
+                            className={`flex items-center rounded p-0.5 transition-all ${gridCols === cols ? 'opacity-100' : 'opacity-35 hover:opacity-60'}`}
+                            aria-label={`Switch to ${cols} column grid`}
+                          >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                              {cols === 1 && <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />}
+                              {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
+                              {cols === 3 && (<><rect x="2" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1" fill="currentColor" /></>)}
+                              {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -942,7 +937,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
+              <div className={`hidden md:grid transition-all duration-300 ${gridCols === 1 ? 'md:grid-cols-1 md:max-w-2xl md:mx-auto md:gap-10' : gridCols === 2 ? 'md:grid-cols-2 md:gap-8' : gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
