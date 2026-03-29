@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 
 // ─── Gallery room thumbnails (keyed by DB slug) ─────────────────────────────
 const CARD_THUMBNAILS: Record<string, string[]> = {
@@ -906,8 +906,31 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             </p>
           )}
 
-          {/* Desktop: Filter + Grid toggle + search */}
-          <div className="hidden md:flex items-center gap-2 mb-4">
+          {/* Desktop: A-Z jump bar — full width */}
+          <div className="hidden md:block mb-6">
+            <div className="h-px bg-border/60 mb-5" />
+            <div
+              ref={letterBarRef}
+              className="flex items-center justify-between"
+            >
+              {LETTERS.map((letter) => {
+                const isActive = activeLetters.has(letter);
+                return (
+                  <button
+                    key={letter}
+                    onClick={() => jumpToLetter(letter)}
+                    className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/20 cursor-default"}`}
+                  >
+                    {letter}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="h-px bg-border/60 mt-5" />
+          </div>
+
+          {/* Desktop: Filter + Search row */}
+          <div className="hidden md:flex items-center gap-3 mb-6">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-foreground text-foreground transition-colors relative"
@@ -919,34 +942,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
               )}
             </button>
-            <div className="flex-1" />
-            {/* A-Z jump bar */}
-            <div
-              ref={letterBarRef}
-              className="flex items-center gap-1.5 lg:gap-2.5 overflow-x-auto"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}
-            >
-              {LETTERS.map((letter) => {
-                const isActive = activeLetters.has(letter);
-                return (
-                  <button
-                    key={letter}
-                    onClick={() => jumpToLetter(letter)}
-                    className={`flex-none font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}
-                  >
-                    {letter}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="relative w-56 ml-2">
+            <div className="relative w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Designer..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-8 h-9 text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+                className="pl-9 pr-8 h-10 text-sm bg-background border-border shadow-sm focus:border-primary/60 focus:shadow-md font-body uppercase tracking-[0.12em]"
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
