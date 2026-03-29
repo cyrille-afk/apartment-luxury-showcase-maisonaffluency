@@ -15,6 +15,8 @@ import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 import HeroManager from "@/components/trade/HeroManager";
 import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
 import ScrapeProducts from "@/components/trade/ScrapeProducts";
+import { Link } from "react-router-dom";
+import { Instagram } from "lucide-react";
 
 interface Application {
   id: string;
