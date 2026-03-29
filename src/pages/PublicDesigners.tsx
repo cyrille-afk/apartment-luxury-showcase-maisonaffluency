@@ -157,6 +157,103 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
   );
 }
 
+// ─── Reusable Sub-Designer Card ──────────────────────────────────────────────
+function SubDesignerCard({ d, parentName }: { d: { slug: string; name: string; image?: string; instagramUrl?: string }; parentName: string }) {
+  const igUrl = d.instagramUrl || INSTAGRAM_LINKS[d.slug];
+  return (
+    <Link
+      to={`/designers/${d.slug}`}
+      className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+    >
+      <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+        {d.image ? (
+          <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted/5">
+            <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+        </div>
+        {igUrl && (
+          <a href={igUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+            className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all">
+            <Instagram className="h-2.5 w-2.5" />
+          </a>
+        )}
+      </div>
+      <div className="px-2 py-1.5 bg-background text-center">
+        <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
+        <p className="font-body text-[8px] text-muted-foreground/60 uppercase tracking-[0.1em] mt-0.5 line-clamp-1">{parentName}</p>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Sub-Designer Carousel (>5 items) ────────────────────────────────────────
+function SubDesignerCarousel({ designers, parentName }: { designers: { slug: string; name: string; image?: string; instagramUrl?: string }[]; parentName: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(designers.length / itemsPerPage);
+
+  const scrollToPage = (page: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cardWidth = el.scrollWidth / designers.length;
+    el.scrollTo({ left: cardWidth * page * itemsPerPage, behavior: "smooth" });
+    setActiveIdx(page);
+  };
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cardWidth = el.scrollWidth / designers.length;
+    const page = Math.round(el.scrollLeft / (cardWidth * itemsPerPage));
+    setActiveIdx(Math.min(page, totalPages - 1));
+  };
+
+  return (
+    <div>
+      <div className="relative group/carousel">
+        {activeIdx > 0 && (
+          <button onClick={() => scrollToPage(activeIdx - 1)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-1.5 rounded-full bg-background/80 border border-border shadow-md hover:bg-background transition-colors"
+            aria-label="Previous">
+            <ChevronLeft className="h-4 w-4 text-foreground" />
+          </button>
+        )}
+        {activeIdx < totalPages - 1 && (
+          <button onClick={() => scrollToPage(activeIdx + 1)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-1.5 rounded-full bg-background/80 border border-border shadow-md hover:bg-background transition-colors"
+            aria-label="Next">
+            <ChevronRight className="h-4 w-4 text-foreground" />
+          </button>
+        )}
+        <div ref={scrollRef} onScroll={handleScroll}
+          className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide scroll-smooth px-1"
+          style={{ scrollSnapType: "x mandatory" }}>
+          {designers.map((d) => (
+            <div key={d.slug} className="w-[30%] sm:w-[23%] md:w-[18.5%] lg:w-[13.5%] flex-shrink-0" style={{ scrollSnapAlign: "start" }}>
+              <SubDesignerCard d={d} parentName={parentName} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button key={i} onClick={() => scrollToPage(i)}
+              className={`rounded-full transition-all duration-300 ${i === activeIdx ? "w-5 h-1.5 bg-foreground" : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`}
+              aria-label={`Page ${i + 1}`} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Parent Brand Card (landscape, homepage-style) ───────────────────────────
 function ParentBrandCard({
   item,
