@@ -783,10 +783,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               <div className="flex-1">
                 <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
-                    Designers & Makers{" "}
-                    <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">
-                      On View
-                    </span>
+                    Designers & Makers
                   </h2>
                 </div>
                 <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
@@ -942,6 +939,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
               )}
             </button>
+            <div className="flex-1" />
             <div className="relative w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
