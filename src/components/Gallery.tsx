@@ -859,6 +859,48 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             )}
           </motion.div>
 
+          {/* Mobile: Interactive Gallery badge + pill bar — outside section loop so it stays visible */}
+          <div className="md:hidden">
+            <div className="flex justify-start mb-4">
+              <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-foreground font-body font-light">
+                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
+                  <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
+                  <Plus className="relative h-2.5 w-2.5 text-white" />
+                </span>
+                Interactive Gallery
+              </span>
+            </div>
+            <div className="mb-6">
+              <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-3">
+                {galleryExperiences.map((exp, idx) => (
+                  <button
+                    key={exp.experience}
+                    onClick={() => setActiveMobilePill(idx)}
+                    className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 ${
+                      activeMobilePill === idx
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-transparent text-foreground border-foreground/30 hover:border-foreground/60'
+                    }`}
+                  >
+                    {exp.experience}
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-center gap-1 mt-1">
+                {galleryExperiences.map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={`rounded-full transition-all duration-300 ${
+                      activeMobilePill === idx
+                        ? 'w-1.5 h-1.5 bg-foreground'
+                        : 'w-1 h-1 bg-foreground/25'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
           {(() => {
             const firstHotspotSectionIdx = galleryExperiences.findIndex(s => !s.items.some(i => i.description));
             return filteredExperiences.map((section, sectionIndex) => {
