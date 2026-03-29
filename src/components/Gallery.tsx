@@ -254,7 +254,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(4);
 
   // Quote request dialog state (triggered from hotspot pins)
   const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
@@ -777,28 +777,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </span>
                         Interactive Gallery
                       </span>
-                      <button
-                        onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                        className="flex items-center rounded transition-all hover:opacity-70"
-                        aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-                      >
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                          {gridCols === 3 ? (
-                            <>
-                              <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="10" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="16" y="3" width="4" height="18" rx="1" fill="black" />
-                            </>
-                          ) : (
-                            <>
-                              <rect x="2" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="7.5" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="13" y="3" width="4" height="18" rx="1" fill="black" />
-                              <rect x="18.5" y="3" width="4" height="18" rx="0.5" fill="black" />
-                            </>
-                          )}
-                        </svg>
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {([1, 2, 3, 4] as const).map((cols) => (
+                          <button
+                            key={cols}
+                            onClick={() => setGridCols(cols)}
+                            className={`flex items-center rounded p-0.5 transition-all ${gridCols === cols ? 'opacity-100' : 'opacity-35 hover:opacity-60'}`}
+                            aria-label={`Switch to ${cols} column grid`}
+                          >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                              {cols === 1 && <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />}
+                              {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
+                              {cols === 3 && (<><rect x="2" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1" fill="currentColor" /></>)}
+                              {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -942,7 +937,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
+              <div className={`hidden md:grid transition-all duration-300 ${gridCols === 1 ? 'md:grid-cols-1 md:max-w-2xl md:mx-auto md:gap-10' : gridCols === 2 ? 'md:grid-cols-2 md:gap-8' : gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
@@ -958,10 +953,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
                     >
                       <div
-                        className="relative mb-2 aspect-[4/5] overflow-hidden rounded-sm shadow-md transition-shadow duration-500 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)]"
+                        className={`relative mb-2 overflow-hidden rounded-sm shadow-md transition-all duration-500 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] ${gridCols === 1 ? 'aspect-[16/10]' : gridCols === 2 ? 'aspect-[4/4]' : 'aspect-[4/5]'}`}
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85]" loading="lazy" />
+                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 1 ? "100vw" : gridCols === 2 ? "(max-width: 1024px) 50vw, 50vw" : gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85]" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Cinematic title overlay on hover */}
                         <div className="absolute bottom-0 left-0 right-0 px-4 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
@@ -1000,8 +995,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           className="absolute bottom-2 right-2 md:bottom-4 md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
-                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols === 4 ? 'p-1.5' : 'p-1.5 md:p-2'}`}>
-                            <Maximize2 className={`w-3 h-3 ${gridCols === 4 ? '' : 'md:w-3.5 md:h-3.5'}`} />
+                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols >= 3 ? 'p-1.5' : 'p-2'}`}>
+                            <Maximize2 className={`${gridCols >= 3 ? 'w-3 h-3' : 'w-4 h-4'}`} />
                           </span>
                         </button>
                       </div>
