@@ -6,12 +6,10 @@ import {
   Image, 
   Users, 
   Palette, 
-  Building2, 
   FileText, 
   Mail,
   Menu,
   X,
-  ChevronUp,
   Gem
 } from "lucide-react";
 import { scrollToSection as scrollToSectionUtil } from "@/lib/scrollToSection";
@@ -23,7 +21,6 @@ const sections = [
   { id: "curating-team", label: "Team", icon: Users },
   { id: "designers", label: "Designers", icon: Palette },
   { id: "collectibles", label: "Collectible Design", icon: Gem },
-  { id: "brands", label: "Ateliers", icon: Building2 },
   { id: "details", label: "Trade", icon: FileText },
   { id: "contact", label: "Contact", icon: Mail },
 ];
