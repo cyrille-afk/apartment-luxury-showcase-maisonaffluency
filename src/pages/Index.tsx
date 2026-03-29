@@ -31,7 +31,7 @@ const QuickJumpMenu = lazyRetry(() => import("@/components/QuickJumpMenu"));
 const DesignDetails = lazyRetry(() => import("@/components/DesignDetails"));
 const ContactInquiry = lazyRetry(() => import("@/components/ContactInquiry"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
-const FeaturedDesigners = lazyRetry(() => import("@/components/FeaturedDesigners"));
+const DesignersDirectory = lazyRetry(() => import("@/components/DesignersDirectory"));
 const Collectibles = lazyRetry(() => import("@/components/Collectibles"));
 const BrandsAteliers = lazyRetry(() => import("@/components/BrandsAteliers"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
@@ -444,9 +444,9 @@ const Index = () => {
             <Suspense fallback={null}>
               <ProductGrid sectionScope="designers" />
             </Suspense>
-            <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+            <section id="designers" className="scroll-mt-20 md:scroll-mt-24 py-16">
               <Suspense fallback={<SectionFallback />}>
-                <FeaturedDesigners />
+                <DesignersDirectory showTradeCTA={false} />
               </Suspense>
             </section>
 
