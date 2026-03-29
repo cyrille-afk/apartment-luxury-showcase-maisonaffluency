@@ -198,7 +198,7 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
     scrollRef.current?.scrollBy({ left: dir === "left" ? -240 : 240, behavior: "smooth" });
   };
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch") return;
     const el = scrollRef.current;
     if (!el) return;
