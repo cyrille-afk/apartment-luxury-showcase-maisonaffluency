@@ -299,6 +299,26 @@ function ParentBrandCard({
   );
 }
 
+// ─── Share helper — uses bridge file for WhatsApp OG previews ────────────────
+function buildShareUrl(slug: string): string {
+  return `https://www.maisonaffluency.com/designers/${slug}-og.html?v=20260329&t=${Date.now()}`;
+}
+
+function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: string) {
+  e.stopPropagation();
+  e.preventDefault();
+  const bridgeUrl = buildShareUrl(item.slug);
+  const text = `${displayName} — Maison Affluency`;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = `https://wa.me/?text=${encodeURIComponent(`${text}\n${bridgeUrl}`)}`;
+  } else {
+    navigator.clipboard.writeText(`${text}: ${bridgeUrl}`);
+    import("sonner").then(({ toast }) => toast.success("Link copied"));
+  }
+  trackCTA.whatsapp(`Directory_Share_${item.name}`);
+}
+
 // ─── Single Designer Card (portrait, with optional parent attribution) ───────
 function SingleDesignerCard({ item }: { item: Designer }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
@@ -350,6 +370,16 @@ function SingleDesignerCard({ item }: { item: Designer }) {
             </p>
           )}
         </div>
+
+        {/* Share button — bottom-left */}
+        <button
+          onClick={(e) => handleDesignerShare(e, item, displayName)}
+          className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity"
+          aria-label={`Share ${displayName}`}
+        >
+          <Share2 className="h-3 w-3" />
+          <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
+        </button>
 
         {/* Gallery room thumbnails — bottom-right with "on view" label */}
         {thumbs.length > 0 && (
