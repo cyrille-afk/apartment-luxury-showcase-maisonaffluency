@@ -2,12 +2,13 @@ import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, Search, X, Layers } from "lucide-react";
+import { ChevronDown, Search, X, Layers, Instagram, Share2 } from "lucide-react";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
+import { trackCTA } from "@/lib/analytics";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
@@ -23,9 +24,9 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="overflow-hidden"
+      className="overflow-hidden col-span-full"
     >
-      <div className="pt-3 pb-2 pl-2">
+      <div className="pt-4 pb-2">
         <div className="flex items-center gap-2 mb-3 px-1">
           <Layers className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="font-body text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
@@ -42,7 +43,7 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
             <span className="font-body text-xs text-muted-foreground/50">Loading…</span>
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-2 md:gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 md:gap-3">
             {designers.map((d) => (
               <Link
                 key={d.slug}
@@ -77,6 +78,182 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
   );
 }
 
+// ─── Parent Brand Card (landscape, homepage-style) ───────────────────────────
+function ParentBrandCard({
+  item,
+  isOpen,
+  onToggle,
+  designerCount,
+}: {
+  item: Designer;
+  isOpen: boolean;
+  onToggle: () => void;
+  designerCount: number;
+}) {
+  const instagramLink = item.links?.find((l) => l.type === "instagram")?.url;
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const url = `https://www.maisonaffluency.com/designers/${item.slug}`;
+    const text = `${item.display_name || item.name} — Maison Affluency`;
+    navigator.clipboard.writeText(`${text}: ${url}`);
+    import("sonner").then(({ toast }) => toast.success("Link copied"));
+    trackCTA.whatsapp(`Directory_Share_${item.name}`);
+  };
+
+  return (
+    <div className="col-span-2 md:col-span-2">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer h-[240px] md:h-[280px]">
+        {/* Background image */}
+        {(item.hero_image_url || item.image_url) && (
+          <img
+            src={item.hero_image_url || item.image_url}
+            alt={item.name}
+            loading="lazy"
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover"
+          />
+        )}
+        <div className={`absolute inset-0 transition-all duration-300 ${
+          (item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"
+        }`} />
+
+        {/* Logo badge — top-left */}
+        <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
+          {item.logo_url ? (
+            <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" />
+          ) : (
+            <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">
+              {item.display_name || item.name}
+            </span>
+          )}
+        </div>
+
+        {/* Origin label under badge */}
+        {item.source && (
+          <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 w-14 md:w-16 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest text-center">
+            {item.specialty?.split("·")[0]?.trim() || ""}
+          </p>
+        )}
+
+        {/* Instagram icon — top-right */}
+        {instagramLink && (
+          <a
+            href={instagramLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`${item.name} on Instagram`}
+          >
+            <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          </a>
+        )}
+
+        {/* Bottom-right: Designers toggle */}
+        <button
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
+          className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+        >
+          <Layers className="h-3 w-3" />
+          <span className="font-body text-[9px] uppercase tracking-[0.12em]">
+            Designers{designerCount > 0 ? ` (${designerCount})` : ""}
+          </span>
+          <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        </button>
+
+        {/* Bottom-left: Share */}
+        <button
+          onClick={handleShare}
+          className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
+          aria-label={`Share ${item.name}`}
+        >
+          <Share2 className="h-3 w-3" />
+          <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
+        </button>
+
+        {/* Hover overlay — View Profile */}
+        <Link
+          to={`/designers/${item.slug}`}
+          className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        >
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+            View Profile
+          </span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Single Designer Card (portrait, with optional parent attribution) ───────
+function SingleDesignerCard({ item }: { item: Designer }) {
+  const hasParent = item.founder && item.founder !== item.name;
+
+  return (
+    <Link
+      to={`/designers/${item.slug}`}
+      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+    >
+      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+        {item.image_url ? (
+          <img
+            src={item.image_url}
+            alt={item.name}
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+            <span className="font-display text-3xl text-muted-foreground/20">
+              {item.name.charAt(0)}
+            </span>
+          </div>
+        )}
+
+        {/* Name overlay — top */}
+        <div className="absolute inset-x-0 top-0 px-3 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
+          {hasParent ? (
+            <>
+              <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+                {item.display_name || item.name}
+              </p>
+              <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">
+                {item.founder}
+              </p>
+            </>
+          ) : (
+            <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+              {item.display_name || item.name}
+            </p>
+          )}
+        </div>
+
+        {/* Founder pill — top-right for sub-designers */}
+        {hasParent && (
+          <span className="absolute top-2 right-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+            <Layers className="h-2 w-2" />
+            {item.founder}
+          </span>
+        )}
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
+          {item.specialty && (
+            <p className="font-body text-[10px] text-white/85 text-center leading-relaxed line-clamp-3 mb-3 max-w-[90%]">
+              {item.specialty}
+            </p>
+          )}
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+            View Profile
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 // ─── Letter Group with scroll-reveal ─────────────────────────────────────────
 function LetterGroup({
   letter,
@@ -92,12 +269,17 @@ function LetterGroup({
   const isRevealed = forceOpen || isInView;
   const [openParent, setOpenParent] = useState<string | null>(null);
 
+  // Get designer counts for parent brands in this group
+  const parentBrands = useMemo(
+    () => designers.filter((d) => d.founder === d.name),
+    [designers]
+  );
+
   return (
     <div id={`alpha-${letter}`} className="scroll-mt-32 mb-6">
-      {/* Sentinel for intersection observer */}
       <div ref={sentinelRef} />
 
-      {/* Letter heading — always visible */}
+      {/* Letter heading */}
       <div className="flex items-center gap-3 mb-4 px-1">
         <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
         <div className="flex-1 h-px bg-border/40" />
@@ -106,7 +288,6 @@ function LetterGroup({
         </span>
       </div>
 
-      {/* Cards — revealed when scrolled into view or force-opened */}
       <AnimatePresence>
         {isRevealed ? (
           <motion.div
@@ -117,94 +298,34 @@ function LetterGroup({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
               {designers.map((item) => {
                 const isAtelier = item.founder === item.name;
-                return (
-                  <div key={item.slug}>
-                    <Link
-                      to={`/designers/${item.slug}`}
-                      onClick={() => {
-                        sessionStorage.removeItem("__scroll_y");
-                        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-                      }}
-                      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
-                    >
-                      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
-                            <span className="font-display text-3xl text-muted-foreground/20">
-                              {item.name.charAt(0)}
-                            </span>
-                          </div>
-                        )}
 
-                        {/* Name overlay — top */}
-                        <div className="absolute inset-x-0 top-0 px-3 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-                          <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
-                            {item.display_name || item.name}
-                          </p>
-                        </div>
+                if (isAtelier) {
+                  return (
+                    <ParentBrandCardWrapper
+                      key={item.slug}
+                      item={item}
+                      openParent={openParent}
+                      setOpenParent={setOpenParent}
+                    />
+                  );
+                }
 
-                        {/* Atelier badge */}
-                        {isAtelier && (
-                          <div className="absolute top-2.5 right-2.5 w-12 h-12 md:w-14 md:h-14 bg-foreground flex items-center justify-center p-1 overflow-hidden">
-                            <span className="font-display text-[5px] md:text-[7px] text-background text-center leading-tight uppercase tracking-[0.12em]">
-                              {item.name}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Founder pill */}
-                        {item.founder && !isAtelier && (
-                          <span className="absolute top-2 right-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full">
-                            {item.founder}
-                          </span>
-                        )}
-
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
-                          {item.specialty && (
-                            <p className="font-body text-[10px] text-white/85 text-center leading-relaxed line-clamp-3 mb-3 max-w-[90%]">
-                              {item.specialty}
-                            </p>
-                          )}
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                            View Profile
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-
-                    {/* Parent brand: Designers toggle */}
-                    {isAtelier && (
-                      <button
-                        onClick={() => setOpenParent(openParent === item.name ? null : item.name)}
-                        className="mt-1.5 flex items-center gap-1.5 px-2 py-1 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Layers className="h-3 w-3" />
-                        <span className="font-body text-[10px] uppercase tracking-[0.12em]">Designers</span>
-                        <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParent === item.name ? "rotate-180" : ""}`} />
-                      </button>
-                    )}
-
-                    {/* Sub-designers grid */}
-                    <AnimatePresence>
-                      {isAtelier && openParent === item.name && (
-                        <ParentSubGrid parentName={item.name} onClose={() => setOpenParent(null)} />
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
+                return <SingleDesignerCard key={item.slug} item={item} />;
               })}
+
+              {/* Sub-designers grid — spans full width below the card grid */}
+              <AnimatePresence>
+                {openParent && (
+                  <ParentSubGrid
+                    key={openParent}
+                    parentName={openParent}
+                    onClose={() => setOpenParent(null)}
+                  />
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         ) : (
-          /* Placeholder height so scroll position stays consistent */
           <div
             className="flex items-center justify-center py-12 text-muted-foreground/30"
             style={{ minHeight: `${Math.ceil(designers.length / 5) * 280}px` }}
@@ -216,6 +337,29 @@ function LetterGroup({
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// Wrapper to handle designer count fetching for parent brands
+function ParentBrandCardWrapper({
+  item,
+  openParent,
+  setOpenParent,
+}: {
+  item: Designer;
+  openParent: string | null;
+  setOpenParent: (name: string | null) => void;
+}) {
+  const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
+  const isOpen = openParent === item.name;
+
+  return (
+    <ParentBrandCard
+      item={item}
+      isOpen={isOpen}
+      onToggle={() => setOpenParent(isOpen ? null : item.name)}
+      designerCount={subDesigners.length}
+    />
   );
 }
 
@@ -273,7 +417,6 @@ const PublicDesigners = () => {
 
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
-    // Force-open the letter group immediately
     setForcedLetters((prev) => new Set(prev).add(letter));
     setTimeout(() => {
       document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -339,7 +482,6 @@ const PublicDesigners = () => {
 
           {/* Sticky A-Z bar + Search */}
           <div className="sticky top-16 z-20 bg-background pb-3 pt-2 border-b border-border/30 mb-6">
-            {/* A-Z letters */}
             <div
               ref={letterBarRef}
               className="flex items-center gap-2 md:gap-3 lg:gap-4 overflow-x-auto pb-2"
@@ -363,7 +505,6 @@ const PublicDesigners = () => {
               })}
             </div>
 
-            {/* Search */}
             <div className="relative max-w-xs mt-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
