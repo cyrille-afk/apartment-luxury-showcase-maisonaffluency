@@ -392,7 +392,8 @@ function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
   const [openParent, setOpenParent] = useState<string | null>(null);
-  const needsCarousel = designers.length > 5;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const needsCarousel = designers.length > (isMobile ? 2 : 5);
 
   return (
     <div id={`alpha-${letter}`} className="scroll-mt-32 mb-6">
