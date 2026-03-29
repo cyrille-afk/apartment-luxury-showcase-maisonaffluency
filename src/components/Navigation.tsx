@@ -247,7 +247,7 @@ const Navigation = () => {
               </Button>
             </SheetTrigger>
             
-            <SheetContent side="left" className="w-full overflow-y-auto" aria-describedby={undefined}>
+            <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
               </div>
