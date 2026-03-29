@@ -283,7 +283,7 @@ function ParentBrandCard({
         {/* Bottom-left: Share */}
         <button
           onClick={handleShare}
-          className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
+          className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white drop-shadow-md hover:opacity-80 transition-opacity"
           aria-label={`Share ${item.name}`}
         >
           <Share2 className="h-3 w-3" />
@@ -379,7 +379,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
         {/* Share button — bottom-left */}
         <button
           onClick={(e) => handleDesignerShare(e, item, displayName)}
-          className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity"
+          className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white drop-shadow-md hover:opacity-80 transition-opacity"
           aria-label={`Share ${displayName}`}
         >
           <Share2 className="h-3 w-3" />
