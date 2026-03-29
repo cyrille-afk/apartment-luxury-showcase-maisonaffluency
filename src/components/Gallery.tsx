@@ -897,12 +897,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           key={exp.experience}
                           onClick={() => {
                             setActiveMobilePill(idx);
-                            const el = sectionRefs.current[idx];
-                            if (el) {
-                              const offset = 100;
-                              const top = el.getBoundingClientRect().top + window.scrollY - offset;
-                              window.scrollTo({ top, behavior: 'smooth' });
-                            }
                           }}
                           className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 ${
                             activeMobilePill === idx
