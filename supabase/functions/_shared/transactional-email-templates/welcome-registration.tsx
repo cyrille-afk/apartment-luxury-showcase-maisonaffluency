@@ -38,7 +38,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
       <Container style={container}>
         <Section style={logoSection}>
           <Img
-            src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-logo.jpeg"
+            src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-logo.jpg"
             alt="Affluency - Unique by Design"
             width="280"
             style={logo}
