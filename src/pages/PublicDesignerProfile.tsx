@@ -342,7 +342,7 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-4 md:space-y-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-2 md:space-y-3">
           <div className="flex items-center justify-between">
             <Link
               to={`/designers?letter=${encodeURIComponent(designer?.name?.[0]?.toUpperCase() || "A")}`}
@@ -371,8 +371,8 @@ const PublicDesignerProfile = () => {
 
           {isDesignerProfile ? (
             /* Designer profile: portrait hero left + quote & opening text right */
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start md:items-center">
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-col md:flex-row gap-2 md:gap-6 items-start md:items-center">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -479,7 +479,7 @@ const PublicDesignerProfile = () => {
             </div>
           ) : (
             /* Atelier profile: panoramic hero + bio below */
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
