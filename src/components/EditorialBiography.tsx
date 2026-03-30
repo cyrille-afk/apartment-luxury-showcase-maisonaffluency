@@ -316,36 +316,48 @@ function VideoBlock({
               allowFullScreen
             />
           )
-        ) : !playing ? (
-          <button
-            onClick={() => setPlaying(true)}
-            className="w-full h-full relative group cursor-pointer"
-            aria-label={`Play ${caption || "video"}`}
-          >
-            {currentPosterUrl ? (
-              <img
-                src={optimizeImageUrl(currentPosterUrl)}
-                alt={caption || `${designerName} — video cover`}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                onError={handlePosterError}
-              />
-            ) : (
-              <div className="w-full h-full bg-muted/40" />
-            )}
-            {playOverlay}
-          </button>
         ) : (
-          <video
-            ref={videoRef}
-            src={videoSrc}
-            controls
-            autoPlay
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-contain bg-black"
-            poster={currentPosterUrl}
-          />
+          <>
+            <video
+              ref={videoRef}
+              src={videoSrc}
+              controls
+              playsInline
+              preload="metadata"
+              className={`w-full h-full object-contain bg-black ${!playing ? "opacity-0 absolute inset-0" : ""}`}
+              poster={currentPosterUrl}
+            />
+            {!playing && (
+              <button
+                onClick={() => {
+                  setPlaying(true);
+                  const v = videoRef.current;
+                  if (v) {
+                    v.muted = false;
+                    v.play().catch(() => {
+                      v.muted = true;
+                      v.play().catch(() => undefined);
+                    });
+                  }
+                }}
+                className="absolute inset-0 w-full h-full group cursor-pointer"
+                aria-label={`Play ${caption || "video"}`}
+              >
+                {currentPosterUrl ? (
+                  <img
+                    src={optimizeImageUrl(currentPosterUrl)}
+                    alt={caption || `${designerName} — video cover`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={handlePosterError}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted/40" />
+                )}
+                {playOverlay}
+              </button>
+            )}
+          </>
         )}
       </div>
       {caption && (
