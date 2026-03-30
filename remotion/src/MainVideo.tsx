@@ -60,7 +60,7 @@ const scenes: SceneData[] = [
   { image: portrait("AffluencySG_143_1_f9iihg"), room: "", title: "Design & Fine Art Books Corner", caption: "A curated library of inspiration", orientation: "portrait" },
 
   // ── The Details Make the Design ──
-  { image: portrait("details-section_u6rwbu"), room: "The Details Make the Design", title: "Curated Vignette", caption: "Every object tells a story", orientation: "portrait" },
+  { image: portrait("IMG_2397-resized_rufbef"), room: "The Details Make the Design", title: "Curated Vignette", caption: "Every object tells a story", orientation: "portrait" },
   { image: portrait("details-console_hk6uxt"), room: "", title: "Craftsmanship at Every Corner", caption: "The details are not the details — they make the design", orientation: "portrait" },
   { image: portrait("details-lamp_clzcrk"), room: "", title: "Light & Texture", caption: "Interplay of materials and illumination", orientation: "portrait" },
   { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait" },
