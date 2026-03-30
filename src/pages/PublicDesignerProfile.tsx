@@ -833,6 +833,7 @@ const PublicDesignerProfile = () => {
                         {designerLabel && designerSlug ? (
                           <Link
                             to={`/designers/${designerSlug}`}
+                            onClick={(e) => e.stopPropagation()}
                             className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
                           >
                             {designerLabel}
