@@ -593,7 +593,8 @@ const PublicDesignerProfile = () => {
                     }
 
                     // Pull the first text block after the first media so it can sit side-by-side with that image
-                    const firstPairTextIdx = firstMediaIdx >= 0
+                    // On mobile, skip pairing extra text — enforce max 1 paragraph before next image
+                    const firstPairTextIdx = !isMobile && firstMediaIdx >= 0
                       ? remainingBlocks.findIndex((block, idx) => idx > firstMediaIdx && !isMediaBlock(block))
                       : -1;
                     const firstPairText = firstPairTextIdx >= 0 ? remainingBlocks[firstPairTextIdx] : null;
