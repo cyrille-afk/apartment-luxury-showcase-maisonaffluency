@@ -284,17 +284,16 @@ export const collectibleDesigners: Array<{
     id: "christopher-boots",
     name: "Christopher Boots",
     specialty: "Sculptural Crystal & Bronze Lighting",
-    image: matthieuGicquelImg,
+    image: christopherBootsCollImg,
     biography:
-      "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
-    notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
-    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode", galleryIndex: GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER },
-    philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
+      "Christopher Boots is a Melbourne-based lighting designer whose work occupies the rare intersection of geology, sculpture, and illumination. Since founding his eponymous studio, Boots has developed a distinctive practice centred on the transformation of raw natural materials — quartz crystals, marble, alabaster, and semi-precious stones — into dramatic, large-scale luminaires.",
+    notableWorks: "Prometheus III Astraea, Ouranos Series, Q Series Diamond Chandeliers",
+    philosophy: "I want to make objects that outlast their owners. Crystal has been forming underground for millions of years. The least I can do is give it a setting worthy of that patience.",
     curatorPicks: [
-      { image: matthieuGicquelGeode, title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", category: "Decorative Object", subcategory: "Tableware", materials: "Textured glass • 24k gold leaf rim", dimensions: "Ø32 cm", edition: "Unique Piece" },
+      { image: christopherBootsPrometheusIII, title: "Prometheus III Astraea", category: "Lighting", subcategory: "Pendant", materials: "Brass, Lapis Lazuli, Quartz Crystal", dimensions: "900 x 65 mm", tags: ["Genesis Collection"] },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/matthieu_gicquel/?hl=en" },
+      { type: "Instagram", url: "https://www.instagram.com/christopherboots/" },
       { type: "Curators' Picks" },
     ],
   },
