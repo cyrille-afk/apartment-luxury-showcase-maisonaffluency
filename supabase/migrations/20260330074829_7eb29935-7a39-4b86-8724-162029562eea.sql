@@ -1,0 +1,1 @@
+UPDATE designers SET biography = REPLACE(biography, 'https://youtu.be/OaRgw7VoeY0?si=_osneNXBdSUzE4iq | Achille Salvagni Portrait', 'https://youtu.be/OaRgw7VoeY0?si=_osneNXBdSUzE4iq | Achille Salvagni Portrait | poster:https://res.cloudinary.com/dif1oamtj/image/upload/v1774856563/Screen_Shot_2026-03-30_at_3.41.52_PM_sezoxs.png') WHERE id = 'cf661540-983d-40c9-904d-1cb2cd65416b';
