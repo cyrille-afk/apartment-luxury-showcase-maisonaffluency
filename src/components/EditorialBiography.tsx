@@ -655,7 +655,7 @@ export default function EditorialBiography({
     }
 
     // On mobile, insert the first image after the first paragraph of leading text
-    const firstImageIndex = isMobile && leadingText.length > 1
+    const firstImageIndex = isMobile && leadingText.length >= 1
       ? parsed.findIndex((b) => b.type === "image")
       : -1;
     const earlyMobileImage = firstImageIndex >= 0 ? parsed[firstImageIndex] as { type: "image"; url: string; caption: string | null } : null;
