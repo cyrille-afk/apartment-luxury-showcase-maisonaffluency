@@ -12,7 +12,7 @@ import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, Z
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
-import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { scrollToSection } from "@/lib/scrollToSection";
 import WhatsAppShareButton from "./WhatsAppShareButton";
@@ -692,11 +692,12 @@ const Collectibles = () => {
                 </p>
                 <button
                   onClick={() => {
-                    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
-                    const shareUrl = `https://${projectId}.supabase.co/functions/v1/og-image?path=${encodeURIComponent("/#collectibles")}&v=20260325b&t=${Date.now()}`;
-                    const text = `Collectible Design On View — Maison Affluency\n${shareUrl}`;
-                    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                    window.open(wa, "_blank", "noopener");
+                    sharePageOnWhatsApp(
+                      "/#collectibles",
+                      "Collectible Design On View — Maison Affluency",
+                      undefined,
+                      { directUrlPath: "/collectibles-og.html" }
+                    );
                   }}
                   className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
                   aria-label="Share Collectible Design section"
