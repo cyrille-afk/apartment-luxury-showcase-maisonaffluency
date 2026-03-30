@@ -60,25 +60,42 @@ const TradeGallery = () => {
     normalizeName(s).split(" ").filter((t) => t.length > 2);
 
   const refreshPrices = async () => {
-    const { data } = await supabase
-      .from("trade_products")
-      .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
-      .not("trade_price_cents", "is", null);
-    if (data) {
-      const lookup = new Map<string, { cents: number; currency: string; price_unit?: string }>();
-      const entries: { name: string; cents: number; currency: string; price_unit?: string }[] = [];
-      for (const p of data) {
-        if (p.trade_price_cents) {
-          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency, price_unit: p.price_unit };
-          entries.push(entry);
-          lookup.set(p.product_name.trim().toLowerCase(), entry);
-          const norm = normalizeName(p.product_name);
-          if (norm) lookup.set(norm, entry);
-        }
-      }
-      setPriceLookup(lookup);
-      setPriceEntries(entries);
+    const [{ data: tpData }, { data: cpData }] = await Promise.all([
+      supabase
+        .from("trade_products")
+        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .not("trade_price_cents", "is", null),
+      supabase
+        .from("designer_curator_picks")
+        .select("title, trade_price_cents, currency")
+        .not("trade_price_cents", "is", null),
+    ]);
+
+    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string }>();
+    const entries: { name: string; cents: number; currency: string; price_unit?: string }[] = [];
+
+    const addEntry = (name: string, cents: number, currency: string, price_unit?: string) => {
+      const entry = { name, cents, currency, price_unit };
+      entries.push(entry);
+      lookup.set(name.trim().toLowerCase(), entry);
+      const norm = normalizeName(name);
+      if (norm) lookup.set(norm, entry);
+    };
+
+    // Trade products prices
+    for (const p of tpData ?? []) {
+      if (p.trade_price_cents) addEntry(p.product_name, p.trade_price_cents, p.currency, p.price_unit);
     }
+
+    // Curator picks prices (only add if not already present from trade_products)
+    for (const p of cpData ?? []) {
+      if (p.trade_price_cents && !lookup.has(p.title.trim().toLowerCase())) {
+        addEntry(p.title, p.trade_price_cents, p.currency);
+      }
+    }
+
+    setPriceLookup(lookup);
+    setPriceEntries(entries);
   };
 
   useEffect(() => {
