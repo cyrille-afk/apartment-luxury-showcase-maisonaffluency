@@ -371,6 +371,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(1);
   const [activeMobilePill, setActiveMobilePill] = useState(0);
+  const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Quote request dialog state (triggered from hotspot pins)
@@ -871,12 +872,37 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
               </span>
             </div>
             <div className="mb-6">
-              <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-3">
+              <div
+                ref={pillBarRef}
+                className="flex overflow-x-auto scrollbar-hide gap-2 pb-3 snap-x snap-mandatory"
+                onScroll={() => {
+                  const el = pillBarRef.current;
+                  if (!el) return;
+                  const buttons = el.querySelectorAll<HTMLButtonElement>('button');
+                  const center = el.scrollLeft + el.clientWidth / 2;
+                  let closestIdx = 0;
+                  let closestDist = Infinity;
+                  buttons.forEach((btn, i) => {
+                    const btnCenter = btn.offsetLeft + btn.offsetWidth / 2;
+                    const dist = Math.abs(btnCenter - center);
+                    if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+                  });
+                  if (closestIdx !== activeMobilePill) setActiveMobilePill(closestIdx);
+                }}
+              >
                 {galleryExperiences.map((exp, idx) => (
                   <button
                     key={exp.experience}
-                    onClick={() => setActiveMobilePill(idx)}
-                    className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 ${
+                    onClick={() => {
+                      setActiveMobilePill(idx);
+                      const el = pillBarRef.current;
+                      const btn = el?.querySelectorAll<HTMLButtonElement>('button')[idx];
+                      if (el && btn) {
+                        const scrollTo = btn.offsetLeft - el.clientWidth / 2 + btn.offsetWidth / 2;
+                        el.scrollTo({ left: scrollTo, behavior: 'smooth' });
+                      }
+                    }}
+                    className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 snap-center ${
                       activeMobilePill === idx
                         ? 'bg-foreground text-background border-foreground'
                         : 'bg-transparent text-foreground border-foreground/30 hover:border-foreground/60'
@@ -888,8 +914,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
               </div>
               <div className="flex justify-center gap-1 mt-1">
                 {galleryExperiences.map((_, idx) => (
-                  <span
+                  <button
                     key={idx}
+                    onClick={() => {
+                      setActiveMobilePill(idx);
+                      const el = pillBarRef.current;
+                      const btn = el?.querySelectorAll<HTMLButtonElement>('button')[idx];
+                      if (el && btn) {
+                        const scrollTo = btn.offsetLeft - el.clientWidth / 2 + btn.offsetWidth / 2;
+                        el.scrollTo({ left: scrollTo, behavior: 'smooth' });
+                      }
+                    }}
                     className={`rounded-full transition-all duration-300 ${
                       activeMobilePill === idx
                         ? 'w-1.5 h-1.5 bg-foreground'
