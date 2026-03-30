@@ -561,11 +561,12 @@ function CollapsibleBiographyWrapper({
       <div>
         {visible}
         {!expanded && (
-          <div className="mt-5">
+          <div className="mt-5 flex justify-center">
             <button
               onClick={() => setExpanded(true)}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
             >
+              <ChevronDown className="w-3.5 h-3.5" />
               View full profile
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
