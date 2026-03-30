@@ -40,7 +40,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
           <Img
             src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg"
             alt="Affluency - Unique by Design"
-            width="280"
+            width="420"
             style={logo}
           />
         </Section>
