@@ -1033,8 +1033,15 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
+    // Use direct scroll instead of scrollToSection to avoid the settle/lead-in
+    // animation loop that causes erratic jumping on mobile rapid taps.
     requestAnimationFrame(() => {
-      scrollToSection(`alpha-${letter}`);
+      const el = document.getElementById(`alpha-${letter}`);
+      if (!el) return;
+      const nav = document.querySelector("nav");
+      const navHeight = nav?.getBoundingClientRect().height ?? 96;
+      const y = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
     });
   }, [activeLetters]);
 
