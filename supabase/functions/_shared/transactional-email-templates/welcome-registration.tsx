@@ -9,16 +9,16 @@ const SITE_NAME = "Maison Affluency"
 // Curated showcase images — diverse pieces from the collection
 const SHOWCASE_IMAGES = [
   {
-    src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1772106126/Screen_Shot_2026-02-22_at_2.36.04_PM_ivwy5t.png',
-    alt: 'Portal by Jeff Zimmerman',
+    src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773320943/Screen_Shot_2026-03-12_at_9.07.50_PM_jjbf3t.png',
+    alt: 'Orion Pendant by Garnier & Linker',
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1774869657/Screen_Shot_2026-03-30_at_7.20.35_PM_hmegqy.png',
     alt: 'Ouranos I by Christopher Boots',
   },
   {
-    src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773292459/Screen_Shot_2026-03-12_at_12.50.53_PM_wp4tbm.png',
-    alt: 'Firefly Chandelier by Rosie Li',
+    src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773578050/Screen_Shot_2026-03-15_at_8.32.08_PM_leki9q.png',
+    alt: 'Galea Lantern by Alexander Lamont',
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1774225373/Arbor-Desk_04_alexander-lamont_cprwfe.jpg',
@@ -75,7 +75,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Section>
 
         <Text style={captionText}>
-          A glimpse of our curators' picks — from Jeff Zimmerman and Christopher Boots to Rosie Li and Alexander Lamont.
+          A glimpse of our curators' picks — from Garnier & Linker and Christopher Boots to Alexander Lamont.
         </Text>
 
         <Text style={text}>
