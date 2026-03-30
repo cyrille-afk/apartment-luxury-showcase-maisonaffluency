@@ -333,7 +333,7 @@ const PublicDesignerProfile = () => {
       remainingBio = result.filter(Boolean).join("\n\n");
     } else {
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
-      heroParagraphs = textBlocks.slice(0, isMobile ? 1 : (isDesignerProfile ? 2 : 2));
+      heroParagraphs = textBlocks.slice(0, isMobile ? 1 : (isDesignerProfile ? 3 : 2));
       // Preserve original order including inline media
       const heroSet = new Set(heroParagraphs);
       const allRemaining: string[] = [];
