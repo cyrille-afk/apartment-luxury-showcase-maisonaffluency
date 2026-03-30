@@ -58,7 +58,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -70,6 +70,17 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
     if (error) {
       toast({ title: "Sign Up Failed", description: error.message, variant: "destructive" });
       return;
+    }
+    // Send welcome email (fire-and-forget)
+    if (signUpData?.user?.id) {
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'welcome-registration',
+          recipientEmail: email,
+          idempotencyKey: `welcome-reg-${signUpData.user.id}`,
+          templateData: { firstName },
+        },
+      }).catch(() => {});
     }
     toast({ title: "Check your email", description: "We've sent you a confirmation link. Please verify your email to continue." });
     onClose();
