@@ -94,7 +94,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
 
         <Text style={textMuted}>
           If you are an architect, interior designer, or hospitality professional, consider applying to our{' '}
-          <a href="https://maisonaffluency.com/trade/register" style={link}>Trade Program</a>{' '}
+          <a <a href="https://maisonaffluency.com/trade/program" style={link}>Trade Program</a>{' '} style={link}>Trade Program</a>{' '}
           for exclusive trade pricing and dedicated concierge support.
         </Text>
 
