@@ -329,7 +329,7 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
       { title: "Design & Fine Art Books Corner", section: "Home Office with a View", cloudinaryId: "AffluencySG_143_1_f9iihg" },
       /* The Details Make the Design (24-27) */
       { title: "Curated Vignette", section: "The Details Make the Design", cloudinaryId: "IMG_2397-resized_rufbef" },
-      { title: "The Details Make the Design", section: "The Details Make the Design", cloudinaryId: "details-console_hk6uxt" },
+      { title: "The Details Make the Design", section: "The Details Make the Design", cloudinaryId: "WhatsApp_Image_2026-03-30_at_7.35.18_PM_nkvc8c" },
       { title: "Light & Texture", section: "The Details Make the Design", cloudinaryId: "details-lamp_clzcrk" },
       { title: "Craftsmanship at Every Corner", section: "The Details Make the Design", cloudinaryId: "AffluencySG_204_1_qbbpqb" },
     ];

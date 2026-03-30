@@ -61,7 +61,7 @@ const scenes: SceneData[] = [
 
   // ── The Details Make the Design ──
   { image: portrait("IMG_2397-resized_rufbef"), room: "The Details Make the Design", title: "Curated Vignette", caption: "Every object tells a story", orientation: "portrait" },
-  { image: portrait("details-console_hk6uxt"), room: "", title: "Craftsmanship at Every Corner", caption: "The details are not the details — they make the design", orientation: "portrait" },
+  { image: portrait("WhatsApp_Image_2026-03-30_at_7.35.18_PM_nkvc8c"), room: "", title: "Craftsmanship at Every Corner", caption: "The details are not the details — they make the design", orientation: "portrait" },
   { image: portrait("details-lamp_clzcrk"), room: "", title: "Light & Texture", caption: "Interplay of materials and illumination", orientation: "portrait" },
   { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait" },
 ];

@@ -49,7 +49,7 @@ export const GALLERY_THUMBNAILS: Record<number, string> = {
 
   /* The Details Make the Design */
   24: t("IMG_2397-resized_rufbef"),
-  25: t("details-console_hk6uxt"),
+  25: t("WhatsApp_Image_2026-03-30_at_7.35.18_PM_nkvc8c"),
   26: t("details-lamp_clzcrk"),
   27: t("AffluencySG_204_1_qbbpqb"),
 };
