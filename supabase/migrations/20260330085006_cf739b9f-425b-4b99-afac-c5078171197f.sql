@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET subtitle = NULL WHERE id IN ('2c0e11fb-dc5b-46ae-a471-2626bfb3d8ea', '47692f12-9014-4232-a920-7d06b546b55a', 'b8d4e925-bbba-467b-a11c-f5d82690a1da');
