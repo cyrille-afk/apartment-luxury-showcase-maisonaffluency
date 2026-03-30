@@ -38,43 +38,39 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
       currency,
       designers(name)
     `)
-    .order("sort_order", { ascending: true })
-    .then(({ data, error }) => {
-      if (error) throw error;
+    .order("sort_order", { ascending: true });
 
-      return ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
-        const designer = Array.isArray(pick.designers)
-          ? pick.designers[0]
-          : pick.designers;
-        const brandName = designer?.name?.trim();
-        if (!brandName || !pick.title) return [];
+  if (error) throw error;
 
-        const rawCategory =
-          pick.category || pick.tags?.[0] || "Uncategorized";
+  return ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
+    const designer = Array.isArray(pick.designers)
+      ? pick.designers[0]
+      : pick.designers;
+    const brandName = designer?.name?.trim();
+    if (!brandName || !pick.title) return [];
 
-        return [
-          {
-            id: pick.id,
-            brand_name: brandName,
-            product_name: pick.title,
-            subtitle: pick.subtitle ?? undefined,
-            category: normalizeCategory(rawCategory) || rawCategory,
-            subcategory: normalizeSubcategory(
-              pick.subcategory || pick.tags?.[1]
-            ),
-            tags: pick.tags || [],
-            materials: pick.materials ?? undefined,
-            dimensions: pick.dimensions ?? undefined,
-            description: pick.description ?? undefined,
-            image_url: pick.image_url || null,
-            hover_image_url: pick.hover_image_url ?? undefined,
-            edition: pick.edition ?? undefined,
-            pdf_url: pick.pdf_url ?? undefined,
-            pdf_urls: pick.pdf_urls ?? undefined,
-          } satisfies TradeProduct,
-        ];
-      });
-    });
+    const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
+
+    return [
+      {
+        id: pick.id,
+        brand_name: brandName,
+        product_name: pick.title,
+        subtitle: pick.subtitle ?? undefined,
+        category: normalizeCategory(rawCategory) || rawCategory,
+        subcategory: normalizeSubcategory(pick.subcategory || pick.tags?.[1]),
+        tags: pick.tags || [],
+        materials: pick.materials ?? undefined,
+        dimensions: pick.dimensions ?? undefined,
+        description: pick.description ?? undefined,
+        image_url: pick.image_url || null,
+        hover_image_url: pick.hover_image_url ?? undefined,
+        edition: pick.edition ?? undefined,
+        pdf_url: pick.pdf_url ?? undefined,
+        pdf_urls: pick.pdf_urls ?? undefined,
+      } satisfies TradeProduct,
+    ];
+  });
 }
 
 const keyOf = (p: TradeProduct) =>
