@@ -480,7 +480,7 @@ const TradeAtelierProfile = () => {
                     biographyImages={[]}
                     pickImages={[]}
                     designerName={designer.name}
-                    startImageIndex={1}
+                    startImageIndex={0}
                   />
                 </motion.div>
               )}

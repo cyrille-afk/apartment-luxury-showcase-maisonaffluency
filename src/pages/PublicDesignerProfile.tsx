@@ -606,7 +606,7 @@ const PublicDesignerProfile = () => {
                       .filter((_, idx) => !consumedIndexes.has(idx))
                       .join("\n\n");
 
-                    const firstMediaOnRight = firstMediaParsed?.align === "right";
+                    const firstMediaOnRight = false;
 
                     const firstMediaFigure = firstMediaParsed ? (
                       <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
