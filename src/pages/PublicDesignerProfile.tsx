@@ -253,7 +253,7 @@ const PublicDesignerProfile = () => {
       // Separate text-only blocks from inline media blocks
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
 
-      const maxHero = isDesignerProfile ? 4 : 3;
+      const maxHero = isDesignerProfile ? 2 : 3;
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
@@ -316,7 +316,7 @@ const PublicDesignerProfile = () => {
       remainingBio = result.filter(Boolean).join("\n\n");
     } else {
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
-      heroParagraphs = textBlocks.slice(0, isDesignerProfile ? 4 : 2);
+      heroParagraphs = textBlocks.slice(0, isDesignerProfile ? 2 : 2);
       // Preserve original order including inline media
       const heroSet = new Set(heroParagraphs);
       const allRemaining: string[] = [];
