@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
 import { trackCTA } from "@/lib/analytics";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
@@ -472,16 +473,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
                         e.preventDefault();
                         e.stopPropagation();
                         if (resolvedGalleryIdx !== null) {
-                          // Store intent in sessionStorage so Gallery picks it up even if not yet mounted
                           sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
                           sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
                           sessionStorage.setItem('galleryFilterDesigner', item.name);
-                          // Scroll to gallery section
                           const galleryEl = document.getElementById('gallery');
                           if (galleryEl) {
                             galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           }
-                          // Also dispatch event in case Gallery is already mounted
                           setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
                               detail: {
@@ -491,6 +489,15 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
                               },
                             }));
                           }, 600);
+                        } else {
+                          // Graceful fallback: scroll to gallery with designer filter but no specific lightbox
+                          const galleryEl = document.getElementById('gallery');
+                          if (galleryEl) {
+                            galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                          import("@/hooks/use-toast").then(({ toast }) => {
+                            toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
+                          });
                         }
                       }}
                       className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
