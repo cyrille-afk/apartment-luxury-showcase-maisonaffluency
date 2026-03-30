@@ -967,9 +967,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     const letter = initialLetter?.toUpperCase();
     if (letter && LETTERS.includes(letter)) {
       setForcedLetters(new Set([letter]));
-      setTimeout(() => {
-        document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 300);
+      requestAnimationFrame(() => {
+        scrollToSection(`alpha-${letter}`);
+      });
     }
   }, [initialLetter]);
 
@@ -1033,9 +1033,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
-    setTimeout(() => {
-      document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
+    requestAnimationFrame(() => {
+      scrollToSection(`alpha-${letter}`);
+    });
   }, [activeLetters]);
 
   useEffect(() => {
