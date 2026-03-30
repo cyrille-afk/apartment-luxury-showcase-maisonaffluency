@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, buildDesignerOgUrl, shareOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
+import ShareMenu from "./ShareMenu";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
