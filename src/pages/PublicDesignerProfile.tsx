@@ -761,7 +761,11 @@ const PublicDesignerProfile = () => {
                         )}
                         {(() => {
                           const tags: string[] = pick.tags || [];
-                          const specialTags = tags.filter((t) =>
+                          // When a specific edition string exists, drop the generic "limited-edition" tag
+                          const filtered = pick.edition
+                            ? tags.filter(t => !/^limited-edition$/i.test(t))
+                            : tags;
+                          const specialTags = filtered.filter((t) =>
                             /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award/i.test(t)
                           );
                           if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
