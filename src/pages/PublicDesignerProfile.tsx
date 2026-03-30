@@ -700,7 +700,7 @@ const PublicDesignerProfile = () => {
                 </button>
               </div>
 
-              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridCols === 4 ? "grid-cols-3 md:grid-cols-4" : "grid-cols-2 md:grid-cols-3")}>
+              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
                   const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
