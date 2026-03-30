@@ -358,8 +358,9 @@ const PublicDesignerProfile = () => {
           <div className="flex items-center justify-between">
             <Link
               to={(() => {
-                const letter = encodeURIComponent(designer?.name?.[0]?.toUpperCase() || "A");
                 const isChild = designer?.founder && designer.founder !== designer.name;
+                const baseName = isChild ? designer.founder : designer?.name;
+                const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
                 const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
                 return `/designers?letter=${letter}${expandParam}`;
               })()}
