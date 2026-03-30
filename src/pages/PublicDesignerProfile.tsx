@@ -16,6 +16,7 @@ import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -569,22 +570,23 @@ const PublicDesignerProfile = () => {
 
                     // Find first media URL in remainingBlocks
                     let firstMediaIdx = -1;
-                    let firstMediaParsed: { url: string; caption: string | null; size: "small" | null } | null = null;
+                    let firstMediaParsed: { url: string; caption: string | null; size: "small" | null; align: "left" | "right" | null } | null = null;
                     for (let i = 0; i < remainingBlocks.length; i++) {
                       const line = remainingBlocks[i];
                       const pipes = line.split(/\s*\|\s*/);
                       const url = pipes[0]?.trim() || "";
-                      if (/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
+                      if ((/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url)) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
                         let caption: string | null = null;
                         let size: "small" | null = null;
+                        let align: "left" | "right" | null = null;
                         for (let j = 1; j < pipes.length; j++) {
                           const seg = pipes[j].trim();
                           if (/^small$/i.test(seg)) size = "small";
-                          else if (/^(left|right)$/i.test(seg)) { /* skip alignment */ }
+                          else if (/^(left|right)$/i.test(seg)) align = seg.toLowerCase() as "left" | "right";
                           else if (/^poster:/i.test(seg)) { /* skip poster */ }
                           else if (!caption) caption = seg;
                         }
-                        firstMediaParsed = { url, caption, size };
+                        firstMediaParsed = { url, caption, size, align };
                         firstMediaIdx = i;
                         break;
                       }
@@ -604,9 +606,32 @@ const PublicDesignerProfile = () => {
                       .filter((_, idx) => !consumedIndexes.has(idx))
                       .join("\n\n");
 
+                    const firstMediaOnRight = firstMediaParsed?.align === "right";
+
+                    const firstMediaFigure = firstMediaParsed ? (
+                      <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
+                        <figure>
+                          <div className="rounded-xl overflow-hidden bg-muted/10">
+                            <img
+                              src={optimizeImageUrl(firstMediaParsed.url)}
+                              alt={firstMediaParsed.caption || `${designer.name} — editorial`}
+                              className="w-full h-full object-contain"
+                              loading="lazy"
+                            />
+                          </div>
+                          {firstMediaParsed.caption && (
+                            <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
+                              {firstMediaParsed.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      </div>
+                    ) : null;
+
                     return (
                       <>
                         <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
+                          {!firstMediaOnRight && firstMediaFigure}
                           <div className="flex-1 min-w-0">
                             <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
                             <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
@@ -618,25 +643,7 @@ const PublicDesignerProfile = () => {
                               )}
                             </div>
                           </div>
-                          {firstMediaParsed && (
-                            <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
-                              <figure>
-                                <div className="rounded-xl overflow-hidden bg-muted/10">
-                                  <img
-                                    src={firstMediaParsed.url}
-                                    alt={firstMediaParsed.caption || `${designer.name} — editorial`}
-                                    className="w-full h-full object-contain"
-                                    loading="lazy"
-                                  />
-                                </div>
-                                {firstMediaParsed.caption && (
-                                  <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
-                                    {firstMediaParsed.caption}
-                                  </figcaption>
-                                )}
-                              </figure>
-                            </div>
-                          )}
+                          {firstMediaOnRight && firstMediaFigure}
                         </div>
 
                         {heritageSlides.length > 0 && (
