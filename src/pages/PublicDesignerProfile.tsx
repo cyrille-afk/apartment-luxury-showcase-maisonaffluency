@@ -759,15 +759,19 @@ const PublicDesignerProfile = () => {
                             />
                           </>
                         )}
-                        {pick.tags && pick.tags.length > 0 && (() => {
-                          const collectionTags = pick.tags.filter((t) =>
-                            /couture|edition|limited|modern scholar|unesco|good design award/i.test(t)
+                        {(() => {
+                          const tags: string[] = pick.tags || [];
+                          const specialTags = tags.filter((t) =>
+                            /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award/i.test(t)
                           );
-                          return collectionTags.length > 0 ? (
+                          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
+                            specialTags.unshift(pick.edition);
+                          }
+                          return specialTags.length > 0 ? (
                             <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                              {collectionTags.map((tag) => (
+                              {specialTags.map((tag, i) => (
                                 <span
-                                  key={tag}
+                                  key={i}
                                   className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
                                 >
                                   {tag}
