@@ -75,7 +75,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Section>
 
         <Text style={captionText}>
-          A glimpse of our curators' picks — from Garnier & Linker and Christopher Boots to Alexander Lamont.
+          A glimpse of our curators' picks — from Garnier & Linker, Christopher Boots and Alexander Lamont to Atelier Pendhapa.
         </Text>
 
         <Text style={text}>
