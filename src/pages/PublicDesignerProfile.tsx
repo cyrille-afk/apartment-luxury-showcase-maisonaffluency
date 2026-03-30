@@ -254,7 +254,7 @@ const PublicDesignerProfile = () => {
       // Separate text-only blocks from inline media blocks
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
 
-      const maxHero = isMobile ? 1 : (isDesignerProfile ? 2 : 3);
+      const maxHero = isMobile ? 1 : 2;
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
@@ -594,7 +594,8 @@ const PublicDesignerProfile = () => {
 
                     // Pull the first text block after the first media so it can sit side-by-side with that image
                     // On mobile, skip pairing extra text — enforce max 1 paragraph before next image
-                    const firstPairTextIdx = !isMobile && firstMediaIdx >= 0
+                    // On desktop, only pair extra text if heroParagraphs < 2 (max 2 paragraphs per image)
+                    const firstPairTextIdx = !isMobile && heroParagraphs.length < 2 && firstMediaIdx >= 0
                       ? remainingBlocks.findIndex((block, idx) => idx > firstMediaIdx && !isMediaBlock(block))
                       : -1;
                     const firstPairText = firstPairTextIdx >= 0 ? remainingBlocks[firstPairTextIdx] : null;
