@@ -1003,22 +1003,22 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </p>
                         <div className="flex-1 flex justify-end">
                           <div className="flex items-center gap-1">
-                            {/* Left button: toggles between 1 and 2 columns — icon shows destination */}
+                            {/* Left button: toggles 1↔3 columns */}
                             <button
-                              onClick={() => setGridCols(gridCols === 2 ? 1 : 2)}
-                              className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols <= 2 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
-                              aria-label={gridCols === 1 ? 'Switch to 2 columns' : 'Switch to 1 column'}
+                              onClick={() => setGridCols(gridCols === 1 ? 3 : 1)}
+                              className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols <= 1 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
+                              aria-label={gridCols === 1 ? 'Switch to 3 columns' : 'Switch to 1 column'}
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 {gridCols === 1
-                                  ? (<><rect x="3" y="3" width="8" height="18" rx="1.5" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1.5" fill="currentColor" /></>)
+                                  ? (<><rect x="2" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /></>)
                                   : <rect x="7" y="3" width="10" height="18" rx="1.5" fill="currentColor" />
                                 }
                               </svg>
                             </button>
-                            {/* Right button: toggles 3↔4 columns — icon shows destination */}
+                            {/* Right button: toggles 3↔4 columns */}
                             <button
-                              onClick={() => setGridCols(gridCols >= 4 ? 3 : gridCols === 3 ? 4 : 3)}
+                              onClick={() => setGridCols(gridCols >= 4 ? 3 : 4)}
                               className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols >= 3 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
                               aria-label={gridCols === 3 ? 'Switch to 4 columns' : 'Switch to 3 columns'}
                             >
@@ -1221,7 +1221,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   openLightbox={openLightbox}
                 />
               ) : (
-                <div className={`hidden md:grid transition-all duration-300 ${gridCols === 2 ? 'md:grid-cols-2 md:gap-8' : gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
+                <div className={`hidden md:grid transition-all duration-300 ${gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
@@ -1237,10 +1237,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
                     >
                       <div
-                        className={`relative mb-2 overflow-hidden rounded-sm shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] transition-all duration-500 group-hover:shadow-[0_25px_60px_-10px_rgba(0,0,0,0.5)] ${gridCols === 2 ? 'aspect-[3/2]' : 'aspect-[4/5]'}`}
+                        className={`relative mb-2 overflow-hidden rounded-sm shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] transition-all duration-500 group-hover:shadow-[0_25px_60px_-10px_rgba(0,0,0,0.5)] aspect-[4/5]`}
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 2 ? "(max-width: 1024px) 50vw, 50vw" : gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" />
+                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Cinematic title overlay on hover */}
                         <div className="absolute bottom-0 left-0 right-0 px-4 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
@@ -1279,8 +1279,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           className="absolute bottom-2 right-2 md:bottom-4 md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
-                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols === 2 ? 'p-1.5' : gridCols >= 3 ? 'p-1' : 'p-2'}`}>
-                            <Maximize2 className={`${gridCols === 2 ? 'w-3.5 h-3.5' : gridCols >= 3 ? 'w-2.5 h-2.5' : 'w-4 h-4'}`} />
+                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols >= 3 ? 'p-1' : 'p-2'}`}>
+                            <Maximize2 className={`${gridCols >= 3 ? 'w-2.5 h-2.5' : 'w-4 h-4'}`} />
                           </span>
                         </button>
                       </div>
