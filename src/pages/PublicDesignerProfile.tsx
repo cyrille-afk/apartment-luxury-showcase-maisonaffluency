@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
-import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
+import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -79,6 +79,9 @@ const PublicDesignerProfile = () => {
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const { data: designer, isLoading } = useDesigner(slug);
+  const isParentBrand = designer?.founder === designer?.name;
+  const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
+  const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
@@ -110,8 +113,6 @@ const PublicDesignerProfile = () => {
     };
   }, [slug]);
 
-  const isParentBrand = designer?.founder === designer?.name;
-  const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     (isParentBrand || isChildDesigner) ? designer : undefined,
     { publicOnly: true }
@@ -119,6 +120,15 @@ const PublicDesignerProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const displayBiography = isChildDesigner && parentDesigner?.biography
+    ? parentDesigner.biography
+    : designer?.biography;
+  const displayBiographyImages = isChildDesigner && parentDesigner?.biography_images?.length
+    ? parentDesigner.biography_images
+    : designer?.biography_images;
+  const displayPhilosophy = isChildDesigner && parentDesigner?.philosophy
+    ? parentDesigner.philosophy
+    : designer?.philosophy;
 
   const picks = useMemo(() => {
     const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
@@ -135,14 +145,14 @@ const PublicDesignerProfile = () => {
 
     // Collect image URLs used in biography so matching picks are excluded from the grid.
     const bioUrls = new Set<string>();
-    for (const entry of designer?.biography_images || []) {
+    for (const entry of displayBiographyImages || []) {
       if (entry) {
         const url = entry.split(/\s*\|\s*/)[0]?.trim();
         if (url) bioUrls.add(url);
       }
     }
-    if (designer?.biography) {
-      for (const block of designer.biography.split(/\n\n+/)) {
+    if (displayBiography) {
+      for (const block of displayBiography.split(/\n\n+/)) {
         const trimmed = block.trim();
         const url = trimmed.split(/\s*\|\s*/)[0]?.trim();
         if (url && /^https?:\/\//i.test(url) && !/\s/.test(url)) {
@@ -152,7 +162,7 @@ const PublicDesignerProfile = () => {
     }
 
     // Exclude picks whose image already appears in the biography
-    const filtered = bioUrls.size > 0
+    const filtered = bioUrls.size > 0 && !isGrouped
       ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
       : rawPicks;
 
@@ -200,9 +210,9 @@ const PublicDesignerProfile = () => {
     }
 
     return keepOuranosOffFirstRow(arranged.length === stabilizedFiltered.length ? arranged : stabilizedFiltered);
-  }, [rawPicks, gridCols, isMobile, designer?.biography_images, designer?.biography, designer?.slug]);
+  }, [rawPicks, gridCols, isMobile, displayBiographyImages, displayBiography, designer?.slug, isGrouped]);
 
-  const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
+  const isDesignerProfile = isChildDesigner;
 
   if (isLoading) {
     return (
@@ -229,8 +239,8 @@ const PublicDesignerProfile = () => {
   };
 
   /* Split biography into hero paragraphs + remaining (with interleaved media) — same as trade */
-  const bioBlocks = designer.biography
-    ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
+  const bioBlocks = displayBiography
+    ? displayBiography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
     : [];
   // Check if biography text already contains inline media URLs
   const bioHasInlineMedia = bioBlocks.some((b: string) => {
@@ -245,7 +255,7 @@ const PublicDesignerProfile = () => {
     );
   });
   // Skip biography_images interleaving when bio text already has inline media
-  const manualMedia = bioHasInlineMedia ? [] : (designer.biography_images || []).filter(Boolean);
+  const manualMedia = bioHasInlineMedia ? [] : (displayBiographyImages || []).filter(Boolean);
   const mediaEntries = manualMedia.slice(0, 3);
 
   let heroParagraphs: string[] = [];
@@ -352,7 +362,7 @@ const PublicDesignerProfile = () => {
     <>
       <Helmet>
         <title>{name} — Maison Affluency</title>
-        <meta name="description" content={designer.biography?.slice(0, 155) || designer.specialty} />
+        <meta name="description" content={displayBiography?.slice(0, 155) || designer.specialty} />
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground">
@@ -452,8 +462,8 @@ const PublicDesignerProfile = () => {
                   transition={{ ...transition, delay: 0.15 }}
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
-                  {designer.philosophy && (() => {
-                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                  {displayPhilosophy && (() => {
+                    const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
                     const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
                     if (match) {
                       return (
@@ -555,15 +565,15 @@ const PublicDesignerProfile = () => {
                 )}
               </motion.div>
 
-              {designer.biography && (
+              {displayBiography && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ ...transition, delay: 0.2 }}
                   className="flex flex-col mt-4"
                 >
-                  {designer.philosophy && (() => {
-                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                  {displayPhilosophy && (() => {
+                    const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
                     const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
                     if (match) {
                       return (

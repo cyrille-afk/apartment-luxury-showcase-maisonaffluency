@@ -67,6 +67,28 @@ export function useDesigner(slug: string | undefined) {
   });
 }
 
+/** Fetch a single designer by exact name */
+export function useDesignerByName(name: string | undefined) {
+  return useQuery({
+    queryKey: ["designer-by-name", name],
+    queryFn: async () => {
+      if (!name) return null;
+      const { data, error } = await supabase
+        .from("designers")
+        .select("*")
+        .eq("name", name)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        ...data,
+        links: (data.links as Designer["links"]) || [],
+      } as Designer;
+    },
+    enabled: !!name,
+  });
+}
+
 /** Fetch curator picks for a designer */
 export function useDesignerPicks(designerId: string | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
