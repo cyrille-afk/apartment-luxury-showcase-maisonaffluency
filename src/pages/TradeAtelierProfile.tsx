@@ -337,7 +337,7 @@ const TradeAtelierProfile = () => {
           });
           // Skip biography_images interleaving when bio text already has inline media
           const manualMedia = bioHasInlineMedia ? [] : (designer.biography_images || []).filter(Boolean);
-          const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
+          const curatedMedia = bioHasInlineMedia ? [] : picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
           const baseMediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 3);
           const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-chareau.jpg | Maison de Verre, Paris";
 
@@ -480,7 +480,7 @@ const TradeAtelierProfile = () => {
                     biographyImages={[]}
                     pickImages={[]}
                     designerName={designer.name}
-                    startImageIndex={1}
+                    startImageIndex={0}
                   />
                 </motion.div>
               )}
