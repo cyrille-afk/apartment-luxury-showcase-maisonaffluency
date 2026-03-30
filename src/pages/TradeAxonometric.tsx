@@ -71,8 +71,9 @@ const ProductPicker = ({
   subcategory?: string;
   brand?: string;
 }) => {
+  const { allProducts: allTradeProds } = useTradeProducts();
   const products = useMemo(() => {
-    let all = getAllTradeProducts().filter((p) => p.image_url);
+    let all = allTradeProds.filter((p) => p.image_url);
     if (category) all = all.filter((p) => p.category === category);
     if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
     if (brand) all = all.filter((p) => p.brand_name === brand);
