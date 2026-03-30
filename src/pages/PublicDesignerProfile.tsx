@@ -357,7 +357,13 @@ const PublicDesignerProfile = () => {
         <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-1 md:space-y-1.5">
           <div className="flex items-center justify-between">
             <Link
-              to={`/designers?letter=${encodeURIComponent(designer?.name?.[0]?.toUpperCase() || "A")}`}
+              to={(() => {
+                const isChild = designer?.founder && designer.founder !== designer.name;
+                const baseName = isChild ? designer.founder : designer?.name;
+                const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
+                const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
+                return `/designers?letter=${letter}${expandParam}`;
+              })()}
               className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
@@ -833,6 +839,7 @@ const PublicDesignerProfile = () => {
                         {designerLabel && designerSlug ? (
                           <Link
                             to={`/designers/${designerSlug}`}
+                            onClick={(e) => e.stopPropagation()}
                             className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
                           >
                             {designerLabel}

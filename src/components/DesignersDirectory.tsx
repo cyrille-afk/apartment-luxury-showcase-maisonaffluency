@@ -543,17 +543,20 @@ function LetterGroup({
   forceOpen,
   parentDesignerCountByName,
   fallbackGalleryIndexByDesigner,
+  initialExpand,
 }: {
   letter: string;
   designers: Designer[];
   forceOpen?: boolean;
   parentDesignerCountByName: Record<string, number>;
   fallbackGalleryIndexByDesigner: Record<string, number[]>;
+  initialExpand?: string;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
-  const [openParent, setOpenParent] = useState<string | null>(null);
+  const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
+  const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const needsCarousel = designers.length > (isMobile ? 2 : 5);
 
@@ -837,12 +840,14 @@ const PickCard = ({ pick }: { pick: PickItem }) => {
 // ─── Main Directory Component ────────────────────────────────────────────────
 interface DesignersDirectoryProps {
   initialLetter?: string;
+  initialExpand?: string;
   showHeader?: boolean;
   showTradeCTA?: boolean;
 }
 
 const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   initialLetter,
+  initialExpand,
   showHeader = true,
   showTradeCTA = true,
 }) => {
@@ -1343,6 +1348,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                           forceOpen={forcedLetters.has(letter)}
                           parentDesignerCountByName={parentDesignerCountByName}
                           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                          initialExpand={initialExpand}
                         />
                       ))}
                     </div>
@@ -1409,6 +1415,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                         forceOpen={forcedLetters.has(letter)}
                         parentDesignerCountByName={parentDesignerCountByName}
                         fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                        initialExpand={initialExpand}
                       />
                     ))}
                   </div>

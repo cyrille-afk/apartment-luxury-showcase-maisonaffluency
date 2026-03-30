@@ -42,6 +42,7 @@ function BackToTopButton() {
 const PublicDesigners = () => {
   const [searchParams] = useSearchParams();
   const initialLetter = searchParams.get("letter") || undefined;
+  const initialExpand = searchParams.get("expand") || undefined;
 
   return (
     <>
@@ -71,7 +72,7 @@ const PublicDesigners = () => {
         <Navigation />
 
         <div className="pt-28 pb-20">
-          <DesignersDirectory initialLetter={initialLetter} />
+          <DesignersDirectory initialLetter={initialLetter} initialExpand={initialExpand} />
         </div>
 
         <Footer />
