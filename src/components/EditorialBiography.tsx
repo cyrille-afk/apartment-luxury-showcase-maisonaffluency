@@ -34,7 +34,7 @@ function isVideoUrl(url: string): boolean {
 /** Convert YouTube/Vimeo URLs to embeddable format */
 function getEmbedUrl(url: string): string | null {
   let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1`;
+  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1`;
   match = url.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
   return null;
