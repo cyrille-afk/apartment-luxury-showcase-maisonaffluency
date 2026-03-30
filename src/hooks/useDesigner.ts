@@ -121,12 +121,31 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         .eq("founder", designer.name)
         .neq("id", designer.id);
 
-      // Include the parent brand itself + sub-designers so parent pages show all relevant picks
       const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id);
-      const allDesigners = [
-        { id: designer.id, name: designer.name, slug: designer.slug },
-        ...subOnly,
-      ];
+
+      // If this designer is a child (founder differs from name), also include parent + siblings
+      let parentAndSiblings: { id: string; name: string; slug: string }[] = [];
+      if (designer.founder && designer.founder !== designer.name) {
+        const { data: family } = await supabase
+          .from("designers")
+          .select("id, name, slug")
+          .eq("founder", designer.founder)
+          .neq("id", designer.id);
+        // Also find the parent itself (whose name matches the founder)
+        const { data: parent } = await supabase
+          .from("designers")
+          .select("id, name, slug")
+          .eq("name", designer.founder)
+          .limit(1);
+        parentAndSiblings = [...(parent || []), ...(family || [])];
+      }
+
+      // Deduplicate: current designer + children + parent family
+      const seen = new Set<string>();
+      const allDesigners: { id: string; name: string; slug: string }[] = [];
+      for (const d of [{ id: designer.id, name: designer.name, slug: designer.slug }, ...subOnly, ...parentAndSiblings]) {
+        if (!seen.has(d.id)) { seen.add(d.id); allDesigners.push(d); }
+      }
 
       const designerIds = allDesigners.map((d) => d.id);
       const nameMap = Object.fromEntries(allDesigners.map((d) => [d.id, { name: d.name, slug: d.slug }]));
