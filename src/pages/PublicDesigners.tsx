@@ -72,7 +72,7 @@ const PublicDesigners = () => {
         <Navigation />
 
         <div className="pt-28 pb-20">
-          <DesignersDirectory initialLetter={initialLetter} />
+          <DesignersDirectory initialLetter={initialLetter} initialExpand={initialExpand} />
         </div>
 
         <Footer />
