@@ -146,6 +146,23 @@ const TradeDesignersAdmin = () => {
     enabled: !!isSuperAdmin,
   });
 
+  // Fetch public picks count per designer for debug counter
+  const { data: picksCountMap = {} } = useQuery({
+    queryKey: ["admin-public-picks-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designer_curator_picks_public")
+        .select("designer_id");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      (data || []).forEach((row) => {
+        if (row.designer_id) counts[row.designer_id] = (counts[row.designer_id] || 0) + 1;
+      });
+      return counts;
+    },
+    enabled: !!isSuperAdmin,
+  });
+
   const saveMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<DesignerRow> }) => {
       const payload = { ...updates, updated_at: new Date().toISOString() };
@@ -447,6 +464,11 @@ const TradeDesignersAdmin = () => {
                         <Badge variant={d.is_published ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
                           {d.is_published ? "Published" : "Draft"}
                         </Badge>
+                        {(picksCountMap[d.id] ?? 0) > 0 && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
+                            {picksCountMap[d.id]} picks
+                          </Badge>
+                        )}
                         {dirty && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-secondary text-secondary">
                             Unsaved
