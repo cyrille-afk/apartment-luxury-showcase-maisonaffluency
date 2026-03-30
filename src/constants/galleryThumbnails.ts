@@ -36,7 +36,7 @@ export const GALLERY_THUMBNAILS: Record<number, string> = {
   15: t("bedroom-alt_yk0j0d"),
 
   /* A Small Room with Massive Personality */
-  16: t("small-room-bedroom_mp8mdd"),
+  16: t("AffluencySG_094-Bloom_35_color_gimp_correction_okyphd"),
   17: t("small-room-personality_wvxz6y"),
   18: t("small-room-vase_s3nz5o"),
   19: t("small-room-chair_aobzyb"),
