@@ -1,3 +1,4 @@
+/** @jsxImportSource npm:react@18.3.1 */
 import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section, Row, Column,
