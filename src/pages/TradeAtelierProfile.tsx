@@ -523,7 +523,7 @@ const TradeAtelierProfile = () => {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ ...transition, delay: 0.2 }}
-                  className="flex flex-col"
+                  className="flex flex-col mt-4"
                 >
                   {designer.philosophy && (
                     <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
