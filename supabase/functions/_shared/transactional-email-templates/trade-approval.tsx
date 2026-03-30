@@ -4,7 +4,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
-import type { TemplateEntry } from './registry.ts'
+import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
 
