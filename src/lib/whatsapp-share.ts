@@ -6,9 +6,6 @@
  */
 
 const SITE_URL = "https://www.maisonaffluency.com";
-
-const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
-const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
 const OG_SHARE_VERSION = "20260327i";
 
 type ShareSection = "designer" | "collectible" | "atelier";
@@ -31,12 +28,9 @@ export const slugify = (s: string) =>
     .replace(/(^-|-$)/g, '');
 
 /**
- * Build an OG-friendly URL for a specific SPA route.
- * Prefer static bridge files on the main domain for reliable OG previews.
- * Falls back to the edge function for dynamic routes (products, journal, etc.).
+ * Build a share URL using Maison Affluency domain only (never backend URLs).
  */
-export const buildOgUrl = (path: string) =>
-  `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}&v=${OG_SHARE_VERSION}&t=${Date.now()}`;
+export const buildOgUrl = (path: string) => buildSiteShareUrl(path);
 
 const appendOgVersion = (url: string) => {
   try {
