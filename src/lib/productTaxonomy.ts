@@ -13,9 +13,44 @@ export const SUBCATEGORY_MAP: Record<string, string[]> = {
 const CATEGORY_NORMALIZE: Record<string, string> = {
   "Decorative Object": "Décor",
   "Decorative Objects": "Décor",
-  Furniture: "Tables",
   "Wall Art": "Décor",
+  Accessories: "Décor",
+  Objects: "Décor",
+  Decorative: "Décor",
+  Textiles: "Décor",
+  Linens: "Décor",
+  Screens: "Décor",
+  Sculpture: "Décor",
 };
+
+// Subcategories that belong to Seating (used to resolve "Furniture" → correct parent)
+const SEATING_SUBCATEGORIES = new Set([
+  "Sofas", "Sofa", "Armchairs", "Armchair", "Chairs", "Chair",
+  "Daybeds & Benches", "Daybed", "Bench", "Ottomans & Stools",
+  "Ottoman", "Stool", "Stools", "Bar Stools", "Bar Stool",
+]);
+
+const TABLES_SUBCATEGORIES = new Set([
+  "Consoles", "Console", "Coffee Tables", "Coffee Table",
+  "Desks", "Desk", "Dining Tables", "Dining Table",
+  "Side Tables", "Side Table", "Table",
+]);
+
+const STORAGE_SUBCATEGORIES = new Set([
+  "Bookcases", "Bookcase", "Cabinets", "Cabinet",
+  "Bookcases & Credenzas", "Sideboards", "Sideboard",
+]);
+
+/**
+ * Resolve ambiguous "Furniture" category using subcategory hint.
+ */
+function resolveFurniture(subcategory?: string): string {
+  if (!subcategory) return "Tables"; // fallback
+  if (SEATING_SUBCATEGORIES.has(subcategory)) return "Seating";
+  if (TABLES_SUBCATEGORIES.has(subcategory)) return "Tables";
+  if (STORAGE_SUBCATEGORIES.has(subcategory)) return "Storage";
+  return "Tables"; // fallback for unknown subcategories
+}
 
 // Map singular/non-canonical subcategories to canonical plural labels
 const SUBCATEGORY_NORMALIZE: Record<string, string> = {
@@ -66,8 +101,9 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   Wallcoverings: "Decorative Objects",
 };
 
-export function normalizeCategory(value?: string): string | undefined {
+export function normalizeCategory(value?: string, subcategory?: string): string | undefined {
   if (!value) return value;
+  if (value === "Furniture") return resolveFurniture(subcategory);
   return CATEGORY_NORMALIZE[value] || value;
 }
 

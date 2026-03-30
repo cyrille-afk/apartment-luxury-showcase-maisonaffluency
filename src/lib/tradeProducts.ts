@@ -42,13 +42,14 @@ export function getAllTradeProducts(): TradeProduct[] {
     for (const pick of picks) {
       if (!pick.title) continue;
       const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
+      const rawSubcategory = pick.subcategory || pick.tags?.[1];
       products.push({
         id: `tp-${idx++}`,
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle,
-        category: normalizeCategory(rawCategory) || rawCategory,
-        subcategory: normalizeSubcategory(pick.subcategory || pick.tags?.[1]),
+        category: normalizeCategory(rawCategory, rawSubcategory) || rawCategory,
+        subcategory: normalizeSubcategory(rawSubcategory),
         tags: pick.tags || [],
         materials: pick.materials,
         dimensions: pick.dimensions,
