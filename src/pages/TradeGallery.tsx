@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen, Tag } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -9,6 +10,7 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
+import { normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -23,13 +25,79 @@ interface DraftQuote {
   created_at: string;
 }
 
-
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const allProducts = useMemo(() => getAllTradeProducts(), []);
+  const staticProducts = useMemo(() => getAllTradeProducts(), []);
+  const { data: liveProducts = [] } = useQuery({
+    queryKey: ["trade-gallery-live-products"],
+    queryFn: async (): Promise<TradeProduct[]> => {
+      const { data, error } = await supabase
+        .from("designer_curator_picks")
+        .select(`
+          id,
+          title,
+          subtitle,
+          image_url,
+          hover_image_url,
+          materials,
+          dimensions,
+          description,
+          edition,
+          pdf_url,
+          pdf_urls,
+          category,
+          subcategory,
+          tags,
+          trade_price_cents,
+          currency,
+          designers(name)
+        `)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+
+      return ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
+        const designer = Array.isArray(pick.designers) ? pick.designers[0] : pick.designers;
+        const brandName = designer?.name?.trim();
+        if (!brandName || !pick.title) return [];
+
+        const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
+
+        return [{
+          id: pick.id,
+          brand_name: brandName,
+          product_name: pick.title,
+          subtitle: pick.subtitle ?? undefined,
+          category: normalizeCategory(rawCategory) || rawCategory,
+          subcategory: normalizeSubcategory(pick.subcategory || pick.tags?.[1]),
+          tags: pick.tags || [],
+          materials: pick.materials ?? undefined,
+          dimensions: pick.dimensions ?? undefined,
+          description: pick.description ?? undefined,
+          image_url: pick.image_url || null,
+          hover_image_url: pick.hover_image_url ?? undefined,
+          edition: pick.edition ?? undefined,
+          pdf_url: pick.pdf_url ?? undefined,
+          pdf_urls: pick.pdf_urls ?? undefined,
+        } satisfies TradeProduct];
+      });
+    },
+    staleTime: 60_000,
+  });
+
+  const allProducts = useMemo(() => {
+    const keyOf = (product: TradeProduct) => `${product.brand_name.trim().toLowerCase()}::${product.product_name.trim().toLowerCase()}`;
+    const merged = new Map<string, TradeProduct>();
+
+    for (const product of staticProducts) merged.set(keyOf(product), product);
+    for (const product of liveProducts) merged.set(keyOf(product), product);
+
+    return Array.from(merged.values());
+  }, [liveProducts, staticProducts]);
+
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
   const categories = useMemo(() => getAllCategories(allProducts), [allProducts]);
 
