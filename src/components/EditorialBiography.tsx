@@ -611,7 +611,8 @@ export default function EditorialBiography({
   designerName,
   debugMediaOrder = false,
   allowCollapse: externalAllowCollapse = true,
-}: EditorialBiographyProps) {
+  startImageIndex = 0,
+}: EditorialBiographyProps & { startImageIndex?: number }) {
   const isMobile = useIsMobile();
   const blocks = biography
     .split(/\n\n+/)
@@ -640,7 +641,7 @@ export default function EditorialBiography({
 
     // Group consecutive text blocks that follow an image, pair them for split layout
     const elements: JSX.Element[] = [];
-    let imageIdx = 0;
+    let imageIdx = startImageIndex;
     let i = 0;
 
     // Render leading text paragraphs before first media
