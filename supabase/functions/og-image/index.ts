@@ -301,7 +301,7 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
       { title: "An Inviting Lounge Area", section: "A Sociable Environment", cloudinaryId: "bespoke-sofa_gxidtx" },
       { title: "A Sophisticated Living Room", section: "A Sociable Environment", cloudinaryId: "living-room-hero_zxfcxl" },
       { title: "Panoramic Cityscape Views", section: "A Sociable Environment", cloudinaryId: "dining-room_ey0bu5" },
-      { title: "A Sun Lit Reading Corner", section: "A Sociable Environment", cloudinaryId: "IMG_2402_y3atdm" },
+      { title: "A Sun Lit Reading Corner", section: "A Sociable Environment", cloudinaryId: "IMG_2397-resized_rufbef" },
       /* An Intimate Setting (4-7) */
       { title: "A Dreamy Tuscan Landscape", section: "An Intimate Setting", cloudinaryId: "intimate-dining_ux4pee" },
       { title: "A Highly Customised Dining Room", section: "An Intimate Setting", cloudinaryId: "intimate-table-detail_aqxvvm" },
