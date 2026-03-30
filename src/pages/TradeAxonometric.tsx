@@ -238,11 +238,12 @@ const TradeAxonometric = () => {
   const textureInputRef = useRef<HTMLInputElement>(null);
 
   // Wallcovering products from platform catalog
+  const { allProducts: allTradeProdsWall } = useTradeProducts();
   const wallcoveringProducts = useMemo(() => {
-    return getAllTradeProducts().filter(
+    return allTradeProdsWall.filter(
       (p) => p.subcategory === "Wallcoverings" && p.image_url
     );
-  }, []);
+  }, [allTradeProdsWall]);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
