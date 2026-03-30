@@ -48,7 +48,7 @@ const scenes: SceneData[] = [
   { image: portrait("bedroom-alt_yk0j0d"), room: "", title: "Unique By Design Vignette", caption: "A personal statement in every corner", orientation: "portrait" },
 
   // ── A Small Room with Massive Personality ──
-  { image: portrait("small-room-bedroom_mp8mdd"), room: "A Small Room with Massive Personality", title: "An Artistic Statement", caption: "Bold statement pieces · Artisan craftsmanship", orientation: "portrait" },
+  { image: portrait("AffluencySG_094-Bloom_35_color_gimp_correction_okyphd"), room: "A Small Room with Massive Personality", title: "An Artistic Statement", caption: "Bold statement pieces · Artisan craftsmanship", orientation: "portrait" },
   { image: portrait("small-room-personality_wvxz6y"), room: "", title: "Compact Elegance", caption: "Maximising character in a modest footprint", orientation: "portrait" },
   { image: portrait("small-room-vase_s3nz5o"), room: "", title: "Yellow Crystalline", caption: "Hand-crafted artisan glasswork", orientation: "portrait" },
   { image: portrait("small-room-chair_aobzyb"), room: "", title: "Golden Hour", caption: "Warm light and refined seating", orientation: "portrait" },

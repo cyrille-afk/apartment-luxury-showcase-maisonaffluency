@@ -318,7 +318,7 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
       { title: "A Venitian Cocoon", section: "A Calming and Dreamy Environment", cloudinaryId: "calming-2" },
       { title: "Unique By Design Vignette", section: "A Calming and Dreamy Environment", cloudinaryId: "bedroom-alt_yk0j0d" },
       /* A Small Room with Massive Personality (16-19) */
-      { title: "An Artistic Statement", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-bedroom_mp8mdd" },
+      { title: "An Artistic Statement", section: "A Small Room with Massive Personality", cloudinaryId: "AffluencySG_094-Bloom_35_color_gimp_correction_okyphd" },
       { title: "Compact Elegance", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-personality_wvxz6y" },
       { title: "Yellow Crystalline", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-vase_s3nz5o" },
       { title: "Golden Hour", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-chair_aobzyb" },
