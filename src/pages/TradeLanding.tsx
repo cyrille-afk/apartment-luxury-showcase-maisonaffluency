@@ -4,7 +4,7 @@ import { ArrowLeft, ChevronDown, Quote, Share2, Check } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
-import { withOgCacheBust } from "@/lib/whatsapp-share";
+import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
@@ -414,10 +414,15 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           {/* Share button — bottom right of hero */}
           <button
             onClick={() => {
-              navigator.clipboard.writeText(TRADE_PROGRAM_SHARE_URL).then(() => {
-                setShareCopied(true);
-                setTimeout(() => setShareCopied(false), 2000);
-              });
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+              if (isMobile) {
+                shareOnWhatsApp(`Maison Affluency — Trade Program: ${TRADE_PROGRAM_SHARE_URL}`);
+              } else {
+                navigator.clipboard.writeText(TRADE_PROGRAM_SHARE_URL).then(() => {
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                });
+              }
             }}
             className="absolute bottom-4 right-4 md:bottom-6 md:right-6 inline-flex items-center gap-1.5 font-body text-[10px] text-white/70 hover:text-white transition-colors uppercase tracking-[0.15em] z-10"
             title="Copy shareable link with preview"
