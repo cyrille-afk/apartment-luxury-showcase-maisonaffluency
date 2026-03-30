@@ -339,7 +339,7 @@ export const collectibleDesigners: Array<{
     name: "AS Atelier",
     founder: "Achille Salvagni",
     specialty: "Sculptural Furniture & Lighting — Collectible Design from Rome to New York",
-    image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/achille-salvagni-atelier-bg",
+    image: "https://ifdm.design/wp-content/uploads/2022/10/Achille-Salvagni.jpg",
     biography:
       "Achille Salvagni Atelier is the Rome-based design studio creating sculptural furniture, lighting and objects of extraordinary craftsmanship under the creative direction of architect and designer Achille Salvagni. Each piece is produced by a network of master artisans across Italy: bronze is hand-cast and patinated in Tuscan foundries; Murano glass is mouth-blown by Venetian maestri; rare marbles are sourced from historic quarries and finished to exacting standards in Roman workshops. Represented exclusively by Maison Gerard in New York, the Atelier maintains showrooms in Rome and London.",
     notableWorks: "Octopus Chandelier, Spider Sconce, Toro Console, Linneo Consolle Blu",
