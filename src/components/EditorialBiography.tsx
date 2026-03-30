@@ -191,6 +191,8 @@ const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
     "/images/lamont-video-poster-v2.jpg?v=20260323-2",
   "https://vimeo.com/803009029":
     "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun.jpg",
+  "https://youtu.be/OaRgw7VoeY0":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1774856563/Screen_Shot_2026-03-30_at_3.41.52_PM_sezoxs.png",
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
@@ -245,7 +247,7 @@ function VideoBlock({
 
   const posterCandidates = useMemo(
     () =>
-      [...new Set([manualPosterUrl, ...ytThumbnails, autoPosterUrl, mappedFallbackPoster].filter((p): p is string => !!p))],
+      [...new Set([manualPosterUrl, mappedFallbackPoster, ...ytThumbnails, autoPosterUrl].filter((p): p is string => !!p))],
     [manualPosterUrl, autoPosterUrl, mappedFallbackPoster, ytThumbnails.join(",")]
   );
 
