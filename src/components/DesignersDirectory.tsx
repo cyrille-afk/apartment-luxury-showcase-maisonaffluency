@@ -21,20 +21,23 @@ import { scrollToSection } from "@/lib/scrollToSection";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
-  // Match URLs with version: /v12345/public-id.ext
   const withVersion = url.match(/\/v\d+\/(.+?)(?:\.\w+)?$/);
   if (withVersion?.[1]) return withVersion[1];
-  // Match URLs without version (from cloudinaryUrl helper): /transforms/public-id
   const withoutVersion = url.match(/\/upload\/[^/]+\/(.+?)(?:\.\w+)?$/);
   return withoutVersion?.[1] || null;
 }
 
+const normalizeCloudinaryId = (id: string) => id.replace(/\.(jpg|jpeg|png|webp|avif)$/i, "");
+const cloudinaryIdBasename = (id: string) => normalizeCloudinaryId(id).split("/").pop() || normalizeCloudinaryId(id);
+
 const THUMBNAIL_TO_GALLERY_INDEX: Map<string, number> = (() => {
-  // Build reverse map: cloudinary ID → flat gallery index
   const idToIndex = new Map<string, number>();
   for (const [idx, thumbUrl] of Object.entries(GALLERY_THUMBNAILS)) {
     const id = extractCloudinaryId(thumbUrl);
-    if (id) idToIndex.set(id, Number(idx));
+    if (!id) continue;
+    const normalized = normalizeCloudinaryId(id);
+    idToIndex.set(normalized, Number(idx));
+    idToIndex.set(cloudinaryIdBasename(normalized), Number(idx));
   }
   return idToIndex;
 })();
@@ -42,12 +45,8 @@ const THUMBNAIL_TO_GALLERY_INDEX: Map<string, number> = (() => {
 function resolveThumbToGalleryIndex(thumbUrl: string): number | null {
   const id = extractCloudinaryId(thumbUrl);
   if (!id) return null;
-  // Try exact match first, then partial
-  if (THUMBNAIL_TO_GALLERY_INDEX.has(id)) return THUMBNAIL_TO_GALLERY_INDEX.get(id)!;
-  for (const [key, idx] of THUMBNAIL_TO_GALLERY_INDEX) {
-    if (id.includes(key) || key.includes(id)) return idx;
-  }
-  return null;
+  const normalized = normalizeCloudinaryId(id);
+  return THUMBNAIL_TO_GALLERY_INDEX.get(normalized) ?? THUMBNAIL_TO_GALLERY_INDEX.get(cloudinaryIdBasename(normalized)) ?? null;
 }
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
@@ -424,11 +423,16 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number> }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]> }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
+  const { toast } = useToast();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
-  const fallbackGalleryIdx = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? null;
+  const fallbackGalleryIndices = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? [];
+  const getPositionalFallbackIndex = (thumbPosition: number) => {
+    if (fallbackGalleryIndices.length === 0) return null;
+    return fallbackGalleryIndices[thumbPosition] ?? fallbackGalleryIndices[0] ?? null;
+  };
 
   return (
     <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
@@ -466,7 +470,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
               <div className="flex gap-1.5">
                 {thumbs.slice(0, 2).map((src, i) => {
                   const mappedGalleryIdx = resolveThumbToGalleryIndex(src);
-                  const resolvedGalleryIdx = mappedGalleryIdx ?? fallbackGalleryIdx;
+                  const resolvedGalleryIdx = mappedGalleryIdx ?? getPositionalFallbackIndex(i);
                   return (
                     <button
                       key={i}
@@ -496,9 +500,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
                           if (galleryEl) {
                             galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           }
-                          import("@/hooks/use-toast").then(({ toast }) => {
-                            toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
-                          });
+                          toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
                         }
                       }}
                       className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
@@ -546,7 +548,7 @@ function LetterGroup({
   designers: Designer[];
   forceOpen?: boolean;
   parentDesignerCountByName: Record<string, number>;
-  fallbackGalleryIndexByDesigner: Record<string, number>;
+  fallbackGalleryIndexByDesigner: Record<string, number[]>;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
@@ -611,7 +613,7 @@ function LetterGroup({
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number> }) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]> }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
