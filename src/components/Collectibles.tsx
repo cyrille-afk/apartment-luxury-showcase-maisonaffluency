@@ -39,6 +39,8 @@ const kikoLopezImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd"
 const nathalieZieglerImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.41.17_PM_r8vwke", { width: 800, quality: "auto", crop: "fill" });
 const maartenVrolijkImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
 const matthieuGicquelImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.13.15_PM_emrclr", { width: 800, quality: "auto", crop: "fill" });
+const christopherBootsCollImg = cloudinaryUrl("Screen_Shot_2026-03-30_at_6.50.02_PM_ilziod", { width: 800, quality: "auto", crop: "fill" });
+const christopherBootsPrometheusIII = cloudinaryUrl("Screen_Shot_2026-03-30_at_7.30.45_PM_yznarq", { width: 1200, quality: "auto:good", crop: "fill" });
 
 // Curators' Picks images
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
@@ -264,6 +266,24 @@ export const collectibleDesigners: Array<{
     id: "matthieu-gicquel",
     name: "Matthieu Gicquel",
     specialty: "Artisan Glass & Tableware",
+    image: matthieuGicquelImg,
+    biography:
+      "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
+    notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
+    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode", galleryIndex: GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER },
+    philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
+    curatorPicks: [
+      { image: matthieuGicquelGeode, title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", category: "Decorative Object", subcategory: "Tableware", materials: "Textured glass • 24k gold leaf rim", dimensions: "Ø32 cm", edition: "Unique Piece" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/matthieu_gicquel/?hl=en" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "christopher-boots",
+    name: "Christopher Boots",
+    specialty: "Sculptural Crystal & Bronze Lighting",
     image: matthieuGicquelImg,
     biography:
       "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
