@@ -48,7 +48,7 @@ export const GALLERY_THUMBNAILS: Record<number, string> = {
   23: t("AffluencySG_143_1_f9iihg"),
 
   /* The Details Make the Design */
-  24: t("details-section_u6rwbu"),
+  24: t("IMG_2397-resized_rufbef"),
   25: t("details-console_hk6uxt"),
   26: t("details-lamp_clzcrk"),
   27: t("AffluencySG_204_1_qbbpqb"),
