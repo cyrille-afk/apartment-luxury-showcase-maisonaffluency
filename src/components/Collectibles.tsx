@@ -1054,18 +1054,14 @@ const Collectibles = () => {
                                </div>
                              </div>
 
-                             {/* Share — bottom-left */}
-                             <button
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 shareProfileOnWhatsApp("designer", designer.id, designer.name);
-                               }}
-                               className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors"
-                               aria-label={`Share ${designer.name}`}
-                             >
-                               <Share2 className="w-3.5 h-3.5" />
-                               <span className="font-body text-[9px] uppercase tracking-[0.15em]">Share</span>
-                             </button>
+                              {/* Share — bottom-left */}
+                              <ShareMenu
+                                url={buildDesignerOgUrl(designer.name)}
+                                message={`Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
+                                className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors"
+                                iconSize="w-3.5 h-3.5"
+                                labelSize="text-[9px]"
+                              />
 
                              {/* Designer portrait thumbnail — bottom-right */}
                              <div className="absolute bottom-3 right-3 z-10">
@@ -1159,18 +1155,14 @@ const Collectibles = () => {
                                )}
                              </div>
                            </div>
-                           {/* Share — bottom-left */}
-                           <button
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               shareProfileOnWhatsApp("designer", designer.id, designer.name);
-                             }}
-                             className="absolute bottom-2 left-2 z-10 flex items-center gap-1 text-white/70 hover:text-white transition-colors"
-                             aria-label={`Share ${designer.name}`}
-                           >
-                             <Share2 className="w-3 h-3" />
-                             <span className="font-body text-[8px] uppercase tracking-[0.15em]">Share</span>
-                           </button>
+                            {/* Share — bottom-left */}
+                            <ShareMenu
+                              url={buildDesignerOgUrl(designer.name)}
+                              message={`Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
+                              className="absolute bottom-2 left-2 z-10 flex items-center gap-1 text-white/70 hover:text-white transition-colors"
+                              iconSize="w-3 h-3"
+                              labelSize="text-[8px]"
+                            />
                            {/* Designer portrait — bottom-right */}
                            <div className="absolute bottom-2 right-2 z-10">
                              <div className="w-20 h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
