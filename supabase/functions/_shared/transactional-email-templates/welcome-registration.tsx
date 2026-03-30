@@ -104,25 +104,24 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Text>
 
         <Hr style={divider} />
-        <Section style={footerRow}>
-          <Row>
-            <Column style={footerTextCol}>
-              <Text style={footerSmall}>
+        <table width="100%" cellPadding="0" cellSpacing="0" style={{ borderCollapse: 'collapse' as const }}>
+          <tr>
+            <td align="right" style={{ verticalAlign: 'middle', paddingRight: '8px' }}>
+              <p style={footerSmall}>
                 {SITE_NAME} Singapore<br />
                 <em>Unique by Design</em>
-              </Text>
-            </Column>
-            <Column style={footerLogoCol}>
-              <Img
+              </p>
+            </td>
+            <td align="right" style={{ verticalAlign: 'middle', width: '48px' }}>
+              <img
                 src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-logo.jpg"
                 alt="Affluency"
                 width="40"
                 height="40"
-                style={footerLogo}
               />
-            </Column>
-          </Row>
-        </Section>
+            </td>
+          </tr>
+        </table>
       </Container>
     </Body>
   </Html>
@@ -162,8 +161,4 @@ const imageCol = { width: '50%', paddingRight: '4px', paddingBottom: '8px', vert
 const imageColRight = { width: '50%', paddingLeft: '4px', paddingBottom: '8px', verticalAlign: 'top' as const }
 const gridImage = { display: 'block', width: '100%', height: 'auto', borderRadius: '4px', objectFit: 'cover' as const }
 const footer = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
-const footerRow = { width: '100%' }
-const footerTextCol = { verticalAlign: 'middle' as const, textAlign: 'right' as const }
-const footerLogoCol = { verticalAlign: 'middle' as const, textAlign: 'right' as const, width: '50px', paddingLeft: '12px' }
-const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' }
-const footerLogo = { display: 'inline-block' }
+const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: "Georgia, 'Playfair Display', serif" }
