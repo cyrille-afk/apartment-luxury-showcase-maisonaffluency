@@ -253,8 +253,9 @@ const PublicDesignerProfile = () => {
       // Separate text-only blocks from inline media blocks
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
 
-      // Cap hero paragraphs at 2 to keep the top section balanced
-      const maxHero = 3;
+      // For designer (portrait) profiles, allow many more paragraphs beside the hero
+      // so text fills the full height of the tall portrait image
+      const maxHero = isDesignerProfile ? 8 : 3;
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
@@ -317,7 +318,7 @@ const PublicDesignerProfile = () => {
       remainingBio = result.filter(Boolean).join("\n\n");
     } else {
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
-      heroParagraphs = textBlocks.slice(0, 2);
+      heroParagraphs = textBlocks.slice(0, isDesignerProfile ? 8 : 2);
       // Preserve original order including inline media
       const heroSet = new Set(heroParagraphs);
       const allRemaining: string[] = [];
@@ -372,7 +373,7 @@ const PublicDesignerProfile = () => {
           {isDesignerProfile ? (
             /* Designer profile: portrait hero left + quote & opening text right */
             <div className="flex flex-col gap-0">
-              <div className="flex flex-col md:flex-row gap-0 md:gap-4 items-start md:items-center">
+              <div className="flex flex-col md:flex-row gap-0 md:gap-4 items-start">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
