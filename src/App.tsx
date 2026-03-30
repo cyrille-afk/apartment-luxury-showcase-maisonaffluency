@@ -63,7 +63,7 @@ const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
 const SpecSheetRedirect = lazy(() => import("./pages/SpecSheetRedirect"));
-
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
