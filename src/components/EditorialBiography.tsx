@@ -297,7 +297,7 @@ function VideoBlock({
               aria-label={`Play ${caption || "video"}`}
             >
               <img
-                src={currentPosterUrl}
+                src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -322,7 +322,7 @@ function VideoBlock({
           >
             {currentPosterUrl ? (
               <img
-                src={currentPosterUrl}
+                src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
                 className="w-full h-full object-cover"
                 loading="lazy"
