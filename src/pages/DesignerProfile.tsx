@@ -149,19 +149,31 @@ const DesignerProfile = () => {
             >
               <div className="border-l-2 border-primary/30 pl-8 py-4">
                 <Quote className="w-6 h-6 text-primary/40 mb-3" />
-                <blockquote className="font-display text-[13px] sm:text-base md:text-2xl md:text-center italic leading-relaxed" /* philosophy-split */>
+              <blockquote className="font-display text-[13px] sm:text-base md:text-2xl md:text-center italic leading-relaxed" /* philosophy-split */>
                   {(() => {
-                    const match = designer.philosophy.match(/^(.*?)(\([^)]+\))(.*)$/s);
-                    if (match) {
-                      return (
-                        <>
-                          "<span className="text-foreground">{match[1].trimEnd()}</span>{' '}
-                          <span className="text-muted-foreground/60">{match[2]}</span>
-                          <span className="text-foreground">{match[3]}</span>"
-                        </>
-                      );
-                    }
-                    return <span className="text-foreground/80">"{designer.philosophy}"</span>;
+                    const text = designer.philosophy;
+                    // Split attribution (— Author...) from the quote body
+                    const attrMatch = text.match(/^([\s\S]*?)\s*(—\s*.+)$/);
+                    const quoteBody = attrMatch ? attrMatch[1] : text;
+                    const attribution = attrMatch ? attrMatch[2] : null;
+
+                    // Render quote body with line break support
+                    const lines = quoteBody.split('\n').filter(Boolean);
+                    return (
+                      <span className="text-foreground/80">
+                        "{lines.map((line, i) => (
+                          <span key={i}>
+                            {line.trim()}
+                            {i < lines.length - 1 && <br />}
+                          </span>
+                        ))}"
+                        {attribution && (
+                          <span className="block text-muted-foreground/60 text-[11px] sm:text-sm md:text-base not-italic mt-3">
+                            {attribution}
+                          </span>
+                        )}
+                      </span>
+                    );
                   })()}
                 </blockquote>
               </div>
