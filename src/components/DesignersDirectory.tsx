@@ -181,7 +181,7 @@ function useDesignerCategories() {
   });
 }
 
-// ─── Hook: fetch fallback gallery index per designer from gallery hotspots ───
+// ─── Hook: fetch fallback gallery indices per designer from gallery hotspots ──
 function useDesignerHotspotFallbacks() {
   return useQuery({
     queryKey: ["designer-hotspot-fallbacks"],
@@ -208,13 +208,14 @@ function useDesignerHotspotFallbacks() {
         countsByDesigner[key][index] = (countsByDesigner[key][index] || 0) + 1;
       }
 
-      const fallbackByDesigner: Record<string, number> = {};
+      const rankedByDesigner: Record<string, number[]> = {};
       for (const [designerKey, countMap] of Object.entries(countsByDesigner)) {
-        const top = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0];
-        if (top) fallbackByDesigner[designerKey] = Number(top[0]);
+        rankedByDesigner[designerKey] = Object.entries(countMap)
+          .sort((a, b) => b[1] - a[1])
+          .map(([idx]) => Number(idx));
       }
 
-      return fallbackByDesigner;
+      return rankedByDesigner;
     },
     staleTime: 10 * 60 * 1000,
   });
