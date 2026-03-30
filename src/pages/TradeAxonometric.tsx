@@ -142,7 +142,7 @@ const CategoryFilterBar = ({
   onBrandChange: (v: string) => void;
 }) => {
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
-  const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
+  const { brands } = useTradeProducts();
   return (
     <div className="flex flex-wrap gap-1.5">
       <select
