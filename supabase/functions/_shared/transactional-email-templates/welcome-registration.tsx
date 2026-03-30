@@ -104,10 +104,25 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Text>
 
         <Hr style={divider} />
-        <Text style={footerSmall}>
-          {SITE_NAME} Singapore<br />
-          <em>Unique by Design</em>
-        </Text>
+        <Section style={footerRow}>
+          <Row>
+            <Column style={footerTextCol}>
+              <Text style={footerSmall}>
+                {SITE_NAME} Singapore<br />
+                <em>Unique by Design</em>
+              </Text>
+            </Column>
+            <Column style={footerLogoCol}>
+              <Img
+                src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-logo.jpg"
+                alt="Affluency"
+                width="40"
+                height="40"
+                style={footerLogo}
+              />
+            </Column>
+          </Row>
+        </Section>
       </Container>
     </Body>
   </Html>
