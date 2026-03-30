@@ -422,7 +422,7 @@ function SplitImageBlock({
   const imageWidth = isSmall ? "md:w-[22%]" : "md:w-[42%]";
 
   return (
-    <div className={`${index === 0 ? "mt-8 md:mt-12 mb-4 md:mb-6" : "mt-10 md:mt-16 mb-6 md:mb-10"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
+    <div className={`${index === 0 ? "mt-4 md:mt-6 mb-3 md:mb-4" : "mt-6 md:mt-8 mb-4 md:mb-6"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
       {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
       <div className={`shrink-0 w-full ${imageWidth} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
         {imageEl}

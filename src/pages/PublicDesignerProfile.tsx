@@ -342,7 +342,7 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-8 md:space-y-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-4 md:space-y-6">
           <div className="flex items-center justify-between">
             <Link
               to={`/designers?letter=${encodeURIComponent(designer?.name?.[0]?.toUpperCase() || "A")}`}
@@ -371,8 +371,8 @@ const PublicDesignerProfile = () => {
 
           {isDesignerProfile ? (
             /* Designer profile: portrait hero left + quote & opening text right */
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start md:items-center">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start md:items-center">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -605,7 +605,7 @@ const PublicDesignerProfile = () => {
 
                     return (
                       <>
-                        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center">
+                        <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
                           <div className="flex-1 min-w-0">
                             <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
                             <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
@@ -647,7 +647,7 @@ const PublicDesignerProfile = () => {
                           const shouldCollapse = editorialBlocks.length > 3;
                           return (
                             <ProfileCollapsible shouldCollapse={shouldCollapse}>
-                              <div className="mt-10 md:mt-14">
+                              <div className="mt-6 md:mt-8">
                                 <EditorialBiography
                                   biography={editorialBio}
                                   biographyImages={[]}
