@@ -1033,16 +1033,38 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
-    // Use direct scroll instead of scrollToSection to avoid the settle/lead-in
-    // animation loop that causes erratic jumping on mobile rapid taps.
-    requestAnimationFrame(() => {
+
+    const getY = () => {
       const el = document.getElementById(`alpha-${letter}`);
-      if (!el) return;
+      if (!el) return null;
       const nav = document.querySelector("nav");
       const navHeight = nav?.getBoundingClientRect().height ?? 96;
-      const y = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
-      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-    });
+      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - 8);
+    };
+
+    // Instant-jump to force content-visibility sections to render,
+    // then settle with correction passes before a final smooth scroll.
+    const firstY = getY();
+    if (firstY === null) return;
+    window.scrollTo({ top: firstY, behavior: "instant" as ScrollBehavior });
+
+    let passes = 0;
+    let prevY = firstY;
+    const settle = () => {
+      const nextY = getY();
+      if (nextY === null) return;
+      const delta = Math.abs(nextY - prevY);
+      prevY = nextY;
+      if (delta > 2 && passes < 8) {
+        window.scrollTo({ top: nextY, behavior: "instant" as ScrollBehavior });
+        passes++;
+        setTimeout(() => requestAnimationFrame(settle), 50);
+      } else {
+        // Final smooth scroll to exact position
+        window.scrollTo({ top: nextY, behavior: "smooth" });
+      }
+    };
+    requestAnimationFrame(() => requestAnimationFrame(settle));
   }, [activeLetters]);
 
   useEffect(() => {
