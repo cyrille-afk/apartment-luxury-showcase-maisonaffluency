@@ -241,7 +241,7 @@ const TradeAtelierProfile = () => {
     setAddingProductId(null);
   }, [user, activeQuoteId, toast]);
 
-  const allProducts = useMemo(() => getAllTradeProducts(), []);
+  const { allProducts } = useTradeProducts();
 
   const brandProducts = useMemo(() => {
     if (!designer) return [];

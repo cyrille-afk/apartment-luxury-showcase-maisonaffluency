@@ -116,7 +116,7 @@ const TradeDesigners = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const allProducts = useMemo(() => getAllTradeProducts(), []);
+  const { allProducts } = useTradeProducts();
   const productCountMap = useMemo(() => {
     const map = new Map<string, number>();
     for (const p of allProducts) {
