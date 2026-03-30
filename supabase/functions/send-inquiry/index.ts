@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #faf9f7;">
           <div style="text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e8e4de;">
             <img 
-              src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-logo.jpg" 
+              src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" 
               alt="Affluency - Unique by Design" 
               style="max-width: 280px; height: auto;"
             />
