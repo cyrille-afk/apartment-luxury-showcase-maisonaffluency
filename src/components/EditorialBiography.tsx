@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Play, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 interface EditorialBiographyProps {
   biography: string;
@@ -389,7 +390,7 @@ function SplitImageBlock({
     >
       <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
         <img
-          src={url}
+          src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
           className="w-full h-full object-contain"
           loading="lazy"
@@ -451,7 +452,7 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
     >
       <div className="rounded-xl overflow-hidden bg-muted/10 aspect-square max-w-[480px] mx-auto">
         <img
-          src={url}
+          src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
           className="w-full h-full object-contain"
           loading="lazy"
