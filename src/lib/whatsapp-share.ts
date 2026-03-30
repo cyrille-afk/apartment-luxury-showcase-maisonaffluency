@@ -46,26 +46,24 @@ const appendOgVersion = (url: string) => {
 export const withOgCacheBust = (url: string) => appendOgVersion(url);
 
 const DESIGNER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
-  "jean-michel-frank": "/designers/jean-michel-frank-og-v2.html",
-  "eileen-gray": "/designers/eileen-gray-og-v2.html",
-  "achille-salvagni-atelier": "/designers/achille-salvagni-atelier-og-v2.html",
   "as-atelier": "/designers/achille-salvagni-atelier-og-v2.html",
 };
 
 /**
  * Build a static bridge file URL for a designer profile.
+ * All designers now default to -og-v2.html to bust WhatsApp's stale cache.
  */
 export const buildDesignerOgUrl = (name: string) =>
   withOgCacheBust(
     `${SITE_URL}${
       DESIGNER_OG_BRIDGE_OVERRIDES[slugify(name)] ??
-      `/designers/${slugify(name)}-og.html`
+      `/designers/${slugify(name)}-og-v2.html`
     }`
   );
 
 /**
  * Build a static bridge file URL for an atelier/brand.
- * Supports per-brand versioned bridge files when cache busting is needed.
+ * All ateliers now default to -og-v2.html to bust WhatsApp's stale cache.
  */
 const ATELIER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
   "ecart-paris": "/ateliers/ecart-paris-og-v3.html",
@@ -74,7 +72,7 @@ const ATELIER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
 export const buildAtelierOgUrl = (name: string) => {
   const slug = slugify(name);
   const overridePath = ATELIER_OG_BRIDGE_OVERRIDES[slug];
-  return withOgCacheBust(`${SITE_URL}${overridePath ?? `/ateliers/${slug}-og.html`}`);
+  return withOgCacheBust(`${SITE_URL}${overridePath ?? `/ateliers/${slug}-og-v2.html`}`);
 };
 
 /**
