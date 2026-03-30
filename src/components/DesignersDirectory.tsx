@@ -1030,9 +1030,15 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     return counts;
   }, [items]);
 
+  // Ref to cancel in-flight jump animations when a new letter is tapped
+  const jumpSessionRef = useRef(0);
+
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
+
+    // Increment session so any in-flight settle loop from a previous tap aborts
+    const session = ++jumpSessionRef.current;
 
     const getY = () => {
       const el = document.getElementById(`alpha-${letter}`);
@@ -1043,7 +1049,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     };
 
     // Instant-jump to force content-visibility sections to render,
-    // then settle with correction passes before a final smooth scroll.
+    // then settle with correction passes before a final instant scroll.
     const firstY = getY();
     if (firstY === null) return;
     window.scrollTo({ top: firstY, behavior: "instant" as ScrollBehavior });
@@ -1051,6 +1057,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     let passes = 0;
     let prevY = firstY;
     const settle = () => {
+      // Abort if a newer tap has started
+      if (jumpSessionRef.current !== session) return;
       const nextY = getY();
       if (nextY === null) return;
       const delta = Math.abs(nextY - prevY);
@@ -1060,8 +1068,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         passes++;
         setTimeout(() => requestAnimationFrame(settle), 50);
       } else {
-        // Final smooth scroll to exact position
-        window.scrollTo({ top: nextY, behavior: "smooth" });
+        // Final position — use instant to avoid fighting with future taps
+        if (jumpSessionRef.current === session) {
+          window.scrollTo({ top: nextY, behavior: "instant" as ScrollBehavior });
+        }
       }
     };
     requestAnimationFrame(() => requestAnimationFrame(settle));
