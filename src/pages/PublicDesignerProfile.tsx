@@ -119,6 +119,7 @@ const PublicDesignerProfile = () => {
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
+  const isGrouped = groupedPicks.length > 0;
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const displayBiography = isChildDesigner && parentDesigner?.biography
     ? parentDesigner.biography
@@ -230,7 +231,6 @@ const PublicDesignerProfile = () => {
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
-  const isGrouped = groupedPicks.length > 0;
   const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   const buildDesignerBridgePath = (_kind: "og" | "card") => {
