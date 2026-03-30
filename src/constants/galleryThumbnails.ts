@@ -15,7 +15,7 @@ export const GALLERY_THUMBNAILS: Record<number, string> = {
   0: t("bespoke-sofa_gxidtx"),
   1: t("living-room-hero_zxfcxl"),
   2: t("dining-room_ey0bu5"),
-  3: t("IMG_2397-resized_rufbef"),
+  3: t("IMG_2402-resized_swt5iy"),
 
   /* An Intimate Setting */
   4: t("intimate-dining_ux4pee"),

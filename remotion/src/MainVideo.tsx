@@ -28,7 +28,7 @@ const scenes: SceneData[] = [
   { image: portrait("bespoke-sofa_gxidtx"), room: "A Sociable Environment", title: "An Inviting Lounge Area", caption: "Bespoke sofa · Hand-knotted artisan rug · Sculptural lighting", orientation: "portrait" },
   { image: landscape("living-room-hero_zxfcxl"), room: "", title: "A Sophisticated Living Room", caption: "Collectible furniture and panoramic cityscape views", orientation: "landscape" },
   { image: portrait("dining-room_ey0bu5"), room: "", title: "Panoramic Cityscape Views", caption: "Custom dining with a view of the city skyline", orientation: "portrait" },
-  { image: portrait("IMG_2397-resized_rufbef"), room: "", title: "A Sun Lit Reading Corner", caption: "Quiet moments bathed in natural light", orientation: "portrait" },
+  { image: portrait("IMG_2402-resized_swt5iy"), room: "", title: "A Sun Lit Reading Corner", caption: "Quiet moments bathed in natural light", orientation: "portrait" },
 
   // ── An Intimate Setting ──
   { image: portrait("intimate-dining_ux4pee"), room: "An Intimate Setting", title: "A Dreamy Tuscan Landscape", caption: "Custom dining · Hand-blown glass pendants", orientation: "portrait" },
