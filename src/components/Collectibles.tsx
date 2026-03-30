@@ -39,6 +39,8 @@ const kikoLopezImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd"
 const nathalieZieglerImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.41.17_PM_r8vwke", { width: 800, quality: "auto", crop: "fill" });
 const maartenVrolijkImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
 const matthieuGicquelImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.13.15_PM_emrclr", { width: 800, quality: "auto", crop: "fill" });
+const christopherBootsCollImg = cloudinaryUrl("Screen_Shot_2026-03-30_at_6.50.02_PM_ilziod", { width: 800, quality: "auto", crop: "fill" });
+const christopherBootsPrometheusIII = cloudinaryUrl("Screen_Shot_2026-03-30_at_7.30.45_PM_yznarq", { width: 1200, quality: "auto:good", crop: "fill" });
 
 // Curators' Picks images
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
@@ -275,6 +277,23 @@ export const collectibleDesigners: Array<{
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/matthieu_gicquel/?hl=en" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "christopher-boots",
+    name: "Christopher Boots",
+    specialty: "Sculptural Crystal & Bronze Lighting",
+    image: christopherBootsCollImg,
+    biography:
+      "Christopher Boots is a Melbourne-based lighting designer whose work occupies the rare intersection of geology, sculpture, and illumination. Since founding his eponymous studio, Boots has developed a distinctive practice centred on the transformation of raw natural materials — quartz crystals, marble, alabaster, and semi-precious stones — into dramatic, large-scale luminaires.",
+    notableWorks: "Prometheus III Astraea, Ouranos Series, Q Series Diamond Chandeliers",
+    philosophy: "I want to make objects that outlast their owners. Crystal has been forming underground for millions of years. The least I can do is give it a setting worthy of that patience.",
+    curatorPicks: [
+      { image: christopherBootsPrometheusIII, title: "Prometheus III Astraea", category: "Lighting", subcategory: "Pendant", materials: "Brass, Lapis Lazuli, Quartz Crystal", dimensions: "900 x 65 mm", tags: ["Genesis Collection"] },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/christopherboots/" },
       { type: "Curators' Picks" },
     ],
   },
