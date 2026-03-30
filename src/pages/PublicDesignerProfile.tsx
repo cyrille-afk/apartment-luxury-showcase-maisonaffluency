@@ -653,6 +653,7 @@ const PublicDesignerProfile = () => {
                                   pickImages={[]}
                                   designerName={designer.name}
                                   allowCollapse={false}
+                                  startImageIndex={1}
                                 />
                               </div>
                             </ProfileCollapsible>

@@ -641,7 +641,7 @@ export default function EditorialBiography({
 
     // Group consecutive text blocks that follow an image, pair them for split layout
     const elements: JSX.Element[] = [];
-    let imageIdx = 0;
+    let imageIdx = startImageIndex;
     let i = 0;
 
     // Render leading text paragraphs before first media
