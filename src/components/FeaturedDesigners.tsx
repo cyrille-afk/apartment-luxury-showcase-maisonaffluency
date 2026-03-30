@@ -1154,7 +1154,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     specialty: "Bronze Lighting & Artisan Foundry",
     image: yvesMacheretImg,
     cardThumbnails: [
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085890/small-room-bedroom_mp8mdd.jpg", galleryIndex: GALLERY.AN_ARTISTIC_STATEMENT },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774855454/AffluencySG_094-Bloom_35_color_gimp_correction_okyphd.jpg", galleryIndex: GALLERY.AN_ARTISTIC_STATEMENT },
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772085802/home-office-desk_g0ywv2.png", galleryIndex: GALLERY.A_WORKSPACE_OF_DISTINCTION },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-03-02_at_6.53.46_PM_sh5m0r.png",
@@ -2039,7 +2039,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     cardThumbnails: [
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085890/small-room-bedroom_mp8mdd.jpg", galleryIndex: GALLERY.AN_ARTISTIC_STATEMENT },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774855454/AffluencySG_094-Bloom_35_color_gimp_correction_okyphd.jpg", galleryIndex: GALLERY.AN_ARTISTIC_STATEMENT },
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085919/small-room-personality_wvxz6y.png", galleryIndex: GALLERY.COMPACT_ELEGANCE },
     ],
     links: [
