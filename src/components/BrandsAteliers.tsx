@@ -2478,40 +2478,15 @@ function AlphaStrip({
 
                 {/* Bottom-left: Share + Curators' Picks */}
                 <div className="absolute bottom-3 left-3 z-10 flex items-center gap-3">
-                  {/* Desktop share */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = isParentBrand ? buildParentBrandOgUrl(brand.name) : `https://www.maisonaffluency.com/designers/${profileSlug}`;
-                      const text = isParentBrand ? buildParentShareText(brand.name) : `${brand.name} — Maison Affluency`;
-                      navigator.clipboard.writeText(`${text}: ${url}`);
-                      import('sonner').then(({ toast }) => toast.success('Link copied'));
-                      trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
-                    }}
-                    className="hidden md:flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
-                    aria-label={`Share ${brand.name}`}
-                  >
-                    <Share2 className="h-3 w-3" />
-                    <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
-                  </button>
-                  {/* Mobile WhatsApp */}
-                  <WhatsAppShareButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isParentBrand) {
-                        const url = buildParentBrandOgUrl(brand.name);
-                        const msg = `${buildParentShareText(brand.name)}: ${url}`;
-                        window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                      } else {
-                        const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
-                        shareProfileOnWhatsApp("atelier", brand.id, brand.name, featuredText);
-                      }
-                      trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
-                    }}
-                    label={`Share ${brand.name} on WhatsApp`}
-                    size="sm"
-                    variant="glass"
-                    className="md:hidden"
+                  {/* Share menu (desktop + mobile) */}
+                  <ShareMenu
+                    url={isParentBrand ? buildParentBrandOgUrl(brand.name) : buildAtelierOgUrl(brand.name)}
+                    message={isParentBrand
+                      ? `${buildParentShareText(brand.name)}: ${buildParentBrandOgUrl(brand.name)}`
+                      : `Check out ${brand.name} at Maison Affluency: ${buildAtelierOgUrl(brand.name)}`}
+                    className="flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
+                    iconSize="h-3 w-3"
+                    labelSize="text-[9px]"
                   />
                 </div>
 
