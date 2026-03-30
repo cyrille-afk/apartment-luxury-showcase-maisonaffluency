@@ -358,6 +358,141 @@ const PublicDesignerProfile = () => {
     }
   }
 
+  const biographySection = displayBiography ? (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ ...transition, delay: 0.2 }}
+      className="flex flex-col mt-4"
+    >
+      {displayPhilosophy && (() => {
+        const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
+        const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+        if (match) {
+          return (
+            <blockquote className="font-display italic leading-snug mb-6 text-center">
+              <span className="text-lg md:text-xl text-foreground">"{match[1].trimEnd()}"</span>
+              {match[3] && <span className="text-lg md:text-xl text-foreground"> {match[3]}</span>}
+              <br />
+              <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
+            </blockquote>
+          );
+        }
+        return (
+          <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
+            "{clean}"
+          </blockquote>
+        );
+      })()}
+
+      {(() => {
+        const remainingBlocks = remainingBio
+          ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
+          : [];
+
+        let firstMediaIdx = -1;
+        let firstMediaParsed: { url: string; caption: string | null; size: "small" | null; align: "left" | "right" | null } | null = null;
+        for (let i = 0; i < remainingBlocks.length; i++) {
+          const line = remainingBlocks[i];
+          const pipes = line.split(/\s*\|\s*/);
+          const url = pipes[0]?.trim() || "";
+          if ((/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url)) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
+            let caption: string | null = null;
+            let size: "small" | null = null;
+            let align: "left" | "right" | null = null;
+            for (let j = 1; j < pipes.length; j++) {
+              const seg = pipes[j].trim();
+              if (/^small$/i.test(seg)) size = "small";
+              else if (/^(left|right)$/i.test(seg)) align = seg.toLowerCase() as "left" | "right";
+              else if (/^poster:/i.test(seg)) { /* skip poster */ }
+              else if (!caption) caption = seg;
+            }
+            firstMediaParsed = { url, caption, size, align };
+            firstMediaIdx = i;
+            break;
+          }
+        }
+
+        const firstPairTextIdx = !isMobile && heroParagraphs.length < 2 && firstMediaIdx >= 0
+          ? remainingBlocks.findIndex((block, idx) => idx > firstMediaIdx && !isMediaBlock(block))
+          : -1;
+        const firstPairText = firstPairTextIdx >= 0 ? remainingBlocks[firstPairTextIdx] : null;
+
+        const consumedIndexes = new Set<number>();
+        if (firstMediaIdx >= 0) consumedIndexes.add(firstMediaIdx);
+        if (firstPairTextIdx >= 0) consumedIndexes.add(firstPairTextIdx);
+        const editorialBio = remainingBlocks
+          .filter((_, idx) => !consumedIndexes.has(idx))
+          .join("\n\n");
+
+        const firstMediaOnRight = false;
+
+        const firstMediaFigure = firstMediaParsed ? (
+          <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
+            <figure>
+              <div className="rounded-xl overflow-hidden bg-muted/10">
+                <img
+                  src={optimizeImageUrl(firstMediaParsed.url)}
+                  alt={firstMediaParsed.caption || `${designer.name} — editorial`}
+                  className="w-full h-full object-contain"
+                  loading="lazy"
+                />
+              </div>
+              {firstMediaParsed.caption && (
+                <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
+                  {firstMediaParsed.caption}
+                </figcaption>
+              )}
+            </figure>
+          </div>
+        ) : null;
+
+        return (
+          <>
+            <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
+              {!firstMediaOnRight && firstMediaFigure}
+              <div className="flex-1 min-w-0">
+                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
+                <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+                  {heroParagraphs.map((p: string, i: number) => (
+                    <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                  ))}
+                  {firstPairText && (
+                    <p className={heroParagraphs.length > 0 ? "mt-4" : ""}>{renderParagraph(firstPairText)}</p>
+                  )}
+                </div>
+              </div>
+              {firstMediaOnRight && firstMediaFigure}
+            </div>
+
+            {heritageSlides.length > 0 && (
+              <HeritageSlider slides={heritageSlides} />
+            )}
+
+            {editorialBio && (() => {
+              const editorialBlocks = editorialBio.split(/\n\n+/).filter(Boolean);
+              const shouldCollapse = editorialBlocks.length > 3;
+              return (
+                <ProfileCollapsible shouldCollapse={shouldCollapse}>
+                  <div className="mt-6 md:mt-8">
+                    <EditorialBiography
+                      biography={editorialBio}
+                      biographyImages={[]}
+                      pickImages={[]}
+                      designerName={designer.name}
+                      allowCollapse={false}
+                      startImageIndex={1}
+                    />
+                  </div>
+                </ProfileCollapsible>
+              );
+            })()}
+          </>
+        );
+      })()}
+    </motion.div>
+  ) : null;
+
   return (
     <>
       <Helmet>
@@ -402,113 +537,68 @@ const PublicDesignerProfile = () => {
           </div>
 
           {isDesignerProfile ? (
-            /* Designer profile: portrait hero left + quote & opening text right */
+            /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
-              <div className="flex flex-col md:flex-row gap-0 md:gap-4 md:items-start items-start">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={transition}
-                  className="relative shrink-0 md:w-[38%]"
-                >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={transition}
+                className="relative mx-auto w-full max-w-[720px] rounded-xl overflow-hidden shrink-0"
+              >
+                <div className="aspect-[4/5] md:aspect-[3/4] max-h-[78vh]">
                   {heroImage && (
-                    <>
-                    <div className="relative rounded-xl overflow-hidden md:max-h-[600px]">
-                      <img src={heroImage} alt={name} className="w-full h-full object-cover" loading="eager" />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6 flex items-end justify-between">
-                        <div>
-                          <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
-                          {designer.specialty && (
-                            <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
-                          )}
-                        </div>
-                        <button
-                          className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
-                          title="Copy shareable link"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const url = designerOgUrl;
-                            navigator.clipboard.writeText(url).then(() => {
-                              setShareCopied(true);
-                              setTimeout(() => setShareCopied(false), 2000);
-                            });
-                          }}
-                        >
-                          {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                          {shareCopied ? "Copied!" : "Share"}
-                        </button>
-                      </div>
-                    </div>
-                    {designer.hero_photo_credit && (
-                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 mt-1.5 text-right pr-1">
-                        Photo: {designer.hero_photo_credit}
-                      </p>
+                    <img
+                      src={heroImage}
+                      alt={name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ objectPosition: "center top" }}
+                      loading="eager"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+                </div>
+
+                {designer.founder && designer.founder !== designer.name && (
+                  <Link
+                    to={`/designers/${designer.founder.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
+                  >
+                    {designer.founder}
+                  </Link>
+                )}
+
+                <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 flex items-end justify-between gap-4">
+                  <div>
+                    <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
+                    {designer.specialty && (
+                      <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
                     )}
-                    </>
-                  )}
-                  {designer.founder && designer.founder !== designer.name && (
-                    <Link
-                      to={`/designers/${designer.founder.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
-                    >
-                      {designer.founder}
-                    </Link>
-                  )}
-                </motion.div>
+                  </div>
+                  <button
+                    className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
+                    title="Copy shareable link"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const url = designerOgUrl;
+                      navigator.clipboard.writeText(url).then(() => {
+                        setShareCopied(true);
+                        setTimeout(() => setShareCopied(false), 2000);
+                      });
+                    }}
+                  >
+                    {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                    {shareCopied ? "Copied!" : "Share"}
+                  </button>
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...transition, delay: 0.15 }}
-                  className="flex-1 min-w-0 flex flex-col justify-center"
-                >
-                  {displayPhilosophy && (() => {
-                    const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
-                    const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
-                    if (match) {
-                      return (
-                        <blockquote className="font-display italic leading-snug mb-5 text-center">
-                          <span className="text-base md:text-lg text-foreground">"{match[1].trimEnd()}"</span>
-                          {match[3] && <span className="text-base md:text-lg text-foreground"> {match[3]}</span>}
-                          <br />
-                          <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
-                        </blockquote>
-                      );
-                    }
-                    return (
-                      <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 text-center">
-                        "{clean}"
-                      </blockquote>
-                    );
-                  })()}
-                  {heroParagraphs.length > 0 && (
-                    <div className="font-body text-sm leading-relaxed text-foreground/85">
-                      {heroParagraphs.map((p: string, i: number) => (
-                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                      ))}
-                    </div>
-                  )}
-                 </motion.div>
-              </div>
+                {designer.hero_photo_credit && (
+                  <p className="absolute bottom-1 right-4 md:right-6 text-[10px] uppercase tracking-[0.15em] text-white/50 z-10">
+                    Photo: {designer.hero_photo_credit}
+                  </p>
+                )}
+              </motion.div>
 
-              {heritageSlides.length > 0 && (
-                <HeritageSlider slides={heritageSlides} />
-              )}
-
-              {remainingBio && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...transition, delay: 0.2 }}
-                >
-                  <EditorialBiography
-                    biography={remainingBio}
-                    biographyImages={[]}
-                    pickImages={[]}
-                    designerName={designer.name}
-                  />
-                </motion.div>
-              )}
+              {biographySection}
             </div>
           ) : (
             /* Atelier profile: panoramic hero + bio below */
@@ -565,148 +655,7 @@ const PublicDesignerProfile = () => {
                 )}
               </motion.div>
 
-              {displayBiography && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...transition, delay: 0.2 }}
-                  className="flex flex-col mt-4"
-                >
-                  {displayPhilosophy && (() => {
-                    const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
-                    const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
-                    if (match) {
-                      return (
-                        <blockquote className="font-display italic leading-snug mb-6 text-center">
-                          <span className="text-lg md:text-xl text-foreground">"{match[1].trimEnd()}"</span>
-                          {match[3] && <span className="text-lg md:text-xl text-foreground"> {match[3]}</span>}
-                          <br />
-                          <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
-                        </blockquote>
-                      );
-                    }
-                    return (
-                      <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
-                        "{clean}"
-                      </blockquote>
-                    );
-                  })()}
-
-                  {/* Side-by-side: About + opening text on left, first media on right */}
-                  {(() => {
-                    // remainingBio already has media URLs interleaved as text lines
-                    // Split it to extract the first media URL for the hero, keep the rest for EditorialBiography
-                    const remainingBlocks = remainingBio
-                      ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
-                      : [];
-
-                    // Find first media URL in remainingBlocks
-                    let firstMediaIdx = -1;
-                    let firstMediaParsed: { url: string; caption: string | null; size: "small" | null; align: "left" | "right" | null } | null = null;
-                    for (let i = 0; i < remainingBlocks.length; i++) {
-                      const line = remainingBlocks[i];
-                      const pipes = line.split(/\s*\|\s*/);
-                      const url = pipes[0]?.trim() || "";
-                      if ((/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url)) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
-                        let caption: string | null = null;
-                        let size: "small" | null = null;
-                        let align: "left" | "right" | null = null;
-                        for (let j = 1; j < pipes.length; j++) {
-                          const seg = pipes[j].trim();
-                          if (/^small$/i.test(seg)) size = "small";
-                          else if (/^(left|right)$/i.test(seg)) align = seg.toLowerCase() as "left" | "right";
-                          else if (/^poster:/i.test(seg)) { /* skip poster */ }
-                          else if (!caption) caption = seg;
-                        }
-                        firstMediaParsed = { url, caption, size, align };
-                        firstMediaIdx = i;
-                        break;
-                      }
-                    }
-
-                    // Pull the first text block after the first media so it can sit side-by-side with that image
-                    // On mobile, skip pairing extra text — enforce max 1 paragraph before next image
-                    // On desktop, only pair extra text if heroParagraphs < 2 (max 2 paragraphs per image)
-                    const firstPairTextIdx = !isMobile && heroParagraphs.length < 2 && firstMediaIdx >= 0
-                      ? remainingBlocks.findIndex((block, idx) => idx > firstMediaIdx && !isMediaBlock(block))
-                      : -1;
-                    const firstPairText = firstPairTextIdx >= 0 ? remainingBlocks[firstPairTextIdx] : null;
-
-                    // Remove consumed blocks (first media + first paired text) from editorial flow
-                    const consumedIndexes = new Set<number>();
-                    if (firstMediaIdx >= 0) consumedIndexes.add(firstMediaIdx);
-                    if (firstPairTextIdx >= 0) consumedIndexes.add(firstPairTextIdx);
-                    const editorialBio = remainingBlocks
-                      .filter((_, idx) => !consumedIndexes.has(idx))
-                      .join("\n\n");
-
-                    const firstMediaOnRight = false;
-
-                    const firstMediaFigure = firstMediaParsed ? (
-                      <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
-                        <figure>
-                          <div className="rounded-xl overflow-hidden bg-muted/10">
-                            <img
-                              src={optimizeImageUrl(firstMediaParsed.url)}
-                              alt={firstMediaParsed.caption || `${designer.name} — editorial`}
-                              className="w-full h-full object-contain"
-                              loading="lazy"
-                            />
-                          </div>
-                          {firstMediaParsed.caption && (
-                            <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
-                              {firstMediaParsed.caption}
-                            </figcaption>
-                          )}
-                        </figure>
-                      </div>
-                    ) : null;
-
-                    return (
-                      <>
-                        <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
-                          {!firstMediaOnRight && firstMediaFigure}
-                          <div className="flex-1 min-w-0">
-                            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
-                            <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-                              {heroParagraphs.map((p: string, i: number) => (
-                                <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                              ))}
-                              {firstPairText && (
-                                <p className={heroParagraphs.length > 0 ? "mt-4" : ""}>{renderParagraph(firstPairText)}</p>
-                              )}
-                            </div>
-                          </div>
-                          {firstMediaOnRight && firstMediaFigure}
-                        </div>
-
-                        {heritageSlides.length > 0 && (
-                          <HeritageSlider slides={heritageSlides} />
-                        )}
-
-                        {editorialBio && (() => {
-                          const editorialBlocks = editorialBio.split(/\n\n+/).filter(Boolean);
-                          const shouldCollapse = editorialBlocks.length > 3;
-                          return (
-                            <ProfileCollapsible shouldCollapse={shouldCollapse}>
-                              <div className="mt-6 md:mt-8">
-                                <EditorialBiography
-                                  biography={editorialBio}
-                                  biographyImages={[]}
-                                  pickImages={[]}
-                                  designerName={designer.name}
-                                  allowCollapse={false}
-                                  startImageIndex={1}
-                                />
-                              </div>
-                            </ProfileCollapsible>
-                          );
-                        })()}
-                      </>
-                    );
-                  })()}
-                </motion.div>
-              )}
+              {biographySection}
             </div>
           )}
 
