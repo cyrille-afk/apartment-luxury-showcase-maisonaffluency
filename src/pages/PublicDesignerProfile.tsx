@@ -270,7 +270,7 @@ const PublicDesignerProfile = () => {
       // Separate text-only blocks from inline media blocks
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
 
-      const maxHero = isMobile ? 1 : 2;
+      const maxHero = isMobile ? 1 : (isDesignerProfile ? 3 : 2);
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
