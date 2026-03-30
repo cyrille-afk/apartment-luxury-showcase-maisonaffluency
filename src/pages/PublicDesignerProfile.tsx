@@ -371,7 +371,7 @@ const PublicDesignerProfile = () => {
           {isDesignerProfile ? (
             /* Designer profile: portrait hero left + quote & opening text right */
             <div className="flex flex-col gap-0">
-              <div className="flex flex-col md:flex-row gap-0 md:gap-4 items-start">
+              <div className="flex flex-col md:flex-row gap-0 md:gap-4 md:items-center items-start">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
