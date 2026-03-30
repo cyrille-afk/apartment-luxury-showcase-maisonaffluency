@@ -1138,44 +1138,44 @@ const Collectibles = () => {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-2xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
                           )}
-                           {/* Name + icons overlay */}
+                           {/* Name + IG icon — top overlay */}
                            <div className="absolute inset-x-0 top-0 px-3 pb-8 pt-2 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
                              <div className="flex items-start justify-between">
                                <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">
                                  {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
                                </p>
-                               <div className="flex items-center gap-1.5 ml-1 flex-shrink-0">
-                                 {designer.links?.find(l => l.type === "Instagram" && l.url) && (
-                                   <a
-                                     href={designer.links.find(l => l.type === "Instagram")!.url}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     onClick={(e) => e.stopPropagation()}
-                                     className="text-white/70 hover:text-white transition-colors"
-                                     aria-label={`${designer.name} on Instagram`}
-                                   >
-                                     <Instagram className="w-3 h-3" />
-                                   </a>
-                                 )}
-                                 <button
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     shareProfileOnWhatsApp("designer", designer.id, designer.name);
-                                   }}
-                                   className="text-white/70 hover:text-white transition-colors"
-                                   aria-label={`Share ${designer.name}`}
+                               {designer.links?.find(l => l.type === "Instagram" && l.url) && (
+                                 <a
+                                   href={designer.links.find(l => l.type === "Instagram")!.url}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   onClick={(e) => e.stopPropagation()}
+                                   className="ml-1 flex-shrink-0 text-white/80 hover:text-white transition-colors"
+                                   aria-label={`${designer.name} on Instagram`}
                                  >
-                                   <Share2 className="w-3 h-3" />
-                                 </button>
-                               </div>
+                                   <Instagram className="w-4 h-4" />
+                                 </a>
+                               )}
                              </div>
                            </div>
-                          {/* Designer portrait — bottom-right */}
-                          <div className="absolute bottom-2 right-2 z-10">
-                            <div className="w-20 h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
-                              <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
-                            </div>
-                          </div>
+                           {/* Share — bottom-left */}
+                           <button
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               shareProfileOnWhatsApp("designer", designer.id, designer.name);
+                             }}
+                             className="absolute bottom-2 left-2 z-10 flex items-center gap-1 text-white/70 hover:text-white transition-colors"
+                             aria-label={`Share ${designer.name}`}
+                           >
+                             <Share2 className="w-3 h-3" />
+                             <span className="font-body text-[8px] uppercase tracking-[0.15em]">Share</span>
+                           </button>
+                           {/* Designer portrait — bottom-right */}
+                           <div className="absolute bottom-2 right-2 z-10">
+                             <div className="w-20 h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
+                               <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
+                             </div>
+                           </div>
                         </div>
                       </button>
                     );
