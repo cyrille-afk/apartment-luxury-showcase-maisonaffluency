@@ -50,6 +50,7 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
     if (!brandName || !pick.title) return [];
 
     const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
+    const rawSubcategory = pick.subcategory || pick.tags?.[1];
 
     return [
       {
@@ -57,8 +58,8 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle ?? undefined,
-        category: normalizeCategory(rawCategory) || rawCategory,
-        subcategory: normalizeSubcategory(pick.subcategory || pick.tags?.[1]),
+        category: normalizeCategory(rawCategory, rawSubcategory) || rawCategory,
+        subcategory: normalizeSubcategory(rawSubcategory),
         tags: pick.tags || [],
         materials: pick.materials ?? undefined,
         dimensions: pick.dimensions ?? undefined,
