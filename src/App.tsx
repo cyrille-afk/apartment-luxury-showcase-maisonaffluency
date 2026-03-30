@@ -191,6 +191,7 @@ const App = () => {
 
                   <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
                   <Route path="/terms" element={<Suspense fallback={null}><TermsOfService /></Suspense>} />
+                  <Route path="/unsubscribe" element={<Suspense fallback={null}><Unsubscribe /></Suspense>} />
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
               )}
