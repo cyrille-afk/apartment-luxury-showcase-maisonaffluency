@@ -49,10 +49,24 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
           <strong>The {SITE_NAME} Team</strong>
         </Text>
         <Hr style={divider} />
-        <Text style={footerSmall}>
-          {SITE_NAME} Singapore<br />
-          <em>Unique by Design</em>
-        </Text>
+        <table width="100%" cellPadding="0" cellSpacing="0" style={{ borderCollapse: 'collapse' as const }}>
+          <tr>
+            <td align="right" style={{ verticalAlign: 'middle', paddingRight: '8px' }}>
+              <p style={footerSmall}>
+                {SITE_NAME} Singapore<br />
+                <em>Unique by Design</em>
+              </p>
+            </td>
+            <td align="right" style={{ verticalAlign: 'middle', width: '48px' }}>
+              <img
+                src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-logo.jpg"
+                alt="Affluency"
+                width="40"
+                height="40"
+              />
+            </td>
+          </tr>
+        </table>
       </Container>
     </Body>
   </Html>
