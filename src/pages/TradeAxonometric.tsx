@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
-import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
+import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,8 +71,9 @@ const ProductPicker = ({
   subcategory?: string;
   brand?: string;
 }) => {
+  const { allProducts: allTradeProds } = useTradeProducts();
   const products = useMemo(() => {
-    let all = getAllTradeProducts().filter((p) => p.image_url);
+    let all = allTradeProds.filter((p) => p.image_url);
     if (category) all = all.filter((p) => p.category === category);
     if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
     if (brand) all = all.filter((p) => p.brand_name === brand);
@@ -90,7 +91,7 @@ const ProductPicker = ({
       );
     }
     return all.slice(0, 24);
-  }, [search, category, subcategory, brand]);
+  }, [allTradeProds, search, category, subcategory, brand]);
 
   if (products.length === 0) {
     return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
@@ -141,7 +142,7 @@ const CategoryFilterBar = ({
   onBrandChange: (v: string) => void;
 }) => {
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
-  const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
+  const { brands } = useTradeProducts();
   return (
     <div className="flex flex-wrap gap-1.5">
       <select
@@ -237,11 +238,12 @@ const TradeAxonometric = () => {
   const textureInputRef = useRef<HTMLInputElement>(null);
 
   // Wallcovering products from platform catalog
+  const { allProducts: allTradeProdsWall } = useTradeProducts();
   const wallcoveringProducts = useMemo(() => {
-    return getAllTradeProducts().filter(
+    return allTradeProdsWall.filter(
       (p) => p.subcategory === "Wallcoverings" && p.image_url
     );
-  }, []);
+  }, [allTradeProdsWall]);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);

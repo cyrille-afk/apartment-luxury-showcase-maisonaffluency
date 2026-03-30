@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
-import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
+import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,8 +106,9 @@ export default function ProposalBuilder({
   const [subcategory, setSubcategory] = useState("");
   const [brand, setBrand] = useState("");
 
+  const { allProducts: allTradeProds, brands } = useTradeProducts();
   const products = useMemo(() => {
-    let all = getAllTradeProducts().filter((p) => p.image_url);
+    let all = allTradeProds.filter((p) => p.image_url);
     if (category) all = all.filter((p) => p.category === category);
     if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
     if (brand) all = all.filter((p) => p.brand_name === brand);
@@ -121,9 +122,8 @@ export default function ProposalBuilder({
       );
     }
     return all.slice(0, 24);
-  }, [search, category, subcategory, brand]);
+  }, [allTradeProds, search, category, subcategory, brand]);
 
-  const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
 
   // Auto-load products from preloaded favorite IDs
