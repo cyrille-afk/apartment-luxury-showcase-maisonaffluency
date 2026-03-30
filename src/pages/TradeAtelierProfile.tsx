@@ -622,7 +622,7 @@ const TradeAtelierProfile = () => {
                           const filtered = pick.edition
                             ? tags.filter(t => !/^limited-edition$/i.test(t))
                             : tags;
-                          const specialTags = filtered.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis|collection/i.test(t));
+                          const specialTags = filtered.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
                           if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
                             specialTags.unshift(pick.edition);
                           }
