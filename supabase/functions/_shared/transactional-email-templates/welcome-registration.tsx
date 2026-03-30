@@ -75,7 +75,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Section>
 
         <Text style={captionText}>
-          A glimpse of our curators' picks — from Jeff Zimmerman and Christopher Boots to Rosie Li and Alexander Lamont.
+          A glimpse of our curators' picks — from Garnier & Linker and Christopher Boots to Alexander Lamont.
         </Text>
 
         <Text style={text}>
