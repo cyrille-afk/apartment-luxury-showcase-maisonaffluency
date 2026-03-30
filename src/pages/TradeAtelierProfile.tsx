@@ -114,10 +114,11 @@ const TradeAtelierProfile = () => {
       window.clearTimeout(timer);
     };
   }, [slug]);
-  // For parent brands (founder === name), fetch picks from all sub-designers
+  // For parent brands (founder === name) or child designers, fetch picks from all related designers
   const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
+  const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand && designer?.founder === designer?.name ? designer : undefined
+    (isParentBrand || isChildDesigner) ? designer : undefined
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
