@@ -1,0 +1,1 @@
+UPDATE designers SET hero_image_url = NULL, updated_at = now() WHERE slug = 'achille-salvagni-designer' AND hero_image_url LIKE '%encrypted-tbn0.gstatic.com%';

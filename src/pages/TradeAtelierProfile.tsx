@@ -323,7 +323,20 @@ const TradeAtelierProfile = () => {
             ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
             : [];
 
-          const manualMedia = (designer.biography_images || []).filter(Boolean);
+          // Check if biography text already contains inline media URLs
+          const bioHasInlineMedia = bioBlocks.some((b: string) => {
+            const pipes = b.split(/\s*\|\s*/);
+            const url = pipes[0]?.trim() || "";
+            if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
+            return (
+              /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
+              /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
+              /vimeo\.com\//i.test(url) ||
+              /youtube\.com\/watch|youtu\.be\//i.test(url)
+            );
+          });
+          // Skip biography_images interleaving when bio text already has inline media
+          const manualMedia = bioHasInlineMedia ? [] : (designer.biography_images || []).filter(Boolean);
           const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
           const baseMediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 3);
           const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-chareau.jpg | Maison de Verre, Paris";
