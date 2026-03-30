@@ -215,7 +215,20 @@ const PublicDesignerProfile = () => {
   const bioBlocks = designer.biography
     ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
     : [];
-  const manualMedia = (designer.biography_images || []).filter(Boolean);
+  // Check if biography text already contains inline media URLs
+  const bioHasInlineMedia = bioBlocks.some((b: string) => {
+    const pipes = b.split(/\s*\|\s*/);
+    const url = pipes[0]?.trim() || "";
+    if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
+    return (
+      /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
+      /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
+      /vimeo\.com\//i.test(url) ||
+      /youtube\.com\/watch|youtu\.be\//i.test(url)
+    );
+  });
+  // Skip biography_images interleaving when bio text already has inline media
+  const manualMedia = bioHasInlineMedia ? [] : (designer.biography_images || []).filter(Boolean);
   const mediaEntries = manualMedia.slice(0, 3);
 
   let heroParagraphs: string[] = [];
