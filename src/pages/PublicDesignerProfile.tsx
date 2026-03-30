@@ -394,7 +394,7 @@ const PublicDesignerProfile = () => {
           {isDesignerProfile ? (
             /* Designer profile: portrait hero left + quote & opening text right */
             <div className="flex flex-col gap-0">
-              <div className="flex flex-col md:flex-row gap-0 md:gap-4 md:items-center items-start">
+              <div className="flex flex-col md:flex-row gap-0 md:gap-4 md:items-start items-start">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -403,8 +403,8 @@ const PublicDesignerProfile = () => {
                 >
                   {heroImage && (
                     <>
-                    <div className="relative rounded-xl overflow-hidden">
-                      <img src={heroImage} alt={name} className="w-full h-auto object-contain" loading="eager" />
+                    <div className="relative rounded-xl overflow-hidden md:max-h-[600px]">
+                      <img src={heroImage} alt={name} className="w-full h-full object-cover" loading="eager" />
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6 flex items-end justify-between">
                         <div>
                           <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
