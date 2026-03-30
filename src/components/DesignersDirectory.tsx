@@ -1316,14 +1316,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           {/* Mobile: Directory */}
           <div className="md:hidden">
             {!filteredPicks && (
-              /* Mobile A-Z bar — hide when showing product picks */
-              <div className="flex items-center gap-1 overflow-x-auto pb-3 mb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
-                {LETTERS.map((letter) => {
-                  const isActive = activeLetters.has(letter);
-                  return (
-                    <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
-                  );
-                })}
+              /* Mobile A-Z bar — wrapped grid for full visibility and touch-friendly sizing */
+              <div className="mb-5">
+                <div className="h-px bg-border/60 mb-3" />
+                <div className="grid grid-cols-9 gap-y-2 gap-x-0">
+                  {LETTERS.map((letter) => {
+                    const isActive = activeLetters.has(letter);
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => jumpToLetter(letter)}
+                        className={`flex items-center justify-center font-serif text-lg min-h-[36px] min-w-[36px] rounded-sm transition-all duration-200 ${isActive ? "text-foreground hover:text-primary active:bg-muted cursor-pointer font-medium" : "text-foreground/20 cursor-default"}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="h-px bg-border/60 mt-3" />
               </div>
             )}
             {isLoading && (
