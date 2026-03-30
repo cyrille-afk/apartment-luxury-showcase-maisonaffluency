@@ -42,6 +42,7 @@ function BackToTopButton() {
 const PublicDesigners = () => {
   const [searchParams] = useSearchParams();
   const initialLetter = searchParams.get("letter") || undefined;
+  const initialExpand = searchParams.get("expand") || undefined;
 
   return (
     <>
