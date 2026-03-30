@@ -1,8 +1,10 @@
+/// <reference types="npm:@types/react@18.3.1" />
+
 import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section, Row, Column,
 } from 'npm:@react-email/components@0.0.22'
-import type { TemplateEntry } from './registry.ts'
+import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
 
@@ -94,7 +96,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
 
         <Text style={textMuted}>
           If you are an architect, interior designer, or hospitality professional, consider applying to our{' '}
-          <a <a href="https://maisonaffluency.com/trade/program" style={link}>Trade Program</a>{' '} style={link}>Trade Program</a>{' '}
+          <a href="https://maisonaffluency.com/trade/program" style={link}>Trade Program</a>{' '}
           for exclusive trade pricing and dedicated concierge support.
         </Text>
 
