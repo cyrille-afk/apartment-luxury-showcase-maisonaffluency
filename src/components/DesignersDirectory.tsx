@@ -1348,6 +1348,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                           forceOpen={forcedLetters.has(letter)}
                           parentDesignerCountByName={parentDesignerCountByName}
                           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                          initialExpand={initialExpand}
                         />
                       ))}
                     </div>
