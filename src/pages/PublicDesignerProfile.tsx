@@ -430,7 +430,8 @@ const PublicDesignerProfile = () => {
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
                   {designer.philosophy && (() => {
-                    const match = designer.philosophy.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
                     if (match) {
                       return (
                         <blockquote className="font-display italic leading-snug mb-5 text-center">
@@ -443,7 +444,7 @@ const PublicDesignerProfile = () => {
                     }
                     return (
                       <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 text-center">
-                        "{designer.philosophy}"
+                        "{clean}"
                       </blockquote>
                     );
                   })()}
@@ -539,7 +540,8 @@ const PublicDesignerProfile = () => {
                   className="flex flex-col mt-4"
                 >
                   {designer.philosophy && (() => {
-                    const match = designer.philosophy.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
                     if (match) {
                       return (
                         <blockquote className="font-display italic leading-snug mb-6 text-center">
@@ -552,7 +554,7 @@ const PublicDesignerProfile = () => {
                     }
                     return (
                       <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
-                        "{designer.philosophy}"
+                        "{clean}"
                       </blockquote>
                     );
                   })()}
