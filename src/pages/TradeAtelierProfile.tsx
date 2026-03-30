@@ -384,9 +384,9 @@ const TradeAtelierProfile = () => {
           }
 
           return isDesignerProfile ? (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
               {/* Hero row: portrait left + quote & opening text right */}
-              <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start">
                 {/* Left: portrait with overlaid name */}
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -486,7 +486,7 @@ const TradeAtelierProfile = () => {
             </div>
           ) : (
             /* Atelier: full-width hero */
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
