@@ -1221,7 +1221,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   openLightbox={openLightbox}
                 />
               ) : (
-                <div className={`hidden md:grid transition-all duration-300 ${gridCols === 2 ? 'md:grid-cols-2 md:gap-8' : gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
+                <div className={`hidden md:grid transition-all duration-300 ${gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
