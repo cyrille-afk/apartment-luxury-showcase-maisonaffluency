@@ -8,7 +8,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
-import { type TradeProduct } from "@/lib/tradeProducts";
+import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
