@@ -1,0 +1,1 @@
+UPDATE designers SET hero_image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1774867825/Screen_Shot_2026-03-30_at_6.50.02_PM_ilziod.png' WHERE slug = 'christopher-boots';
