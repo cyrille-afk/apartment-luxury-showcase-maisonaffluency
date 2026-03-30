@@ -12,7 +12,8 @@ import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, Z
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
-import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, sharePageOnWhatsApp, buildDesignerOgUrl } from "@/lib/whatsapp-share";
+import ShareMenu from "./ShareMenu";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { scrollToSection } from "@/lib/scrollToSection";
 import WhatsAppShareButton from "./WhatsAppShareButton";
