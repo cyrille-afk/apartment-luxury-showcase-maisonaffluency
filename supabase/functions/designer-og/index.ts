@@ -35,9 +35,15 @@ Deno.serve(async (req) => {
   const description = designer.specialty || "Design";
   const canonicalUrl = `https://www.maisonaffluency.com/designers/${designer.slug}`;
 
-  // Build OG image URL from Cloudinary
+  // Build OG image URL from Cloudinary — prefer Cloudinary-hosted images
+  // to avoid hotlink blocks from external domains
   let ogImage = "";
-  const rawImage = designer.hero_image_url || designer.image_url || "";
+  const heroImg = designer.hero_image_url || "";
+  const mainImg = designer.image_url || "";
+  // Prefer whichever is Cloudinary-hosted; fall back to either
+  const rawImage = mainImg.includes("cloudinary.com") ? mainImg
+    : heroImg.includes("cloudinary.com") ? heroImg
+    : heroImg || mainImg;
 
   if (rawImage.includes("cloudinary.com")) {
     // Already a Cloudinary URL – apply OG transform
