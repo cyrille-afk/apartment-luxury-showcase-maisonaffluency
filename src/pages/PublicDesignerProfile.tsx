@@ -116,6 +116,18 @@ const PublicDesignerProfile = () => {
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
   const picks = useMemo(() => {
+    const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
+
+    const keepOuranosOffFirstRow = (items: typeof rawPicks) => {
+      if (designer?.slug !== "christopher-boots" || items.length <= columns) return items;
+      const idx = items.findIndex((pick) => /^ouranos i$/i.test((pick.title || "").trim()));
+      if (idx === -1 || idx >= columns) return items;
+      const next = [...items];
+      const [ouranos] = next.splice(idx, 1);
+      next.push(ouranos);
+      return next;
+    };
+
     // Collect image URLs used in biography so matching picks are excluded from the grid.
     const bioUrls = new Set<string>();
     for (const entry of designer?.biography_images || []) {
@@ -139,7 +151,8 @@ const PublicDesignerProfile = () => {
       ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
       : rawPicks;
 
-    if (filtered.length <= 2) return filtered;
+    const stabilizedFiltered = keepOuranosOffFirstRow(filtered);
+    if (stabilizedFiltered.length <= 2) return stabilizedFiltered;
 
     const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
       if (pick.category?.trim()) return pick.category.trim().toLowerCase();
@@ -147,10 +160,8 @@ const PublicDesignerProfile = () => {
       return "other";
     };
 
-    const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
-
     const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of filtered) {
+    for (const pick of stabilizedFiltered) {
       const key = getFunctionalCategory(pick);
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key)!.push(pick);
@@ -162,7 +173,7 @@ const PublicDesignerProfile = () => {
     }));
 
     const arranged: typeof rawPicks = [];
-    while (arranged.length < filtered.length) {
+    while (arranged.length < stabilizedFiltered.length) {
       const index = arranged.length;
       // Block the category directly above AND directly to the left
       const blockedCategories = new Set<string>();
@@ -183,8 +194,8 @@ const PublicDesignerProfile = () => {
       arranged.push(selected.items.shift()!);
     }
 
-    return arranged.length === filtered.length ? arranged : filtered;
-  }, [rawPicks, gridCols, isMobile, designer?.biography_images, designer?.biography]);
+    return keepOuranosOffFirstRow(arranged.length === stabilizedFiltered.length ? arranged : stabilizedFiltered);
+  }, [rawPicks, gridCols, isMobile, designer?.biography_images, designer?.biography, designer?.slug]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
