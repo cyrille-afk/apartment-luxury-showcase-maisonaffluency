@@ -16,8 +16,8 @@ import {
 } from "@/lib/tradeProducts";
 import { normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
 
-function fetchLiveProducts(): Promise<TradeProduct[]> {
-  return supabase
+async function fetchLiveProducts(): Promise<TradeProduct[]> {
+  const { data, error } = await supabase
     .from("designer_curator_picks")
     .select(`
       id,
