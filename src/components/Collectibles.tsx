@@ -1054,7 +1054,7 @@ const Collectibles = () => {
                                    <button
                                      onClick={(e) => {
                                        e.stopPropagation();
-                                       shareProfileOnWhatsApp(designer.id, designer.name);
+                                       shareProfileOnWhatsApp("designer", designer.id, designer.name);
                                      }}
                                      className="text-white/70 hover:text-white transition-colors"
                                      aria-label={`Share ${designer.name}`}
