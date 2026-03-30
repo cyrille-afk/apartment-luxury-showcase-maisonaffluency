@@ -3117,7 +3117,7 @@ const FeaturedDesigners = () => {
                       {!isZoomed && (() => {
                         const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
                         const tags: string[] = pick?.tags || [];
-                        const specialTags = tags.filter((t: string) => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award/i.test(t));
+                        const specialTags = tags.filter((t: string) => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis|collection/i.test(t));
                         const hasEdition = !!pick?.edition;
                         return (specialTags.length > 0 || hasEdition) ? (
                           <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
