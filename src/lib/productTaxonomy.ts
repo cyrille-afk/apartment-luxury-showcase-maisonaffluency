@@ -101,8 +101,9 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   Wallcoverings: "Decorative Objects",
 };
 
-export function normalizeCategory(value?: string): string | undefined {
+export function normalizeCategory(value?: string, subcategory?: string): string | undefined {
   if (!value) return value;
+  if (value === "Furniture") return resolveFurniture(subcategory);
   return CATEGORY_NORMALIZE[value] || value;
 }
 
