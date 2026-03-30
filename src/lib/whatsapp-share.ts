@@ -46,7 +46,8 @@ const appendOgVersion = (url: string) => {
 export const withOgCacheBust = (url: string) => appendOgVersion(url);
 
 const DESIGNER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
-  "as-atelier": "/designers/achille-salvagni-atelier-og-v2.html",
+  "as-atelier": "/designers/as-atelier-og-v2.html",
+  "achille-salvagni-atelier": "/designers/as-atelier-og-v2.html",
 };
 
 /**
