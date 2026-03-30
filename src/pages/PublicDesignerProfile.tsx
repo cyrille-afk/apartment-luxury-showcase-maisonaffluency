@@ -479,7 +479,7 @@ const PublicDesignerProfile = () => {
             </div>
           ) : (
             /* Atelier profile: panoramic hero + bio below */
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
