@@ -21,8 +21,8 @@ const SHOWCASE_IMAGES = [
     alt: 'Galea Lantern by Alexander Lamont',
   },
   {
-    src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1774225373/Arbor-Desk_04_alexander-lamont_cprwfe.jpg',
-    alt: 'Arbor Desk by Alexander Lamont',
+    src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/Screen_Shot_2026-03-05_at_8.23.37_PM_pj4gi9',
+    alt: 'Mangala Coffee Table by Atelier Pendhapa',
   },
 ]
 
@@ -75,7 +75,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Section>
 
         <Text style={captionText}>
-          A glimpse of our curators' picks — from Garnier & Linker and Christopher Boots to Alexander Lamont.
+          A glimpse of our curators' picks — from Garnier & Linker, Christopher Boots and Alexander Lamont to Atelier Pendhapa.
         </Text>
 
         <Text style={text}>
