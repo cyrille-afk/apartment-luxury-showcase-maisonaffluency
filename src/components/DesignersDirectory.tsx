@@ -837,12 +837,14 @@ const PickCard = ({ pick }: { pick: PickItem }) => {
 // ─── Main Directory Component ────────────────────────────────────────────────
 interface DesignersDirectoryProps {
   initialLetter?: string;
+  initialExpand?: string;
   showHeader?: boolean;
   showTradeCTA?: boolean;
 }
 
 const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   initialLetter,
+  initialExpand,
   showHeader = true,
   showTradeCTA = true,
 }) => {
