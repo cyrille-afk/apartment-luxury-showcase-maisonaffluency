@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Users, X, Layers, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
-import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { useTradeProducts } from "@/hooks/useTradeProducts";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import SectionHero from "@/components/trade/SectionHero";
 

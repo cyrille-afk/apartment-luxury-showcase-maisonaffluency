@@ -7,7 +7,7 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
-import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface TradeProductLightboxItem {
