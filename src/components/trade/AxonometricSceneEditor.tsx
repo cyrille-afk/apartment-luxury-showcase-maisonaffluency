@@ -77,8 +77,9 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
   }, [imageUrl]);
 
   // Product picker data
+  const { allProducts: allTradeProds, brands: allBrands } = useTradeProducts();
   const products = useMemo(() => {
-    let all = getAllTradeProducts().filter((p) => p.image_url);
+    let all = allTradeProds.filter((p) => p.image_url);
     if (sceneCategory) all = all.filter((p) => p.category === sceneCategory);
     if (sceneSubcategory) all = all.filter((p) => p.subcategory === sceneSubcategory);
     if (sceneBrand) all = all.filter((p) => p.brand_name === sceneBrand);
@@ -95,9 +96,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
       );
     }
     return all.slice(0, 30);
-  }, [productSearch, sceneCategory, sceneSubcategory, sceneBrand]);
-
-  const allBrands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
+  }, [allTradeProds, productSearch, sceneCategory, sceneSubcategory, sceneBrand]);
 
   // Drawing (eraser)
   const getCanvasCoords = useCallback((e: React.MouseEvent) => {

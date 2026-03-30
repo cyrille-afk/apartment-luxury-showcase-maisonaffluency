@@ -72,7 +72,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     }
 
     // Fallback: trade catalog
-    const all = getAllTradeProducts();
+    const { allProducts: tradeProds } = useTradeProducts();
+    const all = tradeProds;
     return all
       .filter(p => p.brand_name === product.brand_name && p.id !== product.id && p.image_url)
       .slice(0, 4)
