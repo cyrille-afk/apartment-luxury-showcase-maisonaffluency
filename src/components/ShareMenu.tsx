@@ -14,6 +14,7 @@ interface ShareMenuProps {
 const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]" }: ShareMenuProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (!open) return;
@@ -31,22 +32,31 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
   };
 
   const openWhatsApp = () => {
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.location.href = waUrl;
     setOpen(false);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isMobile) {
+      openWhatsApp();
+    } else {
+      setOpen(!open);
+    }
   };
 
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        onClick={handleClick}
         className={className}
         aria-label="Share"
       >
         <Share2 className={iconSize} />
         {showLabel && <span className={`font-body ${labelSize} uppercase tracking-[0.15em]`}>Share</span>}
       </button>
-      {open && (
+      {open && !isMobile && (
         <div
           className="absolute bottom-full left-0 mb-2 flex flex-col gap-1 bg-black/80 backdrop-blur-md rounded-lg p-1.5 shadow-xl border border-white/10 z-50 min-w-[140px]"
           onClick={(e) => e.stopPropagation()}
