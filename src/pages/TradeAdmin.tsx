@@ -134,18 +134,21 @@ function InstagramAuditCard() {
     // Send email notification to applicant
     const applicantEmail = app.profiles?.email;
     const applicantName = app.profiles ? `${app.profiles.first_name} ${app.profiles.last_name}`.trim() : "";
-    if (applicantEmail) {
+    if (applicantEmail && action === "approved") {
       try {
-        await supabase.functions.invoke("send-application-status", {
+        await supabase.functions.invoke("send-transactional-email", {
           body: {
-            applicantEmail,
-            applicantName,
-            companyName: app.company_name,
-            status: action,
+            templateName: "trade-approval",
+            recipientEmail: applicantEmail,
+            idempotencyKey: `trade-approval-${app.id}`,
+            templateData: {
+              name: applicantName,
+              companyName: app.company_name,
+            },
           },
         });
       } catch (err) {
-        console.error("Failed to send status email:", err);
+        console.error("Failed to send approval email:", err);
       }
     }
 
