@@ -18,6 +18,7 @@ import { withOgCacheBust } from "@/lib/whatsapp-share";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
+import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
@@ -539,6 +540,7 @@ function CarouselDots({ count, selected, onSelect }: { count: number; selected: 
 // ─── Letter Group ────────────────────────────────────────────────────────────
 function LetterGroup({
   letter,
+  anchorId,
   designers,
   forceOpen,
   parentDesignerCountByName,
@@ -546,6 +548,7 @@ function LetterGroup({
   initialExpand,
 }: {
   letter: string;
+  anchorId: string;
   designers: Designer[];
   forceOpen?: boolean;
   parentDesignerCountByName: Record<string, number>;
@@ -561,7 +564,7 @@ function LetterGroup({
   const needsCarousel = designers.length > (isMobile ? 2 : 5);
 
   return (
-    <div id={`alpha-${letter}`} className="scroll-mt-32 mb-6">
+    <div id={anchorId} data-alpha-letter={letter} className="scroll-mt-32 mb-6">
       <div ref={sentinelRef} />
       <div className="flex items-center gap-3 mb-4 px-1">
         <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
@@ -761,7 +764,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
       <CarouselDots count={pages.length} selected={activePage} onSelect={scrollToPage} />
       <AnimatePresence onExitComplete={() => {
         if (!openParent) {
-          const el = document.getElementById(`alpha-${letter}`);
+          const el = getDesignersDirectoryAnchor(letter);
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }}>
@@ -973,7 +976,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     if (letter && LETTERS.includes(letter)) {
       setForcedLetters(new Set([letter]));
       requestAnimationFrame(() => {
-        scrollToSection(`alpha-${letter}`);
+        scrollToSection(getDesignersDirectoryAnchorId(letter));
       });
     }
   }, [initialLetter]);
@@ -1046,7 +1049,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     const session = ++jumpSessionRef.current;
 
     const getY = () => {
-      const el = document.getElementById(`alpha-${letter}`);
+      const el = getDesignersDirectoryAnchor(letter);
       if (!el) return null;
       const nav = document.querySelector("nav");
       const navHeight = nav?.getBoundingClientRect().height ?? 96;
@@ -1298,7 +1301,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           </div>
 
           {/* Desktop: Sidebar + Directory layout */}
-          <div className="hidden md:flex gap-6">
+          <div className="hidden md:flex gap-6" data-directory-layout="desktop">
             <CategorySidebar
               activeCategory={selectedCategory}
               activeSubcategory={selectedSubcategory}
@@ -1349,6 +1352,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                         <LetterGroup
                           key={letter}
                           letter={letter}
+                          anchorId={getDesignersDirectoryAnchorId(letter, "desktop")}
                           designers={designers}
                           forceOpen={forcedLetters.has(letter)}
                           parentDesignerCountByName={parentDesignerCountByName}
@@ -1364,7 +1368,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           </div>
 
           {/* Mobile: Directory */}
-          <div className="md:hidden">
+          <div className="md:hidden" data-directory-layout="mobile">
             {!filteredPicks && (
               /* Mobile A-Z bar — wrapped grid for full visibility and touch-friendly sizing */
               <div className="mb-5">
@@ -1416,6 +1420,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       <LetterGroup
                         key={letter}
                         letter={letter}
+                        anchorId={getDesignersDirectoryAnchorId(letter, "mobile")}
                         designers={designers}
                         forceOpen={forcedLetters.has(letter)}
                         parentDesignerCountByName={parentDesignerCountByName}
