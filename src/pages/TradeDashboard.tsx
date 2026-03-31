@@ -216,8 +216,8 @@ const TradeDashboard = () => {
             }}
             className="shrink-0 flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 shadow-sm hover:opacity-90 transition-all"
           >
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span className="font-body text-[11px] uppercase tracking-[0.15em] text-foreground">Concierge</span>
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="font-body text-[11px] uppercase tracking-[0.15em]">Concierge</span>
           </button>
         </div>
       </div>
