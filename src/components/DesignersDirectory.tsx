@@ -606,7 +606,7 @@ function LetterGroup({
             )}
           </motion.div>
         ) : (
-          <div className="flex items-center justify-center py-12 text-muted-foreground/30" style={{ minHeight: `${Math.ceil(designers.length / 5) * 280}px` }}>
+          <div className="flex items-center justify-center py-12 text-muted-foreground/30" style={{ minHeight: `${Math.ceil(designers.length / (typeof window !== "undefined" && window.innerWidth < 768 ? 2 : 5)) * 280}px` }}>
             <span className="font-body text-xs tracking-widest uppercase">{designers.length} designer{designers.length !== 1 ? "s" : ""}</span>
           </div>
         )}
@@ -1068,10 +1068,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       if (nextY === null) return;
       const delta = Math.abs(nextY - prevY);
       prevY = nextY;
-      if (delta > 2 && passes < 8) {
+      if (delta > 2 && passes < 12) {
         window.scrollTo({ top: nextY, behavior: "instant" as ScrollBehavior });
         passes++;
-        setTimeout(() => requestAnimationFrame(settle), 50);
+        setTimeout(() => requestAnimationFrame(settle), 80);
       } else {
         // Final position — use instant to avoid fighting with future taps
         if (jumpSessionRef.current === session) {
@@ -1079,7 +1079,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         }
       }
     };
-    requestAnimationFrame(() => requestAnimationFrame(settle));
+    // Give AnimatePresence more time to render on mobile
+    setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 100);
   }, [activeLetters]);
 
   useEffect(() => {
