@@ -1053,11 +1053,15 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       return Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - 8);
     };
 
+    // Use window.scrollTo(x, y) for maximum mobile Safari compatibility
+    // (behavior: "instant" is not supported on older iOS versions)
+    const jumpTo = (y: number) => window.scrollTo(0, y);
+
     // Instant-jump to force content-visibility sections to render,
-    // then settle with correction passes before a final instant scroll.
+    // then settle with correction passes.
     const firstY = getY();
     if (firstY === null) return;
-    window.scrollTo({ top: firstY, behavior: "instant" as ScrollBehavior });
+    jumpTo(firstY);
 
     let passes = 0;
     let prevY = firstY;
@@ -1069,18 +1073,18 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       const delta = Math.abs(nextY - prevY);
       prevY = nextY;
       if (delta > 2 && passes < 12) {
-        window.scrollTo({ top: nextY, behavior: "instant" as ScrollBehavior });
+        jumpTo(nextY);
         passes++;
         setTimeout(() => requestAnimationFrame(settle), 80);
       } else {
-        // Final position — use instant to avoid fighting with future taps
+        // Final position
         if (jumpSessionRef.current === session) {
-          window.scrollTo({ top: nextY, behavior: "instant" as ScrollBehavior });
+          jumpTo(nextY);
         }
       }
     };
-    // Give AnimatePresence more time to render on mobile
-    setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 100);
+    // Give AnimatePresence time to render on mobile before settling
+    setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 120);
   }, [activeLetters]);
 
   useEffect(() => {
