@@ -124,8 +124,8 @@ serve(async (req) => {
     }
 
     // Load real catalog data to ground the AI
-    const { designersList, piecesList } = await loadCatalogContext();
-    const systemPrompt = buildSystemPrompt(designersList, piecesList);
+    const { designersList, piecesList, showroomBrands } = await loadCatalogContext();
+    const systemPrompt = buildSystemPrompt(designersList, piecesList, showroomBrands);
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
