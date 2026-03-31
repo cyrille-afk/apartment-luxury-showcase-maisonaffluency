@@ -210,10 +210,16 @@ const Navigation = () => {
       navigate(`/${href}`);
       return;
     }
-    // Delay scroll to allow Sheet close animation to complete and layout to settle
+    // Wait for Sheet close animation to fully complete before scrolling
+    // The Sheet overlay can interfere with scroll position during its exit
     setTimeout(() => {
-      scrollToSection(id);
-    }, 600);
+      // Force a second rAF to ensure layout is stable after sheet removal
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToSection(id);
+        });
+      });
+    }, 500);
   };
 
   return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
