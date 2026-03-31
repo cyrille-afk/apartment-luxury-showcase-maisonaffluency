@@ -199,35 +199,39 @@ const Navigation = () => {
   };
 
   const handleNavClick = (href: string) => {
+    const isMobileSheetNav = isOpen && window.innerWidth < 768;
+
     setIsOpen(false);
+
     if (href.startsWith("/")) {
       navigate(href);
       return;
     }
+
     const id = href.replace(/^#/, "");
+
     // If not on the homepage, navigate there first with the hash
     if (window.location.pathname !== "/") {
       navigate(`/${href}`);
       return;
     }
-    // Capture scroll position before the Sheet overlay removes body overflow
-    // (Radix Dialog sets overflow:hidden on <body> — removing it can reset scroll)
-    const savedY = window.scrollY;
-    const poll = (attempts = 0) => {
-      // Wait until the Sheet overlay is fully removed from the DOM
-      const overlay = document.querySelector("[data-radix-dialog-overlay]");
-      if (overlay && attempts < 30) {
-        setTimeout(() => poll(attempts + 1), 50);
-        return;
-      }
-      // Restore scroll position that may have been lost during overlay teardown
-      window.scrollTo({ top: savedY, behavior: "instant" as ScrollBehavior });
+
+    if (isMobileSheetNav) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${id}`);
       requestAnimationFrame(() => {
-        scrollToSection(id);
+        requestAnimationFrame(() => {
+          const target = document.getElementById(id);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+          scrollToSection(id);
+        });
       });
-    };
-    // Start polling after a short delay so the Sheet begins closing
-    setTimeout(poll, 80);
+      return;
+    }
+
+    scrollToSection(id);
   };
 
   return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
