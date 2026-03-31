@@ -766,6 +766,12 @@ export default function EditorialBiography({
         i++;
         const followText: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
+          // Stop consuming text if the next block after this text is an image —
+          // leave the text for the image to pair with in staggered layout
+          const nextAfterThis = i + 1;
+          if (nextAfterThis < parsed.length && parsed[nextAfterThis].type === "image") {
+            break;
+          }
           followText.push((parsed[i] as { type: "text"; content: string }).content);
           i++;
         }
