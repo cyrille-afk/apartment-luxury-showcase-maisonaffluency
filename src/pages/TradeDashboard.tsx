@@ -198,13 +198,28 @@ const TradeDashboard = () => {
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
       <div className="mb-6 md:mb-8">
-        <h1 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground">
-          Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
-        </h1>
-        <p className="font-body text-xs md:text-sm text-muted-foreground mt-1.5">
-          {profile?.company && <span>{profile.company} · </span>}
-          Your trade dashboard
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground">
+              Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
+            </h1>
+            <p className="font-body text-xs md:text-sm text-muted-foreground mt-1.5">
+              {profile?.company && <span>{profile.company} · </span>}
+              Your trade dashboard
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              // Find and click the floating concierge button
+              const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
+              if (btn) btn.click();
+            }}
+            className="shrink-0 flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 shadow-sm hover:border-foreground/30 hover:shadow-md transition-all"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span className="font-body text-[11px] uppercase tracking-[0.15em] text-foreground">Concierge</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
