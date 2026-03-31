@@ -1,0 +1,1 @@
+UPDATE designers SET display_name = NULL, updated_at = now() WHERE id = '86483e10-0001-4000-8000-000000000001';
