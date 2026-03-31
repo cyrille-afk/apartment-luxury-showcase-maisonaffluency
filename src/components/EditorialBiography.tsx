@@ -645,8 +645,17 @@ export default function EditorialBiography({
   const isMobile = useIsMobile();
   const blocks = biography
     .split(/\n\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+    .flatMap((p) => {
+      const trimmed = p.trim();
+      if (!trimmed) return [];
+      // If a block contains multiple lines and at least one is a media URL,
+      // split on single newlines so each URL becomes its own block
+      const lines = trimmed.split(/\n/);
+      if (lines.length > 1 && lines.some((l) => parseMediaLine(l.trim()) !== null)) {
+        return lines.map((l) => l.trim()).filter(Boolean);
+      }
+      return [trimmed];
+    });
 
   const hasManualMedia = !!(biographyImages && biographyImages.length > 0);
   const hasInlineMedia = blocks.some(isStandaloneMediaUrl);
