@@ -1,0 +1,1 @@
+UPDATE designers SET biography = replace(biography, 'Screen_Shot_2026-03-31_at_3.59.43_PM_mjcdyf.png | | right', 'Screen_Shot_2026-03-31_at_3.59.43_PM_mjcdyf.png | YAFO Cabinet — Place des Vosges | right'), updated_at = now() WHERE slug = 'pierre-yovanovitch';
