@@ -4,6 +4,7 @@ import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calenda
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
+import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -104,6 +105,7 @@ const Navigation = () => {
   }, []);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("#home");
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categoryPanelOpen, setCategoryPanelOpen] = useState(false);
@@ -189,6 +191,18 @@ const Navigation = () => {
     return () => window.removeEventListener('setDesignerCategory', handleExternalClear as EventListener);
   }, []);
 
+  useEffect(() => {
+    if (isOpen || !pendingSection || window.location.pathname !== "/") return;
+
+    return deferHashScrollUntilSheetClosed({
+      id: pendingSection,
+      onScroll: (id) => {
+        setPendingSection((current) => (current === id ? null : current));
+        scrollToSection(id);
+      },
+    });
+  }, [isOpen, pendingSection]);
+
   const scrollToTop = () => {
     sessionStorage.removeItem("__scroll_y");
     if (window.location.pathname !== "/") {
@@ -201,9 +215,8 @@ const Navigation = () => {
   const handleNavClick = (href: string) => {
     const isMobileSheetNav = isOpen && window.innerWidth < 768;
 
-    setIsOpen(false);
-
     if (href.startsWith("/")) {
+      setIsOpen(false);
       navigate(href);
       return;
     }
@@ -212,37 +225,18 @@ const Navigation = () => {
 
     // If not on the homepage, navigate there first with the hash
     if (window.location.pathname !== "/") {
+      setIsOpen(false);
       navigate(`/${href}`);
       return;
     }
 
     if (isMobileSheetNav) {
-      // Wait for the Radix Sheet overlay to fully unmount before scrolling.
-      // The overlay sets overflow:hidden on <body>, which breaks scroll calculations.
-      const doScroll = () => {
-        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${id}`);
-        requestAnimationFrame(() => {
-          const target = document.getElementById(id);
-          if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-          } else {
-            scrollToSection(id);
-          }
-        });
-      };
-      const waitForOverlayRemoval = (attempts = 0) => {
-        const overlay = document.querySelector("[data-radix-dialog-overlay]");
-        if (overlay && attempts < 40) {
-          setTimeout(() => waitForOverlayRemoval(attempts + 1), 50);
-        } else {
-          // Overlay gone — body overflow is restored, safe to scroll
-          doScroll();
-        }
-      };
-      setTimeout(() => waitForOverlayRemoval(), 50);
+      setPendingSection(id);
+      setIsOpen(false);
       return;
     }
 
+    setIsOpen(false);
     scrollToSection(id);
   };
 

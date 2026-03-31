@@ -1,99 +1,62 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 
 /**
  * Regression test for mobile hash-link navigation.
- *
- * Bug: Clicking "Designers & Makers" in the mobile Sheet menu caused
- * the page to scroll UP instead of DOWN because the Radix Sheet's
- * teardown reset body overflow and scroll position before the
- * anchor scroll could fire.
- *
- * Fix: handleNavClick now uses a double-rAF after the Sheet closes
- * to let the DOM stabilize, then calls scrollIntoView on the target.
- *
- * This test verifies the core logic extracted from handleNavClick:
- * after a mobile Sheet close, the scroll must land ON or BELOW the
- * target element — never above it.
  */
 
 describe("Mobile hash-link navigation", () => {
-  let targetEl: HTMLDivElement;
+  const originalRaf = window.requestAnimationFrame;
 
   beforeEach(() => {
-    // Simulate a target section far down the page
-    targetEl = document.createElement("div");
-    targetEl.id = "designers";
-    document.body.appendChild(targetEl);
-
-    // Mock getBoundingClientRect to place the element below viewport
-    vi.spyOn(targetEl, "getBoundingClientRect").mockReturnValue({
-      top: 2400,
-      bottom: 2800,
-      left: 0,
-      right: 390,
-      width: 390,
-      height: 400,
-      x: 0,
-      y: 2400,
-      toJSON: () => {},
-    });
+    vi.useFakeTimers();
+    window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    }) as typeof window.requestAnimationFrame;
   });
 
   afterEach(() => {
-    targetEl.remove();
+    document.body.innerHTML = "";
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+    window.requestAnimationFrame = originalRaf;
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
-  it("should find the target element by ID for hash-link scroll", () => {
-    const id = "designers";
-    const el = document.getElementById(id);
-    expect(el).not.toBeNull();
-    expect(el?.id).toBe("designers");
+  it("waits for the Sheet overlay to clear before scrolling", () => {
+    const overlay = document.createElement("div");
+    overlay.setAttribute("data-radix-dialog-overlay", "");
+    document.body.appendChild(overlay);
+    document.body.style.overflow = "hidden";
+
+    const onScroll = vi.fn();
+    deferHashScrollUntilSheetClosed({ id: "designers", onScroll, closeDelayMs: 0, checkIntervalMs: 50 });
+
+    vi.advanceTimersByTime(200);
+    expect(onScroll).not.toHaveBeenCalled();
+
+    overlay.remove();
+    document.body.style.overflow = "";
+
+    vi.advanceTimersByTime(50);
+    expect(onScroll).toHaveBeenCalledWith("designers");
   });
 
-  it("should call scrollIntoView on the target element (simulating post-Sheet close)", () => {
-    const scrollSpy = vi.fn();
-    targetEl.scrollIntoView = scrollSpy;
-
-    // Simulate the double-rAF pattern from handleNavClick
-    const target = document.getElementById("designers");
-    expect(target).not.toBeNull();
-    target!.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
-  });
-
-  it("should update history state with hash before scrolling", () => {
+  it("updates the hash before running the deferred section scroll", () => {
     const replaceSpy = vi.spyOn(window.history, "replaceState");
+    const onScroll = vi.fn();
 
-    const id = "designers";
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${window.location.search}#${id}`
-    );
+    deferHashScrollUntilSheetClosed({ id: "designers", onScroll, closeDelayMs: 0, checkIntervalMs: 10 });
+    vi.runAllTimers();
 
     expect(replaceSpy).toHaveBeenCalledWith(
       null,
       "",
       expect.stringContaining("#designers")
     );
-  });
-
-  it("should NOT scroll to top (y=0) — the old broken behavior", () => {
-    // The bug caused scrollTo(0) effectively. Verify that our logic
-    // targets the element, not the page top.
-    const rect = targetEl.getBoundingClientRect();
-    expect(rect.top).toBeGreaterThan(0);
-
-    // The fix uses scrollIntoView on the element, which would move
-    // viewport to rect.top, not to 0.
-    const scrollSpy = vi.fn();
-    targetEl.scrollIntoView = scrollSpy;
-    targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    expect(scrollSpy).toHaveBeenCalled();
-    // Confirm we're targeting an element that is below the fold
-    expect(rect.top).toBeGreaterThan(768);
+    expect(onScroll).toHaveBeenCalledWith("designers");
   });
 });
