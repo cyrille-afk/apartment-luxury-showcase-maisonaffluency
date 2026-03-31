@@ -92,6 +92,25 @@ export const buildParentBrandOgUrl = (name: string) => {
 };
 
 /**
+ * Piece-specific OG bridge overrides for collectible items.
+ * Key format: "designer-slug/piece-slug"
+ */
+const PIECE_OG_BRIDGE_OVERRIDES: Record<string, string> = {
+  "christopher-boots/prometheus-iii-astraea": "/collectibles/christopher-boots-prometheus-iii-astraea-og.html",
+};
+
+/**
+ * Build a piece-specific OG bridge URL for a curator pick.
+ * Falls back to the designer OG bridge if no piece-specific bridge exists.
+ */
+export const buildPieceOgUrl = (designerName: string, pieceTitle: string) => {
+  const key = `${slugify(designerName)}/${slugify(pieceTitle)}`;
+  const override = PIECE_OG_BRIDGE_OVERRIDES[key];
+  if (override) return withOgCacheBust(`${SITE_URL}${override}`);
+  return buildDesignerOgUrl(designerName);
+};
+
+/**
  * Build a deep-link URL for a specific designer/brand profile.
  * @deprecated Use buildDesignerOgUrl or buildAtelierOgUrl for social sharing
  */
