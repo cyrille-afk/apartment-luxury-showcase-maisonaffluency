@@ -166,6 +166,7 @@ const TradeLayout = () => {
       <Suspense fallback={null}>
         <CompareFab />
         <CompareDrawer />
+        <AIConcierge />
       </Suspense>
     </SidebarProvider>
   );
