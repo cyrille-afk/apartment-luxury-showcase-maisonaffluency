@@ -488,7 +488,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           ) : (
             <>
               {/* Table header */}
-              <div className="hidden md:grid grid-cols-[1fr_80px_100px_100px] gap-4 pb-3 border-b border-border">
+               <div className="hidden md:grid grid-cols-[1fr_100px_120px_130px] gap-4 pb-3 border-b border-border">
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Description</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-center">Qty</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-right">Unit Price</span>
@@ -506,7 +506,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
-                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_80px_100px_100px] md:gap-4 md:items-start">
+                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_100px_120px_130px] md:gap-4 md:items-start">
                       <div className="flex gap-3 md:gap-4">
                         <div className="w-14 h-14 md:w-20 md:h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                           {product?.image_url ? (
@@ -580,7 +580,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         )}
                       </div>
                       <div className="hidden md:block text-right">
-                        <span className="font-body text-sm text-foreground">{formatPriceRaw(unitPrice, currency) || "TBD"}</span>
+                        <span className="font-body text-sm text-foreground tabular-nums">
+                          {unitPrice ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}` : "TBD"}
+                        </span>
                         {item.unit_price_cents != null && product?.currency && product.currency !== currency && product.trade_price_cents && (
                           <p className="font-body text-[9px] text-muted-foreground/60">
                             Catalog: {currencySymbol(product.currency)} {formatPriceRaw(product.trade_price_cents, product.currency)}
@@ -588,7 +590,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         )}
                       </div>
                       <div className="hidden md:block text-right">
-                        <span className="font-body text-sm text-foreground font-medium">{formatPriceRaw(lineTotal, currency) || "TBD"}</span>
+                        <span className="font-body text-sm text-foreground font-medium tabular-nums">
+                          {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
+                        </span>
                       </div>
                     </div>
                   );
