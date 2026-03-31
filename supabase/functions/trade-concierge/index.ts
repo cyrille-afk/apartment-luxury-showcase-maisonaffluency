@@ -7,30 +7,40 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSystemPrompt(designersList: string, piecesList: string) {
+function buildSystemPrompt(designersList: string, piecesList: string, showroomBrands: string) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
 Your tone is warm yet polished, like a well-informed gallery advisor. Keep answers concise (2-4 sentences unless detail is requested).
 
-## CRITICAL RULE — CATALOG-ONLY RESPONSES
-You must ONLY mention designers, ateliers, pieces, and works that appear in the CATALOG DATA below. NEVER invent, guess, or recall designer names, piece titles, or product names from your general knowledge. If the catalog does not contain a match for what the user is looking for, say so honestly and suggest they browse the Showroom or contact the team — do NOT fabricate names.
+## ABSOLUTE RULE — CATALOG-ONLY RESPONSES
+You must ONLY mention designers, ateliers, pieces, brands, and works that appear in the CATALOG DATA sections below.
+- NEVER invent, guess, or recall designer names, piece titles, product names, or brand names from your general training knowledge.
+- NEVER suggest that a designer or brand is "available in the Showroom" unless they explicitly appear in the SHOWROOM BRANDS list below.
+- If the user asks about a designer or brand NOT in the lists below, say: "I don't currently have [name] in our catalog. Would you like me to suggest similar designers from our collection, or shall I connect you with the team?"
+- Do NOT fabricate piece names, even for designers that ARE in the catalog. Only mention specific pieces listed in CATALOG PIECES below.
 
 ## CATALOG DATA — DESIGNERS & ATELIERS
 These are the ONLY designers and ateliers in the Maison Affluency portfolio:
 ${designersList}
 
-## CATALOG DATA — SELECTED PIECES
-These are examples of pieces available (not exhaustive — direct users to the Showroom for full inventory):
+## CATALOG DATA — PIECES
+These are the ONLY specific pieces you may reference by name:
 ${piecesList}
+
+## SHOWROOM BRANDS
+These are the ONLY brands with products currently browsable in the Showroom:
+${showroomBrands}
+
+If a brand is in DESIGNERS but NOT in SHOWROOM BRANDS, tell the user: "We represent [name] but their pieces are currently available by inquiry only — I can connect you with the team."
 
 ## What you can help with
 - **Product discovery**: Suggest designers or pieces FROM THE CATALOG ABOVE that match a client brief.
-- **Designer knowledge**: Share background on designers listed above — their philosophy, materials, craftsmanship. Use the specialty and biography data provided.
-- **Specification guidance**: Advise on materials, dimensions, lead times, and care.
+- **Designer knowledge**: Share background on designers listed above — their philosophy, materials, craftsmanship.
+- **Specification guidance**: Advise on materials, dimensions, lead times, and care for cataloged pieces.
 - **Trade portal navigation**: Guide users to Showroom, Gallery, Quote Builder, Sample Requests, Resources, 3D Studio, or Project Folders.
 - **Quote & sample process**: Explain how to build quotes, request samples, and manage project folders.
 
-You do NOT have live pricing or stock data. For specific pricing, direct users to the Showroom or Quote Builder.
+You do NOT have live pricing or stock data. For specific pricing, direct users to the Quote Builder.
 
 Format responses with markdown when helpful (bold for emphasis, bullet lists for options).`;
 }
@@ -43,29 +53,53 @@ async function loadCatalogContext() {
   // Fetch published designers
   const { data: designers } = await supabase
     .from("designers")
-    .select("name, display_name, specialty, slug")
+    .select("id, name, display_name, specialty, slug")
     .eq("is_published", true)
     .order("name");
 
-  // Fetch a sample of curator picks (piece titles + materials)
+  // Build a designer ID → name map for joining picks
+  const designerMap = new Map<string, string>();
+  (designers || []).forEach((d: any) => {
+    designerMap.set(d.id, d.display_name || d.name);
+  });
+
+  // Fetch curator picks with designer context
   const { data: picks } = await supabase
     .from("designer_curator_picks")
     .select("title, materials, category, designer_id")
-    .limit(200);
+    .limit(300);
+
+  // Fetch distinct showroom brands (from trade_products that have hotspot presence)
+  const { data: hotspotBrands } = await supabase
+    .from("gallery_hotspots")
+    .select("designer_name");
+  
+  const { data: tradeProducts } = await supabase
+    .from("trade_products")
+    .select("brand_name")
+    .eq("is_active", true);
 
   // Build designer list
   const designerLines = (designers || []).map(
     (d: any) => `- ${d.display_name || d.name} — ${d.specialty || "collectible design"}`
   );
 
-  // Build pieces list grouped loosely
-  const pieceLines = (picks || []).map(
-    (p: any) => `- "${p.title}"${p.materials ? ` (${p.materials})` : ""}${p.category ? ` [${p.category}]` : ""}`
-  );
+  // Build pieces list with designer attribution
+  const pieceLines = (picks || []).map((p: any) => {
+    const designer = designerMap.get(p.designer_id) || "Unknown";
+    return `- "${p.title}" by ${designer}${p.materials ? ` (${p.materials})` : ""}${p.category ? ` [${p.category}]` : ""}`;
+  });
+
+  // Build unique showroom brand list
+  const brandSet = new Set<string>();
+  (hotspotBrands || []).forEach((h: any) => { if (h.designer_name) brandSet.add(h.designer_name); });
+  (tradeProducts || []).forEach((t: any) => { if (t.brand_name) brandSet.add(t.brand_name); });
+  const showroomBrandLines = Array.from(brandSet).sort().map(b => `- ${b}`);
 
   return {
     designersList: designerLines.join("\n") || "No designers currently loaded.",
-    piecesList: pieceLines.slice(0, 100).join("\n") || "No pieces currently loaded.",
+    piecesList: pieceLines.join("\n") || "No pieces currently loaded.",
+    showroomBrands: showroomBrandLines.join("\n") || "No showroom brands currently loaded.",
   };
 }
 
