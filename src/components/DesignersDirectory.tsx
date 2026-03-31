@@ -606,7 +606,7 @@ function LetterGroup({
             )}
           </motion.div>
         ) : (
-          <div className="flex items-center justify-center py-12 text-muted-foreground/30" style={{ minHeight: `${Math.ceil(designers.length / 5) * 280}px` }}>
+          <div className="flex items-center justify-center py-12 text-muted-foreground/30" style={{ minHeight: `${Math.ceil(designers.length / (typeof window !== "undefined" && window.innerWidth < 768 ? 2 : 5)) * 280}px` }}>
             <span className="font-body text-xs tracking-widest uppercase">{designers.length} designer{designers.length !== 1 ? "s" : ""}</span>
           </div>
         )}
