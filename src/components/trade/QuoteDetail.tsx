@@ -488,7 +488,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           ) : (
             <>
               {/* Table header */}
-              <div className="hidden md:grid grid-cols-[1fr_80px_100px_100px] gap-4 pb-3 border-b border-border">
+               <div className="hidden md:grid grid-cols-[1fr_100px_120px_130px] gap-4 pb-3 border-b border-border">
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Description</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-center">Qty</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-right">Unit Price</span>
