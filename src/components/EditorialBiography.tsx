@@ -22,27 +22,33 @@ const MOBILE_COLLAPSE_THRESHOLD = 3;
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
+/** Normalize raw media input, including pasted iframe HTML snippets */
+function normalizeMediaInput(value: string): string {
+  const trimmed = value.trim();
+  const iframeSrcMatch = trimmed.match(/<iframe[^>]*\ssrc=["']([^"']+)["'][^>]*>/i);
+  const candidate = iframeSrcMatch?.[1] || trimmed;
+  return candidate.replace(/&\?/g, "&").replace(/".*$/, "").trim();
+}
+
 /** Detect if a URL is a video */
 function isVideoUrl(url: string): boolean {
-  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return true;
-  if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(url)) return true;
-  if (/youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url)) return true;
-  if (/vimeo\.com\//i.test(url)) return true;
+  const normalized = normalizeMediaInput(url);
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(normalized)) return true;
+  if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(normalized)) return true;
+  if (/youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(normalized)) return true;
+  if (/vimeo\.com\//i.test(normalized)) return true;
+  if (/nowness\.com\/iframe/i.test(normalized)) return true;
   return false;
 }
 
-/** Convert YouTube/Vimeo URLs to embeddable format */
+/** Convert YouTube/Vimeo/NOWNESS URLs to embeddable format */
 function getEmbedUrl(url: string): string | null {
-  let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  const normalized = normalizeMediaInput(url);
+  let match = normalized.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1`;
-  match = url.match(/vimeo\.com\/(\d+)/);
+  match = normalized.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
-  // Nowness iframe embeds
-  if (/nowness\.com\/iframe/i.test(url)) {
-    // Clean up malformed URLs (extra ?, trailing HTML attributes)
-    const cleaned = url.replace(/&\?/g, "&").replace(/".*$/, "").trim();
-    return cleaned;
-  }
+  if (/nowness\.com\/iframe/i.test(normalized)) return normalized;
   return null;
 }
 
@@ -135,7 +141,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
   const value = text.trim();
   // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small
   const pipes = value.split(/\s*\|\s*/);
-  const url = pipes[0]?.trim() || "";
+  const url = normalizeMediaInput(pipes[0] || "");
 
   if (!/^https?:\/\//i.test(url)) return null;
   if (/\s/.test(url)) return null;
