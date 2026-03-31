@@ -214,7 +214,7 @@ const TradeDashboard = () => {
               const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
               if (btn) btn.click();
             }}
-            className="shrink-0 flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 shadow-sm hover:border-foreground/30 hover:shadow-md transition-all"
+            className="shrink-0 flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 shadow-sm hover:opacity-90 transition-all"
           >
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             <span className="font-body text-[11px] uppercase tracking-[0.15em] text-foreground">Concierge</span>
