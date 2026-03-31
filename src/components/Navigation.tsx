@@ -217,17 +217,29 @@ const Navigation = () => {
     }
 
     if (isMobileSheetNav) {
-      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${id}`);
-      requestAnimationFrame(() => {
+      // Wait for the Radix Sheet overlay to fully unmount before scrolling.
+      // The overlay sets overflow:hidden on <body>, which breaks scroll calculations.
+      const doScroll = () => {
+        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${id}`);
         requestAnimationFrame(() => {
           const target = document.getElementById(id);
           if (target) {
             target.scrollIntoView({ behavior: "smooth", block: "start" });
-            return;
+          } else {
+            scrollToSection(id);
           }
-          scrollToSection(id);
         });
-      });
+      };
+      const waitForOverlayRemoval = (attempts = 0) => {
+        const overlay = document.querySelector("[data-radix-dialog-overlay]");
+        if (overlay && attempts < 40) {
+          setTimeout(() => waitForOverlayRemoval(attempts + 1), 50);
+        } else {
+          // Overlay gone — body overflow is restored, safe to scroll
+          doScroll();
+        }
+      };
+      setTimeout(() => waitForOverlayRemoval(), 50);
       return;
     }
 
