@@ -401,7 +401,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
           )}
         </div>
         {instagramLink && (
-          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => e.stopPropagation()} aria-label={`${item.name} on Instagram`}>
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
             <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </a>
         )}
@@ -438,7 +438,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
     <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {instagramLink && (
-          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => e.stopPropagation()} aria-label={`${item.name} on Instagram`}>
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
             <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white drop-shadow-md" />
           </a>
         )}
