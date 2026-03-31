@@ -474,7 +474,7 @@ const PublicDesignerProfile = () => {
               const shouldCollapse = editorialBlocks.length > 3;
               return (
                 <ProfileCollapsible shouldCollapse={shouldCollapse}>
-                  <div className="mt-6 md:mt-8">
+                  <div className="mt-8 md:mt-10">
                     <EditorialBiography
                       biography={editorialBio}
                       biographyImages={[]}
