@@ -8,6 +8,8 @@ import { toast } from "sonner";
 const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or navigating the portal?";
 
 export function AIConcierge() {
+  const { pathname } = useLocation();
+  const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: GREETING },
