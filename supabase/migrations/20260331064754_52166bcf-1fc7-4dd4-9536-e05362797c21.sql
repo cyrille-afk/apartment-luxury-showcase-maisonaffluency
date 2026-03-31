@@ -1,0 +1,1 @@
+UPDATE designers SET philosophy = E'The light, the colours, the wind, the quality of the air —\nI was blessed to live in this part of the world;\nit influenced me very much.\n— Pierre Yovanovitch, Sotheby''s interview', updated_at = now() WHERE slug = 'pierre-yovanovitch';
