@@ -506,7 +506,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
-                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_80px_100px_100px] md:gap-4 md:items-start">
+                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_100px_120px_130px] md:gap-4 md:items-start">
                       <div className="flex gap-3 md:gap-4">
                         <div className="w-14 h-14 md:w-20 md:h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                           {product?.image_url ? (
