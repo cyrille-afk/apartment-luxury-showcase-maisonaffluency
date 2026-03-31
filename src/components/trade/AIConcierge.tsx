@@ -81,7 +81,7 @@ export function AIConcierge() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-4 z-50 flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-3 shadow-lg hover:opacity-90 transition-opacity print:hidden"
+          className="fixed bottom-20 md:bottom-6 right-4 z-[100] flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-3 shadow-lg hover:opacity-90 transition-opacity print:hidden"
           aria-label="Open AI Concierge"
         >
           <Sparkles className="h-4 w-4" />
@@ -91,7 +91,7 @@ export function AIConcierge() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
+        <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
