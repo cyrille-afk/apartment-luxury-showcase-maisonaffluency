@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 const TradeBottomNav = lazy(() => import("@/components/trade/TradeBottomNav"));
+const AIConcierge = lazy(() => import("@/components/trade/AIConcierge").then(m => ({ default: m.AIConcierge })));
 
 const ROUTE_TITLES: Record<string, string> = {
   "/trade": "Dashboard",
