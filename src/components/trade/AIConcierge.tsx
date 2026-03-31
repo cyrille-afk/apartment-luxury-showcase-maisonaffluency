@@ -93,11 +93,11 @@ export function AIConcierge() {
       {!open && !isDashboard && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-4 z-[100] flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-3 shadow-lg hover:opacity-90 transition-opacity print:hidden"
+          className="fixed top-[4.5rem] right-4 z-[100] flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2.5 shadow-lg hover:opacity-90 transition-opacity print:hidden"
           aria-label="Open AI Concierge"
         >
-          <Sparkles className="h-4 w-4" />
-          <span className="font-body text-xs uppercase tracking-widest hidden sm:inline">Concierge</span>
+          <Sparkles className="h-3.5 w-3.5" />
+          <span className="font-body text-[11px] uppercase tracking-widest hidden sm:inline">Concierge</span>
         </button>
       )}
 
