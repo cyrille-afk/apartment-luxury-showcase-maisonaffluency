@@ -210,16 +210,24 @@ const Navigation = () => {
       navigate(`/${href}`);
       return;
     }
-    // Wait for Sheet close animation to fully complete before scrolling
-    // The Sheet overlay can interfere with scroll position during its exit
-    setTimeout(() => {
-      // Force a second rAF to ensure layout is stable after sheet removal
+    // Capture scroll position before the Sheet overlay removes body overflow
+    // (Radix Dialog sets overflow:hidden on <body> — removing it can reset scroll)
+    const savedY = window.scrollY;
+    const poll = (attempts = 0) => {
+      // Wait until the Sheet overlay is fully removed from the DOM
+      const overlay = document.querySelector("[data-radix-dialog-overlay]");
+      if (overlay && attempts < 30) {
+        setTimeout(() => poll(attempts + 1), 50);
+        return;
+      }
+      // Restore scroll position that may have been lost during overlay teardown
+      window.scrollTo({ top: savedY, behavior: "instant" as ScrollBehavior });
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          scrollToSection(id);
-        });
+        scrollToSection(id);
       });
-    }, 500);
+    };
+    // Start polling after a short delay so the Sheet begins closing
+    setTimeout(poll, 80);
   };
 
   return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
