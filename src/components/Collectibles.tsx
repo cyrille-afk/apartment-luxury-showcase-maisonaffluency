@@ -1075,8 +1075,8 @@ const Collectibles = () => {
 
                               {/* Share — bottom-left */}
                               <ShareMenu
-                                url={buildDesignerOgUrl(designer.name)}
-                                message={`Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
+                                url={heroProduct ? buildPieceOgUrl(designer.name, heroProduct.title) : buildDesignerOgUrl(designer.name)}
+                                message={heroProduct ? `${heroProduct.title} by ${designer.name} — Maison Affluency: ${buildPieceOgUrl(designer.name, heroProduct.title)}` : `Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
                                 className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors"
                                 iconSize="w-3.5 h-3.5"
                                 labelSize="text-[9px]"
