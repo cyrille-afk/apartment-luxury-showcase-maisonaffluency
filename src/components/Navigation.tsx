@@ -210,8 +210,10 @@ const Navigation = () => {
       navigate(`/${href}`);
       return;
     }
-    // Delay scroll to allow Sheet close animation to complete and banner to be measurable
-    setTimeout(() => scrollToSection(id), 450);
+    // Delay scroll to allow Sheet close animation to complete and layout to settle
+    setTimeout(() => {
+      scrollToSection(id);
+    }, 600);
   };
 
   return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
