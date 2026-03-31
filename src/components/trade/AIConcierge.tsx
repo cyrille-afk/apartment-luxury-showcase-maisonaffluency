@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, Send, Loader2, Sparkles } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage } from "@/lib/tradeConciergeStream";
 import { toast } from "sonner";
