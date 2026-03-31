@@ -37,6 +37,12 @@ function getEmbedUrl(url: string): string | null {
   if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1`;
   match = url.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
+  // Nowness iframe embeds
+  if (/nowness\.com\/iframe/i.test(url)) {
+    // Clean up malformed URLs (extra ?, trailing HTML attributes)
+    const cleaned = url.replace(/&\?/g, "&").replace(/".*$/, "").trim();
+    return cleaned;
+  }
   return null;
 }
 
