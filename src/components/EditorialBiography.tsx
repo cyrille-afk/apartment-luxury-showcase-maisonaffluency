@@ -791,7 +791,7 @@ export default function EditorialBiography({
         }
         i++;
         const paired: string[] = [];
-        const maxPaired = 2;
+        const maxPaired = 3;
         while (i < parsed.length && parsed[i].type === "text" && paired.length < maxPaired) {
           // Stop pairing if the block after this text is a video — leave this
           // text paragraph unpaired so it renders full-width above the video
