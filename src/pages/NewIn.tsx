@@ -83,56 +83,75 @@ const NewIn = () => {
               {BIOGRAPHY}
             </p>
 
-            <div className="mt-10">
+            <div className="mt-8 flex items-end gap-6">
               <Link
                 to={`/designers/${DESIGNER_SLUG}`}
-                className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+                className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300 shrink-0"
               >
                 View The Full Portrait
                 <span className="w-8 h-px bg-foreground" />
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
+
+              {/* From the Studio — inline mini teaser */}
+              {igWithImages.length > 0 && (
+                <div className="hidden md:flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Instagram className="w-3 h-3 text-muted-foreground" />
+                    <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Studio</span>
+                  </div>
+                  <div className="flex gap-1">
+                    {igWithImages.map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.post_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative block w-12 h-12 overflow-hidden rounded-sm bg-muted"
+                      >
+                        <img
+                          src={post.image_url!}
+                          alt={post.caption || "From the Studio"}
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Mobile: small IG thumbnails below CTA */}
+            {igWithImages.length > 0 && (
+              <div className="flex md:hidden items-center gap-3 mt-5">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Instagram className="w-3 h-3 text-muted-foreground" />
+                  <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Studio</span>
+                </div>
+                <div className="flex gap-1">
+                  {igWithImages.map((post) => (
+                    <a
+                      key={post.id}
+                      href={post.post_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block w-11 h-11 overflow-hidden rounded-sm bg-muted"
+                    >
+                      <img
+                        src={post.image_url!}
+                        alt={post.caption || "From the Studio"}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
-
-      {/* From the Studio — mini 3-post teaser */}
-      {igWithImages.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 md:px-12 py-8 md:py-10">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="h-px flex-1 bg-foreground/20" />
-            <div className="flex items-center gap-2 shrink-0">
-              <Instagram className="w-4 h-4 text-foreground" />
-              <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">
-                From the Studio
-              </h2>
-            </div>
-            <div className="h-px flex-1 bg-foreground/20" />
-          </div>
-          <div className="grid grid-cols-3 gap-1 md:gap-1.5">
-            {igWithImages.map((post) => (
-              <a
-                key={post.id}
-                href={post.post_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative block aspect-square overflow-hidden bg-muted"
-              >
-                <img
-                  src={post.image_url!}
-                  alt={post.caption || "Pierre Bonnefille — From the Studio"}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                  <Instagram className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Separator */}
       <div className="max-w-7xl mx-auto px-6 md:px-12">
