@@ -8,7 +8,7 @@ import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
-import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale, Share2 } from "lucide-react";
+import { ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale, Share2 } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
@@ -1058,18 +1058,23 @@ const Collectibles = () => {
                                    </p>
                                    )}
                                  </div>
-                                 {designer.links?.find(l => l.type === "Instagram" && l.url) && (
-                                   <a
-                                     href={designer.links.find(l => l.type === "Instagram")!.url}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     onClick={(e) => e.stopPropagation()}
-                                     className="ml-2 flex-shrink-0 text-white/80 hover:text-white transition-colors"
-                                     aria-label={`${designer.name} on Instagram`}
-                                   >
-                                     <Instagram className="w-5 h-5" />
-                                   </a>
-                                 )}
+                                  {(() => {
+                                    const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
+                                    if (!igLink?.url) return null;
+                                    const handle = '@' + igLink.url.replace(/\/+$/, '').split('/').pop();
+                                    return (
+                                      <a
+                                        href={igLink.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className={cn("ml-2 flex-shrink-0 font-body text-[9px] text-white/60 hover:text-white transition-colors tracking-wide", designerGridCols === 5 && "hidden")}
+                                        aria-label={`${designer.name} on Instagram`}
+                                      >
+                                        {handle}
+                                      </a>
+                                    );
+                                  })()}
                                </div>
                              </div>
 
@@ -1160,18 +1165,23 @@ const Collectibles = () => {
                                <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">
                                  {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
                                </p>
-                               {designer.links?.find(l => l.type === "Instagram" && l.url) && (
-                                 <a
-                                   href={designer.links.find(l => l.type === "Instagram")!.url}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   onClick={(e) => e.stopPropagation()}
-                                   className="ml-1 flex-shrink-0 text-white/80 hover:text-white transition-colors"
-                                   aria-label={`${designer.name} on Instagram`}
-                                 >
-                                   <Instagram className="w-4 h-4" />
-                                 </a>
-                               )}
+                                {(() => {
+                                  const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
+                                  if (!igLink?.url) return null;
+                                  const handle = '@' + igLink.url.replace(/\/+$/, '').split('/').pop();
+                                  return (
+                                    <a
+                                      href={igLink.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="ml-1 flex-shrink-0 font-body text-[8px] text-white/50 hover:text-white transition-colors tracking-wide"
+                                      aria-label={`${designer.name} on Instagram`}
+                                    >
+                                      {handle}
+                                    </a>
+                                  );
+                                })()}
                              </div>
                            </div>
                             {/* Share — bottom-left */}
