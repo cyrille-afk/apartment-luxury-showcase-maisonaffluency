@@ -85,12 +85,22 @@ const NewIn = () => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="w-full md:w-[38%] flex-shrink-0"
           >
-            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-sm bg-muted">
+            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-sm bg-muted relative">
               <img
                 src={PORTRAIT_IMAGE}
                 alt="Pierre Bonnefille in his atelier"
                 className="w-full h-full object-cover"
               />
+              {/* Mobile share overlay on hero */}
+              <div className="absolute top-2 right-2 md:hidden">
+                <ShareMenu
+                  url="https://www.maisonaffluency.com/new-in-og.html"
+                  message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
+                  iconSize="w-4 h-4"
+                  showLabel={false}
+                />
+              </div>
             </div>
           </motion.div>
 

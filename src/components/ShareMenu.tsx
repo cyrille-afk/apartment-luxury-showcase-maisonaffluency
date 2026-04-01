@@ -37,10 +37,14 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
     setOpen(false);
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isMobile) {
-      openWhatsApp();
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({ title: message.split(":")[0] || "Share", url });
+      } catch {}
+    } else if (isMobile) {
+      copyLink();
     } else {
       setOpen(!open);
     }
