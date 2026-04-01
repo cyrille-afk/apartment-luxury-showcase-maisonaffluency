@@ -14,7 +14,8 @@ export default function InstagramFeedAdmin() {
   const [syncing, setSyncing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const dragItem = useRef<number | null>(null);
-  const dragOverItem = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
