@@ -1043,7 +1043,7 @@ const TradeDesignersAdmin = () => {
                         }
                       />
 
-                      {/* Curator's Picks */}
+                      {/* Curator Picks */}
                       <CuratorPicksManager designerId={d.id} />
 
                       <div className="flex items-center gap-3 flex-wrap">
