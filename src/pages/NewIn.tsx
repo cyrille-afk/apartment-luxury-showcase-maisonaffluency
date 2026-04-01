@@ -354,6 +354,13 @@ const NewIn = () => {
       <Suspense fallback={null}>
         <Footer />
       </Suspense>
+
+      <PublicProductLightbox
+        product={lightboxItem}
+        allPicks={lightboxItems}
+        onClose={() => setLightboxItem(null)}
+        onSelectRelated={(item) => setLightboxItem(item)}
+      />
     </>
   );
 };
