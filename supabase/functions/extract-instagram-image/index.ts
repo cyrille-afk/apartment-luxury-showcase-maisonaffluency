@@ -28,11 +28,8 @@ const decodeHtmlEntities = (value: string) =>
  */
 function upgradeResolution(url: string): string {
   // Replace size segments like /s150x150/, /s320x320/, /s640x640/ with /s1080x1080/
-  let upgraded = url.replace(/\/s\d+x\d+\//g, "/s1080x1080/");
-  // Also try removing crop parameters that force zoomed-in crops
-  // e.g. /e35/ (enhancement), /c0.xxx.yyy.zzz/ (crop coordinates)
-  upgraded = upgraded.replace(/\/c[\d.]+\.[\d.]+\.[\d.]+\.[\d.]+\//g, "/");
-  return upgraded;
+  // Keep Instagram's crop coordinates intact so the image matches the grid crop
+  return url.replace(/\/s\d+x\d+\//g, "/s1080x1080/");
 }
 
 async function extractViaOembed(url: string): Promise<string | null> {
