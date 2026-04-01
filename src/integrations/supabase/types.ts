@@ -627,6 +627,7 @@ export type Database = {
           created_at: string
           designer_id: string
           id: string
+          image_url: string | null
           post_url: string
           sort_order: number
         }
@@ -635,6 +636,7 @@ export type Database = {
           created_at?: string
           designer_id: string
           id?: string
+          image_url?: string | null
           post_url: string
           sort_order?: number
         }
@@ -643,6 +645,7 @@ export type Database = {
           created_at?: string
           designer_id?: string
           id?: string
+          image_url?: string | null
           post_url?: string
           sort_order?: number
         }
