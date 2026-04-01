@@ -563,6 +563,7 @@ interface DesignerRow {
   is_published: boolean;
   biography_images: string[];
   links: Record<string, string> | null;
+  instagram_handle: string | null;
 }
 
 const TradeDesignersAdmin = () => {
@@ -583,7 +584,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links")
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links, instagram_handle")
         .order("name", { ascending: true });
       if (error) throw error;
       return data as DesignerRow[];
@@ -1036,13 +1037,38 @@ const TradeDesignersAdmin = () => {
                       {/* Heritage Slides */}
                       <HeritageSlideManager designerId={d.id} />
 
+                      {/* Instagram Handle */}
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <Instagram className="w-3.5 h-3.5" />
+                          Instagram Handle
+                        </label>
+                        <Input
+                          value={(editBuffer[d.id]?.instagram_handle ?? d.instagram_handle) || ""}
+                          onChange={(e) => setField(d.id, "instagram_handle" as keyof DesignerRow, e.target.value || null as any)}
+                          placeholder="@handle (e.g. @achille_salvagni)"
+                          className="mt-1 text-sm font-mono"
+                        />
+                      </div>
+
                       {/* Instagram Posts */}
                       <InstagramPostManager
                         designerId={d.id}
                         instagramUrls={
-                          d.links
-                            ? Object.values(d.links).filter((v) => typeof v === "string" && v.includes("instagram.com"))
-                            : []
+                          (() => {
+                            const urls: string[] = [];
+                            const handle = (editBuffer[d.id]?.instagram_handle ?? d.instagram_handle);
+                            if (handle) {
+                              const clean = handle.replace(/^@/, "").trim();
+                              if (clean) urls.push(`https://www.instagram.com/${clean}/`);
+                            }
+                            if (d.links) {
+                              Object.values(d.links).forEach((v) => {
+                                if (typeof v === "string" && v.includes("instagram.com")) urls.push(v);
+                              });
+                            }
+                            return urls;
+                          })()
                         }
                       />
 

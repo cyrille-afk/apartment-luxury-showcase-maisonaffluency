@@ -676,6 +676,7 @@ export type Database = {
           hero_photo_credit: string | null
           id: string
           image_url: string
+          instagram_handle: string | null
           is_published: boolean
           links: Json | null
           logo_url: string | null
@@ -698,6 +699,7 @@ export type Database = {
           hero_photo_credit?: string | null
           id?: string
           image_url?: string
+          instagram_handle?: string | null
           is_published?: boolean
           links?: Json | null
           logo_url?: string | null
@@ -720,6 +722,7 @@ export type Database = {
           hero_photo_credit?: string | null
           id?: string
           image_url?: string
+          instagram_handle?: string | null
           is_published?: boolean
           links?: Json | null
           logo_url?: string | null
