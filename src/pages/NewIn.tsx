@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
-import { ArrowRight, FileText, Maximize2, Instagram, Share2 } from "lucide-react";
+import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import Navigation from "@/components/Navigation";
 import { useDesigner, useDesignerPicks } from "@/hooks/useDesigner";
