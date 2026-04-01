@@ -404,7 +404,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
         </div>
         {instagramLink && (
           <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 font-body text-[9px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-            @{instagramLink.replace(/\/+$/, '').split('/').pop()}
+            @{instagramLink.replace(/[/?#].*/g, '').replace(/.*//, '')}
           </a>
         )}
         <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all">
@@ -458,7 +458,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
             </button>
             {instagramLink && (
               <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute bottom-3 right-3 z-10 font-body text-[9px] text-white/50 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                @{instagramLink.replace(/\/+$/, '').split('/').pop()}
+                @{instagramLink.replace(/[/?#].*/g, '').replace(/.*//, '')}
               </a>
             )}
           </>
@@ -521,7 +521,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
             </div>
             {instagramLink && (
               <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                @{instagramLink.replace(/\/+$/, '').split('/').pop()}
+                @{instagramLink.replace(/[/?#].*/g, '').replace(/.*//, '')}
               </a>
             )}
           </div>
