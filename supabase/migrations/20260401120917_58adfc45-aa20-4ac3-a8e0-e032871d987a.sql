@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1775045300/Screen_Shot_2026-04-01_at_8.07.17_PM_mnsidx.png' WHERE slug = 'pierre-bonnefille';
