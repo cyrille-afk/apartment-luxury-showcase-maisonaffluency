@@ -83,8 +83,8 @@ const NewIn = () => {
                 New In
               </span>
               <ShareMenu
-                url="https://www.maisonaffluency.com/new-in"
-                message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in"
+                url="https://www.maisonaffluency.com/new-in-og.html"
+                message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
                 className="flex items-center gap-1.5 text-foreground/50 hover:text-foreground transition-colors"
                 iconSize="w-3.5 h-3.5"
                 showLabel={false}
