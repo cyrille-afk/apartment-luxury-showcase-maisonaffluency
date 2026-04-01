@@ -113,6 +113,44 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [newUrl, setNewUrl] = useState("");
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkText, setBulkText] = useState("");
+  const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
+  const [fetchingAll, setFetchingAll] = useState(false);
+
+  const extractImageForPost = async (postId: string, postUrl: string): Promise<string | null> => {
+    setFetchingIds((prev) => new Set(prev).add(postId));
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-instagram-image", {
+        body: { url: postUrl },
+      });
+      if (error || !data?.success) {
+        toast({ title: "Could not extract image", description: data?.error || error?.message || "Try pasting the URL manually", variant: "destructive" });
+        return null;
+      }
+      const imageUrl = data.imageUrl as string;
+      setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, image_url: imageUrl } : p)));
+      await (supabase.from("designer_instagram_posts" as any) as any).update({ image_url: imageUrl }).eq("id", postId);
+      return imageUrl;
+    } finally {
+      setFetchingIds((prev) => { const s = new Set(prev); s.delete(postId); return s; });
+    }
+  };
+
+  const handleFetchAll = async () => {
+    const missing = posts.filter((p) => !p.image_url);
+    if (!missing.length) {
+      toast({ title: "All posts already have images" });
+      return;
+    }
+    setFetchingAll(true);
+    let fetched = 0;
+    for (const post of missing) {
+      const result = await extractImageForPost(post.id, post.post_url);
+      if (result) fetched++;
+    }
+    setFetchingAll(false);
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    toast({ title: `Fetched ${fetched} of ${missing.length} images` });
+  };
 
   // Extract handles from Instagram URLs
   const handles = instagramUrls.map((url) => {
