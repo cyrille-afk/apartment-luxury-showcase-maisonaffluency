@@ -55,30 +55,39 @@ Deno.serve(async (req) => {
       (p: { media_type: string }) => p.media_type === "IMAGE" || p.media_type === "CAROUSEL_ALBUM",
     );
 
-    // Sort by timestamp descending (newest first) — Instagram API returns
-    // them in reverse-chronological order but we enforce it explicitly.
+    // Sort by timestamp descending (newest first)
     imagePosts.sort((a: { timestamp: string }, b: { timestamp: string }) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 
-    // Upsert posts into designer_instagram_posts
     let inserted = 0;
+    let updated = 0;
     let skipped = 0;
 
     for (let i = 0; i < imagePosts.length; i++) {
       const post = imagePosts[i];
       const postUrl = post.permalink;
+      const postedAt = post.timestamp || null;
 
       // Check if already exists
       const { data: existing } = await supabase
         .from("designer_instagram_posts")
-        .select("id")
+        .select("id, posted_at")
         .eq("post_url", postUrl)
         .eq("designer_id", designerId)
         .maybeSingle();
 
       if (existing) {
-        skipped++;
+        // Always update posted_at if missing (backfill)
+        if (!existing.posted_at && postedAt) {
+          await supabase
+            .from("designer_instagram_posts")
+            .update({ posted_at: postedAt })
+            .eq("id", existing.id);
+          updated++;
+        } else {
+          skipped++;
+        }
         continue;
       }
 
@@ -116,7 +125,8 @@ Deno.serve(async (req) => {
         post_url: postUrl,
         caption: post.caption?.substring(0, 500) || null,
         image_url: storedImageUrl,
-        sort_order: i, // temporary, will be recomputed below
+        posted_at: postedAt,
+        sort_order: 0, // temporary, recomputed below
       });
 
       if (insertError) {
@@ -127,16 +137,22 @@ Deno.serve(async (req) => {
     }
 
     // Recompute sort_order for ALL posts of this designer based on
-    // created_at (which mirrors Instagram publish order for new inserts).
+    // posted_at (Instagram publish time), falling back to created_at.
     // sort_order 0 = newest post.
     const { data: allPosts } = await supabase
       .from("designer_instagram_posts")
-      .select("id, created_at")
+      .select("id, posted_at, created_at")
       .eq("designer_id", designerId)
-      .not("image_url", "is", null)
-      .order("created_at", { ascending: false });
+      .not("image_url", "is", null);
 
     if (allPosts) {
+      // Sort by posted_at desc, fallback to created_at desc
+      allPosts.sort((a: any, b: any) => {
+        const dateA = new Date(a.posted_at || a.created_at).getTime();
+        const dateB = new Date(b.posted_at || b.created_at).getTime();
+        return dateB - dateA;
+      });
+
       for (let idx = 0; idx < allPosts.length; idx++) {
         await supabase
           .from("designer_instagram_posts")
@@ -152,6 +168,7 @@ Deno.serve(async (req) => {
         totalFetched: posts.length,
         imagePosts: imagePosts.length,
         inserted,
+        updated,
         skipped,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
