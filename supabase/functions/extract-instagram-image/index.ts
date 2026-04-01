@@ -312,9 +312,16 @@ Deno.serve(async (req) => {
     try {
       downloaded = await downloadImage(normalizedRemoteImageUrl);
     } catch (directErr) {
-      console.log("Direct download failed, trying Cloudinary proxy...", directErr);
-      const proxied = cloudinaryFetchUrl(normalizedRemoteImageUrl);
-      downloaded = await downloadImage(proxied);
+      console.log("Direct download failed, trying Cloudinary square proxy...", directErr);
+      // Use square crop proxy to ensure 1:1 aspect ratio
+      const proxied = cloudinarySquareUrl(normalizedRemoteImageUrl);
+      try {
+        downloaded = await downloadImage(proxied);
+      } catch {
+        // Last resort: standard proxy without forced square
+        const fallback = cloudinaryFetchUrl(normalizedRemoteImageUrl);
+        downloaded = await downloadImage(fallback);
+      }
     }
 
     const ext = extMap[downloaded.contentType] || "jpg";
