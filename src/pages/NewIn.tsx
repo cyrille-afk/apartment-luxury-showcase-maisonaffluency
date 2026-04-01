@@ -31,7 +31,7 @@ const NewIn = () => {
       <Navigation />
 
       {/* Portrait + Biography — side by side */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-16 md:pb-24 mt-[96px]">
+      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-8 md:pb-12 mt-[96px]">
         <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
           {/* Portrait */}
           <motion.div
