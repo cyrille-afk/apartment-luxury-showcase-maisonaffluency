@@ -255,7 +255,14 @@ const NewIn = () => {
             }
 
             return (
-              <div key={pick.id} className="group flex flex-col">
+              <div
+                key={pick.id}
+                className="group flex flex-col cursor-pointer"
+                onClick={() => {
+                  const item = lightboxItems.find((li) => li.id === pick.id);
+                  if (item) setLightboxItem(item);
+                }}
+              >
                 <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
                   <img
                     src={responsiveCloudinaryUrl(pick.image_url, 600)}
