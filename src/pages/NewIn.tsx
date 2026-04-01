@@ -1,10 +1,11 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import Navigation from "@/components/Navigation";
+import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { useDesigner, useDesignerPicks } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
@@ -39,7 +40,26 @@ const NewIn = () => {
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
+  const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
+
+  const lightboxItems: PublicLightboxItem[] = useMemo(
+    () =>
+      picks.map((p) => ({
+        id: p.id,
+        title: p.title,
+        subtitle: p.subtitle,
+        image_url: p.image_url,
+        hover_image_url: p.hover_image_url,
+        brand_name: designer?.name ?? "",
+        materials: p.materials,
+        dimensions: p.dimensions,
+        category: p.category,
+        subcategory: (p as any).subcategory ?? null,
+        pdf_url: p.pdf_url,
+      })),
+    [picks, designer?.name]
+  );
 
   return (
     <>
@@ -235,7 +255,14 @@ const NewIn = () => {
             }
 
             return (
-              <div key={pick.id} className="group flex flex-col">
+              <div
+                key={pick.id}
+                className="group flex flex-col cursor-pointer"
+                onClick={() => {
+                  const item = lightboxItems.find((li) => li.id === pick.id);
+                  if (item) setLightboxItem(item);
+                }}
+              >
                 <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
                   <img
                     src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -327,6 +354,13 @@ const NewIn = () => {
       <Suspense fallback={null}>
         <Footer />
       </Suspense>
+
+      <PublicProductLightbox
+        product={lightboxItem}
+        allPicks={lightboxItems}
+        onClose={() => setLightboxItem(null)}
+        onSelectRelated={(item) => setLightboxItem(item)}
+      />
     </>
   );
 };
