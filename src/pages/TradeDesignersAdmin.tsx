@@ -445,24 +445,27 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
         )}
       </label>
-      {posts.length > 0 && (
-        <div className="mt-2 mb-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleFetchAll}
-            disabled={fetchingAll}
-            className="text-xs gap-1.5"
-          >
-            {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
-            {fetchingAll
-              ? "Refreshing…"
+      <div className="mt-2 mb-1 flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleFetchAll}
+          disabled={fetchingAll || posts.length === 0}
+          className="text-xs gap-1.5"
+        >
+          {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+          {fetchingAll
+            ? "Refreshing\u2026"
+            : posts.length === 0
+              ? "Auto-fetch images"
               : hostedImageTargets.length > 0
                 ? `Auto-fetch ${hostedImageTargets.length} image${hostedImageTargets.length > 1 ? "s" : ""}`
                 : `Refresh all ${posts.length} image${posts.length > 1 ? "s" : ""}`}
-          </Button>
-        </div>
-      )}
+        </Button>
+        {posts.length === 0 && (
+          <span className="text-xs text-muted-foreground">Add post URLs below (single or bulk), then click Auto-fetch to pull thumbnails automatically.</span>
+        )}
+      </div>
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex flex-wrap items-start gap-2 rounded-md border border-border/60 p-2">
