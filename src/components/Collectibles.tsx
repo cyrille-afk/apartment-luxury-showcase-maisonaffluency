@@ -312,7 +312,6 @@ export const collectibleDesigners: Array<{
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773620660/Screen_Shot_2026-03-16_at_8.23.51_AM_u4u9b8.png", hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773620318/AffluencySG_075_1_2_1_kge9am.jpg", title: "Bronze Painting 204, 2023", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "(Signed & Dated)\nMixed Media On Metallic Mesh", dimensions: "130 × 130 cm" },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/pierrebonnefille/" },
       { type: "Curators' Picks" },
     ],
   },
