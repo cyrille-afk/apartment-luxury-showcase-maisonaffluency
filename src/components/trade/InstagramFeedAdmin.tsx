@@ -82,23 +82,26 @@ export default function InstagramFeedAdmin() {
 
   const handleDragStart = (index: number) => {
     dragItem.current = index;
+    setDraggingIndex(index);
   };
 
   const handleDragEnter = (index: number) => {
-    dragOverItem.current = index;
+    setDragOverIndex(index);
   };
 
   const handleDrop = async () => {
-    if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) {
+    const from = dragItem.current;
+    const to = dragOverIndex;
+    setDraggingIndex(null);
+    setDragOverIndex(null);
+    if (from === null || to === null || from === to) {
       dragItem.current = null;
-      dragOverItem.current = null;
       return;
     }
     const reordered = [...posts];
-    const [removed] = reordered.splice(dragItem.current, 1);
-    reordered.splice(dragOverItem.current, 0, removed);
+    const [removed] = reordered.splice(from, 1);
+    reordered.splice(to, 0, removed);
     dragItem.current = null;
-    dragOverItem.current = null;
 
     // Batch update sort_order
     const updates = reordered.map((post: any, i: number) => ({ id: post.id, sort_order: i }));
