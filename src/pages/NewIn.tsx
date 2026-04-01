@@ -37,6 +37,7 @@ const NewIn = () => {
   const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
 
