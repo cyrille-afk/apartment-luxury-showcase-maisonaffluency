@@ -538,10 +538,11 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
               className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
             />
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim()} className="text-xs h-8">
-                <Plus className="w-3 h-3 mr-1" /> Import All
+              <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim() || bulkImporting} className="text-xs h-8 gap-1.5">
+                {bulkImporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                {bulkImporting ? "Importing & fetching images…" : "Import & Auto-fetch"}
               </Button>
-              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>
                 Cancel
               </button>
             </div>
