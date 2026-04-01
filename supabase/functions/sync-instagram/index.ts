@@ -6,6 +6,46 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/**
+ * For CAROUSEL_ALBUM posts the top-level media_url may be absent or a
+ * low-res thumbnail. Fetch the first child's full-size media_url instead.
+ */
+async function getFullSizeImageUrl(
+  post: Record<string, any>,
+  accessToken: string,
+): Promise<string | null> {
+  // IMAGE posts: media_url is already full-size
+  if (post.media_type === "IMAGE" && post.media_url) {
+    return post.media_url;
+  }
+
+  // CAROUSEL_ALBUM: fetch the first child media to get its full-size URL
+  if (post.media_type === "CAROUSEL_ALBUM") {
+    try {
+      const childrenRes = await fetch(
+        `https://graph.instagram.com/v21.0/${post.id}/children?fields=id,media_type,media_url&access_token=${accessToken}`,
+      );
+      const childrenData = await childrenRes.json();
+      if (childrenData.data?.length) {
+        // Prefer the first IMAGE child
+        const imageChild = childrenData.data.find(
+          (c: any) => c.media_type === "IMAGE",
+        ) || childrenData.data[0];
+        if (imageChild?.media_url) {
+          return imageChild.media_url;
+        }
+      }
+    } catch (err) {
+      console.warn(`Failed to fetch carousel children for ${post.id}:`, err);
+    }
+    // Fallback to top-level media_url if children fetch fails
+    return post.media_url || post.thumbnail_url || null;
+  }
+
+  // Fallback for any other type
+  return post.media_url || post.thumbnail_url || null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -91,8 +131,8 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Download and re-host the image to storage
-      const imageUrl = post.media_url || post.thumbnail_url;
+      // Get full-size image URL (handles CAROUSEL_ALBUM children)
+      const imageUrl = await getFullSizeImageUrl(post, accessToken);
       let storedImageUrl: string | null = null;
 
       if (imageUrl) {
