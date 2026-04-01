@@ -20,6 +20,7 @@ export interface Designer {
   biography_images: string[];
   is_published: boolean;
   sort_order: number;
+  new_in_order: number | null;
 }
 
 export interface DesignerCuratorPick {
