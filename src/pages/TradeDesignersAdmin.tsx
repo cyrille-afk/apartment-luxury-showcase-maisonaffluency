@@ -563,6 +563,7 @@ interface DesignerRow {
   is_published: boolean;
   biography_images: string[];
   links: Record<string, string> | null;
+  instagram_handle: string | null;
 }
 
 const TradeDesignersAdmin = () => {
