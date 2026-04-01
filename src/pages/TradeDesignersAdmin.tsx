@@ -710,7 +710,14 @@ const TradeDesignersAdmin = () => {
                       <HeritageSlideManager designerId={d.id} />
 
                       {/* Instagram Posts */}
-                      <InstagramPostManager designerId={d.id} />
+                      <InstagramPostManager
+                        designerId={d.id}
+                        instagramUrls={
+                          d.links
+                            ? Object.values(d.links).filter((v) => typeof v === "string" && v.includes("instagram.com"))
+                            : []
+                        }
+                      />
 
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
