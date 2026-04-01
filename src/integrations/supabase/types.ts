@@ -681,6 +681,7 @@ export type Database = {
           links: Json | null
           logo_url: string | null
           name: string
+          new_in_order: number | null
           notable_works: string
           philosophy: string
           slug: string
@@ -704,6 +705,7 @@ export type Database = {
           links?: Json | null
           logo_url?: string | null
           name: string
+          new_in_order?: number | null
           notable_works?: string
           philosophy?: string
           slug: string
@@ -727,6 +729,7 @@ export type Database = {
           links?: Json | null
           logo_url?: string | null
           name?: string
+          new_in_order?: number | null
           notable_works?: string
           philosophy?: string
           slug?: string

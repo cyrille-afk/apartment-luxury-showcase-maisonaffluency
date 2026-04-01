@@ -1,0 +1,1 @@
+ALTER TABLE public.designers ADD COLUMN new_in_order smallint DEFAULT NULL;
