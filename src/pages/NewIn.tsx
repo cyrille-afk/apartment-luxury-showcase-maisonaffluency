@@ -120,7 +120,7 @@ const NewIn = () => {
                     <span className="h-px w-8 bg-current transition-all duration-300 -translate-x-8 opacity-0 group-hover:translate-x-0 group-hover:opacity-100" />
                   </span>
                 </span>
-                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-300", ctaPressed && "-translate-x-1 opacity-0")} />
+                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0", ctaPressed && "-translate-x-1 opacity-0")} />
               </button>
             </div>
 
