@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Instagram, RefreshCw, Eye, EyeOff, Trash2, GripVertical } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ export default function InstagramFeedAdmin() {
   const dragItem = useRef<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
@@ -32,6 +33,55 @@ export default function InstagramFeedAdmin() {
       return data || [];
     },
   });
+
+  const getIndexFromTouch = useCallback((touch: React.Touch) => {
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el || !gridRef.current) return null;
+    const item = el.closest("[data-drag-index]");
+    if (!item) return null;
+    return parseInt(item.getAttribute("data-drag-index")!, 10);
+  }, []);
+
+  const handleTouchStart = useCallback((index: number) => {
+    dragItem.current = index;
+    setDraggingIndex(index);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    const idx = getIndexFromTouch(e.touches[0]);
+    if (idx !== null) setDragOverIndex(idx);
+  }, [getIndexFromTouch]);
+
+  const handleTouchEnd = useCallback(() => {
+    const from = dragItem.current;
+    const to = dragOverIndex;
+    setDraggingIndex(null);
+    setDragOverIndex(null);
+    dragItem.current = null;
+    if (from === null || to === null || from === to) return;
+
+    const reordered = [...posts];
+    const [removed] = reordered.splice(from, 1);
+    reordered.splice(to, 0, removed);
+
+    const updates = reordered.map((post: any, i: number) => ({ id: post.id, sort_order: i }));
+    (async () => {
+      try {
+        for (const u of updates) {
+          await supabase
+            .from("designer_instagram_posts")
+            .update({ sort_order: u.sort_order })
+            .eq("id", u.id);
+        }
+        refetch();
+        queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
+        toast({ title: "Order updated" });
+      } catch (err: any) {
+        toast({ title: "Reorder failed", description: err.message, variant: "destructive" });
+      }
+    })();
+  }, [dragOverIndex, posts, refetch, queryClient, toast]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -154,7 +204,7 @@ export default function InstagramFeedAdmin() {
           {posts.length === 0 ? (
             <p className="font-body text-xs text-muted-foreground text-center py-4">No posts found.</p>
           ) : (
-            <div className="grid grid-cols-6 gap-1.5">
+            <div ref={gridRef} className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
               {posts.map((post: any, i: number) => {
                 const isHidden = post.hidden;
                   const isDragging = draggingIndex === i;
@@ -162,12 +212,16 @@ export default function InstagramFeedAdmin() {
                   return (
                     <div
                       key={post.id}
+                      data-drag-index={i}
                       draggable
                       onDragStart={() => handleDragStart(i)}
                       onDragEnter={() => handleDragEnter(i)}
                       onDragEnd={handleDrop}
                       onDragOver={(e) => e.preventDefault()}
-                      className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing transition-all duration-150 ${isHidden ? "opacity-40" : ""} ${isDragging ? "opacity-30 scale-95 ring-2 ring-primary" : ""} ${isDropTarget ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105" : ""}`}
+                      onTouchStart={() => handleTouchStart(i)}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing transition-all duration-150 touch-none ${isHidden ? "opacity-40" : ""} ${isDragging ? "opacity-30 scale-95 ring-2 ring-primary" : ""} ${isDropTarget ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105" : ""}`}
                     >
                     <img
                       src={post.image_url!}
