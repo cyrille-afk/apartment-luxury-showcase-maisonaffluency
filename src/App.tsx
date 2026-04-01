@@ -51,6 +51,7 @@ const TradeAuditLog = lazy(() => import("./pages/TradeAuditLog"));
 const TradeClientProfiles = lazy(() => import("./pages/TradeClientProfiles"));
 const TradeAtelierProfile = lazy(() => import("./pages/TradeAtelierProfile"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const NewIn = lazy(() => import("./pages/NewIn"));
 const Journal = lazy(() => import("./pages/Journal"));
 const JournalArticle = lazy(() => import("./pages/JournalArticle"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -152,6 +153,7 @@ const App = () => {
                   
                   
                   <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
+                  <Route path="/new-in" element={<Suspense fallback={null}><NewIn /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
                   <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />
                   <Route path="/spec-sheets/:slug" element={<Suspense fallback={null}><SpecSheetRedirect /></Suspense>} />
