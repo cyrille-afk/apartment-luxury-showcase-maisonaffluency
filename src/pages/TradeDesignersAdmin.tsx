@@ -258,6 +258,20 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
         )}
       </label>
+      {posts.length > 0 && posts.some((p) => !p.image_url) && (
+        <div className="mt-2 mb-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleFetchAll}
+            disabled={fetchingAll}
+            className="text-xs gap-1.5"
+          >
+            {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+            {fetchingAll ? "Fetching…" : `Auto-fetch ${posts.filter((p) => !p.image_url).length} missing image${posts.filter((p) => !p.image_url).length > 1 ? "s" : ""}`}
+          </Button>
+        </div>
+      )}
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex items-start gap-2">
@@ -273,6 +287,14 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
               placeholder="Image URL"
               className="text-xs flex-1"
             />
+            <button
+              onClick={() => extractImageForPost(post.id, post.post_url)}
+              disabled={fetchingIds.has(post.id) || !!post.image_url}
+              className="text-muted-foreground hover:text-primary transition-colors p-1 mt-1 disabled:opacity-30"
+              title="Auto-fetch image"
+            >
+              {fetchingIds.has(post.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+            </button>
             <Input
               value={post.caption || ""}
               onChange={(e) => handleCaptionChange(post.id, e.target.value)}
