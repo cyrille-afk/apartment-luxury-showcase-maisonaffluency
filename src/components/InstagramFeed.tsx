@@ -1,10 +1,9 @@
 import { Instagram } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { DesignerInstagramPost } from "@/hooks/useDesignerInstagramPosts";
 
 const InstagramFeed = () => {
-  const { data: posts = [] } = useQuery<DesignerInstagramPost[]>({
+  const { data: posts = [] } = useQuery({
     queryKey: ["homepage-instagram-feed"],
     staleTime: 1000 * 60 * 10,
     queryFn: async () => {
@@ -16,21 +15,9 @@ const InstagramFeed = () => {
         .eq("designer_id", BRAND_DESIGNER_ID)
         .not("image_url", "is", null)
         .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: false })
-        .limit(60);
+        .limit(6);
       if (error) throw error;
-
-      const latestPostBySortOrder = new Map<number, DesignerInstagramPost>();
-
-      for (const post of (data || []) as DesignerInstagramPost[]) {
-        if (!latestPostBySortOrder.has(post.sort_order)) {
-          latestPostBySortOrder.set(post.sort_order, post);
-        }
-      }
-
-      return Array.from(latestPostBySortOrder.values())
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .slice(0, 6);
+      return data || [];
     },
   });
 
