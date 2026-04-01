@@ -226,6 +226,25 @@ export function useAllDesigners() {
   });
 }
 
+/** Fetch designers marked as "New In", ordered by new_in_order */
+export function useNewInDesigners() {
+  return useQuery({
+    queryKey: ["designers-new-in"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designers")
+        .select("*")
+        .not("new_in_order", "is", null)
+        .order("new_in_order", { ascending: true });
+      if (error) throw error;
+      return (data || []).map((d) => ({
+        ...d,
+        links: (d.links as Designer["links"]) || [],
+      })) as Designer[];
+    },
+  });
+}
+
 /** Fetch related designers (same source or specialty keywords) */
 export function useRelatedDesigners(
   currentSlug: string | undefined,
