@@ -400,7 +400,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
             )}
             <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
             <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
-              {item.logo_url ? (
+              {item.logo_url && item.name !== 'Man of Parts' ? (
                 <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" />
               ) : (
                 <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{item.display_name || item.name}</span>
