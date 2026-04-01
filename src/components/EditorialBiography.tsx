@@ -240,6 +240,7 @@ function VideoBlock({
   const [playing, setPlaying] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const [muteVisible, setMuteVisible] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
@@ -349,8 +350,17 @@ function VideoBlock({
         player.mute();
         setIsMuted(true);
       }
+      // Reset auto-hide timer on interaction
+      setMuteVisible(true);
     } catch {}
   }, []);
+
+  // Auto-hide mute button after 5 seconds of playback
+  useEffect(() => {
+    if (!playing || !muteVisible) return;
+    const timer = setTimeout(() => setMuteVisible(false), 5000);
+    return () => clearTimeout(timer);
+  }, [playing, muteVisible]);
 
   const currentPosterUrl = posterCandidates[posterIndex];
 
@@ -398,18 +408,18 @@ function VideoBlock({
               {playOverlay}
             </button>
           ) : (
-            <>
+            <div className="w-full h-full group/yt relative" onMouseEnter={() => setMuteVisible(true)}>
               <div ref={ytContainerRef} className="w-full h-full" />
-              {/* Unmute/Mute overlay button */}
+              {/* Unmute/Mute overlay button — auto-hides, reappears on hover */}
               <button
                 onClick={toggleMute}
-                className="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all text-[11px] font-body tracking-wide"
+                className={`absolute bottom-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all duration-300 text-[11px] font-body tracking-wide ${muteVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none group-hover/yt:opacity-100 group-hover/yt:translate-y-0 group-hover/yt:pointer-events-auto"}`}
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                 <span className="uppercase">{isMuted ? "Unmute" : "Mute"}</span>
               </button>
-            </>
+            </div>
           )
         ) : embedUrl ? (
           !playing && currentPosterUrl ? (
