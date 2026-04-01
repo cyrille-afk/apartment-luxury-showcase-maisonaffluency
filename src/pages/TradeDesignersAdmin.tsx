@@ -188,6 +188,11 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     await (supabase.from("designer_instagram_posts" as any) as any).update({ caption: caption || null }).eq("id", id);
   };
 
+  const handleImageUrlChange = async (id: string, imageUrl: string) => {
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, image_url: imageUrl || null } : p)));
+    await (supabase.from("designer_instagram_posts" as any) as any).update({ image_url: imageUrl || null }).eq("id", id);
+  };
+
   if (!loaded) return null;
 
   return (
