@@ -13,7 +13,7 @@ const DESIGNER_SLUG = "pierre-bonnefille";
 
 const BIOGRAPHY = `Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of both the École Boulle and the École Nationale Supérieure des Arts Décoratifs in Paris, he has spent more than three decades creating his own materials, mixing pigments with sand and ground rock, sometimes applying gold or silver leaf on top, other times stamping the surface with fabric to leave behind what he calls a 'textile fossil', his signature textures.`;
 
-const HERO_IMAGE = "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg";
+const PORTRAIT_IMAGE = "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -30,64 +30,55 @@ const NewIn = () => {
 
       <Navigation />
 
-      {/* Hero */}
-      <section className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden mt-[96px]">
-        <motion.img
-          src={HERO_IMAGE}
-          alt="Pierre Bonnefille — Workspace"
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ scale: 1.08, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-20 pb-10 md:pb-16">
-          <motion.span
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.3 }}
-            className="inline-block font-body text-[10px] uppercase tracking-[0.35em] text-white/70 mb-3"
+      {/* Portrait + Biography — side by side */}
+      <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-16 md:pb-24 mt-[96px]">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
+          {/* Portrait */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full md:w-[38%] flex-shrink-0"
           >
-            New In
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            <div className="aspect-[4/5] overflow-hidden rounded-sm bg-muted">
+              <img
+                src={PORTRAIT_IMAGE}
+                alt="Pierre Bonnefille in his atelier"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </motion.div>
+
+          {/* Name + Bio + CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.45 }}
-            className="font-brand text-3xl md:text-5xl lg:text-6xl text-white tracking-wide"
+            transition={{ ...transition, delay: 0.2 }}
+            className="flex-1 flex flex-col justify-start"
           >
-            Pierre Bonnefille
-          </motion.h1>
+            <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2">
+              New In
+            </span>
+            <h1 className="font-brand text-3xl md:text-4xl lg:text-5xl text-foreground tracking-wide mb-8">
+              Pierre Bonnefille
+            </h1>
+
+            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left">
+              {BIOGRAPHY}
+            </p>
+
+            <div className="mt-10">
+              <Link
+                to={`/designers/${DESIGNER_SLUG}`}
+                className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+              >
+                View The Full Portrait
+                <span className="w-8 h-px bg-foreground" />
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </motion.div>
         </div>
-      </section>
-
-      {/* Biography + CTA */}
-      <section className="max-w-3xl mx-auto px-6 md:px-12 py-16 md:py-24">
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={transition}
-          className="font-body text-base md:text-lg leading-relaxed text-foreground/85"
-        >
-          {BIOGRAPHY}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ ...transition, delay: 0.15 }}
-          className="mt-10"
-        >
-          <Link
-            to={`/designers/${DESIGNER_SLUG}`}
-            className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] px-7 py-3 rounded-full border border-foreground/20 text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
-          >
-            View The Full Portrait
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </motion.div>
       </section>
 
       {/* Separator */}
