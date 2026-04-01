@@ -391,17 +391,23 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
   return (
     <div className="col-span-2 md:col-span-2">
       <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[11/7]">
-        {(item.hero_image_url || item.image_url) && (
-          <img src={item.hero_image_url || item.image_url} alt={item.name} loading="lazy" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
+        {item.name === 'Apparatus' ? (
+          <div className="absolute inset-0 bg-black" />
+        ) : (
+          <>
+            {(item.hero_image_url || item.image_url) && (
+              <img src={item.hero_image_url || item.image_url} alt={item.name} loading="lazy" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
+            )}
+            <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
+            <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
+              {item.logo_url ? (
+                <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" />
+              ) : (
+                <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{item.display_name || item.name}</span>
+              )}
+            </div>
+          </>
         )}
-        <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
-        <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
-          {item.logo_url ? (
-            <img src={item.logo_url} alt={item.name} className="w-full h-full object-contain" />
-          ) : (
-            <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{item.display_name || item.name}</span>
-          )}
-        </div>
         {instagramLink && (
           <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 font-body text-[9px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
             @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
