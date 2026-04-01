@@ -584,7 +584,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links")
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links, instagram_handle")
         .order("name", { ascending: true });
       if (error) throw error;
       return data as DesignerRow[];
