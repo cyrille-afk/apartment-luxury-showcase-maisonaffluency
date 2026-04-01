@@ -2,9 +2,10 @@ import { lazy, Suspense, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
-import { ArrowRight, FileText, Maximize2 } from "lucide-react";
+import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useDesigner, useDesignerPicks } from "@/hooks/useDesigner";
+import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +33,8 @@ function pickSrcSet(url: string): string {
 const NewIn = () => {
   const { data: designer } = useDesigner(DESIGNER_SLUG);
   const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
+  const igWithImages = instagramPosts.filter((p) => p.image_url).slice(0, 3);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
 
   return (
@@ -93,6 +96,43 @@ const NewIn = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* From the Studio — mini 3-post teaser */}
+      {igWithImages.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 md:px-12 py-8 md:py-10">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="h-px flex-1 bg-foreground/20" />
+            <div className="flex items-center gap-2 shrink-0">
+              <Instagram className="w-4 h-4 text-foreground" />
+              <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">
+                From the Studio
+              </h2>
+            </div>
+            <div className="h-px flex-1 bg-foreground/20" />
+          </div>
+          <div className="grid grid-cols-3 gap-1 md:gap-1.5">
+            {igWithImages.map((post) => (
+              <a
+                key={post.id}
+                href={post.post_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative block aspect-square overflow-hidden bg-muted"
+              >
+                <img
+                  src={post.image_url!}
+                  alt={post.caption || "Pierre Bonnefille — From the Studio"}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Separator */}
       <div className="max-w-7xl mx-auto px-6 md:px-12">
