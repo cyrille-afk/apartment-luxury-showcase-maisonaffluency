@@ -683,6 +683,9 @@ const TradeDesignersAdmin = () => {
                       {/* Heritage Slides */}
                       <HeritageSlideManager designerId={d.id} />
 
+                      {/* Instagram Posts */}
+                      <InstagramPostManager designerId={d.id} />
+
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Switch
