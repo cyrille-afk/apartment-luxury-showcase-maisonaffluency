@@ -104,7 +104,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
   );
 }
 
-/** Inline Curator's Picks manager for each designer */
+/** Inline Curator Picks manager for each designer */
 function CuratorPicksManager({ designerId }: { designerId: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
