@@ -54,12 +54,24 @@ export default function InstagramFeedAdmin() {
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchActive.current) {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      return;
+    }
     e.preventDefault();
     const idx = getIndexFromTouch(e.touches[0]);
     if (idx !== null) setDragOverIndex(idx);
   }, [getIndexFromTouch]);
 
   const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (!touchActive.current) {
+      touchActive.current = false;
+      setDraggingIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    touchActive.current = false;
     const from = dragItem.current;
     const to = dragOverIndex;
     setDraggingIndex(null);
