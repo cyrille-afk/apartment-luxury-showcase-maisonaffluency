@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Instagram, Share2, Plus, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
