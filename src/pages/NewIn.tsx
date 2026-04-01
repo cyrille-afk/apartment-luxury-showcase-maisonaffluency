@@ -83,65 +83,37 @@ const NewIn = () => {
               {BIOGRAPHY}
             </p>
 
-            <div className="mt-8 flex items-end gap-6">
+            <div className="mt-8">
               <Link
                 to={`/designers/${DESIGNER_SLUG}`}
-                className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300 shrink-0"
+                className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
                 View The Full Portrait
                 <span className="w-8 h-px bg-foreground" />
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
-
-              {/* From the Studio — inline mini teaser */}
-              {igWithImages.length > 0 && (
-                <div className="hidden md:flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Instagram className="w-3 h-3 text-muted-foreground" />
-                    <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Studio</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {igWithImages.map((post) => (
-                      <a
-                        key={post.id}
-                        href={post.post_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative block w-12 h-12 overflow-hidden rounded-sm bg-muted"
-                      >
-                        <img
-                          src={post.image_url!}
-                          alt={post.caption || "From the Studio"}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          loading="lazy"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Mobile: small IG thumbnails below CTA */}
+            {/* From the Studio — small thumbnails below CTA */}
             {igWithImages.length > 0 && (
-              <div className="flex md:hidden items-center gap-3 mt-5">
+              <div className="mt-8 flex items-center gap-3">
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <Instagram className="w-3 h-3 text-muted-foreground" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Studio</span>
+                  <Instagram className="w-3.5 h-3.5 text-muted-foreground/60" />
+                  <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60">From the Studio</span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   {igWithImages.map((post) => (
                     <a
                       key={post.id}
                       href={post.post_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative block w-11 h-11 overflow-hidden rounded-sm bg-muted"
+                      className="group relative block w-14 h-14 md:w-16 md:h-16 overflow-hidden rounded-sm bg-muted"
                     >
                       <img
                         src={post.image_url!}
                         alt={post.caption || "From the Studio"}
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                       />
                     </a>
