@@ -40,7 +40,26 @@ const NewIn = () => {
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [ctaPressed, setCtaPressed] = useState(false);
+  const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
+
+  const lightboxItems: PublicLightboxItem[] = useMemo(
+    () =>
+      picks.map((p) => ({
+        id: p.id,
+        title: p.title,
+        subtitle: p.subtitle,
+        image_url: p.image_url,
+        hover_image_url: p.hover_image_url,
+        brand_name: designer?.name ?? "",
+        materials: p.materials,
+        dimensions: p.dimensions,
+        category: p.category,
+        subcategory: (p as any).subcategory ?? null,
+        pdf_url: p.pdf_url,
+      })),
+    [picks, designer?.name]
+  );
 
   return (
     <>
