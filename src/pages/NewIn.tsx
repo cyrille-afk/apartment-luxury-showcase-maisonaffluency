@@ -107,7 +107,7 @@ const NewIn = () => {
                   </div>
                   <div className="h-px flex-1 bg-foreground/15" />
                 </div>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
                   {igWithImages.slice(0, 6).map((post, index) => (
                     <a
                       key={post.id}
