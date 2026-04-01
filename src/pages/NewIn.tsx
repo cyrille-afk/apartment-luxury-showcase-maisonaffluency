@@ -2,9 +2,10 @@ import { lazy, Suspense, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
-import { ArrowRight, FileText, Maximize2 } from "lucide-react";
+import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useDesigner, useDesignerPicks } from "@/hooks/useDesigner";
+import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { cn } from "@/lib/utils";
 
