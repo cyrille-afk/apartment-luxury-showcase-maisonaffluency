@@ -18,68 +18,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     console.log('Extracting image from Instagram URL:', url);
 
-    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: url.trim(),
-        formats: ['html'],
-        onlyMainContent: false,
-        waitFor: 2000,
-      }),
+    // Use Instagram's public oEmbed endpoint — no API key needed
+    const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(url.trim())}`;
+
+    const response = await fetch(oembedUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      console.error('Firecrawl error:', data);
+      console.error('oEmbed failed with status:', response.status);
       return new Response(
-        JSON.stringify({ success: false, error: data.error || 'Scrape failed' }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: `Instagram oEmbed returned ${response.status}. The post may be private or the URL invalid.` }),
+        { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Extract og:image from HTML or metadata
-    const html = data?.data?.html || data?.html || '';
-    const metadata = data?.data?.metadata || data?.metadata || {};
-    
-    let imageUrl = metadata?.ogImage || metadata?.['og:image'] || null;
-
-    if (!imageUrl && html) {
-      // Try to extract og:image from HTML
-      const ogMatch = html.match(/<meta\s+(?:property|name)=["']og:image["']\s+content=["']([^"']+)["']/i)
-        || html.match(/content=["']([^"']+)["']\s+(?:property|name)=["']og:image["']/i);
-      if (ogMatch) {
-        imageUrl = ogMatch[1];
-      }
-    }
-
-    if (!imageUrl && html) {
-      // Fallback: try twitter:image
-      const twMatch = html.match(/<meta\s+(?:property|name)=["']twitter:image["']\s+content=["']([^"']+)["']/i)
-        || html.match(/content=["']([^"']+)["']\s+(?:property|name)=["']twitter:image["']/i);
-      if (twMatch) {
-        imageUrl = twMatch[1];
-      }
-    }
+    const data = await response.json();
+    const imageUrl = data.thumbnail_url;
 
     if (!imageUrl) {
-      console.log('No og:image found in scraped page');
       return new Response(
-        JSON.stringify({ success: false, error: 'Could not extract image from this post. Try pasting the image URL manually.' }),
+        JSON.stringify({ success: false, error: 'No thumbnail found in oEmbed response' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
