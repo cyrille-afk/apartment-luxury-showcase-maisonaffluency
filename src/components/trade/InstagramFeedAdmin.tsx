@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Instagram, RefreshCw, Eye, EyeOff, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { Instagram, RefreshCw, Eye, EyeOff, Trash2, GripVertical } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,8 @@ export default function InstagramFeedAdmin() {
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
