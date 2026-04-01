@@ -104,6 +104,180 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
   );
 }
 
+/** Inline Curator's Picks manager for each designer */
+function CuratorPicksManager({ designerId }: { designerId: string }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  type Pick = {
+    id: string; designer_id: string; image_url: string; hover_image_url: string | null;
+    title: string; subtitle: string | null; category: string | null; subcategory: string | null;
+    materials: string | null; dimensions: string | null; description: string | null;
+    edition: string | null; photo_credit: string | null; pdf_url: string | null;
+    pdf_filename: string | null; currency: string; trade_price_cents: number | null;
+    sort_order: number; created_at: string;
+  };
+  const [picks, setPicks] = useState<Pick[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [expandedPickId, setExpandedPickId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("designer_curator_picks")
+      .select("*")
+      .eq("designer_id", designerId)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        setPicks((data as any[]) || []);
+        setLoaded(true);
+      });
+  }, [designerId]);
+
+  const handleAdd = async () => {
+    const order = picks.length;
+    const { data, error } = await supabase
+      .from("designer_curator_picks")
+      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order } as any)
+      .select()
+      .single();
+    if (error) {
+      toast({ title: "Failed to add pick", description: error.message, variant: "destructive" });
+    } else if (data) {
+      setPicks((prev) => [...prev, data as any]);
+      setExpandedPickId((data as any).id);
+      queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await supabase.from("designer_curator_picks").delete().eq("id", id);
+    setPicks((prev) => prev.filter((p) => p.id !== id));
+    queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+  };
+
+  const updateField = async (id: string, field: string, value: any) => {
+    setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
+    await supabase.from("designer_curator_picks").update({ [field]: value } as any).eq("id", id);
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div>
+      <label className="block text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
+        Curators' Picks ({picks.length})
+      </label>
+      <div className="mt-2 space-y-2">
+        {picks.map((pick) => (
+          <div key={pick.id} className="rounded-md border border-border/60 p-2">
+            <div className="flex items-center gap-2">
+              {pick.image_url && (
+                <img src={pick.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0" />
+              )}
+              <span className="text-xs font-medium flex-1 truncate">{pick.title || "Untitled"}</span>
+              {pick.category && <Badge variant="outline" className="text-[10px]">{pick.category}</Badge>}
+              <button
+                onClick={() => setExpandedPickId(expandedPickId === pick.id ? null : pick.id)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                {expandedPickId === pick.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={() => handleDelete(pick.id)}
+                className="text-muted-foreground hover:text-destructive transition-colors p-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {expandedPickId === pick.id && (
+              <div className="mt-3 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Title</label>
+                    <Input value={pick.title} onChange={(e) => updateField(pick.id, "title", e.target.value)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Subtitle</label>
+                    <Input value={pick.subtitle || ""} onChange={(e) => updateField(pick.id, "subtitle", e.target.value || null)} className="text-xs" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Category</label>
+                    <Input value={pick.category || ""} onChange={(e) => updateField(pick.id, "category", e.target.value || null)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Subcategory</label>
+                    <Input value={pick.subcategory || ""} onChange={(e) => updateField(pick.id, "subcategory", e.target.value || null)} className="text-xs" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Image URL</label>
+                  <Input value={pick.image_url} onChange={(e) => updateField(pick.id, "image_url", e.target.value)} className="text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Hover Image URL</label>
+                  <Input value={pick.hover_image_url || ""} onChange={(e) => updateField(pick.id, "hover_image_url", e.target.value || null)} className="text-xs" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Materials</label>
+                    <Input value={pick.materials || ""} onChange={(e) => updateField(pick.id, "materials", e.target.value || null)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Dimensions</label>
+                    <Input value={pick.dimensions || ""} onChange={(e) => updateField(pick.id, "dimensions", e.target.value || null)} className="text-xs" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Edition</label>
+                    <Input value={pick.edition || ""} onChange={(e) => updateField(pick.id, "edition", e.target.value || null)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Photo Credit</label>
+                    <Input value={pick.photo_credit || ""} onChange={(e) => updateField(pick.id, "photo_credit", e.target.value || null)} className="text-xs" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Currency</label>
+                    <Input value={pick.currency} onChange={(e) => updateField(pick.id, "currency", e.target.value)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Trade Price (cents)</label>
+                    <Input type="number" value={pick.trade_price_cents ?? ""} onChange={(e) => updateField(pick.id, "trade_price_cents", e.target.value ? parseInt(e.target.value) : null)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Sort Order</label>
+                    <Input type="number" value={pick.sort_order} onChange={(e) => updateField(pick.id, "sort_order", parseInt(e.target.value) || 0)} className="text-xs" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Description</label>
+                  <Textarea value={pick.description || ""} onChange={(e) => updateField(pick.id, "description", e.target.value || null)} className="text-xs min-h-[60px]" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">PDF URL</label>
+                    <Input value={pick.pdf_url || ""} onChange={(e) => updateField(pick.id, "pdf_url", e.target.value || null)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">PDF Filename</label>
+                    <Input value={pick.pdf_filename || ""} onChange={(e) => updateField(pick.id, "pdf_filename", e.target.value || null)} className="text-xs" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <Button variant="outline" size="sm" onClick={handleAdd} className="mt-2">
+        <Plus className="w-3.5 h-3.5 mr-1" /> Add Pick
+      </Button>
+    </div>
+  );
+}
+
 /** Inline Instagram post manager for each designer */
 function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: string; instagramUrls?: string[] }) {
   const { toast } = useToast();
@@ -866,8 +1040,10 @@ const TradeDesignersAdmin = () => {
                         }
                       />
 
+                      {/* Curator's Picks */}
+                      <CuratorPicksManager designerId={d.id} />
+
                       <div className="flex items-center gap-3 flex-wrap">
-                        <div className="flex items-center gap-2">
                           <Switch
                             checked={getField(d.id, "is_published") as unknown as boolean}
                             onCheckedChange={(checked) => setField(d.id, "is_published", checked as unknown as string)}
