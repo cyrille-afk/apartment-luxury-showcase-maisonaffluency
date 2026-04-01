@@ -18,6 +18,22 @@ export default function InstagramFeedAdmin() {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
+  const { data: posts = [], refetch } = useQuery({
+    queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
+    enabled: previewOpen,
+    staleTime: 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designer_instagram_posts")
+        .select("*")
+        .eq("designer_id", BRAND_DESIGNER_ID)
+        .not("image_url", "is", null)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const getIndexFromTouch = useCallback((touch: React.Touch) => {
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     if (!el || !gridRef.current) return null;
@@ -66,22 +82,6 @@ export default function InstagramFeedAdmin() {
       }
     })();
   }, [dragOverIndex, posts, refetch, queryClient, toast]);
-
-  const { data: posts = [], refetch } = useQuery({
-    queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
-    enabled: previewOpen,
-    staleTime: 0,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("designer_instagram_posts")
-        .select("*")
-        .eq("designer_id", BRAND_DESIGNER_ID)
-        .not("image_url", "is", null)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return data || [];
-    },
-  });
 
   const handleSync = async () => {
     setSyncing(true);
