@@ -150,6 +150,7 @@ function CuratorPicksManager({ designerId }: { designerId: string }) {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this curator pick? This action cannot be undone.")) return;
     await supabase.from("designer_curator_picks").delete().eq("id", id);
     setPicks((prev) => prev.filter((p) => p.id !== id));
     queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
