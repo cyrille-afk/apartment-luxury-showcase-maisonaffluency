@@ -350,8 +350,17 @@ function VideoBlock({
         player.mute();
         setIsMuted(true);
       }
+      // Reset auto-hide timer on interaction
+      setMuteVisible(true);
     } catch {}
   }, []);
+
+  // Auto-hide mute button after 5 seconds of playback
+  useEffect(() => {
+    if (!playing || !muteVisible) return;
+    const timer = setTimeout(() => setMuteVisible(false), 5000);
+    return () => clearTimeout(timer);
+  }, [playing, muteVisible]);
 
   const currentPosterUrl = posterCandidates[posterIndex];
 
