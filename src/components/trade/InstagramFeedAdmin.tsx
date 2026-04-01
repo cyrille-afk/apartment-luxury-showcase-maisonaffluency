@@ -45,8 +45,12 @@ export default function InstagramFeedAdmin() {
   }, []);
 
   const handleTouchStart = useCallback((index: number) => {
-    dragItem.current = index;
-    setDraggingIndex(index);
+    touchActive.current = false;
+    longPressTimer.current = setTimeout(() => {
+      touchActive.current = true;
+      dragItem.current = index;
+      setDraggingIndex(index);
+    }, 300);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
