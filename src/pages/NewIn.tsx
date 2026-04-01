@@ -102,17 +102,14 @@ const NewIn = () => {
             <div className="mt-8">
               <Link
                 to={`/designers/${DESIGNER_SLUG}?expanded=true`}
-                onPointerDown={() => setCtaPressed(true)}
-                className={cn(
-                  "group inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-all duration-300",
-                  ctaPressed && "translate-x-6"
-                )}
+                className="group inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
-                <span>View The Full Portrait</span>
-                <span className="relative ml-2 h-px w-8 overflow-hidden bg-transparent shrink-0">
-                  <span className="absolute inset-y-0 left-0 w-8 bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-full" />
+                <span className="relative inline-flex items-center gap-3 active:translate-x-3 transition-transform duration-150">
+                  <span className="block h-px w-8 bg-foreground transition-transform duration-500 origin-left group-hover:translate-x-[calc(100%+0.75rem)]" />
+                  <span>View The Full Portrait</span>
+                  <span className="w-8" />
                 </span>
-                <ArrowRight className={cn("h-3.5 w-3.5 shrink-0 transition-opacity duration-200", ctaPressed && "opacity-0")} />
+                <ArrowRight className="ml-3 h-3.5 w-3.5 transition-opacity duration-150 active:opacity-0" />
               </Link>
             </div>
 
