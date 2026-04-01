@@ -546,7 +546,7 @@ const PublicDesignerProfile = () => {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
                   {/* Mobile share icon inside hero */}
-                  <div className="absolute top-3 right-3 z-10 md:hidden">
+                  <div className="absolute top-3 right-3 z-20 md:hidden">
                     <ShareMenu
                       url={designerOgUrl}
                       message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
