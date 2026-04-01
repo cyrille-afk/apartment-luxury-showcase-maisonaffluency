@@ -105,12 +105,18 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 }
 
 /** Inline Instagram post manager for each designer */
-function InstagramPostManager({ designerId }: { designerId: string }) {
+function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: string; instagramUrls?: string[] }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+
+  // Extract handles from Instagram URLs
+  const handles = instagramUrls.map((url) => {
+    const match = url.match(/instagram\.com\/([^/?]+)/);
+    return match ? match[1] : null;
+  }).filter(Boolean) as string[];
 
   useEffect(() => {
     supabase
@@ -158,7 +164,26 @@ function InstagramPostManager({ designerId }: { designerId: string }) {
     <div>
       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
         <Instagram className="w-3.5 h-3.5" />
-        Instagram Posts <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
+        Instagram Posts
+        {handles.length > 0 && (
+          <span className="normal-case font-normal flex items-center gap-1.5 ml-1">
+            —
+            {handles.map((handle, i) => (
+              <a
+                key={handle}
+                href={`https://www.instagram.com/${handle}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-normal"
+              >
+                @{handle}
+              </a>
+            ))}
+          </span>
+        )}
+        {handles.length === 0 && (
+          <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
+        )}
       </label>
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
