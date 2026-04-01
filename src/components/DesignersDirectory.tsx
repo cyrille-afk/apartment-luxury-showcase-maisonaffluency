@@ -403,8 +403,8 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
           )}
         </div>
         {instagramLink && (
-          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-            <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 font-body text-[9px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+            @{instagramLink.replace(/\/+$/, '').split('/').pop()}
           </a>
         )}
         <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all">
