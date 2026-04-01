@@ -39,7 +39,6 @@ function InstagramEmbed({ postUrl }: { postUrl: string }) {
     <div ref={ref} className="instagram-embed-container w-full max-w-[328px] mx-auto">
       <blockquote
         className="instagram-media"
-        data-instgrm-captioned
         data-instgrm-permalink={cleanUrl}
         data-instgrm-version="14"
         style={{
