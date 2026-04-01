@@ -16,6 +16,8 @@ import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
+import DesignerInstagramSection from "@/components/DesignerInstagramSection";
+import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
