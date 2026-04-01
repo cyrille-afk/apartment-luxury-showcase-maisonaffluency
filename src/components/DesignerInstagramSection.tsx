@@ -40,7 +40,7 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
             ? "grid-cols-1 max-w-md mx-auto"
             : postsWithImages.length === 2
             ? "grid-cols-2 max-w-2xl mx-auto"
-            : "grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto"
+            : "grid-cols-2 lg:grid-cols-3 max-w-3xl mx-auto"
         }`}
       >
         {postsWithImages.map((post) => (
