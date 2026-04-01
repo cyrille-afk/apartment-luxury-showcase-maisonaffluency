@@ -108,7 +108,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: string; instagramUrls?: string[] }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number }[]>([]);
+  const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number; image_url: string | null }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const [bulkMode, setBulkMode] = useState(false);
