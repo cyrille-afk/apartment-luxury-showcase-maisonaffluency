@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Play, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { Play, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
