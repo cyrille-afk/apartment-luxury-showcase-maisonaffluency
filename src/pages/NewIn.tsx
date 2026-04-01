@@ -34,8 +34,8 @@ const NewIn = () => {
   const { data: designer } = useDesigner(DESIGNER_SLUG);
   const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
-  const igWithImages = instagramPosts.filter((p) => p.image_url).slice(0, 3);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const igWithImages = instagramPosts.filter((p) => p.image_url);
 
   return (
     <>
@@ -93,37 +93,48 @@ const NewIn = () => {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
-
-            {/* From the Studio — small thumbnails below CTA */}
-            {igWithImages.length > 0 && (
-              <div className="mt-8 flex items-center gap-3">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <Instagram className="w-3.5 h-3.5 text-muted-foreground/60" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60">From the Studio</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {igWithImages.map((post) => (
-                    <a
-                      key={post.id}
-                      href={post.post_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative block w-14 h-14 md:w-16 md:h-16 overflow-hidden rounded-sm bg-muted"
-                    >
-                      <img
-                        src={post.image_url!}
-                        alt={post.caption || "From the Studio"}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </motion.div>
         </div>
       </section>
+
+      {/* From the Studio — full-width row, side by side with hero area */}
+      {igWithImages.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pb-8 md:pb-12">
+          {/* Section header */}
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="h-px flex-1 bg-foreground/20" />
+            <div className="flex items-center gap-2 shrink-0">
+              <Instagram className="w-4 h-4 text-foreground" />
+              <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">
+                From the Studio
+              </h2>
+            </div>
+            <div className="h-px flex-1 bg-foreground/20" />
+          </div>
+          {/* Grid — 3 on mobile, 6 on desktop */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5">
+            {instagramPosts.filter((p) => p.image_url).slice(0, 6).map((post, index) => (
+              <a
+                key={post.id}
+                href={post.post_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
+              >
+                <img
+                  src={post.image_url!}
+                  alt={post.caption || "Pierre Bonnefille — From the Studio"}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Separator */}
       <div className="max-w-7xl mx-auto px-6 md:px-12">
