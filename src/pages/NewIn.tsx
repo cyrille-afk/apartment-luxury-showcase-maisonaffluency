@@ -101,10 +101,11 @@ const NewIn = () => {
             <div className="mt-8">
               <Link
                 to={`/designers/${DESIGNER_SLUG}?expanded=true`}
-                className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+                className="group inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
+                <span className="w-8 h-px bg-foreground group-hover:w-0 transition-all duration-500" />
                 View The Full Portrait
-                <span className="w-8 h-px bg-foreground" />
+                <span className="w-0 h-px bg-foreground group-hover:w-8 transition-all duration-500" />
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
