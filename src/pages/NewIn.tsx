@@ -62,7 +62,7 @@ const NewIn = () => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="w-full md:w-[38%] flex-shrink-0"
           >
-            <div className="aspect-[4/5] overflow-hidden rounded-sm bg-muted">
+            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-sm bg-muted">
               <img
                 src={PORTRAIT_IMAGE}
                 alt="Pierre Bonnefille in his atelier"
