@@ -111,6 +111,8 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   // Extract handles from Instagram URLs
   const handles = instagramUrls.map((url) => {
