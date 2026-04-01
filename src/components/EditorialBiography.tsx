@@ -321,7 +321,7 @@ function VideoBlock({
             </button>
           ) : (
             <iframe
-              src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
+              src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1&mute=1` : `${embedUrl}?autoplay=1&mute=1`) : embedUrl}
               title={caption || `${designerName} — video`}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
