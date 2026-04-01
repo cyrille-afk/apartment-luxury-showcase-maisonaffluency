@@ -435,7 +435,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
-  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
+  const instagramLinks: string[] = (() => {
+    const hardcoded = INSTAGRAM_LINKS[item.slug];
+    if (hardcoded) return [hardcoded];
+    const fromDb = (item.links as any[])?.filter((l: any) => (l.type === "Instagram" || l.type === "instagram") && l.url).map((l: any) => l.url as string) || [];
+    return fromDb;
+  })();
+  const instagramLink = instagramLinks[0];
   const fallbackGalleryIndices = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? [];
   const getPositionalFallbackIndex = (thumbPosition: number) => {
     if (fallbackGalleryIndices.length === 0) return null;
