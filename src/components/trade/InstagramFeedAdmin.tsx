@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instagram, RefreshCw, Eye } from "lucide-react";
+import { Instagram, RefreshCw, Eye, EyeOff, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -24,8 +24,7 @@ export default function InstagramFeedAdmin() {
         .select("*")
         .eq("designer_id", BRAND_DESIGNER_ID)
         .not("image_url", "is", null)
-        .order("sort_order", { ascending: true })
-        .limit(6);
+        .order("sort_order", { ascending: true });
       if (error) throw error;
       return data || [];
     },
@@ -51,6 +50,35 @@ export default function InstagramFeedAdmin() {
     }
   };
 
+  const toggleHidden = async (postId: string, currentlyHidden: boolean) => {
+    const { error } = await supabase
+      .from("designer_instagram_posts")
+      .update({ hidden: !currentlyHidden })
+      .eq("id", postId);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
+  };
+
+  const deletePost = async (postId: string) => {
+    if (!window.confirm("Permanently delete this post? This cannot be undone.")) return;
+    const { error } = await supabase
+      .from("designer_instagram_posts")
+      .delete()
+      .eq("id", postId);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
+  };
+
+  const visibleCount = posts.filter((p: any) => !p.hidden).length;
+
   return (
     <div className="border border-border rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between">
@@ -58,7 +86,7 @@ export default function InstagramFeedAdmin() {
           <Instagram className="h-4 w-4 text-muted-foreground" />
           <div>
             <span className="font-display text-sm text-foreground">Homepage Instagram Feed</span>
-            <p className="font-body text-[10px] text-muted-foreground">@myaffluency · synced posts shown at bottom of homepage</p>
+            <p className="font-body text-[10px] text-muted-foreground">@myaffluency · top 6 visible posts shown on homepage</p>
           </div>
         </div>
         <button
@@ -76,28 +104,59 @@ export default function InstagramFeedAdmin() {
           <ChevronRight className="h-3 w-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
           <Eye className="h-3 w-3 text-muted-foreground" />
           <span className="font-body text-[11px] text-muted-foreground group-hover:text-foreground transition-colors">
-            Preview homepage grid
+            Manage posts ({visibleCount} visible)
           </span>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3">
           {posts.length === 0 ? (
             <p className="font-body text-xs text-muted-foreground text-center py-4">No posts found.</p>
           ) : (
-            <div className="grid grid-cols-6 gap-1">
-              {posts.map((post, i) => (
-                <div key={post.id} className="relative aspect-square overflow-hidden rounded bg-muted group">
-                  <img
-                    src={post.image_url!}
-                    alt={post.caption?.substring(0, 40) || `Post ${i + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 inset-x-0 bg-foreground/70 px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="font-body text-[9px] text-background truncate block">
-                      #{post.sort_order}
-                    </span>
+            <div className="grid grid-cols-6 gap-1.5">
+              {posts.map((post: any, i: number) => {
+                const isHidden = post.hidden;
+                return (
+                  <div
+                    key={post.id}
+                    className={`relative aspect-square overflow-hidden rounded bg-muted group ${isHidden ? "opacity-40" : ""}`}
+                  >
+                    <img
+                      src={post.image_url!}
+                      alt={post.caption?.substring(0, 40) || `Post ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Overlay controls */}
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-colors flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={() => toggleHidden(post.id, isHidden)}
+                        title={isHidden ? "Show on homepage" : "Hide from homepage"}
+                        className="p-1.5 rounded-full bg-background/90 hover:bg-background text-foreground transition-colors"
+                      >
+                        {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => deletePost(post.id)}
+                        title="Delete post"
+                        className="p-1.5 rounded-full bg-background/90 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    {/* Status badge */}
+                    <div className="absolute top-1 right-1">
+                      {isHidden && (
+                        <span className="bg-foreground/70 text-background text-[8px] font-body px-1 py-0.5 rounded uppercase tracking-wider">
+                          Hidden
+                        </span>
+                      )}
+                      {!isHidden && i < 6 && (
+                        <span className="bg-primary/80 text-primary-foreground text-[8px] font-body px-1 py-0.5 rounded">
+                          #{post.sort_order + 1}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CollapsibleContent>
