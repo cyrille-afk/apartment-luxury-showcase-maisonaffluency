@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -113,6 +113,44 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [newUrl, setNewUrl] = useState("");
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkText, setBulkText] = useState("");
+  const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
+  const [fetchingAll, setFetchingAll] = useState(false);
+
+  const extractImageForPost = async (postId: string, postUrl: string): Promise<string | null> => {
+    setFetchingIds((prev) => new Set(prev).add(postId));
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-instagram-image", {
+        body: { url: postUrl },
+      });
+      if (error || !data?.success) {
+        toast({ title: "Could not extract image", description: data?.error || error?.message || "Try pasting the URL manually", variant: "destructive" });
+        return null;
+      }
+      const imageUrl = data.imageUrl as string;
+      setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, image_url: imageUrl } : p)));
+      await (supabase.from("designer_instagram_posts" as any) as any).update({ image_url: imageUrl }).eq("id", postId);
+      return imageUrl;
+    } finally {
+      setFetchingIds((prev) => { const s = new Set(prev); s.delete(postId); return s; });
+    }
+  };
+
+  const handleFetchAll = async () => {
+    const missing = posts.filter((p) => !p.image_url);
+    if (!missing.length) {
+      toast({ title: "All posts already have images" });
+      return;
+    }
+    setFetchingAll(true);
+    let fetched = 0;
+    for (const post of missing) {
+      const result = await extractImageForPost(post.id, post.post_url);
+      if (result) fetched++;
+    }
+    setFetchingAll(false);
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    toast({ title: `Fetched ${fetched} of ${missing.length} images` });
+  };
 
   // Extract handles from Instagram URLs
   const handles = instagramUrls.map((url) => {
@@ -220,6 +258,20 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
         )}
       </label>
+      {posts.length > 0 && posts.some((p) => !p.image_url) && (
+        <div className="mt-2 mb-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleFetchAll}
+            disabled={fetchingAll}
+            className="text-xs gap-1.5"
+          >
+            {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+            {fetchingAll ? "Fetching…" : `Auto-fetch ${posts.filter((p) => !p.image_url).length} missing image${posts.filter((p) => !p.image_url).length > 1 ? "s" : ""}`}
+          </Button>
+        </div>
+      )}
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex items-start gap-2">
@@ -235,6 +287,14 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
               placeholder="Image URL"
               className="text-xs flex-1"
             />
+            <button
+              onClick={() => extractImageForPost(post.id, post.post_url)}
+              disabled={fetchingIds.has(post.id) || !!post.image_url}
+              className="text-muted-foreground hover:text-primary transition-colors p-1 mt-1 disabled:opacity-30"
+              title="Auto-fetch image"
+            >
+              {fetchingIds.has(post.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+            </button>
             <Input
               value={post.caption || ""}
               onChange={(e) => handleCaptionChange(post.id, e.target.value)}
