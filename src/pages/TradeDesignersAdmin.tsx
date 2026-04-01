@@ -149,7 +149,35 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleBulkAdd = async () => {
+    const urls = bulkText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && l.includes("instagram.com"));
+    if (!urls.length) {
+      toast({ title: "No valid URLs found", description: "Paste Instagram post URLs, one per line.", variant: "destructive" });
+      return;
+    }
+    let startOrder = posts.length;
+    const rows = urls.map((url, i) => ({
+      designer_id: designerId,
+      post_url: url,
+      sort_order: startOrder + i,
+    }));
+    const { data, error } = await (supabase.from("designer_instagram_posts" as any) as any)
+      .insert(rows)
+      .select();
+    if (error) {
+      toast({ title: "Bulk import failed", description: error.message, variant: "destructive" });
+    } else if (data) {
+      setPosts((prev) => [...prev, ...(data as any[])]);
+      setBulkText("");
+      setBulkMode(false);
+      queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+      toast({ title: `${(data as any[]).length} posts added` });
+    }
+  };
+
     await (supabase.from("designer_instagram_posts" as any) as any).delete().eq("id", id);
     setPosts((prev) => prev.filter((p) => p.id !== id));
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
