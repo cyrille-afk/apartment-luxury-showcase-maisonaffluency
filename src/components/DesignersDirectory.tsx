@@ -142,7 +142,7 @@ const INSTAGRAM_LINKS: Record<string, string> = {
   "milan-pekar": "https://www.instagram.com/pekarmilan/",
   "nathalie-ziegler": "https://instagram.com/nathaliezieglerpasqua",
   "olivia-cognet": "https://www.instagram.com/olivia_cognet",
-  "pierre-bonnefille": "https://www.instagram.com/pierrebonnefille/",
+  
   "reda-amalou": "https://www.instagram.com/redaamaloudesign/",
   "thierry-lemaire": "https://www.instagram.com/thierrylemaire_/",
   "tristan-auer": "https://www.instagram.com/tristanauer/",
