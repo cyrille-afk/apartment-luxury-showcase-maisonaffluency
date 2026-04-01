@@ -1,7 +1,8 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
