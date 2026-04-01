@@ -148,7 +148,7 @@ const NewIn = () => {
                   <span className="relative z-10">View The Full Portrait</span>
                   <span
                     className={cn(
-                      "pointer-events-none absolute right-10 top-1/2 h-px w-12 -translate-y-1/2 bg-current opacity-100 transition-all duration-300",
+                      "pointer-events-none absolute right-5 top-1/2 h-px w-8 -translate-y-1/2 bg-current opacity-100 transition-all duration-300",
                       "translate-x-0 group-hover:translate-x-6 group-hover:opacity-0",
                       ctaPressed && "translate-x-6 opacity-0"
                     )}
