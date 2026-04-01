@@ -75,7 +75,7 @@ const NewIn = () => {
             <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2">
               New In
             </span>
-            <h1 className="font-brand text-3xl md:text-4xl lg:text-5xl text-foreground tracking-wide mb-8">
+            <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase mb-8">
               Pierre Bonnefille
             </h1>
 
