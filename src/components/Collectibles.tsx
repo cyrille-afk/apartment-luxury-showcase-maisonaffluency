@@ -1165,18 +1165,23 @@ const Collectibles = () => {
                                <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">
                                  {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
                                </p>
-                               {designer.links?.find(l => l.type === "Instagram" && l.url) && (
-                                 <a
-                                   href={designer.links.find(l => l.type === "Instagram")!.url}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   onClick={(e) => e.stopPropagation()}
-                                   className="ml-1 flex-shrink-0 text-white/80 hover:text-white transition-colors"
-                                   aria-label={`${designer.name} on Instagram`}
-                                 >
-                                   <Instagram className="w-4 h-4" />
-                                 </a>
-                               )}
+                                {(() => {
+                                  const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
+                                  if (!igLink?.url) return null;
+                                  const handle = '@' + igLink.url.replace(/\/+$/, '').split('/').pop();
+                                  return (
+                                    <a
+                                      href={igLink.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="ml-1 flex-shrink-0 font-body text-[8px] text-white/50 hover:text-white transition-colors tracking-wide"
+                                      aria-label={`${designer.name} on Instagram`}
+                                    >
+                                      {handle}
+                                    </a>
+                                  );
+                                })()}
                              </div>
                            </div>
                             {/* Share — bottom-left */}
