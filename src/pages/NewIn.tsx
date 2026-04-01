@@ -222,7 +222,7 @@ const NewIn = () => {
           </div>
         </div>
 
-        <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+        <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
           {picks.map((pick) => {
             const hasEdition = !!pick.edition;
             const tags: string[] = (pick as any).tags || [];
