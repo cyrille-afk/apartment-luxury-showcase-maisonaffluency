@@ -660,10 +660,10 @@ const Navigation = () => {
               {/* New In — far left */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground"
+                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-red-600 hover:text-red-700"
               >
                 New In
-                <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 h-0.5 bg-red-600 transition-all duration-300 w-0 group-hover:w-full" />
               </button>
 
               {leftNavItems.map((item, index) => (
