@@ -91,16 +91,6 @@ const NewIn = () => {
                 alt="Pierre Bonnefille in his atelier"
                 className="w-full h-full object-cover"
               />
-              {/* Mobile share overlay on hero */}
-              <div className="absolute top-2 right-2 md:hidden">
-                <ShareMenu
-                  url="https://www.maisonaffluency.com/new-in-og.html"
-                  message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
-                  className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
-                  iconSize="w-4 h-4"
-                  showLabel={false}
-                />
-              </div>
             </div>
           </motion.div>
 
@@ -115,15 +105,13 @@ const NewIn = () => {
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
                 New In
               </span>
-              <div className="hidden md:block">
-                <ShareMenu
-                  url="https://www.maisonaffluency.com/new-in-og.html"
-                  message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
-                  className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
-                  iconSize="w-6 h-6"
-                  showLabel={false}
-                />
-              </div>
+              <ShareMenu
+                url="https://www.maisonaffluency.com/new-in-og.html"
+                message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
+                className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
+                iconSize="w-5 h-5 md:w-6 md:h-6"
+                showLabel={false}
+              />
             </div>
             <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase mb-8">
               Pierre Bonnefille
