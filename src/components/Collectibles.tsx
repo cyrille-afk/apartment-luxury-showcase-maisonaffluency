@@ -1058,18 +1058,23 @@ const Collectibles = () => {
                                    </p>
                                    )}
                                  </div>
-                                 {designer.links?.find(l => l.type === "Instagram" && l.url) && (
-                                   <a
-                                     href={designer.links.find(l => l.type === "Instagram")!.url}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     onClick={(e) => e.stopPropagation()}
-                                     className="ml-2 flex-shrink-0 text-white/80 hover:text-white transition-colors"
-                                     aria-label={`${designer.name} on Instagram`}
-                                   >
-                                     <Instagram className="w-5 h-5" />
-                                   </a>
-                                 )}
+                                  {(() => {
+                                    const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
+                                    if (!igLink?.url) return null;
+                                    const handle = '@' + igLink.url.replace(/\/+$/, '').split('/').pop();
+                                    return (
+                                      <a
+                                        href={igLink.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className={cn("ml-2 flex-shrink-0 font-body text-[9px] text-white/60 hover:text-white transition-colors tracking-wide", designerGridCols === 5 && "hidden")}
+                                        aria-label={`${designer.name} on Instagram`}
+                                      >
+                                        {handle}
+                                      </a>
+                                    );
+                                  })()}
                                </div>
                              </div>
 
