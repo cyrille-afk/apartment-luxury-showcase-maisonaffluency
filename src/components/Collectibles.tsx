@@ -1157,30 +1157,11 @@ const Collectibles = () => {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-2xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
                           )}
-                           {/* Name + IG icon — top overlay */}
+                           {/* Name — top overlay */}
                            <div className="absolute inset-x-0 top-0 px-3 pb-8 pt-2 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-                             <div className="flex items-start justify-between">
-                               <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">
-                                 {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
-                               </p>
-                                {(() => {
-                                  const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
-                                  if (!igLink?.url) return null;
-                                  const handle = '@' + igLink.url.split('?')[0].replace(/\/+$/, '').split('/').pop();
-                                  return (
-                                    <a
-                                      href={igLink.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="ml-1 flex-shrink-0 font-body text-[8px] text-white/50 hover:text-white transition-colors tracking-wide"
-                                      aria-label={`${designer.name} on Instagram`}
-                                    >
-                                      {handle}
-                                    </a>
-                                  );
-                                })()}
-                             </div>
+                             <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">
+                               {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
+                             </p>
                            </div>
                             {/* Share — bottom-left */}
                             <ShareMenu
@@ -1190,11 +1171,28 @@ const Collectibles = () => {
                               iconSize="w-3 h-3"
                               labelSize="text-[8px]"
                             />
-                           {/* Designer portrait — bottom-right */}
-                           <div className="absolute bottom-2 right-2 z-10">
+                           {/* Designer portrait + IG handle — bottom-right */}
+                           <div className="absolute bottom-2 right-2 z-10 flex flex-col items-end gap-1">
                              <div className="w-20 h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
                                <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
                              </div>
+                             {(() => {
+                               const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
+                               if (!igLink?.url) return null;
+                               const handle = '@' + igLink.url.split('?')[0].replace(/\/+$/, '').split('/').pop();
+                               return (
+                                 <a
+                                   href={igLink.url}
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   onClick={(e) => e.stopPropagation()}
+                                   className="font-body text-[7px] text-white/40 hover:text-white transition-colors tracking-wide drop-shadow-sm"
+                                   aria-label={`${designer.name} on Instagram`}
+                                 >
+                                   {handle}
+                                 </a>
+                               );
+                             })()}
                            </div>
                         </div>
                       </button>
