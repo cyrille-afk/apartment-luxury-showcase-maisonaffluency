@@ -5,6 +5,7 @@ export interface DesignerInstagramPost {
   id: string;
   designer_id: string;
   post_url: string;
+  image_url: string | null;
   caption: string | null;
   sort_order: number;
   created_at: string;
