@@ -235,18 +235,40 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             </button>
           </div>
         ))}
-        <div className="flex items-center gap-2">
-          <Input
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            placeholder="https://www.instagram.com/p/..."
-            className="text-xs flex-1"
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
-          />
-          <Button size="sm" variant="outline" onClick={handleAdd} disabled={!newUrl.trim()} className="text-xs h-8">
-            <Plus className="w-3 h-3 mr-1" /> Add
-          </Button>
-        </div>
+        {bulkMode ? (
+          <div className="space-y-2">
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={"Paste Instagram post URLs, one per line:\nhttps://www.instagram.com/p/ABC123/\nhttps://www.instagram.com/p/DEF456/"}
+              className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
+            />
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim()} className="text-xs h-8">
+                <Plus className="w-3 h-3 mr-1" /> Import All
+              </Button>
+              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Input
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder="https://www.instagram.com/p/..."
+              className="text-xs flex-1"
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+            />
+            <Button size="sm" variant="outline" onClick={handleAdd} disabled={!newUrl.trim()} className="text-xs h-8">
+              <Plus className="w-3 h-3 mr-1" /> Add
+            </Button>
+            <button onClick={() => setBulkMode(true)} className="text-xs text-muted-foreground hover:text-primary whitespace-nowrap">
+              Bulk import
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
