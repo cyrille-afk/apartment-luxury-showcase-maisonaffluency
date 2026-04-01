@@ -39,7 +39,6 @@ function InstagramEmbed({ postUrl }: { postUrl: string }) {
     <div ref={ref} className="instagram-embed-container w-full max-w-[328px] mx-auto">
       <blockquote
         className="instagram-media"
-        data-instgrm-captioned
         data-instgrm-permalink={cleanUrl}
         data-instgrm-version="14"
         style={{
@@ -95,14 +94,7 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         }`}
       >
         {posts.map((post) => (
-          <div key={post.id} className="w-full flex flex-col items-center">
-            <InstagramEmbed postUrl={post.post_url} />
-            {post.caption && (
-              <p className="font-body text-[10px] text-muted-foreground/70 text-center mt-2 max-w-[300px] italic">
-                {post.caption}
-              </p>
-            )}
-          </div>
+          <InstagramEmbed key={post.id} postUrl={post.post_url} />
         ))}
       </div>
     </motion.section>
