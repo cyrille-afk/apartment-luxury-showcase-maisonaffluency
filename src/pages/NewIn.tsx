@@ -106,20 +106,20 @@ const NewIn = () => {
                 onClick={() => {
                   if (ctaPressed) return;
                   setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 220);
+                  window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 380);
                 }}
                 className="group inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
-                <span className={cn("relative inline-flex items-center min-w-fit transition-transform duration-200", ctaPressed && "translate-x-3")}>
-                  <span
-                    className={cn(
-                      "absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[calc(100%-2rem)]",
-                      ctaPressed && "translate-x-[calc(100%-2rem)]"
-                    )}
-                  />
-                  <span className="relative z-10 px-12 bg-background">View The Full Portrait</span>
+                <span className={cn("inline-flex items-center transition-transform duration-300", ctaPressed && "translate-x-4")}>
+                  <span className="inline-flex w-8 items-center justify-start overflow-hidden">
+                    <span className={cn("h-px w-8 bg-current transition-all duration-300", ctaPressed ? "translate-x-8 opacity-0" : "translate-x-0 opacity-100")} />
+                  </span>
+                  <span className="mx-3">View The Full Portrait</span>
+                  <span className="inline-flex w-8 items-center justify-start overflow-hidden">
+                    <span className={cn("h-px w-8 bg-current transition-all duration-300", ctaPressed ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0")} />
+                  </span>
                 </span>
-                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-200", ctaPressed && "translate-x-1 opacity-0")} />
+                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-300", ctaPressed && "-translate-x-1 opacity-0")} />
               </button>
             </div>
 
