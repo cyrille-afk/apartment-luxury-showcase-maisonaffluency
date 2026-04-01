@@ -129,18 +129,37 @@ const NewIn = () => {
                   setCtaPressed(true);
                   window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 380);
                 }}
-                className="group inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+                className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
-                <span className={cn("inline-flex items-center transition-transform duration-300", ctaPressed && "translate-x-4")}>
-                  <span className="inline-flex w-8 items-center justify-start overflow-hidden">
-                    <span className="h-px w-8 bg-current transition-all duration-300 translate-x-0 opacity-100 group-hover:translate-x-8 group-hover:opacity-0" />
-                  </span>
-                  <span className="mx-3">View The Full Portrait</span>
-                  <span className="inline-flex w-8 items-center justify-start overflow-hidden">
-                    <span className="h-px w-8 bg-current transition-all duration-300 -translate-x-8 opacity-0 group-hover:translate-x-0 group-hover:opacity-100" />
-                  </span>
+                <span
+                  className={cn(
+                    "relative inline-flex items-center whitespace-nowrap pl-0 pr-14 transition-[padding] duration-300",
+                    "group-hover:pl-20 group-hover:pr-0",
+                    ctaPressed && "pl-20 pr-0"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none absolute left-0 top-1/2 h-px w-12 -translate-y-1/2 bg-current opacity-0 transition-all duration-300",
+                      "translate-x-2 group-hover:translate-x-0 group-hover:opacity-100",
+                      ctaPressed && "translate-x-0 opacity-100"
+                    )}
+                  />
+                  <span className="relative z-10">View The Full Portrait</span>
+                  <span
+                    className={cn(
+                      "pointer-events-none absolute right-10 top-1/2 h-px w-12 -translate-y-1/2 bg-current opacity-100 transition-all duration-300",
+                      "translate-x-0 group-hover:translate-x-6 group-hover:opacity-0",
+                      ctaPressed && "translate-x-6 opacity-0"
+                    )}
+                  />
+                  <ArrowRight
+                    className={cn(
+                      "pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0",
+                      ctaPressed && "-translate-x-1 opacity-0"
+                    )}
+                  />
                 </span>
-                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0", ctaPressed && "-translate-x-1 opacity-0")} />
               </button>
             </div>
 
