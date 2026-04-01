@@ -38,6 +38,11 @@ function cloudinaryFetchUrl(sourceUrl: string): string {
   return `https://res.cloudinary.com/dif1oamtj/image/fetch/f_auto,q_auto:best,c_limit,w_1600,h_1600/${encoded}`;
 }
 
+function cloudinarySquareUrl(sourceUrl: string): string {
+  const encoded = encodeURIComponent(sourceUrl);
+  return `https://res.cloudinary.com/dif1oamtj/image/fetch/w_1080,h_1080,c_fill,g_auto,f_jpg,q_auto:best/${encoded}`;
+}
+
 async function fetchJson(url: string, init?: RequestInit) {
   const response = await fetch(url, init);
   const text = await response.text();
