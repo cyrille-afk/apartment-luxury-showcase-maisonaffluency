@@ -33,14 +33,18 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         <div className="h-px flex-1 bg-foreground/20" />
       </div>
 
-      {/* Clean image grid */}
+      {/* Horizontal image strip — matches Instagram's native grid height */}
       <div
-        className={`grid gap-4 md:gap-6 ${
+        className={`grid gap-2 md:gap-3 ${
           postsWithImages.length === 1
-            ? "grid-cols-1 max-w-md mx-auto"
+            ? "grid-cols-1 max-w-lg mx-auto"
             : postsWithImages.length === 2
-            ? "grid-cols-2 max-w-2xl mx-auto"
-            : "grid-cols-2 lg:grid-cols-3 max-w-3xl mx-auto"
+            ? "grid-cols-2 max-w-4xl mx-auto"
+            : postsWithImages.length <= 3
+            ? `grid-cols-${postsWithImages.length} max-w-5xl mx-auto`
+            : postsWithImages.length <= 5
+            ? `grid-cols-${postsWithImages.length} max-w-6xl mx-auto`
+            : "grid-cols-3 lg:grid-cols-5 max-w-6xl mx-auto"
         }`}
       >
         {postsWithImages.map((post) => (
@@ -49,7 +53,7 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
             href={post.post_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative block aspect-square overflow-hidden bg-muted"
+            className="group relative block aspect-[4/5] overflow-hidden bg-muted rounded-sm"
           >
             <img
               src={post.image_url!}
