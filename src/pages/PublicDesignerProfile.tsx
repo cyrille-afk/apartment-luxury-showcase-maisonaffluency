@@ -44,7 +44,8 @@ function displayName(name: string): string {
 }
 
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
-  const [expanded, setExpanded] = useState(false);
+  const [sp] = useSearchParams();
+  const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
   if (!shouldCollapse) return <>{children}</>;
   return (
     <div className="relative">

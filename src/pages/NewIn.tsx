@@ -85,7 +85,7 @@ const NewIn = () => {
 
             <div className="mt-8">
               <Link
-                to={`/designers/${DESIGNER_SLUG}`}
+                to={`/designers/${DESIGNER_SLUG}?expanded=true`}
                 className="inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
                 View The Full Portrait
