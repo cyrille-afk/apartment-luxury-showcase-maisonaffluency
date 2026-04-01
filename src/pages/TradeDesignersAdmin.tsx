@@ -57,6 +57,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this heritage slide? This action cannot be undone.")) return;
     await (supabase.from("designer_heritage_slides" as any) as any).delete().eq("id", id);
     setSlides((prev) => prev.filter((s) => s.id !== id));
     queryClient.invalidateQueries({ queryKey: ["heritage-slides", designerId] });
@@ -149,6 +150,7 @@ function CuratorPicksManager({ designerId }: { designerId: string }) {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this curator pick? This action cannot be undone.")) return;
     await supabase.from("designer_curator_picks").delete().eq("id", id);
     setPicks((prev) => prev.filter((p) => p.id !== id));
     queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
@@ -403,6 +405,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
   };
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this Instagram post? This action cannot be undone.")) return;
     await (supabase.from("designer_instagram_posts" as any) as any).delete().eq("id", id);
     setPosts((prev) => prev.filter((p) => p.id !== id));
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
