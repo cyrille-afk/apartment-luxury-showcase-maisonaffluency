@@ -456,7 +456,13 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                       <div className="p-3">
                         <h5 className="font-serif text-sm text-foreground leading-tight">{hotspot.product_name}</h5>
                         {hotspot.designer_name && (
-                          <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
+                          <a
+                            href={`/designers/${hotspot.designer_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/designers/${hotspot.designer_name!.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}?expanded=true`); }}
+                            className="text-xs text-muted-foreground font-body mt-0.5 hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer block"
+                          >
+                            {hotspot.designer_name}
+                          </a>
                         )}
                         {/* Edition badge */}
                         {(() => {
