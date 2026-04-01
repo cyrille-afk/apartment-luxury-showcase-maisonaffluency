@@ -19,10 +19,10 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="mt-20 md:mt-28 pt-12 md:pt-16 border-t border-border/40"
+      className="mt-12 md:mt-16 pt-12 md:pt-16 border-t border-border/40"
     >
       {/* Section header */}
-      <div className="flex items-center justify-center gap-3 mb-8 md:mb-10">
+      <div className="flex items-center justify-center gap-3 mb-8 md:mb-10 px-4 md:px-12">
         <div className="h-px flex-1 bg-foreground/20" />
         <div className="flex items-center gap-2 shrink-0">
           <Instagram className="w-4 h-4 text-foreground" />
