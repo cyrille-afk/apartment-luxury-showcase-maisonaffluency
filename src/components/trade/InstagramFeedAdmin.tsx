@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Instagram, RefreshCw, Eye, EyeOff, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { Instagram, RefreshCw, Eye, EyeOff, Trash2, GripVertical } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,8 @@ export default function InstagramFeedAdmin() {
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
@@ -77,6 +79,43 @@ export default function InstagramFeedAdmin() {
     queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
   };
 
+  const handleDragStart = (index: number) => {
+    dragItem.current = index;
+  };
+
+  const handleDragEnter = (index: number) => {
+    dragOverItem.current = index;
+  };
+
+  const handleDrop = async () => {
+    if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) {
+      dragItem.current = null;
+      dragOverItem.current = null;
+      return;
+    }
+    const reordered = [...posts];
+    const [removed] = reordered.splice(dragItem.current, 1);
+    reordered.splice(dragOverItem.current, 0, removed);
+    dragItem.current = null;
+    dragOverItem.current = null;
+
+    // Batch update sort_order
+    const updates = reordered.map((post: any, i: number) => ({ id: post.id, sort_order: i }));
+    try {
+      for (const u of updates) {
+        await supabase
+          .from("designer_instagram_posts")
+          .update({ sort_order: u.sort_order })
+          .eq("id", u.id);
+      }
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
+      toast({ title: "Order updated" });
+    } catch (err: any) {
+      toast({ title: "Reorder failed", description: err.message, variant: "destructive" });
+    }
+  };
+
   const visibleCount = posts.filter((p: any) => !p.hidden).length;
 
   return (
@@ -117,7 +156,12 @@ export default function InstagramFeedAdmin() {
                 return (
                   <div
                     key={post.id}
-                    className={`relative aspect-square overflow-hidden rounded bg-muted group ${isHidden ? "opacity-40" : ""}`}
+                    draggable
+                    onDragStart={() => handleDragStart(i)}
+                    onDragEnter={() => handleDragEnter(i)}
+                    onDragEnd={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing ${isHidden ? "opacity-40" : ""}`}
                   >
                     <img
                       src={post.image_url!}
