@@ -103,9 +103,13 @@ const NewIn = () => {
                 to={`/designers/${DESIGNER_SLUG}?expanded=true`}
                 className="group inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
-                <span className="w-8 h-px bg-foreground group-hover:w-0 transition-all duration-500" />
-                View The Full Portrait
-                <span className="w-0 h-px bg-foreground group-hover:w-8 transition-all duration-500" />
+                <span className="relative inline-flex items-center overflow-visible" style={{ padding: '0 2.5rem' }}>
+                  <span
+                    className="absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[calc(100%+2rem)]"
+                    style={{ transformOrigin: 'left center' }}
+                  />
+                  <span>View The Full Portrait</span>
+                </span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
