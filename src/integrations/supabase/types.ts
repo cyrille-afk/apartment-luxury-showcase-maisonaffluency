@@ -626,6 +626,7 @@ export type Database = {
           caption: string | null
           created_at: string
           designer_id: string
+          hidden: boolean
           id: string
           image_url: string | null
           post_url: string
@@ -635,6 +636,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           designer_id: string
+          hidden?: boolean
           id?: string
           image_url?: string | null
           post_url: string
@@ -644,6 +646,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           designer_id?: string
+          hidden?: boolean
           id?: string
           image_url?: string | null
           post_url?: string
