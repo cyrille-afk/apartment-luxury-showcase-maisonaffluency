@@ -54,7 +54,6 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
               </div>
             </a>
           ))}
-        </div>
       </div>
     </motion.section>
   );
