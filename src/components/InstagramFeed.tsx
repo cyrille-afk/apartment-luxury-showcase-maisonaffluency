@@ -7,9 +7,12 @@ const InstagramFeed = () => {
     queryKey: ["homepage-instagram-feed"],
     staleTime: 1000 * 60 * 10,
     queryFn: async () => {
+      // Maison Affluency brand designer ID for @myaffluency homepage feed
+      const BRAND_DESIGNER_ID = "fc97c782-b149-482e-b362-a9427088d211";
       const { data, error } = await supabase
         .from("designer_instagram_posts")
         .select("*")
+        .eq("designer_id", BRAND_DESIGNER_ID)
         .not("image_url", "is", null)
         .order("sort_order", { ascending: true })
         .limit(6);
