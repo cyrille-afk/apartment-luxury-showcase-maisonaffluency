@@ -439,7 +439,9 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
   return (
     <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-        {item.image_url && item.name !== 'Apparatus' ? (
+        {item.name === 'Apparatus' ? (
+          <div className="w-full h-full bg-black" />
+        ) : item.image_url ? (
           <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
