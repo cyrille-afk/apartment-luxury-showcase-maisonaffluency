@@ -119,6 +119,8 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const needsHostedImage = (imageUrl: string | null) =>
     !imageUrl || /cdninstagram\.com|fbcdn\.net/i.test(imageUrl) || imageUrl.includes("&amp;");
 
+  const hostedImageTargets = posts.filter((p) => needsHostedImage(p.image_url));
+
   const extractImageForPost = async (postId: string, postUrl: string): Promise<string | null> => {
     setFetchingIds((prev) => new Set(prev).add(postId));
     try {
@@ -269,7 +271,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
         )}
       </label>
-      {posts.length > 0 && posts.some((p) => needsHostedImage(p.image_url)) && (
+      {posts.length > 0 && (
         <div className="mt-2 mb-1">
           <Button
             variant="outline"
@@ -281,13 +283,15 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
             {fetchingAll
               ? "Refreshing…"
-              : `Refresh ${posts.filter((p) => needsHostedImage(p.image_url)).length} image${posts.filter((p) => needsHostedImage(p.image_url)).length > 1 ? "s" : ""}`}
+              : hostedImageTargets.length > 0
+                ? `Auto-fetch ${hostedImageTargets.length} image${hostedImageTargets.length > 1 ? "s" : ""}`
+                : `Refresh all ${posts.length} image${posts.length > 1 ? "s" : ""}`}
           </Button>
         </div>
       )}
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
-          <div key={post.id} className="flex items-start gap-2">
+          <div key={post.id} className="flex flex-wrap items-start gap-2 rounded-md border border-border/60 p-2">
             {post.image_url && (
               <img src={post.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0 mt-0.5" />
             )}
@@ -298,21 +302,25 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
               value={post.image_url || ""}
               onChange={(e) => handleImageUrlChange(post.id, e.target.value)}
               placeholder="Image URL"
-              className="text-xs flex-1"
+              className="text-xs min-w-[220px] flex-1"
             />
-            <button
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
               onClick={() => extractImageForPost(post.id, post.post_url)}
               disabled={fetchingIds.has(post.id)}
-              className="text-muted-foreground hover:text-primary transition-colors p-1 mt-1 disabled:opacity-30"
+              className="h-9 shrink-0 gap-1.5 text-xs"
               title={needsHostedImage(post.image_url) ? "Fetch hosted image" : "Refresh hosted image"}
             >
               {fetchingIds.has(post.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
-            </button>
+              {needsHostedImage(post.image_url) ? "Auto-fetch" : "Refresh"}
+            </Button>
             <Input
               value={post.caption || ""}
               onChange={(e) => handleCaptionChange(post.id, e.target.value)}
               placeholder="Caption"
-              className="text-xs w-32"
+              className="text-xs w-32 min-w-[140px]"
             />
             <button
               onClick={() => handleDelete(post.id)}
