@@ -405,6 +405,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
   };
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this Instagram post? This action cannot be undone.")) return;
     await (supabase.from("designer_instagram_posts" as any) as any).delete().eq("id", id);
     setPosts((prev) => prev.filter((p) => p.id !== id));
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
