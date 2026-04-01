@@ -7,11 +7,10 @@ const corsHeaders = {
 };
 
 /**
- * Step 1 – Exchange short-lived token → long-lived token (60 days)
- * Step 2 – Fetch recent media from the Instagram Graph API
- * Step 3 – Upsert into designer_instagram_posts
+ * Sync Instagram posts using the Instagram Business Login API.
+ * Uses graph.instagram.com endpoints (not Facebook Graph API).
  *
- * Body: { designerId: string, igUserId?: string, action?: "exchange_token" | "sync" }
+ * Body: { designerId: string }
  */
 
 Deno.serve(async (req) => {
@@ -25,53 +24,8 @@ Deno.serve(async (req) => {
   );
 
   try {
-    const { designerId, igUserId, action = "sync" } = await req.json();
+    const { designerId } = await req.json();
 
-    // ── Exchange token ──────────────────────────────────────────────
-    if (action === "exchange_token") {
-      const shortToken = Deno.env.get("META_ACCESS_TOKEN");
-      const appId = Deno.env.get("META_APP_ID");
-      const appSecret = Deno.env.get("META_APP_SECRET");
-
-      if (!shortToken || !appId || !appSecret) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Missing Meta credentials in secrets" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      const url = `https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${encodeURIComponent(shortToken)}`;
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data.error) {
-        console.error("Token exchange error:", data.error);
-        return new Response(
-          JSON.stringify({ success: false, error: data.error.message }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      // data.access_token is the long-lived token (60 days)
-      // data.expires_in is seconds (~5184000 for 60 days)
-      const longToken = data.access_token;
-      const expiresIn = data.expires_in;
-
-      console.log(`Token exchanged successfully. Expires in ${Math.round(expiresIn / 86400)} days.`);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          longLivedToken: longToken,
-          expiresInDays: Math.round(expiresIn / 86400),
-          message: "Save this long-lived token as META_ACCESS_TOKEN secret to replace the short-lived one.",
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    // ── Sync Instagram media ────────────────────────────────────────
     if (!designerId) {
       return new Response(
         JSON.stringify({ success: false, error: "designerId is required" }),
@@ -87,52 +41,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // If no igUserId provided, discover it from /me/accounts → IG business account
-    let instagramUserId = igUserId;
-
-    if (!instagramUserId) {
-      // Get pages the user manages
-      const pagesRes = await fetch(
-        `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,instagram_business_account&access_token=${accessToken}`,
-      );
-      const pagesData = await pagesRes.json();
-
-      if (pagesData.error) {
-        return new Response(
-          JSON.stringify({ success: false, error: `Pages API: ${pagesData.error.message}` }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      // Find the first page with an IG business account
-      const pageWithIG = pagesData.data?.find(
-        (p: { instagram_business_account?: { id: string } }) => p.instagram_business_account?.id,
-      );
-
-      if (!pageWithIG) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "No Instagram Business Account found linked to your Facebook Pages.",
-            pages: pagesData.data?.map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })),
-          }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      instagramUserId = pageWithIG.instagram_business_account.id;
-      console.log(`Discovered IG Business Account: ${instagramUserId} from page "${pageWithIG.name}"`);
-    }
-
-    // Fetch recent media
+    // Fetch recent media using Instagram Business Login API
     const mediaRes = await fetch(
-      `https://graph.facebook.com/v21.0/${instagramUserId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=25&access_token=${accessToken}`,
+      `https://graph.instagram.com/v21.0/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=25&access_token=${accessToken}`,
     );
     const mediaData = await mediaRes.json();
 
     if (mediaData.error) {
       return new Response(
-        JSON.stringify({ success: false, error: `Media API: ${mediaData.error.message}` }),
+        JSON.stringify({ success: false, error: `Instagram API: ${mediaData.error.message}` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -166,7 +83,7 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Download and re-host the image to our storage
+      // Download and re-host the image to storage
       const imageUrl = post.media_url || post.thumbnail_url;
       let storedImageUrl: string | null = null;
 
@@ -186,6 +103,8 @@ Deno.serve(async (req) => {
             if (!uploadError) {
               const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
               storedImageUrl = urlData.publicUrl;
+            } else {
+              console.warn(`Upload error for ${postUrl}:`, uploadError.message);
             }
           }
         } catch (err) {
@@ -211,7 +130,6 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        instagramUserId,
         totalFetched: posts.length,
         imagePosts: imagePosts.length,
         inserted,
