@@ -669,9 +669,14 @@ const PublicDesignerProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
+              className="mt-12 md:mt-16 pt-10 md:pt-14 border-t border-border/40"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">Curators' Picks</h2>
+                <div className="flex items-center gap-3">
+                  <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
+                    <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h2>
+                  </div>
+                </div>
                 <button
                   onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
                   className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
