@@ -523,19 +523,12 @@ const PublicDesignerProfile = () => {
               Designers
             </Link>
             <div className="md:hidden">
-              <WhatsAppShareButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sharePageOnWhatsApp(
-                    `/designers/${designer.slug}`,
-                    `${designer.name} — Maison Affluency`,
-                    designer.specialty || undefined,
-                    { directUrlPath: buildDesignerBridgePath("og") }
-                  );
-                }}
-                label="Share"
-                size="sm"
-                variant="solid"
+              <ShareMenu
+                url={designerOgUrl}
+                message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
+                iconSize="w-4 h-4"
+                showLabel={false}
               />
             </div>
           </div>
