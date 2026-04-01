@@ -156,7 +156,12 @@ export default function InstagramFeedAdmin() {
                 return (
                   <div
                     key={post.id}
-                    className={`relative aspect-square overflow-hidden rounded bg-muted group ${isHidden ? "opacity-40" : ""}`}
+                    draggable
+                    onDragStart={() => handleDragStart(i)}
+                    onDragEnter={() => handleDragEnter(i)}
+                    onDragEnd={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing ${isHidden ? "opacity-40" : ""}`}
                   >
                     <img
                       src={post.image_url!}
