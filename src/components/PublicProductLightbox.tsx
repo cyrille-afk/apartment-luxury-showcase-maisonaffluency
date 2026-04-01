@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -87,6 +88,7 @@ function useLocalFavorites() {
 /* ------------------------------------------------------------------ */
 
 const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
@@ -283,9 +285,17 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           {/* Details */}
           <div className="flex-1 p-5 md:p-8 flex flex-col gap-3 md:gap-4 overflow-y-auto">
             <div>
-              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">
+              <button
+                type="button"
+                onClick={() => {
+                  const slug = designerDisplay.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+                  onClose();
+                  navigate(`/designers/${slug}?expanded=true`);
+                }}
+                className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
+              >
                 {designerDisplay}
-              </p>
+              </button>
               <h2 className="font-display text-lg md:text-2xl text-foreground mt-1 leading-tight">
                 {product.subtitle
                   ? `${product.title} ${product.subtitle}`
