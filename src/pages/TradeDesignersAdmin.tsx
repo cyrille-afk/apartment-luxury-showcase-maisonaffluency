@@ -218,14 +218,23 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex items-start gap-2">
-            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline shrink-0 w-40 truncate mt-1.5">
+            {post.image_url && (
+              <img src={post.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0 mt-0.5" />
+            )}
+            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline shrink-0 w-32 truncate mt-1.5">
               {post.post_url.replace(/https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "")}
             </a>
             <Input
+              value={post.image_url || ""}
+              onChange={(e) => handleImageUrlChange(post.id, e.target.value)}
+              placeholder="Image URL"
+              className="text-xs flex-1"
+            />
+            <Input
               value={post.caption || ""}
               onChange={(e) => handleCaptionChange(post.id, e.target.value)}
-              placeholder="Caption (optional)"
-              className="text-xs flex-1"
+              placeholder="Caption"
+              className="text-xs w-32"
             />
             <button
               onClick={() => handleDelete(post.id)}
