@@ -33,31 +33,34 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         <div className="h-px flex-1 bg-foreground/20" />
       </div>
 
-      {/* Horizontal Instagram-style strip — single row, equal height, natural widths */}
-      <div className="flex gap-1 w-full overflow-x-auto scrollbar-hide">
-        {postsWithImages.map((post) => (
-          <a
-            key={post.id}
-            href={post.post_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative shrink-0 h-[280px] md:h-[320px] overflow-hidden bg-muted"
-            style={{ flex: `1 1 0%`, minWidth: 0 }}
-          >
-            <img
-              src={post.image_url!}
-              alt={post.caption || `${designerName} — Instagram`}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-3">
-              <div className="translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                <Instagram className="w-4 h-4 text-background" />
+      {/* Full-width horizontal strip — breaks out of parent padding */}
+      <div className="-mx-4 md:-mx-12">
+        <div className="flex gap-[2px] w-full">
+          {postsWithImages.map((post) => (
+            <a
+              key={post.id}
+              href={post.post_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex-1 min-w-0 overflow-hidden bg-muted"
+            >
+              <div className="aspect-square">
+                <img
+                  src={post.image_url!}
+                  alt={post.caption || `${designerName} — Instagram`}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
               </div>
-            </div>
-          </a>
-        ))}
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-3">
+                <div className="translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                  <Instagram className="w-4 h-4 text-background" />
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
     </motion.section>
   );
