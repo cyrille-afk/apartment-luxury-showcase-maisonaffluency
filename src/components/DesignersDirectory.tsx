@@ -464,12 +464,12 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
           </>
         )}
         {thumbs.length > 0 && (
-          <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1.5">
-            <div className="flex items-end gap-2">
-              <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity mb-1" aria-label={`Share ${displayName}`}>
-                <Share2 className="h-3.5 w-3.5" />
-                <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
-              </button>
+          <>
+            <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
+              <Share2 className="h-3.5 w-3.5" />
+              <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
+            </button>
+            <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1.5">
               <div className="flex flex-col items-center gap-1.5">
                 <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
                 <div className="flex gap-1.5">
@@ -518,13 +518,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
                   })}
                 </div>
               </div>
+              {instagramLink && (
+                <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+                  @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
+                </a>
+              )}
             </div>
-            {instagramLink && (
-              <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
-              </a>
-            )}
-          </div>
+          </>
         )}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Portrait</span>
