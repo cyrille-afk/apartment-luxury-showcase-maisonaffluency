@@ -240,6 +240,7 @@ function VideoBlock({
   const [playing, setPlaying] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const [muteVisible, setMuteVisible] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
