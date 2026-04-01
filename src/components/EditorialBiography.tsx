@@ -239,14 +239,18 @@ function VideoBlock({
   const embedUrl = getEmbedUrl(url);
   const [playing, setPlaying] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const ytPlayerRef = useRef<any>(null);
+  const ytContainerRef = useRef<HTMLDivElement | null>(null);
+  const ytId = extractYouTubeId(url);
+  const isYouTube = !!ytId;
 
   // Extract YouTube thumbnail automatically — try maxres first, then hqdefault
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  const ytThumbnails = ytMatch
+  const ytThumbnails = ytId
     ? [
-        `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`,
-        `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`,
+        `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`,
+        `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
       ]
     : [];
   const thumbnailUrl = ytThumbnails[0] || null;
@@ -280,12 +284,79 @@ function VideoBlock({
     video.play().catch(() => undefined);
   }, [playing, isNativeVideo, videoSrc]);
 
+  // Load YouTube IFrame API script once globally
+  useEffect(() => {
+    if (!isYouTube) return;
+    if (document.getElementById("yt-iframe-api")) return;
+    const tag = document.createElement("script");
+    tag.id = "yt-iframe-api";
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  }, [isYouTube]);
+
+  // Create YT Player when user clicks play
+  useEffect(() => {
+    if (!playing || !isYouTube || !ytContainerRef.current) return;
+    if (ytPlayerRef.current) return;
+
+    const createPlayer = () => {
+      const containerId = `yt-player-${index}-${ytId}`;
+      ytContainerRef.current!.id = containerId;
+      ytPlayerRef.current = new (window as any).YT.Player(containerId, {
+        videoId: ytId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          origin: window.location.origin,
+        },
+        events: {
+          onReady: (event: any) => {
+            event.target.playVideo();
+            setIsMuted(true);
+          },
+        },
+      });
+    };
+
+    if ((window as any).YT?.Player) {
+      createPlayer();
+    } else {
+      const prev = (window as any).onYouTubeIframeAPIReady;
+      (window as any).onYouTubeIframeAPIReady = () => {
+        prev?.();
+        createPlayer();
+      };
+    }
+
+    return () => {
+      try { ytPlayerRef.current?.destroy?.(); } catch {}
+      ytPlayerRef.current = null;
+    };
+  }, [playing, isYouTube, ytId, index]);
+
+  const toggleMute = useCallback(() => {
+    const player = ytPlayerRef.current;
+    if (!player) return;
+    try {
+      if (player.isMuted()) {
+        player.unMute();
+        player.setVolume(100);
+        setIsMuted(false);
+      } else {
+        player.mute();
+        setIsMuted(true);
+      }
+    } catch {}
+  }, []);
+
   const currentPosterUrl = posterCandidates[posterIndex];
 
   const handlePosterError = () => {
     setPosterIndex((prev) => {
       if (prev >= posterCandidates.length - 1) {
-        // All posters failed — force playing state so iframe renders directly
         setPlaying(true);
         return prev;
       }
@@ -310,7 +381,37 @@ function VideoBlock({
       className="my-4 md:my-6 -mx-2 md:-mx-6"
     >
       <div className="aspect-video rounded-xl overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
-        {embedUrl ? (
+        {isYouTube ? (
+          !playing && currentPosterUrl ? (
+            <button
+              onClick={() => setPlaying(true)}
+              className="w-full h-full relative group cursor-pointer"
+              aria-label={`Play ${caption || "video"}`}
+            >
+              <img
+                src={optimizeImageUrl(currentPosterUrl)}
+                alt={caption || `${designerName} — video cover`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={handlePosterError}
+              />
+              {playOverlay}
+            </button>
+          ) : (
+            <>
+              <div ref={ytContainerRef} className="w-full h-full" />
+              {/* Unmute/Mute overlay button */}
+              <button
+                onClick={toggleMute}
+                className="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all text-[11px] font-body tracking-wide"
+                aria-label={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                <span className="uppercase">{isMuted ? "Unmute" : "Mute"}</span>
+              </button>
+            </>
+          )
+        ) : embedUrl ? (
           !playing && currentPosterUrl ? (
             <button
               onClick={() => setPlaying(true)}
