@@ -36,7 +36,7 @@ function InstagramEmbed({ postUrl }: { postUrl: string }) {
   const cleanUrl = postUrl.split("?")[0].replace(/\/$/, "") + "/";
 
   return (
-    <div ref={ref} className="instagram-embed-container w-full max-w-[328px] mx-auto">
+    <div ref={ref} className="instagram-embed-container w-full max-w-[328px] mx-auto overflow-hidden" style={{ maxHeight: "520px" }}>
       <blockquote
         className="instagram-media"
         data-instgrm-permalink={cleanUrl}
