@@ -210,6 +210,7 @@ interface DesignerRow {
   source: string;
   is_published: boolean;
   biography_images: string[];
+  links: Record<string, string> | null;
 }
 
 const TradeDesignersAdmin = () => {
