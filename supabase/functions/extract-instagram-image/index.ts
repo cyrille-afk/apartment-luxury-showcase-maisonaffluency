@@ -19,17 +19,106 @@ const extMap: Record<string, string> = {
 };
 
 const decodeHtmlEntities = (value: string) =>
-  value.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
+  value
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"');
 
-/**
- * Upgrade an Instagram CDN thumbnail URL to the highest available resolution.
- * Instagram CDN URLs often contain `/s640x640/` or similar size segments.
- * Replacing with `/s1080x1080/` often yields the original resolution.
- */
 function upgradeResolution(url: string): string {
-  // Replace size segments like /s150x150/, /s320x320/, /s640x640/ with /s1080x1080/
-  // Keep Instagram's crop coordinates intact so the image matches the grid crop
   return url.replace(/\/s\d+x\d+\//g, "/s1080x1080/");
+}
+
+function normalizeInstagramUrl(url: string): string {
+  return url.trim().split("?")[0].replace(/\/$/, "") + "/";
+}
+
+function cloudinaryFetchUrl(sourceUrl: string): string {
+  const encoded = encodeURIComponent(sourceUrl);
+  return `https://res.cloudinary.com/dif1oamtj/image/fetch/f_auto,q_auto:best,c_limit,w_1600,h_1600/${encoded}`;
+}
+
+async function fetchJson(url: string, init?: RequestInit) {
+  const response = await fetch(url, init);
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status}): ${text.slice(0, 240)}`);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("Upstream response was not valid JSON");
+  }
+}
+
+type InstagramGraphMedia = {
+  id?: string;
+  media_type?: string;
+  media_url?: string;
+  thumbnail_url?: string;
+  children?: { data?: Array<{ media_type?: string; media_url?: string; thumbnail_url?: string }> };
+};
+
+async function resolveMediaUrlViaGraph(cleanUrl: string): Promise<{ url: string; method: string } | null> {
+  const accessToken = Deno.env.get("META_ACCESS_TOKEN");
+  if (!accessToken) return null;
+
+  try {
+    const oembed = await fetchJson(
+      `https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(cleanUrl)}`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          Accept: "application/json",
+        },
+      },
+    );
+
+    const mediaId = typeof oembed?.media_id === "string" ? oembed.media_id : null;
+    if (!mediaId) return null;
+
+    const media = await fetchJson(
+      `https://graph.facebook.com/v23.0/${encodeURIComponent(mediaId)}?fields=id,media_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}&access_token=${encodeURIComponent(accessToken)}`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          Accept: "application/json",
+        },
+      },
+    ) as InstagramGraphMedia;
+
+    if (media.media_type === "CAROUSEL_ALBUM" && media.children?.data?.length) {
+      const preferredChild = media.children.data.find((child) => child.media_type === "IMAGE" && child.media_url) ||
+        media.children.data.find((child) => child.media_url || child.thumbnail_url);
+
+      if (preferredChild?.media_url) {
+        return { url: preferredChild.media_url, method: "graph-carousel" };
+      }
+
+      if (preferredChild?.thumbnail_url) {
+        return { url: preferredChild.thumbnail_url, method: "graph-carousel-thumb" };
+      }
+    }
+
+    if (media.media_type === "VIDEO" && typeof media.thumbnail_url === "string") {
+      return { url: media.thumbnail_url, method: "graph-video-thumb" };
+    }
+
+    if (typeof media.media_url === "string") {
+      return { url: media.media_url, method: "graph-media" };
+    }
+
+    if (typeof media.thumbnail_url === "string") {
+      return { url: media.thumbnail_url, method: "graph-thumb" };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn("Graph media lookup failed:", error);
+    return null;
+  }
 }
 
 async function extractViaOembed(url: string): Promise<string | null> {
@@ -40,7 +129,6 @@ async function extractViaOembed(url: string): Promise<string | null> {
       redirect: "follow",
     });
     if (!response.ok) {
-      // Consume body to prevent leak
       await response.text();
       return null;
     }
@@ -51,9 +139,7 @@ async function extractViaOembed(url: string): Promise<string | null> {
     }
     const data = await response.json();
     if (typeof data?.thumbnail_url === "string") {
-      const raw = decodeHtmlEntities(data.thumbnail_url);
-      // Try to upgrade to 1080px version
-      return upgradeResolution(raw);
+      return upgradeResolution(decodeHtmlEntities(data.thumbnail_url));
     }
     return null;
   } catch {
@@ -79,7 +165,6 @@ async function extractViaHtmlScrape(url: string): Promise<string | null> {
 
     const html = await response.text();
 
-    // Try og:image first (usually highest quality)
     const ogMatch =
       html.match(
         /<meta\s+(?:[^>]*?)property=["']og:image["']\s+content=["']([^"']+)["']/i,
@@ -89,7 +174,6 @@ async function extractViaHtmlScrape(url: string): Promise<string | null> {
       );
     if (ogMatch?.[1]) return upgradeResolution(decodeHtmlEntities(ogMatch[1]));
 
-    // twitter:image fallback
     const twMatch =
       html.match(
         /<meta\s+(?:[^>]*?)name=["']twitter:image["']\s+content=["']([^"']+)["']/i,
@@ -103,15 +187,6 @@ async function extractViaHtmlScrape(url: string): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-/**
- * Use Cloudinary fetch to proxy + transform the image to a 1080x1080 square.
- * This ensures consistent aspect ratio regardless of source crop.
- */
-function cloudinaryFetchUrl(sourceUrl: string): string {
-  const encoded = encodeURIComponent(sourceUrl);
-  return `https://res.cloudinary.com/dif1oamtj/image/fetch/w_1080,h_1080,c_fill,g_auto,f_jpg,q_auto:best/${encoded}`;
 }
 
 async function downloadImage(candidateUrl: string) {
@@ -132,9 +207,7 @@ async function downloadImage(candidateUrl: string) {
     );
   }
 
-  const rawContentType = (
-    imageResponse.headers.get("content-type") || ""
-  ).trim();
+  const rawContentType = (imageResponse.headers.get("content-type") || "").trim();
   const contentType = rawContentType.split(";")[0].trim().toLowerCase();
 
   if (!contentType.startsWith("image/")) {
@@ -182,18 +255,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    const cleanUrl = url.trim().split("?")[0].replace(/\/$/, "") + "/";
+    const cleanUrl = normalizeInstagramUrl(url);
     console.log("Extracting image from:", cleanUrl);
 
-    // Step 1: Extract the raw Instagram image URL via oEmbed or HTML scrape
-    let remoteImageUrl = await extractViaOembed(cleanUrl);
-    const method = remoteImageUrl ? "oembed" : "scrape";
-    if (!remoteImageUrl) {
+    let resolution = await resolveMediaUrlViaGraph(cleanUrl);
+    if (!resolution) {
+      const oembedUrl = await extractViaOembed(cleanUrl);
+      if (oembedUrl) {
+        resolution = { url: oembedUrl, method: "oembed" };
+      }
+    }
+    if (!resolution) {
       console.log("oEmbed failed, trying HTML scrape...");
-      remoteImageUrl = await extractViaHtmlScrape(cleanUrl);
+      const scrapedUrl = await extractViaHtmlScrape(cleanUrl);
+      if (scrapedUrl) {
+        resolution = { url: scrapedUrl, method: "scrape" };
+      }
     }
 
-    if (!remoteImageUrl) {
+    if (!resolution) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -207,16 +287,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    const normalizedRemoteImageUrl = decodeHtmlEntities(remoteImageUrl);
-    console.log(`Extracted via ${method}:`, normalizedRemoteImageUrl.substring(0, 100));
+    const normalizedRemoteImageUrl = decodeHtmlEntities(resolution.url);
+    console.log(`Extracted via ${resolution.method}:`, normalizedRemoteImageUrl.substring(0, 140));
 
-    // Step 2: Try to download the upgraded-resolution image directly first.
-    // If that fails, fall back to Cloudinary fetch proxy for square crop.
     let downloaded;
     try {
       downloaded = await downloadImage(normalizedRemoteImageUrl);
     } catch (directErr) {
-      console.log("Direct download failed, trying Cloudinary fetch proxy...", directErr);
+      console.log("Direct download failed, trying Cloudinary proxy...", directErr);
       const proxied = cloudinaryFetchUrl(normalizedRemoteImageUrl);
       downloaded = await downloadImage(proxied);
     }
@@ -234,12 +312,9 @@ Deno.serve(async (req) => {
 
     if (uploadError) throw uploadError;
 
-    const { data: urlData } = supabase.storage
-      .from("assets")
-      .getPublicUrl(path);
+    const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
     const publicUrl = urlData.publicUrl;
 
-    // Step 3: Update the DB record if postId provided
     if (postId && typeof postId === "string") {
       const { error: updateError } = await supabase
         .from("designer_instagram_posts")
@@ -249,15 +324,13 @@ Deno.serve(async (req) => {
       if (updateError) throw updateError;
     }
 
-    console.log("Success:", publicUrl.substring(0, 80));
-
     return new Response(
       JSON.stringify({
         success: true,
         imageUrl: publicUrl,
         sourceUrl: normalizedRemoteImageUrl,
         storagePath: path,
-        method,
+        method: resolution.method,
       }),
       {
         status: 200,
