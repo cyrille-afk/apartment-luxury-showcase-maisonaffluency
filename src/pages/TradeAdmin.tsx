@@ -166,6 +166,7 @@ function InstagramAuditCard() {
     <div className="max-w-5xl space-y-6">
       {/* Instagram Audit link */}
       <InstagramAuditCard />
+      <InstagramFeedAdmin />
 
       <TaxonomyAudit />
 
