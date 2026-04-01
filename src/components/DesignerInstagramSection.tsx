@@ -34,8 +34,8 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
       </div>
 
       {/* Full-width horizontal strip — breaks out of parent padding */}
-      <div className="-mx-4 md:-mx-12">
-        <div className="flex gap-[2px] w-full">
+      <div className="-mx-4 md:-mx-8 lg:-mx-12">
+        <div className="flex gap-[2px] w-full h-[200px] md:h-[260px] lg:h-[300px]">
           {postsWithImages.map((post) => (
             <a
               key={post.id}
@@ -44,14 +44,12 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
               rel="noopener noreferrer"
               className="group relative flex-1 min-w-0 overflow-hidden bg-muted"
             >
-              <div className="aspect-square">
-                <img
-                  src={post.image_url!}
-                  alt={post.caption || `${designerName} — Instagram`}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
+              <img
+                src={post.image_url!}
+                alt={post.caption || `${designerName} — Instagram`}
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                loading="lazy"
+              />
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-3">
                 <div className="translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
