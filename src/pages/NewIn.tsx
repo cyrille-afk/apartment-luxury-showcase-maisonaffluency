@@ -177,29 +177,49 @@ const NewIn = () => {
               <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h2>
             </div>
           </div>
-          <button
-            onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
-            className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
-            aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-            title={gridCols === 3 ? "Display 4" : "Display 3"}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              {gridCols === 3 ? (
-                <>
-                  <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                  <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                  <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                  <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" opacity={0.35} />
-                </>
-              ) : (
-                <>
-                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                  <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                  <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" opacity={0.35} />
-                </>
-              )}
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Mobile toggle: 1 ↔ 2 columns */}
+            <button
+              onClick={() => setMobileGridCols((prev) => (prev === 1 ? 2 : 1))}
+              className="md:hidden flex items-center p-1.5 rounded transition-all hover:opacity-70"
+              aria-label={`Switch to ${mobileGridCols === 1 ? 2 : 1} column grid`}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                {mobileGridCols === 1 ? (
+                  <>
+                    <rect x="2" y="3" width="9" height="18" rx="1" fill="currentColor" />
+                    <rect x="13" y="3" width="9" height="18" rx="1" fill="currentColor" opacity={0.35} />
+                  </>
+                ) : (
+                  <rect x="4" y="3" width="16" height="18" rx="1" fill="currentColor" />
+                )}
+              </svg>
+            </button>
+            {/* Desktop toggle: 3 ↔ 4 columns */}
+            <button
+              onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
+              className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
+              aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
+              title={gridCols === 3 ? "Display 4" : "Display 3"}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                {gridCols === 3 ? (
+                  <>
+                    <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                    <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                    <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                    <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" opacity={0.35} />
+                  </>
+                ) : (
+                  <>
+                    <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
+                    <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
+                    <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" opacity={0.35} />
+                  </>
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
