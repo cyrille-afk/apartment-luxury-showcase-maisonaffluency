@@ -164,7 +164,7 @@ function CuratorPicksManager({ designerId }: { designerId: string }) {
   return (
     <div>
       <label className="block text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
-        Curators' Picks ({picks.length})
+        Curators&apos; Picks ({picks.length})
       </label>
       <div className="mt-2 space-y-2">
         {picks.map((pick) => (
