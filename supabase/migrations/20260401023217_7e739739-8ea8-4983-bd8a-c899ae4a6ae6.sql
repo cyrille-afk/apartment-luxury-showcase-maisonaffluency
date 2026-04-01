@@ -1,0 +1,1 @@
+ALTER TABLE public.designer_instagram_posts ADD COLUMN image_url TEXT;

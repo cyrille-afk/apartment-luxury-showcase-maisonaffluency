@@ -1,59 +1,7 @@
-import { useEffect, useRef, memo } from "react";
+import { memo } from "react";
 import { Instagram } from "lucide-react";
 import { motion } from "framer-motion";
 import type { DesignerInstagramPost } from "@/hooks/useDesignerInstagramPosts";
-
-declare global {
-  interface Window {
-    instgrm?: { Embeds: { process: () => void } };
-  }
-}
-
-let scriptLoaded = false;
-
-function loadInstagramScript() {
-  if (scriptLoaded) return;
-  scriptLoaded = true;
-  const s = document.createElement("script");
-  s.src = "https://www.instagram.com/embed.js";
-  s.async = true;
-  document.body.appendChild(s);
-}
-
-function InstagramEmbed({ postUrl }: { postUrl: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    loadInstagramScript();
-    // Re-process embeds when the component mounts
-    const timer = setTimeout(() => {
-      window.instgrm?.Embeds.process();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [postUrl]);
-
-  // Extract clean URL (strip query params like ?hl=en)
-  const cleanUrl = postUrl.split("?")[0].replace(/\/$/, "") + "/";
-
-  return (
-    <div ref={ref} className="instagram-embed-container w-full max-w-[328px] mx-auto overflow-hidden" style={{ maxHeight: "520px" }}>
-      <blockquote
-        className="instagram-media"
-        data-instgrm-permalink={cleanUrl}
-        data-instgrm-version="14"
-        style={{
-          background: "transparent",
-          border: 0,
-          margin: "0 auto",
-          maxWidth: "328px",
-          minWidth: "280px",
-          padding: 0,
-          width: "100%",
-        }}
-      />
-    </div>
-  );
-}
 
 interface Props {
   posts: DesignerInstagramPost[];
@@ -61,7 +9,9 @@ interface Props {
 }
 
 const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
-  if (!posts.length) return null;
+  // Only show posts that have an image_url
+  const postsWithImages = posts.filter((p) => p.image_url);
+  if (!postsWithImages.length) return null;
 
   return (
     <motion.section
@@ -83,18 +33,45 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         <div className="h-px flex-1 bg-border/40" />
       </div>
 
-      {/* Embed grid */}
+      {/* Clean image grid */}
       <div
-        className={`grid gap-6 justify-items-center ${
-          posts.length === 1
-            ? "grid-cols-1 max-w-sm mx-auto"
-            : posts.length === 2
-            ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto"
-            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto"
+        className={`grid gap-4 md:gap-6 ${
+          postsWithImages.length === 1
+            ? "grid-cols-1 max-w-md mx-auto"
+            : postsWithImages.length === 2
+            ? "grid-cols-2 max-w-2xl mx-auto"
+            : "grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto"
         }`}
       >
-        {posts.map((post) => (
-          <InstagramEmbed key={post.id} postUrl={post.post_url} />
+        {postsWithImages.map((post) => (
+          <a
+            key={post.id}
+            href={post.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative block aspect-square overflow-hidden bg-muted"
+          >
+            <img
+              src={post.image_url!}
+              alt={post.caption || `${designerName} — Instagram`}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              loading="lazy"
+            />
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-4">
+              <div className="translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                <Instagram className="w-4 h-4 text-background" />
+              </div>
+            </div>
+            {/* Caption */}
+            {post.caption && (
+              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-foreground/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p className="font-body text-[10px] text-background/90 leading-snug line-clamp-2">
+                  {post.caption}
+                </p>
+              </div>
+            )}
+          </a>
         ))}
       </div>
     </motion.section>

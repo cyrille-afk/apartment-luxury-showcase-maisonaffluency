@@ -108,7 +108,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: string; instagramUrls?: string[] }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number }[]>([]);
+  const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number; image_url: string | null }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const [bulkMode, setBulkMode] = useState(false);
@@ -188,6 +188,11 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     await (supabase.from("designer_instagram_posts" as any) as any).update({ caption: caption || null }).eq("id", id);
   };
 
+  const handleImageUrlChange = async (id: string, imageUrl: string) => {
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, image_url: imageUrl || null } : p)));
+    await (supabase.from("designer_instagram_posts" as any) as any).update({ image_url: imageUrl || null }).eq("id", id);
+  };
+
   if (!loaded) return null;
 
   return (
@@ -218,14 +223,23 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex items-start gap-2">
-            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline shrink-0 w-40 truncate mt-1.5">
+            {post.image_url && (
+              <img src={post.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0 mt-0.5" />
+            )}
+            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline shrink-0 w-32 truncate mt-1.5">
               {post.post_url.replace(/https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "")}
             </a>
             <Input
+              value={post.image_url || ""}
+              onChange={(e) => handleImageUrlChange(post.id, e.target.value)}
+              placeholder="Image URL"
+              className="text-xs flex-1"
+            />
+            <Input
               value={post.caption || ""}
               onChange={(e) => handleCaptionChange(post.id, e.target.value)}
-              placeholder="Caption (optional)"
-              className="text-xs flex-1"
+              placeholder="Caption"
+              className="text-xs w-32"
             />
             <button
               onClick={() => handleDelete(post.id)}
