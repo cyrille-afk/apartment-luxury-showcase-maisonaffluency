@@ -104,17 +104,22 @@ const NewIn = () => {
               <button
                 type="button"
                 onClick={() => {
+                  if (ctaPressed) return;
                   setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 160);
+                  window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 380);
                 }}
                 className="group inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
-                <span className={cn("relative inline-flex items-center gap-3 transition-transform duration-150", ctaPressed && "translate-x-3")}>
-                  <span className="block h-px w-8 bg-foreground transition-transform duration-500 origin-left group-hover:translate-x-[calc(100%+0.75rem)]" />
-                  <span>View The Full Portrait</span>
-                  <span className="w-8" />
+                <span className={cn("inline-flex items-center transition-transform duration-300", ctaPressed && "translate-x-4")}>
+                  <span className="inline-flex w-8 items-center justify-start overflow-hidden">
+                    <span className={cn("h-px w-8 bg-current transition-all duration-300", ctaPressed ? "translate-x-8 opacity-0" : "translate-x-0 opacity-100")} />
+                  </span>
+                  <span className="mx-3">View The Full Portrait</span>
+                  <span className="inline-flex w-8 items-center justify-start overflow-hidden">
+                    <span className={cn("h-px w-8 bg-current transition-all duration-300", ctaPressed ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0")} />
+                  </span>
                 </span>
-                {!ctaPressed && <ArrowRight className="ml-3 h-3.5 w-3.5" />}
+                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-300", ctaPressed && "-translate-x-1 opacity-0")} />
               </button>
             </div>
 
