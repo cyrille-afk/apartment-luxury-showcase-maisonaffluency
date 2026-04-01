@@ -34,7 +34,7 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
       </div>
 
       {/* Full-bleed grid — breaks out of parent container to match homepage feed */}
-      <div className="relative w-screen left-1/2 -translate-x-1/2">
+      <div className="relative w-[100vw] left-1/2 -translate-x-1/2 overflow-hidden">
         <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5 w-full">
           {postsWithImages.slice(0, 6).map((post) => (
             <a
