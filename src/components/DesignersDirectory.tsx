@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Instagram, Share2, Plus, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
@@ -330,9 +330,9 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
                       <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                     </div>
                     {igUrl && (
-                      <a href={igUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all">
-                        <Instagram className="h-2.5 w-2.5" />
-                      </a>
+                      <span className="absolute bottom-1.5 left-2 z-10 font-body text-[7px] text-white/50 tracking-wide drop-shadow-sm">
+                        @{igUrl.replace(/\/+$/, '').split('/').pop()}
+                      </span>
                     )}
                   </div>
                   <div className="px-2 py-1.5 bg-background text-center">
@@ -403,8 +403,8 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
           )}
         </div>
         {instagramLink && (
-          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-            <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 font-body text-[9px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+            @{instagramLink.replace(/\/+$/, '').split('/').pop()}
           </a>
         )}
         <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all">
@@ -440,8 +440,8 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
     <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {instagramLink && (
-          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-            <Instagram className="h-5 w-5 md:h-6 md:w-6 text-white drop-shadow-md" />
+          <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 font-body text-[10px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-md" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+            @{instagramLink.replace(/\/+$/, '').split('/').pop()}
           </a>
         )}
         {item.image_url ? (
