@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/fetch/w_800,c_fill,g_auto,q_auto,f_auto/https://encrypted-tbn0.gstatic.com/images%3Fq%3Dtbn%3AANd9GcSmicVmcd8vGzPS_Ifm48JUYDsF8fSeJBYf-w%26s' WHERE slug = 'yabu-pushelberg-man-of-parts';
