@@ -1040,7 +1040,10 @@ const TradeDesignersAdmin = () => {
                         }
                       />
 
-                      <div className="flex items-center gap-3 flex-wrap">
+                      {/* Curator's Picks */}
+                      <CuratorPicksManager designerId={d.id} />
+
+
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={getField(d.id, "is_published") as unknown as boolean}
