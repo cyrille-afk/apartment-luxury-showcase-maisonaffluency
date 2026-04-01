@@ -32,10 +32,12 @@ function pickSrcSet(url: string): string {
 }
 
 const NewIn = () => {
+  const navigate = useNavigate();
   const { data: designer } = useDesigner(DESIGNER_SLUG);
   const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [ctaPressed, setCtaPressed] = useState(false);
   const igWithImages = instagramPosts.filter((p) => p.image_url);
 
   return (
