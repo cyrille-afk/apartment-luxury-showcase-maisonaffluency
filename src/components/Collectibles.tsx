@@ -1045,36 +1045,17 @@ const Collectibles = () => {
                               <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-3xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
                             )}
 
-                             {/* Name + IG icon — top overlay */}
+                             {/* Name — top overlay */}
                              <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-                               <div className="flex items-start justify-between">
-                                 <div className="flex-1 min-w-0">
-                                   <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                                     {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
-                                   </p>
-                                   {designer.founder && (
-                                   <p className={cn("font-body text-[9px] md:text-[10px] text-white/60 tracking-wider mt-0.5 drop-shadow-sm", designerGridCols === 5 && "hidden")}>
-                                     {designer.founder}
-                                   </p>
-                                   )}
-                                 </div>
-                                  {(() => {
-                                    const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
-                                    if (!igLink?.url) return null;
-                                    const handle = '@' + igLink.url.split('?')[0].replace(/\/+$/, '').split('/').pop();
-                                    return (
-                                      <a
-                                        href={igLink.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        onClick={(e) => e.stopPropagation()}
-                                        className={cn("ml-2 flex-shrink-0 font-body text-[9px] text-white/60 hover:text-white transition-colors tracking-wide", designerGridCols === 5 && "hidden")}
-                                        aria-label={`${designer.name} on Instagram`}
-                                      >
-                                        {handle}
-                                      </a>
-                                    );
-                                  })()}
+                               <div className="flex-1 min-w-0">
+                                 <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                                   {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
+                                 </p>
+                                 {designer.founder && (
+                                 <p className={cn("font-body text-[9px] md:text-[10px] text-white/60 tracking-wider mt-0.5 drop-shadow-sm", designerGridCols === 5 && "hidden")}>
+                                   {designer.founder}
+                                 </p>
+                                 )}
                                </div>
                              </div>
 
@@ -1087,11 +1068,28 @@ const Collectibles = () => {
                                 labelSize="text-[9px]"
                               />
 
-                             {/* Designer portrait thumbnail — bottom-right */}
-                             <div className="absolute bottom-3 right-3 z-10">
+                             {/* Designer portrait thumbnail + IG handle — bottom-right */}
+                             <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1">
                                <div className="w-24 h-24 md:w-28 md:h-28 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
                                  <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
                                </div>
+                               {(() => {
+                                 const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
+                                 if (!igLink?.url) return null;
+                                 const handle = '@' + igLink.url.split('?')[0].replace(/\/+$/, '').split('/').pop();
+                                 return (
+                                   <a
+                                     href={igLink.url}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     onClick={(e) => e.stopPropagation()}
+                                     className={cn("font-body text-[8px] text-white/40 hover:text-white transition-colors tracking-wide drop-shadow-sm", designerGridCols === 5 && "hidden")}
+                                     aria-label={`${designer.name} on Instagram`}
+                                   >
+                                     {handle}
+                                   </a>
+                                 );
+                               })()}
                              </div>
 
                              {/* Hover overlay */}
