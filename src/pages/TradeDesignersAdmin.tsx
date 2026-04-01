@@ -104,7 +104,98 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
   );
 }
 
-interface DesignerRow {
+/** Inline Instagram post manager for each designer */
+function InstagramPostManager({ designerId }: { designerId: string }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number }[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [newUrl, setNewUrl] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("designer_instagram_posts" as any)
+      .select("*")
+      .eq("designer_id", designerId)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        setPosts((data as any[]) || []);
+        setLoaded(true);
+      });
+  }, [designerId]);
+
+  const handleAdd = async () => {
+    const url = newUrl.trim();
+    if (!url) return;
+    const order = posts.length;
+    const { data, error } = await (supabase.from("designer_instagram_posts" as any) as any)
+      .insert({ designer_id: designerId, post_url: url, sort_order: order })
+      .select()
+      .single();
+    if (error) {
+      toast({ title: "Failed to add", description: error.message, variant: "destructive" });
+    } else if (data) {
+      setPosts((prev) => [...prev, data as any]);
+      setNewUrl("");
+      queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await (supabase.from("designer_instagram_posts" as any) as any).delete().eq("id", id);
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+  };
+
+  const handleCaptionChange = async (id: string, caption: string) => {
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, caption: caption || null } : p)));
+    await (supabase.from("designer_instagram_posts" as any) as any).update({ caption: caption || null }).eq("id", id);
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div>
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+        <Instagram className="w-3.5 h-3.5" />
+        Instagram Posts <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
+      </label>
+      <div className="mt-2 space-y-2">
+        {posts.map((post) => (
+          <div key={post.id} className="flex items-start gap-2">
+            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline shrink-0 w-40 truncate mt-1.5">
+              {post.post_url.replace(/https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "")}
+            </a>
+            <Input
+              value={post.caption || ""}
+              onChange={(e) => handleCaptionChange(post.id, e.target.value)}
+              placeholder="Caption (optional)"
+              className="text-xs flex-1"
+            />
+            <button
+              onClick={() => handleDelete(post.id)}
+              className="text-muted-foreground hover:text-destructive transition-colors p-1 mt-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+        <div className="flex items-center gap-2">
+          <Input
+            value={newUrl}
+            onChange={(e) => setNewUrl(e.target.value)}
+            placeholder="https://www.instagram.com/p/..."
+            className="text-xs flex-1"
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+          />
+          <Button size="sm" variant="outline" onClick={handleAdd} disabled={!newUrl.trim()} className="text-xs h-8">
+            <Plus className="w-3 h-3 mr-1" /> Add
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
   id: string;
   slug: string;
   name: string;
