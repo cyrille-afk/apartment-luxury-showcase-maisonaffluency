@@ -376,6 +376,8 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
   };
 
+  const [bulkImporting, setBulkImporting] = useState(false);
+
   const handleBulkAdd = async () => {
     const urls = bulkText
       .split("\n")
@@ -385,6 +387,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       toast({ title: "No valid URLs found", description: "Paste Instagram post URLs, one per line.", variant: "destructive" });
       return;
     }
+    setBulkImporting(true);
     let startOrder = posts.length;
     const rows = urls.map((url, i) => ({
       designer_id: designerId,
@@ -396,13 +399,29 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       .select();
     if (error) {
       toast({ title: "Bulk import failed", description: error.message, variant: "destructive" });
-    } else if (data) {
-      setPosts((prev) => [...prev, ...(data as any[])]);
-      setBulkText("");
-      setBulkMode(false);
-      queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
-      toast({ title: `${(data as any[]).length} posts added` });
+      setBulkImporting(false);
+      return;
     }
+    if (!data) {
+      setBulkImporting(false);
+      return;
+    }
+    const newPosts = data as any[];
+    setPosts((prev) => [...prev, ...newPosts]);
+    setBulkText("");
+    setBulkMode(false);
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    toast({ title: `${newPosts.length} posts added — auto-fetching images…` });
+
+    // Immediately auto-fetch images for all new posts
+    let fetched = 0;
+    for (const post of newPosts) {
+      const result = await extractImageForPost(post.id, post.post_url);
+      if (result) fetched++;
+    }
+    setBulkImporting(false);
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    toast({ title: `Fetched ${fetched} of ${newPosts.length} images` });
   };
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this Instagram post? This action cannot be undone.")) return;
