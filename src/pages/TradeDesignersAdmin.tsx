@@ -116,40 +116,51 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
   const [fetchingAll, setFetchingAll] = useState(false);
 
+  const needsHostedImage = (imageUrl: string | null) =>
+    !imageUrl || /cdninstagram\.com|fbcdn\.net/i.test(imageUrl) || imageUrl.includes("&amp;");
+
   const extractImageForPost = async (postId: string, postUrl: string): Promise<string | null> => {
     setFetchingIds((prev) => new Set(prev).add(postId));
     try {
       const { data, error } = await supabase.functions.invoke("extract-instagram-image", {
-        body: { url: postUrl },
+        body: { url: postUrl, postId },
       });
       if (error || !data?.success) {
-        toast({ title: "Could not extract image", description: data?.error || error?.message || "Try pasting the URL manually", variant: "destructive" });
+        toast({
+          title: "Could not extract image",
+          description: data?.error || error?.message || "Try pasting the URL manually",
+          variant: "destructive",
+        });
         return null;
       }
       const imageUrl = data.imageUrl as string;
       setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, image_url: imageUrl } : p)));
-      await (supabase.from("designer_instagram_posts" as any) as any).update({ image_url: imageUrl }).eq("id", postId);
+      queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
       return imageUrl;
     } finally {
-      setFetchingIds((prev) => { const s = new Set(prev); s.delete(postId); return s; });
+      setFetchingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(postId);
+        return next;
+      });
     }
   };
 
   const handleFetchAll = async () => {
-    const missing = posts.filter((p) => !p.image_url);
-    if (!missing.length) {
-      toast({ title: "All posts already have images" });
+    const targets = posts.filter((p) => needsHostedImage(p.image_url));
+    if (!targets.length) {
+      toast({ title: "All posts already use hosted images" });
       return;
     }
     setFetchingAll(true);
     let fetched = 0;
-    for (const post of missing) {
+    for (const post of targets) {
       const result = await extractImageForPost(post.id, post.post_url);
       if (result) fetched++;
     }
     setFetchingAll(false);
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
-    toast({ title: `Fetched ${fetched} of ${missing.length} images` });
+    toast({ title: `Refreshed ${fetched} of ${targets.length} images` });
   };
 
   // Extract handles from Instagram URLs
@@ -241,7 +252,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
         {handles.length > 0 && (
           <span className="normal-case font-normal flex items-center gap-1.5 ml-1">
             —
-            {handles.map((handle, i) => (
+            {handles.map((handle) => (
               <a
                 key={handle}
                 href={`https://www.instagram.com/${handle}/`}
@@ -258,7 +269,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           <span className="normal-case font-normal">(curated posts displayed on the designer profile)</span>
         )}
       </label>
-      {posts.length > 0 && posts.some((p) => !p.image_url) && (
+      {posts.length > 0 && posts.some((p) => needsHostedImage(p.image_url)) && (
         <div className="mt-2 mb-1">
           <Button
             variant="outline"
@@ -268,7 +279,9 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             className="text-xs gap-1.5"
           >
             {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
-            {fetchingAll ? "Fetching…" : `Auto-fetch ${posts.filter((p) => !p.image_url).length} missing image${posts.filter((p) => !p.image_url).length > 1 ? "s" : ""}`}
+            {fetchingAll
+              ? "Refreshing…"
+              : `Refresh ${posts.filter((p) => needsHostedImage(p.image_url)).length} image${posts.filter((p) => needsHostedImage(p.image_url)).length > 1 ? "s" : ""}`}
           </Button>
         </div>
       )}
@@ -289,9 +302,9 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             />
             <button
               onClick={() => extractImageForPost(post.id, post.post_url)}
-              disabled={fetchingIds.has(post.id) || !!post.image_url}
+              disabled={fetchingIds.has(post.id)}
               className="text-muted-foreground hover:text-primary transition-colors p-1 mt-1 disabled:opacity-30"
-              title="Auto-fetch image"
+              title={needsHostedImage(post.image_url) ? "Fetch hosted image" : "Refresh hosted image"}
             >
               {fetchingIds.has(post.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
             </button>
