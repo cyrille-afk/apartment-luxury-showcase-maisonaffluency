@@ -662,6 +662,8 @@ const PublicDesignerProfile = () => {
             </div>
           )}
 
+          <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+
           {picks.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -851,8 +853,6 @@ const PublicDesignerProfile = () => {
           )}
 
         </div>
-
-        <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
 
         <div className="text-center py-8">
           <p className="font-body text-sm text-muted-foreground mb-4">Interested in pieces from this collection?</p>
