@@ -33,34 +33,27 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         <div className="h-px flex-1 bg-foreground/20" />
       </div>
 
-      {/* Full-width horizontal strip — breaks out of any parent max-width/padding */}
-      <div
-        className="relative left-1/2 -translate-x-1/2 w-screen"
-      >
-        <div className="flex gap-[2px] w-full h-[200px] md:h-[260px] lg:h-[300px]">
-          {postsWithImages.map((post) => (
-            <a
-              key={post.id}
-              href={post.post_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative flex-1 min-w-0 overflow-hidden bg-muted"
-            >
-              <img
-                src={post.image_url!}
-                alt={post.caption || `${designerName} — Instagram`}
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                loading="lazy"
-              />
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-3">
-                <div className="translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  <Instagram className="w-4 h-4 text-background" />
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
+      {/* Grid — matches homepage Instagram feed layout */}
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5">
+        {postsWithImages.map((post) => (
+          <a
+            key={post.id}
+            href={post.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative aspect-square overflow-hidden bg-muted"
+          >
+            <img
+              src={post.image_url!}
+              alt={post.caption || `${designerName} — Instagram`}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+              <Instagram className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+          </a>
+        ))}
       </div>
     </motion.section>
   );
