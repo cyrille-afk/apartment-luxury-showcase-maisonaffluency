@@ -35,13 +35,13 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
 
       {/* Grid — matches homepage Instagram feed layout */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5 px-4 md:px-12 lg:px-20">
-          {postsWithImages.slice(0, 6).map((post) => (
+          {postsWithImages.slice(0, 6).map((post, index) => (
             <a
               key={post.id}
               href={post.post_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative block aspect-square overflow-hidden bg-muted"
+              className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
             >
               <img
                 src={post.image_url!}
