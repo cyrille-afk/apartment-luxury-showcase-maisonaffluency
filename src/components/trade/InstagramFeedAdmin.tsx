@@ -14,7 +14,8 @@ export default function InstagramFeedAdmin() {
   const [syncing, setSyncing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const dragItem = useRef<number | null>(null);
-  const dragOverItem = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
@@ -81,23 +82,26 @@ export default function InstagramFeedAdmin() {
 
   const handleDragStart = (index: number) => {
     dragItem.current = index;
+    setDraggingIndex(index);
   };
 
   const handleDragEnter = (index: number) => {
-    dragOverItem.current = index;
+    setDragOverIndex(index);
   };
 
   const handleDrop = async () => {
-    if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) {
+    const from = dragItem.current;
+    const to = dragOverIndex;
+    setDraggingIndex(null);
+    setDragOverIndex(null);
+    if (from === null || to === null || from === to) {
       dragItem.current = null;
-      dragOverItem.current = null;
       return;
     }
     const reordered = [...posts];
-    const [removed] = reordered.splice(dragItem.current, 1);
-    reordered.splice(dragOverItem.current, 0, removed);
+    const [removed] = reordered.splice(from, 1);
+    reordered.splice(to, 0, removed);
     dragItem.current = null;
-    dragOverItem.current = null;
 
     // Batch update sort_order
     const updates = reordered.map((post: any, i: number) => ({ id: post.id, sort_order: i }));
@@ -153,16 +157,18 @@ export default function InstagramFeedAdmin() {
             <div className="grid grid-cols-6 gap-1.5">
               {posts.map((post: any, i: number) => {
                 const isHidden = post.hidden;
-                return (
-                  <div
-                    key={post.id}
-                    draggable
-                    onDragStart={() => handleDragStart(i)}
-                    onDragEnter={() => handleDragEnter(i)}
-                    onDragEnd={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing ${isHidden ? "opacity-40" : ""}`}
-                  >
+                  const isDragging = draggingIndex === i;
+                  const isDropTarget = dragOverIndex === i && draggingIndex !== null && draggingIndex !== i;
+                  return (
+                    <div
+                      key={post.id}
+                      draggable
+                      onDragStart={() => handleDragStart(i)}
+                      onDragEnter={() => handleDragEnter(i)}
+                      onDragEnd={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                      className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing transition-all duration-150 ${isHidden ? "opacity-40" : ""} ${isDragging ? "opacity-30 scale-95 ring-2 ring-primary" : ""} ${isDropTarget ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105" : ""}`}
+                    >
                     <img
                       src={post.image_url!}
                       alt={post.caption?.substring(0, 40) || `Post ${i + 1}`}
