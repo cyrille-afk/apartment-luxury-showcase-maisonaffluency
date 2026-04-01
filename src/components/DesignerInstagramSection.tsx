@@ -33,27 +33,16 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         <div className="h-px flex-1 bg-foreground/20" />
       </div>
 
-      {/* Horizontal image strip — matches Instagram's native grid height */}
-      <div
-        className={`grid gap-2 md:gap-3 ${
-          postsWithImages.length === 1
-            ? "grid-cols-1 max-w-lg mx-auto"
-            : postsWithImages.length === 2
-            ? "grid-cols-2 max-w-4xl mx-auto"
-            : postsWithImages.length <= 3
-            ? `grid-cols-${postsWithImages.length} max-w-5xl mx-auto`
-            : postsWithImages.length <= 5
-            ? `grid-cols-${postsWithImages.length} max-w-6xl mx-auto`
-            : "grid-cols-3 lg:grid-cols-5 max-w-6xl mx-auto"
-        }`}
-      >
+      {/* Horizontal Instagram-style strip — single row, equal height, natural widths */}
+      <div className="flex gap-1 w-full overflow-x-auto scrollbar-hide">
         {postsWithImages.map((post) => (
           <a
             key={post.id}
             href={post.post_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative block aspect-[4/5] overflow-hidden bg-muted rounded-sm"
+            className="group relative shrink-0 h-[280px] md:h-[320px] overflow-hidden bg-muted"
+            style={{ flex: `1 1 0%`, minWidth: 0 }}
           >
             <img
               src={post.image_url!}
@@ -62,19 +51,11 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
               loading="lazy"
             />
             {/* Hover overlay */}
-            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-4">
+            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-end justify-start p-3">
               <div className="translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                 <Instagram className="w-4 h-4 text-background" />
               </div>
             </div>
-            {/* Caption */}
-            {post.caption && (
-              <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-foreground/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p className="font-body text-[10px] text-background/90 leading-snug line-clamp-2">
-                  {post.caption}
-                </p>
-              </div>
-            )}
           </a>
         ))}
       </div>
