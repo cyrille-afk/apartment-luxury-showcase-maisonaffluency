@@ -662,6 +662,8 @@ const PublicDesignerProfile = () => {
             </div>
           )}
 
+          <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+
           {picks.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
