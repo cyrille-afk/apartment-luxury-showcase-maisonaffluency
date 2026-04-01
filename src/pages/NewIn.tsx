@@ -34,7 +34,7 @@ const NewIn = () => {
   const { data: designer } = useDesigner(DESIGNER_SLUG);
   const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
-  const igWithImages = instagramPosts.filter((p) => p.image_url).slice(0, 3);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
 
   return (
