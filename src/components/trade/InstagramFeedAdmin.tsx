@@ -157,16 +157,18 @@ export default function InstagramFeedAdmin() {
             <div className="grid grid-cols-6 gap-1.5">
               {posts.map((post: any, i: number) => {
                 const isHidden = post.hidden;
-                return (
-                  <div
-                    key={post.id}
-                    draggable
-                    onDragStart={() => handleDragStart(i)}
-                    onDragEnter={() => handleDragEnter(i)}
-                    onDragEnd={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing ${isHidden ? "opacity-40" : ""}`}
-                  >
+                  const isDragging = draggingIndex === i;
+                  const isDropTarget = dragOverIndex === i && draggingIndex !== null && draggingIndex !== i;
+                  return (
+                    <div
+                      key={post.id}
+                      draggable
+                      onDragStart={() => handleDragStart(i)}
+                      onDragEnter={() => handleDragEnter(i)}
+                      onDragEnd={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                      className={`relative aspect-square overflow-hidden rounded bg-muted group cursor-grab active:cursor-grabbing transition-all duration-150 ${isHidden ? "opacity-40" : ""} ${isDragging ? "opacity-30 scale-95 ring-2 ring-primary" : ""} ${isDropTarget ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105" : ""}`}
+                    >
                     <img
                       src={post.image_url!}
                       alt={post.caption?.substring(0, 40) || `Post ${i + 1}`}
