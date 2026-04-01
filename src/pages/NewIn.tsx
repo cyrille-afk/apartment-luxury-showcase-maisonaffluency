@@ -140,7 +140,7 @@ const NewIn = () => {
       </div>
 
       {/* Curators' Picks */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 pt-8 md:pt-12 pb-16 md:pb-24">
+      <section className="max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-16 md:pb-24">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
