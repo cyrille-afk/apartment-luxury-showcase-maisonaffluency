@@ -88,6 +88,7 @@ function useLocalFavorites() {
 /* ------------------------------------------------------------------ */
 
 const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
