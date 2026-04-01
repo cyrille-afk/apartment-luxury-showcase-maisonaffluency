@@ -326,16 +326,6 @@ const Navigation = () => {
                   </Fragment>
                 ))}
                 
-                {/* New In */}
-                <button
-                  onClick={() => handleNavClick("/new-in")}
-                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                  style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
-                >
-                  New In
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-
                 {/* Journal */}
                 <button
                   onClick={() => handleNavClick("/journal")}
