@@ -16,6 +16,8 @@ import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
+import DesignerInstagramSection from "@/components/DesignerInstagramSection";
+import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -119,6 +121,7 @@ const PublicDesignerProfile = () => {
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
+  const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = groupedPicks.length > 0;
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const displayBiography = isChildDesigner && parentDesigner?.biography
@@ -846,6 +849,8 @@ const PublicDesignerProfile = () => {
               <p className="font-body text-sm text-muted-foreground">Curators' picks coming soon</p>
             </div>
           )}
+
+          <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
 
           <div className="text-center py-8">
             <p className="font-body text-sm text-muted-foreground mb-4">Interested in pieces from this collection?</p>

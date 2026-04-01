@@ -621,6 +621,41 @@ export type Database = {
           },
         ]
       }
+      designer_instagram_posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          designer_id: string
+          id: string
+          post_url: string
+          sort_order: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          designer_id: string
+          id?: string
+          post_url: string
+          sort_order?: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          designer_id?: string
+          id?: string
+          post_url?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "designer_instagram_posts_designer_id_fkey"
+            columns: ["designer_id"]
+            isOneToOne: false
+            referencedRelation: "designers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       designers: {
         Row: {
           biography: string
