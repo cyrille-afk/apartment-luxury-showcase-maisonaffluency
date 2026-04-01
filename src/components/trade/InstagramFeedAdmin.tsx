@@ -16,6 +16,56 @@ export default function InstagramFeedAdmin() {
   const dragItem = useRef<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const getIndexFromTouch = useCallback((touch: React.Touch) => {
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el || !gridRef.current) return null;
+    const item = el.closest("[data-drag-index]");
+    if (!item) return null;
+    return parseInt(item.getAttribute("data-drag-index")!, 10);
+  }, []);
+
+  const handleTouchStart = useCallback((index: number) => {
+    dragItem.current = index;
+    setDraggingIndex(index);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    const idx = getIndexFromTouch(e.touches[0]);
+    if (idx !== null) setDragOverIndex(idx);
+  }, [getIndexFromTouch]);
+
+  const handleTouchEnd = useCallback(() => {
+    const from = dragItem.current;
+    const to = dragOverIndex;
+    setDraggingIndex(null);
+    setDragOverIndex(null);
+    dragItem.current = null;
+    if (from === null || to === null || from === to) return;
+
+    const reordered = [...posts];
+    const [removed] = reordered.splice(from, 1);
+    reordered.splice(to, 0, removed);
+
+    const updates = reordered.map((post: any, i: number) => ({ id: post.id, sort_order: i }));
+    (async () => {
+      try {
+        for (const u of updates) {
+          await supabase
+            .from("designer_instagram_posts")
+            .update({ sort_order: u.sort_order })
+            .eq("id", u.id);
+        }
+        refetch();
+        queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
+        toast({ title: "Order updated" });
+      } catch (err: any) {
+        toast({ title: "Reorder failed", description: err.message, variant: "destructive" });
+      }
+    })();
+  }, [dragOverIndex, posts, refetch, queryClient, toast]);
 
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["admin-ig-preview", BRAND_DESIGNER_ID],
