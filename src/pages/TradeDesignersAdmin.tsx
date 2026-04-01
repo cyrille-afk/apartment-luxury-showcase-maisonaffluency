@@ -104,7 +104,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
   );
 }
 
-/** Inline Curator's Picks manager for each designer */
+/** Inline Curator Picks manager for each designer */
 function CuratorPicksManager({ designerId }: { designerId: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1043,7 +1043,7 @@ const TradeDesignersAdmin = () => {
                         }
                       />
 
-                      {/* Curator's Picks */}
+                      {/* Curator Picks */}
                       <CuratorPicksManager designerId={d.id} />
 
                       <div className="flex items-center gap-3 flex-wrap">
