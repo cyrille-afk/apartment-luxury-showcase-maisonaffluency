@@ -376,6 +376,8 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
   };
 
+  const [bulkImporting, setBulkImporting] = useState(false);
+
   const handleBulkAdd = async () => {
     const urls = bulkText
       .split("\n")
@@ -385,6 +387,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       toast({ title: "No valid URLs found", description: "Paste Instagram post URLs, one per line.", variant: "destructive" });
       return;
     }
+    setBulkImporting(true);
     let startOrder = posts.length;
     const rows = urls.map((url, i) => ({
       designer_id: designerId,
@@ -396,13 +399,29 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       .select();
     if (error) {
       toast({ title: "Bulk import failed", description: error.message, variant: "destructive" });
-    } else if (data) {
-      setPosts((prev) => [...prev, ...(data as any[])]);
-      setBulkText("");
-      setBulkMode(false);
-      queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
-      toast({ title: `${(data as any[]).length} posts added` });
+      setBulkImporting(false);
+      return;
     }
+    if (!data) {
+      setBulkImporting(false);
+      return;
+    }
+    const newPosts = data as any[];
+    setPosts((prev) => [...prev, ...newPosts]);
+    setBulkText("");
+    setBulkMode(false);
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    toast({ title: `${newPosts.length} posts added — auto-fetching images…` });
+
+    // Immediately auto-fetch images for all new posts
+    let fetched = 0;
+    for (const post of newPosts) {
+      const result = await extractImageForPost(post.id, post.post_url);
+      if (result) fetched++;
+    }
+    setBulkImporting(false);
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+    toast({ title: `Fetched ${fetched} of ${newPosts.length} images` });
   };
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this Instagram post? This action cannot be undone.")) return;
@@ -519,10 +538,11 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
               className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
             />
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim()} className="text-xs h-8">
-                <Plus className="w-3 h-3 mr-1" /> Import All
+              <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim() || bulkImporting} className="text-xs h-8 gap-1.5">
+                {bulkImporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                {bulkImporting ? "Importing & fetching images…" : "Import & Auto-fetch"}
               </Button>
-              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>
                 Cancel
               </button>
             </div>
