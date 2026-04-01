@@ -463,60 +463,57 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
             )}
           </>
         )}
-        {thumbs.length > 0 && (
+          <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
+            <Share2 className="h-3.5 w-3.5" />
+            <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
+          </button>
           <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1.5">
-            <div className="flex items-end gap-2">
-              <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity mb-1" aria-label={`Share ${displayName}`}>
-                <Share2 className="h-3.5 w-3.5" />
-                <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
-              </button>
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
-                <div className="flex gap-1.5">
-                  {thumbs.slice(0, 2).map((src, i) => {
-                    const mappedGalleryIdx = resolveThumbToGalleryIndex(src);
-                    const resolvedGalleryIdx = mappedGalleryIdx ?? getPositionalFallbackIndex(i);
-                    return (
-                      <button
-                        key={i}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (resolvedGalleryIdx !== null) {
-                            sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
-                            sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
-                            sessionStorage.setItem('galleryFilterDesigner', item.name);
-                            const galleryEl = document.getElementById('gallery');
-                            if (galleryEl) {
-                              galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                            setTimeout(() => {
-                              window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                detail: {
-                                  index: resolvedGalleryIdx,
-                                  sourceId: `designer-card-${item.slug}`,
-                                  filterDesigner: item.name,
-                                },
-                              }));
-                            }, 600);
-                          } else {
-                            const galleryEl = document.getElementById('gallery');
-                            if (galleryEl) {
-                              galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                            toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
+              <div className="flex gap-1.5">
+                {thumbs.slice(0, 2).map((src, i) => {
+                  const mappedGalleryIdx = resolveThumbToGalleryIndex(src);
+                  const resolvedGalleryIdx = mappedGalleryIdx ?? getPositionalFallbackIndex(i);
+                  return (
+                    <button
+                      key={i}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (resolvedGalleryIdx !== null) {
+                          sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
+                          sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
+                          sessionStorage.setItem('galleryFilterDesigner', item.name);
+                          const galleryEl = document.getElementById('gallery');
+                          if (galleryEl) {
+                            galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           }
-                        }}
-                        className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
-                      >
-                        <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
-                        <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
-                          <Plus className="w-2 h-2 text-white" />
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                          setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                              detail: {
+                                index: resolvedGalleryIdx,
+                                sourceId: `designer-card-${item.slug}`,
+                                filterDesigner: item.name,
+                              },
+                            }));
+                          }, 600);
+                        } else {
+                          const galleryEl = document.getElementById('gallery');
+                          if (galleryEl) {
+                            galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                          toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
+                        }
+                      }}
+                      className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
+                    >
+                      <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
+                      <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                        <Plus className="w-2 h-2 text-white" />
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
             {instagramLink && (
