@@ -79,6 +79,43 @@ export default function InstagramFeedAdmin() {
     queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
   };
 
+  const handleDragStart = (index: number) => {
+    dragItem.current = index;
+  };
+
+  const handleDragEnter = (index: number) => {
+    dragOverItem.current = index;
+  };
+
+  const handleDrop = async () => {
+    if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) {
+      dragItem.current = null;
+      dragOverItem.current = null;
+      return;
+    }
+    const reordered = [...posts];
+    const [removed] = reordered.splice(dragItem.current, 1);
+    reordered.splice(dragOverItem.current, 0, removed);
+    dragItem.current = null;
+    dragOverItem.current = null;
+
+    // Batch update sort_order
+    const updates = reordered.map((post: any, i: number) => ({ id: post.id, sort_order: i }));
+    try {
+      for (const u of updates) {
+        await supabase
+          .from("designer_instagram_posts")
+          .update({ sort_order: u.sort_order })
+          .eq("id", u.id);
+      }
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["homepage-instagram-feed"] });
+      toast({ title: "Order updated" });
+    } catch (err: any) {
+      toast({ title: "Reorder failed", description: err.message, variant: "destructive" });
+    }
+  };
+
   const visibleCount = posts.filter((p: any) => !p.hidden).length;
 
   return (
