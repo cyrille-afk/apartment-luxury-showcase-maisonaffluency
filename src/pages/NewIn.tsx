@@ -102,16 +102,17 @@ const NewIn = () => {
             <div className="mt-8">
               <Link
                 to={`/designers/${DESIGNER_SLUG}?expanded=true`}
-                className="group inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+                onPointerDown={() => setCtaPressed(true)}
+                className={cn(
+                  "group inline-flex items-center gap-3 font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-all duration-300",
+                  ctaPressed && "translate-x-6"
+                )}
               >
-                <span className="relative inline-flex items-center overflow-visible" style={{ padding: '0 2.5rem' }}>
-                  <span
-                    className="absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[calc(100%+2rem)]"
-                    style={{ transformOrigin: 'left center' }}
-                  />
-                  <span>View The Full Portrait</span>
+                <span>View The Full Portrait</span>
+                <span className="relative ml-2 h-px w-8 overflow-hidden bg-transparent shrink-0">
+                  <span className="absolute inset-y-0 left-0 w-8 bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-full" />
                 </span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className={cn("h-3.5 w-3.5 shrink-0 transition-opacity duration-200", ctaPressed && "opacity-0")} />
               </Link>
             </div>
 
