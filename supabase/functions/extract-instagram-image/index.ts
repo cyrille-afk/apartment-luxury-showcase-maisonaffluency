@@ -38,6 +38,11 @@ function cloudinaryFetchUrl(sourceUrl: string): string {
   return `https://res.cloudinary.com/dif1oamtj/image/fetch/f_auto,q_auto:best,c_limit,w_1600,h_1600/${encoded}`;
 }
 
+function cloudinarySquareUrl(sourceUrl: string): string {
+  const encoded = encodeURIComponent(sourceUrl);
+  return `https://res.cloudinary.com/dif1oamtj/image/fetch/w_1080,h_1080,c_fill,g_auto,f_jpg,q_auto:best/${encoded}`;
+}
+
 async function fetchJson(url: string, init?: RequestInit) {
   const response = await fetch(url, init);
   const text = await response.text();
@@ -77,46 +82,59 @@ async function resolveMediaUrlViaGraph(cleanUrl: string): Promise<{ url: string;
     );
 
     const mediaId = typeof oembed?.media_id === "string" ? oembed.media_id : null;
-    if (!mediaId) return null;
+    // Extract oEmbed thumbnail as fallback before attempting Graph
+    const oembedThumb = typeof oembed?.thumbnail_url === "string"
+      ? upgradeResolution(decodeHtmlEntities(oembed.thumbnail_url))
+      : null;
 
-    const media = await fetchJson(
-      `https://graph.facebook.com/v23.0/${encodeURIComponent(mediaId)}?fields=id,media_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}&access_token=${encodeURIComponent(accessToken)}`,
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-          Accept: "application/json",
-        },
-      },
-    ) as InstagramGraphMedia;
+    if (mediaId) {
+      try {
+        const media = await fetchJson(
+          `https://graph.facebook.com/v23.0/${encodeURIComponent(mediaId)}?fields=id,media_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}&access_token=${encodeURIComponent(accessToken)}`,
+          {
+            headers: {
+              "User-Agent": "Mozilla/5.0",
+              Accept: "application/json",
+            },
+          },
+        ) as InstagramGraphMedia;
 
-    if (media.media_type === "CAROUSEL_ALBUM" && media.children?.data?.length) {
-      const preferredChild = media.children.data.find((child) => child.media_type === "IMAGE" && child.media_url) ||
-        media.children.data.find((child) => child.media_url || child.thumbnail_url);
+        if (media.media_type === "CAROUSEL_ALBUM" && media.children?.data?.length) {
+          const preferredChild = media.children.data.find((child) => child.media_type === "IMAGE" && child.media_url) ||
+            media.children.data.find((child) => child.media_url || child.thumbnail_url);
 
-      if (preferredChild?.media_url) {
-        return { url: preferredChild.media_url, method: "graph-carousel" };
+          if (preferredChild?.media_url) {
+            return { url: preferredChild.media_url, method: "graph-carousel" };
+          }
+          if (preferredChild?.thumbnail_url) {
+            return { url: preferredChild.thumbnail_url, method: "graph-carousel-thumb" };
+          }
+        }
+
+        if (media.media_type === "VIDEO" && typeof media.thumbnail_url === "string") {
+          return { url: media.thumbnail_url, method: "graph-video-thumb" };
+        }
+
+        if (typeof media.media_url === "string") {
+          return { url: media.media_url, method: "graph-media" };
+        }
+
+        if (typeof media.thumbnail_url === "string") {
+          return { url: media.thumbnail_url, method: "graph-thumb" };
+        }
+      } catch (graphErr) {
+        console.warn("Graph API lookup failed (will use oEmbed thumbnail):", graphErr);
       }
-
-      if (preferredChild?.thumbnail_url) {
-        return { url: preferredChild.thumbnail_url, method: "graph-carousel-thumb" };
-      }
     }
 
-    if (media.media_type === "VIDEO" && typeof media.thumbnail_url === "string") {
-      return { url: media.thumbnail_url, method: "graph-video-thumb" };
-    }
-
-    if (typeof media.media_url === "string") {
-      return { url: media.media_url, method: "graph-media" };
-    }
-
-    if (typeof media.thumbnail_url === "string") {
-      return { url: media.thumbnail_url, method: "graph-thumb" };
+    // Fallback: use the oEmbed thumbnail (works for any public post)
+    if (oembedThumb) {
+      return { url: oembedThumb, method: "oembed-internal" };
     }
 
     return null;
   } catch (error) {
-    console.warn("Graph media lookup failed:", error);
+    console.warn("Graph/oEmbed resolution failed:", error);
     return null;
   }
 }
@@ -294,9 +312,16 @@ Deno.serve(async (req) => {
     try {
       downloaded = await downloadImage(normalizedRemoteImageUrl);
     } catch (directErr) {
-      console.log("Direct download failed, trying Cloudinary proxy...", directErr);
-      const proxied = cloudinaryFetchUrl(normalizedRemoteImageUrl);
-      downloaded = await downloadImage(proxied);
+      console.log("Direct download failed, trying Cloudinary square proxy...", directErr);
+      // Use square crop proxy to ensure 1:1 aspect ratio
+      const proxied = cloudinarySquareUrl(normalizedRemoteImageUrl);
+      try {
+        downloaded = await downloadImage(proxied);
+      } catch {
+        // Last resort: standard proxy without forced square
+        const fallback = cloudinaryFetchUrl(normalizedRemoteImageUrl);
+        downloaded = await downloadImage(fallback);
+      }
     }
 
     const ext = extMap[downloaded.contentType] || "jpg";
