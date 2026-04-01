@@ -149,6 +149,9 @@ const NewIn = () => {
                 </div>
               </div>
             )}
+          </motion.div>
+        </div>
+      </section>
 
       {/* Separator */}
       <div className="max-w-7xl mx-auto px-6 md:px-12">
