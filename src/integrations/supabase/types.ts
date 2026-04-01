@@ -630,6 +630,7 @@ export type Database = {
           id: string
           image_url: string | null
           post_url: string
+          posted_at: string | null
           sort_order: number
         }
         Insert: {
@@ -640,6 +641,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           post_url: string
+          posted_at?: string | null
           sort_order?: number
         }
         Update: {
@@ -650,6 +652,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           post_url?: string
+          posted_at?: string | null
           sort_order?: number
         }
         Relationships: [

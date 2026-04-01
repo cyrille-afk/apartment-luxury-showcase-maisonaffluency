@@ -1,0 +1,1 @@
+ALTER TABLE public.designer_instagram_posts ADD COLUMN IF NOT EXISTS posted_at timestamptz;
