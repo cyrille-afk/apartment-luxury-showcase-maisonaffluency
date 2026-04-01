@@ -1,0 +1,1 @@
+ALTER TABLE public.designer_instagram_posts ADD COLUMN IF NOT EXISTS hidden boolean NOT NULL DEFAULT false;

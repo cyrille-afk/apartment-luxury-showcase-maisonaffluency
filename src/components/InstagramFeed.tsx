@@ -14,6 +14,7 @@ const InstagramFeed = () => {
         .select("*")
         .eq("designer_id", BRAND_DESIGNER_ID)
         .not("image_url", "is", null)
+        .eq("hidden", false)
         .order("sort_order", { ascending: true })
         .limit(6);
       if (error) throw error;

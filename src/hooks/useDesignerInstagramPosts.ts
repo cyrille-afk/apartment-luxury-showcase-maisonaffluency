@@ -21,6 +21,7 @@ export function useDesignerInstagramPosts(designerId: string | undefined) {
         .from("designer_instagram_posts" as any)
         .select("*")
         .eq("designer_id", designerId!)
+        .eq("hidden", false)
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return (data as unknown as DesignerInstagramPost[]) || [];
