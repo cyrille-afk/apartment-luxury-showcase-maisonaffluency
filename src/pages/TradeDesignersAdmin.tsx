@@ -196,6 +196,7 @@ function InstagramPostManager({ designerId }: { designerId: string }) {
     </div>
   );
 }
+interface DesignerRow {
   id: string;
   slug: string;
   name: string;
