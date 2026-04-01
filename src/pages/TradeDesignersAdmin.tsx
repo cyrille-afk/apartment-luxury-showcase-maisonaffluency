@@ -472,7 +472,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             {post.image_url && (
               <img src={post.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0 mt-0.5" />
             )}
-            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline shrink-0 w-32 truncate mt-1.5">
+            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline break-all mt-1.5 min-w-[120px] max-w-[260px]">
               {post.post_url.replace(/https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "")}
             </a>
             <Input
