@@ -20,6 +20,7 @@ export interface Designer {
   biography_images: string[];
   is_published: boolean;
   sort_order: number;
+  new_in_order: number | null;
 }
 
 export interface DesignerCuratorPick {
@@ -216,6 +217,25 @@ export function useAllDesigners() {
         .from("designers")
         .select("*")
         .order("name", { ascending: true });
+      if (error) throw error;
+      return (data || []).map((d) => ({
+        ...d,
+        links: (d.links as Designer["links"]) || [],
+      })) as Designer[];
+    },
+  });
+}
+
+/** Fetch designers marked as "New In", ordered by new_in_order */
+export function useNewInDesigners() {
+  return useQuery({
+    queryKey: ["designers-new-in"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designers")
+        .select("*")
+        .not("new_in_order", "is", null)
+        .order("new_in_order", { ascending: true });
       if (error) throw error;
       return (data || []).map((d) => ({
         ...d,
