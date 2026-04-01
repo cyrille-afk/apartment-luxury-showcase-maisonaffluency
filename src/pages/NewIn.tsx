@@ -115,13 +115,15 @@ const NewIn = () => {
               <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
                 New In
               </span>
-              <ShareMenu
-                url="https://www.maisonaffluency.com/new-in-og.html"
-                message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
-                className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
-                iconSize="w-6 h-6"
-                showLabel={false}
-              />
+              <div className="hidden md:block">
+                <ShareMenu
+                  url="https://www.maisonaffluency.com/new-in-og.html"
+                  message="Maison Affluency · New In · Pierre Bonnefille — French artist, painter, designer and Maître d'Art: https://www.maisonaffluency.com/new-in-og.html"
+                  className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
+                  iconSize="w-6 h-6"
+                  showLabel={false}
+                />
+              </div>
             </div>
             <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase mb-8">
               Pierre Bonnefille
