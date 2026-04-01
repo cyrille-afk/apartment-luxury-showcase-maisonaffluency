@@ -330,9 +330,9 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
                       <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                     </div>
                     {igUrl && (
-                      <a href={igUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all">
-                        <Instagram className="h-2.5 w-2.5" />
-                      </a>
+                      <span className="absolute bottom-1.5 left-2 z-10 font-body text-[7px] text-white/50 tracking-wide drop-shadow-sm">
+                        @{igUrl.replace(/\/+$/, '').split('/').pop()}
+                      </span>
                     )}
                   </div>
                   <div className="px-2 py-1.5 bg-background text-center">
