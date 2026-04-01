@@ -41,11 +41,18 @@ function isVideoUrl(url: string): boolean {
   return false;
 }
 
+/** Extract YouTube video ID from URL, or null */
+function extractYouTubeId(url: string): string | null {
+  const normalized = normalizeMediaInput(url);
+  const match = normalized.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
+
 /** Convert YouTube/Vimeo/NOWNESS URLs to embeddable format */
 function getEmbedUrl(url: string): string | null {
   const normalized = normalizeMediaInput(url);
   let match = normalized.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1`;
+  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`;
   match = normalized.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
   if (/nowness\.com\/iframe/i.test(normalized)) return normalized;
