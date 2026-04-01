@@ -33,8 +33,10 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
         <div className="h-px flex-1 bg-foreground/20" />
       </div>
 
-      {/* Full-width horizontal strip — breaks out of parent padding */}
-      <div className="-mx-4 md:-mx-8 lg:-mx-12">
+      {/* Full-width horizontal strip — breaks out of any parent max-width/padding */}
+      <div
+        className="relative left-1/2 -translate-x-1/2 w-screen"
+      >
         <div className="flex gap-[2px] w-full h-[200px] md:h-[260px] lg:h-[300px]">
           {postsWithImages.map((post) => (
             <a
