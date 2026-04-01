@@ -284,12 +284,22 @@ const Navigation = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-0 pb-40">
+                {/* New In — top of mobile menu */}
+                <button
+                  onClick={() => handleNavClick("/new-in")}
+                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
+                  style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}
+                >
+                  New In
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
                 {leftNavItems.map((item, index) => (
                   <Fragment key={item.href}>
                     <button 
                       onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                      style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
+                      style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
                     >
                       {item.mobileLabel}
                       <ChevronRight className="h-4 w-4" />
