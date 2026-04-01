@@ -177,7 +177,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       toast({ title: `${(data as any[]).length} posts added` });
     }
   };
-
+  const handleDelete = async (id: string) => {
     await (supabase.from("designer_instagram_posts" as any) as any).delete().eq("id", id);
     setPosts((prev) => prev.filter((p) => p.id !== id));
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
