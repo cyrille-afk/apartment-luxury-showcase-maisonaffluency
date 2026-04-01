@@ -1,53 +1,25 @@
 import { Instagram } from "lucide-react";
-
-/**
- * Manually curated Instagram feed grid.
- * Update the POSTS array to refresh content — no API needed.
- */
-
-interface InstaPost {
-  /** Cloudinary or direct image URL */
-  imageUrl: string;
-  /** Instagram post permalink */
-  postUrl: string;
-  /** Alt text */
-  alt: string;
-}
-
-const POSTS: InstaPost[] = [
-  {
-    imageUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773373912/Screen_Shot_2026-03-13_at_11.51.17_AM_egvsuz.png",
-    postUrl: "https://www.instagram.com/myaffluency/",
-    alt: "Curated showroom vignette at Maison Affluency Singapore",
-  },
-  {
-    imageUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773372909/Screen_Shot_2026-03-13_at_11.34.42_AM_icbzuz.png",
-    postUrl: "https://www.instagram.com/myaffluency/",
-    alt: "Collectible design piece in situ",
-  },
-  {
-    imageUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773374192/Screen_Shot_2026-03-13_at_11.55.51_AM_vbstnu.png",
-    postUrl: "https://www.instagram.com/myaffluency/",
-    alt: "Atelier craftsmanship detail",
-  },
-  {
-    imageUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg",
-    postUrl: "https://www.instagram.com/myaffluency/",
-    alt: "Private viewing at Maison Affluency",
-  },
-  {
-    imageUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,g_center,q_auto,f_auto/v1773373912/Screen_Shot_2026-03-13_at_11.51.17_AM_egvsuz.png",
-    postUrl: "https://www.instagram.com/myaffluency/",
-    alt: "Designer furniture close-up",
-  },
-  {
-    imageUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,g_north,q_auto,f_auto/v1773374192/Screen_Shot_2026-03-13_at_11.55.51_AM_vbstnu.png",
-    postUrl: "https://www.instagram.com/myaffluency/",
-    alt: "Material detail from European atelier",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const InstagramFeed = () => {
+  const { data: posts = [] } = useQuery({
+    queryKey: ["homepage-instagram-feed"],
+    staleTime: 1000 * 60 * 10,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designer_instagram_posts")
+        .select("*")
+        .not("image_url", "is", null)
+        .order("sort_order", { ascending: true })
+        .limit(6);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  if (posts.length === 0) return null;
+
   return (
     <section className="bg-background border-t border-border px-6 py-14 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
@@ -66,17 +38,17 @@ const InstagramFeed = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5">
-          {POSTS.map((post, i) => (
+          {posts.map((post) => (
             <a
-              key={i}
-              href={post.postUrl}
+              key={post.id}
+              href={post.post_url}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative aspect-square overflow-hidden bg-muted"
             >
               <img
-                src={post.imageUrl}
-                alt={post.alt}
+                src={post.image_url!}
+                alt={post.caption?.substring(0, 80) || "Instagram post"}
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
