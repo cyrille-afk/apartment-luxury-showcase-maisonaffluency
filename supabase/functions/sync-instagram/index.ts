@@ -6,13 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-/**
- * Sync Instagram posts using the Instagram Business Login API.
- * Uses graph.instagram.com endpoints (not Facebook Graph API).
- *
- * Body: { designerId: string }
- */
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -60,6 +53,12 @@ Deno.serve(async (req) => {
     // Filter to IMAGE and CAROUSEL_ALBUM (skip VIDEO-only)
     const imagePosts = posts.filter(
       (p: { media_type: string }) => p.media_type === "IMAGE" || p.media_type === "CAROUSEL_ALBUM",
+    );
+
+    // Sort by timestamp descending (newest first) — Instagram API returns
+    // them in reverse-chronological order but we enforce it explicitly.
+    imagePosts.sort((a: { timestamp: string }, b: { timestamp: string }) =>
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 
     // Upsert posts into designer_instagram_posts
@@ -117,7 +116,7 @@ Deno.serve(async (req) => {
         post_url: postUrl,
         caption: post.caption?.substring(0, 500) || null,
         image_url: storedImageUrl,
-        sort_order: i,
+        sort_order: i, // temporary, will be recomputed below
       });
 
       if (insertError) {
@@ -125,6 +124,26 @@ Deno.serve(async (req) => {
       } else {
         inserted++;
       }
+    }
+
+    // Recompute sort_order for ALL posts of this designer based on
+    // created_at (which mirrors Instagram publish order for new inserts).
+    // sort_order 0 = newest post.
+    const { data: allPosts } = await supabase
+      .from("designer_instagram_posts")
+      .select("id, created_at")
+      .eq("designer_id", designerId)
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false });
+
+    if (allPosts) {
+      for (let idx = 0; idx < allPosts.length; idx++) {
+        await supabase
+          .from("designer_instagram_posts")
+          .update({ sort_order: idx })
+          .eq("id", allPosts[idx].id);
+      }
+      console.log(`Recomputed sort_order for ${allPosts.length} posts`);
     }
 
     return new Response(
