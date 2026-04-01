@@ -104,17 +104,22 @@ const NewIn = () => {
               <button
                 type="button"
                 onClick={() => {
+                  if (ctaPressed) return;
                   setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 160);
+                  window.setTimeout(() => navigate(`/designers/${DESIGNER_SLUG}?expanded=true`), 220);
                 }}
                 className="group inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
-                <span className={cn("relative inline-flex items-center gap-3 transition-transform duration-150", ctaPressed && "translate-x-3")}>
-                  <span className="block h-px w-8 bg-foreground transition-transform duration-500 origin-left group-hover:translate-x-[calc(100%+0.75rem)]" />
-                  <span>View The Full Portrait</span>
-                  <span className="w-8" />
+                <span className={cn("relative inline-flex items-center min-w-fit transition-transform duration-200", ctaPressed && "translate-x-3")}>
+                  <span
+                    className={cn(
+                      "absolute left-0 top-1/2 h-px w-8 -translate-y-1/2 bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[calc(100%-2rem)]",
+                      ctaPressed && "translate-x-[calc(100%-2rem)]"
+                    )}
+                  />
+                  <span className="relative z-10 px-12 bg-background">View The Full Portrait</span>
                 </span>
-                {!ctaPressed && <ArrowRight className="ml-3 h-3.5 w-3.5" />}
+                <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-200", ctaPressed && "translate-x-1 opacity-0")} />
               </button>
             </div>
 
