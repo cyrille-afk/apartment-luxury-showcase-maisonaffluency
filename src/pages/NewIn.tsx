@@ -113,11 +113,11 @@ const NewIn = () => {
               >
                 <span className={cn("inline-flex items-center transition-transform duration-300", ctaPressed && "translate-x-4")}>
                   <span className="inline-flex w-8 items-center justify-start overflow-hidden">
-                    <span className={cn("h-px w-8 bg-current transition-all duration-300", ctaPressed ? "translate-x-8 opacity-0" : "translate-x-0 opacity-100")} />
+                    <span className="h-px w-8 bg-current transition-all duration-300 translate-x-0 opacity-100 group-hover:translate-x-8 group-hover:opacity-0" />
                   </span>
                   <span className="mx-3">View The Full Portrait</span>
                   <span className="inline-flex w-8 items-center justify-start overflow-hidden">
-                    <span className={cn("h-px w-8 bg-current transition-all duration-300", ctaPressed ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0")} />
+                    <span className="h-px w-8 bg-current transition-all duration-300 -translate-x-8 opacity-0 group-hover:translate-x-0 group-hover:opacity-100" />
                   </span>
                 </span>
                 <ArrowRight className={cn("ml-3 h-3.5 w-3.5 transition-all duration-300", ctaPressed && "-translate-x-1 opacity-0")} />
