@@ -50,6 +50,8 @@ export default function InstagramFeedAdmin() {
       touchActive.current = true;
       dragItem.current = index;
       setDraggingIndex(index);
+      // Haptic feedback (vibrate if supported)
+      if (navigator.vibrate) navigator.vibrate(30);
     }, 300);
   }, []);
 
