@@ -521,7 +521,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
             </div>
             {instagramLink && (
               <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                @{instagramLink.replace(/[/?#].*/g, '').replace(/.*//, '')}
+                @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
               </a>
             )}
           </div>

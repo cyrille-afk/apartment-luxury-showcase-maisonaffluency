@@ -1168,7 +1168,7 @@ const Collectibles = () => {
                                 {(() => {
                                   const igLink = designer.links?.find(l => l.type === "Instagram" && l.url);
                                   if (!igLink?.url) return null;
-                                  const handle = '@' + igLink.url.replace(/\/+$/, '').split('/').pop();
+                                  const handle = '@' + igLink.url.split('?')[0].replace(/\/+$/, '').split('/').pop();
                                   return (
                                     <a
                                       href={igLink.url}
