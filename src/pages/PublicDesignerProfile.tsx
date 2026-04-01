@@ -850,17 +850,18 @@ const PublicDesignerProfile = () => {
             </div>
           )}
 
-          <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+        </div>
 
-          <div className="text-center py-8">
-            <p className="font-body text-sm text-muted-foreground mb-4">Interested in pieces from this collection?</p>
-            <Link
-              to="/trade/program"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-xs tracking-[0.15em] uppercase rounded-full hover:bg-foreground/90 transition-colors"
-            >
-              Join Our Trade Program
-            </Link>
-          </div>
+        <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+
+        <div className="text-center py-8">
+          <p className="font-body text-sm text-muted-foreground mb-4">Interested in pieces from this collection?</p>
+          <Link
+            to="/trade/program"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-xs tracking-[0.15em] uppercase rounded-full hover:bg-foreground/90 transition-colors"
+          >
+            Join Our Trade Program
+          </Link>
         </div>
 
         <Footer />
