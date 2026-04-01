@@ -34,7 +34,7 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
       </div>
 
       {/* Grid — matches homepage Instagram feed layout */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5 px-4 md:px-12 lg:px-20">
           {postsWithImages.slice(0, 6).map((post) => (
             <a
               key={post.id}
