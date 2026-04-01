@@ -111,6 +111,8 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   // Extract handles from Instagram URLs
   const handles = instagramUrls.map((url) => {
@@ -147,6 +149,34 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
   };
 
+  const handleBulkAdd = async () => {
+    const urls = bulkText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && l.includes("instagram.com"));
+    if (!urls.length) {
+      toast({ title: "No valid URLs found", description: "Paste Instagram post URLs, one per line.", variant: "destructive" });
+      return;
+    }
+    let startOrder = posts.length;
+    const rows = urls.map((url, i) => ({
+      designer_id: designerId,
+      post_url: url,
+      sort_order: startOrder + i,
+    }));
+    const { data, error } = await (supabase.from("designer_instagram_posts" as any) as any)
+      .insert(rows)
+      .select();
+    if (error) {
+      toast({ title: "Bulk import failed", description: error.message, variant: "destructive" });
+    } else if (data) {
+      setPosts((prev) => [...prev, ...(data as any[])]);
+      setBulkText("");
+      setBulkMode(false);
+      queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+      toast({ title: `${(data as any[]).length} posts added` });
+    }
+  };
   const handleDelete = async (id: string) => {
     await (supabase.from("designer_instagram_posts" as any) as any).delete().eq("id", id);
     setPosts((prev) => prev.filter((p) => p.id !== id));
@@ -205,18 +235,40 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             </button>
           </div>
         ))}
-        <div className="flex items-center gap-2">
-          <Input
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            placeholder="https://www.instagram.com/p/..."
-            className="text-xs flex-1"
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
-          />
-          <Button size="sm" variant="outline" onClick={handleAdd} disabled={!newUrl.trim()} className="text-xs h-8">
-            <Plus className="w-3 h-3 mr-1" /> Add
-          </Button>
-        </div>
+        {bulkMode ? (
+          <div className="space-y-2">
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={"Paste Instagram post URLs, one per line:\nhttps://www.instagram.com/p/ABC123/\nhttps://www.instagram.com/p/DEF456/"}
+              className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
+            />
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim()} className="text-xs h-8">
+                <Plus className="w-3 h-3 mr-1" /> Import All
+              </Button>
+              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Input
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder="https://www.instagram.com/p/..."
+              className="text-xs flex-1"
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+            />
+            <Button size="sm" variant="outline" onClick={handleAdd} disabled={!newUrl.trim()} className="text-xs h-8">
+              <Plus className="w-3 h-3 mr-1" /> Add
+            </Button>
+            <button onClick={() => setBulkMode(true)} className="text-xs text-muted-foreground hover:text-primary whitespace-nowrap">
+              Bulk import
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
