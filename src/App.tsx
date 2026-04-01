@@ -195,10 +195,6 @@ const App = () => {
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
               )}
-              {/* Temporary build badge – remove after confirming deploy */}
-              <div style={{ position: 'fixed', bottom: 4, right: 4, zIndex: 99999, background: 'rgba(0,0,0,0.75)', color: '#0f0', fontSize: 10, padding: '2px 6px', borderRadius: 4, fontFamily: 'monospace', pointerEvents: 'none' }}>
-                build 2026-03-31a
-              </div>
 
               {/* Deferred UI: toasts + analytics mount after hero is painted */}
               {showDeferredUi && (
