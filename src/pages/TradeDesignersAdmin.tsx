@@ -1043,8 +1043,7 @@ const TradeDesignersAdmin = () => {
                       {/* Curator's Picks */}
                       <CuratorPicksManager designerId={d.id} />
 
-
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3 flex-wrap">
                           <Switch
                             checked={getField(d.id, "is_published") as unknown as boolean}
                             onCheckedChange={(checked) => setField(d.id, "is_published", checked as unknown as string)}
