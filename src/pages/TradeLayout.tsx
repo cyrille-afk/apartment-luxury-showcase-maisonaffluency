@@ -1,7 +1,8 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
@@ -32,6 +33,33 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/boards": "Boards",
   "/trade/media": "Media Library",
 };
+
+function BackToTopButton() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          key="back-to-top"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-foreground text-background shadow-lg hover:opacity-80 transition-opacity"
+          aria-label="Back to top"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
 
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin } = useAuth();
@@ -167,6 +195,7 @@ const TradeLayout = () => {
         <CompareFab />
         <CompareDrawer />
         <AIConcierge />
+        <BackToTopButton />
       </Suspense>
     </SidebarProvider>
   );
