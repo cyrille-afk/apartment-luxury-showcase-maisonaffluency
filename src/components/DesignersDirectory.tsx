@@ -435,7 +435,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
-  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
+  const instagramLinks: string[] = (() => {
+    const hardcoded = INSTAGRAM_LINKS[item.slug];
+    if (hardcoded) return [hardcoded];
+    const fromDb = (item.links as any[])?.filter((l: any) => (l.type === "Instagram" || l.type === "instagram") && l.url).map((l: any) => l.url as string) || [];
+    return fromDb;
+  })();
+  const instagramLink = instagramLinks[0];
   const fallbackGalleryIndices = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? [];
   const getPositionalFallbackIndex = (thumbPosition: number) => {
     if (fallbackGalleryIndices.length === 0) return null;
@@ -464,10 +470,17 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
               <Share2 className="h-3 w-3" />
               <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
             </button>
-            {instagramLink && (
-              <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute bottom-3 right-3 z-10 font-body text-[9px] text-white/50 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
-              </a>
+            {instagramLinks.length > 0 && (
+              <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-0.5">
+                {instagramLinks.map((igUrl, i) => {
+                  const handle = '@' + igUrl.split('?')[0].replace(/\/+$/, '').split('/').pop();
+                  return (
+                    <a key={i} href={igUrl} target="_blank" rel="noopener noreferrer" className="font-body text-[9px] text-white/50 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(igUrl, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+                      {handle}
+                    </a>
+                  );
+                })}
+              </div>
             )}
           </>
         )}
@@ -526,11 +539,14 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: De
                   })}
                 </div>
               </div>
-              {instagramLink && (
-                <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                  @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
-                </a>
-              )}
+              {instagramLinks.length > 0 && instagramLinks.map((igUrl, i) => {
+                const handle = '@' + igUrl.split('?')[0].replace(/\/+$/, '').split('/').pop();
+                return (
+                  <a key={i} href={igUrl} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(igUrl, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+                    {handle}
+                  </a>
+                );
+              })}
             </div>
           </>
         )}
