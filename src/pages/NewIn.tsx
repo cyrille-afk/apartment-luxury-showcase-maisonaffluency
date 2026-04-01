@@ -43,6 +43,11 @@ const NewIn = () => {
       <Helmet>
         <title>New In — Pierre Bonnefille | Maison Affluency</title>
         <meta name="description" content="Discover Pierre Bonnefille — French artist, painter, designer and Maître d'Art. Explore his curated collection of sculptural works at Maison Affluency." />
+        <meta property="og:title" content="New In — Pierre Bonnefille | Maison Affluency" />
+        <meta property="og:description" content="Discover Pierre Bonnefille — French artist, painter, designer and Maître d'Art. Explore his curated collection at Maison Affluency." />
+        <meta property="og:image" content={PORTRAIT_IMAGE} />
+        <meta property="og:url" content="https://www.maisonaffluency.com/new-in" />
+        <meta property="og:type" content="article" />
       </Helmet>
 
       <Navigation />
