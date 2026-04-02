@@ -1401,12 +1401,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
           {/* Mobile: Directory */}
           <div className="md:hidden" data-directory-layout="mobile">
-            {/* DEBUG overlay — remove after confirming fix */}
-            {debugInfo && (
-              <div className="fixed bottom-16 left-2 right-2 z-[9999] bg-black/80 text-green-400 text-[11px] font-mono px-3 py-2 rounded-lg pointer-events-none text-center">
-                {debugInfo}
-              </div>
-            )}
             {!filteredPicks && (
               /* Mobile A-Z bar — wrapped grid for full visibility and touch-friendly sizing */
               <div className="mb-5">
