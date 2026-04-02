@@ -152,6 +152,10 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 const NewIn = () => {
   const { data: designers = [], isLoading } = useNewInDesigners();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const firstDesigner = designers[0];
 
   const pageTitle = firstDesigner
