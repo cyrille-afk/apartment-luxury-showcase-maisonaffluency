@@ -80,6 +80,8 @@ function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof us
 /* ── Desktop sticky jump nav ── */
 function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!designers || designers.length < 2) return;
@@ -97,9 +99,11 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
           } else {
             visibleSlugs.delete(d.slug);
           }
-          // Pick the first visible designer in order
-          const first = designers.find((dd) => visibleSlugs.has(dd.slug));
-          setActiveSlug(first?.slug || null);
+          // Only update from observer when not in a programmatic scroll
+          if (!isScrollingRef.current) {
+            const first = designers.find((dd) => visibleSlugs.has(dd.slug));
+            setActiveSlug(first?.slug || null);
+          }
         },
         { rootMargin: "-200px 0px -40% 0px", threshold: 0 }
       );
@@ -113,12 +117,21 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   if (!designers || designers.length < 2) return null;
 
   const handleClick = (slug: string) => {
-    setActiveSlug(slug); // Immediately highlight clicked designer
+    // Suppress observer updates during smooth scroll
+    isScrollingRef.current = true;
+    clearTimeout(scrollTimeoutRef.current);
+    setActiveSlug(slug);
+
     const el = document.getElementById(`new-in-${slug}`);
     if (el) {
       const y = el.getBoundingClientRect().top + window.scrollY - 190;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
+
+    // Re-enable observer after scroll settles
+    scrollTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 1000);
   };
 
   return (
