@@ -122,7 +122,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             </h2>
 
             <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left">
-              {biography}
+              {firstBioParagraph}
             </p>
 
             <div className="mt-8">
