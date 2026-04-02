@@ -1121,12 +1121,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 120);
   }, [activeLetters]);
 
-  // Clear debug label after 4s
-  useEffect(() => {
-    if (!debugInfo) return;
-    const t = setTimeout(() => setDebugInfo(null), 4000);
-    return () => clearTimeout(t);
-  }, [debugInfo]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
