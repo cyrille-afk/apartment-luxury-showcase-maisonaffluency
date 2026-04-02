@@ -113,10 +113,11 @@ const NewIn = () => {
           <MobileDesignerCarousel designers={designers} />
         </div>
 
-        {/* Desktop: stacked editorial sections */}
+        {/* Desktop: sticky jump nav + stacked editorial sections */}
         <div className="hidden md:block">
+          <DesktopJumpNav designers={designers} />
           {designers.map((designer, idx) => (
-            <div key={designer.slug}>
+            <div key={designer.slug} id={`new-in-${designer.slug}`}>
               <NewInSpotlight designer={designer} />
               {idx < designers.length - 1 && (
                 <div className="max-w-7xl mx-auto px-12 lg:px-20 py-6">
