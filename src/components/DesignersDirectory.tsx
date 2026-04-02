@@ -1070,8 +1070,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // Ref to cancel in-flight jump animations when a new letter is tapped
   const jumpSessionRef = useRef(0);
 
-  // ── DEBUG: temporary toast showing resolved layout + anchor on each tap ──
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
