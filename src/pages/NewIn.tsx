@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useRef } from "react";
+import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
 import Navigation from "@/components/Navigation";
