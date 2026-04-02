@@ -246,18 +246,18 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
               title={gridCols === 3 ? "Display 4" : "Display 3"}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                {gridCols === 3 ? (
+                {gridCols === 4 ? (
+                  <>
+                    <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
+                    <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
+                    <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
+                  </>
+                ) : (
                   <>
                     <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
                     <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
                     <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                    <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" opacity={0.35} />
-                  </>
-                ) : (
-                  <>
-                    <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                    <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                    <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" opacity={0.35} />
+                    <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" />
                   </>
                 )}
               </svg>
