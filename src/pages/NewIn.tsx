@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useCallback, useEffect } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
 import Navigation from "@/components/Navigation";
@@ -77,6 +77,76 @@ function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof us
   );
 }
 
+/* ── Desktop sticky jump nav ── */
+function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
+  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!designers || designers.length < 2) return;
+
+    const observers: IntersectionObserver[] = [];
+    const visibleSlugs = new Set<string>();
+
+    designers.forEach((d) => {
+      const el = document.getElementById(`new-in-${d.slug}`);
+      if (!el) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            visibleSlugs.add(d.slug);
+          } else {
+            visibleSlugs.delete(d.slug);
+          }
+          // Pick the first visible designer in order
+          const first = designers.find((dd) => visibleSlugs.has(dd.slug));
+          setActiveSlug(first?.slug || null);
+        },
+        { rootMargin: "-120px 0px -50% 0px", threshold: 0 }
+      );
+      observer.observe(el);
+      observers.push(observer);
+    });
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, [designers]);
+
+  if (!designers || designers.length < 2) return null;
+
+  const handleClick = (slug: string) => {
+    const el = document.getElementById(`new-in-${slug}`);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 160;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <div className="sticky top-[96px] z-30 bg-background/90 backdrop-blur-sm border-b border-border/20">
+      <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
+        <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground shrink-0">
+          New In
+        </span>
+        <div className="flex items-center gap-6">
+          {designers.map((d) => (
+            <button
+              key={d.slug}
+              onClick={() => handleClick(d.slug)}
+              className={cn(
+                "font-display text-sm tracking-wide transition-all duration-300 pb-0.5 border-b-2",
+                activeSlug === d.slug
+                  ? "text-foreground border-foreground"
+                  : "text-muted-foreground border-transparent hover:text-foreground/70"
+              )}
+            >
+              {d.display_name || d.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ── */
 const NewIn = () => {
   const { data: designers = [], isLoading } = useNewInDesigners();
@@ -113,10 +183,11 @@ const NewIn = () => {
           <MobileDesignerCarousel designers={designers} />
         </div>
 
-        {/* Desktop: stacked editorial sections */}
+        {/* Desktop: sticky jump nav + stacked editorial sections */}
         <div className="hidden md:block">
+          <DesktopJumpNav designers={designers} />
           {designers.map((designer, idx) => (
-            <div key={designer.slug}>
+            <div key={designer.slug} id={`new-in-${designer.slug}`}>
               <NewInSpotlight designer={designer} />
               {idx < designers.length - 1 && (
                 <div className="max-w-7xl mx-auto px-12 lg:px-20 py-6">
