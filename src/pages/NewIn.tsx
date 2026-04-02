@@ -1,7 +1,6 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import useEmblaCarousel from "embla-carousel-react";
 import Navigation from "@/components/Navigation";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import { useNewInDesigners } from "@/hooks/useDesigner";
@@ -9,25 +8,78 @@ import { cn } from "@/lib/utils";
 
 const Footer = lazy(() => import("@/components/Footer"));
 
+/* ── Mobile carousel with dot indicators ── */
+function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start" });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  if (!designers || designers.length === 0) return null;
+
+  return (
+    <div>
+      {/* Dot indicators */}
+      {designers.length > 1 && (
+        <div className="flex items-center justify-center gap-2 py-4">
+          {designers.map((d, i) => (
+            <button
+              key={d.slug}
+              onClick={() => emblaApi?.scrollTo(i)}
+              className="flex items-center gap-1.5 group"
+              aria-label={`Go to ${d.display_name || d.name}`}
+            >
+              <span
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  i === selectedIndex
+                    ? "w-6 bg-foreground"
+                    : "w-1.5 bg-foreground/25 group-hover:bg-foreground/40"
+                )}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Designer name label */}
+      <div className="px-6 pb-3">
+        <p className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
+          New In — {designers[selectedIndex]?.display_name || designers[selectedIndex]?.name}
+        </p>
+      </div>
+
+      {/* Carousel */}
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {designers.map((designer) => (
+            <div key={designer.slug} className="flex-[0_0_100%] min-w-0">
+              <NewInSpotlight designer={designer} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Page ── */
 const NewIn = () => {
   const { data: designers = [], isLoading } = useNewInDesigners();
-  // First designer open by default
-  const [openSlugs, setOpenSlugs] = useState<Set<string>>(new Set());
-
-  const toggleDesigner = (slug: string) => {
-    setOpenSlugs((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
-  };
-
-  // Auto-open the first designer once data loads
-  const firstSlug = designers[0]?.slug;
-  if (firstSlug && openSlugs.size === 0 && !openSlugs.has(firstSlug)) {
-    setOpenSlugs(new Set([firstSlug]));
-  }
 
   const firstDesigner = designers[0];
 
@@ -56,51 +108,24 @@ const NewIn = () => {
       <Navigation />
 
       <div className="mt-[96px]">
-        {designers.map((designer) => {
-          const isOpen = openSlugs.has(designer.slug);
-          const displayName = designer.display_name || designer.name;
-          return (
-            <div key={designer.slug} className="border-b border-border/30">
-              {/* Collapsible trigger */}
-              <button
-                type="button"
-                onClick={() => toggleDesigner(designer.slug)}
-                className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-6 md:py-8 flex items-center justify-between group text-left"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-                    New In
-                  </span>
-                  <h2 className="font-display text-xl md:text-2xl lg:text-[1.75rem] text-foreground tracking-[0.12em] uppercase">
-                    {displayName}
-                  </h2>
-                </div>
-                <ChevronDown
-                  className={cn(
-                    "w-5 h-5 text-foreground/60 transition-transform duration-300 shrink-0",
-                    isOpen && "rotate-180"
-                  )}
-                />
-              </button>
+        {/* Mobile: swipeable carousel with dots */}
+        <div className="md:hidden">
+          <MobileDesignerCarousel designers={designers} />
+        </div>
 
-              {/* Collapsible content */}
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    key={`content-${designer.slug}`}
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <NewInSpotlight designer={designer} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+        {/* Desktop: stacked editorial sections */}
+        <div className="hidden md:block">
+          {designers.map((designer, idx) => (
+            <div key={designer.slug}>
+              <NewInSpotlight designer={designer} />
+              {idx < designers.length - 1 && (
+                <div className="max-w-7xl mx-auto px-12 lg:px-20 py-6">
+                  <div className="border-t border-border/30" />
+                </div>
+              )}
             </div>
-          );
-        })}
+          ))}
+        </div>
 
         {isLoading && (
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-24 text-center">
