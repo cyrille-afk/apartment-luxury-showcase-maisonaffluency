@@ -121,7 +121,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   };
 
   return (
-    <div className="sticky top-[96px] z-30 bg-background/90 backdrop-blur-sm border-b border-border/20">
+    <div className="sticky top-[140px] z-30 bg-background/90 backdrop-blur-sm border-b border-border/20">
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
         <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground shrink-0">
           New In
