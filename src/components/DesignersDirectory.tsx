@@ -1070,18 +1070,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // Ref to cancel in-flight jump animations when a new letter is tapped
   const jumpSessionRef = useRef(0);
 
-  // ── DEBUG: temporary toast showing resolved layout + anchor on each tap ──
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
 
-    // DEBUG label
-    const layout = getDesignersDirectoryLayout();
-    const anchorId = getDesignersDirectoryAnchorId(letter, layout);
-    const el = document.getElementById(anchorId);
-    setDebugInfo(`${layout} | ${anchorId} | found=${!!el}`);
 
     // Increment session so any in-flight settle loop from a previous tap aborts
     const session = ++jumpSessionRef.current;
@@ -1128,12 +1121,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 120);
   }, [activeLetters]);
 
-  // Clear debug label after 4s
-  useEffect(() => {
-    if (!debugInfo) return;
-    const t = setTimeout(() => setDebugInfo(null), 4000);
-    return () => clearTimeout(t);
-  }, [debugInfo]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -1414,12 +1401,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
           {/* Mobile: Directory */}
           <div className="md:hidden" data-directory-layout="mobile">
-            {/* DEBUG overlay — remove after confirming fix */}
-            {debugInfo && (
-              <div className="fixed bottom-16 left-2 right-2 z-[9999] bg-black/80 text-green-400 text-[11px] font-mono px-3 py-2 rounded-lg pointer-events-none text-center">
-                {debugInfo}
-              </div>
-            )}
             {!filteredPicks && (
               /* Mobile A-Z bar — wrapped grid for full visibility and touch-friendly sizing */
               <div className="mb-5">
