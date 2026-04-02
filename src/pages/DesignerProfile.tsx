@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet-async";
 import { motion, type Transition } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote } from "lucide-react";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
+import ShareMenu from "@/components/ShareMenu";
+import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 
 const transition: Transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] };
 const reveal: Transition = { ...transition, delay: 0.15 };
@@ -40,6 +42,7 @@ const DesignerProfile = () => {
   const name = displayName(designer.name);
   const firstLetter = designer.name.charAt(0).toUpperCase();
   const backTo = `/designers?letter=${firstLetter}`;
+  const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   return (
     <>
@@ -78,6 +81,26 @@ const DesignerProfile = () => {
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          {/* Mobile share icon */}
+          <div className="absolute top-3 right-3 z-20 md:hidden">
+            <ShareMenu
+              url={designerOgUrl}
+              message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
+              iconSize="w-4 h-4"
+              showLabel={false}
+            />
+          </div>
+          {/* Desktop share icon */}
+          <div className="absolute bottom-4 right-6 md:right-16 z-20 hidden md:block">
+            <ShareMenu
+              url={designerOgUrl}
+              message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
+              iconSize="w-4 h-4"
+              showLabel={false}
+            />
+          </div>
           {designer.hero_photo_credit && (
             <p className="absolute bottom-2 right-6 md:right-16 text-[10px] uppercase tracking-[0.15em] text-white/60 z-10">
               Photo: {designer.hero_photo_credit}
