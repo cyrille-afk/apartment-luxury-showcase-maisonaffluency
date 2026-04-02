@@ -584,6 +584,7 @@ interface DesignerRow {
   biography_images: string[];
   links: Record<string, string> | null;
   instagram_handle: string | null;
+  instagram_handle_2: string | null;
 }
 
 const TradeDesignersAdmin = () => {
