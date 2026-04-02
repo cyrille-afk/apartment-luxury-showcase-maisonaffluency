@@ -58,8 +58,22 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   );
 
   const displayName = designer.display_name || designer.name;
-  const biography = designer.biography;
   const shareUrl = `https://www.maisonaffluency.com/new-in?designer=${designer.slug}`;
+
+  // Extract only the first plain-text paragraph from the biography
+  // (the field contains media URLs, pipe-separated metadata, etc.)
+  const firstBioParagraph = useMemo(() => {
+    if (!designer.biography) return "";
+    const blocks = designer.biography.split(/\n\n+/).map((b) => b.trim()).filter(Boolean);
+    for (const block of blocks) {
+      const firstToken = block.split(/\s*\|\s*/)[0]?.trim() || "";
+      // Skip blocks that start with a URL (media / video references)
+      if (/^https?:\/\//i.test(firstToken) && !/\s/.test(firstToken)) continue;
+      // Strip any remaining HTML tags for clean rendering
+      return block.replace(/<[^>]+>/g, "");
+    }
+    return "";
+  }, [designer.biography]);
 
   return (
     <>
@@ -108,7 +122,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             </h2>
 
             <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left">
-              {biography}
+              {firstBioParagraph}
             </p>
 
             <div className="mt-8">
