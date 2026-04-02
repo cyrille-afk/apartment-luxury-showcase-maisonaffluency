@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useRef } from "react";
+import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
 import Navigation from "@/components/Navigation";
@@ -155,6 +156,15 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
               {d.display_name || d.name}
             </button>
           ))}
+        </div>
+        <div className="ml-auto">
+          <ShareMenu
+            url="https://www.maisonaffluency.com/new-in-og.html"
+            message="Maison Affluency · New In — Discover our latest designers: https://www.maisonaffluency.com/new-in-og.html"
+            className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
+            iconSize="w-5 h-5"
+            showLabel={false}
+          />
         </div>
       </div>
     </div>
