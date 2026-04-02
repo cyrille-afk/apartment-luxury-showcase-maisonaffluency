@@ -228,13 +228,13 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
               aria-label={`Switch to ${mobileGridCols === 1 ? 2 : 1} column grid`}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                {mobileGridCols === 1 ? (
+                {mobileGridCols === 2 ? (
+                  <rect x="4" y="3" width="16" height="18" rx="1" fill="currentColor" />
+                ) : (
                   <>
                     <rect x="2" y="3" width="9" height="18" rx="1" fill="currentColor" />
-                    <rect x="13" y="3" width="9" height="18" rx="1" fill="currentColor" opacity={0.35} />
+                    <rect x="13" y="3" width="9" height="18" rx="1" fill="currentColor" />
                   </>
-                ) : (
-                  <rect x="4" y="3" width="16" height="18" rx="1" fill="currentColor" />
                 )}
               </svg>
             </button>
