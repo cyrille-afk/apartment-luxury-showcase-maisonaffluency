@@ -30,7 +30,16 @@ function upgradeResolution(url: string): string {
 }
 
 function normalizeInstagramUrl(url: string): string {
-  return url.trim().split("?")[0].replace(/\/$/, "") + "/";
+  // Decode any HTML entities first
+  const raw = url.trim().replace(/&amp;/g, "&");
+  // Extract the shortcode from any Instagram post/reel URL format
+  const shortcodeMatch = raw.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/i);
+  if (shortcodeMatch) {
+    // Always return the canonical permalink — strips query params, img_index, locale, etc.
+    return `https://www.instagram.com/p/${shortcodeMatch[1]}/`;
+  }
+  // Fallback for non-post URLs (profiles, etc.)
+  return raw.split("?")[0].replace(/\/$/, "") + "/";
 }
 
 function cloudinaryFetchUrl(sourceUrl: string): string {
