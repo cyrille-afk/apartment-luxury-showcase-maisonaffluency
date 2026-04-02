@@ -113,9 +113,10 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   if (!designers || designers.length < 2) return null;
 
   const handleClick = (slug: string) => {
+    setActiveSlug(slug); // Immediately highlight clicked designer
     const el = document.getElementById(`new-in-${slug}`);
     if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 160;
+      const y = el.getBoundingClientRect().top + window.scrollY - 190;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
