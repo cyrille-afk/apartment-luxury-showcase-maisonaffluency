@@ -287,7 +287,7 @@ const Navigation = () => {
                 {/* New In — top of mobile menu */}
                 <button
                   onClick={() => handleNavClick("/new-in")}
-                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-red-600 hover:text-red-700 font-bold animate-fade-in opacity-0"
+                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-red-700 hover:text-white hover:bg-red-600 font-bold animate-fade-in opacity-0 bg-red-600/10 px-3 rounded-lg"
                   style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}
                 >
                   New In
