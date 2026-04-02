@@ -101,7 +101,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
           const first = designers.find((dd) => visibleSlugs.has(dd.slug));
           setActiveSlug(first?.slug || null);
         },
-        { rootMargin: "-120px 0px -50% 0px", threshold: 0 }
+        { rootMargin: "-200px 0px -40% 0px", threshold: 0 }
       );
       observer.observe(el);
       observers.push(observer);
@@ -113,9 +113,10 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   if (!designers || designers.length < 2) return null;
 
   const handleClick = (slug: string) => {
+    setActiveSlug(slug); // Immediately highlight clicked designer
     const el = document.getElementById(`new-in-${slug}`);
     if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 160;
+      const y = el.getBoundingClientRect().top + window.scrollY - 190;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
