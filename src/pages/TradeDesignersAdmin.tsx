@@ -584,6 +584,7 @@ interface DesignerRow {
   biography_images: string[];
   links: Record<string, string> | null;
   instagram_handle: string | null;
+  instagram_handle_2: string | null;
 }
 
 const TradeDesignersAdmin = () => {
@@ -604,7 +605,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links, instagram_handle")
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links, instagram_handle, instagram_handle_2")
         .order("name", { ascending: true });
       if (error) throw error;
       return data as DesignerRow[];
@@ -1069,6 +1070,12 @@ const TradeDesignersAdmin = () => {
                           placeholder="@handle (e.g. @achille_salvagni)"
                           className="mt-1 text-sm font-mono"
                         />
+                        <Input
+                          value={(editBuffer[d.id]?.instagram_handle_2 ?? d.instagram_handle_2) || ""}
+                          onChange={(e) => setField(d.id, "instagram_handle_2" as keyof DesignerRow, e.target.value || null as any)}
+                          placeholder="Second handle (optional)"
+                          className="mt-1 text-sm font-mono"
+                        />
                       </div>
 
                       {/* Instagram Posts */}
@@ -1081,6 +1088,11 @@ const TradeDesignersAdmin = () => {
                             if (handle) {
                               const clean = handle.replace(/^@/, "").trim();
                               if (clean) urls.push(`https://www.instagram.com/${clean}/`);
+                            }
+                            const handle2 = (editBuffer[d.id]?.instagram_handle_2 ?? d.instagram_handle_2);
+                            if (handle2) {
+                              const clean2 = handle2.replace(/^@/, "").trim();
+                              if (clean2) urls.push(`https://www.instagram.com/${clean2}/`);
                             }
                             if (d.links) {
                               Object.values(d.links).forEach((v) => {

@@ -1,0 +1,1 @@
+ALTER TABLE public.designers ADD COLUMN instagram_handle_2 text DEFAULT NULL;
