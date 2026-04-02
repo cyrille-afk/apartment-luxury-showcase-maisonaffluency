@@ -1089,6 +1089,11 @@ const TradeDesignersAdmin = () => {
                               const clean = handle.replace(/^@/, "").trim();
                               if (clean) urls.push(`https://www.instagram.com/${clean}/`);
                             }
+                            const handle2 = (editBuffer[d.id]?.instagram_handle_2 ?? d.instagram_handle_2);
+                            if (handle2) {
+                              const clean2 = handle2.replace(/^@/, "").trim();
+                              if (clean2) urls.push(`https://www.instagram.com/${clean2}/`);
+                            }
                             if (d.links) {
                               Object.values(d.links).forEach((v) => {
                                 if (typeof v === "string" && v.includes("instagram.com")) urls.push(v);
