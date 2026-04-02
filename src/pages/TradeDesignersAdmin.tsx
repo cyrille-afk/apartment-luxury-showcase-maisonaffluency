@@ -1070,6 +1070,12 @@ const TradeDesignersAdmin = () => {
                           placeholder="@handle (e.g. @achille_salvagni)"
                           className="mt-1 text-sm font-mono"
                         />
+                        <Input
+                          value={(editBuffer[d.id]?.instagram_handle_2 ?? d.instagram_handle_2) || ""}
+                          onChange={(e) => setField(d.id, "instagram_handle_2" as keyof DesignerRow, e.target.value || null as any)}
+                          placeholder="Second handle (optional)"
+                          className="mt-1 text-sm font-mono"
+                        />
                       </div>
 
                       {/* Instagram Posts */}
