@@ -42,6 +42,7 @@ const DesignerProfile = () => {
   const name = displayName(designer.name);
   const firstLetter = designer.name.charAt(0).toUpperCase();
   const backTo = `/designers?letter=${firstLetter}`;
+  const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   return (
     <>
