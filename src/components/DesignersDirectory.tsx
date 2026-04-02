@@ -1075,11 +1075,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => new Set(prev).add(letter));
 
-    // DEBUG label
-    const layout = getDesignersDirectoryLayout();
-    const anchorId = getDesignersDirectoryAnchorId(letter, layout);
-    const el = document.getElementById(anchorId);
-    setDebugInfo(`${layout} | ${anchorId} | found=${!!el}`);
 
     // Increment session so any in-flight settle loop from a previous tap aborts
     const session = ++jumpSessionRef.current;
