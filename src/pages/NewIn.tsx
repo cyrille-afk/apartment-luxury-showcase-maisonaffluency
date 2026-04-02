@@ -101,7 +101,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
           const first = designers.find((dd) => visibleSlugs.has(dd.slug));
           setActiveSlug(first?.slug || null);
         },
-        { rootMargin: "-120px 0px -50% 0px", threshold: 0 }
+        { rootMargin: "-200px 0px -40% 0px", threshold: 0 }
       );
       observer.observe(el);
       observers.push(observer);
