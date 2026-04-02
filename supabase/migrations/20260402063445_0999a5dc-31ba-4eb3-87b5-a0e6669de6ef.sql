@@ -1,0 +1,1 @@
+UPDATE public.designers SET new_in_order = 3 WHERE slug = 'pierre-yovanovitch';
