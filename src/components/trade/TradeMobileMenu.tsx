@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronRight, LogOut, Menu, X,
+import {
+  ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Image, Heart, FolderArchive, MapPin,
   Users, FolderOpen, Package, FileText, Box, Settings,
   Shield, AlertCircle, FileSpreadsheet, Layers, Scissors,
@@ -28,27 +29,47 @@ const navGroups = [
     ],
   },
   {
-    label: "Tools",
+    label: "Discover",
     items: [
       { title: "Gallery", url: "/trade/gallery", icon: Image },
       { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
       { title: "Resources", url: "/trade/documents", icon: FolderOpen },
-      { title: "Sample Requests", url: "/trade/samples", icon: Package },
+      { title: "Material Library", url: "/trade/materials", icon: Layers },
+    ],
+  },
+  {
+    label: "Specification",
+    items: [
       { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
-      { title: "Order Timeline", url: "/trade/order-timeline", icon: CalendarClock },
       { title: "FF&E Schedule", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
       { title: "Tearsheet Builder", url: "/trade/tearsheets", icon: Scissors },
-      { title: "Material Library", url: "/trade/materials", icon: Layers },
-      { title: "Mood Board", url: "/trade/mood-boards", icon: Paintbrush },
       { title: "Comparator", url: "/trade/comparator", icon: Columns },
-      { title: "Budget Tracker", url: "/trade/budget", icon: Wallet },
+      { title: "Mood Board", url: "/trade/mood-boards", icon: Paintbrush },
+      { title: "Annotations", url: "/trade/annotations", icon: MessageCircle },
+    ],
+  },
+  {
+    label: "Procurement",
+    items: [
+      { title: "Order Timeline", url: "/trade/order-timeline", icon: CalendarClock },
+      { title: "Sample Requests", url: "/trade/samples", icon: Package },
       { title: "Shipping Tracker", url: "/trade/shipping-tracker", icon: Truck },
       { title: "Lead Time Calendar", url: "/trade/lead-time-calendar", icon: CalendarDays },
-      { title: "Annotations", url: "/trade/annotations", icon: MessageCircle },
+      { title: "Budget Tracker", url: "/trade/budget", icon: Wallet },
       { title: "Reorder", url: "/trade/reorder", icon: RefreshCw },
       { title: "Currency Converter", url: "/trade/currency-converter", icon: ArrowRightLeft },
+    ],
+  },
+  {
+    label: "Learn",
+    items: [
       { title: "CPD & Education", url: "/trade/cpd", icon: GraduationCap },
       { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
       { title: "Settings", url: "/trade/settings", icon: Settings },
     ],
   },
@@ -74,7 +95,6 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
 
   const handleNav = (url: string) => {
     onOpenChange(false);
-    // Small delay to let Sheet close animation start
     setTimeout(() => navigate(url), 150);
   };
 
@@ -97,19 +117,13 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
       <SheetContent side="left" className="w-full overflow-y-auto p-0" aria-describedby={undefined}>
         <div className="sr-only"><h2>Trade Portal Menu</h2></div>
 
-        {/* Brand header */}
         <div className="flex flex-col items-center pt-6 pb-4 border-b border-border/30 mb-2 px-6">
           <button onClick={() => handleNav("/trade")} className="group cursor-pointer">
-            <span className="font-display text-base text-foreground tracking-wide block text-center">
-              Maison Affluency
-            </span>
-            <span className="font-body text-[9px] text-muted-foreground uppercase tracking-[0.2em] block text-center">
-              Trade Portal
-            </span>
+            <span className="font-display text-base text-foreground tracking-wide block text-center">Maison Affluency</span>
+            <span className="font-body text-[9px] text-muted-foreground uppercase tracking-[0.2em] block text-center">Trade Portal</span>
           </button>
         </div>
 
-        {/* Navigation groups */}
         <div className="flex flex-col px-6 pb-32">
           {navGroups.map((group, gi) => (
             <Fragment key={group.label}>
@@ -126,11 +140,9 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
                     onClick={() => handleNav(item.url)}
                     className={cn(
                       "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
-                      active
-                        ? "text-foreground font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
+                      active ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                     )}
-                    style={{ animationDelay: `${idx * 60}ms`, animationFillMode: "forwards" }}
+                    style={{ animationDelay: `${idx * 40}ms`, animationFillMode: "forwards" }}
                   >
                     <span className="flex items-center gap-3">
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -143,13 +155,10 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
             </Fragment>
           ))}
 
-          {/* Admin group */}
           {isAdmin && (
             <>
               <div className="border-t border-border/30 my-3" />
-              <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">
-                Admin
-              </span>
+              <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">Admin</span>
               {adminItems.map((item) => {
                 const idx = itemIndex++;
                 const active = isActive(item.url);
@@ -159,21 +168,13 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
                     onClick={() => handleNav(item.url)}
                     className={cn(
                       "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
-                      active
-                        ? "text-foreground font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
+                      active ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                     )}
-                    style={{ animationDelay: `${idx * 60}ms`, animationFillMode: "forwards" }}
+                    style={{ animationDelay: `${idx * 40}ms`, animationFillMode: "forwards" }}
                   >
                     <span className="flex items-center gap-3">
                       <item.icon className="h-4 w-4 shrink-0" />
                       {item.title}
-                      {item.url === "/trade/quotes-admin" && submittedCount > 0 && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-medium leading-none">
-                          <AlertCircle className="h-2.5 w-2.5" />
-                          {submittedCount}
-                        </span>
-                      )}
                     </span>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
                   </button>
@@ -182,7 +183,6 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
             </>
           )}
 
-          {/* User + Sign Out */}
           <div className="border-t border-border/30 mt-6 pt-4">
             {profile && (
               <div className="flex items-center gap-2.5 mb-4">
