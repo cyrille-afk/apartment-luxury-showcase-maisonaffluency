@@ -12,6 +12,7 @@ interface TearsheetProduct {
   product_name: string;
   brand_name: string;
   category: string | null;
+  subcategory: string | null;
   image_url: string | null;
   dimensions: string | null;
   materials: string | null;
@@ -23,6 +24,9 @@ interface TearsheetProduct {
 export default function TradeTearsheets() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [filterDesigner, setFilterDesigner] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterSubcategory, setFilterSubcategory] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -33,11 +37,11 @@ export default function TradeTearsheets() {
       const [curatorRes, tradeRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
-          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name, founder)")
+          .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, designers!inner(name, founder)")
           .order("title"),
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, category, image_url, dimensions, materials, description, lead_time")
+          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time")
           .eq("is_active", true)
           .not("image_url", "is", null)
           .neq("image_url", "")
@@ -63,6 +67,7 @@ export default function TradeTearsheets() {
           product_name: p.title,
           brand_name: brandName,
           category: p.category,
+          subcategory: p.subcategory || null,
           image_url: p.image_url,
           dimensions: p.dimensions,
           materials: p.materials,
@@ -82,6 +87,7 @@ export default function TradeTearsheets() {
           product_name: p.product_name,
           brand_name: p.brand_name,
           category: p.category,
+          subcategory: p.subcategory || null,
           image_url: p.image_url,
           dimensions: p.dimensions,
           materials: p.materials,
