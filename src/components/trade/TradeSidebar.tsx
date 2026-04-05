@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation, Heart, BarChart3, ClipboardList, Users, PenLine, History, Sparkles } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Heart, Package, Box, FolderArchive, AlertCircle, Users, DollarSign, ClipboardList } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,7 +44,9 @@ export function TradeSidebar() {
   const navigate = useNavigate();
   const { isAdmin, isSuperAdmin, signOut, profile, user } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [submittedCount, setSubmittedCount] = useState(0);
+  const [submittedQuotes, setSubmittedQuotes] = useState(0);
+  const [pendingApps, setPendingApps] = useState(0);
+  const [pendingSamples, setPendingSamples] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -52,28 +54,32 @@ export function TradeSidebar() {
       .then(({ data }) => { if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url); });
   }, [user]);
 
-  // Fetch count of submitted quotes for admin badge
+  // Fetch counts for admin badges
   useEffect(() => {
     if (!isAdmin) return;
-    const fetchCount = async () => {
-      const { count } = await supabase
-        .from("trade_quotes")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "submitted");
-      setSubmittedCount(count || 0);
+    const fetchCounts = async () => {
+      const [quotes, apps, samples] = await Promise.all([
+        supabase.from("trade_quotes").select("*", { count: "exact", head: true }).eq("status", "submitted"),
+        supabase.from("trade_applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("trade_sample_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
+      setSubmittedQuotes(quotes.count || 0);
+      setPendingApps(apps.count || 0);
+      setPendingSamples(samples.count || 0);
     };
-    fetchCount();
+    fetchCounts();
 
-    // Subscribe to realtime changes on trade_quotes
     const channel = supabase
-      .channel("trade-quotes-badge")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => {
-        fetchCount();
-      })
+      .channel("admin-badges")
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => fetchCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_applications" }, () => fetchCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests" }, () => fetchCounts())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [isAdmin]);
+
+  const totalBadge = submittedQuotes + pendingApps + pendingSamples;
 
   const handleSignOut = async () => {
     await signOut();
@@ -186,17 +192,29 @@ export function TradeSidebar() {
                     >
                       <Shield className="h-4 w-4 shrink-0" />
                       {!collapsed && (
-                        <span className="flex items-center gap-2">
+                        <span className="flex items-center gap-2 flex-wrap">
                           Admin
-                          {submittedCount > 0 && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-medium leading-none">
-                              <AlertCircle className="h-2.5 w-2.5" />
-                              {submittedCount}
+                          {submittedQuotes > 0 && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive text-[9px] font-medium leading-none" title={`${submittedQuotes} pending quote${submittedQuotes > 1 ? 's' : ''}`}>
+                              <DollarSign className="h-2.5 w-2.5" />
+                              {submittedQuotes}
+                            </span>
+                          )}
+                          {pendingApps > 0 && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-warning/15 text-warning text-[9px] font-medium leading-none" title={`${pendingApps} pending application${pendingApps > 1 ? 's' : ''}`}>
+                              <ClipboardList className="h-2.5 w-2.5" />
+                              {pendingApps}
+                            </span>
+                          )}
+                          {pendingSamples > 0 && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-medium leading-none" title={`${pendingSamples} pending sample${pendingSamples > 1 ? 's' : ''}`}>
+                              <Package className="h-2.5 w-2.5" />
+                              {pendingSamples}
                             </span>
                           )}
                         </span>
                       )}
-                      {collapsed && submittedCount > 0 && (
+                      {collapsed && totalBadge > 0 && (
                         <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
                       )}
                     </NavLink>
