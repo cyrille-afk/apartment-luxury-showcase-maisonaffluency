@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield,
-  MapPin, Heart, Package, Box, FolderArchive, Users, DollarSign, ClipboardList,
-  CalendarClock, FileSpreadsheet, Layers, Scissors, MessageCircle, Truck,
-  Paintbrush, Wallet, CalendarDays, RefreshCw, ArrowRightLeft, GraduationCap,
-  Columns, Sparkles,
+  LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -16,99 +13,15 @@ import {
   SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
-type NavItem = { title: string; url: string; icon: any; end?: boolean };
-type NavGroup = { label: string; items: NavItem[] };
-
-const navGroups: NavGroup[] = [
-  {
-    label: "Navigation",
-    items: [
-      { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
-      { title: "Showroom", url: "/trade/showroom", icon: MapPin },
-    ],
-  },
-  {
-    label: "My Collections",
-    items: [
-      { title: "Favorites", url: "/trade/favorites", icon: Heart },
-      { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
-    ],
-  },
-  {
-    label: "Discover",
-    items: [
-      { title: "Gallery", url: "/trade/gallery", icon: Image },
-      { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
-      { title: "Resources", url: "/trade/documents", icon: FolderOpen },
-      { title: "Material Library", url: "/trade/materials", icon: Layers },
-    ],
-  },
-  {
-    label: "Specification",
-    items: [
-      { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
-      { title: "FF&E Schedule", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
-      { title: "Tearsheet Builder", url: "/trade/tearsheets", icon: Scissors },
-      { title: "Product Comparator", url: "/trade/comparator", icon: Columns },
-      { title: "Mood Board", url: "/trade/mood-boards", icon: Paintbrush },
-      { title: "Markup & Annotation", url: "/trade/annotations", icon: MessageCircle },
-    ],
-  },
-  {
-    label: "Procurement",
-    items: [
-      { title: "Order Timeline", url: "/trade/order-timeline", icon: CalendarClock },
-      { title: "Sample Requests", url: "/trade/samples", icon: Package },
-      { title: "Shipping Tracker", url: "/trade/shipping-tracker", icon: Truck },
-      { title: "Lead Time Calendar", url: "/trade/lead-time-calendar", icon: CalendarDays },
-      { title: "Budget Tracker", url: "/trade/budget", icon: Wallet },
-      { title: "Reorder", url: "/trade/reorder", icon: RefreshCw },
-      { title: "Currency Converter", url: "/trade/currency-converter", icon: ArrowRightLeft },
-    ],
-  },
-  {
-    label: "Learn",
-    items: [
-      { title: "CPD & Education", url: "/trade/cpd", icon: GraduationCap },
-      { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { title: "Settings", url: "/trade/settings", icon: Settings },
-    ],
-  },
+const coreItems = [
+  { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
+  { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+  { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
+  { title: "Quotes", url: "/trade/quotes", icon: FileText },
+  { title: "Tools", url: "/trade/tools", icon: Wrench },
+  { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
-
-function SidebarNavGroup({ group, collapsed }: { group: NavGroup; collapsed: boolean }) {
-  return (
-    <SidebarGroup>
-      <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-        {!collapsed && group.label}
-      </SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {group.items.map((item) => (
-            <SidebarMenuItem key={item.url}>
-              <SidebarMenuButton asChild>
-                <NavLink
-                  to={item.url}
-                  end={item.end}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                  activeClassName="bg-muted text-foreground font-medium"
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && <span>{item.title}</span>}
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
-}
 
 export function TradeSidebar() {
   const { state } = useSidebar();
@@ -172,9 +85,27 @@ export function TradeSidebar() {
           </NavLink>
         </div>
 
-        {navGroups.map((group) => (
-          <SidebarNavGroup key={group.label} group={group} collapsed={collapsed} />
-        ))}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {coreItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end={item.end}
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {isAdmin && (
           <SidebarGroup>
