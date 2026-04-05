@@ -54,20 +54,24 @@ export default function TradeTearsheets() {
       const seen = new Map<string, boolean>();
       const merged: TearsheetProduct[] = [];
 
-      // Add curator picks — re-attribute child designer picks to their parent (founder)
+      // Add curator picks — display child designer name, group under parent brand
       (curatorRes.data || []).forEach((p: any) => {
         const designer = p.designers as any;
         const designerName = designer?.name || "Unknown";
         const founder = designer?.founder;
-        // Use the parent (founder) name if this is a child designer, otherwise use own name
-        const brandName = (founder && founder !== designerName) ? founder : designerName;
-        const key = `${brandName.toLowerCase()}::${p.title.toLowerCase()}`;
+        const isChild = founder && founder !== designerName;
+        // Display name keeps the child designer, parent_brand is used for filtering/grouping
+        const displayName = designerName;
+        const parentBrand = isChild ? founder : designerName;
+        // Dedup key uses parent brand to avoid duplicates across parent/child
+        const key = `${parentBrand.toLowerCase()}::${p.title.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
         merged.push({
           id: p.id,
           product_name: p.title,
-          brand_name: brandName,
+          brand_name: displayName,
+          parent_brand: parentBrand,
           category: normalizeCategory(p.category, p.subcategory) || null,
           subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
