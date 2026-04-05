@@ -111,7 +111,7 @@ export default function TradeTearsheets() {
   });
 
   // Derive unique values for filter dropdowns using taxonomy order
-  const designers = useMemo(() => [...new Set(products.map((p) => p.brand_name))].sort(), [products]);
+  const designers = useMemo(() => [...new Set(products.map((p) => p.parent_brand))].sort(), [products]);
   const categories = useMemo(() => {
     const raw = [...new Set(products.map((p) => p.category).filter(Boolean))] as string[];
     return CATEGORY_ORDER.filter((c) => raw.includes(c));
