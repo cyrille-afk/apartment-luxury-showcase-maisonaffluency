@@ -33,7 +33,7 @@ export default function TradeTearsheets() {
       const [curatorRes, tradeRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
-          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name)")
+          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name, founder)")
           .order("title"),
         supabase
           .from("trade_products")
