@@ -5,7 +5,7 @@ import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
-import { useDesignerPicks } from "@/hooks/useDesigner";
+import { useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,15 @@ interface NewInSpotlightProps {
 
 const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const navigate = useNavigate();
-  const { data: picks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
+  const isParentOrChild = !!(designer.founder);
+  const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
+  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
+    isParentOrChild ? designer : undefined,
+    { publicOnly: true }
+  );
+  const picks: DesignerCuratorPick[] = isParentOrChild
+    ? groupedPicks.map(({ designer_name, designer_slug, ...rest }) => rest)
+    : simplePicks;
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
