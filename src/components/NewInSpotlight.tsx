@@ -5,7 +5,7 @@ import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
-import { useDesignerPicks } from "@/hooks/useDesigner";
+import { useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { cn } from "@/lib/utils";
