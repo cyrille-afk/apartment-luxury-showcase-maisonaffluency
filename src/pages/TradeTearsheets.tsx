@@ -35,8 +35,8 @@ export default function TradeTearsheets() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["tearsheet-products-merged"],
     queryFn: async () => {
-      // Fetch curator picks (curated, always have images) and trade_products with images
-      const [curatorRes, tradeRes] = await Promise.all([
+      // Fetch curator picks, trade_products, and all designers for parent mapping
+      const [curatorRes, tradeRes, designerRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
           .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, designers!inner(name, founder)")
@@ -49,7 +49,19 @@ export default function TradeTearsheets() {
           .neq("image_url", "")
           .order("brand_name")
           .order("product_name"),
+        supabase
+          .from("designers")
+          .select("name, founder")
+          .not("founder", "is", null),
       ]);
+
+      // Build a lookup: child designer name → parent brand
+      const childToParent = new Map<string, string>();
+      (designerRes.data || []).forEach((d: any) => {
+        if (d.founder && d.founder !== d.name) {
+          childToParent.set(d.name.toLowerCase(), d.founder);
+        }
+      });
 
       const seen = new Map<string, boolean>();
       const merged: TearsheetProduct[] = [];
@@ -85,14 +97,16 @@ export default function TradeTearsheets() {
 
       // Add trade products that aren't already covered
       (tradeRes.data || []).forEach((p: any) => {
-        const key = `${p.brand_name.toLowerCase()}::${p.product_name.toLowerCase()}`;
+        // Resolve parent brand from child→parent map
+        const resolvedParent = childToParent.get(p.brand_name.toLowerCase()) || p.brand_name;
+        const key = `${resolvedParent.toLowerCase()}::${p.product_name.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
         merged.push({
           id: p.id,
           product_name: p.product_name,
           brand_name: p.brand_name,
-          parent_brand: p.brand_name,
+          parent_brand: resolvedParent,
           category: normalizeCategory(p.category, p.subcategory) || null,
           subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
