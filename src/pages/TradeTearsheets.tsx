@@ -97,14 +97,16 @@ export default function TradeTearsheets() {
 
       // Add trade products that aren't already covered
       (tradeRes.data || []).forEach((p: any) => {
-        const key = `${p.brand_name.toLowerCase()}::${p.product_name.toLowerCase()}`;
+        // Resolve parent brand from child→parent map
+        const resolvedParent = childToParent.get(p.brand_name.toLowerCase()) || p.brand_name;
+        const key = `${resolvedParent.toLowerCase()}::${p.product_name.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
         merged.push({
           id: p.id,
           product_name: p.product_name,
           brand_name: p.brand_name,
-          parent_brand: p.brand_name,
+          parent_brand: resolvedParent,
           category: normalizeCategory(p.category, p.subcategory) || null,
           subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
