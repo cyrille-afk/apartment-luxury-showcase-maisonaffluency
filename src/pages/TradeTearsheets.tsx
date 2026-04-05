@@ -53,13 +53,13 @@ export default function TradeTearsheets() {
       const seen = new Map<string, boolean>();
       const merged: TearsheetProduct[] = [];
 
-      // Add curator picks — skip child designers (founder exists and differs from name)
+      // Add curator picks — re-attribute child designer picks to their parent (founder)
       (curatorRes.data || []).forEach((p: any) => {
         const designer = p.designers as any;
-        const brandName = designer?.name || "Unknown";
+        const designerName = designer?.name || "Unknown";
         const founder = designer?.founder;
-        // If this designer is a child (has a founder that differs from its own name), skip it
-        if (founder && founder !== brandName) return;
+        // Use the parent (founder) name if this is a child designer, otherwise use own name
+        const brandName = (founder && founder !== designerName) ? founder : designerName;
         const key = `${brandName.toLowerCase()}::${p.title.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
