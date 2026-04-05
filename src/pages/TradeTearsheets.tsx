@@ -210,9 +210,45 @@ export default function TradeTearsheets() {
           </div>
         ) : (
           <>
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
+              </div>
+              <select
+                value={filterDesigner}
+                onChange={(e) => setFilterDesigner(e.target.value)}
+                className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground"
+              >
+                <option value="">All Designers</option>
+                {designers.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <select
+                value={filterCategory}
+                onChange={(e) => { setFilterCategory(e.target.value); setFilterSubcategory(""); }}
+                className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground"
+              >
+                <option value="">All Categories</option>
+                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              {subcategories.length > 0 && (
+                <select
+                  value={filterSubcategory}
+                  onChange={(e) => setFilterSubcategory(e.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground"
+                >
+                  <option value="">All Subcategories</option>
+                  {subcategories.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              )}
+              {(filterDesigner || filterCategory || filterSubcategory) && (
+                <button
+                  onClick={() => { setFilterDesigner(""); setFilterCategory(""); setFilterSubcategory(""); }}
+                  className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
             {isLoading ? (
               <div className="flex justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
