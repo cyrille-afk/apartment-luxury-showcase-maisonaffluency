@@ -28,6 +28,7 @@ const TradeGallery = lazy(() => import("./pages/TradeGallery"));
 const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
+const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
@@ -190,6 +191,7 @@ const App = () => {
                     {/* spec-sheet moved to public route */}
                     <Route path="audit-log" element={<TradeAuditLog />} />
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
+                    <Route path="order-timeline" element={<TradeOrderTimeline />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 

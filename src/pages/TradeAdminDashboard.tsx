@@ -7,7 +7,7 @@ import {
   Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
-  ClipboardList, Layers, Settings2,
+  ClipboardList, Layers, Settings2, CalendarClock,
 } from "lucide-react";
 
 interface AdminCard {
@@ -30,6 +30,7 @@ const contentGroup: AdminCard[] = [
 
 const commerceGroup: AdminCard[] = [
   { title: "Quote Management", description: "Review and respond to submitted trade quotes", url: "/trade/quotes-admin", icon: DollarSign },
+  { title: "Order Timeline", description: "Kanban view of orders from deposit to delivery", url: "/trade/order-timeline", icon: CalendarClock },
   { title: "Sample Requests", description: "Track sample shipments and returns", url: "/trade/admin", icon: Package },
   { title: "Trade Applications", description: "Review and approve new trade registrations", url: "/trade/admin", icon: Shield },
 ];
