@@ -3,35 +3,102 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef } from "react";
-import { Download, FileText, Loader2, Search, Printer } from "lucide-react";
+import { FileText, Loader2, Search, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+interface TearsheetProduct {
+  id: string;
+  product_name: string;
+  brand_name: string;
+  category: string | null;
+  image_url: string | null;
+  dimensions: string | null;
+  materials: string | null;
+  description: string | null;
+  lead_time: string | null;
+  source: "curator" | "trade";
+}
 
 export default function TradeTearsheets() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["tearsheet-products"],
+    queryKey: ["tearsheet-products-merged"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("trade_products")
-        .select("*")
-        .eq("is_active", true)
-        .order("brand_name")
-        .order("product_name");
-      return data || [];
+      // Fetch curator picks (curated, always have images) and trade_products with images
+      const [curatorRes, tradeRes] = await Promise.all([
+        supabase
+          .from("designer_curator_picks")
+          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name)")
+          .order("title"),
+        supabase
+          .from("trade_products")
+          .select("id, product_name, brand_name, category, image_url, dimensions, materials, description, lead_time")
+          .eq("is_active", true)
+          .not("image_url", "is", null)
+          .neq("image_url", "")
+          .order("brand_name")
+          .order("product_name"),
+      ]);
+
+      const seen = new Map<string, boolean>();
+      const merged: TearsheetProduct[] = [];
+
+      // Add curator picks first (canonical source)
+      (curatorRes.data || []).forEach((p: any) => {
+        const brandName = (p.designers as any)?.name || "Unknown";
+        const key = `${brandName.toLowerCase()}::${p.title.toLowerCase()}`;
+        if (seen.has(key)) return;
+        seen.set(key, true);
+        merged.push({
+          id: p.id,
+          product_name: p.title,
+          brand_name: brandName,
+          category: p.category,
+          image_url: p.image_url,
+          dimensions: p.dimensions,
+          materials: p.materials,
+          description: p.description,
+          lead_time: null,
+          source: "curator",
+        });
+      });
+
+      // Add trade products that aren't already covered
+      (tradeRes.data || []).forEach((p: any) => {
+        const key = `${p.brand_name.toLowerCase()}::${p.product_name.toLowerCase()}`;
+        if (seen.has(key)) return;
+        seen.set(key, true);
+        merged.push({
+          id: p.id,
+          product_name: p.product_name,
+          brand_name: p.brand_name,
+          category: p.category,
+          image_url: p.image_url,
+          dimensions: p.dimensions,
+          materials: p.materials,
+          description: p.description,
+          lead_time: p.lead_time,
+          source: "trade",
+        });
+      });
+
+      // Sort by brand then product name
+      merged.sort((a, b) => a.brand_name.localeCompare(b.brand_name) || a.product_name.localeCompare(b.product_name));
+      return merged;
     },
   });
 
-  const filtered = products.filter((p: any) =>
-    !search || [p.product_name, p.brand_name].some((f: string) => f?.toLowerCase().includes(search.toLowerCase()))
+  const filtered = products.filter((p) =>
+    !search || [p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handlePrint = () => {
-    if (!printRef.current) return;
+    if (!printRef.current || !selectedProduct) return;
     const win = window.open("", "_blank");
     if (!win) return;
     win.document.write(`
@@ -94,12 +161,12 @@ export default function TradeTearsheets() {
                 <img src={selectedProduct.image_url} alt={selectedProduct.product_name} className="max-h-72 object-contain border border-border rounded" />
               )}
               <div className="grid grid-cols-2 gap-4">
-                {[
+                {([
                   ["Category", selectedProduct.category],
                   ["Dimensions", selectedProduct.dimensions],
                   ["Materials", selectedProduct.materials],
                   ["Lead Time", selectedProduct.lead_time],
-                ].map(([label, val]) => (
+                ] as const).map(([label, val]) => (
                   <div key={label}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
                     <p className="font-body text-sm text-foreground mt-0.5">{val || "—"}</p>
@@ -132,7 +199,7 @@ export default function TradeTearsheets() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filtered.map((p: any) => (
+                {filtered.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setSelectedProduct(p)}
@@ -148,7 +215,7 @@ export default function TradeTearsheets() {
                     <div className="flex-1 min-w-0">
                       <p className="font-display text-sm text-foreground truncate">{p.product_name}</p>
                       <p className="font-body text-[11px] text-muted-foreground">{p.brand_name}</p>
-                      <p className="font-body text-[10px] text-muted-foreground/70 mt-1 capitalize">{p.category}</p>
+                      <p className="font-body text-[10px] text-muted-foreground/70 mt-1 capitalize">{p.category || "—"}</p>
                     </div>
                   </button>
                 ))}
