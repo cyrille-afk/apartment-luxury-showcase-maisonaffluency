@@ -218,7 +218,6 @@ export function TradeSidebar() {
                           )}
                         </span>
                       )}
-                      )}
                       {collapsed && totalBadge > 0 && (
                         <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
                       )}
