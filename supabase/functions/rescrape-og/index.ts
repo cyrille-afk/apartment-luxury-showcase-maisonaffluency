@@ -61,14 +61,13 @@ Deno.serve(async (req) => {
           `https://graph.facebook.com/v19.0/?id=${encodeURIComponent(url)}&scrape=true&access_token=${token}`,
           { method: "POST" }
         );
-        const data = await resp.json();
-        if (data.og_object) {
-          return { url, ok: true, title: data.og_object?.title || "" };
+        const text = await resp.text();
+        let data;
+        try { data = JSON.parse(text); } catch { return { url, ok: false, error: `Non-JSON: ${text.slice(0, 300)}` }; }
+        if (data.og_object || data.title || data.id) {
+          return { url, ok: true, title: data.og_object?.title || data.title || "" };
         }
-        if (data.title || data.id) {
-          return { url, ok: true, title: data.title || data.id || "" };
-        }
-        return { url, ok: false, error: data.error?.message || JSON.stringify(data).slice(0, 200) };
+        return { url, ok: false, error: data.error?.message || text.slice(0, 300) };
       } catch (e) {
         return { url, ok: false, error: String(e) };
       }
