@@ -35,8 +35,8 @@ export default function TradeTearsheets() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["tearsheet-products-merged"],
     queryFn: async () => {
-      // Fetch curator picks (curated, always have images) and trade_products with images
-      const [curatorRes, tradeRes] = await Promise.all([
+      // Fetch curator picks, trade_products, and all designers for parent mapping
+      const [curatorRes, tradeRes, designerRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
           .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, designers!inner(name, founder)")
@@ -49,7 +49,19 @@ export default function TradeTearsheets() {
           .neq("image_url", "")
           .order("brand_name")
           .order("product_name"),
+        supabase
+          .from("designers")
+          .select("name, founder")
+          .not("founder", "is", null),
       ]);
+
+      // Build a lookup: child designer name → parent brand
+      const childToParent = new Map<string, string>();
+      (designerRes.data || []).forEach((d: any) => {
+        if (d.founder && d.founder !== d.name) {
+          childToParent.set(d.name.toLowerCase(), d.founder);
+        }
+      });
 
       const seen = new Map<string, boolean>();
       const merged: TearsheetProduct[] = [];
