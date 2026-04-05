@@ -45,7 +45,7 @@ export default function TradeTearsheets() {
           .order("title"),
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time")
+          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency")
           .eq("is_active", true)
           .not("image_url", "is", null)
           .neq("image_url", "")
