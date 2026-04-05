@@ -20,6 +20,8 @@ interface TearsheetProduct {
   materials: string | null;
   description: string | null;
   lead_time: string | null;
+  trade_price_cents: number | null;
+  currency: string;
   source: "curator" | "trade";
 }
 
