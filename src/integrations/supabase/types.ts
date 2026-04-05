@@ -506,6 +506,95 @@ export type Database = {
         }
         Relationships: []
       }
+      cpd_attendance: {
+        Row: {
+          attended: boolean
+          attended_at: string | null
+          event_id: string
+          id: string
+          registered_at: string
+          user_id: string
+        }
+        Insert: {
+          attended?: boolean
+          attended_at?: string | null
+          event_id: string
+          id?: string
+          registered_at?: string
+          user_id: string
+        }
+        Update: {
+          attended?: boolean
+          attended_at?: string | null
+          event_id?: string
+          id?: string
+          registered_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cpd_attendance_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cpd_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cpd_events: {
+        Row: {
+          brand_name: string | null
+          created_at: string
+          date: string | null
+          description: string | null
+          duration_minutes: number | null
+          event_type: string
+          id: string
+          is_published: boolean
+          location: string | null
+          max_attendees: number | null
+          presenter: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          brand_name?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          event_type?: string
+          id?: string
+          is_published?: boolean
+          location?: string | null
+          max_attendees?: number | null
+          presenter?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          brand_name?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          event_type?: string
+          id?: string
+          is_published?: boolean
+          location?: string | null
+          max_attendees?: number | null
+          presenter?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       designer_curator_picks: {
         Row: {
           category: string | null
@@ -1016,6 +1105,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      material_swatches: {
+        Row: {
+          application: string | null
+          brand_name: string
+          category: string
+          color_family: string | null
+          created_at: string
+          finish: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          material_type: string | null
+          name: string
+          notes: string | null
+          swatch_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          application?: string | null
+          brand_name?: string
+          category?: string
+          color_family?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          material_type?: string | null
+          name: string
+          notes?: string | null
+          swatch_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application?: string | null
+          brand_name?: string
+          category?: string
+          color_family?: string | null
+          created_at?: string
+          finish?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          material_type?: string | null
+          name?: string
+          notes?: string | null
+          swatch_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {

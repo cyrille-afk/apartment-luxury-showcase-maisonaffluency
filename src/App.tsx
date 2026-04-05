@@ -29,6 +29,18 @@ const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
+const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
+const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
+const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
+const TradeAnnotations = lazy(() => import("./pages/TradeAnnotations"));
+const TradeShippingTracker = lazy(() => import("./pages/TradeShippingTracker"));
+const TradeMoodBoards = lazy(() => import("./pages/TradeMoodBoards"));
+const TradeBudgetTracker = lazy(() => import("./pages/TradeBudgetTracker"));
+const TradeLeadTimeCalendar = lazy(() => import("./pages/TradeLeadTimeCalendar"));
+const TradeReorder = lazy(() => import("./pages/TradeReorder"));
+const TradeCurrencyConverter = lazy(() => import("./pages/TradeCurrencyConverter"));
+const TradeCPD = lazy(() => import("./pages/TradeCPD"));
+const TradeComparator = lazy(() => import("./pages/TradeComparator"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
@@ -192,6 +204,18 @@ const App = () => {
                     <Route path="audit-log" element={<TradeAuditLog />} />
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
                     <Route path="order-timeline" element={<TradeOrderTimeline />} />
+                    <Route path="ffe-schedule" element={<TradeFFESchedule />} />
+                    <Route path="materials" element={<TradeMaterialLibrary />} />
+                    <Route path="tearsheets" element={<TradeTearsheets />} />
+                    <Route path="annotations" element={<TradeAnnotations />} />
+                    <Route path="shipping-tracker" element={<TradeShippingTracker />} />
+                    <Route path="mood-boards" element={<TradeMoodBoards />} />
+                    <Route path="budget" element={<TradeBudgetTracker />} />
+                    <Route path="lead-time-calendar" element={<TradeLeadTimeCalendar />} />
+                    <Route path="reorder" element={<TradeReorder />} />
+                    <Route path="currency-converter" element={<TradeCurrencyConverter />} />
+                    <Route path="cpd" element={<TradeCPD />} />
+                    <Route path="comparator" element={<TradeComparator />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
