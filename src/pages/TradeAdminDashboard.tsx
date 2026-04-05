@@ -7,7 +7,7 @@ import {
   Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
-  ClipboardList, Layers, Settings2,
+  ClipboardList, Layers, Settings2, CalendarClock,
 } from "lucide-react";
 
 interface AdminCard {
