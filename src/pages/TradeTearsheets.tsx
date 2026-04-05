@@ -12,6 +12,7 @@ interface TearsheetProduct {
   product_name: string;
   brand_name: string;
   category: string | null;
+  subcategory: string | null;
   image_url: string | null;
   dimensions: string | null;
   materials: string | null;
@@ -23,6 +24,9 @@ interface TearsheetProduct {
 export default function TradeTearsheets() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [filterDesigner, setFilterDesigner] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterSubcategory, setFilterSubcategory] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -33,11 +37,11 @@ export default function TradeTearsheets() {
       const [curatorRes, tradeRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
-          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name, founder)")
+          .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, designers!inner(name, founder)")
           .order("title"),
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, category, image_url, dimensions, materials, description, lead_time")
+          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time")
           .eq("is_active", true)
           .not("image_url", "is", null)
           .neq("image_url", "")
@@ -63,6 +67,7 @@ export default function TradeTearsheets() {
           product_name: p.title,
           brand_name: brandName,
           category: p.category,
+          subcategory: p.subcategory || null,
           image_url: p.image_url,
           dimensions: p.dimensions,
           materials: p.materials,
@@ -82,6 +87,7 @@ export default function TradeTearsheets() {
           product_name: p.product_name,
           brand_name: p.brand_name,
           category: p.category,
+          subcategory: p.subcategory || null,
           image_url: p.image_url,
           dimensions: p.dimensions,
           materials: p.materials,
@@ -97,9 +103,23 @@ export default function TradeTearsheets() {
     },
   });
 
-  const filtered = products.filter((p) =>
-    !search || [p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))
-  );
+  // Derive unique values for filter dropdowns
+  const designers = [...new Set(products.map((p) => p.brand_name))].sort();
+  const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort() as string[];
+  const subcategories = [...new Set(
+    products
+      .filter((p) => !filterCategory || p.category === filterCategory)
+      .map((p) => p.subcategory)
+      .filter(Boolean)
+  )].sort() as string[];
+
+  const filtered = products.filter((p) => {
+    if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
+    if (filterDesigner && p.brand_name !== filterDesigner) return false;
+    if (filterCategory && p.category !== filterCategory) return false;
+    if (filterSubcategory && p.subcategory !== filterSubcategory) return false;
+    return true;
+  });
 
   const handlePrint = () => {
     if (!printRef.current || !selectedProduct) return;
@@ -190,9 +210,45 @@ export default function TradeTearsheets() {
           </div>
         ) : (
           <>
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
+              </div>
+              <select
+                value={filterDesigner}
+                onChange={(e) => setFilterDesigner(e.target.value)}
+                className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground"
+              >
+                <option value="">All Designers</option>
+                {designers.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <select
+                value={filterCategory}
+                onChange={(e) => { setFilterCategory(e.target.value); setFilterSubcategory(""); }}
+                className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground"
+              >
+                <option value="">All Categories</option>
+                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              {subcategories.length > 0 && (
+                <select
+                  value={filterSubcategory}
+                  onChange={(e) => setFilterSubcategory(e.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground"
+                >
+                  <option value="">All Subcategories</option>
+                  {subcategories.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              )}
+              {(filterDesigner || filterCategory || filterSubcategory) && (
+                <button
+                  onClick={() => { setFilterDesigner(""); setFilterCategory(""); setFilterSubcategory(""); }}
+                  className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
             {isLoading ? (
               <div className="flex justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
