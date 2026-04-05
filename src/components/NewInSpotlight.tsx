@@ -8,6 +8,7 @@ import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { cn } from "@/lib/utils";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
