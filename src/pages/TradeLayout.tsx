@@ -34,6 +34,18 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/media": "Media Library",
   "/trade/admin-dashboard": "Admin Dashboard",
   "/trade/order-timeline": "Order Timeline",
+  "/trade/ffe-schedule": "FF&E Schedule",
+  "/trade/materials": "Material Library",
+  "/trade/tearsheets": "Tearsheet Builder",
+  "/trade/annotations": "Markup & Annotation",
+  "/trade/shipping-tracker": "Shipping Tracker",
+  "/trade/mood-boards": "Mood Board",
+  "/trade/budget": "Budget Tracker",
+  "/trade/lead-time-calendar": "Lead Time Calendar",
+  "/trade/reorder": "Reorder",
+  "/trade/currency-converter": "Currency Converter",
+  "/trade/cpd": "CPD & Education",
+  "/trade/comparator": "Product Comparator",
 };
 
 function BackToTopButton() {
