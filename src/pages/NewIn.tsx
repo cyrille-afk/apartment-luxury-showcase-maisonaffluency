@@ -57,11 +57,18 @@ function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof us
         </div>
       )}
 
-      {/* Designer name label */}
-      <div className="px-6 pb-3">
+      {/* Designer name label + share */}
+      <div className="px-6 pb-3 flex items-center justify-between">
         <p className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
           New In — {designers[selectedIndex]?.display_name || designers[selectedIndex]?.name}
         </p>
+        <ShareMenu
+          url="https://www.maisonaffluency.com/new-in-og.html"
+          message="Maison Affluency · New In — Discover our latest designers: https://www.maisonaffluency.com/new-in-og.html"
+          className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+          iconSize="w-4 h-4"
+          showLabel={false}
+        />
       </div>
 
       {/* Carousel */}
