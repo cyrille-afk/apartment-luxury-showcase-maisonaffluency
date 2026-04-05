@@ -3,8 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Image, Heart, FolderArchive, MapPin,
   Users, FolderOpen, Package, FileText, Box, Settings,
-  Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
-  Presentation, AlertCircle,
+  Shield, AlertCircle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -41,15 +40,7 @@ const navGroups = [
 ];
 
 const adminItems = [
-  { title: "Admin", url: "/trade/admin", icon: Shield },
-  { title: "Insights", url: "/trade/insights", icon: BarChart3 },
-  { title: "Journal", url: "/trade/journal", icon: Newspaper },
-  { title: "Provenance", url: "/trade/provenance", icon: Award },
-  { title: "Documents", url: "/trade/documents-admin", icon: Upload },
-  { title: "Quote Mgmt", url: "/trade/quotes-admin", icon: DollarSign },
-  { title: "Media Library", url: "/trade/media", icon: FolderArchive },
-  { title: "Axonometric Studio", url: "/trade/axonometric", icon: Box },
-  { title: "Presentations", url: "/trade/presentations", icon: Presentation },
+  { title: "Admin Dashboard", url: "/trade/admin-dashboard", icon: Shield },
 ];
 
 interface TradeMobileMenuProps {
