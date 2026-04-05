@@ -29,7 +29,15 @@ interface NewInSpotlightProps {
 
 const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const navigate = useNavigate();
-  const { data: picks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
+  const isParentOrChild = !!(designer.founder);
+  const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
+  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
+    isParentOrChild ? designer : undefined,
+    { publicOnly: true }
+  );
+  const picks: DesignerCuratorPick[] = isParentOrChild
+    ? groupedPicks.map(({ designer_name, designer_slug, ...rest }) => rest)
+    : simplePicks;
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
