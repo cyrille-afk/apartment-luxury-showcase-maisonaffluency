@@ -46,6 +46,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/currency-converter": "Currency Converter",
   "/trade/cpd": "CPD & Education",
   "/trade/comparator": "Product Comparator",
+  "/trade/tools": "Tools",
 };
 
 function BackToTopButton() {

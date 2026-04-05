@@ -2,81 +2,22 @@ import { Fragment } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
-  LayoutDashboard, Image, Heart, FolderArchive, MapPin,
-  Users, FolderOpen, Package, FileText, Box, Settings,
-  Shield, AlertCircle, FileSpreadsheet, Layers, Scissors,
-  MessageCircle, Truck, Paintbrush, Wallet, CalendarDays,
-  RefreshCw, ArrowRightLeft, GraduationCap, Columns, CalendarClock,
+  LayoutDashboard, Heart, FolderArchive, MapPin,
+  FileText, Settings, Shield, Wrench,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
-const navGroups = [
-  {
-    label: "Navigation",
-    items: [
-      { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
-      { title: "Showroom", url: "/trade/showroom", icon: MapPin },
-    ],
-  },
-  {
-    label: "My Collections",
-    items: [
-      { title: "Favorites", url: "/trade/favorites", icon: Heart },
-      { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
-    ],
-  },
-  {
-    label: "Discover",
-    items: [
-      { title: "Gallery", url: "/trade/gallery", icon: Image },
-      { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
-      { title: "Resources", url: "/trade/documents", icon: FolderOpen },
-      { title: "Material Library", url: "/trade/materials", icon: Layers },
-    ],
-  },
-  {
-    label: "Specification",
-    items: [
-      { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
-      { title: "FF&E Schedule", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
-      { title: "Tearsheet Builder", url: "/trade/tearsheets", icon: Scissors },
-      { title: "Comparator", url: "/trade/comparator", icon: Columns },
-      { title: "Mood Board", url: "/trade/mood-boards", icon: Paintbrush },
-      { title: "Annotations", url: "/trade/annotations", icon: MessageCircle },
-    ],
-  },
-  {
-    label: "Procurement",
-    items: [
-      { title: "Order Timeline", url: "/trade/order-timeline", icon: CalendarClock },
-      { title: "Sample Requests", url: "/trade/samples", icon: Package },
-      { title: "Shipping Tracker", url: "/trade/shipping-tracker", icon: Truck },
-      { title: "Lead Time Calendar", url: "/trade/lead-time-calendar", icon: CalendarDays },
-      { title: "Budget Tracker", url: "/trade/budget", icon: Wallet },
-      { title: "Reorder", url: "/trade/reorder", icon: RefreshCw },
-      { title: "Currency Converter", url: "/trade/currency-converter", icon: ArrowRightLeft },
-    ],
-  },
-  {
-    label: "Learn",
-    items: [
-      { title: "CPD & Education", url: "/trade/cpd", icon: GraduationCap },
-      { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { title: "Settings", url: "/trade/settings", icon: Settings },
-    ],
-  },
-];
-
-const adminItems = [
-  { title: "Admin Dashboard", url: "/trade/admin-dashboard", icon: Shield },
+const coreItems = [
+  { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
+  { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+  { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
+  { title: "Quotes", url: "/trade/quotes", icon: FileText },
+  { title: "Tools", url: "/trade/tools", icon: Wrench },
+  { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 
 interface TradeMobileMenuProps {
@@ -85,7 +26,7 @@ interface TradeMobileMenuProps {
   submittedCount?: number;
 }
 
-export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: TradeMobileMenuProps) {
+export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, signOut, profile } = useAuth();
@@ -103,8 +44,6 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
     await signOut();
     navigate("/trade/login");
   };
-
-  let itemIndex = 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -125,61 +64,45 @@ export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: Trad
         </div>
 
         <div className="flex flex-col px-6 pb-32">
-          {navGroups.map((group, gi) => (
-            <Fragment key={group.label}>
-              {gi > 0 && <div className="border-t border-border/30 my-3" />}
-              <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">
-                {group.label}
-              </span>
-              {group.items.map((item) => {
-                const idx = itemIndex++;
-                const active = isActive(item.url, item.end);
-                return (
-                  <button
-                    key={item.url}
-                    onClick={() => handleNav(item.url)}
-                    className={cn(
-                      "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
-                      active ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
-                    )}
-                    style={{ animationDelay: `${idx * 40}ms`, animationFillMode: "forwards" }}
-                  >
-                    <span className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {item.title}
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-                  </button>
-                );
-              })}
-            </Fragment>
-          ))}
+          {coreItems.map((item, idx) => {
+            const active = isActive(item.url, item.end);
+            return (
+              <button
+                key={item.url}
+                onClick={() => handleNav(item.url)}
+                className={cn(
+                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  active ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                )}
+                style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "forwards" }}
+              >
+                <span className="flex items-center gap-3">
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {item.title}
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+            );
+          })}
 
           {isAdmin && (
             <>
               <div className="border-t border-border/30 my-3" />
               <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">Admin</span>
-              {adminItems.map((item) => {
-                const idx = itemIndex++;
-                const active = isActive(item.url);
-                return (
-                  <button
-                    key={item.url}
-                    onClick={() => handleNav(item.url)}
-                    className={cn(
-                      "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
-                      active ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
-                    )}
-                    style={{ animationDelay: `${idx * 40}ms`, animationFillMode: "forwards" }}
-                  >
-                    <span className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {item.title}
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-                  </button>
-                );
-              })}
+              <button
+                onClick={() => handleNav("/trade/admin-dashboard")}
+                className={cn(
+                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                  isActive("/trade/admin-dashboard") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                )}
+                style={{ animationDelay: `${(coreItems.length + 1) * 50}ms`, animationFillMode: "forwards" }}
+              >
+                <span className="flex items-center gap-3">
+                  <Shield className="h-4 w-4 shrink-0" />
+                  Admin Dashboard
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
             </>
           )}
 
