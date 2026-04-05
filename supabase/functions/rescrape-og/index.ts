@@ -4,6 +4,40 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// All known OG bridge file paths (relative to site root)
+const ALL_OG_PATHS: string[] = [
+  // Root-level
+  "alexander-lamont-og.html",
+  "apparatus-studio-og.html",
+  "brands-og.html",
+  "collectibles-og.html",
+  "designers-og.html",
+  "ecart-og.html",
+  "eileen-gray-og.html",
+  "felix-aublet-og.html",
+  "gallery-calming-og.html",
+  "gallery-details-og.html",
+  "gallery-home-office-og.html",
+  "gallery-intimate-og.html",
+  "gallery-og.html",
+  "gallery-sanctuary-og.html",
+  "gallery-small-room-og.html",
+  "gallery-sociable-og.html",
+  "jean-michel-frank-og.html",
+  "laurent-maugoust-cecile-chenais-og.html",
+  "leo-aerts-alinea-og.html",
+  "mariano-fortuny-og.html",
+  "new-in-og.html",
+  "paul-laszlo-og.html",
+  "pierre-chareau-og.html",
+  "thierry-lemaire-og.html",
+  "trade-program-og.html",
+];
+
+// Auto-discover: scan the live site for all OG bridge files
+// This uses the file list baked into the function at deploy time
+const SITE_BASE = "https://www.maisonaffluency.com";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -32,26 +66,58 @@ Deno.serve(async (req) => {
   }
   const token = tokenData.access_token;
 
-  // Parse body for URLs or use defaults
+  // Parse body
   let urls: string[] = [];
+  let mode = "custom";
+  let category = "all"; // "designers", "ateliers", "journal", "all"
   try {
     const body = await req.json();
-    if (body.urls && Array.isArray(body.urls)) {
+    if (body.all === true) {
+      mode = "all";
+      category = body.category || "all";
+    } else if (body.urls && Array.isArray(body.urls)) {
       urls = body.urls;
     }
   } catch {
     // no body
   }
 
+  if (mode === "all") {
+    // Build full URL list from known paths + discover from site
+    // We'll fetch the sitemap of OG files from the deployed site
+    try {
+      const resp = await fetch(`${SITE_BASE}/og-manifest.json?t=${Date.now()}`);
+      if (resp.ok) {
+        const manifest = await resp.json();
+        if (Array.isArray(manifest)) {
+          urls = manifest.map((p: string) => `${SITE_BASE}/${p}`);
+        }
+      }
+    } catch {
+      // fallback: use baked-in list
+    }
+
+    // If manifest not available, use the baked-in ALL_OG_PATHS
+    if (urls.length === 0) {
+      urls = ALL_OG_PATHS.map((p) => `${SITE_BASE}/${p}`);
+    }
+
+    // Filter by category if needed
+    if (category !== "all") {
+      urls = urls.filter((u) => u.includes(`/${category}/`));
+    }
+  }
+
   if (urls.length === 0) {
     return new Response(
-      JSON.stringify({ error: "Provide { urls: [...] } in body" }),
+      JSON.stringify({ error: 'Provide { urls: [...] } or { all: true } in body' }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
   const results: { url: string; ok: boolean; title?: string; error?: string }[] = [];
   const BATCH = 5;
+  const DELAY = 300; // ms between batches to respect rate limits
 
   for (let i = 0; i < urls.length; i += BATCH) {
     const batch = urls.slice(i, i + BATCH);
@@ -74,9 +140,8 @@ Deno.serve(async (req) => {
     });
     const batchResults = await Promise.all(promises);
     results.push(...batchResults);
-    // Small delay between batches
     if (i + BATCH < urls.length) {
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, DELAY));
     }
   }
 

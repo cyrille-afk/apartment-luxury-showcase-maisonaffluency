@@ -17,6 +17,7 @@ import HeroManager from "@/components/trade/HeroManager";
 import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
 import ScrapeProducts from "@/components/trade/ScrapeProducts";
 import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
+import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
 import { Instagram } from "lucide-react";
 
@@ -184,6 +185,9 @@ function InstagramAuditCard() {
 
       {/* Scrape Products */}
       <ScrapeProducts />
+
+      {/* OG Rescrape */}
+      <OgRescrapeAdmin />
 
       {/* Sample Requests Manager */}
       <SampleRequestsAdmin />
