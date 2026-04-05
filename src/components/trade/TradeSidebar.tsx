@@ -33,6 +33,7 @@ const toolItems = [
   { title: "Resources", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
+  { title: "Order Timeline", url: "/trade/order-timeline", icon: CalendarClock },
   { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];

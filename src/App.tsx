@@ -191,6 +191,7 @@ const App = () => {
                     {/* spec-sheet moved to public route */}
                     <Route path="audit-log" element={<TradeAuditLog />} />
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
+                    <Route path="order-timeline" element={<TradeOrderTimeline />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
