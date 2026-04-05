@@ -118,6 +118,8 @@ export default function TradeTearsheets() {
           materials: p.materials,
           description: p.description,
           lead_time: p.lead_time,
+          trade_price_cents: p.trade_price_cents || null,
+          currency: p.currency || "EUR",
           source: "trade",
         });
       });
