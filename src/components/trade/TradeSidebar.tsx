@@ -192,24 +192,28 @@ export function TradeSidebar() {
                     >
                       <Shield className="h-4 w-4 shrink-0" />
                       {!collapsed && (
-                        <span className="flex items-center gap-2 flex-wrap">
-                          Admin
-                          {submittedQuotes > 0 && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive text-[9px] font-medium leading-none" title={`${submittedQuotes} pending quote${submittedQuotes > 1 ? 's' : ''}`}>
-                              <DollarSign className="h-2.5 w-2.5" />
-                              {submittedQuotes}
-                            </span>
-                          )}
-                          {pendingApps > 0 && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-warning/15 text-warning text-[9px] font-medium leading-none" title={`${pendingApps} pending application${pendingApps > 1 ? 's' : ''}`}>
-                              <ClipboardList className="h-2.5 w-2.5" />
-                              {pendingApps}
-                            </span>
-                          )}
-                          {pendingSamples > 0 && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-medium leading-none" title={`${pendingSamples} pending sample${pendingSamples > 1 ? 's' : ''}`}>
-                              <Package className="h-2.5 w-2.5" />
-                              {pendingSamples}
+                        <span className="flex flex-col gap-1">
+                          <span>Admin</span>
+                          {(submittedQuotes > 0 || pendingApps > 0 || pendingSamples > 0) && (
+                            <span className="flex flex-col gap-0.5">
+                              {submittedQuotes > 0 && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive text-[9px] font-medium leading-none">
+                                  <DollarSign className="h-2.5 w-2.5" />
+                                  {submittedQuotes} Quote{submittedQuotes > 1 ? 's' : ''}
+                                </span>
+                              )}
+                              {pendingApps > 0 && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-warning/15 text-warning text-[9px] font-medium leading-none">
+                                  <ClipboardList className="h-2.5 w-2.5" />
+                                  {pendingApps} Application{pendingApps > 1 ? 's' : ''}
+                                </span>
+                              )}
+                              {pendingSamples > 0 && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-medium leading-none">
+                                  <Package className="h-2.5 w-2.5" />
+                                  {pendingSamples} Sample{pendingSamples > 1 ? 's' : ''}
+                                </span>
+                              )}
                             </span>
                           )}
                         </span>
