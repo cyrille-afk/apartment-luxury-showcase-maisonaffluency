@@ -184,10 +184,10 @@ export function TradeSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-auto min-h-[36px]">
                     <NavLink
                       to="/trade/admin-dashboard"
-                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      className="flex items-start gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                       activeClassName="bg-muted text-foreground font-medium"
                     >
                       <Shield className="h-4 w-4 shrink-0" />
