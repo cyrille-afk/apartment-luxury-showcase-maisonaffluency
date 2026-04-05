@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3 } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 
@@ -72,6 +72,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
   const isPriced = quoteStatus === "priced";
+  const isCancelled = quoteStatus === "cancelled";
   const isConfirmed = quoteStatus === "confirmed" || quoteStatus === "deposit_paid" || quoteStatus === "paid";
   const isDepositPaid = quoteStatus === "deposit_paid";
   const isFullyPaid = quoteStatus === "paid";
@@ -266,6 +267,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     }).catch((err) => console.error("Order confirmation email failed:", err));
 
     toast({ title: "Order confirmed!", description: "We'll be in touch with next steps." });
+    onStatusChange();
+  };
+
+  const handleCancelOrder = async () => {
+    if (!confirm("Are you sure you want to cancel this confirmed order? This action will be tracked.")) return;
+    await supabase.from("trade_quotes").update({
+      status: "cancelled",
+    } as any).eq("id", quoteId);
+    toast({ title: "Order cancelled", description: "This quote has been marked as cancelled." });
     onStatusChange();
   };
 
