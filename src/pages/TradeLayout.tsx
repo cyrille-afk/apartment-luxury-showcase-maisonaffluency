@@ -33,6 +33,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/boards": "Boards",
   "/trade/media": "Media Library",
   "/trade/admin-dashboard": "Admin Dashboard",
+  "/trade/order-timeline": "Order Timeline",
 };
 
 function BackToTopButton() {
