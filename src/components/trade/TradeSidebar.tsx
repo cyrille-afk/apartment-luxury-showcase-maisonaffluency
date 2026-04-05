@@ -61,7 +61,7 @@ export function TradeSidebar() {
       const [quotes, apps, samples] = await Promise.all([
         supabase.from("trade_quotes").select("*", { count: "exact", head: true }).eq("status", "submitted"),
         supabase.from("trade_applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("trade_sample_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("trade_sample_requests").select("*", { count: "exact", head: true }).eq("status", "requested"),
       ]);
       setSubmittedQuotes(quotes.count || 0);
       setPendingApps(apps.count || 0);
