@@ -33,7 +33,7 @@ export default function TradeTearsheets() {
       const [curatorRes, tradeRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
-          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name)")
+          .select("id, title, designer_id, category, image_url, dimensions, materials, description, designers!inner(name, founder)")
           .order("title"),
         supabase
           .from("trade_products")
@@ -48,9 +48,13 @@ export default function TradeTearsheets() {
       const seen = new Map<string, boolean>();
       const merged: TearsheetProduct[] = [];
 
-      // Add curator picks first (canonical source)
+      // Add curator picks — skip child designers (founder exists and differs from name)
       (curatorRes.data || []).forEach((p: any) => {
-        const brandName = (p.designers as any)?.name || "Unknown";
+        const designer = p.designers as any;
+        const brandName = designer?.name || "Unknown";
+        const founder = designer?.founder;
+        // If this designer is a child (has a founder that differs from its own name), skip it
+        if (founder && founder !== brandName) return;
         const key = `${brandName.toLowerCase()}::${p.title.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
