@@ -131,7 +131,7 @@ export default function TradeTearsheets() {
 
   const filtered = products.filter((p) => {
     if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
-    if (filterDesigner && p.brand_name !== filterDesigner) return false;
+    if (filterDesigner && p.parent_brand !== filterDesigner) return false;
     if (filterCategory && p.category !== filterCategory) return false;
     if (filterSubcategory && p.subcategory !== filterSubcategory) return false;
     return true;
