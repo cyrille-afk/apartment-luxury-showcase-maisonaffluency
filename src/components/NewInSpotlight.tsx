@@ -113,21 +113,21 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             transition={{ ...transition, delay: 0.2 }}
             className="flex-1 flex flex-col justify-start"
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-                New In
-              </span>
+            <span className="font-body text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2 block">
+              New In
+            </span>
+            <div className="flex items-center gap-3 mb-8">
+              <h2 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
+                {displayName}
+              </h2>
               <ShareMenu
                 url={shareUrl}
                 message={`Maison Affluency · New In · ${displayName}: ${shareUrl}`}
-                className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
-                iconSize="w-5 h-5 md:w-6 md:h-6"
+                className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+                iconSize="w-4 h-4 md:w-5 md:h-5"
                 showLabel={false}
               />
             </div>
-            <h2 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase mb-8">
-              {displayName}
-            </h2>
 
             <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left">
               {firstBioParagraph}
