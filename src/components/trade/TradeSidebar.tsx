@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Heart, Package, Box, FolderArchive, AlertCircle, Users, DollarSign, ClipboardList, CalendarClock } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Heart, Package, Box, FolderArchive, AlertCircle, Users, DollarSign, ClipboardList, CalendarClock, FileSpreadsheet, Layers, Scissors, MessageCircle, Truck, Paintbrush, Wallet, CalendarDays, RefreshCw, ArrowRightLeft, GraduationCap, Columns } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,6 +34,18 @@ const toolItems = [
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Order Timeline", url: "/trade/order-timeline", icon: CalendarClock },
+  { title: "FF&E Schedule", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
+  { title: "Tearsheet Builder", url: "/trade/tearsheets", icon: Scissors },
+  { title: "Material Library", url: "/trade/materials", icon: Layers },
+  { title: "Mood Board", url: "/trade/mood-boards", icon: Paintbrush },
+  { title: "Product Comparator", url: "/trade/comparator", icon: Columns },
+  { title: "Budget Tracker", url: "/trade/budget", icon: Wallet },
+  { title: "Shipping Tracker", url: "/trade/shipping-tracker", icon: Truck },
+  { title: "Lead Time Calendar", url: "/trade/lead-time-calendar", icon: CalendarDays },
+  { title: "Markup & Annotation", url: "/trade/annotations", icon: MessageCircle },
+  { title: "Reorder", url: "/trade/reorder", icon: RefreshCw },
+  { title: "Currency Converter", url: "/trade/currency-converter", icon: ArrowRightLeft },
+  { title: "CPD & Education", url: "/trade/cpd", icon: GraduationCap },
   { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
