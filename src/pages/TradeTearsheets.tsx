@@ -12,6 +12,7 @@ interface TearsheetProduct {
   id: string;
   product_name: string;
   brand_name: string;
+  parent_brand: string;
   category: string | null;
   subcategory: string | null;
   image_url: string | null;
