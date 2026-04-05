@@ -32,6 +32,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/presentations": "Presentations",
   "/trade/boards": "Boards",
   "/trade/media": "Media Library",
+  "/trade/admin-dashboard": "Admin Dashboard",
 };
 
 function BackToTopButton() {
