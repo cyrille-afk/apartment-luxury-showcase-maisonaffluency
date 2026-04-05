@@ -62,7 +62,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
       </button>
       {open && !isMobile && (
         <div
-          className="absolute bottom-full left-0 mb-2 flex flex-col gap-1 bg-black/80 backdrop-blur-md rounded-lg p-1.5 shadow-xl border border-white/10 z-50 min-w-[140px]"
+          className="absolute top-full left-0 mt-2 flex flex-col gap-1 bg-black/80 backdrop-blur-md rounded-lg p-1.5 shadow-xl border border-white/10 z-50 min-w-[140px]"
           onClick={(e) => e.stopPropagation()}
         >
           <button onClick={copyLink} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
