@@ -23,6 +23,7 @@ const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBoundary"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
+const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
 const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
@@ -161,6 +162,7 @@ const App = () => {
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
+                    <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
                     <Route path="gallery" element={<TradeGallery />} />
                     <Route path="quotes" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
