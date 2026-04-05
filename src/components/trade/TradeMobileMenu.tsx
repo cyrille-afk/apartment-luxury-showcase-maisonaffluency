@@ -3,8 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Image, Heart, FolderArchive, MapPin,
   Users, FolderOpen, Package, FileText, Box, Settings,
-  Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
-  Presentation, AlertCircle,
+  Shield, AlertCircle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
