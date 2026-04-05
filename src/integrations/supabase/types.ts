@@ -1050,6 +1050,119 @@ export type Database = {
         }
         Relationships: []
       }
+      order_duration_templates: {
+        Row: {
+          brand_name: string
+          category: string
+          created_at: string
+          customs_days: number
+          id: string
+          production_weeks: number
+          shipping_weeks: number
+          updated_at: string
+        }
+        Insert: {
+          brand_name: string
+          category?: string
+          created_at?: string
+          customs_days?: number
+          id?: string
+          production_weeks?: number
+          shipping_weeks?: number
+          updated_at?: string
+        }
+        Update: {
+          brand_name?: string
+          category?: string
+          created_at?: string
+          customs_days?: number
+          id?: string
+          production_weeks?: number
+          shipping_weeks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_timeline: {
+        Row: {
+          actual_delivery_at: string | null
+          admin_notes: string | null
+          balance_due_at: string | null
+          balance_paid_at: string | null
+          created_at: string
+          customs_cleared_at: string | null
+          customs_days: number
+          customs_start_at: string | null
+          deposit_paid_at: string | null
+          estimated_delivery_at: string | null
+          id: string
+          kanban_status: string
+          production_end_at: string | null
+          production_start_at: string | null
+          production_weeks: number
+          quote_id: string
+          shipping_end_at: string | null
+          shipping_start_at: string | null
+          shipping_weeks: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_delivery_at?: string | null
+          admin_notes?: string | null
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
+          created_at?: string
+          customs_cleared_at?: string | null
+          customs_days?: number
+          customs_start_at?: string | null
+          deposit_paid_at?: string | null
+          estimated_delivery_at?: string | null
+          id?: string
+          kanban_status?: string
+          production_end_at?: string | null
+          production_start_at?: string | null
+          production_weeks?: number
+          quote_id: string
+          shipping_end_at?: string | null
+          shipping_start_at?: string | null
+          shipping_weeks?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_delivery_at?: string | null
+          admin_notes?: string | null
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
+          created_at?: string
+          customs_cleared_at?: string | null
+          customs_days?: number
+          customs_start_at?: string | null
+          deposit_paid_at?: string | null
+          estimated_delivery_at?: string | null
+          id?: string
+          kanban_status?: string
+          production_end_at?: string | null
+          production_start_at?: string | null
+          production_weeks?: number
+          quote_id?: string
+          shipping_end_at?: string | null
+          shipping_start_at?: string | null
+          shipping_weeks?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_timeline_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: true
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       presentation_comments: {
         Row: {
           content: string
