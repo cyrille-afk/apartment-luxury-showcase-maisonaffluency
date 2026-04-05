@@ -186,6 +186,9 @@ function InstagramAuditCard() {
       {/* Scrape Products */}
       <ScrapeProducts />
 
+      {/* OG Rescrape */}
+      <OgRescrapeAdmin />
+
       {/* Sample Requests Manager */}
       <SampleRequestsAdmin />
 
