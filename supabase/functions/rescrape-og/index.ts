@@ -65,7 +65,10 @@ Deno.serve(async (req) => {
         if (data.og_object) {
           return { url, ok: true, title: data.og_object?.title || "" };
         }
-        return { url, ok: false, error: data.error?.message || "Unknown" };
+        if (data.title || data.id) {
+          return { url, ok: true, title: data.title || data.id || "" };
+        }
+        return { url, ok: false, error: data.error?.message || JSON.stringify(data).slice(0, 200) };
       } catch (e) {
         return { url, ok: false, error: String(e) };
       }
