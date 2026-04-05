@@ -2,10 +2,11 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { FileText, Loader2, Search, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 
 interface TearsheetProduct {
   id: string;
@@ -66,8 +67,8 @@ export default function TradeTearsheets() {
           id: p.id,
           product_name: p.title,
           brand_name: brandName,
-          category: p.category,
-          subcategory: p.subcategory || null,
+          category: normalizeCategory(p.category, p.subcategory) || null,
+          subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
           dimensions: p.dimensions,
           materials: p.materials,
@@ -86,8 +87,8 @@ export default function TradeTearsheets() {
           id: p.id,
           product_name: p.product_name,
           brand_name: p.brand_name,
-          category: p.category,
-          subcategory: p.subcategory || null,
+          category: normalizeCategory(p.category, p.subcategory) || null,
+          subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
           dimensions: p.dimensions,
           materials: p.materials,
@@ -103,15 +104,24 @@ export default function TradeTearsheets() {
     },
   });
 
-  // Derive unique values for filter dropdowns
-  const designers = [...new Set(products.map((p) => p.brand_name))].sort();
-  const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort() as string[];
-  const subcategories = [...new Set(
-    products
-      .filter((p) => !filterCategory || p.category === filterCategory)
-      .map((p) => p.subcategory)
-      .filter(Boolean)
-  )].sort() as string[];
+  // Derive unique values for filter dropdowns using taxonomy order
+  const designers = useMemo(() => [...new Set(products.map((p) => p.brand_name))].sort(), [products]);
+  const categories = useMemo(() => {
+    const raw = [...new Set(products.map((p) => p.category).filter(Boolean))] as string[];
+    return CATEGORY_ORDER.filter((c) => raw.includes(c));
+  }, [products]);
+  const subcategories = useMemo(() => {
+    if (!filterCategory) return [];
+    const taxonomySubs = getSubcategoriesForCategory(filterCategory);
+    const dataSubs = [...new Set(
+      products.filter((p) => p.category === filterCategory).map((p) => p.subcategory).filter(Boolean)
+    )] as string[];
+    // Return taxonomy-ordered subs that exist in data
+    const ordered = taxonomySubs.filter((s) => dataSubs.includes(s));
+    // Add any data subs not in taxonomy
+    dataSubs.forEach((s) => { if (!ordered.includes(s)) ordered.push(s); });
+    return ordered;
+  }, [products, filterCategory]);
 
   const filtered = products.filter((p) => {
     if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
