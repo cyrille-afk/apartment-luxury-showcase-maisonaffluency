@@ -92,6 +92,7 @@ export default function TradeTearsheets() {
           id: p.id,
           product_name: p.product_name,
           brand_name: p.brand_name,
+          parent_brand: p.brand_name,
           category: normalizeCategory(p.category, p.subcategory) || null,
           subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
