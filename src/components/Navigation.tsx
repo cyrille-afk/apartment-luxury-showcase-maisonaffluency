@@ -382,7 +382,7 @@ const Navigation = () => {
                     <button 
                       key={item.href} 
                       onClick={() => handleNavClick(item.href)}
-                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
+                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-white hover:bg-[hsl(var(--gold))] font-bold bg-[hsl(var(--gold)/0.1)] px-3 rounded-lg"
                     >
                       {item.label}
                       <ChevronRight className="h-4 w-4" />
@@ -720,10 +720,9 @@ const Navigation = () => {
                 <button
                   key={item.href}
                   onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
-                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground"
+                  className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
                 >
                   {item.label}
-                  <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                 </button>
               ))}
             </div>
