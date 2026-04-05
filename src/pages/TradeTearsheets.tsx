@@ -20,6 +20,8 @@ interface TearsheetProduct {
   materials: string | null;
   description: string | null;
   lead_time: string | null;
+  trade_price_cents: number | null;
+  currency: string;
   source: "curator" | "trade";
 }
 
@@ -39,11 +41,11 @@ export default function TradeTearsheets() {
       const [curatorRes, tradeRes, designerRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
-          .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, designers!inner(name, founder)")
+          .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, trade_price_cents, currency, designers!inner(name, founder)")
           .order("title"),
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time")
+          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency")
           .eq("is_active", true)
           .not("image_url", "is", null)
           .neq("image_url", "")
@@ -91,6 +93,8 @@ export default function TradeTearsheets() {
           materials: p.materials,
           description: p.description,
           lead_time: null,
+          trade_price_cents: p.trade_price_cents || null,
+          currency: p.currency || "EUR",
           source: "curator",
         });
       });
@@ -114,6 +118,8 @@ export default function TradeTearsheets() {
           materials: p.materials,
           description: p.description,
           lead_time: p.lead_time,
+          trade_price_cents: p.trade_price_cents || null,
+          currency: p.currency || "EUR",
           source: "trade",
         });
       });
@@ -178,6 +184,9 @@ export default function TradeTearsheets() {
         <div><p class="label">Dimensions</p><p class="value">${selectedProduct.dimensions || "—"}</p></div>
         <div><p class="label">Materials</p><p class="value">${selectedProduct.materials || "—"}</p></div>
         <div><p class="label">Lead Time</p><p class="value">${selectedProduct.lead_time || "—"}</p></div>
+        <div><p class="label">Trade Price</p><p class="value">${selectedProduct.trade_price_cents
+          ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
+          : "Price on Request"}</p></div>
         ${selectedProduct.description ? `<div style="grid-column:1/3"><p class="label">Description</p><p class="value">${selectedProduct.description}</p></div>` : ""}
       </div>
       <div class="footer">
@@ -220,6 +229,9 @@ export default function TradeTearsheets() {
                   ["Dimensions", selectedProduct.dimensions],
                   ["Materials", selectedProduct.materials],
                   ["Lead Time", selectedProduct.lead_time],
+                  ["Trade Price", selectedProduct.trade_price_cents
+                    ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
+                    : "Price on Request"],
                 ] as const).map(([label, val]) => (
                   <div key={label}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
