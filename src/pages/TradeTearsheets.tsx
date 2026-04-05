@@ -226,6 +226,9 @@ export default function TradeTearsheets() {
                   ["Dimensions", selectedProduct.dimensions],
                   ["Materials", selectedProduct.materials],
                   ["Lead Time", selectedProduct.lead_time],
+                  ["Trade Price", selectedProduct.trade_price_cents
+                    ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
+                    : "Price on Request"],
                 ] as const).map(([label, val]) => (
                   <div key={label}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
