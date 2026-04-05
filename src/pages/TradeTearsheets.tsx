@@ -184,6 +184,9 @@ export default function TradeTearsheets() {
         <div><p class="label">Dimensions</p><p class="value">${selectedProduct.dimensions || "—"}</p></div>
         <div><p class="label">Materials</p><p class="value">${selectedProduct.materials || "—"}</p></div>
         <div><p class="label">Lead Time</p><p class="value">${selectedProduct.lead_time || "—"}</p></div>
+        <div><p class="label">Trade Price</p><p class="value">${selectedProduct.trade_price_cents
+          ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
+          : "Price on Request"}</p></div>
         ${selectedProduct.description ? `<div style="grid-column:1/3"><p class="label">Description</p><p class="value">${selectedProduct.description}</p></div>` : ""}
       </div>
       <div class="footer">
