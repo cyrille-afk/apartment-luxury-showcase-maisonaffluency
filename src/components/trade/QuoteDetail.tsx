@@ -898,6 +898,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </div>
           </div>
         )}
+
+        {isCancelled && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
+            <div className="flex items-center gap-2 font-body text-sm text-destructive">
+              <XCircle className="h-4 w-4" />
+              <span>This order has been cancelled</span>
+            </div>
+          </div>
+        )}
+
+        {/* Admin cancel button for confirmed/deposit_paid quotes */}
+        {isSuperAdmin && isConfirmed && !isFullyPaid && !isCancelled && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
+            <button
+              onClick={handleCancelOrder}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-destructive/10 transition-colors"
+            >
+              <XCircle className="h-3.5 w-3.5" /> Cancel Order
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
