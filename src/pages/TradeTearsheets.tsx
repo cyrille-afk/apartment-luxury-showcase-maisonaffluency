@@ -103,9 +103,23 @@ export default function TradeTearsheets() {
     },
   });
 
-  const filtered = products.filter((p) =>
-    !search || [p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))
-  );
+  // Derive unique values for filter dropdowns
+  const designers = [...new Set(products.map((p) => p.brand_name))].sort();
+  const categories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort() as string[];
+  const subcategories = [...new Set(
+    products
+      .filter((p) => !filterCategory || p.category === filterCategory)
+      .map((p) => p.subcategory)
+      .filter(Boolean)
+  )].sort() as string[];
+
+  const filtered = products.filter((p) => {
+    if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
+    if (filterDesigner && p.brand_name !== filterDesigner) return false;
+    if (filterCategory && p.category !== filterCategory) return false;
+    if (filterSubcategory && p.subcategory !== filterSubcategory) return false;
+    return true;
+  });
 
   const handlePrint = () => {
     if (!printRef.current || !selectedProduct) return;
