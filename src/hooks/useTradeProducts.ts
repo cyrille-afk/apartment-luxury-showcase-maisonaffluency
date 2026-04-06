@@ -17,8 +17,8 @@ import {
 import {
   inferSubcategory,
   normalizeCategory,
-  normalizeSubcategory,
 } from "@/lib/productTaxonomy";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 type LiveTradeProduct = TradeProduct & {
   hasExplicitCategory: boolean;
@@ -57,9 +57,10 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       : pick.designers;
     const childName = designer?.name?.trim();
     if (!childName || !pick.title) return [];
-    // Use parent brand (founder) as brand_name when designer is a child
     const founderName = (designer as any)?.founder?.trim();
-    const brandName = (founderName && founderName !== childName) ? founderName : childName;
+    const brandName = normalizeBrandToParent(
+      founderName && founderName !== childName ? founderName : childName,
+    );
 
     const hasExplicitCategory = Boolean(pick.category?.trim?.());
     const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.());

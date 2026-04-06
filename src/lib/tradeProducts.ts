@@ -12,6 +12,7 @@ import {
   normalizeSubcategory,
 } from "@/lib/productTaxonomy";
 import { inferSubcategory } from "@/lib/productTaxonomy";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 export interface TradeProduct {
   id: string;
@@ -40,6 +41,8 @@ export function getAllTradeProducts(): TradeProduct[] {
   let idx = 0;
 
   const addPicks = (brandName: string, picks: CuratorPick[]) => {
+    const normalizedBrandName = normalizeBrandToParent(brandName);
+
     for (const pick of picks) {
       if (!pick.title) continue;
       const rawCategory = pick.category || pick.tags?.[0] || undefined;
@@ -49,7 +52,7 @@ export function getAllTradeProducts(): TradeProduct[] {
       const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";
       products.push({
         id: `tp-${idx++}`,
-        brand_name: brandName,
+        brand_name: normalizedBrandName,
         product_name: pick.title,
         subtitle: pick.subtitle,
         category: resolvedCategory,
