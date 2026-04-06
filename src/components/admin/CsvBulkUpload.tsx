@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface CsvBulkUploadProps {
   designerId: string;
+  designerName?: string;
   currentCount: number;
   onComplete: () => void;
 }
