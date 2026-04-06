@@ -40,9 +40,31 @@ export default function TradeAnnotations() {
   const [dbSearch, setDbSearch] = useState("");
 
   const searchDbImages = useCallback(async (q: string) => {
+    const seen = new Set<string>();
     const results: DbImage[] = [];
 
-    // Search trade_products
+    const addUnique = (item: DbImage) => {
+      if (!item.image_url || seen.has(item.image_url)) return;
+      seen.add(item.image_url);
+      results.push(item);
+    };
+
+    // Curator picks first (most images)
+    let pickQuery = supabase
+      .from("designer_curator_picks")
+      .select("id, title, image_url, designers!inner(name)")
+      .neq("image_url", "");
+    if (q.trim()) {
+      pickQuery = pickQuery.or(`title.ilike.%${q}%`);
+    }
+    const { data: picks } = await pickQuery.order("title").limit(200);
+    if (picks) {
+      picks.forEach((p: any) => {
+        addUnique({ id: p.id, name: p.title, brand: p.designers?.name || "", image_url: p.image_url, source: "pick" });
+      });
+    }
+
+    // Trade products (supplement with any that have images)
     let prodQuery = supabase
       .from("trade_products")
       .select("id, product_name, brand_name, image_url")
@@ -51,32 +73,11 @@ export default function TradeAnnotations() {
     if (q.trim()) {
       prodQuery = prodQuery.or(`product_name.ilike.%${q}%,brand_name.ilike.%${q}%`);
     }
-    const { data: prods } = await prodQuery.order("product_name").limit(30);
+    const { data: prods } = await prodQuery.order("product_name").limit(200);
     if (prods) {
       prods.forEach((p: any) => {
         if (p.image_url) {
-          results.push({ id: p.id, name: p.product_name, brand: p.brand_name, image_url: p.image_url, source: "product" });
-        }
-      });
-    }
-
-    // Search curator picks
-    let pickQuery = supabase
-      .from("designer_curator_picks")
-      .select("id, title, image_url, designers!inner(name)")
-      .not("image_url", "eq", "");
-    if (q.trim()) {
-      pickQuery = pickQuery.or(`title.ilike.%${q}%`);
-    }
-    const { data: picks } = await pickQuery.order("title").limit(30);
-    if (picks) {
-      picks.forEach((p: any) => {
-        if (p.image_url) {
-          const brand = p.designers?.name || "";
-          // Deduplicate by image URL
-          if (!results.some(r => r.image_url === p.image_url)) {
-            results.push({ id: p.id, name: p.title, brand, image_url: p.image_url, source: "pick" });
-          }
+          addUnique({ id: p.id, name: p.product_name, brand: p.brand_name, image_url: p.image_url, source: "product" });
         }
       });
     }
