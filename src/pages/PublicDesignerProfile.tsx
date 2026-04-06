@@ -383,6 +383,19 @@ const PublicDesignerProfile = () => {
             </blockquote>
           );
         }
+        // Try em-dash attribution: "quote text — Author, Source"
+        const dashMatch = clean.match(/^([\s\S]*?)\s*(—\s*.+)$/);
+        if (dashMatch) {
+          const quoteBody = dashMatch[1].trim();
+          const attribution = dashMatch[2].trim();
+          return (
+            <blockquote className="font-display italic leading-snug mb-6 text-center">
+              <span className="text-lg md:text-xl text-foreground">"{quoteBody}"</span>
+              <br />
+              <span className="text-sm md:text-base text-muted-foreground/60 not-italic mt-2 block">{attribution}</span>
+            </blockquote>
+          );
+        }
         return (
           <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
             "{clean}"
