@@ -132,26 +132,7 @@ const ClientBoardViewer = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (notFound) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="font-display text-2xl text-foreground mb-2">Board Not Found</h1>
-          <p className="font-body text-sm text-muted-foreground">This link may have expired or is no longer available.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Group items by subfolder
+  // Group items by subfolder (must be before early returns)
   const subfolders = useMemo(() => {
     const set = new Set<string>();
     items.forEach(i => { if (i.subfolder) set.add(i.subfolder); });
@@ -172,6 +153,26 @@ const ClientBoardViewer = () => {
 
   const approvedCount = items.filter(i => i.approval_status === "approved").length;
   const isReadOnly = board?.status !== "shared";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center">
+          <h1 className="font-display text-2xl text-foreground mb-2">Board Not Found</h1>
+          <p className="font-body text-sm text-muted-foreground">This link may have expired or is no longer available.</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <>
