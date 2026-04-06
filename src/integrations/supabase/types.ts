@@ -223,6 +223,7 @@ export type Database = {
           notes: string | null
           product_id: string
           sort_order: number
+          subfolder: string | null
         }
         Insert: {
           approval_status?: string
@@ -232,6 +233,7 @@ export type Database = {
           notes?: string | null
           product_id: string
           sort_order?: number
+          subfolder?: string | null
         }
         Update: {
           approval_status?: string
@@ -241,6 +243,7 @@ export type Database = {
           notes?: string | null
           product_id?: string
           sort_order?: number
+          subfolder?: string | null
         }
         Relationships: [
           {
@@ -2436,6 +2439,7 @@ export type Database = {
           notes: string | null
           product_id: string
           sort_order: number
+          subfolder: string | null
         }[]
         SetofOptions: {
           from: "*"

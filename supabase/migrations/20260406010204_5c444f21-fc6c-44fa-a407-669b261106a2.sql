@@ -1,0 +1,1 @@
+ALTER TABLE public.client_board_items ADD COLUMN subfolder text DEFAULT NULL;
