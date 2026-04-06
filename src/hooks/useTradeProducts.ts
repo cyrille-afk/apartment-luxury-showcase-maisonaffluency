@@ -45,7 +45,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       tags,
       trade_price_cents,
       currency,
-      designers(name)
+      designers(name, founder)
     `)
     .order("sort_order", { ascending: true });
 
