@@ -141,13 +141,22 @@ const TradeBoardBuilder = () => {
   }, [items, subfolders]);
 
   const searchProducts = useCallback(async (q: string) => {
-    let query = supabase.from("trade_products").select("id, product_name, brand_name, image_url, category").eq("is_active", true).limit(20);
+    if (!user) return;
+    // Source from user's saved favorites only
+    let query = supabase
+      .from("trade_favorites")
+      .select("product_id, trade_products!inner(id, product_name, brand_name, image_url, category)")
+      .eq("user_id", user.id);
     if (q.trim()) {
-      query = query.or(`product_name.ilike.%${q}%,brand_name.ilike.%${q}%`);
+      query = query.or(`trade_products.product_name.ilike.%${q}%,trade_products.brand_name.ilike.%${q}%`);
     }
-    const { data } = await query.order("product_name");
-    setProducts((data as Product[]) || []);
-  }, []);
+    const { data } = await query.order("created_at", { ascending: false });
+    const prods = (data || []).map((f: any) => f.trade_products).filter(Boolean) as Product[];
+    // Deduplicate by product id
+    const seen = new Set<string>();
+    const unique = prods.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+    setProducts(unique);
+  }, [user]);
 
   useEffect(() => { if (addOpen) searchProducts(search); }, [addOpen, search, searchProducts]);
 
@@ -485,7 +494,7 @@ const TradeBoardBuilder = () => {
               autoFocus
             />
             <Button type="submit" disabled={!newSubfolderName.trim()} className="w-full">
-              Create & Add Products
+              Create Sub-folder
             </Button>
           </form>
         </DialogContent>
@@ -526,7 +535,9 @@ const TradeBoardBuilder = () => {
               </button>
             ))}
             {products.length === 0 && (
-              <p className="text-center text-muted-foreground text-sm py-8">No products found</p>
+              <p className="text-center text-muted-foreground text-sm py-8">
+                {search.trim() ? "No matching favorites found" : "No saved favorites yet — save items from the showroom first"}
+              </p>
             )}
           </div>
         </DialogContent>
