@@ -158,16 +158,20 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   // Lighting — specific first
   [/\bsconce\b/i, "Wall Lights"],
   [/\bwall\s*l(?:amp|ight)\b/i, "Wall Lights"],
+  [/\buplight\b/i, "Wall Lights"],
+  [/\bapplique\b/i, "Wall Lights"],
   [/\bpendant\b/i, "Ceiling Lights"],
   [/\bchandelier\b/i, "Ceiling Lights"],
   [/\bceiling\s*l(?:amp|ight)\b/i, "Ceiling Lights"],
   [/\blantern\b/i, "Ceiling Lights"],
+  [/\bsuspension\b/i, "Ceiling Lights"],
   [/\bfloor\s*l(?:amp|ight)\b/i, "Floor Lights"],
   [/\btable\s*l(?:amp|ight)\b/i, "Table Lights"],
   [/\bportable\s*l(?:amp|ight)\b/i, "Table Lights"],
   [/\blaqu[ée]\s.*lamp\b/i, "Table Lights"],
   [/\bsocle\s.*lamp\b/i, "Table Lights"],
-  [/\blamp\b/i, "Table Lights"],  // generic lamp → table light fallback
+  [/\bdesk\s*l(?:amp|ight)\b/i, "Table Lights"],
+  [/\blamp\b/i, "Table Lights"],  // generic "lamp" → table light
   // Storage
   [/\bbookcase\b/i, "Bookcases"],
   [/\bcredenza\b/i, "Cabinets"],
