@@ -189,7 +189,7 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
 // Category-level defaults when no title match and no subcategory
 const CATEGORY_DEFAULT_SUBCATEGORY: Record<string, string> = {
   Rugs: "Hand-Knotted Rugs",
-  Lighting: "Ceiling Lights",
+  Lighting: "Table Lights",
   Storage: "Cabinets",
   Décor: "Decorative Objects",
   Seating: "Chairs",
