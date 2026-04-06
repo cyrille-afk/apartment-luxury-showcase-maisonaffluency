@@ -494,7 +494,7 @@ const TradeBoardBuilder = () => {
               autoFocus
             />
             <Button type="submit" disabled={!newSubfolderName.trim()} className="w-full">
-              Create & Add Products
+              Create Sub-folder
             </Button>
           </form>
         </DialogContent>
