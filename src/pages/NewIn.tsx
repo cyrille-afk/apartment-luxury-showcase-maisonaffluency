@@ -148,7 +148,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
         <div className="flex items-center gap-3 shrink-0">
           <ShareMenu
             url="https://www.maisonaffluency.com/new-in-og.html"
-            message="Maison Affluency · New In — Discover Pierre Bonnefille, Christopher Boots, Pierre Yovanovitch & Achille Salvagni: https://www.maisonaffluency.com/new-in-og.html"
+            message="Maison Affluency · New In — Discover Pierre Bonnefille, Christopher Boots, Pierre Yovanovitch, Achille Salvagni & Pierre Augustin Rose: https://www.maisonaffluency.com/new-in-og.html"
             className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
             iconSize="w-5 h-5"
             showLabel={false}
