@@ -57,6 +57,42 @@ export default function CsvBulkUpload({ designerId, designerName, currentCount, 
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    const { data, error } = await supabase
+      .from("designer_curator_picks")
+      .select("*")
+      .eq("designer_id", designerId)
+      .order("sort_order");
+
+    if (error || !data?.length) {
+      toast({ title: error ? "Export failed" : "No products to export", description: error?.message, variant: "destructive" });
+      setExporting(false);
+      return;
+    }
+
+    const escapeCSV = (val: string) => {
+      if (val.includes(",") || val.includes('"') || val.includes("\n")) {
+        return `"${val.replace(/"/g, '""')}"`;
+      }
+      return val;
+    };
+
+    const rows = data.map((row: any) =>
+      CSV_COLUMNS.map((col) => escapeCSV(String(row[col] ?? ""))).join(",")
+    );
+    const csv = CSV_COLUMNS.join(",") + "\n" + rows.join("\n") + "\n";
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const slug = (designerName || "designer").toLowerCase().replace(/\s+/g, "-");
+    a.href = url; a.download = `curator_picks_${slug}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    setExporting(false);
+    toast({ title: `Exported ${data.length} products` });
+  };
 
   const handleFile = (f: File) => {
     setFile(f);
