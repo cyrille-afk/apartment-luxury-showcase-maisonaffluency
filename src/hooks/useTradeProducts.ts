@@ -15,6 +15,7 @@ import {
   type TradeProduct,
 } from "@/lib/tradeProducts";
 import { normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
+import { inferSubcategory } from "@/lib/productTaxonomy";
 
 async function fetchLiveProducts(): Promise<TradeProduct[]> {
   const { data, error } = await supabase
@@ -51,6 +52,8 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
 
     const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
     const rawSubcategory = pick.subcategory || pick.tags?.[1];
+    const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, pick.title);
+    const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory;
 
     return [
       {
@@ -58,8 +61,8 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle ?? undefined,
-        category: normalizeCategory(rawCategory, rawSubcategory) || rawCategory,
-        subcategory: normalizeSubcategory(rawSubcategory),
+        category: resolvedCategory,
+        subcategory: resolvedSubcategory,
         tags: pick.tags || [],
         materials: pick.materials ?? undefined,
         dimensions: pick.dimensions ?? undefined,
