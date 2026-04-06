@@ -42,11 +42,11 @@ export function getAllTradeProducts(): TradeProduct[] {
   const addPicks = (brandName: string, picks: CuratorPick[]) => {
     for (const pick of picks) {
       if (!pick.title) continue;
-      const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
-      const rawSubcategory = pick.subcategory || pick.tags?.[1];
+      const rawCategory = pick.category || pick.tags?.[0] || undefined;
+      const rawSubcategory = pick.subcategory || undefined;
       const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
       const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, inferenceText);
-      const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory;
+      const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";
       products.push({
         id: `tp-${idx++}`,
         brand_name: brandName,

@@ -238,6 +238,9 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\bvessel\b/i, "Vases & Vessels"],
   [/\bcandle\s*holder\b/i, "Candle Holders"],
   [/\bsculptur/i, "Decorative Objects"],
+  // Rugs
+  [/\brug\b/i, "Hand-Knotted Rugs"],
+  [/\bcarpet\b/i, "Hand-Knotted Rugs"],
 ];
 
 // Category-level defaults when no title match and no subcategory
