@@ -235,22 +235,24 @@ export default function TradeAnnotations() {
               className="pl-9"
             />
           </div>
-          <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-2 min-h-0 mt-2">
+          <div className="flex-1 overflow-y-auto space-y-1 min-h-0 mt-2">
             {dbImages.map(img => (
               <button
                 key={`${img.source}-${img.id}`}
                 onClick={() => selectDbImage(img.image_url)}
-                className="group relative aspect-square rounded-lg overflow-hidden border border-border hover:border-foreground/30 transition-colors"
+                className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left"
               >
-                <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <p className="font-body text-[10px] text-white truncate">{img.name}</p>
-                  <p className="font-body text-[9px] text-white/70 truncate">{img.brand}</p>
+                <div className="w-14 h-14 rounded bg-muted shrink-0 overflow-hidden">
+                  <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-body text-sm text-foreground truncate">{img.name}</p>
+                  <p className="font-body text-xs text-muted-foreground truncate">{img.brand}</p>
                 </div>
               </button>
             ))}
             {dbImages.length === 0 && (
-              <p className="col-span-3 text-center text-muted-foreground text-sm py-8">No images found</p>
+              <p className="text-center text-muted-foreground text-sm py-8">No images found</p>
             )}
           </div>
         </DialogContent>
