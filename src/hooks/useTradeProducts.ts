@@ -14,10 +14,18 @@ import {
   getSubcategories,
   type TradeProduct,
 } from "@/lib/tradeProducts";
-import { normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
-import { inferSubcategory } from "@/lib/productTaxonomy";
+import {
+  inferSubcategory,
+  normalizeCategory,
+  normalizeSubcategory,
+} from "@/lib/productTaxonomy";
 
-async function fetchLiveProducts(): Promise<TradeProduct[]> {
+type LiveTradeProduct = TradeProduct & {
+  hasExplicitCategory: boolean;
+  hasExplicitSubcategory: boolean;
+};
+
+async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
   const { data, error } = await supabase
     .from("designer_curator_picks")
     .select(`
@@ -50,9 +58,12 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
     const brandName = designer?.name?.trim();
     if (!brandName || !pick.title) return [];
 
+    const hasExplicitCategory = Boolean(pick.category?.trim?.());
+    const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.());
     const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
     const rawSubcategory = pick.subcategory || pick.tags?.[1];
-    const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, pick.title);
+    const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
+    const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, inferenceText);
     const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory;
 
     return [
@@ -72,6 +83,8 @@ async function fetchLiveProducts(): Promise<TradeProduct[]> {
         edition: pick.edition ?? undefined,
         pdf_url: pick.pdf_url ?? undefined,
         pdf_urls: pick.pdf_urls ?? undefined,
+        hasExplicitCategory,
+        hasExplicitSubcategory,
       } satisfies TradeProduct,
     ];
   });
@@ -96,8 +109,24 @@ export function useTradeProducts() {
   const allProducts = useMemo(() => {
     const merged = new Map<string, TradeProduct>();
     for (const p of staticProducts) merged.set(keyOf(p), p);
-    // Live data wins on collisions
-    for (const p of liveProducts) merged.set(keyOf(p), p);
+    for (const p of liveProducts) {
+      const key = keyOf(p);
+      const existing = merged.get(key);
+      const { hasExplicitCategory, hasExplicitSubcategory, ...liveProduct } = p;
+
+      if (!existing) {
+        merged.set(key, liveProduct);
+        continue;
+      }
+
+      merged.set(key, {
+        ...existing,
+        ...liveProduct,
+        category: hasExplicitCategory || hasExplicitSubcategory ? liveProduct.category : existing.category,
+        subcategory: hasExplicitSubcategory ? liveProduct.subcategory : existing.subcategory,
+      });
+    }
+
     return Array.from(merged.values());
   }, [staticProducts, liveProducts]);
 
