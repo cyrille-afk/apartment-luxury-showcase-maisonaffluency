@@ -122,17 +122,26 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   const [loaded, setLoaded] = useState(false);
   const [expandedPickId, setExpandedPickId] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase
+  const loadPicks = useCallback(async () => {
+    const { data, error } = await supabase
       .from("designer_curator_picks")
       .select("*")
       .eq("designer_id", designerId)
-      .order("sort_order", { ascending: true })
-      .then(({ data }) => {
-        setPicks((data as any[]) || []);
-        setLoaded(true);
-      });
-  }, [designerId]);
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      toast({ title: "Failed to load picks", description: error.message, variant: "destructive" });
+      setLoaded(true);
+      return;
+    }
+
+    setPicks((data as any[]) || []);
+    setLoaded(true);
+  }, [designerId, toast]);
+
+  useEffect(() => {
+    void loadPicks();
+  }, [loadPicks]);
 
   const handleAdd = async () => {
     const order = picks.length;
@@ -152,9 +161,32 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this curator pick? This action cannot be undone.")) return;
-    await supabase.from("designer_curator_picks").delete().eq("id", id);
+    const { data, error } = await supabase
+      .from("designer_curator_picks")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    if (!data) {
+      toast({
+        title: "Delete did not persist",
+        description: "This pick was removed from the editor view, but not from the backend. The list has been refreshed.",
+        variant: "destructive",
+      });
+      await loadPicks();
+      return;
+    }
+
     setPicks((prev) => prev.filter((p) => p.id !== id));
+    setExpandedPickId((prev) => (prev === id ? null : prev));
     queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+    toast({ title: "Pick deleted" });
   };
 
   const updateField = async (id: string, field: string, value: any) => {
@@ -283,12 +315,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
           designerName={designerName}
           currentCount={picks.length}
           onComplete={() => {
-            supabase
-              .from("designer_curator_picks")
-              .select("*")
-              .eq("designer_id", designerId)
-              .order("sort_order", { ascending: true })
-              .then(({ data }) => setPicks((data as any[]) || []));
+            void loadPicks();
           }}
         />
       </div>
