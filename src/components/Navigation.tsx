@@ -657,14 +657,6 @@ const Navigation = () => {
           </div>
           <div className="flex items-center justify-between w-full pb-3">
             <div className="flex items-center gap-6 lg:gap-10">
-              {/* New In — far left */}
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-red-700 hover:text-white bg-red-600/10 hover:bg-red-600 px-3 py-1 rounded-full"
-              >
-                New In
-              </button>
-
               {leftNavItems.map((item, index) => (
                 <React.Fragment key={item.href}>
                   <button 
@@ -701,6 +693,14 @@ const Navigation = () => {
                   )}
                 </React.Fragment>
               ))}
+
+              {/* New In — between Collectible Design and Journal */}
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
+                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-red-700 hover:text-white bg-red-600/10 hover:bg-red-600 px-3 py-1 rounded-full"
+              >
+                New In
+              </button>
             </div>
 
             <span className="w-px h-3 bg-border/60" aria-hidden="true" />
