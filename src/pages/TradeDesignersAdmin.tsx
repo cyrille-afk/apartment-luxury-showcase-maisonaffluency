@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { lazy, Suspense } from "react";
 import CloudUpload from "@/components/trade/CloudUpload";
+import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -273,9 +274,23 @@ function CuratorPicksManager({ designerId }: { designerId: string }) {
           </div>
         ))}
       </div>
-      <Button variant="outline" size="sm" onClick={handleAdd} className="mt-2">
-        <Plus className="w-3.5 h-3.5 mr-1" /> Add Pick
-      </Button>
+      <div className="mt-2 flex items-center gap-2 flex-wrap">
+        <Button variant="outline" size="sm" onClick={handleAdd}>
+          <Plus className="w-3.5 h-3.5 mr-1" /> Add Pick
+        </Button>
+        <CsvBulkUpload
+          designerId={designerId}
+          currentCount={picks.length}
+          onComplete={() => {
+            supabase
+              .from("designer_curator_picks")
+              .select("*")
+              .eq("designer_id", designerId)
+              .order("sort_order", { ascending: true })
+              .then(({ data }) => setPicks((data as any[]) || []));
+          }}
+        />
+      </div>
     </div>
   );
 }
