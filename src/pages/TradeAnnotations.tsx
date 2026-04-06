@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { normalizeSubcategory } from "@/lib/productTaxonomy";
+import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, X, Plus, Image as ImageIcon, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,8 +74,8 @@ export default function TradeAnnotations() {
         addUnique({
           id: p.id, name: p.title, brand: brandName,
           image_url: p.image_url, source: "pick",
-          category: p.category || "Uncategorized",
-          subcategory: normalizeSubcategory(p.subcategory) || p.category || "Other",
+          category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
+          subcategory: normalizeSubcategory(p.subcategory) || normalizeCategory(p.category, p.subcategory) || "Other",
         });
       });
     }
@@ -96,8 +96,8 @@ export default function TradeAnnotations() {
           addUnique({
             id: p.id, name: p.product_name, brand: p.brand_name,
             image_url: p.image_url, source: "product",
-            category: p.category || "Uncategorized",
-            subcategory: normalizeSubcategory(p.subcategory) || p.category || "Other",
+            category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
+            subcategory: normalizeSubcategory(p.subcategory) || normalizeCategory(p.category, p.subcategory) || "Other",
           });
         }
       });
@@ -262,37 +262,61 @@ export default function TradeAnnotations() {
               <p className="text-center text-muted-foreground text-sm py-8">No images found</p>
             ) : (
               (() => {
-                const grouped: Record<string, DbImage[]> = {};
+                // Group by category → subcategory using canonical taxonomy
+                const byCat: Record<string, Record<string, DbImage[]>> = {};
                 dbImages.forEach(img => {
-                  const key = img.subcategory || "Other";
-                  if (!grouped[key]) grouped[key] = [];
-                  grouped[key].push(img);
+                  const cat = img.category || "Uncategorized";
+                  const sub = img.subcategory || "Other";
+                  if (!byCat[cat]) byCat[cat] = {};
+                  if (!byCat[cat][sub]) byCat[cat][sub] = [];
+                  byCat[cat][sub].push(img);
                 });
-                const sortedKeys = Object.keys(grouped).sort();
-                return sortedKeys.map(sub => (
-                  <div key={sub} className="mb-3">
-                    <p className="font-display text-[10px] uppercase tracking-widest text-muted-foreground px-2 py-1.5 sticky top-0 bg-background/95 backdrop-blur-sm z-10 border-b border-border/50">
-                      {sub} <span className="text-muted-foreground/50 ml-1">({grouped[sub].length})</span>
-                    </p>
-                    <div className="space-y-0.5">
-                      {grouped[sub].map(img => (
-                        <button
-                          key={`${img.source}-${img.id}`}
-                          onClick={() => selectDbImage(img.image_url)}
-                          className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                        >
-                          <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
-                            <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
+                // Sort categories by CATEGORY_ORDER, unknowns at end
+                const catKeys = Object.keys(byCat).sort((a, b) => {
+                  const ai = CATEGORY_ORDER.indexOf(a);
+                  const bi = CATEGORY_ORDER.indexOf(b);
+                  return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                });
+                return catKeys.map(cat => {
+                  const subs = byCat[cat];
+                  const canonicalSubs = SUBCATEGORY_MAP[cat] || [];
+                  const subKeys = Object.keys(subs).sort((a, b) => {
+                    const ai = canonicalSubs.indexOf(a);
+                    const bi = canonicalSubs.indexOf(b);
+                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                  });
+                  return (
+                    <div key={cat} className="mb-4">
+                      <p className="font-display text-[11px] uppercase tracking-widest text-foreground px-2 py-2 sticky top-0 bg-background z-20 border-b border-border">
+                        {cat}
+                      </p>
+                      {subKeys.map(sub => (
+                        <div key={sub} className="mb-1">
+                          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground px-3 py-1 sticky top-8 bg-background/95 backdrop-blur-sm z-10">
+                            {sub} <span className="text-muted-foreground/40 ml-1">({subs[sub].length})</span>
+                          </p>
+                          <div className="space-y-0.5">
+                            {subs[sub].map(img => (
+                              <button
+                                key={`${img.source}-${img.id}`}
+                                onClick={() => selectDbImage(img.image_url)}
+                                className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors text-left"
+                              >
+                                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
+                                  <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-body text-sm text-foreground truncate">{img.name}</p>
+                                  <p className="font-body text-xs text-muted-foreground truncate">{img.brand}</p>
+                                </div>
+                              </button>
+                            ))}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-body text-sm text-foreground truncate">{img.name}</p>
-                            <p className="font-body text-xs text-muted-foreground truncate">{img.brand}</p>
-                          </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
-                  </div>
-                ));
+                  );
+                });
               })()
             )}
           </div>
