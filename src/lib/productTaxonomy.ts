@@ -264,16 +264,11 @@ const ALL_CANONICAL_SUBCATEGORIES = new Set(
  */
 export function inferSubcategory(rawCategory?: string, rawSubcategory?: string, title?: string): string {
   if (rawSubcategory) {
-    const normalized = normalizeSubcategory(rawSubcategory)!;
-    // If the normalized value is a real canonical subcategory, use it
-    if (ALL_CANONICAL_SUBCATEGORIES.has(normalized)) return normalized;
-    // Otherwise try title-based inference before falling through
-    if (title) {
-      const fromTitle = inferSubcategoryFromTitle(title);
-      if (fromTitle) return fromTitle;
+    const normalized = normalizeSubcategory(rawSubcategory) || rawSubcategory;
+    if (ALL_CANONICAL_SUBCATEGORIES.has(normalized)) {
+      return normalized;
     }
-    // Still return the normalized value if it's at least recognized
-    if (normalized !== rawSubcategory) return normalized;
+    // Non-canonical subcategory — fall through to title inference
   }
   // Try title-based inference first
   if (title) {
