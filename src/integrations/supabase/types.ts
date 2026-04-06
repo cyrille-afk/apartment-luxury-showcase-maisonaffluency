@@ -610,6 +610,7 @@ export type Database = {
           hover_image_url: string | null
           id: string
           image_url: string
+          lead_time: string | null
           materials: string | null
           pdf_filename: string | null
           pdf_url: string | null
@@ -633,6 +634,7 @@ export type Database = {
           hover_image_url?: string | null
           id?: string
           image_url?: string
+          lead_time?: string | null
           materials?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
@@ -656,6 +658,7 @@ export type Database = {
           hover_image_url?: string | null
           id?: string
           image_url?: string
+          lead_time?: string | null
           materials?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
@@ -2321,6 +2324,7 @@ export type Database = {
           hover_image_url: string | null
           id: string | null
           image_url: string | null
+          lead_time: string | null
           materials: string | null
           pdf_filename: string | null
           pdf_url: string | null
@@ -2343,6 +2347,7 @@ export type Database = {
           hover_image_url?: string | null
           id?: string | null
           image_url?: string | null
+          lead_time?: string | null
           materials?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
@@ -2365,6 +2370,7 @@ export type Database = {
           hover_image_url?: string | null
           id?: string | null
           image_url?: string | null
+          lead_time?: string | null
           materials?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
