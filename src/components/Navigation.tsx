@@ -287,7 +287,7 @@ const Navigation = () => {
                 {/* New In — top of mobile menu */}
                 <button
                   onClick={() => handleNavClick("/new-in")}
-                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-red-700 hover:text-white hover:bg-red-600 font-bold animate-fade-in opacity-0 bg-red-600/10 px-3 rounded-lg"
+                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-bold animate-fade-in opacity-0 px-3"
                   style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}
                 >
                   New In
@@ -697,7 +697,7 @@ const Navigation = () => {
               {/* New In — between Collectible Design and Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-red-700 hover:text-white bg-red-600/10 hover:bg-red-600 px-3 py-1 rounded-full"
+                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground"
               >
                 New In
               </button>
