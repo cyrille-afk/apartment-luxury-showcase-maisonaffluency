@@ -11,6 +11,7 @@ import {
   normalizeCategory,
   normalizeSubcategory,
 } from "@/lib/productTaxonomy";
+import { inferSubcategory } from "@/lib/productTaxonomy";
 
 export interface TradeProduct {
   id: string;
@@ -43,13 +44,16 @@ export function getAllTradeProducts(): TradeProduct[] {
       if (!pick.title) continue;
       const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
       const rawSubcategory = pick.subcategory || pick.tags?.[1];
+      const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
+      const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, inferenceText);
+      const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory;
       products.push({
         id: `tp-${idx++}`,
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle,
-        category: normalizeCategory(rawCategory, rawSubcategory) || rawCategory,
-        subcategory: normalizeSubcategory(rawSubcategory),
+        category: resolvedCategory,
+        subcategory: resolvedSubcategory,
         tags: pick.tags || [],
         materials: pick.materials,
         dimensions: pick.dimensions,

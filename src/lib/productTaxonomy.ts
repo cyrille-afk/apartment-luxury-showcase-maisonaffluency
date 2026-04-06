@@ -125,6 +125,33 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Hand-Tufted Rug": "Hand-Tufted Rugs",
   "Hand-Woven Rug": "Hand-Woven Rugs",
   Wallcoverings: "Decorative Objects",
+  "Sofas & Loveseats": "Sofas",
+  "Pendant Lighting": "Ceiling Lights",
+  Lantern: "Ceiling Lights",
+  Lanterns: "Ceiling Lights",
+  "Dining Chair": "Chairs",
+  "Dining Chairs": "Chairs",
+  "Lounge Chair": "Armchairs",
+  "Club Chair": "Armchairs",
+  "Limited Edition": "Decorative Objects",
+  "Limited Editions": "Decorative Objects",
+  "Iconic Editions": "Decorative Objects",
+  Centrepiece: "Decorative Objects",
+  Photography: "Decorative Objects",
+  Piano: "Decorative Objects",
+  "Lighting & Sculpture": "Ceiling Lights",
+  "Sculpture & Furniture": "Decorative Objects",
+  "Sculptural Furniture": "Decorative Objects",
+  "Sculptural Objects": "Decorative Objects",
+  "Architecture & Interiors": "Decorative Objects",
+  "Seating & Tables": "Chairs",
+  "Tables & Objects": "Side Tables",
+  "Tables & Sculpture": "Side Tables",
+  "Tables & Seating": "Side Tables",
+  // Display Cabinet → Cabinets
+  "Display Cabinet": "Cabinets",
+  "High Table": "Side Tables",
+  Table: "Side Tables",
 };
 
 // Reverse lookup: given a raw value that might be a subcategory name, find its parent category
@@ -226,12 +253,23 @@ function inferSubcategoryFromTitle(title: string): string | undefined {
   return undefined;
 }
 
+// Set of all canonical subcategory values (values in SUBCATEGORY_MAP)
+const ALL_CANONICAL_SUBCATEGORIES = new Set(
+  Object.values(SUBCATEGORY_MAP).flat()
+);
+
 /**
  * When subcategory is missing, try to derive it from the raw category value
  * or from the product title as a last resort, then fall back to the category default.
  */
 export function inferSubcategory(rawCategory?: string, rawSubcategory?: string, title?: string): string {
-  if (rawSubcategory) return normalizeSubcategory(rawSubcategory) || "Other";
+  if (rawSubcategory) {
+    const normalized = normalizeSubcategory(rawSubcategory) || rawSubcategory;
+    if (ALL_CANONICAL_SUBCATEGORIES.has(normalized)) {
+      return normalized;
+    }
+    // Non-canonical subcategory — fall through to title inference
+  }
   // Try title-based inference first
   if (title) {
     const fromTitle = inferSubcategoryFromTitle(title);
