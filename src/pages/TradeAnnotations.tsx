@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { normalizeCategory, inferSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, X, Plus, Image as ImageIcon, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
