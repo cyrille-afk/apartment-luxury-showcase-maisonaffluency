@@ -151,6 +151,25 @@ const ClientBoardViewer = () => {
     );
   }
 
+  // Group items by subfolder
+  const subfolders = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach(i => { if (i.subfolder) set.add(i.subfolder); });
+    return Array.from(set).sort();
+  }, [items]);
+
+  const groupedItems = useMemo(() => {
+    const groups: { name: string | null; items: BoardItem[] }[] = [];
+    for (const sf of subfolders) {
+      groups.push({ name: sf, items: items.filter(i => i.subfolder === sf) });
+    }
+    const ungrouped = items.filter(i => !i.subfolder);
+    if (ungrouped.length > 0 || subfolders.length === 0) {
+      groups.push({ name: null, items: ungrouped });
+    }
+    return groups;
+  }, [items, subfolders]);
+
   const approvedCount = items.filter(i => i.approval_status === "approved").length;
   const isReadOnly = board?.status !== "shared";
 
