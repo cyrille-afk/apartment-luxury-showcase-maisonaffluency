@@ -21,6 +21,7 @@ interface BoardItem {
   product_id: string;
   approval_status: string;
   notes: string | null;
+  subfolder: string | null;
   product?: {
     product_name: string;
     brand_name: string;
