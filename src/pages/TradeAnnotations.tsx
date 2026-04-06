@@ -291,6 +291,7 @@ export default function TradeAnnotations() {
                 ));
               })()
             )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
