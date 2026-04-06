@@ -93,6 +93,29 @@ Deno.serve(async (req) => {
     }
   }
 
+  // --- New In page ---
+  if (path === "/new-in") {
+    title = "New In — Latest Designers | Maison Affluency";
+    description = "Discover the latest designers and makers joining the Maison Affluency curated roster — emerging talents and established masters of collectible furniture and lighting.";
+
+    const { data: newDesigners } = await supabase
+      .from("designers")
+      .select("name, display_name, slug, specialty, biography")
+      .not("new_in_order", "is", null)
+      .eq("is_published", true)
+      .order("new_in_order", { ascending: true });
+
+    bodyContent = `
+      <h1>New In — Latest Designers &amp; Makers</h1>
+      <p>Discover the latest designers and makers joining the Maison Affluency curated roster.</p>
+      ${(newDesigners || []).map(d => `
+        <h2><a href="${SITE}/designers/${d.slug}">${esc(d.display_name || d.name)}</a></h2>
+        <p><strong>${esc(d.specialty || "")}</strong></p>
+        ${d.biography ? `<p>${esc(d.biography.substring(0, 300))}...</p>` : ""}
+      `).join("")}
+      <p><a href="${SITE}/trade/program">Join Our Trade Program</a> for exclusive pricing and access.</p>`;
+  }
+
   // --- Designer index ---
   if (path === "/designers") {
     title = "Designers & Makers | Maison Affluency";
