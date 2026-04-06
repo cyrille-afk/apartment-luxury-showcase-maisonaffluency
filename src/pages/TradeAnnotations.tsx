@@ -97,7 +97,7 @@ export default function TradeAnnotations() {
             id: p.id, name: p.product_name, brand: p.brand_name,
             image_url: p.image_url, source: "product",
             category: p.category || "Uncategorized",
-            subcategory: p.subcategory || p.category || "Other",
+            subcategory: normalizeSubcategory(p.subcategory) || p.category || "Other",
           });
         }
       });
