@@ -61,7 +61,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
     const hasExplicitCategory = Boolean(pick.category?.trim?.());
     const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.());
     const rawCategory = pick.category?.trim() || pick.tags?.[0] || undefined;
-    const rawSubcategory = pick.subcategory?.trim() || undefined;
+    const rawSubcategory = pick.subcategory?.trim() || pick.tags?.[1] || undefined;
     const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
     const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, inferenceText);
     const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";

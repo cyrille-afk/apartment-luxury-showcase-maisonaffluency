@@ -43,7 +43,7 @@ export function getAllTradeProducts(): TradeProduct[] {
     for (const pick of picks) {
       if (!pick.title) continue;
       const rawCategory = pick.category || pick.tags?.[0] || undefined;
-      const rawSubcategory = pick.subcategory || undefined;
+      const rawSubcategory = pick.subcategory || pick.tags?.[1] || undefined;
       const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
       const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, inferenceText);
       const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";
