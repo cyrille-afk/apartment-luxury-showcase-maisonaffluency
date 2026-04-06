@@ -280,6 +280,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
         </Button>
         <CsvBulkUpload
           designerId={designerId}
+          designerName={designerName}
           currentCount={picks.length}
           onComplete={() => {
             supabase
