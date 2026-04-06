@@ -1120,7 +1120,7 @@ const TradeDesignersAdmin = () => {
                       />
 
                       {/* Curator Picks */}
-                      <CuratorPicksManager designerId={d.id} />
+                      <CuratorPicksManager designerId={d.id} designerName={d.name} />
 
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
