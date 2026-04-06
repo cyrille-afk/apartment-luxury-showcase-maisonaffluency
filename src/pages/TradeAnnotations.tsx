@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { normalizeCategory, inferSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, X, Plus, Image as ImageIcon, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,7 @@ export default function TradeAnnotations() {
           id: p.id, name: p.title, brand: brandName,
           image_url: p.image_url, source: "pick",
           category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
-          subcategory: normalizeSubcategory(p.subcategory) || normalizeCategory(p.category, p.subcategory) || "Other",
+          subcategory: inferSubcategory(p.category, p.subcategory),
         });
       });
     }
@@ -97,7 +97,7 @@ export default function TradeAnnotations() {
             id: p.id, name: p.product_name, brand: p.brand_name,
             image_url: p.image_url, source: "product",
             category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
-            subcategory: normalizeSubcategory(p.subcategory) || normalizeCategory(p.category, p.subcategory) || "Other",
+            subcategory: inferSubcategory(p.category, p.subcategory),
           });
         }
       });

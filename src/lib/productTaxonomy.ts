@@ -103,15 +103,44 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   Wallcoverings: "Decorative Objects",
 };
 
+// Reverse lookup: given a raw value that might be a subcategory name, find its parent category
+function findParentCategory(value: string): string | undefined {
+  const normalized = SUBCATEGORY_NORMALIZE[value] || value;
+  for (const [cat, subs] of Object.entries(SUBCATEGORY_MAP)) {
+    if (subs.includes(normalized)) return cat;
+  }
+  return undefined;
+}
+
 export function normalizeCategory(value?: string, subcategory?: string): string | undefined {
   if (!value) return value;
   if (value === "Furniture") return resolveFurniture(subcategory);
-  return CATEGORY_NORMALIZE[value] || value;
+  const mapped = CATEGORY_NORMALIZE[value] || value;
+  // If the mapped value is a known top-level category, use it
+  if (CATEGORY_ORDER.includes(mapped)) return mapped;
+  // Otherwise it might be a subcategory used as a category (e.g. "Consoles")
+  const parent = findParentCategory(value);
+  if (parent) return parent;
+  return mapped;
 }
 
 export function normalizeSubcategory(value?: string): string | undefined {
   if (!value) return value;
   return SUBCATEGORY_NORMALIZE[value] || value;
+}
+
+/**
+ * When subcategory is missing, try to derive it from the raw category value
+ * (e.g. raw category "Consoles" → subcategory "Consoles")
+ */
+export function inferSubcategory(rawCategory?: string, rawSubcategory?: string): string {
+  if (rawSubcategory) return normalizeSubcategory(rawSubcategory) || "Other";
+  if (!rawCategory) return "Other";
+  // If raw category is actually a subcategory name, use it
+  const normalized = SUBCATEGORY_NORMALIZE[rawCategory] || rawCategory;
+  const parent = findParentCategory(rawCategory);
+  if (parent) return normalized;
+  return "Other";
 }
 
 export function getSubcategoriesForCategory(category: string): string[] {
