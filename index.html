@@ -2,6 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Redirect search engine crawlers to pre-rendered HTML for full content indexing -->
+    <script>
+      (function(){
+        var ua = navigator.userAgent;
+        if(/Googlebot|Bingbot|YandexBot|Baiduspider|DuckDuckBot|Sogou|Exabot|ia_archiver|MJ12bot|AhrefsBot|SemrushBot|DotBot/i.test(ua) && !/prerendered/i.test(window.location.search)){
+          var p = window.location.pathname;
+          if(p !== '/' && p.length > 1){
+            window.location.replace('https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/prerender?path=' + encodeURIComponent(p));
+          }
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maison Affluency | Luxury Furniture &amp; Collectible Design</title>
     <meta name="description" content="Discover contemporary furniture and exceptional collectible  by world-renowned designers and makers in Singapore District 9.">
