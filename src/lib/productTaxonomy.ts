@@ -129,17 +129,63 @@ export function normalizeSubcategory(value?: string): string | undefined {
   return SUBCATEGORY_NORMALIZE[value] || value;
 }
 
+// Title-based keyword patterns → canonical subcategory
+const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
+  [/\bsofa\b/i, "Sofas"],
+  [/\bcanap[ée]/i, "Sofas"],
+  [/\barmchair\b/i, "Armchairs"],
+  [/\bfauteuil\b/i, "Armchairs"],
+  [/\bclub\s*chair\b/i, "Armchairs"],
+  [/\bdining\s*chair\b/i, "Chairs"],
+  [/\bchair\b/i, "Chairs"],
+  [/\bdaybed\b/i, "Daybeds & Benches"],
+  [/\bbench\b/i, "Daybeds & Benches"],
+  [/\btransat\b/i, "Daybeds & Benches"],
+  [/\bbar\s*stool\b/i, "Bar Stools"],
+  [/\bstool\b/i, "Ottomans & Stools"],
+  [/\bottoman\b/i, "Ottomans & Stools"],
+  [/\bconsole\b/i, "Consoles"],
+  [/\bcoffee\s*table\b/i, "Coffee Tables"],
+  [/\bside\s*table\b/i, "Side Tables"],
+  [/\bdesk\b/i, "Desks"],
+  [/\bdining\s*table\b/i, "Dining Tables"],
+  [/\btable\b/i, "Side Tables"],
+  [/\bmirror\b/i, "Mirrors"],
+  [/\bvase\b/i, "Vases & Vessels"],
+  [/\bvessel\b/i, "Vases & Vessels"],
+  [/\bpendant\b/i, "Ceiling Lights"],
+  [/\bchandelier\b/i, "Ceiling Lights"],
+  [/\bfloor\s*l(?:amp|ight)\b/i, "Floor Lights"],
+  [/\btable\s*l(?:amp|ight)\b/i, "Table Lights"],
+  [/\bwall\s*(?:light|sconce)\b/i, "Wall Lights"],
+  [/\bbookcase\b/i, "Bookcases"],
+  [/\bcabinet\b/i, "Cabinets"],
+  [/\bsideboard\b/i, "Cabinets"],
+];
+
+function inferSubcategoryFromTitle(title: string): string | undefined {
+  for (const [pattern, sub] of TITLE_SUBCATEGORY_HINTS) {
+    if (pattern.test(title)) return sub;
+  }
+  return undefined;
+}
+
 /**
  * When subcategory is missing, try to derive it from the raw category value
- * (e.g. raw category "Consoles" → subcategory "Consoles")
+ * or from the product title as a last resort.
  */
-export function inferSubcategory(rawCategory?: string, rawSubcategory?: string): string {
+export function inferSubcategory(rawCategory?: string, rawSubcategory?: string, title?: string): string {
   if (rawSubcategory) return normalizeSubcategory(rawSubcategory) || "Other";
-  if (!rawCategory) return "Other";
+  if (!rawCategory) {
+    if (title) return inferSubcategoryFromTitle(title) || "Other";
+    return "Other";
+  }
   // If raw category is actually a subcategory name, use it
   const normalized = SUBCATEGORY_NORMALIZE[rawCategory] || rawCategory;
   const parent = findParentCategory(rawCategory);
   if (parent) return normalized;
+  // Try title-based inference
+  if (title) return inferSubcategoryFromTitle(title) || "Other";
   return "Other";
 }
 

@@ -75,7 +75,7 @@ export default function TradeAnnotations() {
           id: p.id, name: p.title, brand: brandName,
           image_url: p.image_url, source: "pick",
           category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
-          subcategory: inferSubcategory(p.category, p.subcategory),
+          subcategory: inferSubcategory(p.category, p.subcategory, p.title),
         });
       });
     }
@@ -97,7 +97,7 @@ export default function TradeAnnotations() {
             id: p.id, name: p.product_name, brand: p.brand_name,
             image_url: p.image_url, source: "product",
             category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
-            subcategory: inferSubcategory(p.category, p.subcategory),
+            subcategory: inferSubcategory(p.category, p.subcategory, p.product_name),
           });
         }
       });
