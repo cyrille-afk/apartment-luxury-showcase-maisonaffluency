@@ -1,0 +1,1 @@
+UPDATE designers SET new_in_order = 5 WHERE id = '926b4aa3-7975-4587-9ffb-01f502ca4289';
