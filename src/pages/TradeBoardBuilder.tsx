@@ -80,7 +80,8 @@ const TradeBoardBuilder = () => {
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
   const [renameTarget, setRenameTarget] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const [addToSubfolder, setAddToSubfolder] = useState<string | null>(null); // subfolder to add products into
+  const [addToSubfolder, setAddToSubfolder] = useState<string | null>(null);
+  const [emptySubfolders, setEmptySubfolders] = useState<string[]>([]); // track created but still-empty subfolders
 
   const fetchBoard = useCallback(async () => {
     if (!id) return;
