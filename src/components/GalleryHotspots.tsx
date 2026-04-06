@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Price helpers ── */
@@ -478,7 +479,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                           const pdfUrl = getHotspotPdf(hotspot.product_name);
                           return pdfUrl ? (
                             <a
-                              href={pdfUrl}
+                              href={buildSpecSheetUrl(pdfUrl, hotspot.designer_name || "", hotspot.product_name)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-1 mt-1.5 text-[10px] font-body text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.1em]"
