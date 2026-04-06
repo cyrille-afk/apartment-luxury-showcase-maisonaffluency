@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
-import { normalizeCategory, inferSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { Upload, X, Plus, Image as ImageIcon, Search, Save, Trash2, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
