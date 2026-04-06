@@ -120,8 +120,9 @@ const TradeBoardBuilder = () => {
   const subfolders = useMemo(() => {
     const set = new Set<string>();
     items.forEach(i => { if (i.subfolder) set.add(i.subfolder); });
+    emptySubfolders.forEach(name => set.add(name));
     return Array.from(set).sort();
-  }, [items]);
+  }, [items, emptySubfolders]);
 
   // Group items by subfolder
   const groupedItems = useMemo(() => {
