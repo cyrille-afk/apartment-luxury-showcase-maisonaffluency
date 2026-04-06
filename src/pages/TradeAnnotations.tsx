@@ -54,6 +54,86 @@ export default function TradeAnnotations() {
   const [saving, setSaving] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
 
+  // Load saved annotations list
+  const loadSavedAnnotations = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLoadingList(false); return; }
+    const { data } = await supabase
+      .from("markup_annotations")
+      .select("id, title, image_url, pins, updated_at")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
+    if (data) {
+      setSavedAnnotations(data.map((d: any) => ({
+        ...d,
+        pins: (d.pins as Pin[]) || [],
+      })));
+    }
+    setLoadingList(false);
+  }, []);
+
+  useEffect(() => { loadSavedAnnotations(); }, [loadSavedAnnotations]);
+
+  // Save current annotation
+  const handleSave = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error("Please log in to save annotations"); return; }
+    if (!imageUrl) return;
+    setSaving(true);
+    try {
+      if (currentAnnotationId) {
+        await supabase
+          .from("markup_annotations")
+          .update({ title: annotationTitle, image_url: imageUrl, pins: pins as any, updated_at: new Date().toISOString() })
+          .eq("id", currentAnnotationId);
+        toast.success("Annotation saved");
+      } else {
+        const { data } = await supabase
+          .from("markup_annotations")
+          .insert({ user_id: user.id, title: annotationTitle, image_url: imageUrl, pins: pins as any })
+          .select("id")
+          .single();
+        if (data) setCurrentAnnotationId(data.id);
+        toast.success("Annotation created");
+      }
+      loadSavedAnnotations();
+    } catch { toast.error("Failed to save"); }
+    setSaving(false);
+  };
+
+  // Load a saved annotation
+  const openAnnotation = (ann: SavedAnnotation) => {
+    setCurrentAnnotationId(ann.id);
+    setAnnotationTitle(ann.title);
+    setImageUrl(ann.image_url);
+    setPins(ann.pins);
+    setActivePin(null);
+    setIsPlacing(false);
+  };
+
+  // Delete a saved annotation
+  const deleteAnnotation = async (id: string) => {
+    await supabase.from("markup_annotations").delete().eq("id", id);
+    if (currentAnnotationId === id) {
+      setCurrentAnnotationId(null);
+      setImageUrl(null);
+      setPins([]);
+      setAnnotationTitle("Untitled");
+    }
+    toast.success("Annotation deleted");
+    loadSavedAnnotations();
+  };
+
+  // Start fresh
+  const startNew = () => {
+    setCurrentAnnotationId(null);
+    setAnnotationTitle("Untitled");
+    setImageUrl(null);
+    setPins([]);
+    setActivePin(null);
+    setIsPlacing(false);
+  };
+
   // Database image picker — use same data source as Gallery
   const [browseOpen, setBrowseOpen] = useState(false);
   const [dbSearch, setDbSearch] = useState("");
