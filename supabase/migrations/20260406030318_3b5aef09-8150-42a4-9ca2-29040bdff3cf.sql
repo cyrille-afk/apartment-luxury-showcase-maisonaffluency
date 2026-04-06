@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET category = 'Decorative Objects', subcategory = 'Mirrors' WHERE id IN ('34a70891-4da5-4f52-b2ca-af885eb1c36e', 'b17b7b1e-0438-4db5-a551-c734db744d0f');
