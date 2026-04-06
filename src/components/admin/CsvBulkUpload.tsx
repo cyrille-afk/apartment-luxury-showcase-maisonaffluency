@@ -159,9 +159,14 @@ export default function CsvBulkUpload({ designerId, designerName, currentCount, 
 
   if (!open) {
     return (
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-1.5">
-        <Upload className="w-3.5 h-3.5" /> CSV Import
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-1.5">
+          <Upload className="w-3.5 h-3.5" /> CSV Import
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting} className="gap-1.5">
+          {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} CSV Export
+        </Button>
+      </div>
     );
   }
 
