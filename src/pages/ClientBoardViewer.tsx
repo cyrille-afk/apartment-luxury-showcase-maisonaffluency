@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
-import { Check, X, MessageSquare, Send } from "lucide-react";
+import { Check, X, MessageSquare, Send, Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
