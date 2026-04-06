@@ -8,9 +8,7 @@
         var ua = navigator.userAgent;
         if(/Googlebot|Bingbot|YandexBot|Baiduspider|DuckDuckBot|Sogou|Exabot|ia_archiver|MJ12bot|AhrefsBot|SemrushBot|DotBot/i.test(ua) && !/prerendered/i.test(window.location.search)){
           var p = window.location.pathname;
-          if(p !== '/' && p.length > 1){
-            window.location.replace('https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/prerender?path=' + encodeURIComponent(p));
-          }
+          window.location.replace('https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/prerender?path=' + encodeURIComponent(p || '/'));
         }
       })();
     </script>
