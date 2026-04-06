@@ -535,7 +535,9 @@ const TradeBoardBuilder = () => {
               </button>
             ))}
             {products.length === 0 && (
-              <p className="text-center text-muted-foreground text-sm py-8">No products found</p>
+              <p className="text-center text-muted-foreground text-sm py-8">
+                {search.trim() ? "No matching favorites found" : "No saved favorites yet — save items from the showroom first"}
+              </p>
             )}
           </div>
         </DialogContent>
