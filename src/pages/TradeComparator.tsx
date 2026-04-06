@@ -2,28 +2,31 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Search, Loader2, Columns, X, Plus } from "lucide-react";
+import { Search, Loader2, X, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export default function TradeComparator() {
   const [search, setSearch] = useState("");
   const [compareList, setCompareList] = useState<any[]>([]);
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["comparator-products"],
+  // Load only the user's favourited products
+  const { data: favorites = [], isLoading } = useQuery({
+    queryKey: ["comparator-favorites"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
       const { data } = await supabase
-        .from("trade_products")
-        .select("*")
-        .eq("is_active", true)
-        .order("brand_name")
-        .order("product_name");
-      return data || [];
+        .from("trade_favorites")
+        .select("id, product_id, trade_products(*)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      return (data || [])
+        .filter((f: any) => f.trade_products)
+        .map((f: any) => ({ ...f.trade_products, favorite_id: f.id }));
     },
   });
 
-  const filtered = products.filter((p: any) =>
+  const filtered = favorites.filter((p: any) =>
     !search || [p.product_name, p.brand_name].some((f: string) => f?.toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -54,7 +57,7 @@ export default function TradeComparator() {
         <div>
           <h1 className="font-display text-2xl text-foreground">Product Comparator</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            Side-by-side comparison of up to 4 products on dimensions, materials, price, and lead time.
+            Compare up to 4 products from your favourites side-by-side on dimensions, materials, price, and lead time.
           </p>
         </div>
 
@@ -102,20 +105,30 @@ export default function TradeComparator() {
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-              {compareList.length < 4 ? `Add products to compare (${compareList.length}/4)` : "Maximum 4 products"}
+            <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Heart className="h-3 w-3" />
+              {compareList.length < 4
+                ? `Select from your favourites (${compareList.length}/4)`
+                : "Maximum 4 products"}
             </p>
           </div>
+
+          {favorites.length === 0 && !isLoading && (
+            <p className="font-body text-sm text-muted-foreground py-10 text-center">
+              No favourites yet — save products from the Showroom to compare them here.
+            </p>
+          )}
+
           <div className="relative max-w-sm mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search your favourites..." className="pl-10 font-body text-sm" />
           </div>
 
           {isLoading ? (
             <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto">
-              {filtered.slice(0, 40).map((p: any) => {
+              {filtered.map((p: any) => {
                 const onList = compareList.find((c) => c.id === p.id);
                 return (
                   <button
