@@ -14,6 +14,7 @@ const STATIC_URLS = [
   { loc: "/#curating-team", changefreq: "monthly", priority: "0.7" },
   { loc: "/#details", changefreq: "monthly", priority: "0.6" },
   { loc: "/#contact", changefreq: "monthly", priority: "0.6" },
+  { loc: "/designers", changefreq: "weekly", priority: "0.9" },
   { loc: "/journal", changefreq: "weekly", priority: "0.9" },
   { loc: "/trade/program", changefreq: "monthly", priority: "0.8" },
   { loc: "/trade/register", changefreq: "monthly", priority: "0.6" },
@@ -44,6 +45,13 @@ serve(async () => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
+  // Fetch published designers
+  const { data: designers } = await supabase
+    .from("designers")
+    .select("slug, updated_at")
+    .eq("is_published", true)
+    .order("slug");
+
   // Fetch active products for individual product pages
   const { data: products } = await supabase
     .from("trade_products")
@@ -52,6 +60,10 @@ serve(async () => {
     .order("updated_at", { ascending: false });
 
   const staticEntries = STATIC_URLS.map((u) => urlEntry(u.loc, today, u.changefreq, u.priority));
+
+  const designerEntries = (designers || []).map((d: { slug: string; updated_at: string }) =>
+    urlEntry(`/designers/${d.slug}`, d.updated_at.split("T")[0], "monthly", "0.7")
+  );
 
   const articleEntries = (articles || []).map((a: { slug: string; updated_at: string }) =>
     urlEntry(`/journal/${a.slug}`, a.updated_at.split("T")[0], "monthly", "0.7")
@@ -63,7 +75,7 @@ serve(async () => {
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...articleEntries, ...productEntries].join("\n")}
+${[...staticEntries, ...designerEntries, ...articleEntries, ...productEntries].join("\n")}
 </urlset>`;
 
   return new Response(xml, {
