@@ -72,6 +72,8 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   Daybed: "Daybeds & Benches",
   Bench: "Daybeds & Benches",
   "Wall Light": "Wall Lights",
+  "Wall Sconce": "Wall Lights",
+  "Wall Sconces": "Wall Lights",
   "Ceiling Light": "Ceiling Lights",
   "Floor Light": "Floor Lights",
   "Floor Lamp": "Floor Lights",
