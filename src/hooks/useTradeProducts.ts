@@ -85,7 +85,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         pdf_urls: pick.pdf_urls ?? undefined,
         hasExplicitCategory,
         hasExplicitSubcategory,
-      } satisfies TradeProduct,
+      } satisfies LiveTradeProduct,
     ];
   });
 }
