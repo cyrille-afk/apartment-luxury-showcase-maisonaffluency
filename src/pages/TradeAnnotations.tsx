@@ -158,8 +158,8 @@ export default function TradeAnnotations() {
         name: p.product_name,
         brand: p.brand_name,
         image_url: p.image_url,
-        category: p.category || "Décor",
-        subcategory: p.subcategory || "Decorative Objects",
+        category: p.category,
+        subcategory: p.subcategory || "Other",
         source: "pick",
       });
     }
