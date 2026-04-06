@@ -214,106 +214,99 @@ const ClientBoardViewer = () => {
             )}
           </div>
 
-          {/* Products grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map(item => {
-              const itemComments = comments.filter(c => c.item_id === item.id);
-              return (
-                <div key={item.id} className="border border-border rounded-lg overflow-hidden">
-                  <div className="aspect-square bg-muted relative">
-                    {item.product?.image_url ? (
-                      <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
-                    )}
-                    {item.approval_status === "approved" && (
-                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-green-500 text-white font-body text-[11px] font-medium flex items-center gap-1">
-                        <Check className="h-3 w-3" /> Approved
-                      </div>
-                    )}
-                    {item.approval_status === "rejected" && (
-                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-destructive text-destructive-foreground font-body text-[11px] font-medium flex items-center gap-1">
-                        <X className="h-3 w-3" /> Declined
-                      </div>
-                    )}
+          {/* Products grouped by sub-folder */}
+          <div className="space-y-10">
+            {groupedItems.map(group => (
+              <div key={group.name || "__ungrouped__"}>
+                {group.name && (
+                  <div className="flex items-center gap-2 mb-4 border-b border-border pb-2">
+                    <Folder className="h-4 w-4 text-primary/70" />
+                    <h2 className="font-display text-lg text-foreground">{group.name}</h2>
+                    <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
+                      {group.items.length} {group.items.length === 1 ? "piece" : "pieces"}
+                    </span>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-display text-sm text-foreground">{item.product?.product_name}</h3>
-                    <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
-                    {item.product?.materials && (
-                      <p className="font-body text-[11px] text-muted-foreground mt-1">{item.product.materials}</p>
-                    )}
-                    {item.product?.dimensions && (
-                      <p className="font-body text-[11px] text-muted-foreground">{item.product.dimensions}</p>
-                    )}
-
-                    {/* Approval buttons */}
-                    {!isReadOnly && nameSet && (
-                      <div className="flex gap-2 mt-3">
-                        <Button
-                          size="sm"
-                          variant={item.approval_status === "approved" ? "default" : "outline"}
-                          className="flex-1 h-8 text-xs gap-1"
-                          onClick={() => updateApproval(item.id, "approved")}
-                        >
-                          <Check className="h-3 w-3" /> Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={item.approval_status === "rejected" ? "destructive" : "outline"}
-                          className="flex-1 h-8 text-xs gap-1"
-                          onClick={() => updateApproval(item.id, "rejected")}
-                        >
-                          <X className="h-3 w-3" /> Decline
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* Comments */}
-                    {itemComments.length > 0 && (
-                      <div className="mt-3 space-y-2 border-t border-border pt-3">
-                        {itemComments.map(c => (
-                          <div key={c.id} className="text-xs">
-                            <span className="font-medium text-foreground">{c.author_name}: </span>
-                            <span className="text-muted-foreground">{c.content}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Add comment */}
-                    {!isReadOnly && nameSet && (
-                      activeCommentItem === item.id ? (
-                        <div className="mt-2 flex gap-1.5">
-                          <Textarea
-                            value={commentText}
-                            onChange={e => setCommentText(e.target.value)}
-                            placeholder="Add a comment…"
-                            className="min-h-[60px] text-xs"
-                            autoFocus
-                          />
-                          <div className="flex flex-col gap-1">
-                            <Button size="sm" className="h-7 w-7 p-0" onClick={() => addComment(item.id)}>
-                              <Send className="h-3 w-3" />
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setActiveCommentItem(null); setCommentText(""); }}>
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
+                )}
+                {!group.name && subfolders.length > 0 && (
+                  <div className="flex items-center gap-2 mb-4 border-b border-border pb-2">
+                    <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
+                      Other pieces · {group.items.length}
+                    </span>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {group.items.map(item => {
+                    const itemComments = comments.filter(c => c.item_id === item.id);
+                    return (
+                      <div key={item.id} className="border border-border rounded-lg overflow-hidden">
+                        <div className="aspect-square bg-muted relative">
+                          {item.product?.image_url ? (
+                            <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
+                          )}
+                          {item.approval_status === "approved" && (
+                            <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-green-500 text-white font-body text-[11px] font-medium flex items-center gap-1">
+                              <Check className="h-3 w-3" /> Approved
+                            </div>
+                          )}
+                          {item.approval_status === "rejected" && (
+                            <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-destructive text-destructive-foreground font-body text-[11px] font-medium flex items-center gap-1">
+                              <X className="h-3 w-3" /> Declined
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <button
-                          className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                          onClick={() => setActiveCommentItem(item.id)}
-                        >
-                          <MessageSquare className="h-3 w-3" /> Comment
-                        </button>
-                      )
-                    )}
-                  </div>
+                        <div className="p-4">
+                          <h3 className="font-display text-sm text-foreground">{item.product?.product_name}</h3>
+                          <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
+                          {item.product?.materials && (
+                            <p className="font-body text-[11px] text-muted-foreground mt-1">{item.product.materials}</p>
+                          )}
+                          {item.product?.dimensions && (
+                            <p className="font-body text-[11px] text-muted-foreground">{item.product.dimensions}</p>
+                          )}
+                          {!isReadOnly && nameSet && (
+                            <div className="flex gap-2 mt-3">
+                              <Button size="sm" variant={item.approval_status === "approved" ? "default" : "outline"} className="flex-1 h-8 text-xs gap-1" onClick={() => updateApproval(item.id, "approved")}>
+                                <Check className="h-3 w-3" /> Approve
+                              </Button>
+                              <Button size="sm" variant={item.approval_status === "rejected" ? "destructive" : "outline"} className="flex-1 h-8 text-xs gap-1" onClick={() => updateApproval(item.id, "rejected")}>
+                                <X className="h-3 w-3" /> Decline
+                              </Button>
+                            </div>
+                          )}
+                          {itemComments.length > 0 && (
+                            <div className="mt-3 space-y-2 border-t border-border pt-3">
+                              {itemComments.map(c => (
+                                <div key={c.id} className="text-xs">
+                                  <span className="font-medium text-foreground">{c.author_name}: </span>
+                                  <span className="text-muted-foreground">{c.content}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {!isReadOnly && nameSet && (
+                            activeCommentItem === item.id ? (
+                              <div className="mt-2 flex gap-1.5">
+                                <Textarea value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Add a comment…" className="min-h-[60px] text-xs" autoFocus />
+                                <div className="flex flex-col gap-1">
+                                  <Button size="sm" className="h-7 w-7 p-0" onClick={() => addComment(item.id)}><Send className="h-3 w-3" /></Button>
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setActiveCommentItem(null); setCommentText(""); }}><X className="h-3 w-3" /></Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <button className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors" onClick={() => setActiveCommentItem(item.id)}>
+                                <MessageSquare className="h-3 w-3" /> Comment
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           {/* General comments */}
