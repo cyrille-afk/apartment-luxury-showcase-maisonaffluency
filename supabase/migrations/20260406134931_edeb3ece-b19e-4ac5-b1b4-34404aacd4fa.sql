@@ -1,0 +1,1 @@
+UPDATE designers SET founder = NULL WHERE id = '926b4aa3-7975-4587-9ffb-01f502ca4289';
