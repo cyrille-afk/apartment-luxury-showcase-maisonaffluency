@@ -54,152 +54,37 @@ export default function TradeAnnotations() {
   const [saving, setSaving] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
 
-  // Database image picker
+  // Database image picker — use same data source as Gallery
   const [browseOpen, setBrowseOpen] = useState(false);
-  const [dbImages, setDbImages] = useState<DbImage[]>([]);
   const [dbSearch, setDbSearch] = useState("");
+  const { allProducts } = useTradeProducts();
 
-  // Load saved annotations list
-  const loadSavedAnnotations = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoadingList(false); return; }
-    const { data } = await supabase
-      .from("markup_annotations")
-      .select("id, title, image_url, pins, updated_at")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
-    if (data) {
-      setSavedAnnotations(data.map((d: any) => ({
-        ...d,
-        pins: (d.pins as Pin[]) || [],
-      })));
-    }
-    setLoadingList(false);
-  }, []);
-
-  useEffect(() => { loadSavedAnnotations(); }, [loadSavedAnnotations]);
-
-  // Save current annotation
-  const handleSave = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { toast.error("Please log in to save annotations"); return; }
-    if (!imageUrl) return;
-    setSaving(true);
-    try {
-      if (currentAnnotationId) {
-        await supabase
-          .from("markup_annotations")
-          .update({ title: annotationTitle, image_url: imageUrl, pins: pins as any, updated_at: new Date().toISOString() })
-          .eq("id", currentAnnotationId);
-        toast.success("Annotation saved");
-      } else {
-        const { data } = await supabase
-          .from("markup_annotations")
-          .insert({ user_id: user.id, title: annotationTitle, image_url: imageUrl, pins: pins as any })
-          .select("id")
-          .single();
-        if (data) setCurrentAnnotationId(data.id);
-        toast.success("Annotation created");
-      }
-      loadSavedAnnotations();
-    } catch { toast.error("Failed to save"); }
-    setSaving(false);
-  };
-
-  // Load a saved annotation
-  const openAnnotation = (ann: SavedAnnotation) => {
-    setCurrentAnnotationId(ann.id);
-    setAnnotationTitle(ann.title);
-    setImageUrl(ann.image_url);
-    setPins(ann.pins);
-    setActivePin(null);
-    setIsPlacing(false);
-  };
-
-  // Delete a saved annotation
-  const deleteAnnotation = async (id: string) => {
-    await supabase.from("markup_annotations").delete().eq("id", id);
-    if (currentAnnotationId === id) {
-      setCurrentAnnotationId(null);
-      setImageUrl(null);
-      setPins([]);
-      setAnnotationTitle("Untitled");
-    }
-    toast.success("Annotation deleted");
-    loadSavedAnnotations();
-  };
-
-  // Start fresh
-  const startNew = () => {
-    setCurrentAnnotationId(null);
-    setAnnotationTitle("Untitled");
-    setImageUrl(null);
-    setPins([]);
-    setActivePin(null);
-    setIsPlacing(false);
-  };
-
-  const searchDbImages = useCallback(async (q: string) => {
+  // Filter products for the browse dialog (same data as Gallery)
+  const dbImages: DbImage[] = useMemo(() => {
     const seen = new Set<string>();
     const results: DbImage[] = [];
-    const dedupeKey = (brand: string, name: string) =>
-      `${brand.toLowerCase().trim()}|${name.toLowerCase().trim()}`;
-    const addUnique = (item: DbImage) => {
-      if (!item.image_url) return;
-      const key = dedupeKey(item.brand, item.name);
-      if (seen.has(key)) return;
+    const q = dbSearch.trim().toLowerCase();
+
+    for (const p of allProducts) {
+      if (!p.image_url) continue;
+      const key = `${p.brand_name.toLowerCase()}|${p.product_name.toLowerCase()}`;
+      if (seen.has(key)) continue;
       seen.add(key);
-      results.push(item);
-    };
 
-    let pickQuery = supabase
-      .from("designer_curator_picks")
-      .select("id, title, image_url, category, subcategory, designers!inner(name, founder)")
-      .neq("image_url", "");
-    if (q.trim()) {
-      pickQuery = pickQuery.or(`title.ilike.%${q}%,designers.name.ilike.%${q}%`);
-    }
-    const { data: picks } = await pickQuery.order("title").limit(500);
-    if (picks) {
-      picks.forEach((p: any) => {
-        const designer = p.designers;
-        const brandName = designer?.founder?.trim() || designer?.name?.trim() || "";
-        addUnique({
-          id: p.id, name: p.title, brand: brandName,
-          image_url: p.image_url, source: "pick",
-          category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
-          subcategory: inferSubcategory(p.category, p.subcategory, p.title),
-        });
+      if (q && !p.product_name.toLowerCase().includes(q) && !p.brand_name.toLowerCase().includes(q)) continue;
+
+      results.push({
+        id: p.id,
+        name: p.product_name,
+        brand: p.brand_name,
+        image_url: p.image_url,
+        category: p.category || "Décor",
+        subcategory: p.subcategory || "Decorative Objects",
+        source: "pick",
       });
     }
-
-    let prodQuery = supabase
-      .from("trade_products")
-      .select("id, product_name, brand_name, image_url, category, subcategory")
-      .eq("is_active", true)
-      .not("image_url", "is", null);
-    if (q.trim()) {
-      prodQuery = prodQuery.or(`product_name.ilike.%${q}%,brand_name.ilike.%${q}%`);
-    }
-    const { data: prods } = await prodQuery.order("product_name").limit(500);
-    if (prods) {
-      prods.forEach((p: any) => {
-        if (p.image_url) {
-          addUnique({
-            id: p.id, name: p.product_name, brand: p.brand_name,
-            image_url: p.image_url, source: "product",
-            category: normalizeCategory(p.category, p.subcategory) || "Uncategorized",
-            subcategory: inferSubcategory(p.category, p.subcategory, p.product_name),
-          });
-        }
-      });
-    }
-    setDbImages(results);
-  }, []);
-
-  useEffect(() => {
-    if (browseOpen) searchDbImages(dbSearch);
-  }, [browseOpen, dbSearch, searchDbImages]);
+    return results;
+  }, [allProducts, dbSearch]);
 
   const selectDbImage = (url: string) => {
     setImageUrl(url);
