@@ -80,7 +80,8 @@ const TradeBoardBuilder = () => {
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
   const [renameTarget, setRenameTarget] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const [addToSubfolder, setAddToSubfolder] = useState<string | null>(null); // subfolder to add products into
+  const [addToSubfolder, setAddToSubfolder] = useState<string | null>(null);
+  const [emptySubfolders, setEmptySubfolders] = useState<string[]>([]); // track created but still-empty subfolders
 
   const fetchBoard = useCallback(async () => {
     if (!id) return;
@@ -119,8 +120,9 @@ const TradeBoardBuilder = () => {
   const subfolders = useMemo(() => {
     const set = new Set<string>();
     items.forEach(i => { if (i.subfolder) set.add(i.subfolder); });
+    emptySubfolders.forEach(name => set.add(name));
     return Array.from(set).sort();
-  }, [items]);
+  }, [items, emptySubfolders]);
 
   // Group items by subfolder
   const groupedItems = useMemo(() => {
@@ -173,18 +175,10 @@ const TradeBoardBuilder = () => {
       toast({ title: "Sub-folder already exists", variant: "destructive" });
       return;
     }
+    setEmptySubfolders(prev => [...prev, name]);
     setSubfolderDialogOpen(false);
     setNewSubfolderName("");
-    // Just track it — it will appear once items are assigned
-    // For now, create a placeholder by showing it in UI
-    toast({ title: `Sub-folder "${name}" created`, description: "Add products to it using the + button." });
-    // We'll add a temp empty subfolder by inserting into collapsed state
-    setCollapsedFolders(prev => { const n = new Set(prev); return n; });
-    // Store in local state until items are added
-    setItems(prev => prev); // trigger re-render
-    // Actually, we need to persist this — let's add it by opening the add dialog with this subfolder pre-selected
-    setAddToSubfolder(name);
-    setAddOpen(true);
+    toast({ title: `Sub-folder "${name}" created` });
   };
 
   const renameSubfolder = async (oldName: string, newName: string) => {
@@ -207,6 +201,7 @@ const TradeBoardBuilder = () => {
     for (const item of itemsInFolder) {
       await supabase.from("client_board_items").update({ subfolder: null }).eq("id", item.id);
     }
+    setEmptySubfolders(prev => prev.filter(n => n !== name));
     fetchBoard();
     toast({ title: `Sub-folder "${name}" removed`, description: "Items moved to ungrouped." });
   };
