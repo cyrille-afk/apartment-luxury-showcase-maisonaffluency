@@ -104,7 +104,7 @@ const TradeLayout = () => {
     fetchCount();
     const channel = supabase
       .channel("trade-quotes-badge-layout")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => fetchCount())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes", filter: "status=eq.submitted" }, () => fetchCount())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [isAdmin]);

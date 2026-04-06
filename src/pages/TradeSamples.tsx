@@ -99,16 +99,17 @@ const TradeSamples = () => {
 
   useEffect(() => {
     fetchRequests();
+    if (!user) return;
 
     const channel = supabase
-      .channel("sample-requests")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests" }, () => {
+      .channel(`sample-requests-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests", filter: `user_id=eq.${user.id}` }, () => {
         fetchRequests();
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [user]);
 
   const resetForm = () => {
     setProductName(""); setBrandName(""); setClientName(""); setProjectName("");

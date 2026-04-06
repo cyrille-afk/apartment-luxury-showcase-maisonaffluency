@@ -54,9 +54,9 @@ export function TradeSidebar() {
     fetchCounts();
     const channel = supabase
       .channel("admin-badges")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => fetchCounts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_applications" }, () => fetchCounts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests" }, () => fetchCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes", filter: "status=eq.submitted" }, () => fetchCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_applications", filter: "status=eq.pending" }, () => fetchCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_sample_requests", filter: "status=eq.requested" }, () => fetchCounts())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [isAdmin]);
