@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { normalizeCategory, inferSubcategory, CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, X, Plus, Image as ImageIcon, Search, ChevronRight } from "lucide-react";
+import { Upload, X, Plus, Image as ImageIcon, Search, Save, Trash2, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Pin {
   id: string;
@@ -30,6 +31,14 @@ interface DbImage {
   source: "product" | "pick";
 }
 
+interface SavedAnnotation {
+  id: string;
+  title: string;
+  image_url: string;
+  pins: Pin[];
+  updated_at: string;
+}
+
 export default function TradeAnnotations() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [pins, setPins] = useState<Pin[]>([]);
@@ -37,18 +46,103 @@ export default function TradeAnnotations() {
   const [isPlacing, setIsPlacing] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
 
+  // Persistence
+  const [currentAnnotationId, setCurrentAnnotationId] = useState<string | null>(null);
+  const [annotationTitle, setAnnotationTitle] = useState("Untitled");
+  const [savedAnnotations, setSavedAnnotations] = useState<SavedAnnotation[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [loadingList, setLoadingList] = useState(true);
+
   // Database image picker
   const [browseOpen, setBrowseOpen] = useState(false);
   const [dbImages, setDbImages] = useState<DbImage[]>([]);
   const [dbSearch, setDbSearch] = useState("");
 
-  const searchDbImages = useCallback(async (q: string) => {
-    const seen = new Set<string>(); // dedupe by normalised "brand|name"
-    const results: DbImage[] = [];
+  // Load saved annotations list
+  const loadSavedAnnotations = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLoadingList(false); return; }
+    const { data } = await supabase
+      .from("markup_annotations")
+      .select("id, title, image_url, pins, updated_at")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
+    if (data) {
+      setSavedAnnotations(data.map((d: any) => ({
+        ...d,
+        pins: (d.pins as Pin[]) || [],
+      })));
+    }
+    setLoadingList(false);
+  }, []);
 
+  useEffect(() => { loadSavedAnnotations(); }, [loadSavedAnnotations]);
+
+  // Save current annotation
+  const handleSave = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error("Please log in to save annotations"); return; }
+    if (!imageUrl) return;
+    setSaving(true);
+    try {
+      if (currentAnnotationId) {
+        await supabase
+          .from("markup_annotations")
+          .update({ title: annotationTitle, image_url: imageUrl, pins: pins as any, updated_at: new Date().toISOString() })
+          .eq("id", currentAnnotationId);
+        toast.success("Annotation saved");
+      } else {
+        const { data } = await supabase
+          .from("markup_annotations")
+          .insert({ user_id: user.id, title: annotationTitle, image_url: imageUrl, pins: pins as any })
+          .select("id")
+          .single();
+        if (data) setCurrentAnnotationId(data.id);
+        toast.success("Annotation created");
+      }
+      loadSavedAnnotations();
+    } catch { toast.error("Failed to save"); }
+    setSaving(false);
+  };
+
+  // Load a saved annotation
+  const openAnnotation = (ann: SavedAnnotation) => {
+    setCurrentAnnotationId(ann.id);
+    setAnnotationTitle(ann.title);
+    setImageUrl(ann.image_url);
+    setPins(ann.pins);
+    setActivePin(null);
+    setIsPlacing(false);
+  };
+
+  // Delete a saved annotation
+  const deleteAnnotation = async (id: string) => {
+    await supabase.from("markup_annotations").delete().eq("id", id);
+    if (currentAnnotationId === id) {
+      setCurrentAnnotationId(null);
+      setImageUrl(null);
+      setPins([]);
+      setAnnotationTitle("Untitled");
+    }
+    toast.success("Annotation deleted");
+    loadSavedAnnotations();
+  };
+
+  // Start fresh
+  const startNew = () => {
+    setCurrentAnnotationId(null);
+    setAnnotationTitle("Untitled");
+    setImageUrl(null);
+    setPins([]);
+    setActivePin(null);
+    setIsPlacing(false);
+  };
+
+  const searchDbImages = useCallback(async (q: string) => {
+    const seen = new Set<string>();
+    const results: DbImage[] = [];
     const dedupeKey = (brand: string, name: string) =>
       `${brand.toLowerCase().trim()}|${name.toLowerCase().trim()}`;
-
     const addUnique = (item: DbImage) => {
       if (!item.image_url) return;
       const key = dedupeKey(item.brand, item.name);
@@ -57,7 +151,6 @@ export default function TradeAnnotations() {
       results.push(item);
     };
 
-    // Curator picks first – use parent brand (founder) when available
     let pickQuery = supabase
       .from("designer_curator_picks")
       .select("id, title, image_url, category, subcategory, designers!inner(name, founder)")
@@ -69,7 +162,6 @@ export default function TradeAnnotations() {
     if (picks) {
       picks.forEach((p: any) => {
         const designer = p.designers;
-        // Use the parent brand (founder) if it exists, otherwise the designer name
         const brandName = designer?.founder?.trim() || designer?.name?.trim() || "";
         addUnique({
           id: p.id, name: p.title, brand: brandName,
@@ -80,7 +172,6 @@ export default function TradeAnnotations() {
       });
     }
 
-    // Trade products (supplement)
     let prodQuery = supabase
       .from("trade_products")
       .select("id, product_name, brand_name, image_url, category, subcategory")
@@ -102,7 +193,6 @@ export default function TradeAnnotations() {
         }
       });
     }
-
     setDbImages(results);
   }, []);
 
@@ -113,6 +203,8 @@ export default function TradeAnnotations() {
   const selectDbImage = (url: string) => {
     setImageUrl(url);
     setPins([]);
+    setCurrentAnnotationId(null);
+    setAnnotationTitle("Untitled");
     setBrowseOpen(false);
   };
 
@@ -122,6 +214,8 @@ export default function TradeAnnotations() {
     const url = URL.createObjectURL(file);
     setImageUrl(url);
     setPins([]);
+    setCurrentAnnotationId(null);
+    setAnnotationTitle("Untitled");
   };
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -157,13 +251,54 @@ export default function TradeAnnotations() {
           </div>
           <div className="flex items-center gap-2">
             {imageUrl && (
-              <Button variant="outline" size="sm" onClick={() => setIsPlacing(!isPlacing)} className={isPlacing ? "border-primary text-primary" : ""}>
-                <Plus className="h-4 w-4 mr-2" />
-                {isPlacing ? "Click image to place pin" : "Add Pin"}
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={handleSave} disabled={saving}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? "Saving…" : "Save"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setIsPlacing(!isPlacing)} className={isPlacing ? "border-primary text-primary" : ""}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {isPlacing ? "Click image to place pin" : "Add Pin"}
+                </Button>
+              </>
             )}
           </div>
         </div>
+
+        {/* Saved annotations list */}
+        {!loadingList && savedAnnotations.length > 0 && !imageUrl && (
+          <div className="space-y-2">
+            <p className="font-display text-xs uppercase tracking-wider text-muted-foreground">
+              Your saved annotations
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {savedAnnotations.map(ann => (
+                <div key={ann.id} className="border border-border rounded-lg p-3 hover:border-foreground/30 transition-colors group">
+                  <div className="flex items-start gap-3">
+                    <div className="w-16 h-16 rounded bg-muted shrink-0 overflow-hidden">
+                      <img src={ann.image_url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display text-sm text-foreground truncate">{ann.title}</p>
+                      <p className="font-body text-xs text-muted-foreground mt-0.5">
+                        {ann.pins.length} pin{ann.pins.length !== 1 ? "s" : ""} · {new Date(ann.updated_at).toLocaleDateString()}
+                      </p>
+                      <div className="flex gap-1.5 mt-2">
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => openAnnotation(ann)}>
+                          <FolderOpen className="h-3 w-3 mr-1" /> Open
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive opacity-0 group-hover:opacity-100" onClick={() => deleteAnnotation(ann.id)}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-border pt-4 mt-4" />
+          </div>
+        )}
 
         {!imageUrl ? (
           <div className="grid sm:grid-cols-2 gap-4">
@@ -186,8 +321,14 @@ export default function TradeAnnotations() {
           <div className="flex gap-6 flex-col lg:flex-row">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
-                <Button variant="ghost" size="sm" onClick={() => { setImageUrl(null); setPins([]); }} className="text-xs text-muted-foreground">
-                  ← Change image
+                <Input
+                  value={annotationTitle}
+                  onChange={(e) => setAnnotationTitle(e.target.value)}
+                  className="font-display text-sm h-8 w-48"
+                  placeholder="Annotation title…"
+                />
+                <Button variant="ghost" size="sm" onClick={startNew} className="text-xs text-muted-foreground">
+                  ← New
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setBrowseOpen(true)} className="text-xs text-muted-foreground">
                   <ImageIcon className="h-3 w-3 mr-1" /> Browse database
@@ -262,7 +403,6 @@ export default function TradeAnnotations() {
               <p className="text-center text-muted-foreground text-sm py-8">No images found</p>
             ) : (
               (() => {
-                // Group by category → subcategory using canonical taxonomy
                 const byCat: Record<string, Record<string, DbImage[]>> = {};
                 dbImages.forEach(img => {
                   const cat = img.category || "Uncategorized";
@@ -271,7 +411,6 @@ export default function TradeAnnotations() {
                   if (!byCat[cat][sub]) byCat[cat][sub] = [];
                   byCat[cat][sub].push(img);
                 });
-                // Sort categories by CATEGORY_ORDER, unknowns at end
                 const catKeys = Object.keys(byCat).sort((a, b) => {
                   const ai = CATEGORY_ORDER.indexOf(a);
                   const bi = CATEGORY_ORDER.indexOf(b);
