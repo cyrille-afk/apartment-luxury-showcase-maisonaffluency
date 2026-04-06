@@ -183,10 +183,10 @@
       /* FOUC guard: hide React content until main CSS loads (prevents raw text flash on scroll-restored refresh) */
       html:not(.css-ready) #root > :not(.hero-skeleton) { visibility: hidden; }
       /* Inline hero skeleton — visible BEFORE React boots (fixes FCP) */
-      .hero-skeleton { position: relative; height: 100vh; width: 100%; overflow: hidden; background: #1a1a1a url('https://res.cloudinary.com/dif1oamtj/image/upload/w_20,c_fill,q_auto:low,e_blur:1000,f_webp/AffluencySG_194-22.jpg_macpwj') center/cover no-repeat; }
+      .hero-skeleton { position: relative; height: 72vh; min-height: 420px; width: 100%; overflow: hidden; background: #1a1a1a url('https://res.cloudinary.com/dif1oamtj/image/upload/w_20,c_fill,q_auto:low,e_blur:1000,f_webp/AffluencySG_194-22.jpg_macpwj') center/cover no-repeat; }
       .hero-skeleton img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; color: transparent; }
       .hero-skeleton .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent, rgba(0,0,0,0.2)); }
-      @media (min-width: 768px) { .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
+      @media (min-width: 768px) { .hero-skeleton { height: 100vh; min-height: 0; } .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
 
       /* Self-hosted fonts — cached 1 year via _headers */
       @font-face { font-family: 'Lora'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/Lora-Regular.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
