@@ -125,6 +125,48 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Hand-Tufted Rug": "Hand-Tufted Rugs",
   "Hand-Woven Rug": "Hand-Woven Rugs",
   Wallcoverings: "Decorative Objects",
+  // Dining chair variants
+  "Dining Chair": "Chairs",
+  "Dining Chairs": "Chairs",
+  // Lounge / club chairs → Armchairs
+  "Lounge Chair": "Armchairs",
+  "Club Chair": "Armchairs",
+  // Sofa singular
+  Sofa: "Sofas",
+  "Sofas & Loveseats": "Sofas",
+  // Lighting variants
+  "Floor Lamp": "Floor Lights",
+  "Floor Lamps": "Floor Lights",
+  "Pendant Lighting": "Ceiling Lights",
+  "Pendant Light": "Ceiling Lights",
+  "Pendant Lights": "Ceiling Lights",
+  "Pendant Lamps": "Ceiling Lights",
+  Suspensions: "Ceiling Lights",
+  "Wall Lamp": "Wall Lights",
+  "Wall Lamps": "Wall Lights",
+  "Wall Sconce": "Wall Lights",
+  Lantern: "Ceiling Lights",
+  Lanterns: "Ceiling Lights",
+  // Non-subcategory labels that sometimes appear as subcategory values
+  "Limited Edition": "Decorative Objects",
+  "Limited Editions": "Decorative Objects",
+  "Iconic Editions": "Decorative Objects",
+  Centrepiece: "Decorative Objects",
+  Photography: "Decorative Objects",
+  Piano: "Decorative Objects",
+  "Lighting & Sculpture": "Ceiling Lights",
+  "Sculpture & Furniture": "Decorative Objects",
+  "Sculptural Furniture": "Decorative Objects",
+  "Sculptural Objects": "Decorative Objects",
+  "Architecture & Interiors": "Decorative Objects",
+  "Seating & Tables": "Chairs",
+  "Tables & Objects": "Side Tables",
+  "Tables & Sculpture": "Side Tables",
+  "Tables & Seating": "Side Tables",
+  // Display Cabinet → Cabinets
+  "Display Cabinet": "Cabinets",
+  "High Table": "Side Tables",
+  Table: "Side Tables",
 };
 
 // Reverse lookup: given a raw value that might be a subcategory name, find its parent category
