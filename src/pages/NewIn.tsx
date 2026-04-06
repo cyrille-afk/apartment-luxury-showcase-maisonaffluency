@@ -145,9 +145,18 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   return (
     <div className="sticky top-[140px] z-30 bg-background/90 backdrop-blur-sm border-b border-border/20">
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
-        <span className="font-body text-xs uppercase tracking-[0.2em] font-bold text-red-700 bg-red-600/10 px-3 py-1 rounded-full shrink-0">
-          New In
-        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <ShareMenu
+            url="https://www.maisonaffluency.com/new-in-og.html"
+            message="Maison Affluency · New In — Discover Pierre Bonnefille, Christopher Boots, Pierre Yovanovitch & Achille Salvagni: https://www.maisonaffluency.com/new-in-og.html"
+            className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
+            iconSize="w-5 h-5"
+            showLabel={false}
+          />
+          <span className="font-body text-xs uppercase tracking-[0.2em] font-bold text-foreground bg-muted px-3 py-1 rounded-full">
+            New In
+          </span>
+        </div>
         <div className="flex items-center gap-6">
           {designers.map((d) => (
             <button
@@ -163,15 +172,6 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
               {d.display_name || d.name}
             </button>
           ))}
-        </div>
-        <div className="ml-auto">
-          <ShareMenu
-            url="https://www.maisonaffluency.com/new-in-og.html"
-            message="Maison Affluency · New In — Discover Pierre Bonnefille, Christopher Boots, Pierre Yovanovitch & Achille Salvagni: https://www.maisonaffluency.com/new-in-og.html"
-            className="flex items-center p-1 -m-1 text-foreground/50 hover:text-foreground transition-colors"
-            iconSize="w-5 h-5"
-            showLabel={false}
-          />
         </div>
       </div>
     </div>

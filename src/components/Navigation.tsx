@@ -697,7 +697,7 @@ const Navigation = () => {
               {/* New In — between Collectible Design and Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground"
+                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-foreground after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left pb-0.5"
               >
                 New In
               </button>
