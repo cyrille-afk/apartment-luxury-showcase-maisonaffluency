@@ -107,7 +107,7 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 }
 
 /** Inline Curator Picks manager for each designer */
-function CuratorPicksManager({ designerId }: { designerId: string }) {
+function CuratorPicksManager({ designerId, designerName }: { designerId: string; designerName?: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   type Pick = {
