@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, X, Plus, Image as ImageIcon, Search } from "lucide-react";
+import { Upload, X, Plus, Image as ImageIcon, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,8 @@ interface DbImage {
   name: string;
   brand: string;
   image_url: string;
+  category: string;
+  subcategory: string;
   source: "product" | "pick";
 }
 
@@ -40,44 +42,59 @@ export default function TradeAnnotations() {
   const [dbSearch, setDbSearch] = useState("");
 
   const searchDbImages = useCallback(async (q: string) => {
-    const seen = new Set<string>();
+    const seen = new Set<string>(); // dedupe by normalised "brand|name"
     const results: DbImage[] = [];
 
+    const dedupeKey = (brand: string, name: string) =>
+      `${brand.toLowerCase().trim()}|${name.toLowerCase().trim()}`;
+
     const addUnique = (item: DbImage) => {
-      if (!item.image_url || seen.has(item.image_url)) return;
-      seen.add(item.image_url);
+      if (!item.image_url) return;
+      const key = dedupeKey(item.brand, item.name);
+      if (seen.has(key)) return;
+      seen.add(key);
       results.push(item);
     };
 
     // Curator picks first (most images)
     let pickQuery = supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, designers!inner(name)")
+      .select("id, title, image_url, category, subcategory, designers!inner(name)")
       .neq("image_url", "");
     if (q.trim()) {
       pickQuery = pickQuery.or(`title.ilike.%${q}%`);
     }
-    const { data: picks } = await pickQuery.order("title").limit(200);
+    const { data: picks } = await pickQuery.order("title").limit(500);
     if (picks) {
       picks.forEach((p: any) => {
-        addUnique({ id: p.id, name: p.title, brand: p.designers?.name || "", image_url: p.image_url, source: "pick" });
+        addUnique({
+          id: p.id, name: p.title, brand: p.designers?.name || "",
+          image_url: p.image_url, source: "pick",
+          category: p.category || "Uncategorized",
+          subcategory: p.subcategory || p.category || "Other",
+        });
       });
     }
 
-    // Trade products (supplement with any that have images)
+    // Trade products (supplement)
     let prodQuery = supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url")
+      .select("id, product_name, brand_name, image_url, category, subcategory")
       .eq("is_active", true)
       .not("image_url", "is", null);
     if (q.trim()) {
       prodQuery = prodQuery.or(`product_name.ilike.%${q}%,brand_name.ilike.%${q}%`);
     }
-    const { data: prods } = await prodQuery.order("product_name").limit(200);
+    const { data: prods } = await prodQuery.order("product_name").limit(500);
     if (prods) {
       prods.forEach((p: any) => {
         if (p.image_url) {
-          addUnique({ id: p.id, name: p.product_name, brand: p.brand_name, image_url: p.image_url, source: "product" });
+          addUnique({
+            id: p.id, name: p.product_name, brand: p.brand_name,
+            image_url: p.image_url, source: "product",
+            category: p.category || "Uncategorized",
+            subcategory: p.subcategory || p.category || "Other",
+          });
         }
       });
     }
@@ -236,25 +253,45 @@ export default function TradeAnnotations() {
               className="pl-9"
             />
           </div>
-          <div className="flex-1 overflow-y-auto space-y-1 min-h-0 mt-2">
-            {dbImages.map(img => (
-              <button
-                key={`${img.source}-${img.id}`}
-                onClick={() => selectDbImage(img.image_url)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left"
-              >
-                <div className="w-14 h-14 rounded bg-muted shrink-0 overflow-hidden">
-                  <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-body text-sm text-foreground truncate">{img.name}</p>
-                  <p className="font-body text-xs text-muted-foreground truncate">{img.brand}</p>
-                </div>
-              </button>
-            ))}
-            {dbImages.length === 0 && (
+          <div className="flex-1 overflow-y-auto min-h-0 mt-2">
+            {dbImages.length === 0 ? (
               <p className="text-center text-muted-foreground text-sm py-8">No images found</p>
+            ) : (
+              (() => {
+                const grouped: Record<string, DbImage[]> = {};
+                dbImages.forEach(img => {
+                  const key = img.subcategory || "Other";
+                  if (!grouped[key]) grouped[key] = [];
+                  grouped[key].push(img);
+                });
+                const sortedKeys = Object.keys(grouped).sort();
+                return sortedKeys.map(sub => (
+                  <div key={sub} className="mb-3">
+                    <p className="font-display text-[10px] uppercase tracking-widest text-muted-foreground px-2 py-1.5 sticky top-0 bg-background/95 backdrop-blur-sm z-10 border-b border-border/50">
+                      {sub} <span className="text-muted-foreground/50 ml-1">({grouped[sub].length})</span>
+                    </p>
+                    <div className="space-y-0.5">
+                      {grouped[sub].map(img => (
+                        <button
+                          key={`${img.source}-${img.id}`}
+                          onClick={() => selectDbImage(img.image_url)}
+                          className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors text-left"
+                        >
+                          <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
+                            <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-body text-sm text-foreground truncate">{img.name}</p>
+                            <p className="font-body text-xs text-muted-foreground truncate">{img.brand}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()
             )}
+          </div>
           </div>
         </DialogContent>
       </Dialog>
