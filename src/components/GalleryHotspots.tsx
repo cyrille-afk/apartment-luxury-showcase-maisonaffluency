@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Price helpers ── */
