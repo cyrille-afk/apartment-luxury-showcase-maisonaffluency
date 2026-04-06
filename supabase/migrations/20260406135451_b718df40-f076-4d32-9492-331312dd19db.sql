@@ -1,0 +1,2 @@
+UPDATE designers SET philosophy = 'We manage Pierre Augustin Rose like a research laboratory in perpetual motion. We are constantly producing prototypes, some of which will be developed to fit into our collection and assert our style.
+— Pierre Bénard, The London List' WHERE id = '926b4aa3-7975-4587-9ffb-01f502ca4289';
