@@ -201,6 +201,7 @@ const TradeBoardBuilder = () => {
     for (const item of itemsInFolder) {
       await supabase.from("client_board_items").update({ subfolder: null }).eq("id", item.id);
     }
+    setEmptySubfolders(prev => prev.filter(n => n !== name));
     fetchBoard();
     toast({ title: `Sub-folder "${name}" removed`, description: "Items moved to ungrouped." });
   };
