@@ -62,7 +62,7 @@ export default function TradeAnnotations() {
       .select("id, title, image_url, category, subcategory, designers!inner(name)")
       .neq("image_url", "");
     if (q.trim()) {
-      pickQuery = pickQuery.or(`title.ilike.%${q}%`);
+      pickQuery = pickQuery.or(`title.ilike.%${q}%,designers.name.ilike.%${q}%`);
     }
     const { data: picks } = await pickQuery.order("title").limit(500);
     if (picks) {
