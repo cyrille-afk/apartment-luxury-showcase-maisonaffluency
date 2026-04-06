@@ -175,18 +175,10 @@ const TradeBoardBuilder = () => {
       toast({ title: "Sub-folder already exists", variant: "destructive" });
       return;
     }
+    setEmptySubfolders(prev => [...prev, name]);
     setSubfolderDialogOpen(false);
     setNewSubfolderName("");
-    // Just track it — it will appear once items are assigned
-    // For now, create a placeholder by showing it in UI
-    toast({ title: `Sub-folder "${name}" created`, description: "Add products to it using the + button." });
-    // We'll add a temp empty subfolder by inserting into collapsed state
-    setCollapsedFolders(prev => { const n = new Set(prev); return n; });
-    // Store in local state until items are added
-    setItems(prev => prev); // trigger re-render
-    // Actually, we need to persist this — let's add it by opening the add dialog with this subfolder pre-selected
-    setAddToSubfolder(name);
-    setAddOpen(true);
+    toast({ title: `Sub-folder "${name}" created` });
   };
 
   const renameSubfolder = async (oldName: string, newName: string) => {
