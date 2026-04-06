@@ -439,21 +439,35 @@ export default function TradeAnnotations() {
                             </p>
                           </div>
                           <div className="space-y-0.5">
-                            {subs[sub].map(img => (
-                              <button
-                                key={`${img.source}-${img.id}`}
-                                onClick={() => selectDbImage(img.image_url)}
-                                className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                              >
-                                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
-                                  <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
+                            {(() => {
+                              // Group items by brand within this subcategory
+                              const byBrand: Record<string, DbImage[]> = {};
+                              subs[sub].forEach(img => {
+                                const b = img.brand || "Unknown";
+                                if (!byBrand[b]) byBrand[b] = [];
+                                byBrand[b].push(img);
+                              });
+                              const brandKeys = Object.keys(byBrand).sort((a, b) => a.localeCompare(b));
+                              return brandKeys.map(brand => (
+                                <div key={brand}>
+                                  <p className="font-display text-[10px] uppercase tracking-wider text-muted-foreground/60 px-2 pt-2 pb-0.5">{brand}</p>
+                                  {byBrand[brand].map(img => (
+                                    <button
+                                      key={`${img.source}-${img.id}`}
+                                      onClick={() => selectDbImage(img.image_url)}
+                                      className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors text-left"
+                                    >
+                                      <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
+                                        <img src={img.image_url} alt={img.name} className="w-full h-full object-cover" />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-body text-sm text-foreground truncate">{img.name}</p>
+                                      </div>
+                                    </button>
+                                  ))}
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-body text-sm text-foreground truncate">{img.name}</p>
-                                  <p className="font-body text-xs text-muted-foreground truncate">{img.brand}</p>
-                                </div>
-                              </button>
-                            ))}
+                              ));
+                            })()}
                           </div>
                         </div>
                       ))}
