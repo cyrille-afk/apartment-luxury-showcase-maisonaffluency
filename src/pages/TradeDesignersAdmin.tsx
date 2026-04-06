@@ -263,10 +263,14 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     <Input value={pick.dimensions || ""} onChange={(e) => updateField(pick.id, "dimensions", e.target.value || null)} className="text-xs" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Edition</label>
                     <Input value={pick.edition || ""} onChange={(e) => updateField(pick.id, "edition", e.target.value || null)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Lead Time</label>
+                    <Input value={(pick as any).lead_time || ""} onChange={(e) => updateField(pick.id, "lead_time", e.target.value || null)} className="text-xs" placeholder="e.g. 8–10 weeks" />
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground">Photo Credit</label>
