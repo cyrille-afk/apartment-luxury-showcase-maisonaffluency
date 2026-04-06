@@ -36,6 +36,14 @@ const TABLES_SUBCATEGORIES = new Set([
   "Side Tables", "Side Table", "Table",
 ]);
 
+const LIGHTING_SUBCATEGORIES = new Set([
+  "Wall Lights", "Wall Light", "Wall Lamp", "Wall Lamps", "Wall Sconce", "Wall Sconces", "Sconce", "Sconces",
+  "Ceiling Lights", "Ceiling Light", "Pendant", "Pendants", "Pendant Lamp", "Pendant Lamps", "Pendant Light", "Pendant Lights",
+  "Chandelier", "Chandeliers", "Suspension", "Suspensions", "Lantern", "Lanterns",
+  "Floor Lights", "Floor Light", "Floor Lamp", "Floor Lamps",
+  "Table Lights", "Table Light", "Table Lamp", "Table Lamps", "Portable Lamp", "Portable Lamps", "Desk Lamp", "Desk Lamps",
+]);
+
 const STORAGE_SUBCATEGORIES = new Set([
   "Bookcases", "Bookcase", "Cabinets", "Cabinet",
   "Bookcases & Credenzas", "Sideboards", "Sideboard",
@@ -45,11 +53,13 @@ const STORAGE_SUBCATEGORIES = new Set([
  * Resolve ambiguous "Furniture" category using subcategory hint.
  */
 function resolveFurniture(subcategory?: string): string {
-  if (!subcategory) return "Tables"; // fallback
-  if (SEATING_SUBCATEGORIES.has(subcategory)) return "Seating";
-  if (TABLES_SUBCATEGORIES.has(subcategory)) return "Tables";
-  if (STORAGE_SUBCATEGORIES.has(subcategory)) return "Storage";
-  return "Tables"; // fallback for unknown subcategories
+  const normalized = normalizeSubcategory(subcategory) || subcategory;
+  if (!normalized) return "Tables";
+  if (SEATING_SUBCATEGORIES.has(normalized)) return "Seating";
+  if (TABLES_SUBCATEGORIES.has(normalized)) return "Tables";
+  if (LIGHTING_SUBCATEGORIES.has(normalized)) return "Lighting";
+  if (STORAGE_SUBCATEGORIES.has(normalized)) return "Storage";
+  return findParentCategory(normalized) || "Tables";
 }
 
 // Map singular/non-canonical subcategories to canonical plural labels
@@ -72,15 +82,29 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   Daybed: "Daybeds & Benches",
   Bench: "Daybeds & Benches",
   "Wall Light": "Wall Lights",
+  "Wall Lamp": "Wall Lights",
+  "Wall Lamps": "Wall Lights",
   "Wall Sconce": "Wall Lights",
   "Wall Sconces": "Wall Lights",
+  Sconce: "Wall Lights",
+  Sconces: "Wall Lights",
   "Ceiling Light": "Ceiling Lights",
+  "Pendant Light": "Ceiling Lights",
+  "Pendant Lights": "Ceiling Lights",
+  "Pendant Lamp": "Ceiling Lights",
+  "Pendant Lamps": "Ceiling Lights",
+  Suspension: "Ceiling Lights",
+  Suspensions: "Ceiling Lights",
   "Floor Light": "Floor Lights",
   "Floor Lamp": "Floor Lights",
   "Floor Lamps": "Floor Lights",
   "Table Light": "Table Lights",
   "Table Lamp": "Table Lights",
   "Table Lamps": "Table Lights",
+  "Portable Lamp": "Table Lights",
+  "Portable Lamps": "Table Lights",
+  "Desk Lamp": "Table Lights",
+  "Desk Lamps": "Table Lights",
   Pendant: "Ceiling Lights",
   Pendants: "Ceiling Lights",
   Chandelier: "Ceiling Lights",
@@ -113,13 +137,12 @@ function findParentCategory(value: string): string | undefined {
 }
 
 export function normalizeCategory(value?: string, subcategory?: string): string | undefined {
-  if (!value) return value;
-  if (value === "Furniture") return resolveFurniture(subcategory);
+  const normalizedSubcategory = normalizeSubcategory(subcategory) || subcategory;
+  if (!value) return normalizedSubcategory ? findParentCategory(normalizedSubcategory) : value;
+  if (value === "Furniture") return resolveFurniture(normalizedSubcategory);
   const mapped = CATEGORY_NORMALIZE[value] || value;
-  // If the mapped value is a known top-level category, use it
   if (CATEGORY_ORDER.includes(mapped)) return mapped;
-  // Otherwise it might be a subcategory used as a category (e.g. "Consoles")
-  const parent = findParentCategory(value);
+  const parent = findParentCategory(mapped) || (normalizedSubcategory ? findParentCategory(normalizedSubcategory) : undefined) || findParentCategory(value);
   if (parent) return parent;
   return mapped;
 }
