@@ -129,10 +129,12 @@ export function normalizeSubcategory(value?: string): string | undefined {
   return SUBCATEGORY_NORMALIZE[value] || value;
 }
 
-// Title-based keyword patterns → canonical subcategory
+// Title-based keyword patterns → canonical subcategory (order matters: specific before generic)
 const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
+  // Seating
   [/\bsofa\b/i, "Sofas"],
   [/\bcanap[ée]/i, "Sofas"],
+  [/\b3[- ]?seater\b/i, "Sofas"],
   [/\barmchair\b/i, "Armchairs"],
   [/\bfauteuil\b/i, "Armchairs"],
   [/\bclub\s*chair\b/i, "Armchairs"],
@@ -144,24 +146,51 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\bbar\s*stool\b/i, "Bar Stools"],
   [/\bstool\b/i, "Ottomans & Stools"],
   [/\bottoman\b/i, "Ottomans & Stools"],
+  // Tables
+  [/\bconsolle?\b/i, "Consoles"],
   [/\bconsole\b/i, "Consoles"],
   [/\bcoffee\s*table\b/i, "Coffee Tables"],
   [/\bside\s*table\b/i, "Side Tables"],
   [/\bdesk\b/i, "Desks"],
   [/\bdining\s*table\b/i, "Dining Tables"],
+  [/\bround\s*table\b/i, "Dining Tables"],
   [/\btable\b/i, "Side Tables"],
+  // Lighting — specific first
+  [/\bsconce\b/i, "Wall Lights"],
+  [/\bwall\s*l(?:amp|ight)\b/i, "Wall Lights"],
+  [/\bpendant\b/i, "Ceiling Lights"],
+  [/\bchandelier\b/i, "Ceiling Lights"],
+  [/\bceiling\s*l(?:amp|ight)\b/i, "Ceiling Lights"],
+  [/\blantern\b/i, "Ceiling Lights"],
+  [/\bfloor\s*l(?:amp|ight)\b/i, "Floor Lights"],
+  [/\btable\s*l(?:amp|ight)\b/i, "Table Lights"],
+  [/\bportable\s*l(?:amp|ight)\b/i, "Table Lights"],
+  [/\blaqu[ée]\s.*lamp\b/i, "Table Lights"],
+  [/\bsocle\s.*lamp\b/i, "Table Lights"],
+  [/\blamp\b/i, "Table Lights"],  // generic lamp → table light fallback
+  // Storage
+  [/\bbookcase\b/i, "Bookcases"],
+  [/\bcredenza\b/i, "Cabinets"],
+  [/\bsideboard\b/i, "Cabinets"],
+  [/\bcabinet\b/i, "Cabinets"],
+  [/\bnightstand\b/i, "Cabinets"],
+  // Décor
   [/\bmirror\b/i, "Mirrors"],
   [/\bvase\b/i, "Vases & Vessels"],
   [/\bvessel\b/i, "Vases & Vessels"],
-  [/\bpendant\b/i, "Ceiling Lights"],
-  [/\bchandelier\b/i, "Ceiling Lights"],
-  [/\bfloor\s*l(?:amp|ight)\b/i, "Floor Lights"],
-  [/\btable\s*l(?:amp|ight)\b/i, "Table Lights"],
-  [/\bwall\s*(?:light|sconce)\b/i, "Wall Lights"],
-  [/\bbookcase\b/i, "Bookcases"],
-  [/\bcabinet\b/i, "Cabinets"],
-  [/\bsideboard\b/i, "Cabinets"],
+  [/\bcandle\s*holder\b/i, "Candle Holders"],
+  [/\bsculptur/i, "Decorative Objects"],
 ];
+
+// Category-level defaults when no title match and no subcategory
+const CATEGORY_DEFAULT_SUBCATEGORY: Record<string, string> = {
+  Rugs: "Hand-Knotted Rugs",
+  Lighting: "Ceiling Lights",
+  Storage: "Cabinets",
+  Décor: "Decorative Objects",
+  Seating: "Chairs",
+  Tables: "Side Tables",
+};
 
 function inferSubcategoryFromTitle(title: string): string | undefined {
   for (const [pattern, sub] of TITLE_SUBCATEGORY_HINTS) {
@@ -172,21 +201,23 @@ function inferSubcategoryFromTitle(title: string): string | undefined {
 
 /**
  * When subcategory is missing, try to derive it from the raw category value
- * or from the product title as a last resort.
+ * or from the product title as a last resort, then fall back to the category default.
  */
 export function inferSubcategory(rawCategory?: string, rawSubcategory?: string, title?: string): string {
   if (rawSubcategory) return normalizeSubcategory(rawSubcategory) || "Other";
-  if (!rawCategory) {
-    if (title) return inferSubcategoryFromTitle(title) || "Other";
-    return "Other";
+  // Try title-based inference first
+  if (title) {
+    const fromTitle = inferSubcategoryFromTitle(title);
+    if (fromTitle) return fromTitle;
   }
+  if (!rawCategory) return "Decorative Objects";
   // If raw category is actually a subcategory name, use it
   const normalized = SUBCATEGORY_NORMALIZE[rawCategory] || rawCategory;
   const parent = findParentCategory(rawCategory);
   if (parent) return normalized;
-  // Try title-based inference
-  if (title) return inferSubcategoryFromTitle(title) || "Other";
-  return "Other";
+  // Use category-level default
+  const resolvedCat = CATEGORY_NORMALIZE[rawCategory] || rawCategory;
+  return CATEGORY_DEFAULT_SUBCATEGORY[resolvedCat] || "Decorative Objects";
 }
 
 export function getSubcategoriesForCategory(category: string): string[] {
