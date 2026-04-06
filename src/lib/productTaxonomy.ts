@@ -253,12 +253,28 @@ function inferSubcategoryFromTitle(title: string): string | undefined {
   return undefined;
 }
 
+// Set of all canonical subcategory values (values in SUBCATEGORY_MAP)
+const ALL_CANONICAL_SUBCATEGORIES = new Set(
+  Object.values(SUBCATEGORY_MAP).flat()
+);
+
 /**
  * When subcategory is missing, try to derive it from the raw category value
  * or from the product title as a last resort, then fall back to the category default.
  */
 export function inferSubcategory(rawCategory?: string, rawSubcategory?: string, title?: string): string {
-  if (rawSubcategory) return normalizeSubcategory(rawSubcategory) || "Other";
+  if (rawSubcategory) {
+    const normalized = normalizeSubcategory(rawSubcategory)!;
+    // If the normalized value is a real canonical subcategory, use it
+    if (ALL_CANONICAL_SUBCATEGORIES.has(normalized)) return normalized;
+    // Otherwise try title-based inference before falling through
+    if (title) {
+      const fromTitle = inferSubcategoryFromTitle(title);
+      if (fromTitle) return fromTitle;
+    }
+    // Still return the normalized value if it's at least recognized
+    if (normalized !== rawSubcategory) return normalized;
+  }
   // Try title-based inference first
   if (title) {
     const fromTitle = inferSubcategoryFromTitle(title);
