@@ -49,7 +49,7 @@ function parseCSVLine(line: string): string[] {
   return values;
 }
 
-export default function CsvBulkUpload({ designerId, currentCount, onComplete }: CsvBulkUploadProps) {
+export default function CsvBulkUpload({ designerId, designerName, currentCount, onComplete }: CsvBulkUploadProps) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Record<string, string>[]>([]);
