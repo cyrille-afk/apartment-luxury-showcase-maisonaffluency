@@ -41,7 +41,12 @@ export default function TradeSpecSheet() {
         .limit(1)
         .maybeSingle();
 
-      if (pick?.pdf_url) { setPdfUrl(pick.pdf_url); setLoading(false); return; }
+      if (pick?.pdf_url) {
+        const signed = await getSignedSpecSheetUrl(pick.pdf_url);
+        setPdfUrl(signed);
+        setLoading(false);
+        return;
+      }
 
       const { data: tp } = await supabase
         .from("trade_products")
@@ -51,7 +56,10 @@ export default function TradeSpecSheet() {
         .limit(1)
         .maybeSingle();
 
-      if (tp?.spec_sheet_url) { setPdfUrl(tp.spec_sheet_url); }
+      if (tp?.spec_sheet_url) {
+        const signed = await getSignedSpecSheetUrl(tp.spec_sheet_url);
+        setPdfUrl(signed);
+      }
       setLoading(false);
     };
 
