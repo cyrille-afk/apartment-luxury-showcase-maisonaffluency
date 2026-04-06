@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Share2, FileText, Trash2, GripVertical, Check, X } from "lucide-react";
+import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Board {
   id: string;
@@ -29,6 +42,7 @@ interface BoardItem {
   sort_order: number;
   notes: string | null;
   approval_status: string;
+  subfolder: string | null;
   product?: {
     product_name: string;
     brand_name: string;
@@ -59,6 +73,14 @@ const TradeBoardBuilder = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+
+  // Sub-folder state
+  const [subfolderDialogOpen, setSubfolderDialogOpen] = useState(false);
+  const [newSubfolderName, setNewSubfolderName] = useState("");
+  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
+  const [renameTarget, setRenameTarget] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [addToSubfolder, setAddToSubfolder] = useState<string | null>(null); // subfolder to add products into
 
   const fetchBoard = useCallback(async () => {
     if (!id) return;
@@ -93,6 +115,29 @@ const TradeBoardBuilder = () => {
 
   useEffect(() => { fetchBoard(); }, [fetchBoard]);
 
+  // Derive sub-folder list from items
+  const subfolders = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach(i => { if (i.subfolder) set.add(i.subfolder); });
+    return Array.from(set).sort();
+  }, [items]);
+
+  // Group items by subfolder
+  const groupedItems = useMemo(() => {
+    const groups: { name: string | null; items: BoardItem[] }[] = [];
+    const ungrouped = items.filter(i => !i.subfolder);
+    
+    // Sub-folders first
+    for (const sf of subfolders) {
+      groups.push({ name: sf, items: items.filter(i => i.subfolder === sf) });
+    }
+    // Ungrouped at the end
+    if (ungrouped.length > 0 || subfolders.length === 0) {
+      groups.push({ name: null, items: ungrouped });
+    }
+    return groups;
+  }, [items, subfolders]);
+
   const searchProducts = useCallback(async (q: string) => {
     let query = supabase.from("trade_products").select("id, product_name, brand_name, image_url, category").eq("is_active", true).limit(20);
     if (q.trim()) {
@@ -108,17 +153,75 @@ const TradeBoardBuilder = () => {
     if (!id) return;
     const { error } = await supabase
       .from("client_board_items")
-      .insert({ board_id: id, product_id: productId, sort_order: items.length });
+      .insert({ board_id: id, product_id: productId, sort_order: items.length, subfolder: addToSubfolder });
     if (!error) {
       setAddedIds(prev => new Set(prev).add(productId));
       fetchBoard();
-      toast({ title: "Product added to board" });
+      toast({ title: "Product added" });
     }
   };
 
   const removeItem = async (itemId: string) => {
     await supabase.from("client_board_items").delete().eq("id", itemId);
     fetchBoard();
+  };
+
+  const createSubfolder = async () => {
+    const name = newSubfolderName.trim();
+    if (!name) return;
+    if (subfolders.includes(name)) {
+      toast({ title: "Sub-folder already exists", variant: "destructive" });
+      return;
+    }
+    setSubfolderDialogOpen(false);
+    setNewSubfolderName("");
+    // Just track it — it will appear once items are assigned
+    // For now, create a placeholder by showing it in UI
+    toast({ title: `Sub-folder "${name}" created`, description: "Add products to it using the + button." });
+    // We'll add a temp empty subfolder by inserting into collapsed state
+    setCollapsedFolders(prev => { const n = new Set(prev); return n; });
+    // Store in local state until items are added
+    setItems(prev => prev); // trigger re-render
+    // Actually, we need to persist this — let's add it by opening the add dialog with this subfolder pre-selected
+    setAddToSubfolder(name);
+    setAddOpen(true);
+  };
+
+  const renameSubfolder = async (oldName: string, newName: string) => {
+    if (!newName.trim() || newName.trim() === oldName) {
+      setRenameTarget(null);
+      return;
+    }
+    const itemsInFolder = items.filter(i => i.subfolder === oldName);
+    for (const item of itemsInFolder) {
+      await supabase.from("client_board_items").update({ subfolder: newName.trim() }).eq("id", item.id);
+    }
+    setRenameTarget(null);
+    fetchBoard();
+    toast({ title: `Renamed to "${newName.trim()}"` });
+  };
+
+  const deleteSubfolder = async (name: string) => {
+    // Move items back to ungrouped
+    const itemsInFolder = items.filter(i => i.subfolder === name);
+    for (const item of itemsInFolder) {
+      await supabase.from("client_board_items").update({ subfolder: null }).eq("id", item.id);
+    }
+    fetchBoard();
+    toast({ title: `Sub-folder "${name}" removed`, description: "Items moved to ungrouped." });
+  };
+
+  const moveItemToSubfolder = async (itemId: string, subfolder: string | null) => {
+    await supabase.from("client_board_items").update({ subfolder }).eq("id", itemId);
+    fetchBoard();
+  };
+
+  const toggleCollapse = (name: string) => {
+    setCollapsedFolders(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
   };
 
   const shareBoard = async () => {
@@ -131,7 +234,6 @@ const TradeBoardBuilder = () => {
     const url = `${window.location.origin}/board/${board.share_token}`;
     navigator.clipboard.writeText(url);
 
-    // Send email notification to client if sharing for the first time and email exists
     if (wasDraft) {
       try {
         await supabase.functions.invoke("send-board-shared", {
@@ -157,7 +259,6 @@ const TradeBoardBuilder = () => {
       toast({ title: "No approved items", description: "Your client must approve items before converting.", variant: "destructive" });
       return;
     }
-    // Create quote
     const { data: quote, error } = await supabase
       .from("trade_quotes")
       .insert({ user_id: user.id, status: "draft", client_name: board.client_name })
@@ -167,14 +268,12 @@ const TradeBoardBuilder = () => {
       toast({ title: "Error", description: error?.message, variant: "destructive" });
       return;
     }
-    // Add items
     const quoteItems = approvedItems.map(item => ({
       quote_id: quote.id,
       product_id: item.product_id,
       quantity: 1,
     }));
     await supabase.from("trade_quote_items").insert(quoteItems);
-    // Mark board as converted
     await supabase.from("client_boards").update({ status: "converted" }).eq("id", board.id);
     toast({ title: "Quote created", description: `${approvedItems.length} approved items added to new quote` });
     navigate("/trade/quotes");
@@ -185,6 +284,57 @@ const TradeBoardBuilder = () => {
 
   const approvedCount = items.filter(i => i.approval_status === "approved").length;
   const rejectedCount = items.filter(i => i.approval_status === "rejected").length;
+  const isEditable = board.status !== "converted";
+
+  const renderItemCard = (item: BoardItem) => (
+    <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
+      <div className="aspect-square bg-muted relative">
+        {item.product?.image_url ? (
+          <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
+        )}
+        {item.approval_status === "approved" && (
+          <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
+            <Check className="h-4 w-4 text-white" />
+          </div>
+        )}
+        {item.approval_status === "rejected" && (
+          <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive flex items-center justify-center">
+            <X className="h-4 w-4 text-white" />
+          </div>
+        )}
+      </div>
+      <div className="p-3">
+        <p className="font-body text-sm text-foreground font-medium truncate">{item.product?.product_name}</p>
+        <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
+        {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
+        {isEditable && (
+          <div className="flex items-center gap-1 mt-2">
+            {subfolders.length > 0 && (
+              <Select
+                value={item.subfolder || "__none__"}
+                onValueChange={(v) => moveItemToSubfolder(item.id, v === "__none__" ? null : v)}
+              >
+                <SelectTrigger className="h-7 text-xs w-auto min-w-[100px]">
+                  <SelectValue placeholder="Move to…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Ungrouped</SelectItem>
+                  {subfolders.map(sf => (
+                    <SelectItem key={sf} value={sf}>{sf}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive ml-auto" onClick={() => removeItem(item.id)}>
+              <Trash2 className="h-3 w-3 mr-1" /> Remove
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -193,7 +343,7 @@ const TradeBoardBuilder = () => {
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
-            <ArrowLeft className="h-3.5 w-3.5" /> Boards
+            <ArrowLeft className="h-3.5 w-3.5" /> Folders
           </Button>
         </div>
 
@@ -206,14 +356,18 @@ const TradeBoardBuilder = () => {
               {items.length > 0 && (
                 <span className="font-body text-xs text-muted-foreground">
                   {items.length} items · {approvedCount} approved · {rejectedCount} rejected
+                  {subfolders.length > 0 && ` · ${subfolders.length} sub-folders`}
                 </span>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {board.status !== "converted" && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {isEditable && (
               <>
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAddOpen(true)}>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSubfolderDialogOpen(true)}>
+                  <FolderPlus className="h-3.5 w-3.5" /> Sub-folder
+                </Button>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setAddToSubfolder(null); setAddOpen(true); }}>
                   <Plus className="h-3.5 w-3.5" /> Add Products
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1.5" onClick={shareBoard}>
@@ -229,57 +383,129 @@ const TradeBoardBuilder = () => {
           </div>
         </div>
 
-        {/* Items grid */}
+        {/* Items grouped by sub-folder */}
         {items.length === 0 ? (
           <div className="text-center py-16 border border-dashed border-border rounded-lg">
             <p className="font-body text-sm text-muted-foreground mb-3">No products added yet</p>
-            <Button variant="outline" size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={() => { setAddToSubfolder(null); setAddOpen(true); }} className="gap-1.5">
               <Plus className="h-3.5 w-3.5" /> Add Products
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map(item => (
-              <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
-                <div className="aspect-square bg-muted relative">
-                  {item.product?.image_url ? (
-                    <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
-                  )}
-                  {/* Approval indicator */}
-                  {item.approval_status === "approved" && (
-                    <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+          <div className="space-y-6">
+            {groupedItems.map(group => {
+              const isCollapsed = group.name ? collapsedFolders.has(group.name) : false;
+              const isRenaming = renameTarget === group.name;
+
+              return (
+                <div key={group.name || "__ungrouped__"}>
+                  {/* Sub-folder header */}
+                  {group.name && (
+                    <div className="flex items-center gap-2 mb-3 border-b border-border pb-2">
+                      <button onClick={() => toggleCollapse(group.name!)} className="flex items-center gap-1.5 text-foreground hover:text-primary transition-colors">
+                        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        <Folder className="h-4 w-4 text-primary/70" />
+                      </button>
+
+                      {isRenaming ? (
+                        <form
+                          onSubmit={(e) => { e.preventDefault(); renameSubfolder(group.name!, renameValue); }}
+                          className="flex items-center gap-2 flex-1"
+                        >
+                          <Input
+                            value={renameValue}
+                            onChange={e => setRenameValue(e.target.value)}
+                            className="h-7 text-sm max-w-[200px]"
+                            autoFocus
+                            onBlur={() => setRenameTarget(null)}
+                          />
+                          <Button type="submit" size="sm" variant="ghost" className="h-7 w-7 p-0">
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        </form>
+                      ) : (
+                        <span className="font-display text-sm text-foreground">{group.name}</span>
+                      )}
+
+                      <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider ml-1">
+                        {group.items.length} {group.items.length === 1 ? "item" : "items"}
+                      </span>
+
+                      {isEditable && !isRenaming && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto">
+                              <MoreHorizontal className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setAddToSubfolder(group.name); setAddOpen(true); }}>
+                              <Plus className="h-3.5 w-3.5 mr-2" /> Add products here
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setRenameTarget(group.name); setRenameValue(group.name!); }}>
+                              <Pencil className="h-3.5 w-3.5 mr-2" /> Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => deleteSubfolder(group.name!)}>
+                              <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete sub-folder
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   )}
-                  {item.approval_status === "rejected" && (
-                    <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive flex items-center justify-center">
-                      <X className="h-4 w-4 text-white" />
+
+                  {/* Ungrouped header */}
+                  {!group.name && subfolders.length > 0 && (
+                    <div className="flex items-center gap-2 mb-3 border-b border-border pb-2">
+                      <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
+                        Ungrouped · {group.items.length} {group.items.length === 1 ? "item" : "items"}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Items grid */}
+                  {!isCollapsed && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {group.items.map(renderItemCard)}
                     </div>
                   )}
                 </div>
-                <div className="p-3">
-                  <p className="font-body text-sm text-foreground font-medium truncate">{item.product?.product_name}</p>
-                  <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
-                  {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
-                  {board.status !== "converted" && (
-                    <Button variant="ghost" size="sm" className="mt-2 h-7 text-xs text-destructive hover:text-destructive" onClick={() => removeItem(item.id)}>
-                      <Trash2 className="h-3 w-3 mr-1" /> Remove
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Create sub-folder dialog */}
+      <Dialog open={subfolderDialogOpen} onOpenChange={setSubfolderDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Create Sub-folder</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); createSubfolder(); }} className="space-y-4 pt-2">
+            <Input
+              value={newSubfolderName}
+              onChange={e => setNewSubfolderName(e.target.value)}
+              placeholder="e.g. Living Room, Master Bedroom"
+              autoFocus
+            />
+            <Button type="submit" disabled={!newSubfolderName.trim()} className="w-full">
+              Create & Add Products
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Add products dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="font-display">Add Products</DialogTitle>
+            <DialogTitle className="font-display">
+              Add Products
+              {addToSubfolder && (
+                <span className="text-sm font-body text-muted-foreground font-normal ml-2">→ {addToSubfolder}</span>
+              )}
+            </DialogTitle>
           </DialogHeader>
           <Input value={search} onChange={e => { setSearch(e.target.value); searchProducts(e.target.value); }} placeholder="Search products…" className="mb-3" />
           <div className="flex-1 overflow-y-auto space-y-1 min-h-0">
