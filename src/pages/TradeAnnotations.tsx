@@ -287,14 +287,18 @@ export default function TradeAnnotations() {
                   });
                   return (
                     <div key={cat} className="mb-4">
-                      <p className="font-display text-[11px] uppercase tracking-widest text-foreground px-2 py-2 sticky top-0 bg-background z-20 border-b border-border">
-                        {cat}
-                      </p>
+                      <div className="sticky top-0 z-20 bg-foreground px-3 py-2.5 border-b border-border">
+                        <p className="font-display text-xs uppercase tracking-[0.2em] text-background font-semibold">
+                          {cat}
+                        </p>
+                      </div>
                       {subKeys.map(sub => (
                         <div key={sub} className="mb-1">
-                          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground px-3 py-1 sticky top-8 bg-background/95 backdrop-blur-sm z-10">
-                            {sub} <span className="text-muted-foreground/40 ml-1">({subs[sub].length})</span>
-                          </p>
+                          <div className="sticky top-[38px] z-10 bg-muted/80 backdrop-blur-sm px-3 py-1.5 border-b border-border/50">
+                            <p className="font-display text-[11px] uppercase tracking-wider text-foreground/70 font-medium">
+                              {sub} <span className="text-muted-foreground/50 ml-1">({subs[sub].length})</span>
+                            </p>
+                          </div>
                           <div className="space-y-0.5">
                             {subs[sub].map(img => (
                               <button
