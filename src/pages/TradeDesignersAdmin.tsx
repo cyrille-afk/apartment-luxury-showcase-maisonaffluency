@@ -588,7 +588,7 @@ interface DesignerRow {
 }
 
 const TradeDesignersAdmin = () => {
-  const { isSuperAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -610,7 +610,7 @@ const TradeDesignersAdmin = () => {
       if (error) throw error;
       return data as DesignerRow[];
     },
-    enabled: !!isSuperAdmin,
+    enabled: !!isAdmin,
   });
 
   // Fetch public picks count per designer for debug counter
@@ -627,7 +627,7 @@ const TradeDesignersAdmin = () => {
       });
       return counts;
     },
-    enabled: !!isSuperAdmin,
+    enabled: !!isAdmin,
   });
 
   const saveMutation = useMutation({
@@ -820,7 +820,7 @@ const TradeDesignersAdmin = () => {
   );
 
   if (loading) return null;
-  if (!isSuperAdmin) return <Navigate to="/trade" replace />;
+  if (!isAdmin) return <Navigate to="/trade" replace />;
 
   return (
     <>
