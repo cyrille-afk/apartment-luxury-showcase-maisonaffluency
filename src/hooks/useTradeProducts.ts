@@ -55,8 +55,11 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
     const designer = Array.isArray(pick.designers)
       ? pick.designers[0]
       : pick.designers;
-    const brandName = designer?.name?.trim();
-    if (!brandName || !pick.title) return [];
+    const childName = designer?.name?.trim();
+    if (!childName || !pick.title) return [];
+    // Use parent brand (founder) as brand_name when designer is a child
+    const founderName = (designer as any)?.founder?.trim();
+    const brandName = (founderName && founderName !== childName) ? founderName : childName;
 
     const hasExplicitCategory = Boolean(pick.category?.trim?.());
     const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.());
