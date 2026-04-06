@@ -21,7 +21,7 @@ interface AdminCard {
 
 const contentGroup: AdminCard[] = [
   { title: "Journal", description: "Manage articles, pipeline, and editorial content", url: "/trade/journal", icon: Newspaper },
-  { title: "Designer Editor", description: "Edit designer profiles, bios, and imagery", url: "/trade/designers/admin", icon: PenLine, superAdminOnly: true },
+  { title: "Designer Editor", description: "Edit designer profiles, bios, and imagery", url: "/trade/designers/admin", icon: PenLine },
   { title: "Provenance", description: "Certificates of authenticity and timelines", url: "/trade/provenance", icon: Award },
   { title: "Documents", description: "Upload and manage trade catalogues and spec sheets", url: "/trade/documents-admin", icon: Upload },
   { title: "Media Library", description: "Browse and manage uploaded assets", url: "/trade/media", icon: FolderArchive },

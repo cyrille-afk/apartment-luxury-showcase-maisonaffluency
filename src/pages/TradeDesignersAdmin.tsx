@@ -588,7 +588,7 @@ interface DesignerRow {
 }
 
 const TradeDesignersAdmin = () => {
-  const { isSuperAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -821,6 +821,7 @@ const TradeDesignersAdmin = () => {
 
   if (loading) return null;
   if (!isSuperAdmin) return <Navigate to="/trade" replace />;
+  if (!isAdmin) return <Navigate to="/trade" replace />;
 
   return (
     <>
