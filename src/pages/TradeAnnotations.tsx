@@ -56,10 +56,10 @@ export default function TradeAnnotations() {
       results.push(item);
     };
 
-    // Curator picks first (most images)
+    // Curator picks first – use parent brand (founder) when available
     let pickQuery = supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, category, subcategory, designers!inner(name)")
+      .select("id, title, image_url, category, subcategory, designers!inner(name, founder)")
       .neq("image_url", "");
     if (q.trim()) {
       pickQuery = pickQuery.or(`title.ilike.%${q}%,designers.name.ilike.%${q}%`);
@@ -67,8 +67,11 @@ export default function TradeAnnotations() {
     const { data: picks } = await pickQuery.order("title").limit(500);
     if (picks) {
       picks.forEach((p: any) => {
+        const designer = p.designers;
+        // Use the parent brand (founder) if it exists, otherwise the designer name
+        const brandName = designer?.founder?.trim() || designer?.name?.trim() || "";
         addUnique({
-          id: p.id, name: p.title, brand: p.designers?.name || "",
+          id: p.id, name: p.title, brand: brandName,
           image_url: p.image_url, source: "pick",
           category: p.category || "Uncategorized",
           subcategory: p.subcategory || p.category || "Other",
