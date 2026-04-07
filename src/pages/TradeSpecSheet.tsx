@@ -30,7 +30,7 @@ export default function TradeSpecSheet() {
     : `${brand} Spec Sheet`;
 
   useEffect(() => {
-    if (!product) { setLoading(false); return; }
+    if (!product || !user) { setLoading(false); return; }
 
     const resolve = async () => {
       const { data: pick } = await supabase
@@ -64,7 +64,7 @@ export default function TradeSpecSheet() {
     };
 
     resolve();
-  }, [product]);
+  }, [product, user]);
 
   if (loading || authLoading) {
     return (
