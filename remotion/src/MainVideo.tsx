@@ -225,8 +225,8 @@ function OutroCard() {
   );
 }
 
-// Total duration: intro(70) + 27 scenes × 127 + outro(80) - 28 transitions × 18
-// = 70 + 3429 + 80 - 504 = 3075 frames ≈ 102.5s
+// Total duration: intro(70) + 17 scenes × 127 + outro(80) - 18 transitions × 18
+// = 70 + 2159 + 80 - 324 = 1985 frames ≈ 66.2s
 const TOTAL_FRAMES = 70 + scenes.length * SCENE_DUR + 80 - (scenes.length + 1) * TRANS_DUR;
 const AUDIO_DUR_FRAMES = 32 * 30; // 32s audio at 30fps = 960 frames
 
