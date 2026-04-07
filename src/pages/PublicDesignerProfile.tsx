@@ -468,8 +468,12 @@ const PublicDesignerProfile = () => {
         return (
           <>
             <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
-              {!firstMediaOnRight && firstMediaFigure}
-              <div className="flex-1 min-w-0">
+              {!firstMediaOnRight && firstMediaFigure && (
+                <div className="order-2 md:order-none shrink-0 w-full md:w-auto contents md:block">
+                  {firstMediaFigure}
+                </div>
+              )}
+              <div className="flex-1 min-w-0 order-1 md:order-none">
                 <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
                 <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
                   {heroParagraphs.map((p: string, i: number) => (
