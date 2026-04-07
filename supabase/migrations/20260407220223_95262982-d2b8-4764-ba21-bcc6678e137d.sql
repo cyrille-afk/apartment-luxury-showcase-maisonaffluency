@@ -1,0 +1,1 @@
+UPDATE public.designers SET instagram_handle = NULL WHERE id = 'e49eb791-5564-435d-bd2c-662f0b5d4029';
