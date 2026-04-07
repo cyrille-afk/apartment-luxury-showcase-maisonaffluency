@@ -469,7 +469,7 @@ const PublicDesignerProfile = () => {
           <>
             <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
               {!firstMediaOnRight && firstMediaFigure && (
-                <div className="order-2 md:order-none shrink-0 w-full md:w-auto contents md:block">
+                <div className="order-2 md:order-none">
                   {firstMediaFigure}
                 </div>
               )}
