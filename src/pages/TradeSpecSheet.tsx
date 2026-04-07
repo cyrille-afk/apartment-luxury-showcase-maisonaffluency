@@ -74,14 +74,6 @@ export default function TradeSpecSheet() {
     );
   }
 
-  if (!pdfUrl) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <p className="font-body text-sm text-muted-foreground">No spec sheet found.</p>
-      </div>
-    );
-  }
-
   /* ── Auth gate: user must be registered to view or download ── */
   if (!user) {
     return (
