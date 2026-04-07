@@ -446,7 +446,7 @@ const PublicDesignerProfile = () => {
         const firstMediaOnRight = false;
 
         const firstMediaFigure = firstMediaParsed ? (
-          <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
+          <div className={`shrink-0 w-full order-2 md:order-none ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
             <figure>
               <div className="rounded-xl overflow-hidden bg-muted/10">
                 <img
@@ -469,9 +469,7 @@ const PublicDesignerProfile = () => {
           <>
             <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
               {!firstMediaOnRight && firstMediaFigure && (
-                <div className="order-2 md:order-none">
-                  {firstMediaFigure}
-                </div>
+                firstMediaFigure
               )}
               <div className="flex-1 min-w-0 order-1 md:order-none">
                 <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
