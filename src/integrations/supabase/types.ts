@@ -271,6 +271,8 @@ export type Database = {
           share_token: string
           status: string
           title: string
+          token_expires_at: string | null
+          token_rotated_at: string | null
           updated_at: string
           user_id: string
         }
@@ -282,6 +284,8 @@ export type Database = {
           share_token?: string
           status?: string
           title?: string
+          token_expires_at?: string | null
+          token_rotated_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -293,6 +297,8 @@ export type Database = {
           share_token?: string
           status?: string
           title?: string
+          token_expires_at?: string | null
+          token_rotated_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -2437,6 +2443,8 @@ export type Database = {
           share_token: string
           status: string
           title: string
+          token_expires_at: string | null
+          token_rotated_at: string | null
           updated_at: string
           user_id: string
         }[]
@@ -2508,6 +2516,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      rotate_board_token: { Args: { _board_id: string }; Returns: string }
       update_item_approval_by_token: {
         Args: { _approval_status: string; _item_id: string; _token: string }
         Returns: undefined
