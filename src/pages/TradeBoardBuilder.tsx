@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,8 @@ interface Board {
   client_name: string;
   share_token: string;
   status: string;
+  token_expires_at: string | null;
+  token_rotated_at: string | null;
 }
 
 interface BoardItem {
@@ -276,6 +278,20 @@ const TradeBoardBuilder = () => {
     });
   };
 
+  const rotateToken = async () => {
+    if (!board) return;
+    const { data, error } = await supabase.rpc("rotate_board_token", { _board_id: board.id });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    const newToken = data as string;
+    setBoard({ ...board, share_token: newToken, token_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), token_rotated_at: new Date().toISOString() });
+    const url = `${window.location.origin}/board/${newToken}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Token rotated", description: "New share link copied. The old link no longer works." });
+  };
+
   const convertToQuote = async () => {
     if (!board || !user) return;
     const approvedItems = items.filter(i => i.approval_status === "approved");
@@ -397,6 +413,11 @@ const TradeBoardBuilder = () => {
                 <Button variant="outline" size="sm" className="gap-1.5" onClick={shareBoard}>
                   <Share2 className="h-3.5 w-3.5" /> {board.status === "draft" ? "Share with Client" : "Copy Link"}
                 </Button>
+                {board.status !== "draft" && (
+                  <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={rotateToken} title="Regenerate share link (invalidates old link)">
+                    <RefreshCw className="h-3.5 w-3.5" /> Rotate Link
+                  </Button>
+                )}
                 {approvedCount > 0 && (
                   <Button size="sm" className="gap-1.5" onClick={convertToQuote}>
                     <FileText className="h-3.5 w-3.5" /> Convert to Quote
