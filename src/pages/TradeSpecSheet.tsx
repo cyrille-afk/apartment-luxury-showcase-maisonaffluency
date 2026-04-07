@@ -104,6 +104,14 @@ export default function TradeSpecSheet() {
     );
   }
 
+  if (!pdfUrl) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <p className="font-body text-sm text-muted-foreground">No spec sheet found.</p>
+      </div>
+    );
+  }
+
   const handleDownload = async () => {
     try {
       const res = await fetch(pdfUrl!);
