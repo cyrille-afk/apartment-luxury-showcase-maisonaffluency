@@ -1691,7 +1691,6 @@ const partnerBrands = [
     subcategory: "Tables",
     origin: "France",
     description: "Pierre Augustin Rose is a French design studio creating sculptural furniture defined by organic silhouettes, generous curves and a masterful interplay of natural materials — wood, stone and linen — resulting in pieces that feel both monumental and intimately refined.",
-    instagram: "https://www.instagram.com/pierre_augustin_rose/",
   },
   {
     id: "refractory-studio",
