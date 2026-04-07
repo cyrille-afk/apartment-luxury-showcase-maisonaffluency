@@ -241,7 +241,7 @@ const TOTAL_FRAMES = 70 + scenes.length * SCENE_DUR + 80 - (scenes.length + 1) *
 const AUDIO_DUR_FRAMES = 32 * 30; // 32s audio at 30fps = 960 frames
 
 const VOICEOVER_START = 70; // Start after intro card
-const VOICEOVER_DUR_FRAMES = Math.round(97.5 * 30); // ~97.5s at 30fps (ends ~5s before outro)
+const VOICEOVER_DUR_FRAMES = Math.round(63 * 30); // ~63s at 30fps
 
 export const MainVideo = () => {
   // Layer audio copies to cover the full video duration
