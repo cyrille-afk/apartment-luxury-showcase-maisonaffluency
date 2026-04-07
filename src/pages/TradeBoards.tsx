@@ -27,6 +27,7 @@ interface Board {
   status: string;
   created_at: string;
   updated_at: string;
+  token_expires_at: string | null;
   item_count?: number;
 }
 
@@ -173,6 +174,11 @@ const TradeBoards = () => {
                 </div>
                 <p className="font-body text-xs text-muted-foreground mb-4">
                   {board.item_count} {board.item_count === 1 ? "item" : "items"}
+                  {board.status !== "draft" && board.token_expires_at && (
+                    <span className={new Date(board.token_expires_at) < new Date() ? "text-destructive ml-2" : " ml-2"}>
+                      · {new Date(board.token_expires_at) < new Date() ? "Link expired" : `Expires ${new Date(board.token_expires_at).toLocaleDateString()}`}
+                    </span>
+                  )}
                 </p>
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   {board.status !== "draft" && (
