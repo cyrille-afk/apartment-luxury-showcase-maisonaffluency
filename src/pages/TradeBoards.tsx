@@ -27,6 +27,7 @@ interface Board {
   status: string;
   created_at: string;
   updated_at: string;
+  token_expires_at: string | null;
   item_count?: number;
 }
 
