@@ -6,7 +6,7 @@ import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import remarkBreaks from "remark-breaks";
+
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
