@@ -33,6 +33,31 @@ interface Article {
 
 const CATEGORIES = Object.entries(CATEGORY_LABELS) as [JournalCategory, string][];
 
+const GALLERY_ENTRY_SEPARATOR = " | ";
+
+const parseGalleryImageEntry = (raw: string) => {
+  const separatorIndex = raw.indexOf(GALLERY_ENTRY_SEPARATOR);
+
+  if (separatorIndex === -1) {
+    return { imgUrl: raw.trim(), caption: "" };
+  }
+
+  return {
+    imgUrl: raw.slice(0, separatorIndex).trim(),
+    caption: raw.slice(separatorIndex + GALLERY_ENTRY_SEPARATOR.length),
+  };
+};
+
+const buildGalleryImageEntry = (imgUrl: string, caption: string) =>
+  caption ? `${imgUrl}${GALLERY_ENTRY_SEPARATOR}${caption}` : imgUrl;
+
+const sanitizeGalleryImageEntry = (raw: string) => {
+  const { imgUrl, caption } = parseGalleryImageEntry(raw);
+  const trimmedCaption = caption.trim();
+
+  return trimmedCaption ? buildGalleryImageEntry(imgUrl, trimmedCaption) : imgUrl;
+};
+
 const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   title: "",
   slug: "",
