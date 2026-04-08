@@ -118,10 +118,10 @@ const TradeAtelierProfile = () => {
   const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    (isParentBrand || isChildDesigner) ? designer : undefined
+    isParentBrand ? designer : undefined
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
-  const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const rawPicks = isParentBrand && groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
 
   // Extract image URLs used in biography to deprioritize matching picks
