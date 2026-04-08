@@ -238,18 +238,28 @@ const JournalArticlePage = () => {
                 prose-blockquote:border-l-[3px] prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:font-serif
                 prose-strong:text-foreground"
               dangerouslySetInnerHTML={{
-                __html: article.content
-                  .replace(/\n\n/g, '</p><p>')
-                  .replace(/\n/g, '<br />')
-                  .replace(/^/, '<p>')
-                  .concat('</p>')
-                  .replace(/<p>\s*<\/p>/g, '')
-                  .replace(/<p>(#{1,3})\s/g, '<p class="heading">$1 ')
-                  .replace(/<p class="heading">## (.*?)<\/p>/g, '<h2>$1</h2>')
-                  .replace(/<p class="heading">### (.*?)<\/p>/g, '<h3>$1</h3>')
-                  .replace(/<p>\*\*(.+?)\*\*<\/p>/g, '<p><strong>$1</strong></p>')
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/<p>&gt;\s?(.*?)<\/p>/g, '<blockquote><p>$1</p></blockquote>')
+                __html: (() => {
+                  const blocks = article.content.split(/\n\n+/);
+                  return blocks
+                    .map((block) => {
+                      const trimmed = block.trim();
+                      if (!trimmed) return '';
+                      if (trimmed.startsWith('### '))
+                        return `<h3>${trimmed.slice(4)}</h3>`;
+                      if (trimmed.startsWith('## '))
+                        return `<h2>${trimmed.slice(3)}</h2>`;
+                      if (trimmed.startsWith('> '))
+                        return `<blockquote><p>${trimmed.slice(2)}</p></blockquote>`;
+                      if (trimmed === '---') return '<hr />';
+                      return `<p>${trimmed.replace(/\n/g, '<br />')}</p>`;
+                    })
+                    .join('\n')
+                    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
+                    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                    .replace(/\[([^\]]+)\]\((mailto:[^)]+)\)/g, '<a href="$2">$1</a>');
+                })()
               }}
             />
           </motion.div>
