@@ -240,15 +240,23 @@ const JournalArticlePage = () => {
                   ol: ({ node, ...props }: any) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
                 };
 
-                // Track which gallery image to use (one per ## section, skip the first/intro heading)
-                let galleryIdx = 0;
+                // Assign one gallery image to the end of each designer ## section (skip intro heading)
+                // Count designer sections (skip the first ## which is the intro)
                 let h2Count = 0;
+                const sectionImageMap: (typeof galleryItems[0] | null)[] = sections.map((section) => {
+                  const isH2 = section.startsWith('## ');
+                  if (isH2) h2Count++;
+                  // Assign images to designer sections (2nd ## onward)
+                  if (isH2 && h2Count > 1) {
+                    const idx = h2Count - 2; // 0-based index into gallery
+                    return idx < galleryItems.length ? galleryItems[idx] : null;
+                  }
+                  return null;
+                });
 
                 return sections.map((section, i) => {
-                  const isH2Section = section.startsWith('## ');
-                  if (isH2Section) h2Count++;
-                  // Skip the first ## (intro section) — only assign images from the 2nd ## onward
-                  const image = isH2Section && h2Count > 1 && galleryIdx < galleryItems.length ? galleryItems[galleryIdx++] : null;
+                  const image = sectionImageMap[i];
+                  const imageIdx = image ? galleryItems.indexOf(image) : -1;
 
                   return (
                     <div key={i}>
@@ -258,12 +266,12 @@ const JournalArticlePage = () => {
                       {image && (
                         <figure className="my-8 md:my-12">
                           <button
-                            onClick={() => setLightboxIndex(galleryIdx - 1)}
+                            onClick={() => setLightboxIndex(imageIdx)}
                             className="relative block w-full group cursor-pointer"
                           >
                             <img
                               src={image.url}
-                              alt={image.caption || `${article.title} — Photo ${galleryIdx}`}
+                              alt={image.caption || `${article.title} — Photo ${imageIdx + 1}`}
                               className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
                               loading="lazy"
                             />
