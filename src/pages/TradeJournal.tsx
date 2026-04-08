@@ -338,25 +338,62 @@ const TradeJournal = () => {
                 />
               </div>
 
-              {/* Gallery preview grid */}
+              {/* Gallery preview grid with captions */}
               {editing.gallery_images && editing.gallery_images.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                <div className="mt-4 space-y-3">
                   {editing.gallery_images.map((raw, i) => {
-                    const imgUrl = raw.split(' | ')[0].trim();
+                    const parts = raw.split(' | ');
+                    const imgUrl = parts[0].trim();
+                    const caption = parts[1]?.trim() || '';
                     return (
-                    <div key={i} className="relative group aspect-square rounded-sm overflow-hidden border border-border">
-                      <img src={imgUrl} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                    <div key={i} className="flex gap-3 items-start border border-border rounded-md p-2 group">
+                      <div className="relative w-20 h-20 flex-shrink-0 rounded-sm overflow-hidden">
+                        <img src={imgUrl} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                        <span className="absolute bottom-0.5 left-0.5 font-body text-[9px] text-white/70 bg-black/40 px-1 rounded">
+                          {i + 1}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <p className="font-mono text-[9px] text-muted-foreground/60 truncate">{imgUrl}</p>
+                        <input
+                          value={caption}
+                          onChange={(e) => {
+                            const newCaption = e.target.value;
+                            const newEntry = newCaption ? `${imgUrl} | ${newCaption}` : imgUrl;
+                            setEditing(prev => prev ? {
+                              ...prev,
+                              gallery_images: prev.gallery_images.map((g, idx) => idx === i ? newEntry : g)
+                            } : null);
+                          }}
+                          className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors"
+                          placeholder="Photo caption (e.g. Designer Name, 'Title', 2025)"
+                        />
+                        <button
+                          type="button"
+                          title="Insert image URL into content at cursor"
+                          className="font-body text-[10px] text-primary/70 hover:text-primary transition-colors"
+                          onClick={() => {
+                            const ta = document.getElementById("journal-content-editor") as HTMLTextAreaElement | null;
+                            if (!ta || !editing) return;
+                            const pos = ta.selectionStart;
+                            const text = editing.content;
+                            const insertion = `\n![${caption || 'image'}](${imgUrl})\n`;
+                            const newContent = text.substring(0, pos) + insertion + text.substring(pos);
+                            setEditing(prev => prev ? { ...prev, content: newContent } : null);
+                            requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(pos + insertion.length, pos + insertion.length); });
+                          }}
+                        >
+                          ↳ Insert in content
+                        </button>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setEditing(prev => prev ? { ...prev, gallery_images: prev.gallery_images.filter((_, idx) => idx !== i) } : null)}
-                        className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="p-1 text-muted-foreground/40 hover:text-destructive transition-colors"
                         aria-label="Remove image"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
-                      <span className="absolute bottom-1 left-1 font-body text-[9px] text-white/70 bg-black/40 px-1 rounded">
-                        {i + 1}
-                      </span>
                     </div>
                     );
                   })}
@@ -390,6 +427,7 @@ const TradeJournal = () => {
                   { label: "Link", title: "Link" },
                   { label: "❝", prefix: "> ", title: "Blockquote" },
                   { label: "—", prefix: "\n---\n", title: "Divider" },
+                  { label: "📷", title: "Inline Image" },
                 ].map((btn) => (
                   <button
                     key={btn.label}
@@ -406,7 +444,13 @@ const TradeJournal = () => {
                       const selected = text.substring(start, end);
                       let replacement: string;
                       let cursorOffset: number;
-                      if (btn.label === "Link") {
+                      if (btn.label === "📷") {
+                        const imgUrl = selected || prompt("Paste image URL:") || "";
+                        if (!imgUrl) return;
+                        const alt = prompt("Alt text / caption (optional):") || "image";
+                        replacement = `\n![${alt}](${imgUrl})\n`;
+                        cursorOffset = start + replacement.length;
+                      } else if (btn.label === "Link") {
                         replacement = selected ? `[${selected}](url)` : `[link text](url)`;
                         cursorOffset = selected ? start + selected.length + 3 : start + 1;
                       } else if (btn.prefix) {
