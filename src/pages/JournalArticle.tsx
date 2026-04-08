@@ -194,6 +194,7 @@ const JournalArticlePage = () => {
             className="max-w-3xl mx-auto px-6 py-6 md:py-14"
           >
             <div className="journal-article prose prose-lg max-w-none font-body text-foreground/90 prose-img:rounded-sm prose-img:w-full prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase">
+              {/* Helper: detect paragraphs that contain ONLY a <strong> with no surrounding text */}
               {(() => {
                 // Parse gallery images
                 const galleryItems = (article.gallery_images || []).map((raw) => {
