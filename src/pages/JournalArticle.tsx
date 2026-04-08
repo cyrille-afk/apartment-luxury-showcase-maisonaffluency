@@ -240,12 +240,15 @@ const JournalArticlePage = () => {
                   ol: ({ node, ...props }: any) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
                 };
 
-                // Track which gallery image to use (one per ## section)
+                // Track which gallery image to use (one per ## section, skip the first/intro heading)
                 let galleryIdx = 0;
+                let h2Count = 0;
 
                 return sections.map((section, i) => {
                   const isH2Section = section.startsWith('## ');
-                  const image = isH2Section && galleryIdx < galleryItems.length ? galleryItems[galleryIdx++] : null;
+                  if (isH2Section) h2Count++;
+                  // Skip the first ## (intro section) — only assign images from the 2nd ## onward
+                  const image = isH2Section && h2Count > 1 && galleryIdx < galleryItems.length ? galleryItems[galleryIdx++] : null;
 
                   return (
                     <div key={i}>
