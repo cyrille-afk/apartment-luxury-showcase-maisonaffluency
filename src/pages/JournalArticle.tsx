@@ -106,21 +106,23 @@ const JournalArticlePage = () => {
 
         {/* Cover image */}
         {article.cover_image_url && (
-          <div className="relative w-full flex flex-col items-center bg-muted/10 px-4 md:px-0">
+          <div className="relative w-full flex flex-col items-center bg-muted/10 px-4 md:px-0 group">
             <img
               src={article.cover_image_url}
               alt={article.title}
               className="w-full max-w-4xl mx-auto object-contain"
             />
             {/* Share icon overlay */}
-            <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10">
+            <div className="max-w-4xl w-full mx-auto relative">
+              <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10">
               <ShareMenu
-                url={`https://maisonaffluency.com/journal/${article.slug}`}
-                message={`${article.title} — Maison Affluency: https://maisonaffluency.com/journal/${article.slug}`}
+                url={`https://www.maisonaffluency.com/journal/${article.slug}-og.html`}
+                message={`${article.title} — Maison Affluency: https://www.maisonaffluency.com/journal/${article.slug}-og.html`}
                 className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white/90 hover:text-white px-3 py-2 rounded-full transition-colors"
                 iconSize="w-4 h-4"
                 showLabel={false}
               />
+              </div>
             </div>
             {article.slug === "thierry-lemaire-radical-simplicity" && (
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground py-3">
