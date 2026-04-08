@@ -110,7 +110,7 @@ const JournalArticlePage = () => {
             <img
               src={article.cover_image_url}
               alt={article.title}
-              className="w-full max-h-[40vh] object-cover"
+              className="w-full max-w-4xl mx-auto object-contain"
             />
             {/* Share icon overlay */}
             <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10">
