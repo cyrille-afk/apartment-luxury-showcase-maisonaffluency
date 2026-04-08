@@ -2,9 +2,12 @@ import { useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
+import ShareMenu from "@/components/ShareMenu";
 
 const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
-const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto/bespoke-sofa_gxidtx";
+const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto,f_jpg/bespoke-sofa_gxidtx.jpg";
+const SHARE_URL = "https://www.maisonaffluency.com/apartment-tour-og.html";
+const SHARE_MESSAGE = `Maison Affluency · A Private Apartment Tour — An exclusive cinematic tour of a bespoke Singapore apartment: ${SHARE_URL}`;
 
 const ApartmentTour = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -69,7 +72,7 @@ const ApartmentTour = () => {
         </div>
 
         {/* Video */}
-        <div className="w-full max-w-5xl">
+        <div className="w-full max-w-5xl relative">
           <video
             ref={videoRef}
             src={VIDEO_URL}
@@ -79,6 +82,17 @@ const ApartmentTour = () => {
             className="w-full rounded-sm shadow-2xl"
             style={{ aspectRatio: "16/9" }}
           />
+
+          {/* Share button — frosted glass overlay */}
+          <div className="absolute top-3 right-3 md:bottom-4 md:right-4 md:top-auto z-10">
+            <ShareMenu
+              url={SHARE_URL}
+              message={SHARE_MESSAGE}
+              className="bg-black/50 backdrop-blur-md hover:bg-black/70 text-white/80 hover:text-white rounded-full w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all"
+              iconSize="w-4 h-4"
+              showLabel={false}
+            />
+          </div>
         </div>
 
         {/* Caption */}
