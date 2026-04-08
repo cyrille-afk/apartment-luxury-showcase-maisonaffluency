@@ -127,7 +127,7 @@ const TradeJournal = () => {
       excerpt: editing.excerpt,
       content: editing.content,
       cover_image_url: editing.cover_image_url || null,
-      gallery_images: editing.gallery_images || [],
+      gallery_images: (editing.gallery_images || []).map(sanitizeGalleryImageEntry),
       pdf_url: editing.pdf_url || null,
       category: editing.category,
       author: editing.author,
