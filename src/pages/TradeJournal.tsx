@@ -388,6 +388,7 @@ const TradeJournal = () => {
                   { label: "H2", prefix: "## ", title: "Heading 2" },
                   { label: "H3", prefix: "### ", title: "Heading 3" },
                   { label: "Link", title: "Link" },
+                  { label: "❝", prefix: "> ", title: "Blockquote" },
                   { label: "—", prefix: "\n---\n", title: "Divider" },
                 ].map((btn) => (
                   <button
