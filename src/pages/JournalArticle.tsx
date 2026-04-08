@@ -307,20 +307,33 @@ const JournalArticlePage = () => {
               </>
             )}
 
-            <motion.img
-              key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              src={article.gallery_images[lightboxIndex]}
-              alt={`Photo ${lightboxIndex + 1}`}
-              className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm"
-              onClick={(e) => e.stopPropagation()}
-            />
-
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 font-body text-xs text-white/50">
-              {lightboxIndex + 1} / {article.gallery_images.length}
-            </div>
+            {(() => {
+              const parts = article.gallery_images[lightboxIndex].split(' | ');
+              const imgUrl = parts[0].trim();
+              const caption = parts[1]?.trim() || null;
+              return (
+                <>
+                  <motion.img
+                    key={lightboxIndex}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    src={imgUrl}
+                    alt={caption || `Photo ${lightboxIndex + 1}`}
+                    className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center">
+                    {caption && (
+                      <div className="font-body text-xs text-white/70 italic mb-1">{caption}</div>
+                    )}
+                    <div className="font-body text-[10px] text-white/40">
+                      {lightboxIndex + 1} / {article.gallery_images.length}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </motion.div>
         )}
       </AnimatePresence>
