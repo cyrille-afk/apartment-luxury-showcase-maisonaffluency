@@ -6,10 +6,24 @@ import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import React from "react";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
+
+/** Detect if a paragraph's children consist solely of a single <strong> element (no surrounding text) */
+const isBoldOnlyParagraph = (children: React.ReactNode): boolean => {
+  const arr = React.Children.toArray(children);
+  return arr.length === 1 && React.isValidElement(arr[0]) && (arr[0] as React.ReactElement).type === 'strong';
+};
+
+const JournalParagraph = ({ node, children, ...props }: any) => {
+  const cls = isBoldOnlyParagraph(children)
+    ? "leading-[1.85] text-foreground/80 my-6 journal-subheader"
+    : "leading-[1.85] text-foreground/80 my-6";
+  return <p className={cls} {...props}>{children}</p>;
+};
 
 const JournalArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -194,6 +208,7 @@ const JournalArticlePage = () => {
             className="max-w-3xl mx-auto px-6 py-6 md:py-14"
           >
             <div className="journal-article prose prose-lg max-w-none font-body text-foreground/90 prose-img:rounded-sm prose-img:w-full prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase">
+              {/* Helper: detect paragraphs that contain ONLY a <strong> with no surrounding text */}
               {(() => {
                 // Parse gallery images
                 const galleryItems = (article.gallery_images || []).map((raw) => {
@@ -209,7 +224,7 @@ const JournalArticlePage = () => {
                       components={{
                         h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
-                        p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                        p: JournalParagraph,
                         a: ({ node, ...props }) => (
                           <a className="text-primary underline underline-offset-4" target={props.href?.startsWith("http") ? "_blank" : undefined} rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined} {...props} />
                         ),
@@ -231,7 +246,7 @@ const JournalArticlePage = () => {
                 const mdComponents = {
                   h2: ({ node, ...props }: any) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                   h3: ({ node, ...props }: any) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
-                  p: ({ node, ...props }: any) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                  p: JournalParagraph,
                   a: ({ node, ...props }: any) => (
                     <a className="text-primary underline underline-offset-4" target={props.href?.startsWith("http") ? "_blank" : undefined} rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined} {...props} />
                   ),
