@@ -5,6 +5,7 @@ import Index from "./pages/Index";
 import TradeAxonometric from "./pages/TradeAxonometric";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
+import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 // Defer react-helmet-async — all critical meta tags are already in index.html
 const LazyHelmetProvider = lazy(() =>
@@ -158,21 +159,21 @@ const App = () => {
                   <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
-                  <Route path="/product/:id" element={<Suspense fallback={null}><ProductPage /></Suspense>} />
-                  <Route path="/designer/:slug" element={<Suspense fallback={null}><DesignerProfile /></Suspense>} />
+                  <Route path="/product/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPage /></Suspense>} />
+                  <Route path="/designer/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerProfile /></Suspense>} />
                   {/* Public designers directory — hidden from nav until all data is populated */}
-                  <Route path="/designers" element={<Suspense fallback={null}><PublicDesigners /></Suspense>} />
-                  <Route path="/designers/:slug" element={<Suspense fallback={null}><PublicDesignerProfile /></Suspense>} />
-                  <Route path="/favorites" element={<Suspense fallback={null}><PublicFavorites /></Suspense>} />
-                  <Route path="/apartment-tour" element={<Suspense fallback={null}><ApartmentTour /></Suspense>} />
+                  <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
+                  <Route path="/designers/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile /></Suspense>} />
+                  <Route path="/favorites" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicFavorites /></Suspense>} />
+                  <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
                   
                   
-                  <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
-                  <Route path="/new-in" element={<Suspense fallback={null}><NewIn /></Suspense>} />
-                  <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
-                  <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />
+                  <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
+                  <Route path="/new-in" element={<Suspense fallback={<PageLoadingSkeleton />}><NewIn /></Suspense>} />
+                  <Route path="/journal" element={<Suspense fallback={<PageLoadingSkeleton />}><Journal /></Suspense>} />
+                  <Route path="/journal/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><JournalArticle /></Suspense>} />
                   <Route path="/spec-sheets/:slug" element={<Suspense fallback={null}><SpecSheetRedirect /></Suspense>} />
-                  <Route path="/trade/spec-sheet" element={<Suspense fallback={null}><TradeSpecSheet /></Suspense>} />
+                  <Route path="/trade/spec-sheet" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSpecSheet /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
