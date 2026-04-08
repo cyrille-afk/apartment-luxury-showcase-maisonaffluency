@@ -224,7 +224,7 @@ const JournalArticlePage = () => {
                       components={{
                         h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
-                        p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                        p: JournalParagraph,
                         a: ({ node, ...props }) => (
                           <a className="text-primary underline underline-offset-4" target={props.href?.startsWith("http") ? "_blank" : undefined} rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined} {...props} />
                         ),
@@ -246,7 +246,7 @@ const JournalArticlePage = () => {
                 const mdComponents = {
                   h2: ({ node, ...props }: any) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                   h3: ({ node, ...props }: any) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
-                  p: ({ node, ...props }: any) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                  p: JournalParagraph,
                   a: ({ node, ...props }: any) => (
                     <a className="text-primary underline underline-offset-4" target={props.href?.startsWith("http") ? "_blank" : undefined} rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined} {...props} />
                   ),
