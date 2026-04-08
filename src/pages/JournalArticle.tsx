@@ -183,7 +183,7 @@ const JournalArticlePage = () => {
           </motion.div>
         )}
 
-        {/* Article body */}
+        {/* Article body with inline gallery images */}
         {article.content && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -192,29 +192,90 @@ const JournalArticlePage = () => {
             className="max-w-3xl mx-auto px-6 py-6 md:py-14"
           >
             <div className="journal-article prose prose-lg max-w-none font-body text-foreground/90 prose-img:rounded-sm prose-img:w-full prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkBreaks]}
-                components={{
-                  h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
-                  h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
-                  p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
-                  a: ({ node, ...props }) => (
-                    <a
-                      className="text-primary underline underline-offset-4"
-                      target={props.href?.startsWith("http") ? "_blank" : undefined}
-                      rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined}
-                      {...props}
-                    />
+              {(() => {
+                // Parse gallery images
+                const galleryItems = (article.gallery_images || []).map((raw) => {
+                  const parts = raw.split(' | ');
+                  return { url: parts[0].trim(), caption: parts[1]?.trim() || null };
+                });
+
+                // If no gallery images, render content as-is
+                if (galleryItems.length === 0) {
+                  return (
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
+                      components={{
+                        h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
+                        p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                        a: ({ node, ...props }) => (
+                          <a className="text-primary underline underline-offset-4" target={props.href?.startsWith("http") ? "_blank" : undefined} rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined} {...props} />
+                        ),
+                        blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
+                        hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
+                      }}
+                    >
+                      {article.content}
+                    </ReactMarkdown>
+                  );
+                }
+
+                // Split content by ## headings to interleave images
+                const sections = article.content.split(/(?=^## )/m);
+
+                const mdComponents = {
+                  h2: ({ node, ...props }: any) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
+                  h3: ({ node, ...props }: any) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
+                  p: ({ node, ...props }: any) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                  a: ({ node, ...props }: any) => (
+                    <a className="text-primary underline underline-offset-4" target={props.href?.startsWith("http") ? "_blank" : undefined} rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined} {...props} />
                   ),
-                  blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
-                  strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
-                  hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
-                  ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
-                  ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
-                }}
-              >
-                {article.content}
-              </ReactMarkdown>
+                  blockquote: ({ node, ...props }: any) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
+                  strong: ({ node, ...props }: any) => <strong className="text-foreground font-semibold" {...props} />,
+                  hr: ({ node, ...props }: any) => <hr className="my-10 border-border" {...props} />,
+                  ul: ({ node, ...props }: any) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
+                  ol: ({ node, ...props }: any) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
+                };
+
+                // Track which gallery image to use (one per ## section)
+                let galleryIdx = 0;
+
+                return sections.map((section, i) => {
+                  const isH2Section = section.startsWith('## ');
+                  const image = isH2Section && galleryIdx < galleryItems.length ? galleryItems[galleryIdx++] : null;
+
+                  return (
+                    <div key={i}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={mdComponents}>
+                        {section}
+                      </ReactMarkdown>
+                      {image && (
+                        <figure className="my-8 md:my-12">
+                          <button
+                            onClick={() => setLightboxIndex(galleryIdx - 1)}
+                            className="relative block w-full group cursor-pointer"
+                          >
+                            <img
+                              src={image.url}
+                              alt={image.caption || `${article.title} — Photo ${galleryIdx}`}
+                              className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
+                              loading="lazy"
+                            />
+                          </button>
+                          {image.caption && (
+                            <figcaption className="mt-2 font-body text-[11px] tracking-wide text-muted-foreground italic text-center">
+                              {image.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </motion.div>
         )}
