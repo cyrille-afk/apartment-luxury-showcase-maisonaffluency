@@ -1,4 +1,7 @@
-import { corsHeaders } from '@supabase/supabase-js/cors'
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
@@ -7,40 +10,42 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate JWT
+    // Auth: accept service-role key OR admin user JWT
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    if (!isServiceRole) {
+      if (!authHeader?.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
 
-    // Check admin role
-    const userId = claimsData.claims.sub as string;
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
 
-    const isAdmin = roles?.some(r => r.role === 'admin' || r.role === 'super_admin');
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const isAdmin = roles?.some(r => r.role === 'admin' || r.role === 'super_admin');
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: 'Admin access required' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     const { urls, action } = await req.json();
@@ -59,7 +64,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const sa = JSON.parse(serviceAccountKey);
+    let sa: Record<string, unknown>;
+    try {
+      sa = JSON.parse(serviceAccountKey);
+    } catch {
+      // The secret might be double-encoded or wrapped
+      sa = JSON.parse(JSON.parse(serviceAccountKey));
+    }
+    console.log('SA keys:', Object.keys(sa));
+    if (!sa.private_key) {
+      return new Response(JSON.stringify({ error: 'Service account missing private_key field', keys: Object.keys(sa) }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
     // Create JWT for Google API auth
     const accessToken = await getGoogleAccessToken(sa);
