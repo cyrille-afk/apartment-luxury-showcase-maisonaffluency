@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
+import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 
 const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
 const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto/bespoke-sofa_gxidtx";
@@ -16,6 +17,21 @@ const ApartmentTour = () => {
       v.muted = true;
       v.play();
     });
+
+    // Track play/pause events
+    const onPlay = () => trackVideoEvent("play", "showroom-tour");
+    const onPause = () => trackVideoEvent("pause", "showroom-tour");
+    v.addEventListener("play", onPlay);
+    v.addEventListener("pause", onPause);
+
+    // Milestone tracking (25/50/75/100%)
+    const detachMilestones = attachMilestoneTracking(v, "showroom-tour");
+
+    return () => {
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
+      detachMilestones();
+    };
   }, []);
 
   return (
