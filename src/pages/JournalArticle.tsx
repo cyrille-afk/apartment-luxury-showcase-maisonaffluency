@@ -95,20 +95,9 @@ const JournalArticlePage = () => {
               <ArrowLeft className="w-4 h-4" />
               Back to Journal
             </Link>
-            <WhatsAppShareButton
-              onClick={() => {
-                sharePageOnWhatsApp(
-                  `/journal/${slug}`,
-                  article.title,
-                  article.excerpt?.slice(0, 60),
-                  { directUrlPath: `/journal/${article.slug}-og.html` }
-                );
-                trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
-              }}
-              label="Share on WhatsApp"
-              variant="prominent"
-              className="md:!text-sm md:!px-4 md:!py-2"
-            />
+            <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              {formatDate(article.published_at)}
+            </span>
           </div>
         </div>
 
