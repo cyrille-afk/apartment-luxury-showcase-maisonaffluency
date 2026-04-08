@@ -4,6 +4,9 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
@@ -227,46 +230,31 @@ const JournalArticlePage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-3xl mx-auto px-6 py-6 md:py-14"
           >
-            <div
-              className="journal-article prose prose-lg max-w-none font-body text-foreground/90
-                prose-p:leading-[1.85] prose-p:text-foreground/80 prose-p:my-6
-                prose-a:text-primary prose-a:underline prose-a:underline-offset-4
-                prose-img:rounded-sm prose-img:w-full
-                prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase
-                prose-h2:font-display prose-h2:text-lg prose-h2:md:text-xl prose-h2:uppercase prose-h2:tracking-[0.08em] prose-h2:border-t prose-h2:border-border prose-h2:pt-10 prose-h2:md:pt-16 prose-h2:mt-10 prose-h2:md:mt-16
-                prose-h3:font-display prose-h3:text-base prose-h3:md:text-lg prose-h3:tracking-wide
-                prose-blockquote:border-l-[3px] prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:font-serif
-                prose-strong:text-foreground"
-              dangerouslySetInnerHTML={{
-                __html: (() => {
-                  const blocks = article.content.split(/\n\n+/);
-                  return blocks
-                    .map((block) => {
-                      const trimmed = block.trim();
-                      if (!trimmed) return '';
-                      if (trimmed.startsWith('### '))
-                        return `<h3>${trimmed.slice(4)}</h3>`;
-                      if (trimmed.startsWith('## '))
-                        return `<h2>${trimmed.slice(3)}</h2>`;
-                      if (trimmed.startsWith('> '))
-                        return `<blockquote><p>${trimmed.slice(2)}</p></blockquote>`;
-                      if (trimmed === '---') return '<hr />';
-                      return `<p>${trimmed.replace(/\n/g, '<br />')}</p>`;
-                    })
-                    .join('\n')
-                    // Bold+italic balanced: ***word***
-                    .replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>')
-                    // Bold (may contain *italic* inside): ***word* rest** or **text**
-                    .replace(/\*\*((?:[^*]|\*(?!\*))+)\*\*/g, (_, inner) =>
-                      `<strong>${inner.replace(/\*([^*]+)\*/g, '<em>$1</em>')}</strong>`
-                    )
-                    // Remaining italic: *word*
-                    .replace(/\*([^*<]+)\*/g, '<em>$1</em>')
-                    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-                    .replace(/\[([^\]]+)\]\((mailto:[^)]+)\)/g, '<a href="$2">$1</a>');
-                })()
-              }}
-            />
+            <div className="journal-article prose prose-lg max-w-none font-body text-foreground/90 prose-img:rounded-sm prose-img:w-full prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks]}
+                components={{
+                  h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
+                  h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
+                  p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                  a: ({ node, ...props }) => (
+                    <a
+                      className="text-primary underline underline-offset-4"
+                      target={props.href?.startsWith("http") ? "_blank" : undefined}
+                      rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined}
+                      {...props}
+                    />
+                  ),
+                  blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
+                  strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
+                  hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
+                  ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
+                  ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
+                }}
+              >
+                {article.content}
+              </ReactMarkdown>
+            </div>
           </motion.div>
         )}
 
