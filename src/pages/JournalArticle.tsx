@@ -169,23 +169,34 @@ const JournalArticlePage = () => {
             className="max-w-6xl mx-auto px-4 md:px-8 py-10 md:py-14"
           >
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 md:gap-4">
-              {article.gallery_images.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => setLightboxIndex(i)}
-                  className="relative block w-full mb-3 md:mb-4 break-inside-avoid group cursor-pointer"
-                >
-                  <img
-                    src={url}
-                    alt={`${article.title} — Photo ${i + 1}`}
-                    className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
-                    loading="lazy"
-                  />
-                  <span className="absolute bottom-2 left-2 bg-black/60 text-white font-body text-[10px] tracking-wider px-2 py-0.5 rounded-sm">
-                    {i + 1}
-                  </span>
-                </button>
-              ))}
+              {article.gallery_images.map((raw, i) => {
+                const parts = raw.split(' | ');
+                const imgUrl = parts[0].trim();
+                const caption = parts[1]?.trim() || null;
+                return (
+                  <figure
+                    key={i}
+                    className="mb-3 md:mb-4 break-inside-avoid"
+                  >
+                    <button
+                      onClick={() => setLightboxIndex(i)}
+                      className="relative block w-full group cursor-pointer"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={caption || `${article.title} — Photo ${i + 1}`}
+                        className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
+                        loading="lazy"
+                      />
+                    </button>
+                    {caption && (
+                      <figcaption className="mt-2 font-body text-[11px] tracking-wide text-muted-foreground italic text-center">
+                        {caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                );
+              })}
             </div>
           </motion.div>
         )}
