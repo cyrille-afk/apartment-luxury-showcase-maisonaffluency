@@ -230,30 +230,31 @@ const JournalArticlePage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-3xl mx-auto px-6 py-6 md:py-14"
           >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkBreaks]}
-              components={{
-                h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
-                p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
-                a: ({ node, ...props }) => (
-                  <a
-                    className="text-primary underline underline-offset-4"
-                    target={props.href?.startsWith("http") ? "_blank" : undefined}
-                    rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined}
-                    {...props}
-                  />
-                ),
-                blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
-                strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
-                hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
-                ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
-                ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
-              }}
-              className="journal-article prose prose-lg max-w-none font-body text-foreground/90 prose-img:rounded-sm prose-img:w-full prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase"
-            >
-              {article.content}
-            </ReactMarkdown>
+            <div className="journal-article prose prose-lg max-w-none font-body text-foreground/90 prose-img:rounded-sm prose-img:w-full prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks]}
+                components={{
+                  h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
+                  h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
+                  p: ({ node, ...props }) => <p className="leading-[1.85] text-foreground/80 my-6" {...props} />,
+                  a: ({ node, ...props }) => (
+                    <a
+                      className="text-primary underline underline-offset-4"
+                      target={props.href?.startsWith("http") ? "_blank" : undefined}
+                      rel={props.href?.startsWith("http") ? "noopener noreferrer" : undefined}
+                      {...props}
+                    />
+                  ),
+                  blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
+                  strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
+                  hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
+                  ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
+                  ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
+                }}
+              >
+                {article.content}
+              </ReactMarkdown>
+            </div>
           </motion.div>
         )}
 
