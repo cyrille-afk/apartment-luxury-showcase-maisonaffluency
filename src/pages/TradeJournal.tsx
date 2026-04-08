@@ -444,7 +444,13 @@ const TradeJournal = () => {
                       const selected = text.substring(start, end);
                       let replacement: string;
                       let cursorOffset: number;
-                      if (btn.label === "Link") {
+                      if (btn.label === "📷") {
+                        const imgUrl = selected || prompt("Paste image URL:") || "";
+                        if (!imgUrl) return;
+                        const alt = prompt("Alt text / caption (optional):") || "image";
+                        replacement = `\n![${alt}](${imgUrl})\n`;
+                        cursorOffset = start + replacement.length;
+                      } else if (btn.label === "Link") {
                         replacement = selected ? `[${selected}](url)` : `[link text](url)`;
                         cursorOffset = selected ? start + selected.length + 3 : start + 1;
                       } else if (btn.prefix) {
