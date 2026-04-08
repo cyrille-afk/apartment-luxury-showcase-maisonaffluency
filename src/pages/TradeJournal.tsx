@@ -358,7 +358,8 @@ const TradeJournal = () => {
                         {i + 1}
                       </span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
