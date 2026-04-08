@@ -2,9 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
-import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
-import { trackCTA } from "@/lib/analytics";
-import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
@@ -97,33 +95,32 @@ const JournalArticlePage = () => {
               <ArrowLeft className="w-4 h-4" />
               Back to Journal
             </Link>
-            <WhatsAppShareButton
-              onClick={() => {
-                sharePageOnWhatsApp(
-                  `/journal/${slug}`,
-                  article.title,
-                  article.excerpt?.slice(0, 60),
-                  { directUrlPath: `/journal/${article.slug}-og.html` }
-                );
-                trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
-              }}
-              label="Share on WhatsApp"
-              variant="prominent"
-              className="md:!text-sm md:!px-4 md:!py-2"
-            />
+            <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              {formatDate(article.published_at)}
+            </span>
           </div>
         </div>
 
         {/* Cover image */}
         {article.cover_image_url && (
-          <div className="w-full flex flex-col items-center bg-muted/10 px-4 md:px-0">
+          <div className="relative w-full flex flex-col items-center bg-muted/10 px-4 md:px-0">
             <img
               src={article.cover_image_url}
               alt={article.title}
               className="w-full max-h-[80vh] object-contain"
             />
+            {/* Share icon overlay */}
+            <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-10">
+              <ShareMenu
+                url={`https://maisonaffluency.com/journal/${article.slug}`}
+                message={`${article.title} — Maison Affluency: https://maisonaffluency.com/journal/${article.slug}`}
+                className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white/90 hover:text-white px-3 py-2 rounded-full transition-colors"
+                iconSize="w-4 h-4"
+                showLabel={false}
+              />
+            </div>
             {article.slug === "thierry-lemaire-radical-simplicity" && (
-            <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground py-3">
+              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground py-3">
                 Unveiling master pieces, Maison Affluency, Singapore. Photography by Hosanna Swee
               </p>
             )}
