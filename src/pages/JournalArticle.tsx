@@ -232,8 +232,25 @@ const JournalArticlePage = () => {
                 prose-p:leading-[1.85] prose-p:text-foreground/80 prose-p:my-6
                 prose-a:text-primary prose-a:underline prose-a:underline-offset-4
                 prose-img:rounded-sm prose-img:w-full
-                prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase"
-              dangerouslySetInnerHTML={{ __html: article.content.replace(/(\d+)\.\s/g, '<br /><br />$1. ') .replace(/^<br \/><br \/>/, '') }}
+                prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase
+                prose-h2:font-display prose-h2:text-lg prose-h2:md:text-xl prose-h2:uppercase prose-h2:tracking-[0.08em] prose-h2:border-t prose-h2:border-border prose-h2:pt-10 prose-h2:md:pt-16 prose-h2:mt-10 prose-h2:md:mt-16
+                prose-h3:font-display prose-h3:text-base prose-h3:md:text-lg prose-h3:tracking-wide
+                prose-blockquote:border-l-[3px] prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:font-serif
+                prose-strong:text-foreground"
+              dangerouslySetInnerHTML={{
+                __html: article.content
+                  .replace(/\n\n/g, '</p><p>')
+                  .replace(/\n/g, '<br />')
+                  .replace(/^/, '<p>')
+                  .concat('</p>')
+                  .replace(/<p>\s*<\/p>/g, '')
+                  .replace(/<p>(#{1,3})\s/g, '<p class="heading">$1 ')
+                  .replace(/<p class="heading">## (.*?)<\/p>/g, '<h2>$1</h2>')
+                  .replace(/<p class="heading">### (.*?)<\/p>/g, '<h3>$1</h3>')
+                  .replace(/<p>\*\*(.+?)\*\*<\/p>/g, '<p><strong>$1</strong></p>')
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/<p>&gt;\s?(.*?)<\/p>/g, '<blockquote><p>$1</p></blockquote>')
+              }}
             />
           </motion.div>
         )}
