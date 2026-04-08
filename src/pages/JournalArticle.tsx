@@ -160,46 +160,7 @@ const JournalArticlePage = () => {
           </div>
         </motion.div>
 
-        {/* Photo gallery (if gallery_images present) */}
-        {hasGallery && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
-            className="max-w-6xl mx-auto px-4 md:px-8 py-10 md:py-14"
-          >
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 md:gap-4">
-              {article.gallery_images.map((raw, i) => {
-                const parts = raw.split(' | ');
-                const imgUrl = parts[0].trim();
-                const caption = parts[1]?.trim() || null;
-                return (
-                  <figure
-                    key={i}
-                    className="mb-3 md:mb-4 break-inside-avoid"
-                  >
-                    <button
-                      onClick={() => setLightboxIndex(i)}
-                      className="relative block w-full group cursor-pointer"
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={caption || `${article.title} — Photo ${i + 1}`}
-                        className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
-                        loading="lazy"
-                      />
-                    </button>
-                    {caption && (
-                      <figcaption className="mt-2 font-body text-[11px] tracking-wide text-muted-foreground italic text-center">
-                        {caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
+        {/* Gallery images are now rendered inline within article content */}
 
         {/* Embedded PDF viewer */}
         {article.pdf_url && (
