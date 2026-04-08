@@ -33,6 +33,31 @@ interface Article {
 
 const CATEGORIES = Object.entries(CATEGORY_LABELS) as [JournalCategory, string][];
 
+const GALLERY_ENTRY_SEPARATOR = " | ";
+
+const parseGalleryImageEntry = (raw: string) => {
+  const separatorIndex = raw.indexOf(GALLERY_ENTRY_SEPARATOR);
+
+  if (separatorIndex === -1) {
+    return { imgUrl: raw.trim(), caption: "" };
+  }
+
+  return {
+    imgUrl: raw.slice(0, separatorIndex).trim(),
+    caption: raw.slice(separatorIndex + GALLERY_ENTRY_SEPARATOR.length),
+  };
+};
+
+const buildGalleryImageEntry = (imgUrl: string, caption: string) =>
+  caption ? `${imgUrl}${GALLERY_ENTRY_SEPARATOR}${caption}` : imgUrl;
+
+const sanitizeGalleryImageEntry = (raw: string) => {
+  const { imgUrl, caption } = parseGalleryImageEntry(raw);
+  const trimmedCaption = caption.trim();
+
+  return trimmedCaption ? buildGalleryImageEntry(imgUrl, trimmedCaption) : imgUrl;
+};
+
 const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   title: "",
   slug: "",
@@ -102,7 +127,7 @@ const TradeJournal = () => {
       excerpt: editing.excerpt,
       content: editing.content,
       cover_image_url: editing.cover_image_url || null,
-      gallery_images: editing.gallery_images || [],
+      gallery_images: (editing.gallery_images || []).map(sanitizeGalleryImageEntry),
       pdf_url: editing.pdf_url || null,
       category: editing.category,
       author: editing.author,
@@ -342,9 +367,7 @@ const TradeJournal = () => {
               {editing.gallery_images && editing.gallery_images.length > 0 && (
                 <div className="mt-4 space-y-3">
                   {editing.gallery_images.map((raw, i) => {
-                    const parts = raw.split(' | ');
-                    const imgUrl = parts[0].trim();
-                    const caption = parts[1]?.trim() || '';
+                    const { imgUrl, caption } = parseGalleryImageEntry(raw);
                     return (
                     <div key={i} className="flex gap-3 items-start border border-border rounded-md p-2 group">
                       <div className="relative w-20 h-20 flex-shrink-0 rounded-sm overflow-hidden">
@@ -359,12 +382,14 @@ const TradeJournal = () => {
                           value={caption}
                           onChange={(e) => {
                             const newCaption = e.target.value;
-                            const newEntry = newCaption ? `${imgUrl} | ${newCaption}` : imgUrl;
                             setEditing(prev => prev ? {
                               ...prev,
-                              gallery_images: prev.gallery_images.map((g, idx) => idx === i ? newEntry : g)
+                              gallery_images: prev.gallery_images.map((g, idx) => idx === i ? buildGalleryImageEntry(imgUrl, newCaption) : g)
                             } : null);
                           }}
+                          spellCheck={false}
+                          autoCorrect="off"
+                          autoCapitalize="words"
                           className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors"
                           placeholder="Photo caption (e.g. Designer Name, 'Title', 2025)"
                         />
@@ -377,7 +402,7 @@ const TradeJournal = () => {
                             if (!ta || !editing) return;
                             const pos = ta.selectionStart;
                             const text = editing.content;
-                            const insertion = `\n![${caption || 'image'}](${imgUrl})\n`;
+                            const insertion = `\n![${caption.trim() || 'image'}](${imgUrl})\n`;
                             const newContent = text.substring(0, pos) + insertion + text.substring(pos);
                             setEditing(prev => prev ? { ...prev, content: newContent } : null);
                             requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(pos + insertion.length, pos + insertion.length); });
