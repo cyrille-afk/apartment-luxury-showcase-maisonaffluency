@@ -341,9 +341,11 @@ const TradeJournal = () => {
               {/* Gallery preview grid */}
               {editing.gallery_images && editing.gallery_images.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                  {editing.gallery_images.map((url, i) => (
+                  {editing.gallery_images.map((raw, i) => {
+                    const imgUrl = raw.split(' | ')[0].trim();
+                    return (
                     <div key={i} className="relative group aspect-square rounded-sm overflow-hidden border border-border">
-                      <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                      <img src={imgUrl} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setEditing(prev => prev ? { ...prev, gallery_images: prev.gallery_images.filter((_, idx) => idx !== i) } : null)}
@@ -356,7 +358,8 @@ const TradeJournal = () => {
                         {i + 1}
                       </span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
