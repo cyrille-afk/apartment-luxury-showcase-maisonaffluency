@@ -9,6 +9,7 @@ import remarkGfm from "remark-gfm";
 import React from "react";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
+import { useAuth } from "@/hooks/useAuth";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
 
@@ -29,6 +30,7 @@ const JournalArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { loading: authLoading, user } = useAuth();
   const isPreview = searchParams.get("preview") === "true";
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,11 +38,35 @@ const JournalArticlePage = () => {
 
   useEffect(() => {
     if (!slug) return;
+
+    if (isPreview && authLoading) {
+      return;
+    }
+
+    if (isPreview && !user) {
+      navigate("/trade/login", { replace: true });
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
     fetchArticleBySlug(slug, isPreview)
-      .then(setArticle)
-      .catch(() => navigate("/journal", { replace: true }))
-      .finally(() => setLoading(false));
-  }, [slug, navigate, isPreview]);
+      .then((data) => {
+        if (!cancelled) setArticle(data);
+      })
+      .catch(() => {
+        if (!cancelled) navigate("/journal", { replace: true });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, navigate, isPreview, authLoading, user]);
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
