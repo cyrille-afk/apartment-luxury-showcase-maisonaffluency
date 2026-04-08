@@ -376,17 +376,66 @@ const TradeJournal = () => {
               />
             </div>
 
-            {/* Content (HTML) */}
+            {/* Content (Markdown) */}
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
-                Content <span className="text-muted-foreground/50">(HTML)</span>
+                Content <span className="text-muted-foreground/50">(Markdown)</span>
               </label>
+              <div className="flex items-center gap-1 mb-1">
+                {[
+                  { label: "B", wrap: "**", title: "Bold" },
+                  { label: "I", wrap: "*", title: "Italic" },
+                  { label: "H2", prefix: "## ", title: "Heading 2" },
+                  { label: "H3", prefix: "### ", title: "Heading 3" },
+                  { label: "Link", title: "Link" },
+                  { label: "—", prefix: "\n---\n", title: "Divider" },
+                ].map((btn) => (
+                  <button
+                    key={btn.label}
+                    type="button"
+                    title={btn.title}
+                    className="px-2 py-1 text-[11px] font-mono border border-border rounded hover:bg-muted transition-colors"
+                    style={btn.label === "B" ? { fontWeight: 700 } : btn.label === "I" ? { fontStyle: "italic" } : undefined}
+                    onClick={() => {
+                      const ta = document.getElementById("journal-content-editor") as HTMLTextAreaElement | null;
+                      if (!ta || !editing) return;
+                      const start = ta.selectionStart;
+                      const end = ta.selectionEnd;
+                      const text = editing.content;
+                      const selected = text.substring(start, end);
+                      let replacement: string;
+                      let cursorOffset: number;
+                      if (btn.label === "Link") {
+                        replacement = selected ? `[${selected}](url)` : `[link text](url)`;
+                        cursorOffset = selected ? start + selected.length + 3 : start + 1;
+                      } else if (btn.prefix) {
+                        replacement = btn.prefix + selected;
+                        cursorOffset = start + btn.prefix.length + selected.length;
+                      } else if (btn.wrap) {
+                        replacement = `${btn.wrap}${selected || "bold text"}${btn.wrap}`;
+                        cursorOffset = selected ? end + btn.wrap.length * 2 : start + btn.wrap.length;
+                      } else {
+                        return;
+                      }
+                      const newContent = text.substring(0, start) + replacement + text.substring(end);
+                      setEditing(prev => prev ? { ...prev, content: newContent } : null);
+                      requestAnimationFrame(() => {
+                        ta.focus();
+                        const selectStart = btn.wrap && !selected ? start + btn.wrap.length : cursorOffset;
+                        const selectEnd = btn.wrap && !selected ? start + btn.wrap.length + (btn.label === "B" ? 9 : 11) : cursorOffset;
+                        ta.setSelectionRange(selectStart, selectEnd);
+                      });
+                    }}
+                  />
+                ))}
+              </div>
               <textarea
+                id="journal-content-editor"
                 rows={16}
                 value={editing.content}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, content: e.target.value } : null)}
                 className="w-full p-3 border border-border rounded-md bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors resize-y font-mono leading-relaxed"
-                placeholder="<p>Article body in HTML...</p>"
+                placeholder="Write article content in Markdown. Use **bold**, *italic*, ## headings..."
               />
             </div>
 
