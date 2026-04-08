@@ -126,13 +126,13 @@ const PublicDesignerProfile = () => {
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = groupedPicks.length > 0;
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
-  const displayBiography = isChildDesigner && parentDesigner?.biography
+  const displayBiography = isChildDesigner && !designer?.biography && parentDesigner?.biography
     ? parentDesigner.biography
     : designer?.biography;
-  const displayBiographyImages = isChildDesigner && parentDesigner?.biography_images?.length
+  const displayBiographyImages = isChildDesigner && (!designer?.biography_images || designer.biography_images.length === 0) && parentDesigner?.biography_images?.length
     ? parentDesigner.biography_images
     : designer?.biography_images;
-  const displayPhilosophy = isChildDesigner && parentDesigner?.philosophy
+  const displayPhilosophy = isChildDesigner && !designer?.philosophy && parentDesigner?.philosophy
     ? parentDesigner.philosophy
     : designer?.philosophy;
 
