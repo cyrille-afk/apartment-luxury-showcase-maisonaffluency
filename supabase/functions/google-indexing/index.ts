@@ -64,7 +64,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const sa = JSON.parse(serviceAccountKey);
+    let sa: Record<string, unknown>;
+    try {
+      sa = JSON.parse(serviceAccountKey);
+    } catch {
+      // The secret might be double-encoded or wrapped
+      sa = JSON.parse(JSON.parse(serviceAccountKey));
+    }
+    console.log('SA keys:', Object.keys(sa));
+    if (!sa.private_key) {
+      return new Response(JSON.stringify({ error: 'Service account missing private_key field', keys: Object.keys(sa) }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
     // Create JWT for Google API auth
     const accessToken = await getGoogleAccessToken(sa);
