@@ -169,23 +169,34 @@ const JournalArticlePage = () => {
             className="max-w-6xl mx-auto px-4 md:px-8 py-10 md:py-14"
           >
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 md:gap-4">
-              {article.gallery_images.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => setLightboxIndex(i)}
-                  className="relative block w-full mb-3 md:mb-4 break-inside-avoid group cursor-pointer"
-                >
-                  <img
-                    src={url}
-                    alt={`${article.title} — Photo ${i + 1}`}
-                    className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
-                    loading="lazy"
-                  />
-                  <span className="absolute bottom-2 left-2 bg-black/60 text-white font-body text-[10px] tracking-wider px-2 py-0.5 rounded-sm">
-                    {i + 1}
-                  </span>
-                </button>
-              ))}
+              {article.gallery_images.map((raw, i) => {
+                const parts = raw.split(' | ');
+                const imgUrl = parts[0].trim();
+                const caption = parts[1]?.trim() || null;
+                return (
+                  <figure
+                    key={i}
+                    className="mb-3 md:mb-4 break-inside-avoid"
+                  >
+                    <button
+                      onClick={() => setLightboxIndex(i)}
+                      className="relative block w-full group cursor-pointer"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={caption || `${article.title} — Photo ${i + 1}`}
+                        className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
+                        loading="lazy"
+                      />
+                    </button>
+                    {caption && (
+                      <figcaption className="mt-2 font-body text-[11px] tracking-wide text-muted-foreground italic text-center">
+                        {caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                );
+              })}
             </div>
           </motion.div>
         )}
@@ -296,20 +307,33 @@ const JournalArticlePage = () => {
               </>
             )}
 
-            <motion.img
-              key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              src={article.gallery_images[lightboxIndex]}
-              alt={`Photo ${lightboxIndex + 1}`}
-              className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm"
-              onClick={(e) => e.stopPropagation()}
-            />
-
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 font-body text-xs text-white/50">
-              {lightboxIndex + 1} / {article.gallery_images.length}
-            </div>
+            {(() => {
+              const parts = article.gallery_images[lightboxIndex].split(' | ');
+              const imgUrl = parts[0].trim();
+              const caption = parts[1]?.trim() || null;
+              return (
+                <>
+                  <motion.img
+                    key={lightboxIndex}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    src={imgUrl}
+                    alt={caption || `Photo ${lightboxIndex + 1}`}
+                    className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center">
+                    {caption && (
+                      <div className="font-body text-xs text-white/70 italic mb-1">{caption}</div>
+                    )}
+                    <div className="font-body text-[10px] text-white/40">
+                      {lightboxIndex + 1} / {article.gallery_images.length}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </motion.div>
         )}
       </AnimatePresence>
