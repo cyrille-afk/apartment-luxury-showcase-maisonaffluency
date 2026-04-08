@@ -6,10 +6,24 @@ import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import React from "react";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
+
+/** Detect if a paragraph's children consist solely of a single <strong> element (no surrounding text) */
+const isBoldOnlyParagraph = (children: React.ReactNode): boolean => {
+  const arr = React.Children.toArray(children);
+  return arr.length === 1 && React.isValidElement(arr[0]) && (arr[0] as React.ReactElement).type === 'strong';
+};
+
+const JournalParagraph = ({ node, children, ...props }: any) => {
+  const cls = isBoldOnlyParagraph(children)
+    ? "leading-[1.85] text-foreground/80 my-6 journal-subheader"
+    : "leading-[1.85] text-foreground/80 my-6";
+  return <p className={cls} {...props}>{children}</p>;
+};
 
 const JournalArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
