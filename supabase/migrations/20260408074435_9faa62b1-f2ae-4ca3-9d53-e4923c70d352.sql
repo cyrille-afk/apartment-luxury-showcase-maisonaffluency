@@ -1,0 +1,1 @@
+UPDATE journal_articles SET tags = array_remove(tags, 'india mahdavi') WHERE slug = 'art-paris-2026-maison-affluency-designers-grand-palais';
