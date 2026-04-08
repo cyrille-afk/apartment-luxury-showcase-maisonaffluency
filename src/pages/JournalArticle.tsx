@@ -254,9 +254,14 @@ const JournalArticlePage = () => {
                       return `<p>${trimmed.replace(/\n/g, '<br />')}</p>`;
                     })
                     .join('\n')
-                    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
+                    // Bold+italic balanced: ***word***
+                    .replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>')
+                    // Bold (may contain *italic* inside): ***word* rest** or **text**
+                    .replace(/\*\*((?:[^*]|\*(?!\*))+)\*\*/g, (_, inner) =>
+                      `<strong>${inner.replace(/\*([^*]+)\*/g, '<em>$1</em>')}</strong>`
+                    )
+                    // Remaining italic: *word*
+                    .replace(/\*([^*<]+)\*/g, '<em>$1</em>')
                     .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
                     .replace(/\[([^\]]+)\]\((mailto:[^)]+)\)/g, '<a href="$2">$1</a>');
                 })()
