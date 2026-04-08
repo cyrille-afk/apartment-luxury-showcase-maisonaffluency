@@ -323,7 +323,7 @@ All colors MUST be HSL.
   }
 }
 
-.journal-article p strong {
+.journal-article p > strong:only-child {
   display: block;
   font-weight: 600;
   color: hsl(var(--foreground));
@@ -333,7 +333,7 @@ All colors MUST be HSL.
 }
 
 @media (min-width: 768px) {
-  .journal-article p strong {
+  .journal-article p > strong:only-child {
     margin-top: 2.5rem;
     margin-bottom: 0.75rem;
   }
