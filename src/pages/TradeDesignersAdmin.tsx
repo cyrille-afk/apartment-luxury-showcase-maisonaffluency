@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { lazy, Suspense } from "react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
+import BiographyToolbar from "@/components/admin/BiographyToolbar";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
