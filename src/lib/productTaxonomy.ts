@@ -1,10 +1,11 @@
-export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
+export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Bedroom Furniture", "Rugs", "Décor"];
 
 export const SUBCATEGORY_MAP: Record<string, string[]> = {
   Seating: ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
   Tables: ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
   Lighting: ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   Storage: ["Bookcases", "Cabinets"],
+  "Bedroom Furniture": ["Headboards"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
   Décor: ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
 };
