@@ -335,11 +335,11 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                       <Maximize2 className="h-3 w-3" />
                     </div>
                   </div>
-                  {(pick.pdf_url || (pick.pdfUrls && pick.pdfUrls.length > 0)) && (
+                  {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
                     <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <SpecSheetButton
-                        pdfUrl={pick.pdf_url || pick.pdfUrl}
-                        pdfUrls={pick.pdfUrls}
+                        pdfUrl={pick.pdf_url}
+                        pdfUrls={pick.pdf_urls as any}
                         brandName={designer.name}
                         productName={pick.title}
                         variant="icon"
