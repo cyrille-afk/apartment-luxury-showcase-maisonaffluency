@@ -127,7 +127,7 @@ const Navigation = () => {
       overview: "#overview",
       gallery: "#overview",
       "curating-team": "#overview",
-      designers: "#designers",
+      designers: "/designers",
       collectibles: "#collectibles",
       
       details: "/trade/program",
