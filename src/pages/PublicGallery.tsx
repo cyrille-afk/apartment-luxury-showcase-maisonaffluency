@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Gallery from "@/components/Gallery";
+import ApartmentTourInterlude from "@/components/ApartmentTourInterlude";
 
 function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -37,6 +38,10 @@ function BackToTopButton() {
 }
 
 const PublicGallery = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -64,7 +69,11 @@ const PublicGallery = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="pt-28 pb-20">
+        <div className="pt-28">
+          <ApartmentTourInterlude />
+        </div>
+
+        <div className="pb-20">
           <Gallery />
         </div>
 
