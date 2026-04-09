@@ -41,7 +41,7 @@ const leftNavItems = [{
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
-  href: "#collectibles",
+  href: "/collectibles",
   icon: Gem,
 }];
 
@@ -128,7 +128,7 @@ const Navigation = () => {
       gallery: "#overview",
       "curating-team": "#overview",
       designers: "/designers",
-      collectibles: "#collectibles",
+      collectibles: "/collectibles",
       
       details: "/trade/program",
       contact: "/trade/program",

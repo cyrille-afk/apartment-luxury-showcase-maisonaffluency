@@ -80,6 +80,7 @@ const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
 const SpecSheetRedirect = lazy(() => import("./pages/SpecSheetRedirect"));
+const PublicCollectibles = lazy(() => import("./pages/PublicCollectibles"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 
 
@@ -165,6 +166,7 @@ const App = () => {
                   <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
                   <Route path="/designers/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile /></Suspense>} />
                   <Route path="/favorites" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicFavorites /></Suspense>} />
+                  <Route path="/collectibles" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicCollectibles /></Suspense>} />
                   <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
                   
                   
