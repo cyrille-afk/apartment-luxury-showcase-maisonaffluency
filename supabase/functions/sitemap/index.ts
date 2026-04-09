@@ -6,7 +6,7 @@ const SITE = "https://maisonaffluency.com";
 const STATIC_URLS = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/#overview", changefreq: "monthly", priority: "0.8" },
-  { loc: "/#gallery", changefreq: "monthly", priority: "0.8" },
+  { loc: "/gallery", changefreq: "monthly", priority: "0.8" },
   { loc: "/#product-grid", changefreq: "weekly", priority: "0.8" },
   { loc: "/designers", changefreq: "monthly", priority: "0.9" },
   { loc: "/collectibles", changefreq: "monthly", priority: "0.8" },

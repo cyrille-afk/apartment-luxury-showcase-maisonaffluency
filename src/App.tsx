@@ -168,6 +168,7 @@ const App = () => {
                   <Route path="/designers/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile /></Suspense>} />
                   <Route path="/favorites" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicFavorites /></Suspense>} />
                   <Route path="/collectibles" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicCollectibles /></Suspense>} />
+                  <Route path="/gallery" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicGallery /></Suspense>} />
                   <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
                   
                   
