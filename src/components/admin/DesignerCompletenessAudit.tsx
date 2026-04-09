@@ -21,7 +21,7 @@ interface DesignerStatus {
   maxScore: number;
 }
 
-type FilterMode = "all" | "complete" | "incomplete";
+type FilterMode = "all" | "complete" | "almost" | "incomplete";
 
 export default function DesignerCompletenessAudit() {
   const [filter, setFilter] = useState<FilterMode>("incomplete");
