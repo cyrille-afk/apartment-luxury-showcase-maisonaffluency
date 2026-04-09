@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2, Maximize2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import EditorialBiography from "@/components/EditorialBiography";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";

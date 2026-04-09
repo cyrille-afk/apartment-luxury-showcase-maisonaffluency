@@ -8,6 +8,7 @@ import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { cn } from "@/lib/utils";
 
