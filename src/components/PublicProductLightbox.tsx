@@ -365,16 +365,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                 {pinned ? "Pinned" : "Pin to Selection"}
               </button>
 
-              {product.pdf_url && (
-                <button
-                  onClick={() => requireAuth(() => {
-                    window.open(buildSpecSheetUrl(product.pdf_url!, designerDisplay, product.title), '_blank');
-                  }, "download this spec sheet")}
-                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))] cursor-pointer"
-                >
-                  <FileDown size={13} />
-                  Spec Sheet
-                </button>
+              {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
+                <SpecSheetButton
+                  pdfUrl={product.pdf_url}
+                  pdfUrls={product.pdf_urls}
+                  brandName={designerDisplay}
+                  productName={product.title}
+                  variant="button"
+                  onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
+                />
               )}
             </div>
 
