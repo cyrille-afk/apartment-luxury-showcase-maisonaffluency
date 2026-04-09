@@ -70,16 +70,23 @@ const DesignerProfile = () => {
 
         {/* Hero */}
         <section className="relative h-[60vh] min-h-[420px] overflow-hidden">
-          {(designer.hero_image_url || designer.image_url) && (
-            <motion.img
-              src={designer.hero_image_url || designer.image_url}
-              alt={name}
-              initial={{ scale: 1.08, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
+          {(designer.hero_image_url || designer.image_url) && (() => {
+            const raw = designer.hero_image_url || designer.image_url;
+            // Apply Cloudinary transforms for performance if not already present
+            const optimised = raw.includes('/upload/') && !raw.includes('/upload/w_') && !raw.includes('/upload/c_')
+              ? raw.replace('/upload/', '/upload/w_1920,c_fill,q_auto:good,f_auto/')
+              : raw;
+            return (
+              <motion.img
+                src={optimised}
+                alt={name}
+                initial={{ scale: 1.08, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            );
+          })()}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
           {/* Mobile share icon */}
           <div className="absolute top-3 right-3 z-20 md:hidden">
