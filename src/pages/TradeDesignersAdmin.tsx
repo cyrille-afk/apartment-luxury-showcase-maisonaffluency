@@ -691,8 +691,8 @@ const TradeDesignersAdmin = () => {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
+    onSuccess: async (_, { id }) => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
       setEditBuffer((prev) => {
         const next = { ...prev };
         delete next[id];
