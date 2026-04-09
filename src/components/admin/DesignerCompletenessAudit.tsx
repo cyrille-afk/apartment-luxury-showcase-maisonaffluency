@@ -121,7 +121,8 @@ export default function DesignerCompletenessAudit() {
   const filtered = useMemo(() => {
     let list = statuses;
     if (filter === "complete") list = list.filter((s) => s.score === s.maxScore);
-    if (filter === "incomplete") list = list.filter((s) => s.score < s.maxScore);
+    if (filter === "almost") list = list.filter((s) => s.score === s.maxScore - 1);
+    if (filter === "incomplete") list = list.filter((s) => s.score < s.maxScore - 1);
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((s) => s.name.toLowerCase().includes(q));
