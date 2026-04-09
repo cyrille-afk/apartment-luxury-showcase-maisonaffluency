@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Play, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 interface EditorialBiographyProps {
@@ -111,10 +112,12 @@ function renderSingleLine(text: string): React.ReactNode[] {
     }
     const linkMatch = part.match(/^<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>$/);
     if (linkMatch) {
+      const href = linkMatch[1];
+      const isInternal = href.startsWith("/");
       return (
-        <a key={i} href={linkMatch[1]} className="underline underline-offset-2 text-foreground hover:text-primary transition-colors">
+        <InternalLink key={i} href={href} isInternal={isInternal}>
           {linkMatch[2]}
-        </a>
+        </InternalLink>
       );
     }
     return <span key={i}>{renderQuotedText(part)}</span>;
