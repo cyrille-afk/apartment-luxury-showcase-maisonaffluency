@@ -32,7 +32,7 @@ export default function DesignerCompletenessAudit() {
     queryFn: async () => {
       const { data } = await supabase
         .from("designers")
-        .select("id, name, slug, biography, philosophy, hero_image_url, logo_url, instagram_handle, is_published")
+        .select("id, name, slug, founder, biography, philosophy, hero_image_url, image_url, logo_url, instagram_handle, is_published")
         .eq("is_published", true)
         .order("name");
       return data || [];
@@ -46,7 +46,7 @@ export default function DesignerCompletenessAudit() {
       const { data } = await supabase
         .from("designer_curator_picks")
         .select("designer_id");
-      if (!data) return {};
+      if (!data) return {} as Record<string, number>;
       const counts: Record<string, number> = {};
       data.forEach((r: any) => {
         counts[r.designer_id] = (counts[r.designer_id] || 0) + 1;
@@ -83,22 +83,34 @@ export default function DesignerCompletenessAudit() {
 
   const statuses = useMemo<DesignerStatus[]>(() => {
     if (!designers || !pickCounts || !heritageIds || !instagramPostIds) return [];
+
+    const relatedByParent = new Map<string, any[]>();
+    designers.forEach((d: any) => {
+      if (!d.founder) return;
+      const list = relatedByParent.get(d.founder) || [];
+      list.push(d);
+      relatedByParent.set(d.founder, list);
+    });
+
     return designers.map((d: any) => {
       const hasBio = !!(d.biography && d.biography.trim());
       const hasPhilosophy = !!(d.philosophy && d.philosophy.trim());
-      const hasHero = !!(d.hero_image_url && d.hero_image_url.trim());
-      
-      const picksCount = pickCounts[d.id] || 0;
+      const isParentBrand = !!(d.founder && d.founder === d.name);
+      const relatedDesigners = isParentBrand ? relatedByParent.get(d.name) || [d] : [d];
+      const hasHero = !!((d.hero_image_url && d.hero_image_url.trim()) || (isParentBrand && d.image_url && d.image_url.trim()));
+
+      const picksCount = relatedDesigners.reduce((sum, related) => sum + (pickCounts[related.id] || 0), 0);
       const hasPicks = picksCount > 0;
-      const hasHeritageSlides = heritageIds.has(d.id);
-      const hasInstagram = !!(d.instagram_handle && d.instagram_handle.trim()) || instagramPostIds.has(d.id);
+      const hasHeritageSlides = relatedDesigners.some((related) => heritageIds.has(related.id));
+      const hasInstagram = relatedDesigners.some((related) =>
+        !!(related.instagram_handle && related.instagram_handle.trim()) || instagramPostIds.has(related.id)
+      );
 
       let score = 0;
       const maxScore = 6;
       if (hasBio) score++;
       if (hasPhilosophy) score++;
       if (hasHero) score++;
-      
       if (hasPicks) score++;
       if (hasHeritageSlides) score++;
       if (hasInstagram) score++;
