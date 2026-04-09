@@ -972,7 +972,10 @@ const TradeDesignersAdmin = () => {
           </Link>
         </div>
 
-        {/* Search + A-Z */}
+        {/* Completeness Audit */}
+        <DesignerCompletenessAudit />
+
+
         <div className="space-y-3">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
