@@ -31,7 +31,7 @@ const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quali
 const leftNavItems = [{
   label: "Gallery",
   mobileLabel: "Gallery",
-  href: "#overview",
+  href: "/gallery",
   icon: Image,
 }, {
   label: "Designers",
