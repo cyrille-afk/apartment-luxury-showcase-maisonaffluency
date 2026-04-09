@@ -91,7 +91,7 @@ export default function DesignerCompletenessAudit() {
       const picksCount = pickCounts[d.id] || 0;
       const hasPicks = picksCount > 0;
       const hasHeritageSlides = heritageIds.has(d.id);
-      const hasInstagram = !!(d.instagram_handle && d.instagram_handle.trim());
+      const hasInstagram = !!(d.instagram_handle && d.instagram_handle.trim()) || instagramPostIds.has(d.id);
 
       let score = 0;
       const maxScore = 6;
