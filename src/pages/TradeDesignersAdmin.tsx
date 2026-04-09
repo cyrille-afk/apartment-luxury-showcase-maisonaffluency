@@ -23,6 +23,37 @@ const EditorialBiography = lazy(() => import("@/components/EditorialBiography"))
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+const parseBiographyMediaEntry = (entry: string) => {
+  const rawSegments = entry.split("|");
+  const url = (rawSegments[0] || "").trim();
+  const hasMetadata = rawSegments.length > 2;
+  const caption = rawSegments.length > 1
+    ? rawSegments[1]
+        .replace(/^ /, "")
+        .replace(hasMetadata ? / $/ : /$^/, "")
+    : "";
+
+  return {
+    url,
+    caption,
+    metadata: rawSegments.slice(2).map((segment) => segment.trim()),
+  };
+};
+
+const serializeBiographyMediaEntry = (url: string, caption: string, metadata: string[] = []) => {
+  const parts = [url.trim()];
+
+  if (caption !== "" || metadata.length > 0) {
+    parts.push(caption);
+  }
+
+  parts.push(...metadata.map((segment) => segment.trim()));
+
+  while (parts.length > 1 && parts[parts.length - 1] === "") parts.pop();
+
+  return parts.join(" | ");
+};
+
 /** Inline heritage slide manager for each designer */
 function HeritageSlideManager({ designerId }: { designerId: string }) {
   const { toast } = useToast();
@@ -1061,22 +1092,12 @@ const TradeDesignersAdmin = () => {
                         </label>
                         <div className="mt-2 space-y-3">
                           {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((entry: string, idx: number) => {
-                            // Parse pipe separator: "URL | Caption | Size | Alignment"
-                            // Only trim URL & metadata — preserve interior caption spaces
-                            const rawSegments = entry.split("|");
-                            const stripPadding = (s: string) => s.replace(/^ /, '').replace(/ $/, '');
-                            const rawUrl = (rawSegments[0] || "").trim();
-                            const caption = rawSegments.length > 1 ? stripPadding(rawSegments[1]) : "";
-                            const segments = [rawUrl, caption, ...rawSegments.slice(2).map(s => s.trim())];
+                            const { url: rawUrl, caption, metadata } = parseBiographyMediaEntry(entry);
                             const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo/i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
 
                             const updateEntry = (newUrl: string, newCaption: string) => {
-                              const rest = segments.slice(2).map(s => s.trim());
-                              const parts = [newUrl.trim(), newCaption, ...rest];
-                              // Remove trailing empty segments
-                              while (parts.length > 1 && parts[parts.length - 1] === "") parts.pop();
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
-                              imgs[idx] = parts.length > 1 ? parts.join(" | ") : parts[0];
+                              imgs[idx] = serializeBiographyMediaEntry(newUrl, newCaption, metadata);
                               setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
                             };
 
