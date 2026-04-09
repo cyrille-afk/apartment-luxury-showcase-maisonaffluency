@@ -112,7 +112,7 @@ export default function DesignerCompletenessAudit() {
       const q = search.toLowerCase();
       list = list.filter((s) => s.name.toLowerCase().includes(q));
     }
-    return list.sort((a, b) => a.score - b.score);
+    return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [statuses, filter, search]);
 
   if (!designers) return null;
