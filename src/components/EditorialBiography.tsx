@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Play, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 interface EditorialBiographyProps {
@@ -88,6 +89,27 @@ export function renderParagraph(text: string): React.ReactNode[] {
   return renderSingleLine(text);
 }
 
+/** Internal link component that uses React Router for same-app navigation */
+function InternalLink({ href, isInternal, children }: { href: string; isInternal: boolean; children: React.ReactNode }) {
+  const navigate = useNavigate();
+  if (isInternal) {
+    return (
+      <a
+        href={href}
+        onClick={(e) => { e.preventDefault(); navigate(href); }}
+        className="underline underline-offset-2 text-foreground hover:text-primary transition-colors cursor-pointer"
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 text-foreground hover:text-primary transition-colors">
+      {children}
+    </a>
+  );
+}
+
 /** Render a single line of inline HTML */
 function renderSingleLine(text: string): React.ReactNode[] {
   // Split on <strong>...</strong>, <em>...</em>, and <a href="...">...</a> tags
@@ -111,10 +133,12 @@ function renderSingleLine(text: string): React.ReactNode[] {
     }
     const linkMatch = part.match(/^<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>$/);
     if (linkMatch) {
+      const href = linkMatch[1];
+      const isInternal = href.startsWith("/");
       return (
-        <a key={i} href={linkMatch[1]} className="underline underline-offset-2 text-foreground hover:text-primary transition-colors">
+        <InternalLink key={i} href={href} isInternal={isInternal}>
           {linkMatch[2]}
-        </a>
+        </InternalLink>
       );
     }
     return <span key={i}>{renderQuotedText(part)}</span>;
