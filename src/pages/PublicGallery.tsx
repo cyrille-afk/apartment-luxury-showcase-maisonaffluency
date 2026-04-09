@@ -70,7 +70,7 @@ const PublicGallery = () => {
         <Navigation />
 
         <div className="pt-28">
-          <ApartmentTourInterlude />
+          <ApartmentTourInterlude compact />
         </div>
 
         <div className="pb-20">
