@@ -809,10 +809,9 @@ const PublicDesignerProfile = () => {
                             <SpecSheetButton
                               pdfUrl={pick.pdf_url}
                               pdfUrls={pick.pdf_urls as PdfEntry[]}
-                              designerName={designer.name}
+                              brandName={designer.name}
                               productName={pick.title}
                               className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                              iconSize="h-3.5 w-3.5"
                             />
                           </div>
                         )}
