@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -242,6 +242,12 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 <img src={pick.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0" />
               )}
               <span className="text-xs font-medium flex-1 truncate">{pick.title || "Untitled"}</span>
+              {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
+                <Badge variant="outline" className="text-[10px] border-[hsl(var(--pdf-red))]/40 text-[hsl(var(--pdf-red))]">
+                  <FileDown className="w-2.5 h-2.5 mr-0.5" />
+                  PDF{pick.pdf_urls && pick.pdf_urls.length > 1 ? ` ×${pick.pdf_urls.length}` : ''}
+                </Badge>
+              )}
               {pick.category && <Badge variant="outline" className="text-[10px]">{pick.category}</Badge>}
               <button
                 onClick={() => setExpandedPickId(expandedPickId === pick.id ? null : pick.id)}
