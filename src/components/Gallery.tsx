@@ -414,7 +414,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         dimensions: p.dimensions || null,
         category: p.category || null,
         subcategory: p.subcategory || null,
-        pdf_url: p.pdf_url || p.pdf_urls?.[0]?.url || null,
+        pdf_url: p.pdf_url || null,
+        pdf_urls: (p.pdf_urls as any) || null,
       }));
 
       setDbCuratorPicks(mapped);
@@ -437,7 +438,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         dimensions: p.dimensions || null,
         category: p.category || null,
         subcategory: p.subcategory || null,
-        pdf_url: p.pdf_url || p.pdf_urls?.[0]?.url || null,
+        pdf_url: p.pdf_url || null,
+        pdf_urls: p.pdf_urls || null,
       }));
 
     const byKey = new Map<string, PublicLightboxItem>();

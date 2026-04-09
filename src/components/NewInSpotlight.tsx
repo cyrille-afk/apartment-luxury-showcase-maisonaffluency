@@ -8,6 +8,7 @@ import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { cn } from "@/lib/utils";
 
@@ -334,18 +335,15 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                       <Maximize2 className="h-3 w-3" />
                     </div>
                   </div>
-                  {pick.pdf_url && (
+                  {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
                     <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <a
-                        href={buildSpecSheetUrl(pick.pdf_url, designer.name, pick.title)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                        title="Spec sheet"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                      </a>
+                      <SpecSheetButton
+                        pdfUrl={pick.pdf_url}
+                        pdfUrls={pick.pdf_urls as any}
+                        brandName={designer.name}
+                        productName={pick.title}
+                        variant="icon"
+                      />
                     </div>
                   )}
                 </div>
