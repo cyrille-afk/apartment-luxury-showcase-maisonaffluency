@@ -697,15 +697,16 @@ const TradeDesignersAdmin = () => {
       queryClient.setQueryData<DesignerRow[]>(["admin-designers"], (old) =>
         old?.map((d) => (d.id === id ? { ...d, ...payload } : d))
       );
-      // Clear the edit buffer for this designer immediately
+      toast({ title: "Saved", description: "Designer updated successfully." });
+      // Wait for refetch to complete before clearing buffer, so fresh server
+      // data is available and the UI never falls back to stale cached values
+      await queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
+      // Clear the edit buffer only after the refetch has landed
       setEditBuffer((prev) => {
         const next = { ...prev };
         delete next[id];
         return next;
       });
-      toast({ title: "Saved", description: "Designer updated successfully." });
-      // Background refetch to ensure full consistency
-      queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
