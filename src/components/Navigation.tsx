@@ -36,7 +36,7 @@ const leftNavItems = [{
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
-  href: "#designers",
+  href: "/designers",
   icon: Palette,
 }, {
   label: "Collectible Design",
@@ -127,7 +127,7 @@ const Navigation = () => {
       overview: "#overview",
       gallery: "#overview",
       "curating-team": "#overview",
-      designers: "#designers",
+      designers: "/designers",
       collectibles: "#collectibles",
       
       details: "/trade/program",
@@ -502,7 +502,7 @@ const Navigation = () => {
                               setCategoryPanelOpen(false);
                               setIsOpen(false);
                               window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                              handleNavClick('#designers');
+                              handleNavClick('/designers');
                             }}
                             className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
                           >
@@ -515,7 +515,7 @@ const Navigation = () => {
                                 setCategoryPanelOpen(false);
                                 setIsOpen(false);
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                handleNavClick('#designers');
+                                handleNavClick('/designers');
                               }}
                               className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
                             >
