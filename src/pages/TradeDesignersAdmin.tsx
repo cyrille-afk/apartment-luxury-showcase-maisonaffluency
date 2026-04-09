@@ -1067,8 +1067,8 @@ const TradeDesignersAdmin = () => {
                             const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo/i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
 
                             const updateEntry = (newUrl: string, newCaption: string) => {
-                              const rest = segments.slice(2);
-                              const parts = [newUrl, newCaption, ...rest].map(s => s.trim());
+                              const rest = segments.slice(2).map(s => s.trim());
+                              const parts = [newUrl.trim(), newCaption, ...rest];
                               // Remove trailing empty segments
                               while (parts.length > 1 && parts[parts.length - 1] === "") parts.pop();
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
