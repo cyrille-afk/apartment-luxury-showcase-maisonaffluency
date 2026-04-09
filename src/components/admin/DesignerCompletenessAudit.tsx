@@ -82,7 +82,7 @@ export default function DesignerCompletenessAudit() {
   });
 
   const statuses = useMemo<DesignerStatus[]>(() => {
-    if (!designers || !pickCounts || !heritageIds) return [];
+    if (!designers || !pickCounts || !heritageIds || !instagramPostIds) return [];
     return designers.map((d: any) => {
       const hasBio = !!(d.biography && d.biography.trim());
       const hasPhilosophy = !!(d.philosophy && d.philosophy.trim());
