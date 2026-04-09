@@ -690,15 +690,22 @@ const TradeDesignersAdmin = () => {
         .update(payload)
         .eq("id", id);
       if (error) throw error;
+      return { id, payload };
     },
-    onSuccess: async (_, { id }) => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
+    onSuccess: async ({ id, payload }) => {
+      // Optimistically patch the query cache so the UI never loses data
+      queryClient.setQueryData<DesignerRow[]>(["admin-designers"], (old) =>
+        old?.map((d) => (d.id === id ? { ...d, ...payload } : d))
+      );
+      // Clear the edit buffer for this designer immediately
       setEditBuffer((prev) => {
         const next = { ...prev };
         delete next[id];
         return next;
       });
       toast({ title: "Saved", description: "Designer updated successfully." });
+      // Background refetch to ensure full consistency
+      queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
