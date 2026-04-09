@@ -1051,36 +1051,66 @@ const TradeDesignersAdmin = () => {
                         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                           Editorial Media <span className="normal-case font-normal">(images, YouTube/Vimeo links, or MP4 URLs — shown between biography paragraphs)</span>
                         </label>
-                        <div className="mt-2 space-y-2">
+                        <div className="mt-2 space-y-3">
                           {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((entry: string, idx: number) => {
-                            // Parse pipe separator: "URL | Caption"
-                            const pipeMatch = entry.match(/^(https?:\/\/\S+)\s*\|\s*(.+)$/i);
-                            const rawUrl = pipeMatch ? pipeMatch[1].trim() : entry.trim();
-                            const caption = pipeMatch ? pipeMatch[2].trim() : null;
+                            // Parse pipe separator: "URL | Caption | Size | Alignment"
+                            const segments = entry.split("|").map(s => s.trim());
+                            const rawUrl = segments[0] || "";
+                            const caption = segments[1] || "";
                             const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo/i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
+
+                            const updateEntry = (newUrl: string, newCaption: string) => {
+                              const rest = segments.slice(2);
+                              const parts = [newUrl, newCaption, ...rest].map(s => s.trim());
+                              // Remove trailing empty segments
+                              while (parts.length > 1 && parts[parts.length - 1] === "") parts.pop();
+                              const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                              imgs[idx] = parts.length > 1 ? parts.join(" | ") : parts[0];
+                              setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                            };
+
                             return (
-                              <div key={idx} className="flex items-start gap-2">
+                              <div key={idx} className="flex items-start gap-2 border border-border/50 rounded-md p-2">
                                 {isVideo ? (
-                                  <div className="w-16 h-10 rounded shrink-0 bg-muted flex items-center justify-center text-muted-foreground text-[9px] font-medium">▶ Video</div>
+                                  <div className="w-16 h-16 rounded shrink-0 bg-muted flex items-center justify-center text-muted-foreground text-[9px] font-medium">▶ Video</div>
                                 ) : rawUrl.startsWith("http") ? (
-                                  <img src={rawUrl} alt="" className="w-16 h-10 object-cover rounded shrink-0 bg-muted" />
+                                  <img src={rawUrl} alt="" className="w-16 h-16 object-cover rounded shrink-0 bg-muted" />
                                 ) : (
-                                  <div className="w-16 h-10 rounded shrink-0 bg-muted" />
+                                  <div className="w-16 h-16 rounded shrink-0 bg-muted" />
                                 )}
-                                <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex-1 min-w-0 space-y-1.5">
                                   <Input
-                                    value={entry}
-                                    onChange={(e) => {
-                                      const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
-                                      imgs[idx] = e.target.value;
-                                      setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
-                                    }}
-                                    placeholder="URL | Caption  (e.g. https://...jpg | My Caption)"
-                                    className="text-xs"
+                                    value={rawUrl}
+                                    onChange={(e) => updateEntry(e.target.value, caption)}
+                                    placeholder="Media URL (https://...jpg or video link)"
+                                    className="text-xs font-mono"
                                   />
-                                  {caption && (
-                                    <p className="text-[10px] text-muted-foreground italic truncate px-1">Caption: {caption}</p>
-                                  )}
+                                  <input
+                                    value={caption}
+                                    onChange={(e) => updateEntry(rawUrl, e.target.value)}
+                                    spellCheck={false}
+                                    autoCorrect="off"
+                                    autoCapitalize="words"
+                                    className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors"
+                                    placeholder="Caption (e.g. Designer Name, 'Title', 2025)"
+                                  />
+                                  <button
+                                    type="button"
+                                    title="Insert this media into biography text at cursor position"
+                                    className="font-body text-[10px] text-primary/70 hover:text-primary transition-colors"
+                                    onClick={() => {
+                                      const ta = document.getElementById(`bio-editor-${d.id}`) as HTMLTextAreaElement | null;
+                                      if (!ta || !rawUrl) return;
+                                      const pos = ta.selectionStart;
+                                      const bioVal = getField(d.id, "biography") || "";
+                                      const insertion = caption ? `\n${rawUrl} | ${caption}\n` : `\n${rawUrl}\n`;
+                                      const newBio = bioVal.substring(0, pos) + insertion + bioVal.substring(pos);
+                                      setField(d.id, "biography", newBio);
+                                      requestAnimationFrame(() => { ta.focus(); ta.setSelectionRange(pos + insertion.length, pos + insertion.length); });
+                                    }}
+                                  >
+                                    ↳ Insert in biography
+                                  </button>
                                 </div>
                                 <button
                                   onClick={() => {
