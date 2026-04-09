@@ -73,10 +73,7 @@ const DesignerProfile = () => {
         <section className="relative h-[60vh] min-h-[420px] overflow-hidden">
           {(designer.hero_image_url || designer.image_url) && (() => {
             const raw = designer.hero_image_url || designer.image_url;
-            // Apply Cloudinary transforms for performance if not already present
-            const optimised = raw.includes('/upload/') && !raw.includes('/upload/w_') && !raw.includes('/upload/c_')
-              ? raw.replace('/upload/', '/upload/w_1920,c_fill,q_auto:good,f_auto/')
-              : raw;
+            const optimised = optimizeImageUrl(raw, "w_1920,c_fill,q_auto:good,f_auto");
             return (
               <motion.img
                 src={optimised}
