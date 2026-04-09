@@ -110,11 +110,12 @@ export default function DesignerCompletenessAudit() {
   const summary = useMemo(() => {
     const total = statuses.length;
     const complete = statuses.filter((s) => s.score === s.maxScore).length;
+    const almost = statuses.filter((s) => s.score === s.maxScore - 1).length;
     const hasPicks = statuses.filter((s) => s.picksCount > 0).length;
     const hasHero = statuses.filter((s) => s.hasHero).length;
     const hasBio = statuses.filter((s) => s.hasBio).length;
     const hasPhilosophy = statuses.filter((s) => s.hasPhilosophy).length;
-    return { total, complete, hasPicks, hasHero, hasBio, hasPhilosophy };
+    return { total, complete, almost, hasPicks, hasHero, hasBio, hasPhilosophy };
   }, [statuses]);
 
   const filtered = useMemo(() => {
