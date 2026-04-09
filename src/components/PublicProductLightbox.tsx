@@ -280,7 +280,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                   onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
                   className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md cursor-pointer"
                 />
-              )
+              )}
             </div>
           </div>
 
