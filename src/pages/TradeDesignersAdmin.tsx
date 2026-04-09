@@ -142,12 +142,13 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 function CuratorPicksManager({ designerId, designerName }: { designerId: string; designerName?: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  type PdfEntry = { label: string; url: string; filename?: string };
   type Pick = {
     id: string; designer_id: string; image_url: string; hover_image_url: string | null;
     title: string; subtitle: string | null; category: string | null; subcategory: string | null;
     materials: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
-    pdf_filename: string | null; currency: string; trade_price_cents: number | null;
+    pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
     sort_order: number; created_at: string;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
