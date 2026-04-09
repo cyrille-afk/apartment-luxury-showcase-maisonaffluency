@@ -35,14 +35,17 @@ export default function TradeSpecSheet() {
     const resolve = async () => {
       const { data: pick } = await supabase
         .from("designer_curator_picks")
-        .select("pdf_url")
+        .select("pdf_url, pdf_urls")
         .ilike("title", product)
-        .not("pdf_url", "is", null)
         .limit(1)
         .maybeSingle();
 
-      if (pick?.pdf_url) {
-        const signed = await getSignedSpecSheetUrl(pick.pdf_url);
+      // Resolve from pdf_url (legacy) or pdf_urls (multi-PDF) — take the first entry
+      const resolvedUrl = pick?.pdf_url
+        || ((pick?.pdf_urls as any[] | null)?.[0]?.url ?? null);
+
+      if (resolvedUrl) {
+        const signed = await getSignedSpecSheetUrl(resolvedUrl);
         setPdfUrl(signed);
         setLoading(false);
         return;
