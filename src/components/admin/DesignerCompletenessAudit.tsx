@@ -165,19 +165,26 @@ export default function DesignerCompletenessAudit() {
             />
           </div>
           <div className="flex gap-1">
-            {(["incomplete", "all", "complete"] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] border transition-colors ${
-                  filter === f
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
-                }`}
-              >
-                {f} {f === "incomplete" ? `(${statuses.filter((s) => s.score < s.maxScore).length})` : f === "complete" ? `(${summary.complete})` : `(${summary.total})`}
-              </button>
-            ))}
+            {(["incomplete", "almost", "all", "complete"] as const).map((f) => {
+              const count = f === "incomplete" ? statuses.filter((s) => s.score < s.maxScore - 1).length
+                : f === "almost" ? summary.almost
+                : f === "complete" ? summary.complete
+                : summary.total;
+              const label = f === "almost" ? "5/6" : f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] border transition-colors ${
+                    filter === f
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
+                  }`}
+                >
+                  {label} ({count})
+                </button>
+              );
+            })}
           </div>
         </div>
 
