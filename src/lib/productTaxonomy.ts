@@ -163,6 +163,7 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   // Display Cabinet → Cabinets
   "Display Cabinet": "Cabinets",
   "High Table": "Side Tables",
+  Headboard: "Headboards",
   Table: "Side Tables",
 };
 
