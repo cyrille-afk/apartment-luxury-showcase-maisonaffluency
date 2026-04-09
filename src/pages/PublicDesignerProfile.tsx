@@ -83,6 +83,7 @@ const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
+  const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = designer?.founder === designer?.name;
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
