@@ -241,6 +241,8 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\bsideboard\b/i, "Cabinets"],
   [/\bcabinet\b/i, "Cabinets"],
   [/\bnightstand\b/i, "Cabinets"],
+  // Bedroom Furniture
+  [/\bheadboard\b/i, "Headboards"],
   // Décor
   [/\bmirror\b/i, "Mirrors"],
   [/\bvase\b/i, "Vases & Vessels"],
@@ -257,6 +259,7 @@ const CATEGORY_DEFAULT_SUBCATEGORY: Record<string, string> = {
   Rugs: "Hand-Knotted Rugs",
   Lighting: "Table Lights",
   Storage: "Cabinets",
+  "Bedroom Furniture": "Headboards",
   Décor: "Decorative Objects",
   Seating: "Chairs",
   Tables: "Side Tables",
