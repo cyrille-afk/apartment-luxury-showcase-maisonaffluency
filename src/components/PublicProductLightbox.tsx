@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
