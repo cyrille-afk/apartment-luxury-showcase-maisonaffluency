@@ -4,8 +4,9 @@ import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { ArrowLeft, UserCheck, UserX, Clock, Shield } from "lucide-react";
+import { ArrowLeft, UserCheck, UserX, Clock, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useMemo } from "react";
 
 interface RegisteredUser {
   id: string;
@@ -20,11 +21,11 @@ interface RegisteredUser {
 
 export default function TradeRegisteredUsers() {
   const { isAdmin, loading } = useAuth();
+  const [search, setSearch] = useState("");
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-registered-users"],
     queryFn: async () => {
-      // Fetch all profiles
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("id, email, first_name, last_name, company, created_at")
@@ -32,7 +33,6 @@ export default function TradeRegisteredUsers() {
 
       if (error || !profiles) return [];
 
-      // Fetch roles and applications in parallel
       const [rolesRes, appsRes] = await Promise.all([
         supabase.from("user_roles").select("user_id, role"),
         supabase.from("trade_applications").select("user_id, status").order("created_at", { ascending: false }),
@@ -45,7 +45,6 @@ export default function TradeRegisteredUsers() {
         rolesMap.set(r.user_id, existing);
       });
 
-      // Only keep latest application per user
       const appMap = new Map<string, string>();
       (appsRes.data || []).forEach((a: any) => {
         if (!appMap.has(a.user_id)) appMap.set(a.user_id, a.status);
@@ -59,6 +58,22 @@ export default function TradeRegisteredUsers() {
     },
     enabled: isAdmin,
   });
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return users;
+    const q = search.toLowerCase();
+    return users.filter((u) => {
+      const name = `${u.first_name} ${u.last_name}`.toLowerCase();
+      const month = format(new Date(u.created_at), "MMMM yyyy").toLowerCase();
+      return (
+        name.includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.company.toLowerCase().includes(q) ||
+        month.includes(q) ||
+        u.roles.some((r) => r.replace("_", " ").includes(q))
+      );
+    });
+  }, [users, search]);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
@@ -89,15 +104,30 @@ export default function TradeRegisteredUsers() {
       <Helmet><title>Registered Users — Admin — Maison Affluency</title></Helmet>
 
       <div className="max-w-6xl space-y-6">
-        <div className="flex items-center gap-3">
-          <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
-            <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-          </Link>
-          <div>
-            <h1 className="font-display text-2xl text-foreground">Registered Users</h1>
-            <p className="font-body text-sm text-muted-foreground mt-0.5">
-              All accounts that have signed up — {users.length} total
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
+              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+            </Link>
+            <div>
+              <h1 className="font-display text-2xl text-foreground">Registered Users</h1>
+              <p className="font-body text-sm text-muted-foreground mt-0.5">
+                {search.trim()
+                  ? `${filtered.length} of ${users.length} users`
+                  : `All accounts that have signed up — ${users.length} total`}
+              </p>
+            </div>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, month…"
+              className="pl-8 pr-3 py-1.5 text-sm font-body rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 w-56"
+            />
           </div>
         </div>
 
@@ -117,7 +147,7 @@ export default function TradeRegisteredUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
+                  {filtered.map((u) => (
                     <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-display text-sm text-foreground">
@@ -146,6 +176,13 @@ export default function TradeRegisteredUsers() {
                       </td>
                     </tr>
                   ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                        No users match "{search}"
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
