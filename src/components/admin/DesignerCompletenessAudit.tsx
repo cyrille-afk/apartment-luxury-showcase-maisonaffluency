@@ -68,6 +68,19 @@ export default function DesignerCompletenessAudit() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: instagramPostIds } = useQuery({
+    queryKey: ["instagram-post-ids-audit"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_instagram_posts")
+        .select("designer_id")
+        .eq("hidden", false);
+      if (!data) return new Set<string>();
+      return new Set(data.map((r: any) => r.designer_id));
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
   const statuses = useMemo<DesignerStatus[]>(() => {
     if (!designers || !pickCounts || !heritageIds) return [];
     return designers.map((d: any) => {
