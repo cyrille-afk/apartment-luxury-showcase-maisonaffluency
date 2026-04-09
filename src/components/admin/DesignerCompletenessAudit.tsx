@@ -13,7 +13,7 @@ interface DesignerStatus {
   hasBio: boolean;
   hasPhilosophy: boolean;
   hasHero: boolean;
-  hasLogo: boolean;
+  
   picksCount: number;
   hasHeritageSlides: boolean;
   hasInstagram: boolean;
@@ -74,23 +74,23 @@ export default function DesignerCompletenessAudit() {
       const hasBio = !!(d.biography && d.biography.trim());
       const hasPhilosophy = !!(d.philosophy && d.philosophy.trim());
       const hasHero = !!(d.hero_image_url && d.hero_image_url.trim());
-      const hasLogo = !!(d.logo_url && d.logo_url.trim());
+      
       const picksCount = pickCounts[d.id] || 0;
       const hasPicks = picksCount > 0;
       const hasHeritageSlides = heritageIds.has(d.id);
       const hasInstagram = !!(d.instagram_handle && d.instagram_handle.trim());
 
       let score = 0;
-      const maxScore = 7;
+      const maxScore = 6;
       if (hasBio) score++;
       if (hasPhilosophy) score++;
       if (hasHero) score++;
-      if (hasLogo) score++;
+      
       if (hasPicks) score++;
       if (hasHeritageSlides) score++;
       if (hasInstagram) score++;
 
-      return { id: d.id, name: d.name, slug: d.slug, hasBio, hasPhilosophy, hasHero, hasLogo, picksCount, hasHeritageSlides, hasInstagram, score, maxScore };
+      return { id: d.id, name: d.name, slug: d.slug, hasBio, hasPhilosophy, hasHero, picksCount, hasHeritageSlides, hasInstagram, score, maxScore };
     });
   }, [designers, pickCounts, heritageIds]);
 
@@ -168,12 +168,11 @@ export default function DesignerCompletenessAudit() {
 
         {/* Table */}
         <div className="border border-border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_40px_40px_40px_40px_40px_40px_40px_60px] gap-0 text-[10px] font-body uppercase tracking-wider text-muted-foreground bg-muted/30 px-3 py-2 border-b border-border">
+          <div className="grid grid-cols-[1fr_40px_40px_40px_40px_40px_40px_60px] gap-0 text-[10px] font-body uppercase tracking-wider text-muted-foreground bg-muted/30 px-3 py-2 border-b border-border">
             <span>Designer</span>
             <span className="text-center" title="Biography">Bio</span>
             <span className="text-center" title="Philosophy">Phil</span>
             <span className="text-center" title="Hero Image">Hero</span>
-            <span className="text-center" title="Logo">Logo</span>
             <span className="text-center" title="Curator's Picks">Picks</span>
             <span className="text-center" title="Heritage Slides">Herit</span>
             <span className="text-center" title="Instagram">IG</span>
@@ -185,13 +184,12 @@ export default function DesignerCompletenessAudit() {
                 key={s.id}
                 to={`/designers/${s.slug}`}
                 target="_blank"
-                className="grid grid-cols-[1fr_40px_40px_40px_40px_40px_40px_40px_60px] gap-0 px-3 py-2 items-center hover:bg-muted/20 transition-colors"
+                className="grid grid-cols-[1fr_40px_40px_40px_40px_40px_40px_60px] gap-0 px-3 py-2 items-center hover:bg-muted/20 transition-colors"
               >
                 <span className="font-body text-xs text-foreground truncate pr-2">{s.name}</span>
                 <span className="flex justify-center"><Dot ok={s.hasBio} /></span>
                 <span className="flex justify-center"><Dot ok={s.hasPhilosophy} /></span>
                 <span className="flex justify-center"><Dot ok={s.hasHero} /></span>
-                <span className="flex justify-center"><Dot ok={s.hasLogo} /></span>
                 <span className="flex justify-center">
                   {s.picksCount > 0 ? (
                     <span className="inline-flex items-center gap-0.5">
