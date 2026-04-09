@@ -125,7 +125,7 @@ const Navigation = () => {
     const sectionToNav: Record<string, string> = {
       home: "#overview",
       overview: "#overview",
-      gallery: "#overview",
+      gallery: "/gallery",
       "curating-team": "#overview",
       designers: "/designers",
       collectibles: "/collectibles",
