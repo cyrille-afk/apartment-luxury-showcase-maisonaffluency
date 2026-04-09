@@ -253,6 +253,10 @@ const JournalArticlePage = () => {
                         p: JournalParagraph,
                         a: ({ node, children, ...props }) => {
                           let href = props.href || "";
+                          const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
+                          if (sitePattern.test(href)) {
+                            href = href.replace(sitePattern, "");
+                          }
                           if (href.startsWith("/designers/") && !href.includes("from_journal")) {
                             const sep = href.includes("?") ? "&" : "?";
                             href = `${href}${sep}from_journal=${article.slug}`;
