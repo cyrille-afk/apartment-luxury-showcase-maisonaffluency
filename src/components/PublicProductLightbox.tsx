@@ -23,6 +23,7 @@ export interface PublicLightboxItem {
   category?: string | null;
   subcategory?: string | null;
   pdf_url?: string | null;
+  pdf_urls?: PdfEntry[] | null;
 }
 
 interface Props {
