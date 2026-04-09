@@ -5,9 +5,10 @@ const corsHeaders = {
 };
 
 // All known OG bridge file paths (relative to site root)
+// Baked-in fallback list — the function prefers og-manifest.json at runtime
 const ALL_OG_PATHS: string[] = [
-  // Root-level
   "alexander-lamont-og.html",
+  "apartment-tour-og.html",
   "apparatus-studio-og.html",
   "brands-og.html",
   "collectibles-og.html",
@@ -32,6 +33,35 @@ const ALL_OG_PATHS: string[] = [
   "pierre-chareau-og.html",
   "thierry-lemaire-og.html",
   "trade-program-og.html",
+  // Gallery item bridges
+  "gallery/a-colourful-nook.html",
+  "gallery/a-design-treasure-trove.html",
+  "gallery/a-dreamy-tuscan-landscape.html",
+  "gallery/a-highly-customised-dining-room.html",
+  "gallery/a-jewelry-box-like-setting.html",
+  "gallery/a-masterful-suite.html",
+  "gallery/a-relaxed-setting.html",
+  "gallery/a-serene-decor.html",
+  "gallery/a-sophisticated-boudoir.html",
+  "gallery/a-sophisticated-living-room.html",
+  "gallery/a-sun-lit-reading-corner.html",
+  "gallery/a-venitian-cocoon.html",
+  "gallery/a-workspace-of-distinction.html",
+  "gallery/an-artistic-statement.html",
+  "gallery/an-inviting-lounge-area.html",
+  "gallery/compact-elegance.html",
+  "gallery/craftsmanship-at-every-corner.html",
+  "gallery/curated-vignette.html",
+  "gallery/design-and-fine-art-books-corner.html",
+  "gallery/design-tableau.html",
+  "gallery/golden-hour.html",
+  "gallery/light-and-focus.html",
+  "gallery/light-and-texture.html",
+  "gallery/panoramic-cityscape-views.html",
+  "gallery/refined-details.html",
+  "gallery/the-details-make-the-design.html",
+  "gallery/unique-by-design-vignette.html",
+  "gallery/yellow-crystalline.html",
 ];
 
 // Auto-discover: scan the live site for all OG bridge files
