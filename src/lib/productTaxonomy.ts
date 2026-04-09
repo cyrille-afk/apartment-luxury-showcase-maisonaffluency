@@ -1,10 +1,11 @@
-export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
+export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Bedroom Furniture", "Rugs", "Décor"];
 
 export const SUBCATEGORY_MAP: Record<string, string[]> = {
   Seating: ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
   Tables: ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
   Lighting: ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   Storage: ["Bookcases", "Cabinets"],
+  "Bedroom Furniture": ["Headboards"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
   Décor: ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
 };
@@ -21,6 +22,8 @@ const CATEGORY_NORMALIZE: Record<string, string> = {
   Linens: "Décor",
   Screens: "Décor",
   Sculpture: "Décor",
+  Bedroom: "Bedroom Furniture",
+  "Bed Furniture": "Bedroom Furniture",
 };
 
 // Subcategories that belong to Seating (used to resolve "Furniture" → correct parent)
@@ -49,6 +52,10 @@ const STORAGE_SUBCATEGORIES = new Set([
   "Bookcases & Credenzas", "Sideboards", "Sideboard",
 ]);
 
+const BEDROOM_SUBCATEGORIES = new Set([
+  "Headboards", "Headboard",
+]);
+
 /**
  * Resolve ambiguous "Furniture" category using subcategory hint.
  */
@@ -59,6 +66,7 @@ function resolveFurniture(subcategory?: string): string {
   if (TABLES_SUBCATEGORIES.has(normalized)) return "Tables";
   if (LIGHTING_SUBCATEGORIES.has(normalized)) return "Lighting";
   if (STORAGE_SUBCATEGORIES.has(normalized)) return "Storage";
+  if (BEDROOM_SUBCATEGORIES.has(normalized)) return "Bedroom Furniture";
   return findParentCategory(normalized) || "Tables";
 }
 
@@ -155,6 +163,7 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   // Display Cabinet → Cabinets
   "Display Cabinet": "Cabinets",
   "High Table": "Side Tables",
+  Headboard: "Headboards",
   Table: "Side Tables",
 };
 
@@ -232,6 +241,8 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\bsideboard\b/i, "Cabinets"],
   [/\bcabinet\b/i, "Cabinets"],
   [/\bnightstand\b/i, "Cabinets"],
+  // Bedroom Furniture
+  [/\bheadboard\b/i, "Headboards"],
   // Décor
   [/\bmirror\b/i, "Mirrors"],
   [/\bvase\b/i, "Vases & Vessels"],
@@ -248,6 +259,7 @@ const CATEGORY_DEFAULT_SUBCATEGORY: Record<string, string> = {
   Rugs: "Hand-Knotted Rugs",
   Lighting: "Table Lights",
   Storage: "Cabinets",
+  "Bedroom Furniture": "Headboards",
   Décor: "Decorative Objects",
   Seating: "Chairs",
   Tables: "Side Tables",
