@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { lazy, Suspense } from "react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
+import BiographyToolbar from "@/components/admin/BiographyToolbar";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -999,11 +1000,17 @@ const TradeDesignersAdmin = () => {
                     <div className="border-t border-border px-4 py-4 space-y-4 bg-muted/10">
                       <div>
                         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Biography</label>
+                        <BiographyToolbar
+                          textareaId={`bio-editor-${d.id}`}
+                          value={getField(d.id, "biography")}
+                          onChange={(v) => setField(d.id, "biography", v)}
+                        />
                         <Textarea
+                          id={`bio-editor-${d.id}`}
                           value={getField(d.id, "biography")}
                           onChange={(e) => setField(d.id, "biography", e.target.value)}
                           rows={10}
-                          className="mt-1 font-body text-sm"
+                          className="font-body text-sm font-mono"
                         />
                       </div>
 
