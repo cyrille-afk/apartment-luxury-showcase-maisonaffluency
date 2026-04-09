@@ -105,7 +105,7 @@ export default function DesignerCompletenessAudit() {
 
       return { id: d.id, name: d.name, slug: d.slug, hasBio, hasPhilosophy, hasHero, picksCount, hasHeritageSlides, hasInstagram, score, maxScore };
     });
-  }, [designers, pickCounts, heritageIds]);
+  }, [designers, pickCounts, heritageIds, instagramPostIds]);
 
   const summary = useMemo(() => {
     const total = statuses.length;
