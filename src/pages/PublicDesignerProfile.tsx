@@ -745,7 +745,8 @@ const PublicDesignerProfile = () => {
                         dimensions: pick.dimensions,
                         category: pick.category,
                         subcategory: pick.subcategory,
-                        pdf_url: pick.pdf_url,
+                        pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+                        pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
                       })}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
@@ -803,18 +804,16 @@ const PublicDesignerProfile = () => {
                             <Maximize2 className="h-3 w-3" />
                           </div>
                         </div>
-                        {pick.pdf_url && (
+                        {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (
                           <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a
-                              href={buildSpecSheetUrl(pick.pdf_url, designer.name, pick.title)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
+                            <SpecSheetButton
+                              pdfUrl={pick.pdf_url}
+                              pdfUrls={pick.pdf_urls as PdfEntry[]}
+                              designerName={designer.name}
+                              productName={pick.title}
                               className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                              title="Spec sheet"
-                            >
-                              <FileText className="h-3.5 w-3.5" />
-                            </a>
+                              iconSize="h-3.5 w-3.5"
+                            />
                           </div>
                         )}
                       </div>
@@ -897,7 +896,8 @@ const PublicDesignerProfile = () => {
           dimensions: p.dimensions,
           category: p.category,
           subcategory: p.subcategory,
-          pdf_url: p.pdf_url,
+          pdf_url: p.pdf_url || ((p.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+          pdf_urls: p.pdf_urls as PdfEntry[] | undefined,
         }))}
         onClose={() => setLightboxItem(null)}
         onSelectRelated={(item) => setLightboxItem(item)}
