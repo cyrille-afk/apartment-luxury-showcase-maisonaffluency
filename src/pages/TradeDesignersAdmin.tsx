@@ -1097,8 +1097,27 @@ const TradeDesignersAdmin = () => {
 
                             const updateEntry = (newUrl: string, newCaption: string) => {
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                              const oldSerialized = imgs[idx];
                               imgs[idx] = serializeBiographyMediaEntry(newUrl, newCaption, metadata);
                               setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+
+                              // Sync inline biography token when caption changes
+                              const bioVal = getField(d.id, "biography") || "";
+                              if (bioVal && rawUrl) {
+                                // Build old inline token pattern: URL alone or URL | old caption
+                                const escapedUrl = rawUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                                const oldInlinePattern = new RegExp(
+                                  `(^|\\n)(${escapedUrl})(?:\\s*\\|\\s*${caption.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})?\\s*(?=\\n|$)`,
+                                  "m"
+                                );
+                                const newInlineToken = newCaption
+                                  ? `${newUrl} | ${newCaption}`
+                                  : newUrl;
+                                const updatedBio = bioVal.replace(oldInlinePattern, `$1${newInlineToken}`);
+                                if (updatedBio !== bioVal) {
+                                  setField(d.id, "biography", updatedBio);
+                                }
+                              }
                             };
 
                             return (
