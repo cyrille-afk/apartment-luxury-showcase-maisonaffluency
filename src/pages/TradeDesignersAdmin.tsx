@@ -1062,9 +1062,12 @@ const TradeDesignersAdmin = () => {
                         <div className="mt-2 space-y-3">
                           {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((entry: string, idx: number) => {
                             // Parse pipe separator: "URL | Caption | Size | Alignment"
-                            const segments = entry.split("|").map(s => s.trim());
-                            const rawUrl = segments[0] || "";
-                            const caption = segments[1] || "";
+                            // Only trim URL & metadata — preserve interior caption spaces
+                            const rawSegments = entry.split("|");
+                            const stripPadding = (s: string) => s.replace(/^ /, '').replace(/ $/, '');
+                            const rawUrl = (rawSegments[0] || "").trim();
+                            const caption = rawSegments.length > 1 ? stripPadding(rawSegments[1]) : "";
+                            const segments = [rawUrl, caption, ...rawSegments.slice(2).map(s => s.trim())];
                             const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo/i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
 
                             const updateEntry = (newUrl: string, newCaption: string) => {
