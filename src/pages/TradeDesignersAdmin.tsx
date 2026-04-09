@@ -328,15 +328,47 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <label className="text-[10px] text-muted-foreground">Description</label>
                   <Textarea value={pick.description || ""} onChange={(e) => updateField(pick.id, "description", e.target.value || null)} className="text-xs min-h-[60px]" />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[10px] text-muted-foreground">PDF URL</label>
-                    <Input value={pick.pdf_url || ""} onChange={(e) => updateField(pick.id, "pdf_url", e.target.value || null)} className="text-xs" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-muted-foreground">PDF Filename</label>
-                    <Input value={pick.pdf_filename || ""} onChange={(e) => updateField(pick.id, "pdf_filename", e.target.value || null)} className="text-xs" />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-muted-foreground font-medium">Spec Sheets / PDFs</label>
+                  {/* Legacy single PDF */}
+                  {pick.pdf_url && !(pick.pdf_urls && pick.pdf_urls.length > 0) && (
+                    <div className="flex items-center gap-2">
+                      <Input value={pick.pdf_url} onChange={(e) => updateField(pick.id, "pdf_url", e.target.value || null)} placeholder="PDF URL" className="text-xs flex-1" />
+                      <Input value={pick.pdf_filename || ""} onChange={(e) => updateField(pick.id, "pdf_filename", e.target.value || null)} placeholder="Filename" className="text-xs w-36" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => {
+                        // Migrate to pdf_urls
+                        const entries: PdfEntry[] = [{ label: pick.pdf_filename || "Spec Sheet", url: pick.pdf_url! }];
+                        updateField(pick.id, "pdf_urls", entries);
+                        updateField(pick.id, "pdf_url", null);
+                        updateField(pick.id, "pdf_filename", null);
+                      }}><span className="text-[9px]">→ multi</span></Button>
+                    </div>
+                  )}
+                  {/* Multi-PDF list */}
+                  {(pick.pdf_urls || []).map((entry: PdfEntry, idx: number) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input value={entry.label} onChange={(e) => {
+                        const updated = [...(pick.pdf_urls || [])];
+                        updated[idx] = { ...entry, label: e.target.value };
+                        updateField(pick.id, "pdf_urls", updated);
+                      }} placeholder="Label (e.g. Small Lamp)" className="text-xs w-32" />
+                      <Input value={entry.url} onChange={(e) => {
+                        const updated = [...(pick.pdf_urls || [])];
+                        updated[idx] = { ...entry, url: e.target.value };
+                        updateField(pick.id, "pdf_urls", updated);
+                      }} placeholder="PDF URL" className="text-xs flex-1" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-destructive" onClick={() => {
+                        const updated = (pick.pdf_urls || []).filter((_: PdfEntry, i: number) => i !== idx);
+                        updateField(pick.id, "pdf_urls", updated.length ? updated : null);
+                      }}><X className="w-3.5 h-3.5" /></Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" size="sm" className="text-[10px] h-6" onClick={() => {
+                    const current = pick.pdf_urls || [];
+                    updateField(pick.id, "pdf_urls", [...current, { label: "", url: "" }]);
+                  }}>
+                    <Plus className="w-3 h-3 mr-1" /> Add PDF
+                  </Button>
                 </div>
               </div>
             )}
