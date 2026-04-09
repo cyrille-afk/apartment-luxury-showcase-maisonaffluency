@@ -89,6 +89,27 @@ export function renderParagraph(text: string): React.ReactNode[] {
   return renderSingleLine(text);
 }
 
+/** Internal link component that uses React Router for same-app navigation */
+function InternalLink({ href, isInternal, children }: { href: string; isInternal: boolean; children: React.ReactNode }) {
+  const navigate = useNavigate();
+  if (isInternal) {
+    return (
+      <a
+        href={href}
+        onClick={(e) => { e.preventDefault(); navigate(href); }}
+        className="underline underline-offset-2 text-foreground hover:text-primary transition-colors cursor-pointer"
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 text-foreground hover:text-primary transition-colors">
+      {children}
+    </a>
+  );
+}
+
 /** Render a single line of inline HTML */
 function renderSingleLine(text: string): React.ReactNode[] {
   // Split on <strong>...</strong>, <em>...</em>, and <a href="...">...</a> tags
