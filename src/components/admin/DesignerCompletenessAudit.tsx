@@ -68,8 +68,21 @@ export default function DesignerCompletenessAudit() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: instagramPostIds } = useQuery({
+    queryKey: ["instagram-post-ids-audit"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_instagram_posts")
+        .select("designer_id")
+        .eq("hidden", false);
+      if (!data) return new Set<string>();
+      return new Set(data.map((r: any) => r.designer_id));
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
   const statuses = useMemo<DesignerStatus[]>(() => {
-    if (!designers || !pickCounts || !heritageIds) return [];
+    if (!designers || !pickCounts || !heritageIds || !instagramPostIds) return [];
     return designers.map((d: any) => {
       const hasBio = !!(d.biography && d.biography.trim());
       const hasPhilosophy = !!(d.philosophy && d.philosophy.trim());
@@ -78,7 +91,7 @@ export default function DesignerCompletenessAudit() {
       const picksCount = pickCounts[d.id] || 0;
       const hasPicks = picksCount > 0;
       const hasHeritageSlides = heritageIds.has(d.id);
-      const hasInstagram = !!(d.instagram_handle && d.instagram_handle.trim());
+      const hasInstagram = !!(d.instagram_handle && d.instagram_handle.trim()) || instagramPostIds.has(d.id);
 
       let score = 0;
       const maxScore = 6;
@@ -92,7 +105,7 @@ export default function DesignerCompletenessAudit() {
 
       return { id: d.id, name: d.name, slug: d.slug, hasBio, hasPhilosophy, hasHero, picksCount, hasHeritageSlides, hasInstagram, score, maxScore };
     });
-  }, [designers, pickCounts, heritageIds]);
+  }, [designers, pickCounts, heritageIds, instagramPostIds]);
 
   const summary = useMemo(() => {
     const total = statuses.length;
