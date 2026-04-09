@@ -334,18 +334,15 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                       <Maximize2 className="h-3 w-3" />
                     </div>
                   </div>
-                  {pick.pdf_url && (
+                  {(pick.pdf_url || (pick.pdfUrls && pick.pdfUrls.length > 0)) && (
                     <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <a
-                        href={buildSpecSheetUrl(pick.pdf_url, designer.name, pick.title)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                        title="Spec sheet"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                      </a>
+                      <SpecSheetButton
+                        pdfUrl={pick.pdf_url || pick.pdfUrl}
+                        pdfUrls={pick.pdfUrls}
+                        brandName={designer.name}
+                        productName={pick.title}
+                        variant="icon"
+                      />
                     </div>
                   )}
                 </div>

@@ -686,23 +686,15 @@ const TradeAtelierProfile = () => {
                                <ShoppingCart className="h-3.5 w-3.5" />}
                             </button>
                           )}
-                          {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (() => {
-                            const pdfHref = pick.pdf_url
-                              ? buildSpecSheetUrl(pick.pdf_url, designerLabel || designer.name, pick.title)
-                              : buildSpecSheetUrl((pick.pdf_urls as any[])[0].url, designerLabel || designer.name, pick.title);
-                            return (
-                              <a
-                                href={pdfHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                                title="Spec sheet"
-                              >
-                                <FileText className="h-3.5 w-3.5" />
-                              </a>
-                            );
-                          })()}
+                          {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (
+                            <SpecSheetButton
+                              pdfUrl={pick.pdf_url}
+                              pdfUrls={pick.pdf_urls as any}
+                              brandName={designerLabel || designer.name}
+                              productName={pick.title}
+                              variant="icon"
+                            />
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-col flex-1">
