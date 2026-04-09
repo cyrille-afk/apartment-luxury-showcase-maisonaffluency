@@ -527,19 +527,29 @@ const PublicDesignerProfile = () => {
 
         <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-1 md:space-y-1.5">
           <div className="flex items-center justify-between">
-            <Link
-              to={(() => {
-                const isChild = designer?.founder && designer.founder !== designer.name;
-                const baseName = isChild ? designer.founder : designer?.name;
-                const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
-                const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
-                return `/designers?letter=${letter}${expandParam}`;
-              })()}
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Designers
-            </Link>
+            {fromJournal ? (
+              <Link
+                to={`/journal/${fromJournal}`}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to Article
+              </Link>
+            ) : (
+              <Link
+                to={(() => {
+                  const isChild = designer?.founder && designer.founder !== designer.name;
+                  const baseName = isChild ? designer.founder : designer?.name;
+                  const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
+                  const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
+                  return `/designers?letter=${letter}${expandParam}`;
+                })()}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Designers
+              </Link>
+            )}
           </div>
 
           {isDesignerProfile ? (
