@@ -354,8 +354,7 @@ const ShowroomGridView = ({
     price: (() => {
       const raw = product.trade_price_cents;
       if (!raw || !product.currency) return null;
-      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
-      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+      return formatPriceConverted(raw, product.currency, displayCurrency, fxRates, product.price_unit);
     })(),
   });
 
@@ -372,8 +371,7 @@ const ShowroomGridView = ({
     price: (() => {
       const raw = product.trade_price_cents;
       if (!raw || !product.currency) return null;
-      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
-      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+      return formatPriceConverted(raw, product.currency, displayCurrency, fxRates, product.price_unit);
     })(),
   });
 
@@ -583,9 +581,16 @@ const ShowroomGridView = ({
                       onPriceUpdated={() => window.location.reload()}
                     />
                   ) : price ? (
-                    <p className="font-display text-sm text-accent font-semibold mt-1 inline-flex items-center justify-center gap-1.5">
-                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
-                      {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
+                    <p className="font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap">
+                      {showTradePrice ? (
+                        <>
+                          <span className="line-through text-muted-foreground/60 font-normal text-xs">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
+                          <span className="text-accent font-semibold">{formatPriceConverted(Math.round(price.cents * (1 - TRADE_DISCOUNT)), price.currency, displayCurrency, fxRates, price.price_unit)}</span>
+                          <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+                        </>
+                      ) : (
+                        <span className="text-accent font-semibold">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
+                      )}
                     </p>
                   ) : null}
                 </div>
@@ -636,9 +641,16 @@ const ShowroomGridView = ({
                     />
                   </div>
                 ) : price ? (
-                  <span className="font-display text-sm text-accent font-semibold shrink-0 inline-flex items-center gap-1.5">
-                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
-                    {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>}
+                  <span className="font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap">
+                    {showTradePrice ? (
+                      <>
+                        <span className="line-through text-muted-foreground/60 font-normal text-xs">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
+                        <span className="text-accent font-semibold">{formatPriceConverted(Math.round(price.cents * (1 - TRADE_DISCOUNT)), price.currency, displayCurrency, fxRates, price.price_unit)}</span>
+                        <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+                      </>
+                    ) : (
+                      <span className="text-accent font-semibold">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
+                    )}
                   </span>
                 ) : null}
                 <button
