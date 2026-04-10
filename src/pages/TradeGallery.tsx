@@ -450,12 +450,25 @@ const TradeGallery = () => {
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.product_name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                    <>
+                      <img
+                        src={product.image_url}
+                        alt={product.product_name}
+                        className={cn(
+                          "absolute inset-0 w-full h-full object-cover transition-all duration-700",
+                          product.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
+                        )}
+                        loading="lazy"
+                      />
+                      {product.hover_image_url && (
+                        <img
+                          src={product.hover_image_url}
+                          alt={`${product.product_name} hover view`}
+                          className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100"
+                          loading="lazy"
+                        />
+                      )}
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Package className="h-6 w-6 text-muted-foreground/30" />
