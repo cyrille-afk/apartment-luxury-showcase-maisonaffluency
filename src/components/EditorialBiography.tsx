@@ -542,7 +542,7 @@ function SplitImageBlock({
   paragraphs: string[];
   overrideCaption?: string | null;
   forceAlign?: "left" | "right" | null;
-  size?: "small" | null;
+  size?: string | null;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = forceAlign ? forceAlign === "right" : index % 2 === 1;
