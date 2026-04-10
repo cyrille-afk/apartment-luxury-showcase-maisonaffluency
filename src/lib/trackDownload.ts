@@ -2,9 +2,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Fire-and-forget: log a document download with the user's country.
- * Works for both document_id (trade_documents table) and standalone tracking.
+ * @param documentId  – UUID from trade_documents (optional for spec sheets etc.)
+ * @param label       – human-readable label when no document_id is available
  */
-export function trackDownload(documentId: string) {
+export function trackDownload(documentId?: string, label?: string) {
   supabase.auth.getUser().then(async ({ data }) => {
     if (!data?.user) return;
     let country = "";
@@ -16,7 +17,8 @@ export function trackDownload(documentId: string) {
     if (app?.country) country = app.country;
     await supabase.from("document_downloads").insert({
       user_id: data.user.id,
-      document_id: documentId,
+      document_id: documentId ?? null,
+      document_label: label ?? "",
       country,
     });
   }).catch(() => {});
