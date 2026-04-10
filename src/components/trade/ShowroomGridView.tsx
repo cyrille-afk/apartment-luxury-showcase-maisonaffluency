@@ -354,8 +354,7 @@ const ShowroomGridView = ({
     price: (() => {
       const raw = product.trade_price_cents;
       if (!raw || !product.currency) return null;
-      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
-      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+      return formatPriceConverted(raw, product.currency, displayCurrency, fxRates, product.price_unit);
     })(),
   });
 
