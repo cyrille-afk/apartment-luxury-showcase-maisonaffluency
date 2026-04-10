@@ -327,7 +327,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     <Input value={pick.price_prefix || ""} onChange={(e) => updateField(pick.id, "price_prefix", e.target.value || null)} className="text-xs" placeholder="e.g. From" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Trade Price (cents)</label>
+                    <label className="text-[10px] text-muted-foreground">RRP Price (cents)</label>
                     <Input type="number" value={pick.trade_price_cents ?? ""} onChange={(e) => updateField(pick.id, "trade_price_cents", e.target.value ? parseInt(e.target.value) : null)} className="text-xs" />
                   </div>
                   <div>
