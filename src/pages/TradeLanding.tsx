@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Quote, Share2, Check } from "lucide-react";
+import { ArrowLeft, ChevronDown, Quote, Share2, Check, FileDown } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -452,6 +452,64 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 </span>
               </motion.div>
             ))}
+          </div>
+        </div>
+
+        {/* ─── Featured Download Banner ─── */}
+        <div className="w-full bg-[hsl(var(--card))] border-b border-border">
+          <div className="max-w-6xl mx-auto px-6 md:px-12 py-8 md:py-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="flex flex-col md:flex-row items-center gap-6 md:gap-10"
+            >
+              {/* Catalogue cover thumbnail */}
+              <a
+                href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
+              >
+                <img
+                  src={cloudinaryUrl("v1775858700/andree-putman-art-paris-cover_placeholder", { width: 400, height: 533, quality: "auto:good", crop: "fill" })}
+                  alt="André Putman Art Paris 2026 Catalogue"
+                  className="w-full h-full object-cover hidden"
+                />
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/40 to-muted/20">
+                  <div className="text-center px-3">
+                    <p className="font-display text-sm text-foreground/80 leading-tight">André Putman</p>
+                    <p className="font-body text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">Art Paris 2026</p>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity p-2.5 rounded-full bg-[hsl(var(--pdf-red))] text-white shadow-lg">
+                    <FileDown className="h-4 w-4" />
+                  </div>
+                </div>
+              </a>
+
+              {/* Text + CTA */}
+              <div className="flex-1 text-center md:text-left">
+                <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-2">Featured Catalogue</p>
+                <h3 className="font-display text-lg md:text-xl text-foreground mb-2">
+                  André Putman — Art Paris 2026
+                </h3>
+                <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-lg">
+                  Explore the exclusive photoshoot catalogue from Art Paris 2026, showcasing André Putman's iconic furniture and design legacy. Free to download.
+                </p>
+                <a
+                  href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                  Download Catalogue
+                </a>
+              </div>
+            </motion.div>
           </div>
         </div>
 
