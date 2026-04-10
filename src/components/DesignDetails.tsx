@@ -24,7 +24,7 @@ const DesignDetails = () => {
           <div className="max-w-3xl mx-auto p-[4px] rounded-sm bg-foreground">
             <div className="p-[6px] sm:p-[8px] md:p-[10px] rounded-sm bg-white">
             <Link
-              to="/trade/program"
+              to="/trade-program"
               className="group block overflow-hidden rounded-sm relative aspect-[5/3]"
             >
             <img

@@ -89,7 +89,7 @@ const QuickJumpMenu = () => {
     }
     // Trade links to a separate page
     if (sectionId === "details") {
-      navigate("/trade/program");
+      navigate("/trade-program");
       setIsOpen(false);
       return;
     }

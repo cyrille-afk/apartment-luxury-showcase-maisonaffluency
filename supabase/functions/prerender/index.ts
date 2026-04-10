@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
             ${picksData.map(p => `<li>${esc(p.title)}${p.category ? ` — ${esc(p.category)}` : ""}${p.materials ? `, ${esc(p.materials)}` : ""}${p.dimensions ? `, ${esc(p.dimensions)}` : ""}</li>`).join("\n            ")}
           </ul>
         ` : ""}
-        <p><a href="${SITE}/trade/program">Join Our Trade Program</a> for exclusive pricing and access.</p>`;
+        <p><a href="${SITE}/trade-program">Join Our Trade Program</a> for exclusive pricing and access.</p>`;
 
       jsonLd = JSON.stringify({
         "@context": "https://schema.org",
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
         <p><strong>${esc(d.specialty || "")}</strong></p>
         ${d.biography ? `<p>${esc(d.biography.substring(0, 300))}...</p>` : ""}
       `).join("")}
-      <p><a href="${SITE}/trade/program">Join Our Trade Program</a> for exclusive pricing and access.</p>`;
+      <p><a href="${SITE}/trade-program">Join Our Trade Program</a> for exclusive pricing and access.</p>`;
   }
 
   // --- Designer index ---
@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
       <ul>
         ${(designers || []).map(d => `<li><a href="${SITE}/designers/${d.slug}">${esc(d.display_name || d.name)}</a> — ${esc(d.specialty || "Design")}</li>`).join("\n        ")}
       </ul>
-      <p><a href="${SITE}/trade/program">Join Our Trade Program</a></p>`;
+      <p><a href="${SITE}/trade-program">Join Our Trade Program</a></p>`;
   }
 
   // --- Journal article ---
@@ -231,7 +231,7 @@ Deno.serve(async (req) => {
         ${product.description ? `<p>${esc(product.description.substring(0, 500))}</p>` : ""}
         ${product.materials ? `<p>Materials: ${esc(product.materials)}</p>` : ""}
         ${product.dimensions ? `<p>Dimensions: ${esc(product.dimensions)}</p>` : ""}
-        <p><a href="${SITE}/trade/program">Join Our Trade Program</a> for pricing and availability.</p>`;
+        <p><a href="${SITE}/trade-program">Join Our Trade Program</a> for pricing and availability.</p>`;
 
       jsonLd = JSON.stringify({
         "@context": "https://schema.org",
@@ -249,7 +249,7 @@ Deno.serve(async (req) => {
           "priceCurrency": "USD",
           "price": "0",
           "priceValidUntil": "2027-12-31",
-          "url": `${SITE}/trade/program`
+          "url": `${SITE}/trade-program`
         }
       });
     }

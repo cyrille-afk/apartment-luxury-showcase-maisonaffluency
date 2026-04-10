@@ -34,7 +34,7 @@ const NotFound = () => {
           Maison Affluency
         </Link>
         <Link
-          to={isTradePath ? "/trade/login" : "/trade/program"}
+          to={isTradePath ? "/trade/login" : "/trade-program"}
           className="inline-flex items-center px-7 py-3 border border-border font-body text-xs uppercase tracking-[0.2em] rounded-full text-foreground hover:bg-muted transition-colors"
         >
           {isTradePath ? "Trade Sign In" : "Trade Program"}
