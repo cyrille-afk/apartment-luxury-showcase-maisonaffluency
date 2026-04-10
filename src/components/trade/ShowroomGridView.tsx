@@ -622,7 +622,7 @@ const ShowroomGridView = ({
                       />
                     </div>
                   ) : (
-                    renderPriceDisplay(price, "font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap")
+                    renderPriceDisplay(price, "font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)
                   )}
                 </div>
               </div>
@@ -659,7 +659,7 @@ const ShowroomGridView = ({
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
-                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end")}
+                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.price_prefix)}
                     <InlinePriceEditor
                       productName={product.product_name}
                       brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
@@ -672,7 +672,7 @@ const ShowroomGridView = ({
                     />
                   </div>
                 ) : (
-                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap")
+                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap", product.price_prefix)
                 )}
                 <button
                   onClick={() => handleAddToQuote(product)}
