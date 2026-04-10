@@ -51,5 +51,4 @@ Disallow: /
 User-agent: cohere-ai
 Disallow: /
 
-Sitemap: https://maisonaffluency.com/sitemap.xml
-Sitemap: https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/sitemap
+Sitemap: https://www.maisonaffluency.com/sitemap.xml
