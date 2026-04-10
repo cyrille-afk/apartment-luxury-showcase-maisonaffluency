@@ -150,7 +150,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     materials: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
-    sort_order: number; created_at: string;
+    price_prefix: string | null; sort_order: number; created_at: string;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -317,10 +317,14 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     <Input value={pick.photo_credit || ""} onChange={(e) => updateField(pick.id, "photo_credit", e.target.value || null)} className="text-xs" />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
                     <Input value={pick.currency} onChange={(e) => updateField(pick.id, "currency", e.target.value)} className="text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Price Prefix</label>
+                    <Input value={pick.price_prefix || ""} onChange={(e) => updateField(pick.id, "price_prefix", e.target.value || null)} className="text-xs" placeholder="e.g. From" />
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground">Trade Price (cents)</label>
