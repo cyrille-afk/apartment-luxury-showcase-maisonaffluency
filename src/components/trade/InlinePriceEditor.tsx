@@ -166,17 +166,14 @@ export default function InlinePriceEditor({
   return (
     <button
       onClick={(e) => { e.stopPropagation(); startEdit(); }}
-      className="group/price flex items-center justify-center gap-1 mt-1 cursor-pointer w-full"
+      className="group/price flex items-center justify-center gap-1 cursor-pointer"
       title="Edit price"
     >
       {currentPriceCents ? (
-        <span className="font-display text-sm text-accent font-semibold">
-          {formatPriceConverted(currentPriceCents, currency, displayCurrency, fxRates, priceUnit)}
-        </span>
+        <Pencil className="h-2.5 w-2.5 text-muted-foreground/40 opacity-0 group-hover/price:opacity-100 transition-opacity" />
       ) : (
         <span className="font-body text-[10px] text-muted-foreground/60 italic">Set price</span>
       )}
-      <Pencil className="h-2.5 w-2.5 text-muted-foreground/40 opacity-0 group-hover/price:opacity-100 transition-opacity" />
     </button>
   );
 }
