@@ -741,7 +741,7 @@ const Collectibles = () => {
                 <button
                   onClick={() => {
                     sharePageOnWhatsApp(
-                      "/#collectibles",
+                      "/collectibles",
                       "Collectible Design On View — Maison Affluency",
                       undefined,
                       { directUrlPath: "/collectibles-og.html" }

@@ -8,6 +8,7 @@ const STATIC_URLS = [
   { loc: "/designers", changefreq: "weekly", priority: "0.9" },
   { loc: "/gallery", changefreq: "monthly", priority: "0.8" },
   { loc: "/collectibles", changefreq: "monthly", priority: "0.8" },
+  { loc: "/contact", changefreq: "monthly", priority: "0.7" },
   { loc: "/journal", changefreq: "weekly", priority: "0.9" },
   { loc: "/trade/program", changefreq: "monthly", priority: "0.8" },
   { loc: "/trade/register", changefreq: "monthly", priority: "0.6" },

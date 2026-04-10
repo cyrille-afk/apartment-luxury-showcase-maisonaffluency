@@ -120,7 +120,7 @@ const ProductPage = () => {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: product.brand_name, item: `${SITE_URL}/#brands` },
+      { "@type": "ListItem", position: 2, name: product.brand_name, item: `${SITE_URL}/designers` },
       { "@type": "ListItem", position: 3, name: product.product_name, item: canonicalUrl },
     ],
   };
