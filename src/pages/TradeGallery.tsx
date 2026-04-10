@@ -63,19 +63,19 @@ const TradeGallery = () => {
     const [{ data: tpData }, { data: cpData }] = await Promise.all([
       supabase
         .from("trade_products")
-        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix")
         .not("trade_price_cents", "is", null),
       supabase
         .from("designer_curator_picks")
-        .select("title, trade_price_cents, currency")
+        .select("title, trade_price_cents, currency, price_prefix")
         .not("trade_price_cents", "is", null),
     ]);
 
-    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string }>();
-    const entries: { name: string; cents: number; currency: string; price_unit?: string }[] = [];
+    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null }>();
+    const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null }[] = [];
 
-    const addEntry = (name: string, cents: number, currency: string, price_unit?: string) => {
-      const entry = { name, cents, currency, price_unit };
+    const addEntry = (name: string, cents: number, currency: string, price_unit?: string, price_prefix?: string | null) => {
+      const entry = { name, cents, currency, price_unit, price_prefix };
       entries.push(entry);
       lookup.set(name.trim().toLowerCase(), entry);
       const norm = normalizeName(name);
@@ -84,13 +84,13 @@ const TradeGallery = () => {
 
     // Trade products prices
     for (const p of tpData ?? []) {
-      if (p.trade_price_cents) addEntry(p.product_name, p.trade_price_cents, p.currency, p.price_unit);
+      if (p.trade_price_cents) addEntry(p.product_name, p.trade_price_cents, p.currency, p.price_unit, p.price_prefix);
     }
 
     // Curator picks prices (only add if not already present from trade_products)
     for (const p of cpData ?? []) {
       if (p.trade_price_cents && !lookup.has(p.title.trim().toLowerCase())) {
-        addEntry(p.title, p.trade_price_cents, p.currency);
+        addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix);
       }
     }
 
@@ -213,28 +213,29 @@ const TradeGallery = () => {
   };
 
   const renderPriceDisplay = (
-    price: { cents: number; currency: string; price_unit?: string } | null,
+    price: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null,
     className: string,
   ) => {
     if (!price) return null;
 
     const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
+    const pfx = price.price_prefix ? `${price.price_prefix} ` : '';
 
     return (
       <span className={className}>
         {showTradePrice ? (
           <>
             <span className="line-through text-muted-foreground/60 font-normal text-xs">
-              {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+              {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="text-accent font-semibold">
-              {formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}
+              {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
           </>
         ) : (
           <span className="text-foreground font-semibold">
-            {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+            {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
           </span>
         )}
       </span>
