@@ -64,6 +64,7 @@ function pickToLightboxItem(
   brandName: string,
   displayCurrency?: DisplayCurrency,
   fxRates?: Record<string, number>,
+  showTradeDiscount?: boolean,
 ): TradeProductLightboxItem {
   const currency = pick.currency || "EUR";
   let price: string | undefined;
