@@ -547,6 +547,7 @@ function SplitImageBlock({
   const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = forceAlign ? forceAlign === "right" : index % 2 === 1;
   const isSmall = size === "small";
+  const isPercent = size && /^\d{1,3}%$/.test(size);
 
   const imageEl = (
     <motion.figure
@@ -588,7 +589,7 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
-  const imageWidth = isSmall ? "md:w-[22%]" : "md:w-[42%]";
+  const imageWidth = isSmall ? "md:w-[22%]" : isPercent ? `md:w-[${size}]` : "md:w-[42%]";
 
   return (
     <div className={`${index === 0 ? "mt-4 md:mt-6 mb-2 md:mb-3" : "mt-5 md:mt-7 mb-2 md:mb-3"} flex flex-col md:flex-row gap-1 md:gap-3 items-center`}>
