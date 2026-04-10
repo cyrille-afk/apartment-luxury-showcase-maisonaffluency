@@ -73,7 +73,7 @@ function useLocalFavorites() {
             description: "Create a free account so your favourites sync across devices.",
             action: {
               label: "Sign up",
-              onClick: () => window.location.assign("/trade/program"),
+              onClick: () => window.location.assign("/trade-program"),
             },
             duration: 8000,
           })
@@ -327,7 +327,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             {/* Primary CTA — matches "Add to Quote" visual style */}
             <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
               <a
-                href="/trade/program"
+                href="/trade-program"
                 className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
               >
                 Price on Request
@@ -410,7 +410,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             <div className="mt-auto pt-4 border-t border-border">
               <p className="font-body text-[11px] text-muted-foreground">
                 For pricing and availability, please{" "}
-                <a href="/trade/program" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                <a href="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
                   join our Trade Program
                 </a>.
               </p>

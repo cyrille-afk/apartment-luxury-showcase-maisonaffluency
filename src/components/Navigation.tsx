@@ -47,7 +47,7 @@ const leftNavItems = [{
 
 const rightNavItems = [{
   label: "Trade Program",
-  href: "/trade/program",
+  href: "/trade-program",
   icon: Briefcase,
 }];
 
@@ -130,8 +130,8 @@ const Navigation = () => {
       designers: "/designers",
       collectibles: "/collectibles",
       
-      details: "/trade/program",
-      contact: "/trade/program",
+      details: "/trade-program",
+      contact: "/trade-program",
     };
 
     const visibleSections = new Set<string>();
@@ -621,7 +621,7 @@ const Navigation = () => {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => navigate("/trade/program#apply")}
+                          onClick={() => navigate("/trade-program#apply")}
                           className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                         >
                           <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />

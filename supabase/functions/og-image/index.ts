@@ -7,7 +7,7 @@
  * route, then redirects real browsers to the SPA via JavaScript.
  *
  * Usage:
- *   https://<project>.supabase.co/functions/v1/og-image?path=/trade/program
+ *   https://<project>.supabase.co/functions/v1/og-image?path=/trade-program
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
@@ -125,7 +125,7 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
         url: `${SITE_URL}/catalogue`,
       };
 
-    case "/trade/program":
+    case "/trade-program":
       return {
         title:
           "Maison Affluency Trade Program — Exclusive Benefits for Design Professionals",
@@ -133,7 +133,7 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
           "Dedicated Client Advisors, Designers & Ateliers Library, Project Folders, Trade Pricing, Consolidated Insured Shipping.",
         image:
           "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg,g_auto/v1772085848/intimate-dining_ux4pee.jpg",
-        url: `${SITE_URL}/trade/program`,
+        url: `${SITE_URL}/trade-program`,
       };
 
     case "/trade/register":
