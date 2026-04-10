@@ -384,7 +384,10 @@ const Navigation = () => {
                       onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-white hover:bg-[hsl(var(--gold))] font-bold bg-[hsl(var(--gold)/0.1)] px-3 rounded-lg"
                     >
-                      {item.label}
+                      <span className="flex items-center gap-2">
+                        {item.label}
+                        <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
+                      </span>
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   ))}
@@ -723,6 +726,7 @@ const Navigation = () => {
                   className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
                 >
                   {item.label}
+                  <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
                 </button>
               ))}
             </div>
