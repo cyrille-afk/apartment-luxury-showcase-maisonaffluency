@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { trackDownload } from "@/lib/trackDownload";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SectionHero from "@/components/trade/SectionHero";
