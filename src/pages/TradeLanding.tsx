@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
+import { trackDownload } from "@/lib/trackDownload";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
@@ -470,6 +471,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "André Putman Art Paris 2026 — Landing")}
                 className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
               >
                 <img
@@ -497,6 +499,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "André Putman Art Paris 2026 — Landing CTA")}
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
                 >
                   <FileDown className="h-3.5 w-3.5" />

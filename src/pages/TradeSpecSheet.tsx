@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackDownload } from "@/lib/trackDownload";
 import { getSignedSpecSheetUrl } from "@/utils/signedSpecSheetUrl";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FileDown, Lock } from "lucide-react";
@@ -116,6 +117,7 @@ export default function TradeSpecSheet() {
   }
 
   const handleDownload = async () => {
+    trackDownload(undefined, `${brand} — ${product} Spec Sheet`);
     try {
       const res = await fetch(pdfUrl!);
       const blob = await res.blob();
