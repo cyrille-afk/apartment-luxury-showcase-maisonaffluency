@@ -68,11 +68,12 @@ function pickToLightboxItem(
   const currency = pick.currency || "EUR";
   let price: string | undefined;
   if (pick.trade_price_cents != null) {
+    const cents = showTradeDiscount ? Math.round(pick.trade_price_cents * 0.92) : pick.trade_price_cents;
     if (displayCurrency && fxRates) {
-      price = formatPriceConverted(pick.trade_price_cents, currency, displayCurrency, fxRates);
+      price = formatPriceConverted(cents, currency, displayCurrency, fxRates);
     } else {
       const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency + " ";
-      price = `${symbol}${(pick.trade_price_cents / 100).toLocaleString()}`;
+      price = `${symbol}${(cents / 100).toLocaleString()}`;
     }
   }
   return {
