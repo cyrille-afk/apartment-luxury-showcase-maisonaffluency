@@ -207,9 +207,38 @@ const TradeGallery = () => {
     return best;
   };
 
-  const applyDiscount = (p: { cents: number; currency: string; price_unit?: string } | null) => {
+  const getDisplayPrice = (p: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!p) return null;
-    return p; // discount is now applied inline in the render
+    return showTradePrice ? { ...p, cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)) } : p;
+  };
+
+  const renderPriceDisplay = (
+    price: { cents: number; currency: string; price_unit?: string } | null,
+    className: string,
+  ) => {
+    if (!price) return null;
+
+    const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
+
+    return (
+      <span className={className}>
+        {showTradePrice ? (
+          <>
+            <span className="line-through text-muted-foreground/60 font-normal text-xs">
+              {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+            </span>
+            <span className="text-accent font-semibold">
+              {formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}
+            </span>
+            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+          </>
+        ) : (
+          <span className="text-accent font-semibold">
+            {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+          </span>
+        )}
+      </span>
+    );
   };
 
   const filtered = useMemo(() => {
@@ -243,13 +272,13 @@ const TradeGallery = () => {
     designerId: product.id,
     section: "designers",
     price: (() => {
-      const p = applyDiscount(getProductPrice(product));
+      const p = getDisplayPrice(getProductPrice(product));
       return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates, p.price_unit) : null;
     })(),
   });
 
   const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
-    const price = applyDiscount(getProductPrice(product));
+    const price = getDisplayPrice(getProductPrice(product));
     return {
       id: product.id,
       product_name: product.product_name,
@@ -415,7 +444,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
-            const price = applyDiscount(getProductPrice(product));
+            const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
@@ -506,29 +535,22 @@ const TradeGallery = () => {
                     <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
                   )}
                   {isAdmin ? (
-                    <InlinePriceEditor
-                      productName={product.product_name}
-                      brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
-                      currentPriceCents={price?.cents}
-                      currency={price?.currency || "SGD"}
-                      priceUnit={price?.price_unit}
-                      displayCurrency={displayCurrency}
-                      fxRates={fxRates}
-                      onPriceUpdated={() => refreshPrices()}
-                    />
-                  ) : price ? (
-                    <p className="font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap">
-                      {showTradePrice ? (
-                        <>
-                          <span className="line-through text-muted-foreground/60 font-normal text-xs">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                          <span className="text-accent font-semibold">{formatPriceConverted(Math.round(price.cents * (1 - TRADE_DISCOUNT)), price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                          <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
-                        </>
-                      ) : (
-                        <span className="text-accent font-semibold">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                      )}
-                    </p>
-                  ) : null}
+                    <div className="mt-1 flex flex-col items-center gap-1.5">
+                      {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap")}
+                      <InlinePriceEditor
+                        productName={product.product_name}
+                        brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                        currentPriceCents={price?.cents}
+                        currency={price?.currency || "SGD"}
+                        priceUnit={price?.price_unit}
+                        displayCurrency={displayCurrency}
+                        fxRates={fxRates}
+                        onPriceUpdated={() => refreshPrices()}
+                      />
+                    </div>
+                  ) : (
+                    renderPriceDisplay(price, "font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap")
+                  )}
                 </div>
               </div>
             );
@@ -539,7 +561,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
-            const price = applyDiscount(getProductPrice(product));
+            const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
@@ -560,7 +582,8 @@ const TradeGallery = () => {
                   </p>
                 </div>
                 {isAdmin ? (
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex flex-col items-end gap-1.5">
+                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end")}
                     <InlinePriceEditor
                       productName={product.product_name}
                       brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -572,19 +595,9 @@ const TradeGallery = () => {
                       onPriceUpdated={() => refreshPrices()}
                     />
                   </div>
-                ) : price ? (
-                  <span className="font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap">
-                    {showTradePrice ? (
-                      <>
-                        <span className="line-through text-muted-foreground/60 font-normal text-xs">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                        <span className="text-accent font-semibold">{formatPriceConverted(Math.round(price.cents * (1 - TRADE_DISCOUNT)), price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                        <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
-                      </>
-                    ) : (
-                      <span className="text-accent font-semibold">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                    )}
-                  </span>
-                ) : null}
+                ) : (
+                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap")
+                )}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
