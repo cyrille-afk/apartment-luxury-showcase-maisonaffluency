@@ -746,10 +746,16 @@ const TradeAtelierProfile = () => {
                           </p>
                         )}
                         <div className="mt-auto pt-1">
-                          <p className="font-display text-[11px] md:text-xs text-foreground">
+                          <p className="font-display text-[11px] md:text-xs text-foreground inline-flex items-center gap-1.5">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
-                                ? `${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`
+                                ? <>
+                                    {`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(
+                                      showTradePrice ? Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)) : pick.trade_price_cents,
+                                      pick.currency || 'EUR', displayCurrency, fxRates
+                                    )}`}
+                                    {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
+                                  </>
                                 : "Price on request"
                               : "Price on request"}
                           </p>
