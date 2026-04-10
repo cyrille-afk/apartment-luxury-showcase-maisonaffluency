@@ -748,16 +748,20 @@ const TradeAtelierProfile = () => {
                           </p>
                         )}
                         <div className="mt-auto pt-1">
-                          <p className="font-display text-[11px] md:text-xs text-foreground inline-flex items-center gap-1.5">
+                          <p className="font-display text-[11px] md:text-xs inline-flex items-center gap-1.5 flex-wrap">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
-                                ? <>
-                                    {`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(
-                                      showTradePrice ? Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)) : pick.trade_price_cents,
-                                      pick.currency || 'EUR', displayCurrency, fxRates
-                                    )}`}
-                                    {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
-                                  </>
+                                ? showTradePrice
+                                  ? <>
+                                      <span className="line-through text-muted-foreground/60 font-normal text-[10px]">
+                                        {`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}
+                                      </span>
+                                      <span className="text-accent font-semibold">
+                                        {formatPriceConverted(Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)), pick.currency || 'EUR', displayCurrency, fxRates)}
+                                      </span>
+                                      <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+                                    </>
+                                  : <span className="text-foreground">{`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
                                 : "Price on request"
                               : "Price on request"}
                           </p>
