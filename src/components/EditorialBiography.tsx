@@ -168,9 +168,9 @@ function renderQuotedText(text: string): React.ReactNode[] {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: string | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small|28%
   const pipes = value.split(/\s*\|\s*/);
   const url = normalizeMediaInput(pipes[0] || "");
 
@@ -180,15 +180,15 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
   let caption: string | null = null;
   let poster: string | null = null;
   let align: "left" | "right" | null = null;
-  let size: "small" | null = null;
+  let size: string | null = null;
   for (let i = 1; i < pipes.length; i++) {
     const seg = pipes[i].trim();
     if (/^poster:/i.test(seg)) {
       poster = seg.replace(/^poster:/i, "").trim();
     } else if (/^(left|right)$/i.test(seg)) {
       align = seg.toLowerCase() as "left" | "right";
-    } else if (/^small$/i.test(seg)) {
-      size = "small";
+    } else if (/^small$/i.test(seg) || /^\d{1,3}%$/.test(seg)) {
+      size = seg.toLowerCase();
     } else if (!caption) {
       caption = seg;
     }
