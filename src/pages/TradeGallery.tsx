@@ -177,7 +177,7 @@ const TradeGallery = () => {
   );
 
   /** Find price by exact name, normalized name, substring, or token overlap */
-  const getProductPrice = (product: TradeProduct): { cents: number; currency: string; price_unit?: string } | null => {
+  const getProductPrice = (product: TradeProduct): { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null => {
     const nameKey = product.product_name.trim().toLowerCase();
     if (priceLookup.has(nameKey)) return priceLookup.get(nameKey)!;
     if (product.subtitle) {
@@ -195,7 +195,7 @@ const TradeGallery = () => {
     // Token overlap
     const targetTokens = new Set(tokenizeName(product.product_name));
     if (targetTokens.size === 0) return null;
-    let best: { cents: number; currency: string; price_unit?: string } | null = null;
+    let best: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null = null;
     let bestScore = 0;
     for (const e of priceEntries) {
       const ct = tokenizeName(e.name);
@@ -207,7 +207,7 @@ const TradeGallery = () => {
     return best;
   };
 
-  const getDisplayPrice = (p: { cents: number; currency: string; price_unit?: string } | null) => {
+  const getDisplayPrice = (p: { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null) => {
     if (!p) return null;
     return showTradePrice ? { ...p, cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)) } : p;
   };
