@@ -191,7 +191,7 @@ const ShowroomGridView = ({
             <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
           </>
         ) : (
-          <span className="text-accent font-semibold">
+          <span className="text-foreground font-semibold">
             {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
           </span>
         )}

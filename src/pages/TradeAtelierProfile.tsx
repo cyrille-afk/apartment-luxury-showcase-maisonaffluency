@@ -748,12 +748,12 @@ const TradeAtelierProfile = () => {
                           </p>
                         )}
                         <div className="mt-auto pt-1">
-                          <p className="font-display text-[11px] md:text-xs inline-flex items-center gap-1.5 flex-wrap">
+                          <p className="font-display text-sm text-center inline-flex items-center justify-center gap-1.5 flex-wrap w-full">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice
                                   ? <>
-                                      <span className="line-through text-muted-foreground/60 font-normal text-[10px]">
+                                      <span className="line-through text-muted-foreground/60 font-normal text-xs">
                                         {`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}
                                       </span>
                                       <span className="text-accent font-semibold">
@@ -761,7 +761,7 @@ const TradeAtelierProfile = () => {
                                       </span>
                                       <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
                                     </>
-                                  : <span className="text-foreground">{`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
+                                  : <span className="text-foreground font-semibold">{`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
                                 : "Price on request"
                               : "Price on request"}
                           </p>
