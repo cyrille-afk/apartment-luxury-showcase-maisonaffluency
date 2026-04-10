@@ -634,7 +634,7 @@ const TradeAtelierProfile = () => {
                     <div
                       key={pick.id}
                       className="group cursor-pointer flex flex-col"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates))}
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
                         {/* Tag badges — upper-left */}
@@ -693,7 +693,7 @@ const TradeAtelierProfile = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates));
+                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice));
                               }}
                               className={cn(
                                 "p-2 rounded-md text-white transition-colors",
