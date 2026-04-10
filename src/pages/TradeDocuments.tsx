@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { trackDownload } from "@/lib/trackDownload";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SectionHero from "@/components/trade/SectionHero";
@@ -276,22 +277,7 @@ const TradeDocuments = () => {
                       onClick={async (e) => {
                         e.preventDefault();
                         // Track download with country
-                        supabase.auth.getUser().then(async ({ data }) => {
-                          if (data?.user) {
-                            let country = "";
-                            const { data: app } = await supabase
-                              .from("trade_applications")
-                              .select("country")
-                              .eq("user_id", data.user.id)
-                              .maybeSingle();
-                            if (app?.country) country = app.country;
-                            supabase.from("document_downloads").insert({
-                              user_id: data.user.id,
-                              document_id: doc.id,
-                              country,
-                            }).then(() => {});
-                          }
-                        });
+                        trackDownload(doc.id);
                         try {
                           const res = await fetch(doc.file_url);
                           const blob = await res.blob();

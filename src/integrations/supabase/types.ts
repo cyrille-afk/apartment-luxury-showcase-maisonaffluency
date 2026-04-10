@@ -851,21 +851,24 @@ export type Database = {
         Row: {
           country: string
           created_at: string
-          document_id: string
+          document_id: string | null
+          document_label: string
           id: string
           user_id: string
         }
         Insert: {
           country?: string
           created_at?: string
-          document_id: string
+          document_id?: string | null
+          document_label?: string
           id?: string
           user_id: string
         }
         Update: {
           country?: string
           created_at?: string
-          document_id?: string
+          document_id?: string | null
+          document_label?: string
           id?: string
           user_id?: string
         }
