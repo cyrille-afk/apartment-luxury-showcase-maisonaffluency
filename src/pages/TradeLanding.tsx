@@ -473,16 +473,10 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
               >
                 <img
-                  src={cloudinaryUrl("v1775858700/andree-putman-art-paris-cover_placeholder", { width: 400, height: 533, quality: "auto:good", crop: "fill" })}
+                  src={cloudinaryUrl("v1775859198/Screen_Shot_2026-04-11_at_6.06.05_AM_iznxoe", { width: 400, height: 533, quality: "auto:good", crop: "fill" })}
                   alt="André Putman Art Paris 2026 Catalogue"
-                  className="w-full h-full object-cover hidden"
+                  className="w-full h-full object-cover"
                 />
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/40 to-muted/20">
-                  <div className="text-center px-3">
-                    <p className="font-display text-sm text-foreground/80 leading-tight">André Putman</p>
-                    <p className="font-body text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">Art Paris 2026</p>
-                  </div>
-                </div>
                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity p-2.5 rounded-full bg-[hsl(var(--pdf-red))] text-white shadow-lg">
                     <FileDown className="h-4 w-4" />
