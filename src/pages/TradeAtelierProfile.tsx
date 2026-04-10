@@ -4,7 +4,7 @@ import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2, Maximize2 } from "lucide-react";
+import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2, Maximize2, Tag } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
@@ -64,15 +64,17 @@ function pickToLightboxItem(
   brandName: string,
   displayCurrency?: DisplayCurrency,
   fxRates?: Record<string, number>,
+  showTradeDiscount?: boolean,
 ): TradeProductLightboxItem {
   const currency = pick.currency || "EUR";
   let price: string | undefined;
   if (pick.trade_price_cents != null) {
+    const cents = showTradeDiscount ? Math.round(pick.trade_price_cents * 0.92) : pick.trade_price_cents;
     if (displayCurrency && fxRates) {
-      price = formatPriceConverted(pick.trade_price_cents, currency, displayCurrency, fxRates);
+      price = formatPriceConverted(cents, currency, displayCurrency, fxRates);
     } else {
       const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency + " ";
-      price = `${symbol}${(pick.trade_price_cents / 100).toLocaleString()}`;
+      price = `${symbol}${(cents / 100).toLocaleString()}`;
     }
   }
   return {
@@ -177,6 +179,8 @@ const TradeAtelierProfile = () => {
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [showTradePrice, setShowTradePrice] = useState(false);
+  const TRADE_DISCOUNT = 0.08;
   const fxRates = useFxRates();
 
   // Lightbox state
@@ -600,6 +604,21 @@ const TradeAtelierProfile = () => {
                   </TooltipProvider>
                 </div>
                 <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+                {(isTradeUser || isAdmin) && (
+                  <button
+                    onClick={() => setShowTradePrice((v) => !v)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
+                      showTradePrice
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    )}
+                    title={showTradePrice ? "Showing trade price (–8%)" : "Showing retail price"}
+                  >
+                    <Tag className="h-3.5 w-3.5" />
+                    {showTradePrice ? "Trade –8%" : "Retail"}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -615,7 +634,7 @@ const TradeAtelierProfile = () => {
                     <div
                       key={pick.id}
                       className="group cursor-pointer flex flex-col"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates))}
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
                         {/* Tag badges — upper-left */}
@@ -674,7 +693,7 @@ const TradeAtelierProfile = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates));
+                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice));
                               }}
                               className={cn(
                                 "p-2 rounded-md text-white transition-colors",
@@ -729,10 +748,16 @@ const TradeAtelierProfile = () => {
                           </p>
                         )}
                         <div className="mt-auto pt-1">
-                          <p className="font-display text-[11px] md:text-xs text-foreground">
+                          <p className="font-display text-[11px] md:text-xs text-foreground inline-flex items-center gap-1.5">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
-                                ? `${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`
+                                ? <>
+                                    {`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(
+                                      showTradePrice ? Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)) : pick.trade_price_cents,
+                                      pick.currency || 'EUR', displayCurrency, fxRates
+                                    )}`}
+                                    {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
+                                  </>
                                 : "Price on request"
                               : "Price on request"}
                           </p>
