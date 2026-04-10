@@ -168,9 +168,9 @@ function renderQuotedText(text: string): React.ReactNode[] {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: string | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small|28%
   const pipes = value.split(/\s*\|\s*/);
   const url = normalizeMediaInput(pipes[0] || "");
 
@@ -180,15 +180,15 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
   let caption: string | null = null;
   let poster: string | null = null;
   let align: "left" | "right" | null = null;
-  let size: "small" | null = null;
+  let size: string | null = null;
   for (let i = 1; i < pipes.length; i++) {
     const seg = pipes[i].trim();
     if (/^poster:/i.test(seg)) {
       poster = seg.replace(/^poster:/i, "").trim();
     } else if (/^(left|right)$/i.test(seg)) {
       align = seg.toLowerCase() as "left" | "right";
-    } else if (/^small$/i.test(seg)) {
-      size = "small";
+    } else if (/^small$/i.test(seg) || /^\d{1,3}%$/.test(seg)) {
+      size = seg.toLowerCase();
     } else if (!caption) {
       caption = seg;
     }
@@ -542,11 +542,12 @@ function SplitImageBlock({
   paragraphs: string[];
   overrideCaption?: string | null;
   forceAlign?: "left" | "right" | null;
-  size?: "small" | null;
+  size?: string | null;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = forceAlign ? forceAlign === "right" : index % 2 === 1;
   const isSmall = size === "small";
+  const isPercent = size && /^\d{1,3}%$/.test(size);
 
   const imageEl = (
     <motion.figure
@@ -588,12 +589,15 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
-  const imageWidth = isSmall ? "md:w-[22%]" : "md:w-[42%]";
+  const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[42%]";
 
   return (
     <div className={`${index === 0 ? "mt-4 md:mt-6 mb-2 md:mb-3" : "mt-5 md:mt-7 mb-2 md:mb-3"} flex flex-col md:flex-row gap-1 md:gap-3 items-center`}>
       {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
-      <div className={`shrink-0 w-full ${imageWidth} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+      <div
+        className={`shrink-0 w-full ${imageWidthClass} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}
+        style={isPercent ? { width: size! } : undefined}
+      >
         {imageEl}
       </div>
       {textEl && (
@@ -808,7 +812,7 @@ export default function EditorialBiography({
     // Separate into text paragraphs and media URLs, preserving order
     type Block =
       | { type: "text"; content: string }
-      | { type: "image"; url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null }
+      | { type: "image"; url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: string | null }
       | { type: "video"; url: string; caption: string | null; poster: string | null };
     const parsed: Block[] = blocks.map((b) => {
       const media = parseMediaLine(b);

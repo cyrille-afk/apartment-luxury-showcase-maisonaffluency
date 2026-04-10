@@ -6,6 +6,7 @@ import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useD
 import ShareMenu from "@/components/ShareMenu";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import EditorialBiography from "@/components/EditorialBiography";
 
 const transition: Transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] };
 const reveal: Transition = { ...transition, delay: 0.15 };
@@ -136,20 +137,11 @@ const DesignerProfile = () => {
               <h2 className="font-display text-lg tracking-widest uppercase text-muted-foreground mb-6">
                 Biography
               </h2>
-              <p className="font-body text-base md:text-lg leading-relaxed text-foreground/90 max-w-3xl">
-                {designer.biography.split(/(\u2018[^\u2019]*\u2019|'[^']*')/g).map((segment, i) => {
-                  const isCurly = segment.startsWith("\u2018") && segment.endsWith("\u2019");
-                  const isStraight = segment.startsWith("'") && segment.endsWith("'") && segment.length > 2;
-                  if (isCurly || isStraight) {
-                    return (
-                      <span key={i} className="italic text-foreground font-medium">
-                        {segment}
-                      </span>
-                    );
-                  }
-                  return <span key={i}>{segment}</span>;
-                })}
-              </p>
+              <EditorialBiography
+                biography={designer.biography}
+                biographyImages={designer.biography_images ?? []}
+                designerName={designer.name}
+              />
               <div className="flex items-center gap-4 mt-6">
                 {instagramLink && (
                   <a href={instagramLink} target="_blank" rel="noopener noreferrer"
