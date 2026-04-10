@@ -36,6 +36,7 @@ interface ShowroomProduct {
   trade_price_cents?: number | null;
   currency?: string;
   price_unit?: string;
+  price_prefix?: string | null;
 }
 
 interface ShowroomGridViewProps {
@@ -173,26 +174,28 @@ const ShowroomGridView = ({
   const renderPriceDisplay = (
     price: { cents: number; currency: string; price_unit?: string } | null,
     className: string,
+    pricePrefix?: string | null,
   ) => {
     if (!price) return null;
 
     const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
+    const pfx = pricePrefix ? `${pricePrefix} ` : '';
 
     return (
       <span className={className}>
         {showTradePrice ? (
           <>
             <span className="line-through text-muted-foreground/60 font-normal text-xs">
-              {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+              {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="text-accent font-semibold">
-              {formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}
+              {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
           </>
         ) : (
           <span className="text-foreground font-semibold">
-            {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+            {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
           </span>
         )}
       </span>
