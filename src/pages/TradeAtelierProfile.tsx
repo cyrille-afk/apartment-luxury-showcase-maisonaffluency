@@ -752,16 +752,16 @@ const TradeAtelierProfile = () => {
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice
-                                  ? <>
+                                   ? <>
                                       <span className="line-through text-muted-foreground/60 font-normal text-xs">
-                                        {`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}
+                                        {`${(pick as any).price_prefix ? (pick as any).price_prefix + ' ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}
                                       </span>
                                       <span className="text-accent font-semibold">
-                                        {formatPriceConverted(Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)), pick.currency || 'EUR', displayCurrency, fxRates)}
+                                        {`${(pick as any).price_prefix ? (pick as any).price_prefix + ' ' : ''}${formatPriceConverted(Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)), pick.currency || 'EUR', displayCurrency, fxRates)}`}
                                       </span>
                                       <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
                                     </>
-                                  : <span className="text-foreground font-semibold">{`${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
+                                  : <span className="text-foreground font-semibold">{`${(pick as any).price_prefix ? (pick as any).price_prefix + ' ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
                                 : "Price on request"
                               : "Price on request"}
                           </p>
