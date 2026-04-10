@@ -609,7 +609,7 @@ const ShowroomGridView = ({
                   {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
-                      {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap")}
+                      {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}
                       <InlinePriceEditor
                         productName={product.product_name}
                         brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
