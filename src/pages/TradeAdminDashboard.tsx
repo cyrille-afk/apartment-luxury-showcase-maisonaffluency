@@ -38,6 +38,7 @@ const commerceGroup: AdminCard[] = [
 
 const analyticsGroup: AdminCard[] = [
   { title: "Insights", description: "Portal engagement, traffic, and usage analytics", url: "/trade/insights", icon: BarChart3 },
+  { title: "Downloads by Country", description: "Track catalogue and spec sheet downloads per country", url: "/trade/downloads-by-country", icon: Globe },
   { title: "Client Profiles", description: "AI-powered taste profiles and engagement scores", url: "/trade/client-profiles", icon: Sparkles },
   { title: "Audit Log", description: "Track content changes and admin actions", url: "/trade/audit-log", icon: History },
 ];

@@ -849,18 +849,21 @@ export type Database = {
       }
       document_downloads: {
         Row: {
+          country: string
           created_at: string
           document_id: string
           id: string
           user_id: string
         }
         Insert: {
+          country?: string
           created_at?: string
           document_id: string
           id?: string
           user_id: string
         }
         Update: {
+          country?: string
           created_at?: string
           document_id?: string
           id?: string
