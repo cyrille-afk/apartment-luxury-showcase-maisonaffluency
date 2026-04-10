@@ -1,20 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SITE = "https://maisonaffluency.com";
+const SITE = "https://www.maisonaffluency.com";
 
 const STATIC_URLS = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
-  { loc: "/#overview", changefreq: "monthly", priority: "0.8" },
-  { loc: "/gallery", changefreq: "monthly", priority: "0.8" },
-  { loc: "/#product-grid", changefreq: "weekly", priority: "0.8" },
-  { loc: "/designers", changefreq: "monthly", priority: "0.9" },
-  { loc: "/collectibles", changefreq: "monthly", priority: "0.8" },
-  { loc: "/#brands", changefreq: "monthly", priority: "0.8" },
-  { loc: "/#curating-team", changefreq: "monthly", priority: "0.7" },
-  { loc: "/#details", changefreq: "monthly", priority: "0.6" },
-  { loc: "/#contact", changefreq: "monthly", priority: "0.6" },
   { loc: "/designers", changefreq: "weekly", priority: "0.9" },
+  { loc: "/gallery", changefreq: "monthly", priority: "0.8" },
+  { loc: "/collectibles", changefreq: "monthly", priority: "0.8" },
   { loc: "/journal", changefreq: "weekly", priority: "0.9" },
   { loc: "/trade/program", changefreq: "monthly", priority: "0.8" },
   { loc: "/trade/register", changefreq: "monthly", priority: "0.6" },
