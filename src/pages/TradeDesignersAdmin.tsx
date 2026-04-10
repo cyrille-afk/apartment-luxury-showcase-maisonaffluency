@@ -563,6 +563,11 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     await (supabase.from("designer_instagram_posts" as any) as any).update({ image_url: imageUrl || null }).eq("id", id);
   };
 
+  const handlePostUrlChange = async (id: string, postUrl: string) => {
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, post_url: postUrl } : p)));
+    await (supabase.from("designer_instagram_posts" as any) as any).update({ post_url: postUrl }).eq("id", id);
+  };
+
   if (!loaded) return null;
 
   return (
@@ -617,9 +622,17 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             {post.image_url && (
               <img src={post.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0 mt-0.5" />
             )}
-            <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline break-all mt-1.5 min-w-[120px] max-w-[260px]">
-              {post.post_url.replace(/https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "")}
-            </a>
+            <div className="flex items-center gap-1 min-w-[120px] max-w-[300px] flex-1 mt-0.5">
+              <Input
+                value={post.post_url}
+                onChange={(e) => handlePostUrlChange(post.id, e.target.value)}
+                placeholder="https://www.instagram.com/p/..."
+                className="text-[10px] flex-1"
+              />
+              <a href={post.post_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary shrink-0">
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
             <Input
               value={post.image_url || ""}
               onChange={(e) => handleImageUrlChange(post.id, e.target.value)}
