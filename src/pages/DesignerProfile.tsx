@@ -140,6 +140,7 @@ const DesignerProfile = () => {
               <EditorialBiography
                 biography={designer.biography}
                 biographyImages={designer.biography_images ?? []}
+                designerName={designer.name}
               />
               <div className="flex items-center gap-4 mt-6">
                 {instagramLink && (
