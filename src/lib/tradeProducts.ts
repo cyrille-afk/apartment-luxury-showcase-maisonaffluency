@@ -30,6 +30,7 @@ export interface TradeProduct {
   edition?: string;
   pdf_url?: string;
   pdf_urls?: { label: string; url: string; filename?: string }[];
+  price_prefix?: string | null;
 }
 
 let _cachedProducts: TradeProduct[] | null = null;

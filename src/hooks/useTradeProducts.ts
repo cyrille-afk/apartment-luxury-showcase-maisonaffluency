@@ -45,6 +45,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       tags,
       trade_price_cents,
       currency,
+      price_prefix,
       designers(name, founder)
     `)
     .order("sort_order", { ascending: true });
@@ -87,6 +88,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         edition: pick.edition ?? undefined,
         pdf_url: pick.pdf_url ?? undefined,
         pdf_urls: pick.pdf_urls ?? undefined,
+        price_prefix: pick.price_prefix ?? undefined,
         hasExplicitCategory,
         hasExplicitSubcategory,
       } satisfies LiveTradeProduct,
