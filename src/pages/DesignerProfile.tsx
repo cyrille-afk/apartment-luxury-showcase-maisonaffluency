@@ -6,6 +6,7 @@ import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useD
 import ShareMenu from "@/components/ShareMenu";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import EditorialBiography from "@/components/EditorialBiography";
 
 const transition: Transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] };
 const reveal: Transition = { ...transition, delay: 0.15 };
