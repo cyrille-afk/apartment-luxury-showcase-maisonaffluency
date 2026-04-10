@@ -277,22 +277,7 @@ const TradeDocuments = () => {
                       onClick={async (e) => {
                         e.preventDefault();
                         // Track download with country
-                        supabase.auth.getUser().then(async ({ data }) => {
-                          if (data?.user) {
-                            let country = "";
-                            const { data: app } = await supabase
-                              .from("trade_applications")
-                              .select("country")
-                              .eq("user_id", data.user.id)
-                              .maybeSingle();
-                            if (app?.country) country = app.country;
-                            supabase.from("document_downloads").insert({
-                              user_id: data.user.id,
-                              document_id: doc.id,
-                              country,
-                            }).then(() => {});
-                          }
-                        });
+                        trackDownload(doc.id);
                         try {
                           const res = await fetch(doc.file_url);
                           const blob = await res.blob();
