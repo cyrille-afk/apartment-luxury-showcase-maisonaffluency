@@ -165,6 +165,40 @@ const ShowroomGridView = ({
   const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
+  const getDisplayPrice = (price: { cents: number; currency: string; price_unit?: string } | null) => {
+    if (!price) return null;
+    return showTradePrice ? { ...price, cents: Math.round(price.cents * (1 - TRADE_DISCOUNT)) } : price;
+  };
+
+  const renderPriceDisplay = (
+    price: { cents: number; currency: string; price_unit?: string } | null,
+    className: string,
+  ) => {
+    if (!price) return null;
+
+    const tradePrice = Math.round(price.cents * (1 - TRADE_DISCOUNT));
+
+    return (
+      <span className={className}>
+        {showTradePrice ? (
+          <>
+            <span className="line-through text-muted-foreground/60 font-normal text-xs">
+              {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+            </span>
+            <span className="text-accent font-semibold">
+              {formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}
+            </span>
+            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+          </>
+        ) : (
+          <span className="text-accent font-semibold">
+            {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
+          </span>
+        )}
+      </span>
+    );
+  };
+
   // Scroll to highlighted product once loaded
   useEffect(() => {
     if (!loading && highlightedId && highlightRef.current) {
@@ -354,7 +388,8 @@ const ShowroomGridView = ({
     price: (() => {
       const raw = product.trade_price_cents;
       if (!raw || !product.currency) return null;
-      return formatPriceConverted(raw, product.currency, displayCurrency, fxRates, product.price_unit);
+      const price = getDisplayPrice({ cents: raw, currency: product.currency, price_unit: product.price_unit });
+      return price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null;
     })(),
   });
 
@@ -371,7 +406,8 @@ const ShowroomGridView = ({
     price: (() => {
       const raw = product.trade_price_cents;
       if (!raw || !product.currency) return null;
-      return formatPriceConverted(raw, product.currency, displayCurrency, fxRates, product.price_unit);
+      const price = getDisplayPrice({ cents: raw, currency: product.currency, price_unit: product.price_unit });
+      return price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null;
     })(),
   });
 
@@ -480,9 +516,8 @@ const ShowroomGridView = ({
             const pinned = isPinned(product.product_name, product.id);
             const isHighlighted = !!(highlightedId && product.trade_product_id === highlightedId);
             const rawCents = product.trade_price_cents;
-            const displayCents = rawCents && showTradePrice ? Math.round(rawCents * (1 - TRADE_DISCOUNT)) : rawCents;
-            const price = displayCents && product.currency
-              ? { cents: displayCents, currency: product.currency, price_unit: product.price_unit }
+            const price = rawCents && product.currency
+              ? { cents: rawCents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div
@@ -570,29 +605,22 @@ const ShowroomGridView = ({
                   {product.dimensions && <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                   {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
                   {isAdmin ? (
-                    <InlinePriceEditor
-                      productName={product.product_name}
-                      brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
-                      currentPriceCents={price?.cents}
-                      currency={price?.currency || "SGD"}
-                      priceUnit={price?.price_unit}
-                      displayCurrency={displayCurrency}
-                      fxRates={fxRates}
-                      onPriceUpdated={() => window.location.reload()}
-                    />
-                  ) : price ? (
-                    <p className="font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap">
-                      {showTradePrice ? (
-                        <>
-                          <span className="line-through text-muted-foreground/60 font-normal text-xs">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                          <span className="text-accent font-semibold">{formatPriceConverted(Math.round(price.cents * (1 - TRADE_DISCOUNT)), price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                          <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
-                        </>
-                      ) : (
-                        <span className="text-accent font-semibold">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                      )}
-                    </p>
-                  ) : null}
+                    <div className="mt-1 flex flex-col items-center gap-1.5">
+                      {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap")}
+                      <InlinePriceEditor
+                        productName={product.product_name}
+                        brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
+                        currentPriceCents={price?.cents}
+                        currency={price?.currency || "SGD"}
+                        priceUnit={price?.price_unit}
+                        displayCurrency={displayCurrency}
+                        fxRates={fxRates}
+                        onPriceUpdated={() => window.location.reload()}
+                      />
+                    </div>
+                  ) : (
+                    renderPriceDisplay(price, "font-display text-sm mt-1 inline-flex items-center justify-center gap-1.5 flex-wrap")
+                  )}
                 </div>
               </div>
             );
@@ -605,9 +633,8 @@ const ShowroomGridView = ({
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
             const rawCents = product.trade_price_cents;
-            const displayCents = rawCents && showTradePrice ? Math.round(rawCents * (1 - TRADE_DISCOUNT)) : rawCents;
-            const price = displayCents && product.currency
-              ? { cents: displayCents, currency: product.currency, price_unit: product.price_unit }
+            const price = rawCents && product.currency
+              ? { cents: rawCents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
@@ -628,7 +655,8 @@ const ShowroomGridView = ({
                   </p>
                 </div>
                 {isAdmin ? (
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex flex-col items-end gap-1.5">
+                    {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end")}
                     <InlinePriceEditor
                       productName={product.product_name}
                       brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
@@ -640,19 +668,9 @@ const ShowroomGridView = ({
                       onPriceUpdated={() => window.location.reload()}
                     />
                   </div>
-                ) : price ? (
-                  <span className="font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap">
-                    {showTradePrice ? (
-                      <>
-                        <span className="line-through text-muted-foreground/60 font-normal text-xs">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                        <span className="text-accent font-semibold">{formatPriceConverted(Math.round(price.cents * (1 - TRADE_DISCOUNT)), price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                        <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
-                      </>
-                    ) : (
-                      <span className="text-accent font-semibold">{formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}</span>
-                    )}
-                  </span>
-                ) : null}
+                ) : (
+                  renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap")
+                )}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
