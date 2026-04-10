@@ -491,7 +491,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   André Putman — Art Paris 2026
                 </h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-lg">
-                  Explore the exclusive photoshoot catalogue from Art Paris 2026, showcasing André Putman's iconic furniture and design legacy. Free to download.
+                  Explore the exclusive photoshoot catalogue from Art Paris 2026 by the talented photographer Sébastien Véronèse, showcasing André Putman's iconic furniture and design legacy. Free to download.
                 </p>
                 <a
                   href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
