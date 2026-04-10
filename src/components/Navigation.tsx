@@ -737,7 +737,6 @@ const Navigation = () => {
                   </div>
                 </div>
               ))}
-              ))}
             </div>
           </div>
 
