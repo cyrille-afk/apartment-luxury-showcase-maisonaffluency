@@ -720,14 +720,23 @@ const Navigation = () => {
 
               {/* Trade Program */}
               {rightNavItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
-                  className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
-                >
-                  {item.label}
-                  <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
-                </button>
+                <div key={item.href} className="relative group/trade">
+                  <button
+                    onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
+                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
+                  >
+                    {item.label}
+                    <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
+                  </button>
+                  {/* Hover tooltip */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover/trade:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                    <div className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
+                      <p className="font-body text-[10px] uppercase tracking-wider">New: André Putman Art Paris</p>
+                      <p className="font-body text-[9px] text-background/60">Free catalogue download</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
               ))}
             </div>
           </div>
