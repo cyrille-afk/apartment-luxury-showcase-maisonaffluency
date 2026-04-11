@@ -45,11 +45,35 @@ serve(async (req) => {
 
     if (!imageUrl) throw new Error("imageUrl is required");
 
+    // Creative brief fields from request form
+    const briefRoomType = body.roomType as string | undefined;
+    const briefStyleDirection = body.styleDirection as string | undefined;
+    const briefLightingMood = body.lightingMood as string | undefined;
+    const briefRenderEngine = body.renderEngine as string | undefined;
+    const briefCameraAngles = body.cameraAngles as string | undefined;
+    const briefNotes = body.briefNotes as string | undefined;
+
+    // Build a rich style string that incorporates the creative brief
+    const buildStyle = () => {
+      const base = style || "photorealistic architectural rendering with warm natural lighting, high-end interior finishes";
+      const parts: string[] = [base];
+      if (briefStyleDirection && briefStyleDirection !== base) parts.push(`Style direction: ${briefStyleDirection}`);
+      if (briefLightingMood) parts.push(`Lighting mood: ${briefLightingMood}`);
+      if (briefRoomType) parts.push(`Room type: ${briefRoomType}`);
+      if (briefRenderEngine && briefRenderEngine !== "no_preference") {
+        const engineLabel = briefRenderEngine === "corona" ? "Corona Renderer" : briefRenderEngine === "vray" ? "V-Ray" : briefRenderEngine;
+        parts.push(`Render engine aesthetic: ${engineLabel} (match its characteristic look — GI, tone-mapping, material response)`);
+      }
+      if (briefCameraAngles) parts.push(`Preferred camera angles: ${briefCameraAngles}`);
+      if (briefNotes) parts.push(`Additional notes: ${briefNotes}`);
+      return parts.join(". ");
+    };
+
     // Turntable angle mode — generates a single view at a specified angle
     const turntableAngle = body.turntableAngle as number | undefined;
 
     let prompt = "";
-    const defaultStyle = style || "photorealistic architectural rendering with warm natural lighting, high-end interior finishes";
+    const defaultStyle = buildStyle();
 
     if (mode === "elevation_to_axo") {
       prompt = `You are an expert architectural visualization AI. Transform this 2D floor plan / elevation drawing into a professional 3D axonometric (isometric) cutaway dollhouse-style interior view.

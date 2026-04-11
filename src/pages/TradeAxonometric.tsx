@@ -553,6 +553,9 @@ const TradeAxonometric = () => {
     }
   };
 
+  // Store the active request's creative brief so we can pass it to the edge function
+  const [activeBrief, setActiveBrief] = useState<Record<string, string>>({});
+
   const loadFromQueue = (req: any) => {
     setSourceImage(req.image_url);
     setActiveRequestId(req.id);
@@ -563,6 +566,15 @@ const TradeAxonometric = () => {
     // Pre-load attached favorite product IDs for proposal builder
     const linkedIds = Array.isArray(req.linked_favorite_product_ids) ? req.linked_favorite_product_ids : [];
     setPreloadedFavoriteProductIds(linkedIds);
+    // Store creative brief fields
+    setActiveBrief({
+      roomType: req.room_type || "",
+      styleDirection: req.style_direction || "",
+      lightingMood: req.lighting_mood || "",
+      renderEngine: req.render_engine || "",
+      cameraAngles: req.camera_angles || "",
+      briefNotes: req.notes || "",
+    });
   };
 
   const completeRequest = async () => {
