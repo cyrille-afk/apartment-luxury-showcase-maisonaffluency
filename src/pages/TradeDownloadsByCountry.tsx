@@ -114,25 +114,33 @@ export default function TradeDownloadsByCountry() {
     enabled: isAdmin,
   });
 
-  // Per-user download log
+  // Per-user download log (members + public/guest)
   const { data: userDownloads = [] } = useQuery<UserDownload[]>({
     queryKey: ["downloads-by-user"],
     queryFn: async () => {
-      const { data: downloads } = await supabase
+      // Fetch member downloads
+      const { data: memberDls } = await supabase
         .from("document_downloads")
         .select("created_at, country, document_label, user_id, trade_documents(title)")
         .order("created_at", { ascending: false });
-      if (!downloads || downloads.length === 0) return [];
 
-      // Fetch profiles for all unique user_ids
-      const userIds = [...new Set(downloads.map((d) => d.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, email, company")
-        .in("id", userIds);
-      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+      // Fetch public/guest downloads
+      const { data: publicDls } = await supabase
+        .from("public_download_events" as any)
+        .select("created_at, country, document_label, source, trade_documents(title)")
+        .order("created_at", { ascending: false });
 
-      return downloads.map((row: any) => {
+      const members = (memberDls || []) as any[];
+      const publics = ((publicDls as unknown) || []) as any[];
+
+      // Fetch profiles for member downloads
+      const userIds = [...new Set(members.map((d) => d.user_id))];
+      const { data: profiles } = userIds.length > 0
+        ? await supabase.from("profiles").select("id, first_name, last_name, email, company").in("id", userIds)
+        : { data: [] };
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+
+      const memberRows: UserDownload[] = members.map((row: any) => {
         const profile = profileMap.get(row.user_id);
         return {
           userName: [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "\u2014",
@@ -143,6 +151,22 @@ export default function TradeDownloadsByCountry() {
           downloadedAt: row.created_at,
         };
       });
+
+      const publicRows: UserDownload[] = publics.map((row: any) => {
+        const relatedDoc = Array.isArray(row.trade_documents) ? row.trade_documents[0] : row.trade_documents;
+        return {
+          userName: "Guest",
+          email: row.source || "public",
+          company: "\u2014",
+          country: row.country || "Unknown",
+          docName: relatedDoc?.title || row.document_label || "Untitled",
+          downloadedAt: row.created_at,
+        };
+      });
+
+      return [...memberRows, ...publicRows].sort(
+        (a, b) => new Date(b.downloadedAt).getTime() - new Date(a.downloadedAt).getTime()
+      );
     },
     enabled: isAdmin,
   });
