@@ -374,7 +374,7 @@ const TradeAxonometricRequests = () => {
         <SectionHero
           section="3d-studio"
           title="3D Studio"
-          subtitle="Professional architectural visualization powered by 3ds Max, Corona & V-Ray"
+          subtitle="AI-assisted architectural visualization with professional-grade refinement"
         >
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
