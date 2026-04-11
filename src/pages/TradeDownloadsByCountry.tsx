@@ -240,45 +240,46 @@ export default function TradeDownloadsByCountry() {
 
             {/* Download Log */}
             <div className="lg:col-span-2">
-            <h2 className="font-display text-lg text-foreground mb-3">Download Log</h2>
-            <div className="border border-border rounded-lg overflow-hidden overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-muted/50 border-b border-border">
-                    <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">User</th>
-                    <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Company</th>
-                    <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Country</th>
-                    <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Document</th>
-                    <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5 text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {userDownloads.map((dl, i) => (
-                    <tr key={i} className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                          <div className="min-w-0">
-                            <p className="font-body text-sm text-foreground truncate">{dl.userName}</p>
-                            <p className="font-body text-[10px] text-muted-foreground truncate">{dl.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2.5 font-body text-xs text-muted-foreground">{dl.company || "—"}</td>
-                      <td className="px-4 py-2.5 font-body text-xs text-muted-foreground">{dl.country}</td>
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <FileText className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-                          <span className="font-body text-xs text-foreground truncate">{dl.docName}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2.5 font-body text-xs text-muted-foreground text-right whitespace-nowrap">
-                        {format(new Date(dl.downloadedAt), "d MMM yyyy, HH:mm")}
-                      </td>
+              <h2 className="font-display text-lg text-foreground mb-3">Download Log</h2>
+              <div className="border border-border rounded-lg overflow-hidden overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-muted/50 border-b border-border">
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">User</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Company</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Country</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Document</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5 text-right">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {userDownloads.map((dl, i) => (
+                      <tr key={i} className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-body text-sm text-foreground truncate">{dl.userName}</p>
+                              <p className="font-body text-[10px] text-muted-foreground truncate">{dl.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 font-body text-xs text-muted-foreground">{dl.company || "\u2014"}</td>
+                        <td className="px-4 py-2.5 font-body text-xs text-muted-foreground">{dl.country}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <FileText className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                            <span className="font-body text-xs text-foreground truncate">{dl.docName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 font-body text-xs text-muted-foreground text-right whitespace-nowrap">
+                          {format(new Date(dl.downloadedAt), "d MMM yyyy, HH:mm")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
