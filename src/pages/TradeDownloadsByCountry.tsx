@@ -3,8 +3,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Download, Globe, FileText, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Download, Globe, FileText, ChevronDown, ChevronRight, User } from "lucide-react";
 import { useState } from "react";
+import { format } from "date-fns";
 
 interface CountryRow {
   country: string;
