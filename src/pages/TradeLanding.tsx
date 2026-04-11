@@ -152,11 +152,12 @@ const TradeLanding = () => {
     if (session?.user) {
       trackDownload(ANDREE_PUTMAN_CATALOG_DOCUMENT_ID, label);
     } else {
+      // For guests, don't send browser-inferred country — let the edge function
+      // resolve it from CDN geo headers (cf-ipcountry) for accuracy.
       void supabase.functions.invoke("log-public-download", {
         body: {
           documentId: ANDREE_PUTMAN_CATALOG_DOCUMENT_ID,
           label,
-          country: inferCountryFromBrowser(),
           source: "trade-landing",
         },
       });
