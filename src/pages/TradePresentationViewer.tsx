@@ -236,10 +236,11 @@ const TradePresentationViewer = () => {
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
 
-  // Slide 0 = cover page, then gallery slides start at index 1
-  const totalSlides = slides.length + 1;
+  // Slide 0 = cover page, then gallery slides, then disclaimer slide at the end
+  const totalSlides = slides.length + 2; // +1 cover, +1 disclaimer
   const isCoverSlide = currentSlide === 0;
-  const actualSlide = isCoverSlide ? null : slides[currentSlide - 1];
+  const isDisclaimerSlide = currentSlide === totalSlides - 1;
+  const actualSlide = (isCoverSlide || isDisclaimerSlide) ? null : slides[currentSlide - 1];
   const slideComments = comments.filter(c => actualSlide && c.slide_id === actualSlide.id);
   const generalComments = comments.filter(c => !c.slide_id);
 
@@ -357,6 +358,23 @@ const TradePresentationViewer = () => {
                     )}
                     <p className="font-body text-xs text-background/40 mt-4">
                       {format(new Date(presentation?.created_at || new Date()), "MMMM yyyy")}
+                    </p>
+                    {/* Disclaimer on cover */}
+                    <p className="font-body text-[8px] text-background/25 mt-6 max-w-md leading-relaxed">
+                      This presentation contains AI-generated visualizations for concept reference only. All imagery is indicative and subject to final design review.
+                    </p>
+                  </div>
+                ) : isDisclaimerSlide ? (
+                  /* Disclaimer Page */
+                  <div className={`w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} aspect-[16/9] max-w-4xl bg-foreground rounded-lg flex flex-col items-center justify-center text-center px-16 relative overflow-hidden`}>
+                    <div className="absolute inset-4 border border-background/20 rounded-md pointer-events-none" />
+                    <h2 className="font-display text-2xl text-background/85 tracking-wider mb-6">Disclaimer</h2>
+                    <div className="w-12 h-px bg-background/25 mb-8" />
+                    <p className="font-body text-[11px] text-background/50 max-w-xl leading-relaxed">
+                      The architectural visualizations contained in this document have been generated using artificial intelligence and are intended for concept and design exploration purposes only. These renderings are indicative representations and do not constitute final design specifications. All materials, finishes, dimensions, and spatial configurations shown are approximate and remain subject to the owner's final review and approval. The architectural base layouts shown herein are for reference only and shall be verified against the latest coordinated and approved architectural drawings.
+                    </p>
+                    <p className="font-body text-[9px] text-background/25 mt-8">
+                      © Maison Affluency {new Date().getFullYear()}
                     </p>
                   </div>
                 ) : (

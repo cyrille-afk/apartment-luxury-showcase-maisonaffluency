@@ -243,8 +243,12 @@ const ImageSlidePage = ({ slide, pageNum, totalPages }: { slide: PresentationSli
   </Page>
 );
 
+const DISCLAIMER_COVER = "This presentation contains AI-generated visualizations for concept reference only. All imagery is indicative and subject to final design review.";
+
+const DISCLAIMER_FULL = "IMPORTANT NOTICE: The architectural visualizations contained in this document have been generated using artificial intelligence and are intended for concept and design exploration purposes only. These renderings are indicative representations and do not constitute final design specifications. All materials, finishes, dimensions, and spatial configurations shown are approximate and remain subject to the owner's final review and approval. The architectural base layouts shown herein are for reference only and shall be verified against the latest coordinated and approved architectural drawings. Maison Affluency accepts no liability for decisions made solely on the basis of these AI-generated visualizations.";
+
 const PresentationPDF = ({ title, clientName, projectName, createdAt, slides }: PresentationPDFProps) => {
-  const totalPages = slides.length + 1;
+  const totalPages = slides.length + 2; // +1 cover, +1 disclaimer
 
   return (
     <Document>
@@ -259,6 +263,9 @@ const PresentationPDF = ({ title, clientName, projectName, createdAt, slides }: 
           {clientName && <Text style={s.coverMeta}>For {clientName}</Text>}
           {projectName && <Text style={s.coverMeta}>{projectName}</Text>}
           <Text style={s.coverDate}>{formatDate(createdAt)}</Text>
+          <Text style={{ fontFamily: fb, fontSize: 6, color: "rgba(255,255,255,0.2)", marginTop: 20, maxWidth: 340, textAlign: "center", lineHeight: 1.5 }}>
+            {DISCLAIMER_COVER}
+          </Text>
         </View>
       </Page>
 
@@ -275,6 +282,25 @@ const PresentationPDF = ({ title, clientName, projectName, createdAt, slides }: 
         }
         return <ImageSlidePage key={i} slide={slide} pageNum={pageNum} totalPages={totalPages} />;
       })}
+
+      {/* Disclaimer Page */}
+      <Page size="A4" orientation="landscape" style={s.page}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 80, backgroundColor: "#1a1a1a" }}>
+          <View style={s.coverBorder} />
+          <Text style={{ fontFamily: fd, fontSize: 18, color: "rgba(255,255,255,0.85)", marginBottom: 30, letterSpacing: 2 }}>
+            Disclaimer
+          </Text>
+          <View style={{ width: 50, height: 0.5, backgroundColor: "rgba(255,255,255,0.25)", marginBottom: 30 }} />
+          <Text style={{ fontFamily: fb, fontSize: 8, color: "rgba(255,255,255,0.5)", maxWidth: 500, textAlign: "center", lineHeight: 1.8 }}>
+            {DISCLAIMER_FULL}
+          </Text>
+          <Text style={{ fontFamily: fb, fontSize: 7, color: "rgba(255,255,255,0.25)", marginTop: 40 }}>
+            © Maison Affluency {new Date().getFullYear()}
+          </Text>
+        </View>
+        <Text style={s.footerBrand}>Maison Affluency</Text>
+        <Text style={s.footer}>{totalPages} / {totalPages}</Text>
+      </Page>
     </Document>
   );
 };
