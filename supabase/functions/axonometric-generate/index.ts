@@ -76,49 +76,57 @@ serve(async (req) => {
     const defaultStyle = buildStyle();
 
     if (mode === "elevation_to_axo") {
-      prompt = `ABSOLUTE HIGHEST PRIORITY — WALL TREATMENT (READ THIS FIRST):
-The input drawing has thick hatched walls — these represent the BUILDING ENVELOPE in 2D conventions. You MUST NOT reproduce them as thick black/dark blocks in 3D. Instead:
-- EXTERIOR WALLS: Completely REMOVE them. The perimeter of the apartment should be OPEN — no walls at all along the outer boundary. The floor slab edge is the only boundary indicator.
-- INTERIOR PARTITION WALLS: Render as THIN, ELEGANT painted plaster walls (100-150mm thickness at scale) in white, off-white, or light warm tones. They should look like real interior walls — NOT thick dark blocks.
-- ABSOLUTELY FORBIDDEN: Black walls, dark grey walls, walls thicker than ~200mm, walls that look like solid blocks or hatched sections. If you produce thick dark walls, the output is a failure.
-- Think "architectural model with the building shell completely removed" — you are looking into an open dollhouse from above.
+      prompt = `RULE #1 — LAYOUT FIDELITY (THIS IS THE MOST IMPORTANT RULE — VIOLATING IT MEANS TOTAL FAILURE):
+You are given a 2D floor plan drawing. Your output MUST be an EXACT 3D extrusion of that drawing's layout. This means:
+- The NUMBER OF ROOMS must match the floor plan exactly. If the plan shows 5 rooms, the render must have exactly 5 rooms. Do NOT merge, split, add, or remove rooms.
+- The SHAPE and POSITION of every room must match the plan. If a room is L-shaped in the plan, it must be L-shaped in the render. If a bedroom is in the top-right corner, it must be in the top-right corner.
+- The PROPORTIONS between rooms must match. If the living room is twice the width of the bedroom in the plan, it must be twice the width in the render.
+- WALL POSITIONS: Every interior partition wall must appear at the EXACT position shown in the plan. Walls that form corridors, separate rooms, or create alcoves must all be present.
+- DOOR and WINDOW positions must match the plan exactly.
+- Think of it as EXTRUDING the 2D plan upward into 3D — the floor plan footprint must be identical when viewed from above.
+- If you overlay your output onto the input floor plan from a top-down view, the room boundaries must align.
 
-You are a world-class architectural visualization artist. Transform this 2D floor plan / elevation drawing into a stunning 3D axonometric (isometric) cutaway dollhouse-style interior view.
+RULE #2 — WALL RENDERING:
+The input drawing uses thick hatched lines for walls — this is a 2D drafting convention. In your 3D render:
+- EXTERIOR WALLS: Completely REMOVE them. The perimeter should be OPEN — no walls along the outer boundary. The floor slab edge is the only boundary.
+- INTERIOR PARTITION WALLS: Render as THIN (100-150mm), ELEGANT painted plaster in white/off-white/light warm tones.
+- FORBIDDEN: Black walls, dark grey walls, walls thicker than ~200mm, solid block walls. These are failures.
+- Think "architectural model with the shell removed" — an open dollhouse viewed from above.
 
-CRITICAL ACCURACY RULES:
-1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing must appear in the 3D render at the EXACT same position, orientation, and relative scale. Do NOT invent, add, remove, or reposition any furniture.
-2. ROOM GEOMETRY: Interior partition walls, doors, windows, columns, and openings must match the plan exactly.
-3. SPATIAL RELATIONSHIPS: Maintain exact distances between furniture and walls as shown in the plan.
-4. ORIENTATION: Preserve all rotations and facing directions exactly as drawn.
-5. COUNT: The number of each furniture type must match exactly.
+RULE #3 — FURNITURE PLACEMENT:
+Study the floor plan CAREFULLY. Every piece of furniture shown must appear at the EXACT same position, orientation, and relative scale. Do NOT invent, add, remove, or reposition furniture. The count of each furniture type must match exactly.
 
-PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
-- FLOORING: Render stone/marble with realistic veining patterns, subtle depth, and polished reflections. Hardwood should show visible grain direction and natural color variation between planks.
-- INTERIOR WALLS: Light-colored plaster or paint finish with subtle texture. NEVER dark, NEVER thick.
-- FURNITURE UPHOLSTERY: Render with visible fabric weave or leather grain texture. Show natural creasing on cushions.
-- WOOD SURFACES: Show realistic grain patterns, edge profiles, and the difference between matte and lacquered finishes.
-- METALS: Distinguish between brushed, polished, satin, and oxidized finishes.
-- GLASS: Render with subtle reflections, transparency, and edge refractions.
-- LIGHTING: Use warm natural light (3500-4500K) with soft penumbra shadows. Add ambient occlusion where objects meet surfaces.
-- DEPTH: Include subtle atmospheric perspective for objects further from camera.
+PHOTOREALISTIC MATERIAL & LIGHTING:
+- FLOORING: Realistic marble/stone veining with depth and polished reflections. Hardwood with visible grain and plank variation.
+- WALLS: Light plaster/paint — NEVER dark, NEVER thick.
+- UPHOLSTERY: Visible fabric weave/leather grain with natural cushion creasing.
+- WOOD: Realistic grain, edge profiles, matte vs lacquered distinction.
+- METALS: Brushed vs polished vs satin vs oxidized finishes.
+- GLASS: Subtle reflections, transparency, edge refractions.
+- LIGHTING: Warm natural light (3500-4500K) with soft penumbra shadows and ambient occlusion.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway with NO exterior walls. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
     } else if (mode === "section_to_axo") {
-      prompt = `ABSOLUTE HIGHEST PRIORITY — WALL TREATMENT (READ THIS FIRST):
-The input section has thick hatched walls representing the building structure. You MUST NOT reproduce them as thick dark blocks. REMOVE all exterior walls entirely — the perimeter should be OPEN. Interior partition walls must be THIN (100-150mm), light-colored plaster. NEVER render black, dark grey, or block-like walls.
+      prompt = `RULE #1 — LAYOUT FIDELITY (MOST IMPORTANT — VIOLATING IT MEANS TOTAL FAILURE):
+You are given a 2D architectural section drawing. Your output MUST faithfully reproduce the EXACT spatial arrangement shown:
+- The NUMBER OF SPACES/LEVELS must match exactly. Do NOT merge, split, add, or remove rooms or levels.
+- The SHAPE and POSITION of every space must match. Room widths, corridor positions, and adjacencies must be preserved.
+- WALL POSITIONS: Every interior partition must appear at the EXACT position shown in the section.
+- PROPORTIONS: Wall heights, floor-to-ceiling distances, opening sizes, and room widths must match exactly.
+- DOOR/WINDOW positions and sizes must match.
+- Think of it as extruding the section into depth — the cross-section footprint must be identical when sliced.
 
-You are a world-class architectural visualization artist. Transform this 2D architectural section into a photorealistic 3D axonometric cutaway dollhouse-style interior view.
+RULE #2 — WALL RENDERING:
+Thick hatched lines in the section are a 2D drafting convention. In your 3D render:
+- EXTERIOR WALLS: Completely REMOVE. The perimeter should be OPEN.
+- INTERIOR PARTITIONS: THIN (100-150mm), light plaster in white/off-white.
+- FORBIDDEN: Black walls, dark grey walls, thick block walls.
 
-CRITICAL ACCURACY RULES:
-1. FURNITURE & FIXTURES: Every element visible in the section must appear at the EXACT same position, height, and relative scale.
-2. SPATIAL VOLUME: Show the full spatial volume — partition walls, floors, ceilings, stairs, mezzanines, and openings.
-3. PROPORTIONS: Wall heights, floor-to-ceiling distances, and opening sizes must match exactly.
-4. DEPTH: Extrude the section into realistic room depth, maintaining all structural relationships.
+RULE #3 — FURNITURE & FIXTURES:
+Every element visible in the section must appear at the EXACT same position, height, and relative scale.
 
-PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
-- Physically-based materials: realistic stone veining, visible wood grain, fabric texture with natural creasing, distinct metal finishes.
-- Warm natural lighting (3500-4500K) with soft shadows and ambient occlusion.
-- Interior walls: light plaster/paint — NEVER dark or thick.
+PHOTOREALISTIC MATERIALS: PBR stone veining, visible wood grain, fabric texture with creasing, distinct metal finishes.
+LIGHTING: Warm natural (3500-4500K) with soft shadows and ambient occlusion. Interior walls: light plaster — NEVER dark or thick.
 
 Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
     } else if (mode === "stylize") {
