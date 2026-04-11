@@ -237,10 +237,9 @@ export default function TradeDownloadsByCountry() {
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* By User — full log */}
-          <div className="lg:col-span-2">
+            {/* Download Log */}
+            <div className="lg:col-span-2">
             <h2 className="font-display text-lg text-foreground mb-3">Download Log</h2>
             <div className="border border-border rounded-lg overflow-hidden overflow-x-auto">
               <table className="w-full text-left">
