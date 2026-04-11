@@ -358,6 +358,10 @@ const TradePresentationViewer = () => {
                     <p className="font-body text-xs text-background/40 mt-4">
                       {format(new Date(presentation?.created_at || new Date()), "MMMM yyyy")}
                     </p>
+                    {/* Disclaimer on cover */}
+                    <p className="font-body text-[8px] text-background/25 mt-6 max-w-md leading-relaxed">
+                      This presentation contains AI-generated visualizations for concept reference only. All imagery is indicative and subject to final design review.
+                    </p>
                   </div>
                 ) : (
                   /* Typed slides */
