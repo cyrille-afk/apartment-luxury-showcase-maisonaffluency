@@ -560,6 +560,21 @@ const TradeAxonometric = () => {
       pushResult(gen);
       toast({ title: "Axonometric view generated" });
 
+      // Auto-save result_image_url to the request so regenerations have a layout anchor
+      if (activeRequestId && (data.storedUrl || data.imageUrl)) {
+        (supabase as any)
+          .from("axonometric_requests")
+          .update({
+            result_image_url: data.storedUrl || data.imageUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", activeRequestId)
+          .then(({ error }: any) => {
+            if (error) console.error("[axo-gen] Failed to auto-save result_image_url:", error);
+            else console.log("[axo-gen] Auto-saved result_image_url for layout lock");
+          });
+      }
+
       // Auto-generate empty room for Proposal Builder
       generateEmptyRoom(data.storedUrl || data.imageUrl);
     } catch (e: any) {
