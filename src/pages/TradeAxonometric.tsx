@@ -554,8 +554,6 @@ const TradeAxonometric = () => {
     }
   };
 
-  // Store the active request's creative brief so we can pass it to the edge function
-  const [activeBrief, setActiveBrief] = useState<Record<string, string>>({});
 
   const loadFromQueue = (req: any) => {
     setSourceImage(req.image_url);
