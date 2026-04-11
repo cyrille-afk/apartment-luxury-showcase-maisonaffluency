@@ -409,10 +409,8 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       });
     }
 
-    // Pro for initial axo transforms + proposal refinements (fidelity), Flash for everything else (speed)
-    const selectedModel = mode === "elevation_to_axo" || mode === "proposal_refine"
-      ? "google/gemini-3-pro-image-preview"
-      : "google/gemini-3.1-flash-image-preview";
+    // Use Pro model for all modes for maximum visual fidelity
+    const selectedModel = "google/gemini-3-pro-image-preview";
 
     console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
