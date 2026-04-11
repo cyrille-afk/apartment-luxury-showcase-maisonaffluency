@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+
+const ENGINE_OPTIONS = [
+  { value: "corona", label: "Corona Renderer", price: "€280 / view", desc: "Warm natural GI — ideal for residential interiors" },
+  { value: "vray", label: "V-Ray", price: "€320 / view", desc: "Precision lighting with caustics — best for galleries & hospitality" },
+] as const;
 
 const TradeAxonometricGallery = () => {
   const { user } = useAuth();
@@ -16,6 +21,9 @@ const TradeAxonometricGallery = () => {
   const [selected, setSelected] = useState<any | null>(null);
   const [addingToQuote, setAddingToQuote] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [prodRenderItem, setProdRenderItem] = useState<any | null>(null);
+  const [chosenEngine, setChosenEngine] = useState<string>("corona");
+  const [submittingRender, setSubmittingRender] = useState(false);
 
   // Published gallery items
   const { data: items } = useQuery({
