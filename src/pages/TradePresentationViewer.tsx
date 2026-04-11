@@ -236,10 +236,11 @@ const TradePresentationViewer = () => {
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
 
-  // Slide 0 = cover page, then gallery slides start at index 1
-  const totalSlides = slides.length + 1;
+  // Slide 0 = cover page, then gallery slides, then disclaimer slide at the end
+  const totalSlides = slides.length + 2; // +1 cover, +1 disclaimer
   const isCoverSlide = currentSlide === 0;
-  const actualSlide = isCoverSlide ? null : slides[currentSlide - 1];
+  const isDisclaimerSlide = currentSlide === totalSlides - 1;
+  const actualSlide = (isCoverSlide || isDisclaimerSlide) ? null : slides[currentSlide - 1];
   const slideComments = comments.filter(c => actualSlide && c.slide_id === actualSlide.id);
   const generalComments = comments.filter(c => !c.slide_id);
 
