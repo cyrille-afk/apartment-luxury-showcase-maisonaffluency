@@ -167,6 +167,16 @@ const TradeAxonometricGallery = () => {
         _materials: `Engine: ${engineLabel}`,
       });
       if (error) throw error;
+
+      // Bell notification for admins
+      const { data: profileData } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
+      const requesterName = profileData ? `${profileData.first_name} ${profileData.last_name}`.trim() : user.email || "A user";
+      await supabase.rpc("notify_admins_production_render", {
+        _render_title: prodRenderItem.title || "Untitled",
+        _engine: engineLabel,
+        _requester_name: requesterName,
+      });
+
       toast({ title: "Production render requested", description: `${engineLabel} — added to your quote` });
       setProdRenderItem(null);
       setSelected(null);
