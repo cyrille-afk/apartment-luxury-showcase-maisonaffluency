@@ -225,6 +225,7 @@ const TradeAxonometric = () => {
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>([]);
   const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(null);
+  const [lightingStrength, setLightingStrength] = useState(80);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -536,6 +537,7 @@ const TradeAxonometric = () => {
         style,
         qualityTier,
         referenceImageUrl: lockedLayoutReference || undefined,
+        lightingStrength: lockedLayoutReference ? lightingStrength : undefined,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
         styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
@@ -1867,6 +1869,20 @@ const TradeAxonometric = () => {
                       <Link2 className="w-3.5 h-3.5 mr-1.5" />
                       {lockedLayoutUrl ? "Unlock Layout" : "Lock Layout"}
                     </Button>
+                  )}
+                  {lockedLayoutUrl && (
+                    <div className="flex items-center gap-2 w-full mt-1">
+                      <span className="font-body text-[10px] text-muted-foreground whitespace-nowrap">Lighting match</span>
+                      <Slider
+                        value={[lightingStrength]}
+                        onValueChange={([v]) => setLightingStrength(v)}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="flex-1"
+                      />
+                      <span className="font-body text-[10px] text-muted-foreground w-8 text-right">{lightingStrength}%</span>
+                    </div>
                   )}
                   <Button
                     variant="outline"
