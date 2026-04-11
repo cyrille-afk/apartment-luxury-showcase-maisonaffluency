@@ -149,7 +149,7 @@ const PipelineInfo = () => {
           <p className="font-body text-[9px] text-muted-foreground/70 italic leading-relaxed border-t border-border pt-3">
             AI-generated visualizations are conceptual previews intended to communicate spatial layouts, material direction, and lighting mood. 
             They are not photographic representations of final products. Colours, textures, and proportions may vary from actual specifications. 
-            Production renders, where commissioned, are prepared using professional 3D software for higher fidelity.
+            Production renders, where commissioned, are prepared in 3ds Max using V-Ray or Corona Renderer for photorealistic fidelity.
           </p>
         </div>
       )}
