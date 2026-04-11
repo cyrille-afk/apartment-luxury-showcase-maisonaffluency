@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+
+const ENGINE_OPTIONS = [
+  { value: "corona", label: "Corona Renderer", price: "€280 / view", desc: "Warm natural GI — ideal for residential interiors" },
+  { value: "vray", label: "V-Ray", price: "€320 / view", desc: "Precision lighting with caustics — best for galleries & hospitality" },
+] as const;
 
 const TradeAxonometricGallery = () => {
   const { user } = useAuth();
@@ -16,6 +21,9 @@ const TradeAxonometricGallery = () => {
   const [selected, setSelected] = useState<any | null>(null);
   const [addingToQuote, setAddingToQuote] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [prodRenderItem, setProdRenderItem] = useState<any | null>(null);
+  const [chosenEngine, setChosenEngine] = useState<string>("corona");
+  const [submittingRender, setSubmittingRender] = useState(false);
 
   // Published gallery items
   const { data: items } = useQuery({
@@ -133,6 +141,42 @@ const TradeAxonometricGallery = () => {
       setActionLoading(null);
     }
   };
+
+  const requestProductionRender = useCallback(async () => {
+    if (!user || !prodRenderItem) return;
+    setSubmittingRender(true);
+    try {
+      let quoteId = draftQuote?.id;
+      if (!quoteId) {
+        const { data: newQuote, error: qErr } = await supabase
+          .from("trade_quotes")
+          .insert({ user_id: user.id })
+          .select("id")
+          .single();
+        if (qErr) throw qErr;
+        quoteId = newQuote.id;
+      }
+      const engineLabel = ENGINE_OPTIONS.find(e => e.value === chosenEngine)?.label || chosenEngine;
+      const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+        _user_id: user.id,
+        _quote_id: quoteId,
+        _product_name: `Production Render — ${prodRenderItem.title || "Untitled"}`,
+        _brand_name: "Axonometric Studio",
+        _category: "Production Render",
+        _image_url: prodRenderItem.image_url,
+        _materials: `Engine: ${engineLabel}`,
+      });
+      if (error) throw error;
+      toast({ title: "Production render requested", description: `${engineLabel} — added to your quote` });
+      setProdRenderItem(null);
+      setSelected(null);
+      queryClient.invalidateQueries({ queryKey: ["draft-quote"] });
+    } catch (e: any) {
+      toast({ title: "Request failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingRender(false);
+    }
+  }, [user, prodRenderItem, chosenEngine, draftQuote, toast, queryClient]);
 
   const renderCard = (item: any, isDraft = false) => (
     <button
@@ -278,15 +322,27 @@ const TradeAxonometricGallery = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    onClick={() => attachToQuote(selected)}
-                    disabled={addingToQuote}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    <Plus className="w-3.5 h-3.5 mr-1.5" />
-                    {addingToQuote ? "Adding…" : "Attach to Quote"}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => attachToQuote(selected)}
+                      disabled={addingToQuote}
+                      className="flex-1"
+                      size="sm"
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1.5" />
+                      {addingToQuote ? "Adding…" : "Attach to Quote"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setChosenEngine("corona");
+                        setProdRenderItem(selected);
+                      }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5" />Production Render
+                    </Button>
+                  </>
                 )}
                 <Button variant="outline" size="sm" asChild>
                   <a href={selected.image_url} target="_blank" rel="noopener noreferrer">
@@ -296,6 +352,49 @@ const TradeAxonometricGallery = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Engine Picker Dialog */}
+      <Dialog open={!!prodRenderItem} onOpenChange={() => setProdRenderItem(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Choose Render Engine</DialogTitle>
+            <DialogDescription className="font-body text-xs text-muted-foreground">
+              Select the engine for your production render of "{prodRenderItem?.title || "Untitled"}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 pt-1">
+            {ENGINE_OPTIONS.map((eng) => (
+              <button
+                key={eng.value}
+                onClick={() => setChosenEngine(eng.value)}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  chosenEngine === eng.value
+                    ? "border-foreground bg-muted/60"
+                    : "border-border hover:border-foreground/20"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-sm text-foreground">{eng.label}</span>
+                  <span className="font-display text-sm text-foreground">{eng.price}</span>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground mt-0.5">{eng.desc}</p>
+              </button>
+            ))}
+          </div>
+          <Button
+            onClick={requestProductionRender}
+            disabled={submittingRender}
+            className="w-full mt-2"
+            size="sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+            {submittingRender ? "Submitting…" : "Request Production Render"}
+          </Button>
+          <p className="font-body text-[9px] text-muted-foreground/60 text-center">
+            Added to your quote as a line item. Rush (+50%) available on request.
+          </p>
         </DialogContent>
       </Dialog>
     </>
