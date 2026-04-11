@@ -224,6 +224,7 @@ const TradeAxonometric = () => {
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>([]);
+  const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(null);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -518,7 +519,7 @@ const TradeAxonometric = () => {
         ? pendingRequests?.find((r: any) => r.id === activeRequestId)
         : null;
       const lockedLayoutReference = (mode === "elevation_to_axo" || mode === "section_to_axo")
-        ? toAbsoluteUrl(result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
+        ? toAbsoluteUrl(lockedLayoutUrl || result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
         : null;
 
       console.log("[axo-gen] Layout lock debug:", {
@@ -1848,6 +1849,25 @@ const TradeAxonometric = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
+                  {(mode === "elevation_to_axo" || mode === "section_to_axo") && result && (
+                    <Button
+                      variant={lockedLayoutUrl ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (lockedLayoutUrl) {
+                          setLockedLayoutUrl(null);
+                          toast({ title: "Layout anchor cleared" });
+                        } else {
+                          const url = result.storedUrl || result.imageUrl;
+                          setLockedLayoutUrl(url);
+                          toast({ title: "Layout locked", description: "This render will anchor all future regenerations." });
+                        }
+                      }}
+                    >
+                      <Link2 className="w-3.5 h-3.5 mr-1.5" />
+                      {lockedLayoutUrl ? "Unlock Layout" : "Lock Layout"}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
