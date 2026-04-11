@@ -141,11 +141,13 @@ Style: ${defaultStyle}. The result must be a faithful 3D translation of the sect
     } else if (mode === "clean_room") {
       prompt = `You are given a 3D axonometric architectural interior render. REMOVE ALL movable furniture, decorations, rugs, plants, artwork, and accessories from the scene. Keep ONLY the architectural shell: walls, floors, ceilings, windows, doors, built-in cabinetry, and fixed architectural elements. Fill the areas where furniture was removed with matching floor/wall textures so the room looks naturally empty and clean. The result should be a pristine, empty architectural space ready for new furniture placement.\n\nStyle: ${defaultStyle}.`;
     } else if (mode === "proposal_render") {
+      const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])
         .map((p: any, i: number) => {
           const rotNote = p.rotation ? ` — ROTATE this product ${p.rotation}° clockwise from its original orientation in the product photo` : "";
           const dimNote = p.dimensions ? ` [Dimensions: ${p.dimensions}]` : "";
-          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${dimNote}${rotNote}`;
+          const matNote = p.material_override?.trim() ? ` — MATERIAL OVERRIDE: render this product in ${p.material_override.trim()} finish instead of its original material/color` : "";
+          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${dimNote}${rotNote}${matNote}`;
         })
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
@@ -170,12 +172,13 @@ CAMERA & VIEWPOINT (HIGHEST PRIORITY — NON-NEGOTIABLE):
 - ABSOLUTELY DO NOT use a low-angle, eye-level, or dramatic perspective — keep the same overhead dollhouse-style viewpoint as the reference
 
 SHAPE & APPEARANCE FIDELITY (MOST IMPORTANT):
-- You MUST reproduce the EXACT shape, silhouette, proportions, color, material, and design of each product AS IT APPEARS in its product photo
+- You MUST reproduce the EXACT shape, silhouette, proportions, and design of each product AS IT APPEARS in its product photo
 - If a product photo shows a ROUND table, render a ROUND table — never change it to rectangular, oval, or any other shape
 - If a product photo shows a curved sofa, render a curved sofa — never straighten it
-- If a product photo shows a specific upholstery color or pattern, use that EXACT color and pattern
+${hasMaterialOverrides ? `- MATERIAL OVERRIDES: When a product has a "MATERIAL OVERRIDE" note, change ONLY the surface material/finish/color to match that override while keeping the EXACT same shape, silhouette, and design. For example, if the override says "brushed brass", render the same product form but in brushed brass finish.
+- For products WITHOUT a material override, use the EXACT color, material, and upholstery shown in the product photo.` : `- If a product photo shows a specific upholstery color or pattern, use that EXACT color and pattern`}
 - Every visible detail (legs, armrests, cushions, base shape, edge profiles) must match the product photo precisely
-- Think of each product photo as a manufacturing specification — the render must look like THAT EXACT product was photographed in the room
+- Think of each product photo as a manufacturing specification — the render must look like THAT EXACT product was photographed in the room${hasMaterialOverrides ? " (with the specified finish change applied)" : ""}
 
 POSITIONING & SCALE RULES:
 - Place EVERY product listed above — do NOT skip any. There are ${placements.length} products and ALL ${placements.length} must appear in the output
