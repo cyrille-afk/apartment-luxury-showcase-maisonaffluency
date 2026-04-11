@@ -22,6 +22,34 @@ interface UserDownload {
   downloadedAt: string;
 }
 
+interface DownloadAnalyticsRow {
+  country: string | null;
+  document_label: string | null;
+  document_id?: string | null;
+  trade_documents?: { title?: string | null } | { title?: string | null }[] | null;
+}
+
+const getDocumentTitle = (row: DownloadAnalyticsRow) => {
+  const relatedDoc = Array.isArray(row.trade_documents) ? row.trade_documents[0] : row.trade_documents;
+  return relatedDoc?.title || row.document_label || "Untitled";
+};
+
+const fetchAnalyticsDownloadRows = async (): Promise<DownloadAnalyticsRow[]> => {
+  const [memberDownloadsRes, publicDownloadsRes] = await Promise.all([
+    supabase
+      .from("document_downloads")
+      .select("country, document_label, document_id, trade_documents(title)"),
+    supabase
+      .from("public_download_events" as any)
+      .select("country, document_label, document_id, trade_documents(title)"),
+  ]);
+
+  return [
+    ...((memberDownloadsRes.data as DownloadAnalyticsRow[] | null) || []),
+    ...((publicDownloadsRes.data as DownloadAnalyticsRow[] | null) || []),
+  ];
+};
+
 export default function TradeDownloadsByCountry() {
   const { isAdmin, loading } = useAuth();
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
@@ -29,20 +57,14 @@ export default function TradeDownloadsByCountry() {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["downloads-by-country"],
     queryFn: async () => {
-      // Fetch downloads with joined document title
-      const { data } = await supabase
-        .from("document_downloads")
-        .select("country, document_label, document_id, trade_documents(title)");
-      if (!data) return [];
+      const data = await fetchAnalyticsDownloadRows();
+      if (data.length === 0) return [];
 
       // Group by country → document
       const countryMap = new Map<string, Map<string, number>>();
       for (const row of data) {
         const c = row.country || "Unknown";
-        const docName =
-          (row as any).trade_documents?.title ||
-          row.document_label ||
-          "Untitled";
+        const docName = getDocumentTitle(row);
         if (!countryMap.has(c)) countryMap.set(c, new Map());
         const docMap = countryMap.get(c)!;
         docMap.set(docName, (docMap.get(docName) || 0) + 1);
@@ -65,16 +87,11 @@ export default function TradeDownloadsByCountry() {
   const { data: docRows = [] } = useQuery({
     queryKey: ["downloads-by-document"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("document_downloads")
-        .select("country, document_label, document_id, trade_documents(title)");
-      if (!data) return [];
+      const data = await fetchAnalyticsDownloadRows();
+      if (data.length === 0) return [];
       const docMap = new Map<string, { total: number; countries: Map<string, number> }>();
       for (const row of data) {
-        const docName =
-          (row as any).trade_documents?.title ||
-          row.document_label ||
-          "Untitled";
+        const docName = getDocumentTitle(row);
         if (!docMap.has(docName)) docMap.set(docName, { total: 0, countries: new Map() });
         const entry = docMap.get(docName)!;
         entry.total++;

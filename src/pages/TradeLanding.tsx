@@ -6,6 +6,7 @@ import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackDownload } from "@/lib/trackDownload";
+import { supabase } from "@/integrations/supabase/client";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
@@ -13,6 +14,32 @@ const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uploa
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
+const ANDREE_PUTMAN_CATALOG_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
+
+const inferCountryFromBrowser = () => {
+  if (typeof navigator === "undefined") return "";
+
+  const locales = [...(navigator.languages || []), navigator.language].filter(Boolean);
+  const displayNames = typeof Intl !== "undefined" && "DisplayNames" in Intl
+    ? new Intl.DisplayNames(["en"], { type: "region" })
+    : null;
+
+  for (const locale of locales) {
+    try {
+      const region = new Intl.Locale(locale).region;
+      if (region) {
+        return displayNames?.of(region) || region;
+      }
+    } catch {
+      const fallbackRegion = locale.match(/[-_]([a-z]{2})$/i)?.[1]?.toUpperCase();
+      if (fallbackRegion) {
+        return displayNames?.of(fallbackRegion) || fallbackRegion;
+      }
+    }
+  }
+
+  return "";
+};
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
@@ -120,7 +147,20 @@ const TradeLanding = () => {
   const andreePutmanCatalogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf";
 
   const handleTrackedCatalogueDownload = useCallback(async (label: string) => {
-    trackDownload("268efc74-9268-4a68-925a-c0de96500590", label);
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.user) {
+      trackDownload(ANDREE_PUTMAN_CATALOG_DOCUMENT_ID, label);
+    } else {
+      void supabase.functions.invoke("log-public-download", {
+        body: {
+          documentId: ANDREE_PUTMAN_CATALOG_DOCUMENT_ID,
+          label,
+          country: inferCountryFromBrowser(),
+          source: "trade-landing",
+        },
+      });
+    }
 
     try {
       const response = await fetch(andreePutmanCatalogUrl);
@@ -136,7 +176,7 @@ const TradeLanding = () => {
     } catch {
       window.open(andreePutmanCatalogUrl, "_blank", "noopener,noreferrer");
     }
-  }, []);
+  }, [andreePutmanCatalogUrl]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
