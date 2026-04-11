@@ -432,9 +432,39 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
     };
     const selectedModel = MODEL_MAP[tier] || MODEL_MAP.standard;
 
-    // For premium tier, add extra fidelity instructions to the prompt
+    // For premium tier, add comprehensive archviz fidelity instructions
     if (tier === "premium") {
-      const fidelityBoost = `\n\nPREMIUM QUALITY REQUIREMENTS:\n- Render at maximum photorealistic fidelity with physically-based materials and accurate light transport\n- Apply subtle ambient occlusion in all corners, crevices, and where objects meet surfaces\n- Render accurate soft shadows with proper penumbra based on light source size\n- Show material-correct reflections: specular highlights on metals, soft sheen on fabrics, glossy reflections on polished stone\n- Add micro-detail: visible grain on wood, subtle weave texture on upholstery, veining patterns on marble\n- Include atmospheric depth: gentle ambient haze, natural color temperature variation with distance\n- Ensure anti-aliased edges with no jagged boundaries on any furniture or architectural element`;
+      const fidelityBoost = `
+
+PREMIUM ARCHVIZ QUALITY — RENDER AT MAXIMUM FIDELITY:
+
+PHYSICALLY-BASED MATERIALS (PBR):
+- MARBLE/STONE: Render with translucent depth — light should partially penetrate the surface (subsurface scattering). Show realistic veining with color variation and depth, not flat painted patterns. Polished marble must show environment reflections and wet-look gloss.
+- WOOD: Show individual plank variation with realistic grain direction, natural knots, and tonal shifts. Distinguish matte vs lacquered vs oiled finishes through reflection sharpness.
+- FABRIC/UPHOLSTERY: Render visible weave or knit texture at close range. Show natural creasing, compression shadows on cushions, and subtle pile direction on velvet.
+- LEATHER: Show natural grain texture, slight sheen, and edge wear/patina on exposed corners.
+- METALS: Brushed metal must show directional micro-scratches catching light. Polished metal must show sharp environment reflections. Satin/matte metal should have soft diffused highlights. Bronze and brass must show warm tonal depth.
+- GLASS: Render with fresnel reflections (stronger at glancing angles), edge tinting, and visible transparency to objects behind.
+
+LIGHTING & SHADOWS:
+- Primary warm natural light (3800K) from windows with realistic fall-off and color temperature gradient.
+- Soft area-light shadows with proper penumbra proportional to light source size — absolutely NO hard-edged shadows anywhere.
+- Deep ambient occlusion in every corner, under furniture, where objects meet floors/walls, and in architectural crevices.
+- Subtle bounce light — warm tones reflecting off wooden floors, cool tones from marble.
+- Contact shadows: small, dark, sharp shadows directly where furniture legs meet the floor.
+
+GEOMETRIC DETAIL:
+- Furniture edges should have subtle chamfers/rounds — no perfectly sharp CG edges.
+- Cushions and soft furnishings should show realistic volume with subtle deformation from gravity.
+- Rugs should show pile height with edge shadow and subtle surface undulation.
+- Anti-aliased edges on all elements with no visible jaggies or pixelation.
+
+ATMOSPHERIC DEPTH:
+- Subtle warm atmospheric haze increasing with distance from camera.
+- Natural color temperature shift — cooler tones in shadows, warmer in lit areas.
+- Gentle depth-of-field suggestion at the furthest edges of the scene.
+
+The final output must be indistinguishable from a professional Corona Renderer 12 or V-Ray 6 production render at presentation quality.`;
       const lastText = content.findIndex((c: any) => c.type === "text");
       if (lastText !== -1) {
         content[lastText].text += fidelityBoost;
