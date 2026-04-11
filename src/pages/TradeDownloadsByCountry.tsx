@@ -44,9 +44,12 @@ const fetchAnalyticsDownloadRows = async (): Promise<DownloadAnalyticsRow[]> => 
       .select("country, document_label, document_id, trade_documents(title)"),
   ]);
 
+  const memberRows = (((memberDownloadsRes.data as unknown) ?? []) as DownloadAnalyticsRow[]);
+  const publicRows = (((publicDownloadsRes.data as unknown) ?? []) as DownloadAnalyticsRow[]);
+
   return [
-    ...((memberDownloadsRes.data as DownloadAnalyticsRow[] | null) || []),
-    ...((publicDownloadsRes.data as DownloadAnalyticsRow[] | null) || []),
+    ...memberRows,
+    ...publicRows,
   ];
 };
 
