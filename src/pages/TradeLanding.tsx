@@ -471,12 +471,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "André Putman Art Paris 2026 — Landing")}
+                onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "Andrée Putman Art Paris 2026 — Landing")}
                 className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
               >
                 <img
                   src={cloudinaryUrl("v1775859198/Screen_Shot_2026-04-11_at_6.06.05_AM_iznxoe", { width: 400, height: 533, quality: "auto:good", crop: "fill" })}
-                  alt="André Putman Art Paris 2026 Catalogue"
+                  alt="Andrée Putman Art Paris 2026 Catalogue"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
@@ -490,16 +490,16 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <div className="flex-1 text-center md:text-left">
                 <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-2">Featured Catalogue</p>
                 <h3 className="font-display text-lg md:text-xl text-foreground mb-2">
-                  André Putman — Art Paris 2026
+                  Andrée Putman — Art Paris 2026
                 </h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-lg">
-                  Explore the exclusive photoshoot catalogue from Art Paris 2026 by the talented photographer Sébastien Véronèse, showcasing André Putman's iconic furniture and design legacy. Free to download.
+                  Explore the exclusive photoshoot catalogue from Art Paris 2026 by the talented photographer Sébastien Véronèse, showcasing Andrée Putman's iconic furniture and design legacy. Free to download.
                 </p>
                 <a
                   href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "André Putman Art Paris 2026 — Landing CTA")}
+                  onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "Andrée Putman Art Paris 2026 — Landing CTA")}
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
                 >
                   <FileDown className="h-3.5 w-3.5" />
