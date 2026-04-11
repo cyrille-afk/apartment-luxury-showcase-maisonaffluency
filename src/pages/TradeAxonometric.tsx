@@ -205,6 +205,7 @@ const TradeAxonometric = () => {
   const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [activeBrief, setActiveBrief] = useState<Record<string, string>>({});
   const [showQueue, setShowQueue] = useState(true);
   const [galleryTitle, setGalleryTitle] = useState("");
   const [galleryDesc, setGalleryDesc] = useState("");
@@ -520,6 +521,13 @@ const TradeAxonometric = () => {
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
         styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
         skipStyleReference: !useLockedRefStyle && !!refStyle,
+        // Creative brief fields from the request queue
+        ...(activeBrief.roomType && { roomType: activeBrief.roomType }),
+        ...(activeBrief.styleDirection && { styleDirection: activeBrief.styleDirection }),
+        ...(activeBrief.lightingMood && { lightingMood: activeBrief.lightingMood }),
+        ...(activeBrief.renderEngine && { renderEngine: activeBrief.renderEngine }),
+        ...(activeBrief.cameraAngles && { cameraAngles: activeBrief.cameraAngles }),
+        ...(activeBrief.briefNotes && { briefNotes: activeBrief.briefNotes }),
       };
 
       const data = await invokeAxonometricGenerate(body, undefined, 1);
@@ -553,6 +561,7 @@ const TradeAxonometric = () => {
     }
   };
 
+
   const loadFromQueue = (req: any) => {
     setSourceImage(req.image_url);
     setActiveRequestId(req.id);
@@ -563,6 +572,15 @@ const TradeAxonometric = () => {
     // Pre-load attached favorite product IDs for proposal builder
     const linkedIds = Array.isArray(req.linked_favorite_product_ids) ? req.linked_favorite_product_ids : [];
     setPreloadedFavoriteProductIds(linkedIds);
+    // Store creative brief fields
+    setActiveBrief({
+      roomType: req.room_type || "",
+      styleDirection: req.style_direction || "",
+      lightingMood: req.lighting_mood || "",
+      renderEngine: req.render_engine || "",
+      cameraAngles: req.camera_angles || "",
+      briefNotes: req.notes || "",
+    });
   };
 
   const completeRequest = async () => {
