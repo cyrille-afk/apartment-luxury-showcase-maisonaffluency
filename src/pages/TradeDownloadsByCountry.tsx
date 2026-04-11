@@ -98,19 +98,31 @@ export default function TradeDownloadsByCountry() {
   const { data: userDownloads = [] } = useQuery<UserDownload[]>({
     queryKey: ["downloads-by-user"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: downloads } = await supabase
         .from("document_downloads")
-        .select("created_at, country, document_label, user_id, trade_documents(title), profiles(first_name, last_name, email, company)")
+        .select("created_at, country, document_label, user_id, trade_documents(title)")
         .order("created_at", { ascending: false });
-      if (!data) return [];
-      return data.map((row: any) => ({
-        userName: [row.profiles?.first_name, row.profiles?.last_name].filter(Boolean).join(" ") || "—",
-        email: row.profiles?.email || "—",
-        company: row.profiles?.company || "—",
-        country: row.country || "Unknown",
-        docName: row.trade_documents?.title || row.document_label || "Untitled",
-        downloadedAt: row.created_at,
-      }));
+      if (!downloads || downloads.length === 0) return [];
+
+      // Fetch profiles for all unique user_ids
+      const userIds = [...new Set(downloads.map((d) => d.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email, company")
+        .in("id", userIds);
+      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+      return downloads.map((row: any) => {
+        const profile = profileMap.get(row.user_id);
+        return {
+          userName: [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "\u2014",
+          email: profile?.email || "\u2014",
+          company: profile?.company || "\u2014",
+          country: row.country || "Unknown",
+          docName: row.trade_documents?.title || row.document_label || "Untitled",
+          downloadedAt: row.created_at,
+        };
+      });
     },
     enabled: isAdmin,
   });
