@@ -167,6 +167,30 @@ const TradeAxonometricGallery = () => {
         _materials: `Engine: ${engineLabel}`,
       });
       if (error) throw error;
+
+      // Send admin notification email
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, email")
+        .eq("id", user.id)
+        .single();
+
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "production-render-request",
+          recipientEmail: "concierge@myaffluency.com",
+          idempotencyKey: `prod-render-${prodRenderItem.id}-${chosenEngine}`,
+          templateData: {
+            userName: profile ? `${profile.first_name} ${profile.last_name}`.trim() : user.email,
+            userEmail: user.email,
+            renderTitle: prodRenderItem.title || "Untitled",
+            engine: engineLabel,
+            projectName: prodRenderItem.project_name || "",
+            imageUrl: prodRenderItem.image_url,
+          },
+        },
+      });
+
       toast({ title: "Production render requested", description: `${engineLabel} — added to your quote` });
       setProdRenderItem(null);
       setSelected(null);
