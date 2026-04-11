@@ -521,6 +521,14 @@ const TradeAxonometric = () => {
         ? toAbsoluteUrl(result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
         : null;
 
+      console.log("[axo-gen] Layout lock debug:", {
+        hasResult: !!result,
+        resultStoredUrl: result?.storedUrl?.slice(0, 60),
+        resultImageUrl: result?.imageUrl?.slice(0, 60),
+        activeRequestResultUrl: activeRequest?.result_image_url?.slice(0, 60),
+        lockedLayoutReference: lockedLayoutReference?.slice(0, 60),
+      });
+
       const body: any = {
         imageUrl: toAbsoluteUrl(sourceImage),
         mode,
