@@ -514,11 +514,19 @@ const TradeAxonometric = () => {
       }
 
       const refStyle = referenceStyles?.find((r) => r.mode === mode);
+      const activeRequest = activeRequestId
+        ? pendingRequests?.find((r: any) => r.id === activeRequestId)
+        : null;
+      const lockedLayoutReference = (mode === "elevation_to_axo" || mode === "section_to_axo")
+        ? toAbsoluteUrl(result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
+        : null;
+
       const body: any = {
         imageUrl: toAbsoluteUrl(sourceImage),
         mode,
         style,
         qualityTier,
+        referenceImageUrl: lockedLayoutReference || undefined,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
         styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
