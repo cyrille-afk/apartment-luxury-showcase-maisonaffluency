@@ -205,6 +205,7 @@ const TradeAxonometric = () => {
   const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [activeBrief, setActiveBrief] = useState<Record<string, string>>({});
   const [showQueue, setShowQueue] = useState(true);
   const [galleryTitle, setGalleryTitle] = useState("");
   const [galleryDesc, setGalleryDesc] = useState("");
