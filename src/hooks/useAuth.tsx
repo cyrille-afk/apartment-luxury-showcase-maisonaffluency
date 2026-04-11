@@ -91,7 +91,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!sbClient) return;
 
+    // 1. Restore session from storage FIRST — this prevents the race where
+    //    onAuthStateChange fires INITIAL_SESSION with null before the token
+    //    is read from localStorage.
+    sbClient.auth.getSession().then(({ data: { session: sess } }: any) => {
+      setSession(sess);
+      setUser(sess?.user ?? null);
+      if (sess?.user) {
+        fetchUserData(sess.user.id, sbClient);
+      }
+      setLoading(false);
+    });
+
+    // 2. THEN subscribe to future changes (sign-in, sign-out, token refresh).
+    //    We deliberately skip the INITIAL_SESSION event since getSession above
+    //    already handled it.
     const { data: { subscription } } = sbClient.auth.onAuthStateChange((event: string, sess: Session | null) => {
+      if (event === "INITIAL_SESSION") return; // already handled above
+
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
@@ -109,15 +126,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             window.location.href = "/trade/login";
           }
         }
-      }
-      setLoading(false);
-    });
-
-    sbClient.auth.getSession().then(({ data: { session: sess } }: any) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) {
-        fetchUserData(sess.user.id, sbClient);
       }
       setLoading(false);
     });
