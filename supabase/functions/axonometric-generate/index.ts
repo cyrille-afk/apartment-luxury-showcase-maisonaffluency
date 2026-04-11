@@ -53,12 +53,84 @@ serve(async (req) => {
     const briefCameraAngles = body.cameraAngles as string | undefined;
     const briefNotes = body.briefNotes as string | undefined;
 
+    const normalizeText = (value?: string) => (value || "").trim().toLowerCase();
+
+    const getStyleProfile = (rawStyle?: string) => {
+      const normalized = normalizeText(rawStyle);
+
+      if (normalized.includes("editorial")) {
+        return {
+          key: "editorial_luxury",
+          label: "Editorial Luxury",
+          renderInstructions:
+            "Create a high-fashion luxury interiors image with sculptural light, richer contrast, deeper shadow separation that still preserves detail, brighter specular highlights on stone/metal/glass, warmer highlights, cleaner blacks, and a premium magazine-grade finish. This must feel dramatic, glamorous, and intentionally art-directed rather than neutral.",
+          lockedReferenceBehavior:
+            "After matching the reference render exactly, apply ONLY a finishing pass of editorial grading: slightly deeper blacks, richer contrast, crisper reflections, and more sculptural highlight roll-off. Do NOT change the reference lighting direction, exposure balance, warmth, or shadow pattern.",
+        };
+      }
+
+      if (normalized.includes("watercolor")) {
+        return {
+          key: "watercolor",
+          label: "Watercolor",
+          renderInstructions:
+            "Create an elegant watercolor architectural illustration with soft pigment washes, visible paper softness, restrained edge definition, fine architectural linework, and delicate tonal transitions.",
+          lockedReferenceBehavior:
+            "Preserve the reference composition and lighting structure, but reinterpret the final finish as a refined watercolor wash without changing the underlying light placement or geometry.",
+        };
+      }
+
+      if (normalized.includes("minimal")) {
+        return {
+          key: "minimal_line",
+          label: "Minimal Line",
+          renderInstructions:
+            "Create a pared-back architectural image with restrained tones, clean line emphasis, soft neutral shadows, simplified material expression, and a calm gallery-like presentation.",
+          lockedReferenceBehavior:
+            "Preserve the reference lighting structure and geometry, then simplify the finish into a cleaner, quieter, more minimal presentation without re-lighting the image.",
+        };
+      }
+
+      if (normalized.includes("scandinavian")) {
+        return {
+          key: "scandinavian",
+          label: "Scandinavian",
+          renderInstructions:
+            "Create a Scandinavian interior image with airy daylight, pale timber, soft diffuse reflections, understated contrast, light tactile materials, and a serene residential atmosphere.",
+          lockedReferenceBehavior:
+            "Keep the exact reference lighting structure intact, but finish the image with a lighter Scandinavian tonality and softer material palette cues only where they do not contradict the locked reference.",
+        };
+      }
+
+      return {
+        key: "photorealistic",
+        label: "Photorealistic",
+        renderInstructions:
+          "Create a neutral high-end archviz image with balanced exposure, true-to-material color, realistic daylight roll-off, natural highlight behavior, readable shadow detail, and minimal grading. This must feel like a premium real photograph of the finished interior rather than a stylized editorial shoot.",
+        lockedReferenceBehavior:
+          "After matching the reference render exactly, keep the finish neutral and documentary: balanced exposure, accurate material color, restrained grading, and no exaggerated contrast or fashion-editorial treatment.",
+      };
+    };
+
+    const styleProfile = getStyleProfile(style || briefStyleDirection);
+    const hasLockedReference = Boolean(
+      referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")
+    );
+
     // Build a rich style string that incorporates the creative brief
     const buildStyle = () => {
-      const base = style || "photorealistic architectural rendering with warm natural lighting, high-end interior finishes";
-      const parts: string[] = [base];
-      if (briefStyleDirection && briefStyleDirection !== base) parts.push(`Style direction: ${briefStyleDirection}`);
-      if (briefLightingMood) parts.push(`Lighting mood: ${briefLightingMood}`);
+      const parts: string[] = [
+        `Primary style preset: ${styleProfile.label}. ${styleProfile.renderInstructions}`,
+      ];
+      if (style && normalizeText(style) !== normalizeText(styleProfile.label)) {
+        parts.push(`Preset source text: ${style}`);
+      }
+      if (briefStyleDirection) parts.push(`Project style direction (secondary to the preset): ${briefStyleDirection}`);
+      if (briefLightingMood) {
+        parts.push(
+          `Lighting mood request (secondary to the preset${hasLockedReference ? " and never allowed to override the locked reference lighting" : ""}): ${briefLightingMood}`
+        );
+      }
       if (briefRoomType) parts.push(`Room type: ${briefRoomType}`);
       if (briefRenderEngine && briefRenderEngine !== "no_preference") {
         const engineLabel = briefRenderEngine === "corona" ? "Corona Renderer" : briefRenderEngine === "vray" ? "V-Ray" : briefRenderEngine;
@@ -304,6 +376,12 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
 
 YOUR TASK: Produce an IMPROVED version of the REFERENCE RENDER. This is NOT a fresh generation — it is a REFINEMENT of the existing render.
 
+REFERENCE LOCK PROTOCOL (ABSOLUTE PRIORITY):
+- Treat IMAGE 1 as the lighting master, exposure master, material-quality benchmark, camera lock, and composition lock.
+- Match the reference render's exact key-light direction, shadow length, shadow softness, ambient occlusion density, white balance, warmth, highlight intensity, black point, reflection intensity, and overall brightness distribution.
+- If the reference is moodier, stay moody. If the reference is warmer, stay warm. Do NOT flatten it into generic daylight. Do NOT cool it down. Do NOT brighten the shadows unless the reference already does so.
+- The floor plan is ONLY a checksum for layout accuracy. Never derive lighting, camera, or mood from the floor plan.
+
 WHAT YOU MUST KEEP IDENTICAL (NON-NEGOTIABLE):
 - The EXACT same room layout, wall positions, room count, and room shapes as the reference render
 - The EXACT same camera angle, elevation, azimuth, crop, and field of view
@@ -322,14 +400,18 @@ CRITICAL FAILURES (any of these means the output is REJECTED):
 - Adding exterior walls or a thick perimeter shell that doesn't exist in the reference
 - Changing the room layout, moving walls, or altering room proportions
 - Flattening the lighting or reducing shadow depth compared to the reference
+- Producing weaker contrast, cooler color temperature, brighter flatter midtones, or less pronounced reflections than the reference
 - Changing the camera angle or composition
 - Removing or repositioning furniture
 
-Style: ${buildStyle()}. The output must be indistinguishable from a professional Corona/V-Ray archviz render and must look like a direct improvement of the reference — not a different render.`;
+STYLE PRESET DIFFERENTIATION FOR THIS RUN:
+- ${styleProfile.lockedReferenceBehavior}
+
+Style: ${buildStyle()}. The output must look like the SAME render session as the reference — only cleaner and higher fidelity — not a different lighting setup or a fresh reinterpretation.`;
     }
 
     if (styleReferenceUrl) {
-      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual style, color grading, lighting, material quality, and rendering technique as closely as possible. Match style only — do NOT let it override any locked geometry or camera instructions already given.`;
+      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual finish, color grading, material quality, and rendering technique as closely as possible. Match style only — do NOT let it override any locked geometry, camera, lighting, exposure, or reference-render instructions already given.`;
     } else if (skipStyleReference) {
       prompt += `\n\nIMPORTANT: Generate a FRESH, original interpretation of this drawing. Choose your own optimal camera angle, viewpoint, color palette, and lighting setup only when no hard layout reference is provided.`;
     }
@@ -536,7 +618,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
             model: attemptModel,
             messages: [{ role: "user", content }],
             modalities: ["image", "text"],
-            temperature: attempt > 1 ? 0.2 : 0, // slight temperature bump on retries
+            temperature: hasLockedReference ? 0 : attempt > 1 ? 0.2 : 0,
           }),
         }
       );
