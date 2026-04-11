@@ -18,25 +18,40 @@ function hashUrl(url: string): string {
 
 const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [cachedDataUrl, setCachedDataUrl] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
+  // Check localStorage cache immediately (no IO)
+  const cacheKey = hashUrl(url);
   useEffect(() => {
-    let cancelled = false;
-    const cacheKey = hashUrl(url);
-
-    // Try localStorage cache first
     try {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         setCachedDataUrl(cached);
         setLoaded(true);
-        return;
       }
-    } catch {
-      // localStorage unavailable, continue with render
-    }
+    } catch {}
+  }, [cacheKey]);
+
+  // IntersectionObserver — only start rendering when visible
+  useEffect(() => {
+    if (cachedDataUrl) return; // already have cached image
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); obs.disconnect(); } },
+      { rootMargin: "200px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [cachedDataUrl]);
+
+  useEffect(() => {
+    if (cachedDataUrl || !isVisible) return;
+    let cancelled = false;
 
     const render = async () => {
       try {
@@ -85,7 +100,7 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
 
     render();
     return () => { cancelled = true; };
-  }, [url]);
+  }, [url, isVisible, cachedDataUrl]);
 
   if (error) {
     return (
