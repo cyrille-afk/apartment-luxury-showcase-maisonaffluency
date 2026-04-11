@@ -576,7 +576,9 @@ const TradeAxonometric = () => {
     setSourceImage(req.image_url);
     setActiveRequestId(req.id);
     setAdminNotes(req.admin_notes || "");
-    setMode(req.request_type === "section" ? "section_to_axo" : "elevation_to_axo");
+    const requestType = String(req.request_type || "").toLowerCase();
+    const isSectionRequest = requestType.includes("section");
+    setMode(isSectionRequest ? "section_to_axo" : "elevation_to_axo");
     setShowQueue(false);
     setResult(null);
     // Pre-load attached favorite product IDs for proposal builder

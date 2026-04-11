@@ -297,21 +297,23 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
-      prompt += `\n\nHARD LAYOUT REFERENCE: A previous render of THIS SAME floor plan is provided as an additional reference image. You MUST keep its room layout, wall positions, camera angle, crop, and overall geometry locked as closely as possible. Use it as a GEOMETRY / COMPOSITION ANCHOR only. You may improve material realism, furniture design language, lighting, and styling, but you MUST NOT redesign the apartment layout, move walls, change room sizes, or choose a different viewpoint. The new output should be directly comparable like-for-like with the reference render.`;
+      prompt += `\n\nHARD LAYOUT REFERENCE: A previous render of THIS SAME project is provided as an additional reference image. Treat that reference render as the LOCKED geometry and camera anchor. The source drawing is still authoritative for plan accuracy, but you MUST keep the reference render's room layout, wall positions, room count, crop, and camera angle as closely matched as possible. You may improve material realism, furniture styling, lighting, and finishes, but you MUST NOT redesign the apartment layout, move walls, change room sizes, or switch to a different composition. The new output must be directly comparable like-for-like with the reference render.`;
     }
 
     if (styleReferenceUrl) {
-      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual style, color grading, lighting, material quality, and rendering technique as closely as possible. The output should look like it was generated in the same batch/session as the reference image. However, choose your OWN optimal camera angle and viewpoint for this specific floor plan — do NOT copy the camera angle from the reference.`;
+      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual style, color grading, lighting, material quality, and rendering technique as closely as possible. Match style only — do NOT let it override any locked geometry or camera instructions already given.`;
     } else if (skipStyleReference) {
-      prompt += `\n\nIMPORTANT: Generate a FRESH, original interpretation of this drawing. Choose your own optimal camera angle, viewpoint, color palette, and lighting setup. Do NOT replicate any previously seen rendering style — produce a unique result.`;
+      prompt += `\n\nIMPORTANT: Generate a FRESH, original interpretation of this drawing. Choose your own optimal camera angle, viewpoint, color palette, and lighting setup only when no hard layout reference is provided.`;
     }
 
     // Build message content
     const content: any[] = [{ type: "text", text: prompt }];
-    content.push({
-      type: "image_url",
-      image_url: { url: imageUrl },
-    });
+    if ((mode === "elevation_to_axo" || mode === "section_to_axo") && referenceImageUrl) {
+      content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
+      content.push({ type: "image_url", image_url: { url: imageUrl } });
+    } else {
+      content.push({ type: "image_url", image_url: { url: imageUrl } });
+    }
 
     // Add replacement product images for product_swap mode
     if (mode === "product_swap") {
