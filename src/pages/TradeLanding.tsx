@@ -117,6 +117,26 @@ const testimonials = [
 const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const andreePutmanCatalogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf";
+
+  const handleTrackedCatalogueDownload = useCallback(async (label: string) => {
+    trackDownload("268efc74-9268-4a68-925a-c0de96500590", label);
+
+    try {
+      const response = await fetch(andreePutmanCatalogUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "Andrée Putman — Art Paris 2026.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(andreePutmanCatalogUrl, "_blank", "noopener,noreferrer");
+    }
+  }, []);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
@@ -467,11 +487,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               className="flex flex-col md:flex-row items-center gap-6 md:gap-10"
             >
               {/* Catalogue cover thumbnail */}
-              <a
-                href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "Andrée Putman Art Paris 2026 — Landing")}
+              <button
+                type="button"
+                onClick={() => void handleTrackedCatalogueDownload("Andrée Putman Art Paris 2026 — Landing")}
                 className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
               >
                 <img
@@ -484,7 +502,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                     <FileDown className="h-4 w-4" />
                   </div>
                 </div>
-              </a>
+              </button>
 
               {/* Text + CTA */}
               <div className="flex-1 text-center md:text-left">
@@ -495,16 +513,14 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-lg">
                   Explore the exclusive photoshoot catalogue from Art Paris 2026 by the talented photographer Sébastien Véronèse, showcasing Andrée Putman's iconic furniture and design legacy. Free to download.
                 </p>
-                <a
-                  href="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackDownload("268efc74-9268-4a68-925a-c0de96500590", "Andrée Putman Art Paris 2026 — Landing CTA")}
+                <button
+                  type="button"
+                  onClick={() => void handleTrackedCatalogueDownload("Andrée Putman Art Paris 2026 — Landing CTA")}
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
                 >
                   <FileDown className="h-3.5 w-3.5" />
                   Download Catalogue
-                </a>
+                </button>
               </div>
             </motion.div>
           </div>
