@@ -47,6 +47,7 @@ interface SelectedProduct {
   isExternal?: boolean;
   rotation?: number;
   room_section?: string;
+  material_override?: string;
   pdf_url?: string;
   pdf_urls?: { label: string; url: string; filename?: string }[];
 }
@@ -277,6 +278,7 @@ export default function ProposalBuilder({
         image_url: toAbsoluteUrl(p.image_url),
         rotation: p.rotation || 0,
         dimensions: p.dimensions || null,
+        material_override: p.material_override || null,
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
@@ -1415,6 +1417,17 @@ export default function ProposalBuilder({
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>
+                  <input
+                    type="text"
+                    value={p.material_override || ""}
+                    onChange={(e) =>
+                      setSelectedProducts((prev) =>
+                        prev.map((x) => x.id === p.id ? { ...x, material_override: e.target.value } : x)
+                      )
+                    }
+                    placeholder="Material override… e.g. brushed brass"
+                    className="mt-1 w-full bg-transparent border border-border rounded px-1.5 py-0.5 font-body text-[9px] text-muted-foreground placeholder:text-muted-foreground/40 outline-none focus:border-foreground transition-colors"
+                  />
                 </div>
                 <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
