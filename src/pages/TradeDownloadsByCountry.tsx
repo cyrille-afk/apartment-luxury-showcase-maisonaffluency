@@ -3,13 +3,23 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Download, Globe, FileText, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Download, Globe, FileText, ChevronDown, ChevronRight, User } from "lucide-react";
 import { useState } from "react";
+import { format } from "date-fns";
 
 interface CountryRow {
   country: string;
   count: number;
   documents: { name: string; count: number }[];
+}
+
+interface UserDownload {
+  userName: string;
+  email: string;
+  company: string;
+  country: string;
+  docName: string;
+  downloadedAt: string;
 }
 
 export default function TradeDownloadsByCountry() {
@@ -84,6 +94,39 @@ export default function TradeDownloadsByCountry() {
     enabled: isAdmin,
   });
 
+  // Per-user download log
+  const { data: userDownloads = [] } = useQuery<UserDownload[]>({
+    queryKey: ["downloads-by-user"],
+    queryFn: async () => {
+      const { data: downloads } = await supabase
+        .from("document_downloads")
+        .select("created_at, country, document_label, user_id, trade_documents(title)")
+        .order("created_at", { ascending: false });
+      if (!downloads || downloads.length === 0) return [];
+
+      // Fetch profiles for all unique user_ids
+      const userIds = [...new Set(downloads.map((d) => d.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email, company")
+        .in("id", userIds);
+      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+      return downloads.map((row: any) => {
+        const profile = profileMap.get(row.user_id);
+        return {
+          userName: [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "\u2014",
+          email: profile?.email || "\u2014",
+          company: profile?.company || "\u2014",
+          country: row.country || "Unknown",
+          docName: row.trade_documents?.title || row.document_label || "Untitled",
+          downloadedAt: row.created_at,
+        };
+      });
+    },
+    enabled: isAdmin,
+  });
+
   const total = rows.reduce((s, r) => s + r.count, 0);
 
   if (loading) return null;
@@ -95,7 +138,7 @@ export default function TradeDownloadsByCountry() {
         <title>Downloads by Country — Admin — Maison Affluency</title>
       </Helmet>
 
-      <div className="max-w-4xl space-y-10">
+      <div className="max-w-6xl space-y-10">
         {/* Header */}
         <div className="flex items-center gap-3">
           <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
@@ -204,6 +247,50 @@ export default function TradeDownloadsByCountry() {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Download Log */}
+            <div className="lg:col-span-2">
+              <h2 className="font-display text-lg text-foreground mb-3">Download Log</h2>
+              <div className="border border-border rounded-lg overflow-hidden overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-muted/50 border-b border-border">
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">User</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Company</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Country</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5">Document</th>
+                      <th className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground px-4 py-2.5 text-right">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {userDownloads.map((dl, i) => (
+                      <tr key={i} className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-body text-sm text-foreground truncate">{dl.userName}</p>
+                              <p className="font-body text-[10px] text-muted-foreground truncate">{dl.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 font-body text-xs text-muted-foreground">{dl.company || "\u2014"}</td>
+                        <td className="px-4 py-2.5 font-body text-xs text-muted-foreground">{dl.country}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <FileText className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                            <span className="font-body text-xs text-foreground truncate">{dl.docName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 font-body text-xs text-muted-foreground text-right whitespace-nowrap">
+                          {format(new Date(dl.downloadedAt), "d MMM yyyy, HH:mm")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
