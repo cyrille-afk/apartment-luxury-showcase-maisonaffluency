@@ -76,40 +76,54 @@ serve(async (req) => {
     const defaultStyle = buildStyle();
 
     if (mode === "elevation_to_axo") {
-      prompt = `You are an expert architectural visualization AI. Transform this 2D floor plan / elevation drawing into a professional 3D axonometric (isometric) cutaway dollhouse-style interior view.
+      prompt = `You are a world-class architectural visualization artist specializing in photorealistic axonometric interior renders. Transform this 2D floor plan / elevation drawing into a stunning 3D axonometric (isometric) cutaway dollhouse-style interior view that looks like a professional archviz portfolio piece.
 
 CRITICAL ACCURACY RULES:
-1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing (sofas, tables, chairs, beds, desks, shelving, rugs, plants) must appear in the 3D render at the EXACT same position, orientation, and relative scale as shown in the plan. Do NOT invent, add, remove, or reposition any furniture.
-2. ROOM GEOMETRY: Interior partition walls, doors, windows, columns, and openings must match the plan exactly — correct lengths, angles, and positions.
-3. SPATIAL RELATIONSHIPS: Maintain the exact distances between furniture pieces and between furniture and walls as shown in the plan.
-4. ORIENTATION: If a sofa faces north in the plan, it must face north in the 3D view. Preserve all rotations and facing directions.
-5. COUNT: The number of each furniture type must match exactly — if the plan shows 2 armchairs, render exactly 2, not 1 or 3.
+1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing must appear in the 3D render at the EXACT same position, orientation, and relative scale. Do NOT invent, add, remove, or reposition any furniture.
+2. ROOM GEOMETRY: Interior partition walls, doors, windows, columns, and openings must match the plan exactly.
+3. SPATIAL RELATIONSHIPS: Maintain exact distances between furniture and walls as shown in the plan.
+4. ORIENTATION: Preserve all rotations and facing directions exactly as drawn.
+5. COUNT: The number of each furniture type must match exactly.
 
-WALL RENDERING RULES — VERY IMPORTANT:
-- Do NOT render thick external/building envelope walls. The exterior boundary of the space should be open or only subtly indicated with a thin edge or floor boundary.
-- Only render INTERIOR partition walls that divide rooms within the space.
-- The result should look like a dollhouse or architectural model with the exterior shell completely removed, exposing the interior directly.
-- Windows and doors on the perimeter should still be visible but without the thick structural wall surrounding them — show them as openings or thin frames at the floor plan boundary.
+WALL RENDERING RULES:
+- Do NOT render thick external/building envelope walls. The exterior boundary should be open or subtly indicated with a thin edge or floor boundary only.
+- Only render INTERIOR partition walls that divide rooms — these should be thin, elegant, and proportional (approximately 100-150mm at scale).
+- The result should look like a premium architectural scale model or dollhouse with the exterior shell removed.
+- Perimeter windows and doors should appear as openings or thin frames without thick structural walls.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway with no roof and no external walls. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan — not an artistic reinterpretation.`;
+PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
+- FLOORING: Render stone/marble with realistic veining patterns, subtle depth, and polished reflections. Hardwood should show visible grain direction and natural color variation between planks. Tiles should have visible grout lines.
+- WALLS: Show subtle plaster texture or paint sheen. Paneled walls must show shadow lines between panels.
+- FURNITURE UPHOLSTERY: Render with visible fabric weave or leather grain texture. Show natural creasing on cushions and pillows with soft shadowing in folds.
+- WOOD SURFACES: Show realistic grain patterns, edge profiles, and the difference between matte and lacquered finishes.
+- METALS: Distinguish between brushed (directional micro-scratches), polished (sharp reflections), satin (soft diffused reflections), and oxidized finishes.
+- GLASS: Render with subtle reflections, transparency, and edge refractions.
+- LIGHTING: Use warm natural light (3500-4500K color temperature) entering from windows with soft shadows. Add gentle ambient occlusion where objects meet surfaces and in corners. All shadows should have soft penumbra — no hard-edged shadows.
+- DEPTH & ATMOSPHERE: Include subtle atmospheric perspective — objects further from camera should have very slight warmth/haze shift.
+
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan rendered at the quality level of a professional Corona Renderer or V-Ray archviz output.`;
     } else if (mode === "section_to_axo") {
-      prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway dollhouse-style interior view.
+      prompt = `You are a world-class architectural visualization artist. Transform this 2D architectural section drawing into a photorealistic 3D axonometric cutaway dollhouse-style interior view.
 
 CRITICAL ACCURACY RULES:
-1. FURNITURE & FIXTURES: Every piece of furniture, fixture, and object visible in the section must appear in the 3D render at the EXACT same position, height, and relative scale. Do NOT invent, add, remove, or reposition any element.
-2. SPATIAL VOLUME: Show the full spatial volume — interior partition walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions from an elevated oblique angle.
-3. PROPORTIONS: Wall heights, floor-to-ceiling distances, stair dimensions, and opening sizes must match the section exactly.
-4. DEPTH: Extrude the section into realistic room depth, maintaining all structural and spatial relationships from the original drawing.
+1. FURNITURE & FIXTURES: Every element visible in the section must appear at the EXACT same position, height, and relative scale. Do NOT add or remove anything.
+2. SPATIAL VOLUME: Show the full spatial volume — interior partition walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions.
+3. PROPORTIONS: Wall heights, floor-to-ceiling distances, and opening sizes must match the section exactly.
+4. DEPTH: Extrude the section into realistic room depth, maintaining all structural relationships.
 
-WALL RENDERING RULES — VERY IMPORTANT:
-- Do NOT render thick external/building envelope walls. The exterior boundary of the space should be open or only subtly indicated with a thin edge or floor boundary.
-- Only render INTERIOR partition walls that divide rooms within the space.
-- The result should look like a dollhouse or architectural model with the exterior shell completely removed, exposing the interior directly.
-- Windows and doors on the perimeter should still be visible but without the thick structural wall surrounding them — show them as openings or thin frames at the boundary.
+WALL RENDERING RULES:
+- Do NOT render thick external walls. Exterior boundaries should be open or subtly indicated with thin edges.
+- Only render INTERIOR partition walls — thin and proportional.
+- The result should look like a premium architectural scale model with the exterior shell removed.
 
-Style: ${defaultStyle}. The result must be a faithful 3D translation of the section — not an artistic reinterpretation.`;
+PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
+- Apply physically-based materials: realistic stone veining, visible wood grain, fabric texture with natural creasing, distinct metal finishes (brushed vs polished vs satin).
+- Use warm natural lighting (3500-4500K) with soft shadows and ambient occlusion in corners and where objects meet surfaces.
+- Include subtle atmospheric perspective and edge anti-aliasing.
+
+Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
     } else if (mode === "stylize") {
-      prompt = `Enhance and stylize this architectural 3D axonometric view to give it a ${defaultStyle} feel. Add realistic textures, materials, shadows, and ambient lighting. Keep the geometry and spatial layout exactly the same but elevate the visual quality to a professional presentation rendering.`;
+      prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.`;
     } else if (mode === "composite") {
       prompt = `Take this 3D axonometric architectural view and incorporate the provided furniture/product images into the scene naturally. Place them at appropriate positions within the rooms, respecting scale, perspective, and the axonometric projection angle. Add realistic shadows and lighting to blend the products seamlessly into the architectural rendering. Style: ${defaultStyle}.`;
     } else if (mode === "3d_to_cad") {
@@ -418,9 +432,39 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
     };
     const selectedModel = MODEL_MAP[tier] || MODEL_MAP.standard;
 
-    // For premium tier, add extra fidelity instructions to the prompt
+    // For premium tier, add comprehensive archviz fidelity instructions
     if (tier === "premium") {
-      const fidelityBoost = `\n\nPREMIUM QUALITY REQUIREMENTS:\n- Render at maximum photorealistic fidelity with physically-based materials and accurate light transport\n- Apply subtle ambient occlusion in all corners, crevices, and where objects meet surfaces\n- Render accurate soft shadows with proper penumbra based on light source size\n- Show material-correct reflections: specular highlights on metals, soft sheen on fabrics, glossy reflections on polished stone\n- Add micro-detail: visible grain on wood, subtle weave texture on upholstery, veining patterns on marble\n- Include atmospheric depth: gentle ambient haze, natural color temperature variation with distance\n- Ensure anti-aliased edges with no jagged boundaries on any furniture or architectural element`;
+      const fidelityBoost = `
+
+PREMIUM ARCHVIZ QUALITY — RENDER AT MAXIMUM FIDELITY:
+
+PHYSICALLY-BASED MATERIALS (PBR):
+- MARBLE/STONE: Render with translucent depth — light should partially penetrate the surface (subsurface scattering). Show realistic veining with color variation and depth, not flat painted patterns. Polished marble must show environment reflections and wet-look gloss.
+- WOOD: Show individual plank variation with realistic grain direction, natural knots, and tonal shifts. Distinguish matte vs lacquered vs oiled finishes through reflection sharpness.
+- FABRIC/UPHOLSTERY: Render visible weave or knit texture at close range. Show natural creasing, compression shadows on cushions, and subtle pile direction on velvet.
+- LEATHER: Show natural grain texture, slight sheen, and edge wear/patina on exposed corners.
+- METALS: Brushed metal must show directional micro-scratches catching light. Polished metal must show sharp environment reflections. Satin/matte metal should have soft diffused highlights. Bronze and brass must show warm tonal depth.
+- GLASS: Render with fresnel reflections (stronger at glancing angles), edge tinting, and visible transparency to objects behind.
+
+LIGHTING & SHADOWS:
+- Primary warm natural light (3800K) from windows with realistic fall-off and color temperature gradient.
+- Soft area-light shadows with proper penumbra proportional to light source size — absolutely NO hard-edged shadows anywhere.
+- Deep ambient occlusion in every corner, under furniture, where objects meet floors/walls, and in architectural crevices.
+- Subtle bounce light — warm tones reflecting off wooden floors, cool tones from marble.
+- Contact shadows: small, dark, sharp shadows directly where furniture legs meet the floor.
+
+GEOMETRIC DETAIL:
+- Furniture edges should have subtle chamfers/rounds — no perfectly sharp CG edges.
+- Cushions and soft furnishings should show realistic volume with subtle deformation from gravity.
+- Rugs should show pile height with edge shadow and subtle surface undulation.
+- Anti-aliased edges on all elements with no visible jaggies or pixelation.
+
+ATMOSPHERIC DEPTH:
+- Subtle warm atmospheric haze increasing with distance from camera.
+- Natural color temperature shift — cooler tones in shadows, warmer in lit areas.
+- Gentle depth-of-field suggestion at the furthest edges of the scene.
+
+The final output must be indistinguishable from a professional Corona Renderer 12 or V-Ray 6 production render at presentation quality.`;
       const lastText = content.findIndex((c: any) => c.type === "text");
       if (lastText !== -1) {
         content[lastText].text += fidelityBoost;
