@@ -40,7 +40,7 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const body = await req.json();
-    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier } = body;
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier, lightingStrength } = body;
     // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
 
     if (!imageUrl) throw new Error("imageUrl is required");
@@ -377,10 +377,13 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
 YOUR TASK: Produce an IMPROVED version of the REFERENCE RENDER. This is NOT a fresh generation — it is a REFINEMENT of the existing render.
 
 REFERENCE LOCK PROTOCOL (ABSOLUTE PRIORITY):
-- Treat IMAGE 1 as the lighting master, exposure master, material-quality benchmark, camera lock, and composition lock.
+- Lighting match strength: ${typeof lightingStrength === "number" ? lightingStrength : 80}%.
+${(typeof lightingStrength !== "number" || lightingStrength >= 70) ? `- Treat IMAGE 1 as the lighting master, exposure master, material-quality benchmark, camera lock, and composition lock.
 - Match the reference render's exact key-light direction, shadow length, shadow softness, ambient occlusion density, white balance, warmth, highlight intensity, black point, reflection intensity, and overall brightness distribution.
 - If the reference is moodier, stay moody. If the reference is warmer, stay warm. Do NOT flatten it into generic daylight. Do NOT cool it down. Do NOT brighten the shadows unless the reference already does so.
-- The floor plan is ONLY a checksum for layout accuracy. Never derive lighting, camera, or mood from the floor plan.
+- The floor plan is ONLY a checksum for layout accuracy. Never derive lighting, camera, or mood from the floor plan.` : (typeof lightingStrength === "number" && lightingStrength >= 40) ? `- Use the reference render as a strong lighting guide: keep the same key-light direction, shadow pattern, and overall warmth. You may subtly adjust exposure or contrast to better serve the selected style preset, but do NOT fundamentally change the lighting character.
+- The floor plan is ONLY a checksum for layout accuracy.` : `- Use the reference render as a loose lighting suggestion. You may re-light the scene to better suit the style preset while keeping the same camera angle and room layout from the reference.
+- The floor plan is ONLY a checksum for layout accuracy.`}
 
 WHAT YOU MUST KEEP IDENTICAL (NON-NEGOTIABLE):
 - The EXACT same room layout, wall positions, room count, and room shapes as the reference render
