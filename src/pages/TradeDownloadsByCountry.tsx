@@ -12,6 +12,15 @@ interface CountryRow {
   documents: { name: string; count: number }[];
 }
 
+interface UserDownload {
+  userName: string;
+  email: string;
+  company: string;
+  country: string;
+  docName: string;
+  downloadedAt: string;
+}
+
 export default function TradeDownloadsByCountry() {
   const { isAdmin, loading } = useAuth();
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
