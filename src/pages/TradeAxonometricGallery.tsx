@@ -322,15 +322,27 @@ const TradeAxonometricGallery = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    onClick={() => attachToQuote(selected)}
-                    disabled={addingToQuote}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    <Plus className="w-3.5 h-3.5 mr-1.5" />
-                    {addingToQuote ? "Adding…" : "Attach to Quote"}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => attachToQuote(selected)}
+                      disabled={addingToQuote}
+                      className="flex-1"
+                      size="sm"
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1.5" />
+                      {addingToQuote ? "Adding…" : "Attach to Quote"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setChosenEngine("corona");
+                        setProdRenderItem(selected);
+                      }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5" />Production Render
+                    </Button>
+                  </>
                 )}
                 <Button variant="outline" size="sm" asChild>
                   <a href={selected.image_url} target="_blank" rel="noopener noreferrer">
@@ -340,6 +352,49 @@ const TradeAxonometricGallery = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Engine Picker Dialog */}
+      <Dialog open={!!prodRenderItem} onOpenChange={() => setProdRenderItem(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Choose Render Engine</DialogTitle>
+            <DialogDescription className="font-body text-xs text-muted-foreground">
+              Select the engine for your production render of "{prodRenderItem?.title || "Untitled"}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 pt-1">
+            {ENGINE_OPTIONS.map((eng) => (
+              <button
+                key={eng.value}
+                onClick={() => setChosenEngine(eng.value)}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  chosenEngine === eng.value
+                    ? "border-foreground bg-muted/60"
+                    : "border-border hover:border-foreground/20"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-sm text-foreground">{eng.label}</span>
+                  <span className="font-display text-sm text-foreground">{eng.price}</span>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground mt-0.5">{eng.desc}</p>
+              </button>
+            ))}
+          </div>
+          <Button
+            onClick={requestProductionRender}
+            disabled={submittingRender}
+            className="w-full mt-2"
+            size="sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+            {submittingRender ? "Submitting…" : "Request Production Render"}
+          </Button>
+          <p className="font-body text-[9px] text-muted-foreground/60 text-center">
+            Added to your quote as a line item. Rush (+50%) available on request.
+          </p>
         </DialogContent>
       </Dialog>
     </>
