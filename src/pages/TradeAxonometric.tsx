@@ -1177,6 +1177,43 @@ const TradeAxonometric = () => {
               </div>
             </div>
 
+            {/* Active Creative Brief — shown when working from a queued request */}
+            {activeRequestId && Object.values(activeBrief).some(v => v && v !== "no_preference") && (
+              <div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-2">
+                <h2 className="font-display text-xs text-primary uppercase tracking-wider">Creative Brief</h2>
+                <div className="flex flex-wrap gap-1.5">
+                  {activeBrief.roomType && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground">
+                      🏠 {activeBrief.roomType}
+                    </span>
+                  )}
+                  {activeBrief.styleDirection && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground">
+                      🎨 {activeBrief.styleDirection}
+                    </span>
+                  )}
+                  {activeBrief.lightingMood && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground">
+                      💡 {activeBrief.lightingMood}
+                    </span>
+                  )}
+                  {activeBrief.renderEngine && activeBrief.renderEngine !== "no_preference" && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground">
+                      ⚙️ {activeBrief.renderEngine === "corona" ? "Corona" : activeBrief.renderEngine === "vray" ? "V-Ray" : activeBrief.renderEngine}
+                    </span>
+                  )}
+                  {activeBrief.cameraAngles && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground">
+                      📐 {activeBrief.cameraAngles}
+                    </span>
+                  )}
+                </div>
+                {activeBrief.briefNotes && (
+                  <p className="text-[11px] text-muted-foreground italic mt-1">"{activeBrief.briefNotes}"</p>
+                )}
+              </div>
+            )}
+
             {/* Style Preset */}
             <div className="border border-border rounded-lg p-5 space-y-4">
               <h2 className="font-display text-sm text-foreground">Style Preset</h2>
