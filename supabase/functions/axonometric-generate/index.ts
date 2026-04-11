@@ -107,21 +107,26 @@ PHOTOREALISTIC MATERIAL & LIGHTING:
 
 Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
     } else if (mode === "section_to_axo") {
-      prompt = `ABSOLUTE HIGHEST PRIORITY — WALL TREATMENT (READ THIS FIRST):
-The input section has thick hatched walls representing the building structure. You MUST NOT reproduce them as thick dark blocks. REMOVE all exterior walls entirely — the perimeter should be OPEN. Interior partition walls must be THIN (100-150mm), light-colored plaster. NEVER render black, dark grey, or block-like walls.
+      prompt = `RULE #1 — LAYOUT FIDELITY (MOST IMPORTANT — VIOLATING IT MEANS TOTAL FAILURE):
+You are given a 2D architectural section drawing. Your output MUST faithfully reproduce the EXACT spatial arrangement shown:
+- The NUMBER OF SPACES/LEVELS must match exactly. Do NOT merge, split, add, or remove rooms or levels.
+- The SHAPE and POSITION of every space must match. Room widths, corridor positions, and adjacencies must be preserved.
+- WALL POSITIONS: Every interior partition must appear at the EXACT position shown in the section.
+- PROPORTIONS: Wall heights, floor-to-ceiling distances, opening sizes, and room widths must match exactly.
+- DOOR/WINDOW positions and sizes must match.
+- Think of it as extruding the section into depth — the cross-section footprint must be identical when sliced.
 
-You are a world-class architectural visualization artist. Transform this 2D architectural section into a photorealistic 3D axonometric cutaway dollhouse-style interior view.
+RULE #2 — WALL RENDERING:
+Thick hatched lines in the section are a 2D drafting convention. In your 3D render:
+- EXTERIOR WALLS: Completely REMOVE. The perimeter should be OPEN.
+- INTERIOR PARTITIONS: THIN (100-150mm), light plaster in white/off-white.
+- FORBIDDEN: Black walls, dark grey walls, thick block walls.
 
-CRITICAL ACCURACY RULES:
-1. FURNITURE & FIXTURES: Every element visible in the section must appear at the EXACT same position, height, and relative scale.
-2. SPATIAL VOLUME: Show the full spatial volume — partition walls, floors, ceilings, stairs, mezzanines, and openings.
-3. PROPORTIONS: Wall heights, floor-to-ceiling distances, and opening sizes must match exactly.
-4. DEPTH: Extrude the section into realistic room depth, maintaining all structural relationships.
+RULE #3 — FURNITURE & FIXTURES:
+Every element visible in the section must appear at the EXACT same position, height, and relative scale.
 
-PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
-- Physically-based materials: realistic stone veining, visible wood grain, fabric texture with natural creasing, distinct metal finishes.
-- Warm natural lighting (3500-4500K) with soft shadows and ambient occlusion.
-- Interior walls: light plaster/paint — NEVER dark or thick.
+PHOTOREALISTIC MATERIALS: PBR stone veining, visible wood grain, fabric texture with creasing, distinct metal finishes.
+LIGHTING: Warm natural (3500-4500K) with soft shadows and ambient occlusion. Interior walls: light plaster — NEVER dark or thick.
 
 Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
     } else if (mode === "stylize") {
