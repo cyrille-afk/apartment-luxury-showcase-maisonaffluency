@@ -297,7 +297,21 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
-      prompt += `\n\nHARD LAYOUT REFERENCE: A previous render of THIS SAME project is provided as an additional reference image. Treat that reference render as the LOCKED geometry and camera anchor. The source drawing is still authoritative for plan accuracy, but you MUST keep the reference render's room layout, wall positions, room count, crop, and camera angle as closely matched as possible. You may improve material realism, furniture styling, lighting, and finishes, but you MUST NOT redesign the apartment layout, move walls, change room sizes, or switch to a different composition. The new output must be directly comparable like-for-like with the reference render.`;
+      prompt += `\n\nHARD LAYOUT & QUALITY REFERENCE: A previous render of THIS SAME project is provided as an additional reference image.
+
+GEOMETRY LOCK (NON-NEGOTIABLE):
+- Keep the reference render's room layout, wall positions, room count, crop, and camera angle EXACTLY as shown.
+- The source drawing is still authoritative for plan accuracy.
+- You MUST NOT redesign the apartment layout, move walls, change room sizes, or switch to a different composition.
+
+LIGHTING & MATERIAL QUALITY LOCK:
+- Study the reference render's LIGHTING QUALITY carefully: the shadow depth, ambient occlusion intensity, warm light color temperature, and soft penumbra shadows.
+- Your output MUST match or EXCEED the reference render's lighting quality — same shadow density, same warm natural tones, same depth of ambient occlusion.
+- If the reference has deep contact shadows under furniture, you must have equally deep contact shadows.
+- If the reference has warm bounce light off marble floors, you must have the same.
+- Do NOT produce a flatter, softer, or less dramatic lighting setup than the reference.
+
+The new output must be directly comparable like-for-like with the reference render — same layout, same or better visual quality.`;
     }
 
     if (styleReferenceUrl) {
