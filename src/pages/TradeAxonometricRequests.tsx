@@ -101,7 +101,7 @@ const PipelineInfo = () => {
                 { step: "1", title: "Creative Brief", desc: "You submit drawings, room dimensions, style direction, and lighting preferences using the form below." },
                 { step: "2", title: "AI Concept Generation", desc: "Our engine generates initial visualizations — exploring layouts, material palettes, and lighting scenarios in seconds." },
                 { step: "3", title: "Refinement & Curation", desc: "You refine using style presets, lighting controls, and layout locking until the direction is right." },
-                { step: "4", title: "Production Render (optional)", desc: "For client-facing deliverables, selected views can be elevated to photorealistic quality by our visualization team." },
+                { step: "4", title: "Production Render (optional)", desc: "For client-facing deliverables, selected views are handed to our visualization team and rendered in 3ds Max with V-Ray or Corona for photorealistic quality." },
                 { step: "5", title: "Review & Delivery", desc: "Finished renders appear in the 3D Studio Gallery. Attach them to quotes or presentations instantly." },
               ].map((s) => (
                 <li key={s.step} className="flex gap-3">
@@ -149,7 +149,7 @@ const PipelineInfo = () => {
           <p className="font-body text-[9px] text-muted-foreground/70 italic leading-relaxed border-t border-border pt-3">
             AI-generated visualizations are conceptual previews intended to communicate spatial layouts, material direction, and lighting mood. 
             They are not photographic representations of final products. Colours, textures, and proportions may vary from actual specifications. 
-            Production renders, where commissioned, are prepared using professional 3D software for higher fidelity.
+            Production renders, where commissioned, are prepared in 3ds Max using V-Ray or Corona Renderer for photorealistic fidelity.
           </p>
         </div>
       )}
