@@ -90,6 +90,7 @@ export default function ProposalBuilder({
   const [lockedIteration, setLockedIteration] = useState<number | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
 
   // External upload dialog state
   const [showExternalDialog, setShowExternalDialog] = useState(false);
@@ -287,6 +288,7 @@ export default function ProposalBuilder({
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_render",
           style,
+          qualityTier,
           placements,
         },
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -341,6 +343,7 @@ export default function ProposalBuilder({
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_refine",
           style,
+          qualityTier,
           placements,
           refinementPrompt: refinementPrompt.trim(),
           markerHints,
