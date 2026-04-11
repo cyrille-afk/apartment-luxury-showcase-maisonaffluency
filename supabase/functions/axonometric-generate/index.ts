@@ -40,7 +40,7 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const body = await req.json();
-    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints } = body;
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier } = body;
     // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
 
     if (!imageUrl) throw new Error("imageUrl is required");
@@ -409,18 +409,33 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       });
     }
 
-    // Use Pro model for all modes for maximum visual fidelity
-    const selectedModel = "google/gemini-3-pro-image-preview";
+    // Quality tier model selection
+    const tier = (qualityTier as string) || "standard";
+    const MODEL_MAP: Record<string, string> = {
+      draft: "google/gemini-3.1-flash-image-preview",
+      standard: "google/gemini-3-pro-image-preview",
+      premium: "google/gemini-3-pro-image-preview",
+    };
+    const selectedModel = MODEL_MAP[tier] || MODEL_MAP.standard;
 
-    console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
+    // For premium tier, add extra fidelity instructions to the prompt
+    if (tier === "premium") {
+      const fidelityBoost = `\n\nPREMIUM QUALITY REQUIREMENTS:\n- Render at maximum photorealistic fidelity with physically-based materials and accurate light transport\n- Apply subtle ambient occlusion in all corners, crevices, and where objects meet surfaces\n- Render accurate soft shadows with proper penumbra based on light source size\n- Show material-correct reflections: specular highlights on metals, soft sheen on fabrics, glossy reflections on polished stone\n- Add micro-detail: visible grain on wood, subtle weave texture on upholstery, veining patterns on marble\n- Include atmospheric depth: gentle ambient haze, natural color temperature variation with distance\n- Ensure anti-aliased edges with no jagged boundaries on any furniture or architectural element`;
+      const lastText = content.findIndex((c: any) => c.type === "text");
+      if (lastText !== -1) {
+        content[lastText].text += fidelityBoost;
+      }
+    }
+
+    console.log(`[axo-gen] mode=${mode}, tier=${tier}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
     const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;
     let textResponse = "";
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      // On final attempt, try Pro model as fallback for better image generation
-      const attemptModel = attempt === MAX_ATTEMPTS ? "google/gemini-3-pro-image-preview" : selectedModel;
+      // On final attempt, always escalate to Pro model as fallback
+      const attemptModel = (attempt === MAX_ATTEMPTS && tier === "draft") ? "google/gemini-3-pro-image-preview" : selectedModel;
       if (attempt > 1) {
         console.log(`[axo-gen] Retry attempt ${attempt} with model=${attemptModel}`);
       }

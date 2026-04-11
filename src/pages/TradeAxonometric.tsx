@@ -222,6 +222,7 @@ const TradeAxonometric = () => {
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
+  const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
   const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>([]);
 
   // AI dialogue state
@@ -517,6 +518,7 @@ const TradeAxonometric = () => {
         imageUrl: toAbsoluteUrl(sourceImage),
         mode,
         style,
+        qualityTier,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
         styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
@@ -1483,6 +1485,31 @@ const TradeAxonometric = () => {
                 </div>
               </div>
             )}
+
+            {/* Quality Tier Selector */}
+            <div className="space-y-1.5">
+              <label className="font-display text-xs tracking-wide text-muted-foreground uppercase">Quality Tier</label>
+              <div className="grid grid-cols-3 gap-1">
+                {([
+                  { value: "draft" as const, label: "Draft", desc: "Fast preview" },
+                  { value: "standard" as const, label: "Standard", desc: "Balanced" },
+                  { value: "premium" as const, label: "Premium", desc: "Max fidelity" },
+                ] as const).map((tier) => (
+                  <button
+                    key={tier.value}
+                    onClick={() => setQualityTier(tier.value)}
+                    className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-md border text-xs transition-colors ${
+                      qualityTier === tier.value
+                        ? "border-primary bg-primary/10 text-primary font-semibold"
+                        : "border-border text-muted-foreground hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="font-display text-[11px]">{tier.label}</span>
+                    <span className="text-[9px] opacity-70">{tier.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Generate Button */}
             <Button

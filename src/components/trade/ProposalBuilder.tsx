@@ -90,6 +90,7 @@ export default function ProposalBuilder({
   const [lockedIteration, setLockedIteration] = useState<number | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
 
   // External upload dialog state
   const [showExternalDialog, setShowExternalDialog] = useState(false);
@@ -287,6 +288,7 @@ export default function ProposalBuilder({
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_render",
           style,
+          qualityTier,
           placements,
         },
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -341,6 +343,7 @@ export default function ProposalBuilder({
           referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_refine",
           style,
+          qualityTier,
           placements,
           refinementPrompt: refinementPrompt.trim(),
           markerHints,
@@ -1214,6 +1217,22 @@ export default function ProposalBuilder({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Quality Tier */}
+          <div className="flex items-center border border-border rounded-md overflow-hidden text-[10px] font-display">
+            {(["draft", "standard", "premium"] as const).map((tier) => (
+              <button
+                key={tier}
+                onClick={() => setQualityTier(tier)}
+                className={`px-2 py-1.5 capitalize transition-colors ${
+                  qualityTier === tier
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {tier}
+              </button>
+            ))}
+          </div>
           <Button
             size="sm"
             onClick={generateProposal}
