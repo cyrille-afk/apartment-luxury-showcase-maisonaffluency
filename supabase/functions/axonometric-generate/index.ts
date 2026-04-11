@@ -427,15 +427,15 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       }
     }
 
-    console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
+    console.log(`[axo-gen] mode=${mode}, tier=${tier}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
     const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;
     let textResponse = "";
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      // On final attempt, try Pro model as fallback for better image generation
-      const attemptModel = attempt === MAX_ATTEMPTS ? "google/gemini-3-pro-image-preview" : selectedModel;
+      // On final attempt, always escalate to Pro model as fallback
+      const attemptModel = (attempt === MAX_ATTEMPTS && tier === "draft") ? "google/gemini-3-pro-image-preview" : selectedModel;
       if (attempt > 1) {
         console.log(`[axo-gen] Retry attempt ${attempt} with model=${attemptModel}`);
       }
