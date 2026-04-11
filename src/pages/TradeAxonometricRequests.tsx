@@ -73,8 +73,8 @@ const PipelineInfo = () => {
             <Info className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
-            <p className="font-display text-sm text-foreground">Our 3D Rendering Pipeline</p>
-            <p className="font-body text-[10px] text-muted-foreground">3ds Max · Corona · V-Ray — professional-grade visualization</p>
+            <p className="font-display text-sm text-foreground">Our Visualization Studio</p>
+            <p className="font-body text-[10px] text-muted-foreground">AI-assisted rendering · guided by archviz standards</p>
           </div>
         </div>
         {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -82,21 +82,15 @@ const PipelineInfo = () => {
 
       {expanded && (
         <div className="border-t border-border p-5 space-y-5">
-          {/* Software Stack */}
+          {/* How It Works */}
           <div className="space-y-2">
-            <h3 className="font-display text-xs uppercase tracking-[0.15em] text-muted-foreground">Software Stack</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { name: "Autodesk 3ds Max", desc: "Industry-standard 3D modelling, precise geometry and parametric control for furniture and architectural elements" },
-                { name: "Chaos Corona", desc: "Physically-based renderer delivering photorealistic daylight, caustics and material accuracy with minimal setup" },
-                { name: "Chaos V-Ray", desc: "Production-proven ray tracer for maximum control over lighting, texturing, and GPU-accelerated rendering" },
-              ].map((sw) => (
-                <div key={sw.name} className="p-3 rounded-lg bg-muted/40 space-y-1">
-                  <p className="font-display text-xs text-foreground">{sw.name}</p>
-                  <p className="font-body text-[10px] text-muted-foreground leading-relaxed">{sw.desc}</p>
-                </div>
-              ))}
-            </div>
+            <h3 className="font-display text-xs uppercase tracking-[0.15em] text-muted-foreground">How It Works</h3>
+            <p className="font-body text-[10px] text-muted-foreground leading-relaxed max-w-2xl">
+              Our visualization studio combines AI-powered rendering with professional archviz quality standards. 
+              Instant AI previews let you explore layouts, lighting and material palettes in real time. 
+              For production-grade deliverables, our team refines select renders using industry-standard tools 
+              to ensure photorealistic fidelity.
+            </p>
           </div>
 
           {/* Workflow */}
@@ -105,9 +99,9 @@ const PipelineInfo = () => {
             <ol className="space-y-2">
               {[
                 { step: "1", title: "Creative Brief", desc: "You submit drawings, room dimensions, style direction, and lighting preferences using the form below." },
-                { step: "2", title: "3D Modelling", desc: "Our team builds the scene in 3ds Max — walls, furniture, finishes — referencing your selected products." },
-                { step: "3", title: "Materials & Texturing", desc: "High-resolution PBR materials are applied: fabrics, marbles, woods, metals — matched to your specification." },
-                { step: "4", title: "Lighting & Rendering", desc: "The scene is lit and rendered in Corona or V-Ray at your chosen resolution and camera angles." },
+                { step: "2", title: "AI Concept Generation", desc: "Our engine generates initial visualizations — exploring layouts, material palettes, and lighting scenarios in seconds." },
+                { step: "3", title: "Refinement & Curation", desc: "You refine using style presets, lighting controls, and layout locking until the direction is right." },
+                { step: "4", title: "Production Render (optional)", desc: "For client-facing deliverables, selected views can be elevated to photorealistic quality by our visualization team." },
                 { step: "5", title: "Review & Delivery", desc: "Finished renders appear in the 3D Studio Gallery. Attach them to quotes or presentations instantly." },
               ].map((s) => (
                 <li key={s.step} className="flex gap-3">
@@ -138,9 +132,9 @@ const PipelineInfo = () => {
             <h3 className="font-display text-xs uppercase tracking-[0.15em] text-muted-foreground">Turnaround</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "Single View", time: "3–5 days" },
-                { label: "Multi-Angle Set", time: "5–7 days" },
-                { label: "Full Room Package", time: "7–10 days" },
+                { label: "AI Preview", time: "Instant" },
+                { label: "Refined Concept", time: "Same day" },
+                { label: "Production Render", time: "3–5 days" },
                 { label: "Rush Delivery", time: "48 hours" },
               ].map((t) => (
                 <div key={t.label} className="p-2.5 rounded-lg bg-muted/40 text-center">
@@ -150,6 +144,13 @@ const PipelineInfo = () => {
               ))}
             </div>
           </div>
+
+          {/* Disclaimer */}
+          <p className="font-body text-[9px] text-muted-foreground/70 italic leading-relaxed border-t border-border pt-3">
+            AI-generated visualizations are conceptual previews intended to communicate spatial layouts, material direction, and lighting mood. 
+            They are not photographic representations of final products. Colours, textures, and proportions may vary from actual specifications. 
+            Production renders, where commissioned, are prepared using professional 3D software for higher fidelity.
+          </p>
         </div>
       )}
     </div>
@@ -373,7 +374,7 @@ const TradeAxonometricRequests = () => {
         <SectionHero
           section="3d-studio"
           title="3D Studio"
-          subtitle="Professional architectural visualization powered by 3ds Max, Corona & V-Ray"
+          subtitle="AI-assisted architectural visualization with professional-grade refinement"
         >
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
