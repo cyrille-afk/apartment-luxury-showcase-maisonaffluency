@@ -124,7 +124,12 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
   }
 
   return (
-    <div className={`relative bg-muted/20 ${className}`}>
+    <div ref={containerRef} className={`relative bg-muted/20 ${className}`}>
+      {!isVisible && !loaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <FileText className="h-8 w-8 text-muted-foreground/20" />
+        </div>
+      )}
       {!loaded && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
           {/* Skeleton shimmer */}
