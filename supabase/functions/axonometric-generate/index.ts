@@ -103,23 +103,27 @@ PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
 
 Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan rendered at the quality level of a professional Corona Renderer or V-Ray archviz output.`;
     } else if (mode === "section_to_axo") {
-      prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway dollhouse-style interior view.
+      prompt = `You are a world-class architectural visualization artist. Transform this 2D architectural section drawing into a photorealistic 3D axonometric cutaway dollhouse-style interior view.
 
 CRITICAL ACCURACY RULES:
-1. FURNITURE & FIXTURES: Every piece of furniture, fixture, and object visible in the section must appear in the 3D render at the EXACT same position, height, and relative scale. Do NOT invent, add, remove, or reposition any element.
-2. SPATIAL VOLUME: Show the full spatial volume — interior partition walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions from an elevated oblique angle.
-3. PROPORTIONS: Wall heights, floor-to-ceiling distances, stair dimensions, and opening sizes must match the section exactly.
-4. DEPTH: Extrude the section into realistic room depth, maintaining all structural and spatial relationships from the original drawing.
+1. FURNITURE & FIXTURES: Every element visible in the section must appear at the EXACT same position, height, and relative scale. Do NOT add or remove anything.
+2. SPATIAL VOLUME: Show the full spatial volume — interior partition walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions.
+3. PROPORTIONS: Wall heights, floor-to-ceiling distances, and opening sizes must match the section exactly.
+4. DEPTH: Extrude the section into realistic room depth, maintaining all structural relationships.
 
-WALL RENDERING RULES — VERY IMPORTANT:
-- Do NOT render thick external/building envelope walls. The exterior boundary of the space should be open or only subtly indicated with a thin edge or floor boundary.
-- Only render INTERIOR partition walls that divide rooms within the space.
-- The result should look like a dollhouse or architectural model with the exterior shell completely removed, exposing the interior directly.
-- Windows and doors on the perimeter should still be visible but without the thick structural wall surrounding them — show them as openings or thin frames at the boundary.
+WALL RENDERING RULES:
+- Do NOT render thick external walls. Exterior boundaries should be open or subtly indicated with thin edges.
+- Only render INTERIOR partition walls — thin and proportional.
+- The result should look like a premium architectural scale model with the exterior shell removed.
 
-Style: ${defaultStyle}. The result must be a faithful 3D translation of the section — not an artistic reinterpretation.`;
+PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
+- Apply physically-based materials: realistic stone veining, visible wood grain, fabric texture with natural creasing, distinct metal finishes (brushed vs polished vs satin).
+- Use warm natural lighting (3500-4500K) with soft shadows and ambient occlusion in corners and where objects meet surfaces.
+- Include subtle atmospheric perspective and edge anti-aliasing.
+
+Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
     } else if (mode === "stylize") {
-      prompt = `Enhance and stylize this architectural 3D axonometric view to give it a ${defaultStyle} feel. Add realistic textures, materials, shadows, and ambient lighting. Keep the geometry and spatial layout exactly the same but elevate the visual quality to a professional presentation rendering.`;
+      prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.`;
     } else if (mode === "composite") {
       prompt = `Take this 3D axonometric architectural view and incorporate the provided furniture/product images into the scene naturally. Place them at appropriate positions within the rooms, respecting scale, perspective, and the axonometric projection angle. Add realistic shadows and lighting to blend the products seamlessly into the architectural rendering. Style: ${defaultStyle}.`;
     } else if (mode === "3d_to_cad") {
