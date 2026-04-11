@@ -45,7 +45,7 @@ const categories: ToolCategory[] = [
     label: "Learn",
     tools: [
       { title: "CPD & Education", description: "Webinars, workshops & CPD tracking", url: "/trade/cpd", icon: GraduationCap },
-      { title: "3D Studio", description: "Request axonometric renders", url: "/trade/axonometric-requests", icon: Box },
+      { title: "3D Studio", description: "3ds Max + Corona/V-Ray rendering pipeline", url: "/trade/axonometric-requests", icon: Box },
     ],
   },
 ];
