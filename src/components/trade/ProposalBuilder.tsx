@@ -1217,6 +1217,22 @@ export default function ProposalBuilder({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Quality Tier */}
+          <div className="flex items-center border border-border rounded-md overflow-hidden text-[10px] font-display">
+            {(["draft", "standard", "premium"] as const).map((tier) => (
+              <button
+                key={tier}
+                onClick={() => setQualityTier(tier)}
+                className={`px-2 py-1.5 capitalize transition-colors ${
+                  qualityTier === tier
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {tier}
+              </button>
+            ))}
+          </div>
           <Button
             size="sm"
             onClick={generateProposal}
