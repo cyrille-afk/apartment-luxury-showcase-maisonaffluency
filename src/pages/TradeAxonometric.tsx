@@ -519,9 +519,11 @@ const TradeAxonometric = () => {
       const activeRequest = activeRequestId
         ? pendingRequests?.find((r: any) => r.id === activeRequestId)
         : null;
-      const lockedLayoutReference = (mode === "elevation_to_axo" || mode === "section_to_axo")
-        ? toAbsoluteUrl(lockedLayoutUrl || result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
-        : null;
+      const lockedLayoutReference = lockedLayoutUrl
+        ? toAbsoluteUrl(lockedLayoutUrl)
+        : (mode === "elevation_to_axo" || mode === "section_to_axo")
+          ? toAbsoluteUrl(result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
+          : null;
 
       console.log("[axo-gen] Layout lock debug:", {
         hasResult: !!result,
