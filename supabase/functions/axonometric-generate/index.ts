@@ -387,14 +387,6 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       }
     }
 
-    // Layout-locked elevation/section reruns: add previous render as geometry anchor after the source drawing
-    if ((mode === "elevation_to_axo" || mode === "section_to_axo") && referenceImageUrl) {
-      content.push({
-        type: "image_url",
-        image_url: { url: referenceImageUrl },
-      });
-    }
-
     // Proposal render: add reference (original furnished) image, then empty room is already the main imageUrl, then product images
     if (mode === "proposal_render") {
       // Insert original furnished image BEFORE the empty room (which is already content[1])
