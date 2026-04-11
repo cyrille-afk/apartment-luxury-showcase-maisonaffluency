@@ -287,7 +287,3 @@ export default function TradeDownloadsByCountry() {
     </>
   );
 }
-      </div>
-    </>
-  );
-}
