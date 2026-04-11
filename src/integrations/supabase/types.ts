@@ -1688,6 +1688,41 @@ export type Database = {
           },
         ]
       }
+      public_download_events: {
+        Row: {
+          country: string
+          created_at: string
+          document_id: string | null
+          document_label: string
+          id: string
+          source: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          document_id?: string | null
+          document_label?: string
+          id?: string
+          source?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          document_id?: string | null
+          document_label?: string
+          id?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_download_events_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "trade_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reference_styles: {
         Row: {
           created_at: string
@@ -2531,6 +2566,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_public_download_event: {
+        Args: {
+          _country?: string
+          _document_id?: string
+          _document_label?: string
+          _source?: string
+        }
+        Returns: string
       }
       move_to_dlq: {
         Args: {
