@@ -759,13 +759,28 @@ const TradeAxonometric = () => {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${Math.abs(warmth)}%)`,
   };
 
+  const forceDownload = async (url: string, filename: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open in new tab
+      window.open(url, "_blank");
+    }
+  };
+
   const downloadImage = () => {
     const url = result?.storedUrl || result?.imageUrl;
     if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `axonometric-${Date.now()}.png`;
-    a.click();
+    forceDownload(url, `axonometric-${Date.now()}.png`);
   };
 
   const resetFilters = () => {
@@ -865,11 +880,9 @@ const TradeAxonometric = () => {
                     {req.status === "in_progress" ? "In Progress" : "Pending"}
                   </span>
                   {req.request_type === "3d_model" ? (
-                    <a href={req.image_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm">
-                        <Download className="w-3.5 h-3.5 mr-1" />Download
-                      </Button>
-                    </a>
+                    <Button variant="outline" size="sm" onClick={() => forceDownload(req.image_url, `3d-model-${req.project_name || Date.now()}.${req.image_url.split('.').pop()?.split('?')[0] || 'zip'}`)}>
+                      <Download className="w-3.5 h-3.5 mr-1" />Download
+                    </Button>
                   ) : (
                     <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
                       <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
