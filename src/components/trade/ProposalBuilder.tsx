@@ -322,6 +322,7 @@ export default function ProposalBuilder({
         rotation: p.rotation || 0,
         dimensions: p.dimensions || null,
         materials: p.materials || null,
+        material_override: p.material_override || null,
       }));
 
       const markerHints = {
