@@ -94,6 +94,27 @@ export default function TradeDownloadsByCountry() {
     enabled: isAdmin,
   });
 
+  // Per-user download log
+  const { data: userDownloads = [] } = useQuery<UserDownload[]>({
+    queryKey: ["downloads-by-user"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("document_downloads")
+        .select("created_at, country, document_label, user_id, trade_documents(title), profiles(first_name, last_name, email, company)")
+        .order("created_at", { ascending: false });
+      if (!data) return [];
+      return data.map((row: any) => ({
+        userName: [row.profiles?.first_name, row.profiles?.last_name].filter(Boolean).join(" ") || "—",
+        email: row.profiles?.email || "—",
+        company: row.profiles?.company || "—",
+        country: row.country || "Unknown",
+        docName: row.trade_documents?.title || row.document_label || "Untitled",
+        downloadedAt: row.created_at,
+      }));
+    },
+    enabled: isAdmin,
+  });
+
   const total = rows.reduce((s, r) => s + r.count, 0);
 
   if (loading) return null;
