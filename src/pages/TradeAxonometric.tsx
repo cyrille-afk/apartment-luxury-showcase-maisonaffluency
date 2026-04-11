@@ -521,6 +521,13 @@ const TradeAxonometric = () => {
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
         styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
         skipStyleReference: !useLockedRefStyle && !!refStyle,
+        // Creative brief fields from the request queue
+        ...(activeBrief.roomType && { roomType: activeBrief.roomType }),
+        ...(activeBrief.styleDirection && { styleDirection: activeBrief.styleDirection }),
+        ...(activeBrief.lightingMood && { lightingMood: activeBrief.lightingMood }),
+        ...(activeBrief.renderEngine && { renderEngine: activeBrief.renderEngine }),
+        ...(activeBrief.cameraAngles && { cameraAngles: activeBrief.cameraAngles }),
+        ...(activeBrief.briefNotes && { briefNotes: activeBrief.briefNotes }),
       };
 
       const data = await invokeAxonometricGenerate(body, undefined, 1);
