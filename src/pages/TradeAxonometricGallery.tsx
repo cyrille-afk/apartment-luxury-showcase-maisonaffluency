@@ -168,27 +168,13 @@ const TradeAxonometricGallery = () => {
       });
       if (error) throw error;
 
-      // Send admin notification email
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("first_name, last_name, email")
-        .eq("id", user.id)
-        .single();
-
-      supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "production-render-request",
-          recipientEmail: "concierge@myaffluency.com",
-          idempotencyKey: `prod-render-${prodRenderItem.id}-${chosenEngine}`,
-          templateData: {
-            userName: profile ? `${profile.first_name} ${profile.last_name}`.trim() : user.email,
-            userEmail: user.email,
-            renderTitle: prodRenderItem.title || "Untitled",
-            engine: engineLabel,
-            projectName: prodRenderItem.project_name || "",
-            imageUrl: prodRenderItem.image_url,
-          },
-        },
+      // Bell notification for admins
+      const { data: profileData } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
+      const requesterName = profileData ? `${profileData.first_name} ${profileData.last_name}`.trim() : user.email || "A user";
+      await supabase.rpc("notify_admins_production_render", {
+        _render_title: prodRenderItem.title || "Untitled",
+        _engine: engineLabel,
+        _requester_name: requesterName,
       });
 
       toast({ title: "Production render requested", description: `${engineLabel} — added to your quote` });

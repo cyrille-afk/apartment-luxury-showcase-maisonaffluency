@@ -2541,6 +2541,14 @@ export type Database = {
         }
         Returns: number
       }
+      notify_admins_production_render: {
+        Args: {
+          _engine: string
+          _render_title: string
+          _requester_name: string
+        }
+        Returns: undefined
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
