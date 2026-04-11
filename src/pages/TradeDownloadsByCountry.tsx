@@ -138,7 +138,7 @@ export default function TradeDownloadsByCountry() {
         <title>Downloads by Country — Admin — Maison Affluency</title>
       </Helmet>
 
-      <div className="max-w-4xl space-y-10">
+      <div className="max-w-6xl space-y-10">
         {/* Header */}
         <div className="flex items-center gap-3">
           <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
