@@ -142,6 +142,42 @@ const TradeAxonometricGallery = () => {
     }
   };
 
+  const requestProductionRender = useCallback(async () => {
+    if (!user || !prodRenderItem) return;
+    setSubmittingRender(true);
+    try {
+      let quoteId = draftQuote?.id;
+      if (!quoteId) {
+        const { data: newQuote, error: qErr } = await supabase
+          .from("trade_quotes")
+          .insert({ user_id: user.id })
+          .select("id")
+          .single();
+        if (qErr) throw qErr;
+        quoteId = newQuote.id;
+      }
+      const engineLabel = ENGINE_OPTIONS.find(e => e.value === chosenEngine)?.label || chosenEngine;
+      const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+        _user_id: user.id,
+        _quote_id: quoteId,
+        _product_name: `Production Render — ${prodRenderItem.title || "Untitled"}`,
+        _brand_name: "Axonometric Studio",
+        _category: "Production Render",
+        _image_url: prodRenderItem.image_url,
+        _materials: `Engine: ${engineLabel}`,
+      });
+      if (error) throw error;
+      toast({ title: "Production render requested", description: `${engineLabel} — added to your quote` });
+      setProdRenderItem(null);
+      setSelected(null);
+      queryClient.invalidateQueries({ queryKey: ["draft-quote"] });
+    } catch (e: any) {
+      toast({ title: "Request failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmittingRender(false);
+    }
+  }, [user, prodRenderItem, chosenEngine, draftQuote, toast, queryClient]);
+
   const renderCard = (item: any, isDraft = false) => (
     <button
       key={item.id}
