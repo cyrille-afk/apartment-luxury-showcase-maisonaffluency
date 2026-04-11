@@ -76,22 +76,32 @@ serve(async (req) => {
     const defaultStyle = buildStyle();
 
     if (mode === "elevation_to_axo") {
-      prompt = `You are an expert architectural visualization AI. Transform this 2D floor plan / elevation drawing into a professional 3D axonometric (isometric) cutaway dollhouse-style interior view.
+      prompt = `You are a world-class architectural visualization artist specializing in photorealistic axonometric interior renders. Transform this 2D floor plan / elevation drawing into a stunning 3D axonometric (isometric) cutaway dollhouse-style interior view that looks like a professional archviz portfolio piece.
 
 CRITICAL ACCURACY RULES:
-1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing (sofas, tables, chairs, beds, desks, shelving, rugs, plants) must appear in the 3D render at the EXACT same position, orientation, and relative scale as shown in the plan. Do NOT invent, add, remove, or reposition any furniture.
-2. ROOM GEOMETRY: Interior partition walls, doors, windows, columns, and openings must match the plan exactly — correct lengths, angles, and positions.
-3. SPATIAL RELATIONSHIPS: Maintain the exact distances between furniture pieces and between furniture and walls as shown in the plan.
-4. ORIENTATION: If a sofa faces north in the plan, it must face north in the 3D view. Preserve all rotations and facing directions.
-5. COUNT: The number of each furniture type must match exactly — if the plan shows 2 armchairs, render exactly 2, not 1 or 3.
+1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing must appear in the 3D render at the EXACT same position, orientation, and relative scale. Do NOT invent, add, remove, or reposition any furniture.
+2. ROOM GEOMETRY: Interior partition walls, doors, windows, columns, and openings must match the plan exactly.
+3. SPATIAL RELATIONSHIPS: Maintain exact distances between furniture and walls as shown in the plan.
+4. ORIENTATION: Preserve all rotations and facing directions exactly as drawn.
+5. COUNT: The number of each furniture type must match exactly.
 
-WALL RENDERING RULES — VERY IMPORTANT:
-- Do NOT render thick external/building envelope walls. The exterior boundary of the space should be open or only subtly indicated with a thin edge or floor boundary.
-- Only render INTERIOR partition walls that divide rooms within the space.
-- The result should look like a dollhouse or architectural model with the exterior shell completely removed, exposing the interior directly.
-- Windows and doors on the perimeter should still be visible but without the thick structural wall surrounding them — show them as openings or thin frames at the floor plan boundary.
+WALL RENDERING RULES:
+- Do NOT render thick external/building envelope walls. The exterior boundary should be open or subtly indicated with a thin edge or floor boundary only.
+- Only render INTERIOR partition walls that divide rooms — these should be thin, elegant, and proportional (approximately 100-150mm at scale).
+- The result should look like a premium architectural scale model or dollhouse with the exterior shell removed.
+- Perimeter windows and doors should appear as openings or thin frames without thick structural walls.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway with no roof and no external walls. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan — not an artistic reinterpretation.`;
+PHOTOREALISTIC MATERIAL & LIGHTING STANDARDS:
+- FLOORING: Render stone/marble with realistic veining patterns, subtle depth, and polished reflections. Hardwood should show visible grain direction and natural color variation between planks. Tiles should have visible grout lines.
+- WALLS: Show subtle plaster texture or paint sheen. Paneled walls must show shadow lines between panels.
+- FURNITURE UPHOLSTERY: Render with visible fabric weave or leather grain texture. Show natural creasing on cushions and pillows with soft shadowing in folds.
+- WOOD SURFACES: Show realistic grain patterns, edge profiles, and the difference between matte and lacquered finishes.
+- METALS: Distinguish between brushed (directional micro-scratches), polished (sharp reflections), satin (soft diffused reflections), and oxidized finishes.
+- GLASS: Render with subtle reflections, transparency, and edge refractions.
+- LIGHTING: Use warm natural light (3500-4500K color temperature) entering from windows with soft shadows. Add gentle ambient occlusion where objects meet surfaces and in corners. All shadows should have soft penumbra — no hard-edged shadows.
+- DEPTH & ATMOSPHERE: Include subtle atmospheric perspective — objects further from camera should have very slight warmth/haze shift.
+
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan rendered at the quality level of a professional Corona Renderer or V-Ray archviz output.`;
     } else if (mode === "section_to_axo") {
       prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway dollhouse-style interior view.
 
