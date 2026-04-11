@@ -145,6 +145,43 @@ const PipelineInfo = () => {
             </div>
           </div>
 
+          {/* Production Render Pricing */}
+          <div className="space-y-2">
+            <h3 className="font-display text-xs uppercase tracking-[0.15em] text-muted-foreground">Production Render Pricing</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                {
+                  engine: "Corona Renderer",
+                  perView: "€280",
+                  desc: "Warm, natural GI with fine material detail. Ideal for residential interiors.",
+                  includes: "Up to 2 revision rounds",
+                },
+                {
+                  engine: "V-Ray",
+                  perView: "€320",
+                  desc: "Precision lighting with advanced caustics and reflections. Best for galleries, hospitality, and high-contrast schemes.",
+                  includes: "Up to 2 revision rounds",
+                },
+                {
+                  engine: "Rush Surcharge",
+                  perView: "+50%",
+                  desc: "48-hour delivery on any engine. Subject to team availability.",
+                  includes: "Confirmed within 4 hours",
+                },
+              ].map((tier) => (
+                <div key={tier.engine} className="p-3 rounded-lg border border-border bg-muted/20 space-y-1.5">
+                  <p className="font-display text-xs text-foreground">{tier.engine}</p>
+                  <p className="font-display text-lg text-foreground leading-none">{tier.perView}<span className="text-[10px] text-muted-foreground font-body ml-1">/ view</span></p>
+                  <p className="font-body text-[10px] text-muted-foreground leading-relaxed">{tier.desc}</p>
+                  <p className="font-body text-[10px] text-foreground/60 italic">{tier.includes}</p>
+                </div>
+              ))}
+            </div>
+            <p className="font-body text-[9px] text-muted-foreground/60">
+              Volume discounts available for 5+ views. Contact us for project-based packages.
+            </p>
+          </div>
+
           {/* Disclaimer */}
           <p className="font-body text-[9px] text-muted-foreground/70 italic leading-relaxed border-t border-border pt-3">
             AI-generated visualizations are conceptual previews intended to communicate spatial layouts, material direction, and lighting mood. 
