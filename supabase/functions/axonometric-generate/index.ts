@@ -297,21 +297,35 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
-      prompt += `\n\nHARD LAYOUT & QUALITY REFERENCE: A previous render of THIS SAME project is provided as an additional reference image.
+      // When a reference render exists, REPLACE the entire prompt with a refinement-focused one
+      prompt = `You are given TWO images:
+1. REFERENCE RENDER (first image): A previous 3D architectural render of this project. This is your PRIMARY input.
+2. SOURCE FLOOR PLAN (second image): The original 2D drawing for geometric verification only.
 
-GEOMETRY LOCK (NON-NEGOTIABLE):
-- Keep the reference render's room layout, wall positions, room count, crop, and camera angle EXACTLY as shown.
-- The source drawing is still authoritative for plan accuracy.
-- You MUST NOT redesign the apartment layout, move walls, change room sizes, or switch to a different composition.
+YOUR TASK: Produce an IMPROVED version of the REFERENCE RENDER. This is NOT a fresh generation — it is a REFINEMENT of the existing render.
 
-LIGHTING & MATERIAL QUALITY LOCK:
-- Study the reference render's LIGHTING QUALITY carefully: the shadow depth, ambient occlusion intensity, warm light color temperature, and soft penumbra shadows.
-- Your output MUST match or EXCEED the reference render's lighting quality — same shadow density, same warm natural tones, same depth of ambient occlusion.
-- If the reference has deep contact shadows under furniture, you must have equally deep contact shadows.
-- If the reference has warm bounce light off marble floors, you must have the same.
-- Do NOT produce a flatter, softer, or less dramatic lighting setup than the reference.
+WHAT YOU MUST KEEP IDENTICAL (NON-NEGOTIABLE):
+- The EXACT same room layout, wall positions, room count, and room shapes as the reference render
+- The EXACT same camera angle, elevation, azimuth, crop, and field of view
+- The EXACT same lighting setup: same shadow directions, same ambient occlusion depth, same warm color temperature (3500-4500K), same contact shadows under furniture
+- The EXACT same wall treatment: if the reference has NO exterior walls (open perimeter with just a floor slab edge), your output must also have NO exterior walls. Do NOT add exterior walls, thick perimeter shells, or boundary walls that don't exist in the reference.
+- The EXACT same overall composition and visual style
 
-The new output must be directly comparable like-for-like with the reference render — same layout, same or better visual quality.`;
+WHAT YOU MAY IMPROVE:
+- Material texture resolution and realism (sharper marble veining, more visible wood grain, fabric weave detail)
+- Shadow softness and penumbra quality
+- Anti-aliasing and edge quality
+- Subtle atmospheric depth
+- Furniture detail and realism
+
+CRITICAL FAILURES (any of these means the output is REJECTED):
+- Adding exterior walls or a thick perimeter shell that doesn't exist in the reference
+- Changing the room layout, moving walls, or altering room proportions
+- Flattening the lighting or reducing shadow depth compared to the reference
+- Changing the camera angle or composition
+- Removing or repositioning furniture
+
+Style: ${buildStyle()}. The output must be indistinguishable from a professional Corona/V-Ray archviz render and must look like a direct improvement of the reference — not a different render.`;
     }
 
     if (styleReferenceUrl) {
