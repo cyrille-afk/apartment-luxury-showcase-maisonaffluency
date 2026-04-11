@@ -1853,7 +1853,7 @@ const TradeAxonometric = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
-                  {(mode === "elevation_to_axo" || mode === "section_to_axo") && result && (
+                  {result && (
                     <Button
                       variant={lockedLayoutUrl ? "default" : "outline"}
                       size="sm"
@@ -1871,6 +1871,33 @@ const TradeAxonometric = () => {
                       <Link2 className="w-3.5 h-3.5 mr-1.5" />
                       {lockedLayoutUrl ? "Unlock Layout" : "Lock Layout"}
                     </Button>
+                  )}
+                  {!lockedLayoutUrl && (
+                    <label>
+                      <Button variant="outline" size="sm" asChild>
+                        <span>
+                          <Upload className="w-3.5 h-3.5 mr-1.5" />Import Reference
+                        </span>
+                      </Button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const ext = file.name.split(".").pop() || "png";
+                          const path = `axonometric-refs/${crypto.randomUUID()}.${ext}`;
+                          const { error } = await supabase.storage.from("gallery").upload(path, file);
+                          if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return; }
+                          const { data: pub } = supabase.storage.from("gallery").getPublicUrl(path);
+                          setLockedLayoutUrl(pub.publicUrl);
+                          setLightingStrength(80);
+                          toast({ title: "Reference imported & locked", description: "This image will anchor all future regenerations." });
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
                   )}
                   {lockedLayoutUrl && (
                     <div className="flex items-center gap-2 w-full mt-1">
