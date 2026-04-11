@@ -10,8 +10,8 @@ import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff, Sparkles } from "lucide-r
 import { format } from "date-fns";
 
 const ENGINE_OPTIONS = [
-  { value: "corona", label: "Corona Renderer", price: "€280 / view", desc: "Warm natural GI — ideal for residential interiors" },
-  { value: "vray", label: "V-Ray", price: "€320 / view", desc: "Precision lighting with caustics — best for galleries & hospitality" },
+  { value: "corona", label: "Corona Renderer", price: "€280 (S$410) / view", desc: "Warm natural GI — ideal for residential interiors" },
+  { value: "vray", label: "V-Ray", price: "€320 (S$470) / view", desc: "Precision lighting with caustics — best for galleries & hospitality" },
 ] as const;
 
 const TradeAxonometricGallery = () => {
