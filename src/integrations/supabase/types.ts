@@ -106,43 +106,64 @@ export type Database = {
       axonometric_requests: {
         Row: {
           admin_notes: string | null
+          camera_angles: string | null
           created_at: string
+          file_formats: string | null
           id: string
           image_url: string
+          lighting_mood: string | null
           linked_favorite_product_ids: Json | null
           notes: string | null
           project_name: string
+          render_engine: string | null
           request_type: string
+          resolution: string | null
           result_image_url: string | null
+          room_type: string | null
           status: Database["public"]["Enums"]["axonometric_request_status"]
+          style_direction: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           admin_notes?: string | null
+          camera_angles?: string | null
           created_at?: string
+          file_formats?: string | null
           id?: string
           image_url: string
+          lighting_mood?: string | null
           linked_favorite_product_ids?: Json | null
           notes?: string | null
           project_name?: string
+          render_engine?: string | null
           request_type?: string
+          resolution?: string | null
           result_image_url?: string | null
+          room_type?: string | null
           status?: Database["public"]["Enums"]["axonometric_request_status"]
+          style_direction?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           admin_notes?: string | null
+          camera_angles?: string | null
           created_at?: string
+          file_formats?: string | null
           id?: string
           image_url?: string
+          lighting_mood?: string | null
           linked_favorite_product_ids?: Json | null
           notes?: string | null
           project_name?: string
+          render_engine?: string | null
           request_type?: string
+          resolution?: string | null
           result_image_url?: string | null
+          room_type?: string | null
           status?: Database["public"]["Enums"]["axonometric_request_status"]
+          style_direction?: string | null
           updated_at?: string
           user_id?: string
         }
