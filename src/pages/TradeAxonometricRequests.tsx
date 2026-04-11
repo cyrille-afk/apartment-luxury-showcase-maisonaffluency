@@ -73,8 +73,8 @@ const PipelineInfo = () => {
             <Info className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
-            <p className="font-display text-sm text-foreground">Our 3D Rendering Pipeline</p>
-            <p className="font-body text-[10px] text-muted-foreground">3ds Max · Corona · V-Ray — professional-grade visualization</p>
+            <p className="font-display text-sm text-foreground">Our Visualization Studio</p>
+            <p className="font-body text-[10px] text-muted-foreground">AI-assisted rendering · guided by archviz standards</p>
           </div>
         </div>
         {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
