@@ -1,54 +1,69 @@
 
 
-## "New In" Feature — Pierre Bonnefille Spotlight
+# Project-Aware Proactive Recommendations
 
-### Overview
-Create a dedicated "New In" page featuring Pierre Bonnefille as the inaugural spotlight, accessible from a new navigation item in the header. The page showcases a hero image, a concise biography excerpt, a CTA linking to the full profile, and all Curators' Picks.
+## Overview
+Build a recommendation engine that analyzes the contents of a designer's client boards (projects) and suggests complementary products from the catalog. Recommendations surface on the **Dashboard**, inline in the **Gallery**, and in **weekly email digests**.
 
-### What gets built
-
-**1. New "New In" navigation item**
-- **Desktop**: Add "New In" link in the bottom nav bar, positioned before "Journal" (right side, after the separator). Styled consistently with existing nav items.
-- **Mobile**: Add "New In" entry in the slide-out menu, placed after "Collectible Design" and before "Journal".
-
-**2. New page: `/new-in`**
-- Route: `/new-in` → `src/pages/NewIn.tsx`
-- Includes `<Navigation />` and `<Footer />` for consistency with other public pages.
-
-**3. Page layout (top to bottom)**
-
-- **Hero section**: Full-width image (Pierre Bonnefille workspace/collection shot from existing Cloudinary assets), with a dark gradient overlay. Designer name and "New In" label overlaid.
-
-- **Biography excerpt**: The concise text you provided:
-  > "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of both the École Boulle and the École Nationale Supérieure des Arts Décoratifs in Paris, he has spent more than three decades creating his own materials, mixing pigments with sand and ground rock, sometimes applying gold or silver leaf on top, other times stamping the surface with fabric to leave behind what he calls a 'textile fossil', his signature textures."
-
-- **CTA button**: "View The Full Portrait" — pill-styled button (matching existing pill conventions like the Curators' Picks badge). Links to `/designers/pierre-bonnefille` (the full public biography page).
-
-- **Curators' Picks section**: Fetches all Pierre Bonnefille's curator picks from the database (using the existing `useDesignerPicks` hook). Displayed in a 4-column grid on desktop, 2-column on mobile — matching the established grid convention. Section header styled with the pill badge format. Separated with border-top and padding as per existing section styling patterns.
-
-### Technical details
-
-| Item | Detail |
-|------|--------|
-| New file | `src/pages/NewIn.tsx` |
-| Modified files | `src/components/Navigation.tsx` (add nav item), `src/App.tsx` (add route) |
-| Data source | `useDesigner` + `useDesignerPicks` hooks (existing, query from database) |
-| Designer slug | `pierre-bonnefille` |
-| Styling | Tailwind, framer-motion animations consistent with designer profile pages |
-| SEO | Helmet meta tags for "New In — Pierre Bonnefille — Maison Affluency" |
-
-### Navigation placement
+## Architecture
 
 ```text
-Desktop bottom bar:
-Gallery | All Categories | Designers | Collectible Design  ·  New In | Journal | Trade Program
-
-Mobile menu (top to bottom):
-Gallery
-  All Categories
-Designers & Makers
-Collectible Design
-New In          ← inserted here
-Journal
+┌──────────────────────┐
+│  client_board_items   │──→ board's product IDs
+│  designer_curator_picks│──→ product attributes (category, materials, brand, tags)
+└──────────┬───────────┘
+           │
+     Edge Function: board-recommendations
+     (Lovable AI: gemini-3-flash-preview)
+           │
+           ▼
+┌──────────────────────┐
+│ board_recommendations │  ← cached ranked suggestions per board
+└──────────────────────┘
+           │
+     ┌─────┼──────────┐
+     ▼     ▼          ▼
+ Dashboard  Gallery   Weekly Digest
+  widget    inline    email section
 ```
+
+## Steps
+
+### 1. Database migration — `board_recommendations` table
+Create a cache table storing AI-generated recommendations per board:
+- `id`, `board_id` (ref client_boards), `product_id` (ref designer_curator_picks), `score` (numeric), `reason` (text — one-line explanation like "Complements the bronze palette"), `created_at`
+- RLS: board owners can SELECT their own; admins can manage all
+- Unique constraint on `(board_id, product_id)`
+
+### 2. Edge function — `board-recommendations`
+- Accepts `{ board_id }`, authenticates the caller
+- Fetches board items + their product attributes (category, materials, brand, tags, title)
+- Fetches the full catalog (designer_curator_picks) excluding items already on the board
+- Builds a prompt asking Lovable AI (gemini-3-flash-preview) to pick the top 8 complementary products with reasons, using tool calling for structured output
+- Upserts results into `board_recommendations`
+- Returns the recommendations as JSON
+
+### 3. Dashboard widget — "Suggested for [Board Name]"
+- New component `BoardRecommendations` below MostPopularProducts on TradeDashboard
+- Fetches the user's most recently updated board that has items
+- Calls the edge function if no cached recommendations exist (or cache is older than 24h)
+- Displays a horizontal scroll of 4-6 product cards with the AI reason as a subtitle
+- Each card links to the product in the gallery; a "Refresh" button re-triggers the edge function
+
+### 4. Gallery inline suggestions
+- When browsing the gallery, if the user has an active board with recommendations, show a subtle banner: "Suggested for *[Board Name]*" with 3 product cards inline between search results
+- Only appears if at least 3 recommendations exist for the user's most recent board
+
+### 5. Weekly digest integration
+- Extend the existing `send-weekly-digest` edge function to include a "Picks for your project" section
+- Pull cached `board_recommendations` for each recipient's most active board
+- Add 2-3 recommended products to the email template
+
+## Technical Details
+
+**Edge function prompt strategy**: The prompt includes the board's product attributes as context and instructs the model to find complementary (not duplicate) products considering material harmony, stylistic coherence, and functional completeness (e.g., if the board has seating but no lighting, suggest lighting).
+
+**Caching**: Recommendations are cached in the database. They're refreshed when: (a) user clicks "Refresh", (b) a board item is added/removed (via a trigger or client-side call), or (c) cache is >24h old.
+
+**Cost control**: Each recommendation call processes ~one board at a time using gemini-3-flash-preview (fast, cheap). No batch processing of all users — recommendations are generated on-demand per board.
 
