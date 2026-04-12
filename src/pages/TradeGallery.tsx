@@ -18,6 +18,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
+import { GalleryInlineSuggestions } from "@/components/trade/GalleryInlineSuggestions";
 
 interface DraftQuote {
   id: string;
@@ -432,6 +433,9 @@ const TradeGallery = () => {
           </button>
         </div>
       </div>
+
+      {/* Inline project-aware suggestions */}
+      <GalleryInlineSuggestions />
 
       {/* Content */}
       {filtered.length === 0 ? (
