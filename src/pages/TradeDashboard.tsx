@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
+import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -259,6 +260,9 @@ const TradeDashboard = () => {
 
       {/* Most Popular */}
       <MostPopularProducts />
+
+      {/* Project-Aware Recommendations */}
+      <BoardRecommendations />
 
       {/* Recent Activity */}
       <div className="mt-10">
