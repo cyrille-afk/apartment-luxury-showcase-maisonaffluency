@@ -169,6 +169,55 @@ export type Database = {
         }
         Relationships: []
       }
+      board_recommendations: {
+        Row: {
+          board_id: string
+          created_at: string
+          id: string
+          product_id: string
+          reason: string
+          score: number
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          reason?: string
+          score?: number
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          reason?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_recommendations_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_recommendations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_recommendations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_thumbnails: {
         Row: {
           brand_name: string

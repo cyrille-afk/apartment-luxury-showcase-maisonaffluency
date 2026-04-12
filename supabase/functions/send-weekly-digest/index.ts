@@ -119,12 +119,60 @@ Deno.serve(async (req) => {
     // 5. Render and enqueue emails
     let enqueued = 0
     for (const recipient of recipients) {
+      // Get project-aware picks for this recipient
+      let projectPicks: { boardTitle: string; products: { name: string; brand: string; image_url: string | null }[] } | undefined
+
+      // Find their most active board with recommendations
+      const { data: boards } = await supabase
+        .from('client_boards')
+        .select('id, title')
+        .eq('user_id', recipient.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+
+      if (boards && boards.length > 0) {
+        const { data: recs } = await supabase
+          .from('board_recommendations')
+          .select('product_id, reason')
+          .eq('board_id', boards[0].id)
+          .order('score', { ascending: false })
+          .limit(3)
+
+        if (recs && recs.length > 0) {
+          const { data: recProds } = await supabase
+            .from('designer_curator_picks')
+            .select('id, title, image_url, designer_id')
+            .in('id', recs.map((r: any) => r.product_id))
+
+          const dIds = [...new Set((recProds || []).map((p: any) => p.designer_id))]
+          const { data: dNames } = await supabase
+            .from('designers')
+            .select('id, name')
+            .in('id', dIds)
+
+          const dm = new Map((dNames || []).map((d: any) => [d.id, d.name]))
+
+          projectPicks = {
+            boardTitle: boards[0].title,
+            products: recs.map((r: any) => {
+              const p = (recProds || []).find((x: any) => x.id === r.product_id)
+              return {
+                name: p?.title || '',
+                brand: dm.get(p?.designer_id) || '',
+                image_url: p?.image_url || null,
+              }
+            }),
+          }
+        }
+      }
+
       const html = await render(
         WeeklyDigestEmail({
           recipient: recipient.email,
           siteUrl,
           popularProducts,
           newArrivals,
+          projectPicks,
         })
       )
 

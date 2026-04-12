@@ -30,6 +30,7 @@ interface WeeklyDigestProps {
   siteUrl: string
   popularProducts: ProductItem[]
   newArrivals: ProductItem[]
+  projectPicks?: { boardTitle: string; products: ProductItem[] }
   unsubscribeUrl?: string
 }
 
@@ -38,6 +39,7 @@ export const WeeklyDigestEmail = ({
   siteUrl,
   popularProducts,
   newArrivals,
+  projectPicks,
   unsubscribeUrl,
 }: WeeklyDigestProps) => (
   <Html lang="en" dir="ltr">
@@ -76,6 +78,25 @@ export const WeeklyDigestEmail = ({
             <Heading as="h2" style={h2}>New Arrivals</Heading>
             <Text style={subtitle}>Recently added to the collection</Text>
             {newArrivals.map((p, i) => (
+              <Section key={i} style={productRow}>
+                {p.image_url && (
+                  <Img src={p.image_url} alt={p.name} width="80" height="80" style={productImage} />
+                )}
+                <div style={productInfo}>
+                  <Text style={productName}>{p.name}</Text>
+                  <Text style={productBrand}>{p.brand}</Text>
+                </div>
+              </Section>
+            ))}
+          </>
+        )}
+
+        {projectPicks && projectPicks.products.length > 0 && (
+          <>
+            <Hr style={sectionDivider} />
+            <Heading as="h2" style={h2}>Picks for "{projectPicks.boardTitle}"</Heading>
+            <Text style={subtitle}>AI-curated suggestions for your project</Text>
+            {projectPicks.products.map((p, i) => (
               <Section key={i} style={productRow}>
                 {p.image_url && (
                   <Img src={p.image_url} alt={p.name} width="80" height="80" style={productImage} />
