@@ -297,7 +297,7 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
       parsed = []
     }
 
-    const fallbackRecommendations = shortlist.slice(0, 8).map((item) => ({
+    const fallbackRecommendations = trimmed.slice(0, 8).map((item) => ({
       product_id: item.id,
       score: Math.max(50, Math.min(100, Math.round(item.score))),
       reason: item.fitNote,
@@ -305,13 +305,13 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
     }))
 
     const aiRecommendations = parsed
-      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < shortlist.length)
+      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < trimmed.length)
       .slice(0, 8)
       .map((r: any) => ({
-        product_id: shortlist[r.index].id,
-        score: r.score || Math.max(50, Math.min(100, Math.round(shortlist[r.index].score))),
-        reason: r.reason || shortlist[r.index].fitNote,
-        source: shortlist[r.index].source,
+        product_id: trimmed[r.index].id,
+        score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
+        reason: r.reason || trimmed[r.index].fitNote,
+        source: trimmed[r.index].source,
       }))
 
     const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade' }> = []
