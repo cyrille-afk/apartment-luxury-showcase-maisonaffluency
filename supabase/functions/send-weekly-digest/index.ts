@@ -182,10 +182,15 @@ Deno.serve(async (req) => {
         queue_name: 'transactional_emails',
         payload: {
           to: recipient.email,
+          from: 'Maison Affluency <notify@notify.www.maisonaffluency.com>',
+          sender_domain: 'notify.www.maisonaffluency.com',
           subject: 'Your Weekly Highlights — Maison Affluency',
           html,
+          purpose: 'transactional',
+          label: 'weekly-digest',
           message_id: messageId,
-          template_name: 'weekly-digest',
+          idempotency_key: messageId,
+          queued_at: new Date().toISOString(),
         },
       })
 

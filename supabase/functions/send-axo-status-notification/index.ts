@@ -189,11 +189,13 @@ const handler = async (req: Request): Promise<Response> => {
       payload: {
         to: profile.email,
         from: "Maison Affluency <notify@notify.www.maisonaffluency.com>",
+        sender_domain: "notify.www.maisonaffluency.com",
         subject,
         html,
         purpose: "transactional",
         label: "axo-status-notification",
         message_id: messageId,
+        idempotency_key: messageId,
         queued_at: new Date().toISOString(),
       },
     });
