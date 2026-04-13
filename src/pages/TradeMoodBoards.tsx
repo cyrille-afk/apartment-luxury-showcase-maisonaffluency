@@ -132,7 +132,7 @@ export default function TradeMoodBoards() {
 
       // Deduplicate by name+brand, preferring curator (richer data)
       const seen = new Set<string>();
-      const merged: typeof tradeItems = [];
+      const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string; category: string; source: "trade" | "curator" }> = [];
       for (const item of [...curatorItems, ...tradeItems]) {
         const key = `${item.product_name?.toLowerCase()}|${item.brand_name?.toLowerCase()}`;
         if (seen.has(key)) continue;
