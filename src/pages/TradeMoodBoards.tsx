@@ -83,17 +83,63 @@ export default function TradeMoodBoards() {
     }
   }, []);
 
-  // All active trade products
+  // All products: merge trade_products + designer_curator_picks
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["mood-board-products"],
+    queryKey: ["mood-board-products-merged"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category")
-        .eq("is_active", true)
-        .not("image_url", "is", null)
-        .order("brand_name");
-      return data || [];
+      const [{ data: trade }, { data: curator }] = await Promise.all([
+        supabase
+          .from("trade_products")
+          .select("id, product_name, brand_name, image_url, category")
+          .eq("is_active", true)
+          .not("image_url", "is", null)
+          .order("brand_name"),
+        supabase
+          .from("designer_curator_picks")
+          .select("id, title, image_url, category, designer_id")
+          .not("image_url", "is", null)
+          .order("title"),
+      ]);
+
+      // Resolve designer names for curator picks
+      const designerIds = [...new Set((curator || []).map((p) => p.designer_id))];
+      let designerMap = new Map<string, string>();
+      if (designerIds.length > 0) {
+        const { data: designers } = await supabase
+          .from("designers")
+          .select("id, name")
+          .in("id", designerIds);
+        designerMap = new Map((designers || []).map((d) => [d.id, d.name]));
+      }
+
+      const tradeItems = (trade || []).map((p) => ({
+        id: p.id,
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+        image_url: p.image_url,
+        category: p.category,
+        source: "trade" as const,
+      }));
+
+      const curatorItems = (curator || []).map((p) => ({
+        id: p.id,
+        product_name: p.title,
+        brand_name: designerMap.get(p.designer_id) || "Unknown",
+        image_url: p.image_url,
+        category: p.category || "",
+        source: "curator" as const,
+      }));
+
+      // Deduplicate by name+brand, preferring curator (richer data)
+      const seen = new Set<string>();
+      const merged: typeof tradeItems = [];
+      for (const item of [...curatorItems, ...tradeItems]) {
+        const key = `${item.product_name?.toLowerCase()}|${item.brand_name?.toLowerCase()}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged.push(item);
+      }
+      return merged.sort((a, b) => a.brand_name.localeCompare(b.brand_name));
     },
   });
 
