@@ -192,6 +192,23 @@ Deno.serve(async (req) => {
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i]
       const payload = msg.message
+
+      // Validate required fields — move invalid payloads to DLQ immediately
+      const missingFields: string[] = []
+      if (!payload?.to) missingFields.push('to')
+      if (!payload?.subject) missingFields.push('subject')
+      if (!payload?.message_id) missingFields.push('message_id')
+      if (!payload?.idempotency_key && !payload?.run_id) missingFields.push('idempotency_key or run_id')
+      if (!payload?.from) missingFields.push('from')
+      if (queue === 'transactional_emails' && !payload?.sender_domain) missingFields.push('sender_domain')
+
+      if (missingFields.length > 0) {
+        const reason = `Invalid payload: missing ${missingFields.join(', ')}. Label: ${payload?.label || payload?.template_name || 'unknown'}`
+        console.error('Dropping malformed email job', { queue, msg_id: msg.msg_id, reason, payload_keys: payload ? Object.keys(payload) : [] })
+        await moveToDlq(supabase, queue, msg, reason)
+        continue
+      }
+
       const failedAttempts =
         payload?.message_id && typeof payload.message_id === 'string'
           ? (failedAttemptsByMessageId.get(payload.message_id) ?? 0)
