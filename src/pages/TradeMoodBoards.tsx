@@ -250,7 +250,7 @@ export default function TradeMoodBoards() {
                   <p className="font-body text-sm text-muted-foreground">Add products from the right panel to build your mood board.</p>
                 </div>
               ) : (
-                <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-2" : board.length <= 4 ? "grid-cols-2" : "grid-cols-3"}`}>
+                <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-3" : board.length <= 6 ? "grid-cols-3" : "grid-cols-4"}`}>
                   {board.map((item) => (
                     <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
                       <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
