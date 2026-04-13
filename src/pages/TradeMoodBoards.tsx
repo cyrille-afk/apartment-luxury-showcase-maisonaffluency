@@ -2,18 +2,34 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 type PickerFilter = "all" | "favourites" | "board";
 
+const BOARD_STORAGE_KEY = "mood-board-items";
+
+function loadBoardFromStorage(): any[] {
+  try {
+    const stored = localStorage.getItem(BOARD_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function TradeMoodBoards() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [board, setBoard] = useState<any[]>([]);
+  const [board, setBoard] = useState<any[]>(loadBoardFromStorage);
   const [filter, setFilter] = useState<PickerFilter>("all");
+
+  // Persist board to localStorage on change
+  useEffect(() => {
+    localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
+  }, [board]);
 
   // All active trade products
   const { data: products = [], isLoading } = useQuery({
