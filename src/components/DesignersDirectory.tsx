@@ -892,9 +892,15 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
 
-  // Category/subcategory filter state
-  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
+  // Category/subcategory filter state — initialize from URL params if present
+  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("category") || null;
+  });
+  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("subcategory") || null;
+  });
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -932,6 +938,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     setSelectedSubcategoryRaw(sub);
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
+
+  // On mount, broadcast URL-param filters to ProductGrid and clean URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    const sub = params.get("subcategory");
+    if (cat || sub) {
+      broadcastFilter(cat || null, sub || null);
+      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat || null, subcategory: sub || null } }));
+      // Clean URL params without triggering navigation
+      params.delete("category");
+      params.delete("subcategory");
+      const clean = params.toString();
+      const hash = window.location.hash;
+      const newUrl = window.location.pathname + (clean ? `?${clean}` : "") + hash;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for external filter sync
   useEffect(() => {
