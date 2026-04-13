@@ -1,69 +1,84 @@
 
+What I found
 
-# Project-Aware Proactive Recommendations
+- The queue is not actually “stalling” because the worker is frozen. It is repeatedly waking up, reading the same bad email jobs, failing, and shutting down.
+- The backend logs show the real failure:
+  - `Email API error: 400`
+  - `Missing run_id or idempotency_key`
+- This means the queue processor is trying to send transactional emails whose payloads are incomplete.
 
-## Overview
-Build a recommendation engine that analyzes the contents of a designer's client boards (projects) and suggests complementary products from the catalog. Recommendations surface on the **Dashboard**, inline in the **Gallery**, and in **weekly email digests**.
+Why this keeps happening
 
-## Architecture
+- `process-email-queue` expects each transactional email job to include a consistent payload, especially:
+  - `message_id`
+  - `idempotency_key` or `run_id`
+  - `from`
+  - `sender_domain`
+  - `purpose`
+  - `label`
+  - `queued_at`
+- Several email-producing functions do not enqueue that full shape. The ones I found are:
+  - `supabase/functions/notify-3d-upload/index.ts`
+  - `supabase/functions/scrape-competitors/index.ts`
+  - `supabase/functions/send-weekly-digest/index.ts`
+  - `supabase/functions/send-axo-status-notification/index.ts`
+- Two of those paths appear to omit even `message_id`, which is worse: the retry-budget logic in `process-email-queue` cannot properly count failed attempts, so those jobs can loop forever.
+- That is likely why you see “failed to unpause queue”: the system resumes processing, immediately hits the same poison messages, and falls back into error again.
 
-```text
-┌──────────────────────┐
-│  client_board_items   │──→ board's product IDs
-│  designer_curator_picks│──→ product attributes (category, materials, brand, tags)
-└──────────┬───────────┘
-           │
-     Edge Function: board-recommendations
-     (Lovable AI: gemini-3-flash-preview)
-           │
-           ▼
-┌──────────────────────┐
-│ board_recommendations │  ← cached ranked suggestions per board
-└──────────────────────┘
-           │
-     ┌─────┼──────────┐
-     ▼     ▼          ▼
- Dashboard  Gallery   Weekly Digest
-  widget    inline    email section
-```
+Implementation plan
 
-## Steps
+1. Standardize queued email payloads
+- Update every enqueueing function so transactional emails always include the same required fields:
+  - `to`
+  - `from`
+  - `sender_domain`
+  - `subject`
+  - `html` and/or `text`
+  - `purpose: 'transactional'`
+  - `label`
+  - `message_id`
+  - `idempotency_key`
+  - `queued_at`
 
-### 1. Database migration — `board_recommendations` table
-Create a cache table storing AI-generated recommendations per board:
-- `id`, `board_id` (ref client_boards), `product_id` (ref designer_curator_picks), `score` (numeric), `reason` (text — one-line explanation like "Complements the bronze palette"), `created_at`
-- RLS: board owners can SELECT their own; admins can manage all
-- Unique constraint on `(board_id, product_id)`
+2. Harden the queue processor
+- Add explicit payload validation at the top of `process-email-queue`.
+- If a queued message is missing required fields, do not retry it.
+- Move invalid messages straight to the dead-letter queue with a clear reason like:
+  - `Invalid payload: missing idempotency_key`
+  - `Invalid payload: missing message_id`
 
-### 2. Edge function — `board-recommendations`
-- Accepts `{ board_id }`, authenticates the caller
-- Fetches board items + their product attributes (category, materials, brand, tags, title)
-- Fetches the full catalog (designer_curator_picks) excluding items already on the board
-- Builds a prompt asking Lovable AI (gemini-3-flash-preview) to pick the top 8 complementary products with reasons, using tool calling for structured output
-- Upserts results into `board_recommendations`
-- Returns the recommendations as JSON
+3. Clean up the currently poisoned queue
+- Identify the already-enqueued invalid jobs in `transactional_emails`.
+- Move or purge those bad jobs so the queue can recover instead of re-reading them forever.
 
-### 3. Dashboard widget — "Suggested for [Board Name]"
-- New component `BoardRecommendations` below MostPopularProducts on TradeDashboard
-- Fetches the user's most recently updated board that has items
-- Calls the edge function if no cached recommendations exist (or cache is older than 24h)
-- Displays a horizontal scroll of 4-6 product cards with the AI reason as a subtitle
-- Each card links to the product in the gallery; a "Refresh" button re-triggers the edge function
+4. Improve error visibility
+- Replace the vague failure path with better logging around:
+  - which function created the bad payload
+  - which required fields are missing
+- If there is a UI/admin status surface for this queue, show the actual last error instead of only “failed to unpause queue”.
 
-### 4. Gallery inline suggestions
-- When browsing the gallery, if the user has an active board with recommendations, show a subtle banner: "Suggested for *[Board Name]*" with 3 product cards inline between search results
-- Only appears if at least 3 recommendations exist for the user's most recent board
+5. Verify end to end
+- Trigger each affected workflow:
+  - 3D upload notification
+  - competitor scrape summary
+  - weekly digest
+  - axonometric status notification
+- Confirm queued emails move from `pending` to `sent`
+- Confirm invalid legacy jobs no longer retry forever
+- Confirm the processor logs stop showing repeated 400s
 
-### 5. Weekly digest integration
-- Extend the existing `send-weekly-digest` edge function to include a "Picks for your project" section
-- Pull cached `board_recommendations` for each recipient's most active board
-- Add 2-3 recommended products to the email template
+Technical details
 
-## Technical Details
+- Primary file to fix: `supabase/functions/process-email-queue/index.ts`
+- Secondary files to fix:
+  - `supabase/functions/notify-3d-upload/index.ts`
+  - `supabase/functions/scrape-competitors/index.ts`
+  - `supabase/functions/send-weekly-digest/index.ts`
+  - `supabase/functions/send-axo-status-notification/index.ts`
+- Most likely no schema change is required unless we choose to add a stronger audit field for source function / queue error classification.
 
-**Edge function prompt strategy**: The prompt includes the board's product attributes as context and instructs the model to find complementary (not duplicate) products considering material harmony, stylistic coherence, and functional completeness (e.g., if the board has seating but no lighting, suggest lighting).
+Expected outcome
 
-**Caching**: Recommendations are cached in the database. They're refreshed when: (a) user clicks "Refresh", (b) a board item is added/removed (via a trigger or client-side call), or (c) cache is >24h old.
-
-**Cost control**: Each recommendation call processes ~one board at a time using gemini-3-flash-preview (fast, cheap). No batch processing of all users — recommendations are generated on-demand per board.
-
+- The queue will stop reprocessing malformed jobs forever.
+- New emails will enqueue with the correct payload shape.
+- “Failed to unpause queue” should disappear because the underlying poison-message loop will be removed.
