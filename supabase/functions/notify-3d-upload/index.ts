@@ -82,16 +82,17 @@ serve(async (req: Request) => {
     }
 
     // Send email notification via queue
-    const resendKey = Deno.env.get("RESEND_API_KEY");
-    if (resendKey) {
-      for (const email of ADMIN_EMAILS) {
-        try {
-          await adminClient.rpc("enqueue_email", {
-            queue_name: "transactional_emails",
-            payload: {
-              to: email,
-              subject: `3D Studio: New ${ext} file uploaded by ${userName}`,
-              html: `
+    for (const email of ADMIN_EMAILS) {
+      const messageId = `3d-upload-${user.id}-${Date.now()}-${email.split("@")[0]}`;
+      try {
+        await adminClient.rpc("enqueue_email", {
+          queue_name: "transactional_emails",
+          payload: {
+            to: email,
+            from: "Maison Affluency 3D Studio <notify@notify.www.maisonaffluency.com>",
+            sender_domain: "notify.www.maisonaffluency.com",
+            subject: `3D Studio: New ${ext} file uploaded by ${userName}`,
+            html: `
                 <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 32px;">
                   <h2 style="font-size: 18px; color: #1a1a1a; margin-bottom: 16px;">New ${ext} File Upload</h2>
                   <p style="font-size: 14px; color: #555; line-height: 1.6;">
@@ -106,12 +107,15 @@ serve(async (req: Request) => {
                   <p style="font-size: 12px; color: #999;">Maison Affluency · 3D Studio Notification</p>
                 </div>
               `,
-              from_name: "Maison Affluency 3D Studio",
-            },
-          });
-        } catch (e) {
-          console.error(`Failed to enqueue email to ${email}:`, e);
-        }
+            purpose: "transactional",
+            label: "3d-upload-notification",
+            message_id: messageId,
+            idempotency_key: messageId,
+            queued_at: new Date().toISOString(),
+          },
+        });
+      } catch (e) {
+        console.error(`Failed to enqueue email to ${email}:`, e);
       }
     }
 

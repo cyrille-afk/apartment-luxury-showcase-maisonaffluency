@@ -259,14 +259,21 @@ Deno.serve(async (req) => {
     `;
 
     for (const email of ADMIN_EMAILS) {
+      const messageId = `scrape-summary-${new Date().toISOString().slice(0, 10)}-${email.split("@")[0]}`;
       try {
         await serviceClient.rpc("enqueue_email", {
           queue_name: "transactional_emails",
           payload: {
             to: email,
+            from: "Maison Affluency Intelligence <notify@notify.www.maisonaffluency.com>",
+            sender_domain: "notify.www.maisonaffluency.com",
             subject: `Competitive Intel: ${totalDesigners} designers, ${auctionResults.length} auction lots collected`,
             html: emailHtml,
-            from_name: "Maison Affluency Intelligence",
+            purpose: "transactional",
+            label: "scrape-summary",
+            message_id: messageId,
+            idempotency_key: messageId,
+            queued_at: new Date().toISOString(),
           },
         });
       } catch (e) {
