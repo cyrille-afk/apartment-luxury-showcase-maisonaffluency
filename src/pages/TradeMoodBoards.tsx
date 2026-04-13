@@ -2,8 +2,8 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect, useCallback } from "react";
-import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -20,16 +20,68 @@ function loadBoardFromStorage(): any[] {
   }
 }
 
+interface MoodRec {
+  product_id: string;
+  score: number;
+  reason: string;
+  title: string;
+  subtitle: string;
+  image_url: string;
+  category: string;
+  brand: string;
+}
+
 export default function TradeMoodBoards() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [board, setBoard] = useState<any[]>(loadBoardFromStorage);
   const [filter, setFilter] = useState<PickerFilter>("all");
+  const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
+  const [recLoading, setRecLoading] = useState(false);
+  const [recError, setRecError] = useState<string | null>(null);
+  const prevBoardIdsRef = useRef<string>("");
 
   // Persist board to localStorage on change
   useEffect(() => {
     localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
   }, [board]);
+
+  // Auto-fetch recommendations when board has 2+ items and composition changes
+  useEffect(() => {
+    const currentIds = board.map((b) => b.id).sort().join(",");
+    if (currentIds === prevBoardIdsRef.current) return;
+    prevBoardIdsRef.current = currentIds;
+
+    if (board.length < 2) {
+      setRecommendations([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetchRecommendations(board.map((b) => b.id));
+    }, 1500); // Debounce 1.5s
+
+    return () => clearTimeout(timer);
+  }, [board]);
+
+  const fetchRecommendations = useCallback(async (productIds: string[]) => {
+    setRecLoading(true);
+    setRecError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("board-recommendations", {
+        body: { product_ids: productIds, source: "mood_board" },
+      });
+      if (error) throw error;
+      if (data?.recommendations) {
+        setRecommendations(data.recommendations);
+      }
+    } catch (err: any) {
+      console.error("Mood board recommendations error:", err);
+      setRecError("Could not generate suggestions");
+    } finally {
+      setRecLoading(false);
+    }
+  }, []);
 
   // All active trade products
   const { data: products = [], isLoading } = useQuery({
@@ -105,6 +157,19 @@ export default function TradeMoodBoards() {
     setBoard((prev) => [...prev, product]);
   };
 
+  const addRecToBoard = (rec: MoodRec) => {
+    if (board.find((b) => b.id === rec.product_id)) return;
+    setBoard((prev) => [...prev, {
+      id: rec.product_id,
+      product_name: rec.title,
+      brand_name: rec.brand,
+      image_url: rec.image_url,
+      category: rec.category,
+    }]);
+    // Remove from recommendations
+    setRecommendations((prev) => prev.filter((r) => r.product_id !== rec.product_id));
+  };
+
   const removeFromBoard = (id: string) => {
     setBoard((prev) => prev.filter((p) => p.id !== id));
   };
@@ -128,34 +193,105 @@ export default function TradeMoodBoards() {
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Board area */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-3">
-              <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{board.length} item{board.length !== 1 ? "s" : ""} on board</p>
-            </div>
-            {board.length === 0 ? (
-              <div className="border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center py-20">
-                <Paintbrush className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                <p className="font-body text-sm text-muted-foreground">Add products from the right panel to build your mood board.</p>
+          <div className="flex-1 space-y-6">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{board.length} item{board.length !== 1 ? "s" : ""} on board</p>
               </div>
-            ) : (
-              <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-2" : board.length <= 4 ? "grid-cols-2" : "grid-cols-3"}`}>
-                {board.map((item) => (
-                  <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                    <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="font-display text-xs text-white truncate">{item.product_name}</p>
-                        <p className="font-body text-[10px] text-white/70">{item.brand_name}</p>
+              {board.length === 0 ? (
+                <div className="border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center py-20">
+                  <Paintbrush className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                  <p className="font-body text-sm text-muted-foreground">Add products from the right panel to build your mood board.</p>
+                </div>
+              ) : (
+                <div className={`grid gap-2 ${board.length <= 2 ? "grid-cols-2" : board.length <= 4 ? "grid-cols-2" : "grid-cols-3"}`}>
+                  {board.map((item) => (
+                    <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                      <img src={item.image_url} alt={item.product_name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <p className="font-display text-xs text-white truncate">{item.product_name}</p>
+                          <p className="font-body text-[10px] text-white/70">{item.brand_name}</p>
+                        </div>
                       </div>
+                      <button
+                        onClick={() => removeFromBoard(item.id)}
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => removeFromBoard(item.id)}
-                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* AI Recommendations */}
+            {(recLoading || recommendations.length > 0 || recError) && (
+              <div className="border-t border-border pt-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-display text-sm text-foreground flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Suggested complements
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fetchRecommendations(board.map((b) => b.id))}
+                    disabled={recLoading || board.length < 2}
+                    className="text-[10px] text-muted-foreground h-7 px-2"
+                  >
+                    <RefreshCw className={`h-3 w-3 mr-1 ${recLoading ? "animate-spin" : ""}`} />
+                    Refresh
+                  </Button>
+                </div>
+
+                {recLoading ? (
+                  <div className="flex gap-3 overflow-hidden">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="w-32 shrink-0 animate-pulse">
+                        <div className="aspect-square bg-muted rounded-lg mb-1.5" />
+                        <div className="h-2.5 w-24 bg-muted rounded mb-1" />
+                        <div className="h-2 w-16 bg-muted rounded" />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : recError ? (
+                  <p className="font-body text-xs text-muted-foreground">{recError}</p>
+                ) : (
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {recommendations.slice(0, 8).map((rec) => (
+                      <button
+                        key={rec.product_id}
+                        onClick={() => addRecToBoard(rec)}
+                        className="group w-32 shrink-0 text-left"
+                      >
+                        <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-1.5 border border-border group-hover:border-primary/40 transition-colors">
+                          {rec.image_url ? (
+                            <img
+                              src={rec.image_url}
+                              alt={rec.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-[10px]">
+                              No image
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <Plus className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                          </div>
+                        </div>
+                        <p className="font-body text-[10px] text-foreground truncate">{rec.title}</p>
+                        <p className="font-body text-[9px] text-muted-foreground truncate">{rec.brand}</p>
+                        <p className="font-body text-[9px] text-primary/70 line-clamp-2 leading-tight mt-0.5">
+                          {rec.reason}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
