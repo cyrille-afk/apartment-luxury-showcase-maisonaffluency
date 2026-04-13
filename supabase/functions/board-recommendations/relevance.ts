@@ -23,6 +23,7 @@ export interface RankedCatalogCandidate extends ProductContextInput {
   role: string;
   roomTags: string[];
   materialTokens: string[];
+  normalizedBrand?: string;
   score: number;
   fitNote: string;
   anchorTitle: string;
