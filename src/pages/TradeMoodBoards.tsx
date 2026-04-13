@@ -3,15 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { Search, Loader2, Paintbrush, Plus, X, Download } from "lucide-react";
+import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+type PickerFilter = "all" | "favourites" | "board";
 
 export default function TradeMoodBoards() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [board, setBoard] = useState<any[]>([]);
+  const [filter, setFilter] = useState<PickerFilter>("all");
 
+  // All active trade products
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["mood-board-products"],
     queryFn: async () => {
@@ -25,7 +29,58 @@ export default function TradeMoodBoards() {
     },
   });
 
-  const filtered = products.filter((p: any) =>
+  // User's favourites
+  const { data: favouriteProducts = [], isLoading: loadingFavs } = useQuery({
+    queryKey: ["mood-board-favourites", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: favs } = await supabase
+        .from("trade_favorites")
+        .select("product_id")
+        .eq("user_id", user!.id);
+      if (!favs?.length) return [];
+      const ids = favs.map((f) => f.product_id);
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, category")
+        .in("id", ids)
+        .not("image_url", "is", null)
+        .order("brand_name");
+      return data || [];
+    },
+  });
+
+  // User's board items (from client_boards)
+  const { data: boardProducts = [], isLoading: loadingBoards } = useQuery({
+    queryKey: ["mood-board-project-items", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: boards } = await supabase
+        .from("client_boards")
+        .select("id")
+        .eq("user_id", user!.id);
+      if (!boards?.length) return [];
+      const boardIds = boards.map((b) => b.id);
+      const { data: items } = await supabase
+        .from("client_board_items")
+        .select("product_id")
+        .in("board_id", boardIds);
+      if (!items?.length) return [];
+      const productIds = [...new Set(items.map((i) => i.product_id))];
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, category")
+        .in("id", productIds)
+        .not("image_url", "is", null)
+        .order("brand_name");
+      return data || [];
+    },
+  });
+
+  const sourceProducts = filter === "favourites" ? favouriteProducts : filter === "board" ? boardProducts : products;
+  const sourceLoading = filter === "favourites" ? loadingFavs : filter === "board" ? loadingBoards : isLoading;
+
+  const filtered = sourceProducts.filter((p: any) =>
     !search || [p.product_name, p.brand_name].some((f: string) => f?.toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -37,6 +92,12 @@ export default function TradeMoodBoards() {
   const removeFromBoard = (id: string) => {
     setBoard((prev) => prev.filter((p) => p.id !== id));
   };
+
+  const filterOptions: { key: PickerFilter; label: string; icon: React.ReactNode }[] = [
+    { key: "all", label: "All", icon: <LayoutGrid className="h-3 w-3" /> },
+    { key: "favourites", label: "Favourites", icon: <Heart className="h-3 w-3" /> },
+    { key: "board", label: "Projects", icon: <FolderOpen className="h-3 w-3" /> },
+  ];
 
   return (
     <>
@@ -85,15 +146,42 @@ export default function TradeMoodBoards() {
 
           {/* Product picker */}
           <div className="w-full lg:w-72 shrink-0 space-y-3">
+            {/* Filter toggle */}
+            <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg">
+              {filterOptions.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setFilter(opt.key)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] font-medium transition-colors ${
+                    filter === opt.key
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.icon}
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-10 font-body text-sm" />
             </div>
+
+            <p className="font-body text-[10px] text-muted-foreground">
+              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+            </p>
+
             <div className="max-h-[500px] overflow-y-auto space-y-1.5 pr-1">
-              {isLoading ? (
+              {sourceLoading ? (
                 <div className="flex justify-center py-10"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+              ) : filtered.length === 0 ? (
+                <p className="font-body text-xs text-muted-foreground text-center py-8">
+                  {filter === "favourites" ? "No favourited products yet." : filter === "board" ? "No products in your project boards." : "No products found."}
+                </p>
               ) : (
-                filtered.slice(0, 50).map((p: any) => {
+                filtered.slice(0, 100).map((p: any) => {
                   const onBoard = board.find((b) => b.id === p.id);
                   return (
                     <button
