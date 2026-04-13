@@ -502,10 +502,15 @@ const Navigation = () => {
                         <div className="pb-3 space-y-0">
                           <button
                             onClick={() => {
-                              setCategoryPanelOpen(false);
+                          setCategoryPanelOpen(false);
                               setIsOpen(false);
-                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                              handleNavClick('/designers');
+                              const isHome = window.location.pathname === "/";
+                              if (isHome) {
+                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                                handleNavClick('/designers');
+                              } else {
+                                navigate(`/designers?category=${encodeURIComponent(cat)}`);
+                              }
                             }}
                             className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
                           >
@@ -517,8 +522,13 @@ const Navigation = () => {
                               onClick={() => {
                                 setCategoryPanelOpen(false);
                                 setIsOpen(false);
-                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                handleNavClick('/designers');
+                                const isHome = window.location.pathname === "/";
+                                if (isHome) {
+                                  window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
+                                  handleNavClick('/designers');
+                                } else {
+                                  navigate(`/designers?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}`);
+                                }
                               }}
                               className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
                             >
@@ -751,11 +761,15 @@ const Navigation = () => {
                   <div key={cat} className="flex flex-col">
                     <button
                       onClick={() => {
-                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
                         setMegaMenuOpen(false);
-                        setTimeout(() => scrollToSection('designers'), 120);
+                        if (window.location.pathname === "/") {
+                          window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                          setTimeout(() => scrollToSection('designers'), 120);
+                        } else {
+                          navigate(`/?category=${encodeURIComponent(cat)}#designers`);
+                        }
                       }}
                       className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
                     >
@@ -767,11 +781,15 @@ const Navigation = () => {
                           <button
                             key={sub}
                             onClick={() => {
-                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
                               setMegaMenuOpen(false);
-                              setTimeout(() => scrollToSection('designers'), 120);
+                              if (window.location.pathname === "/") {
+                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
+                                setTimeout(() => scrollToSection('designers'), 120);
+                              } else {
+                                navigate(`/?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}#designers`);
+                              }
                             }}
                             className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
                           >
