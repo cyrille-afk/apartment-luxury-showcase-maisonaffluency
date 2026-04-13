@@ -168,16 +168,17 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get catalog products (designer_curator_picks) excluding board items
+    // Get catalog products from BOTH sources excluding board items
     const boardTitles = new Set([
       ...(tradeProducts || []).map((p: any) => p.product_name?.toLowerCase()),
       ...curatorProducts.map((p: any) => p.title?.toLowerCase()),
     ])
 
+    // Source 1: designer_curator_picks
     const { data: catalog } = await supabase
       .from('designer_curator_picks')
       .select('id, title, subtitle, category, subcategory, materials, tags, designer_id')
-      .limit(500)
+      .limit(300)
 
     const allDesignerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
     const { data: allDesigners } = await supabase
@@ -187,18 +188,42 @@ Deno.serve(async (req) => {
 
     const designerMap = new Map((allDesigners || []).map((d: any) => [d.id, d.name]))
 
-    const availableCatalog = (catalog || [])
-      .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
-      .map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        subtitle: p.subtitle,
-        category: p.category || '',
-        subcategory: p.subcategory || '',
-        materials: p.materials || '',
-        tags: p.tags || [],
-        brand: designerMap.get(p.designer_id) || '',
-      }))
+    // Source 2: trade_products (active, with images)
+    const { data: tradeCatalog } = await supabase
+      .from('trade_products')
+      .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
+      .eq('is_active', true)
+      .not('image_url', 'is', null)
+      .limit(300)
+
+    const availableCatalog = [
+      ...(catalog || [])
+        .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
+        .map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          subtitle: p.subtitle,
+          category: p.category || '',
+          subcategory: p.subcategory || '',
+          materials: p.materials || '',
+          tags: p.tags || [],
+          brand: designerMap.get(p.designer_id) || '',
+          source: 'curator' as const,
+        })),
+      ...(tradeCatalog || [])
+        .filter((p: any) => !boardTitles.has(p.product_name?.toLowerCase()) && !boardProductIds.includes(p.id))
+        .map((p: any) => ({
+          id: p.id,
+          title: p.product_name,
+          subtitle: '',
+          category: p.category || '',
+          subcategory: p.subcategory || '',
+          materials: p.materials || '',
+          tags: [] as string[],
+          brand: p.brand_name || '',
+          source: 'trade' as const,
+        })),
+    ]
 
     if (availableCatalog.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
