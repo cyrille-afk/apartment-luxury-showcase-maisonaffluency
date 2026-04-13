@@ -892,9 +892,15 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
 
-  // Category/subcategory filter state
-  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
+  // Category/subcategory filter state — initialize from URL params if present
+  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("category") || null;
+  });
+  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("subcategory") || null;
+  });
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
