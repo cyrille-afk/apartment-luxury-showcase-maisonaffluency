@@ -204,13 +204,13 @@ Deno.serve(async (req) => {
     // Take only 30 random candidates so the AI must pick from a different subset each time
     const trimmed = shortlist.slice(0, 30)
 
-    if (shortlist.length === 0) {
+    if (trimmed.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const catalogList = shortlist.map((p, i) =>
+    const catalogList = trimmed.map((p, i) =>
       `${i}: "${p.title}" by ${p.brand} | Role: ${p.role} | Category: ${p.category || 'n/a'} | Materials: ${p.materials || 'n/a'} | Fit: ${p.fitNote} | Pre-score: ${Math.round(p.score)}`
     ).join('\n')
 
