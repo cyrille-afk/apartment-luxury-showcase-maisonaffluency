@@ -1,5 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
+import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent } from './relevance.ts'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -75,44 +77,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check cache for project boards
-    if (cacheKey) {
-      const { data: cached } = await supabase
-        .from('board_recommendations')
-        .select('product_id, score, reason, created_at')
-        .eq('board_id', cacheKey)
-        .order('score', { ascending: false })
-
-      if (cached && cached.length > 0) {
-        const cacheAge = Date.now() - new Date(cached[0].created_at).getTime()
-        if (cacheAge < 24 * 60 * 60 * 1000) {
-          const productIds = cached.map((r: any) => r.product_id)
-          const { data: products } = await supabase
-            .from('designer_curator_picks')
-            .select('id, title, subtitle, image_url, category, designer_id')
-            .in('id', productIds)
-
-          const dIds = [...new Set((products || []).map((p: any) => p.designer_id))]
-          const { data: designers } = await supabase.from('designers').select('id, name').in('id', dIds)
-          const dMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
-
-          const enriched = cached.map((r: any) => {
-            const prod = (products || []).find((p: any) => p.id === r.product_id)
-            return {
-              product_id: r.product_id, score: Number(r.score), reason: r.reason,
-              title: prod?.title || '', subtitle: prod?.subtitle || '',
-              image_url: prod?.image_url || '', category: prod?.category || '',
-              brand: dMap.get(prod?.designer_id) || '',
-            }
-          })
-
-          return new Response(JSON.stringify({ recommendations: enriched, board_title: boardTitle }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          })
-        }
-      }
-    }
-
     // Resolve board items from both tables
     const { data: tradeProducts } = await supabase
       .from('trade_products')
@@ -142,12 +106,12 @@ Deno.serve(async (req) => {
     const boardItems = [
       ...(tradeProducts || []).map((p: any) => ({
         name: p.product_name, brand: p.brand_name,
-        category: p.category, materials: p.materials || 'not specified',
+        category: p.category, subcategory: p.subcategory || '', materials: p.materials || 'not specified',
         dimensions: p.dimensions || '',
       })),
       ...curatorProducts.map((p: any) => ({
         name: p.title, brand: curatorDesignerMap.get(p.designer_id) || 'Unknown',
-        category: p.category || '', materials: p.materials || 'not specified',
+        category: p.category || '', subcategory: p.subcategory || '', materials: p.materials || 'not specified',
         dimensions: '',
       })),
     ]
@@ -188,13 +152,13 @@ Deno.serve(async (req) => {
         .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
           id: p.id, title: p.title, category: p.category || '', materials: p.materials || '',
-          tags: p.tags || [], brand: designerMap.get(p.designer_id) || '', source: 'curator' as const,
+          subcategory: p.subcategory || '', tags: p.tags || [], brand: designerMap.get(p.designer_id) || '', source: 'curator' as const,
         })),
       ...(tradeCatalog || [])
         .filter((p: any) => !boardTitles.has(p.product_name?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
           id: p.id, title: p.product_name, category: p.category || '', materials: p.materials || '',
-          tags: [] as string[], brand: p.brand_name || '', source: 'trade' as const,
+          subcategory: p.subcategory || '', dimensions: p.dimensions || '', tags: [] as string[], brand: p.brand_name || '', source: 'trade' as const,
         })),
     ]
 
@@ -204,50 +168,87 @@ Deno.serve(async (req) => {
       })
     }
 
-    const catalogList = availableCatalog.slice(0, 200).map((p, i) =>
-      `${i}: "${p.title}" by ${p.brand} | ${p.category} | Materials: ${p.materials || 'n/a'}`
+    const boardIntent = summarizeBoardIntent(
+      boardItems.map((item, index) => ({
+        id: `board-${index}`,
+        title: item.name,
+        brand: item.brand,
+        category: item.category,
+        subcategory: item.subcategory,
+        materials: item.materials,
+        dimensions: item.dimensions,
+      }))
+    )
+
+    const rankedCatalog = rankCatalogCandidates(
+      boardItems.map((item, index) => ({
+        id: `board-${index}`,
+        title: item.name,
+        brand: item.brand,
+        category: item.category,
+        subcategory: item.subcategory,
+        materials: item.materials,
+        dimensions: item.dimensions,
+      })),
+      availableCatalog,
+    )
+
+    const shortlist = selectCandidateShortlist(rankedCatalog, 60)
+
+    if (shortlist.length === 0) {
+      return new Response(JSON.stringify({ recommendations: [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const catalogList = shortlist.map((p, i) =>
+      `${i}: "${p.title}" by ${p.brand} | Role: ${p.role} | Category: ${p.category || 'n/a'} | Materials: ${p.materials || 'n/a'} | Fit: ${p.fitNote} | Pre-score: ${Math.round(p.score)}`
     ).join('\n')
 
     // Extract key materials and categories from board for the prompt
     const boardMaterials = boardItems.map(p => p.materials).filter(m => m !== 'not specified').join(', ')
     const boardCategories = boardItems.map(p => p.category).filter(Boolean).join(', ')
 
-    const systemPrompt = `You are a luxury interior design consultant curating items for a cohesive room scheme. You must select items that would naturally coexist in the same interior space as the client's existing selections.
+    const systemPrompt = `You are a luxury interior design consultant curating items for a cohesive room scheme. You are selecting from a shortlist that has already been relevance-ranked for same-room pairing.
 
 ## How to select (in priority order):
 
-1. ROOM PAIRING — Would this item naturally sit alongside the board items in the same room? A dining table needs dining chairs, pendant lighting, a sideboard, table accessories. A lounge chair needs a side table, floor lamp, rug, art.
+1. DIRECT PAIRING — Choose items that directly pair with a specific board item in the same room. A dining table needs dining chairs, pendant lighting, a sideboard, a rug. A chair needs a side table, floor lamp, rug, or sofa context.
 
-2. MATERIAL & FINISH HARMONY — Prioritize items sharing material families with the board. E.g. if the board has travertine + ash wood, favour items in natural stone, light wood, linen, warm metals.
+2. SAME-ROOM COMPLETENESS — Fill in the room naturally. Do not select pieces that belong to a different room type.
 
-3. FUNCTIONAL COMPLETENESS — Fill the room: if the board has seating but no lighting, add lighting. If it has a table but no seating, add seating. Think about what a real room needs.
+3. MATERIAL & FINISH HARMONY — Prioritize items sharing material families, tones, or finishes with the board.
 
-4. SCALE & PROPORTION — Items should work at the same scale. Don't pair monumental tables with tiny accessories exclusively.
+4. USE THE PRE-SCORE — If two options are close, trust the higher pre-score because the shortlist has already been screened for role and room fit.
 
 5. BRAND DIVERSITY — Spread recommendations across different brands/designers.
 
 ## What NOT to do:
-- Do NOT select random items with no spatial or material relationship
-- Do NOT pick items just because they share a category name
-- Do NOT ignore the specific materials listed`
+- Do NOT select random items with no direct pairing logic
+- Do NOT choose multiple extra tables unless they clearly complete the room
+- Do NOT ignore the fit notes or pre-scores
+- Every reason must mention the anchor board item or the room function it completes`
 
     const userPrompt = `## Board: "${boardTitle}"
 Items currently selected:
 ${boardContext}
 
-Key materials on this board: ${boardMaterials || 'not specified'}
+Likely room(s): ${boardIntent.dominantRooms.join(', ') || 'mixed'}
+Pieces already on the board: ${boardIntent.presentRoles.join(', ') || 'mixed'}
+Most needed complement roles: ${boardIntent.desiredRoles.join(', ') || 'mixed'}
+Key materials on this board: ${boardMaterials || boardIntent.materialTokens.join(', ') || 'not specified'}
 Categories present: ${boardCategories || 'mixed'}
 
-## Available catalog:
+## Pre-ranked shortlist:
 ${catalogList}
 
 Think step by step:
-1. What room type do these items suggest? (dining, living, bedroom, etc.)
-2. What's missing to complete that room?
-3. Which catalog items share materials/finishes with the board?
-4. Select 8 items that would work together in the same space.
+1. Identify the strongest anchor item(s) on the board.
+2. Choose items that directly pair to those anchors or complete the same room.
+3. Prefer higher pre-scores when options are otherwise similar.
+4. Select 8 items that would realistically sit in the same room.
 
-Return a JSON array: [{"index": number, "score": 1-100, "reason": "explain the spatial/material connection to a specific board item"}]`
+Return a JSON object with a recommendations array: {"recommendations": [{"index": number, "score": 1-100, "reason": "mention which board item it pairs with or what room gap it solves"}]}`
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -262,7 +263,7 @@ Return a JSON array: [{"index": number, "score": 1-100, "reason": "explain the s
           { role: 'user', content: userPrompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.2,
+        temperature: 0.1,
       }),
     })
 
@@ -287,15 +288,32 @@ Return a JSON array: [{"index": number, "score": 1-100, "reason": "explain the s
       parsed = []
     }
 
-    const recommendations = parsed
-      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < availableCatalog.length)
+    const fallbackRecommendations = shortlist.slice(0, 8).map((item) => ({
+      product_id: item.id,
+      score: Math.max(50, Math.min(100, Math.round(item.score))),
+      reason: item.fitNote,
+      source: item.source,
+    }))
+
+    const aiRecommendations = parsed
+      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < shortlist.length)
       .slice(0, 8)
       .map((r: any) => ({
-        product_id: availableCatalog[r.index].id,
-        score: r.score || 50,
-        reason: r.reason || '',
-        source: availableCatalog[r.index].source,
+        product_id: shortlist[r.index].id,
+        score: r.score || Math.max(50, Math.min(100, Math.round(shortlist[r.index].score))),
+        reason: r.reason || shortlist[r.index].fitNote,
+        source: shortlist[r.index].source,
       }))
+
+    const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade' }> = []
+    const seenProductIds = new Set<string>()
+
+    for (const recommendation of [...aiRecommendations, ...fallbackRecommendations]) {
+      if (seenProductIds.has(recommendation.product_id)) continue
+      seenProductIds.add(recommendation.product_id)
+      recommendations.push(recommendation)
+      if (recommendations.length >= 8) break
+    }
 
     // Cache for project boards (curator picks only due to FK)
     if (cacheKey && recommendations.length > 0) {

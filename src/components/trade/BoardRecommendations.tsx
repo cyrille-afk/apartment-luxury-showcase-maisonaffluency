@@ -70,54 +70,7 @@ export function BoardRecommendations() {
       setBoardId(activeBoardId);
       setBoardTitle(activeBoardTitle);
 
-      // Check for cached recommendations
-      const { data: cached } = await supabase
-        .from("board_recommendations")
-        .select("product_id, score, reason, created_at")
-        .eq("board_id", activeBoardId)
-        .order("score", { ascending: false });
-
-      if (cached && cached.length > 0) {
-        const cacheAge = Date.now() - new Date(cached[0].created_at).getTime();
-        const twentyFourHours = 24 * 60 * 60 * 1000;
-
-        if (cacheAge < twentyFourHours) {
-          // Enrich cached data with product details
-          const productIds = cached.map((r) => r.product_id);
-          const { data: products } = await supabase
-            .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, category, designer_id")
-            .in("id", productIds);
-
-          const designerIds = [...new Set((products || []).map((p) => p.designer_id))];
-          const { data: designers } = await supabase
-            .from("designers")
-            .select("id, name")
-            .in("id", designerIds);
-
-          const designerMap = new Map((designers || []).map((d) => [d.id, d.name]));
-
-          const enriched = cached.map((r) => {
-            const prod = (products || []).find((p) => p.id === r.product_id);
-            return {
-              product_id: r.product_id,
-              score: Number(r.score),
-              reason: r.reason,
-              title: prod?.title || "",
-              subtitle: prod?.subtitle || "",
-              image_url: prod?.image_url || "",
-              category: prod?.category || "",
-              brand: designerMap.get(prod?.designer_id) || "",
-            };
-          });
-
-          setRecommendations(enriched);
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Generate fresh recommendations
+      // Generate fresh recommendations so relevance updates are reflected immediately
       await generateRecommendations(activeBoardId);
     } catch (err) {
       console.error("Failed to load recommendations:", err);
