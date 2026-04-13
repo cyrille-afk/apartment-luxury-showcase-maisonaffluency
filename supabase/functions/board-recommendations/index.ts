@@ -195,22 +195,22 @@ Deno.serve(async (req) => {
 
     const shortlist = selectCandidateShortlist(rankedCatalog, 60)
 
-    // Shuffle shortlist to introduce variety on refresh while keeping top candidates
-    const top = shortlist.slice(0, 15)
-    const rest = shortlist.slice(15)
-    for (let i = rest.length - 1; i > 0; i--) {
+    // Shuffle the entire shortlist so the AI sees candidates in a different order each refresh.
+    // Pre-scores are still visible in the prompt, but positional bias drives variety.
+    for (let i = shortlist.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [rest[i], rest[j]] = [rest[j], rest[i]]
+      [shortlist[i], shortlist[j]] = [shortlist[j], shortlist[i]]
     }
-    shortlist.splice(0, shortlist.length, ...top, ...rest)
+    // Take only 30 random candidates so the AI must pick from a different subset each time
+    const trimmed = shortlist.slice(0, 30)
 
-    if (shortlist.length === 0) {
+    if (trimmed.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const catalogList = shortlist.map((p, i) =>
+    const catalogList = trimmed.map((p, i) =>
       `${i}: "${p.title}" by ${p.brand} | Role: ${p.role} | Category: ${p.category || 'n/a'} | Materials: ${p.materials || 'n/a'} | Fit: ${p.fitNote} | Pre-score: ${Math.round(p.score)}`
     ).join('\n')
 
@@ -297,7 +297,7 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
       parsed = []
     }
 
-    const fallbackRecommendations = shortlist.slice(0, 8).map((item) => ({
+    const fallbackRecommendations = trimmed.slice(0, 8).map((item) => ({
       product_id: item.id,
       score: Math.max(50, Math.min(100, Math.round(item.score))),
       reason: item.fitNote,
@@ -305,13 +305,13 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
     }))
 
     const aiRecommendations = parsed
-      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < shortlist.length)
+      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < trimmed.length)
       .slice(0, 8)
       .map((r: any) => ({
-        product_id: shortlist[r.index].id,
-        score: r.score || Math.max(50, Math.min(100, Math.round(shortlist[r.index].score))),
-        reason: r.reason || shortlist[r.index].fitNote,
-        source: shortlist[r.index].source,
+        product_id: trimmed[r.index].id,
+        score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
+        reason: r.reason || trimmed[r.index].fitNote,
+        source: trimmed[r.index].source,
       }))
 
     const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade' }> = []
