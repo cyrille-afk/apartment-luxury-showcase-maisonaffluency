@@ -195,6 +195,15 @@ Deno.serve(async (req) => {
 
     const shortlist = selectCandidateShortlist(rankedCatalog, 60)
 
+    // Shuffle shortlist to introduce variety on refresh while keeping top candidates
+    const top = shortlist.slice(0, 15)
+    const rest = shortlist.slice(15)
+    for (let i = rest.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rest[i], rest[j]] = [rest[j], rest[i]]
+    }
+    shortlist.splice(0, shortlist.length, ...top, ...rest)
+
     if (shortlist.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -263,7 +272,7 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
           { role: 'user', content: userPrompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.1,
+        temperature: 0.6,
       }),
     })
 
