@@ -28,66 +28,167 @@ Deno.serve(async (req) => {
       })
     }
 
-    const { board_id } = await req.json()
-    if (!board_id) {
-      return new Response(JSON.stringify({ error: 'board_id required' }), {
+    const body = await req.json()
+    const { board_id, product_ids, source } = body
+
+    // Two modes: board_id (project folders) OR product_ids (mood board)
+    let boardTitle = 'Mood Board'
+    let boardProductIds: string[] = []
+    let cacheKey: string | null = null
+
+    if (board_id) {
+      // === Mode 1: Project board ===
+      const { data: board } = await supabase
+        .from('client_boards')
+        .select('id, title, user_id')
+        .eq('id', board_id)
+        .single()
+
+      if (!board || board.user_id !== user.id) {
+        return new Response(JSON.stringify({ error: 'Board not found' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      boardTitle = board.title
+      cacheKey = board_id
+
+      const { data: boardItems } = await supabase
+        .from('client_board_items')
+        .select('product_id')
+        .eq('board_id', board_id)
+
+      if (!boardItems || boardItems.length === 0) {
+        return new Response(JSON.stringify({ recommendations: [], reason: 'Board has no items' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      boardProductIds = boardItems.map((i: any) => i.product_id)
+    } else if (product_ids && Array.isArray(product_ids) && product_ids.length > 0) {
+      // === Mode 2: Direct product IDs (mood board) ===
+      boardProductIds = product_ids.slice(0, 20) // Cap at 20
+      boardTitle = source === 'mood_board' ? 'Your Mood Board' : 'Selection'
+    } else {
+      return new Response(JSON.stringify({ error: 'board_id or product_ids required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Verify board ownership
-    const { data: board } = await supabase
-      .from('client_boards')
-      .select('id, title, user_id')
-      .eq('id', board_id)
-      .single()
+    // Check cache if we have a cache key (project boards only)
+    if (cacheKey) {
+      const { data: cached } = await supabase
+        .from('board_recommendations')
+        .select('product_id, score, reason, created_at')
+        .eq('board_id', cacheKey)
+        .order('score', { ascending: false })
 
-    if (!board || (board.user_id !== user.id)) {
-      return new Response(JSON.stringify({ error: 'Board not found' }), {
-        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      if (cached && cached.length > 0) {
+        const cacheAge = Date.now() - new Date(cached[0].created_at).getTime()
+        const twentyFourHours = 24 * 60 * 60 * 1000
+
+        if (cacheAge < twentyFourHours) {
+          const productIds = cached.map((r: any) => r.product_id)
+          const { data: products } = await supabase
+            .from('designer_curator_picks')
+            .select('id, title, subtitle, image_url, category, designer_id')
+            .in('id', productIds)
+
+          const designerIds = [...new Set((products || []).map((p: any) => p.designer_id))]
+          const { data: designers } = await supabase
+            .from('designers')
+            .select('id, name')
+            .in('id', designerIds)
+
+          const designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
+
+          const enriched = cached.map((r: any) => {
+            const prod = (products || []).find((p: any) => p.id === r.product_id)
+            return {
+              product_id: r.product_id,
+              score: Number(r.score),
+              reason: r.reason,
+              title: prod?.title || '',
+              subtitle: prod?.subtitle || '',
+              image_url: prod?.image_url || '',
+              category: prod?.category || '',
+              brand: designerMap.get(prod?.designer_id) || '',
+            }
+          })
+
+          return new Response(JSON.stringify({ recommendations: enriched, board_title: boardTitle }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+      }
     }
 
-    // Get board items with product details
-    const { data: boardItems } = await supabase
-      .from('client_board_items')
-      .select('product_id')
-      .eq('board_id', board_id)
-
-    if (!boardItems || boardItems.length === 0) {
-      return new Response(JSON.stringify({ recommendations: [], reason: 'Board has no items' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    const boardProductIds = boardItems.map((i: any) => i.product_id)
-
-    // Get product details for board items (from trade_products since that's what client_board_items references)
-    const { data: boardProducts } = await supabase
+    // Get product details — try trade_products first, then curator_picks
+    const { data: tradeProducts } = await supabase
       .from('trade_products')
       .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
       .in('id', boardProductIds)
 
-    // Get catalog products (designer_curator_picks) excluding board items by title match
-    const boardTitles = new Set((boardProducts || []).map((p: any) => p.product_name?.toLowerCase()))
-    
+    const foundTradeIds = new Set((tradeProducts || []).map((p: any) => p.id))
+    const missingIds = boardProductIds.filter(id => !foundTradeIds.has(id))
+
+    let curatorProducts: any[] = []
+    if (missingIds.length > 0) {
+      const { data } = await supabase
+        .from('designer_curator_picks')
+        .select('id, title, subtitle, category, subcategory, materials, designer_id')
+        .in('id', missingIds)
+      curatorProducts = data || []
+    }
+
+    // Get designer names for curator products
+    const curatorDesignerIds = [...new Set(curatorProducts.map((p: any) => p.designer_id))]
+    let curatorDesignerMap = new Map<string, string>()
+    if (curatorDesignerIds.length > 0) {
+      const { data: designers } = await supabase
+        .from('designers')
+        .select('id, name')
+        .in('id', curatorDesignerIds)
+      curatorDesignerMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
+    }
+
+    // Build unified board context
+    const boardContext = [
+      ...(tradeProducts || []).map((p: any) =>
+        `- ${p.product_name} by ${p.brand_name} (${p.category}${p.materials ? ', ' + p.materials : ''})`
+      ),
+      ...curatorProducts.map((p: any) =>
+        `- ${p.title} by ${curatorDesignerMap.get(p.designer_id) || 'Unknown'} (${p.category || ''}${p.materials ? ', ' + p.materials : ''})`
+      ),
+    ].join('\n')
+
+    if (!boardContext.trim()) {
+      return new Response(JSON.stringify({ recommendations: [], reason: 'No product details found' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Get catalog products (designer_curator_picks) excluding board items
+    const boardTitles = new Set([
+      ...(tradeProducts || []).map((p: any) => p.product_name?.toLowerCase()),
+      ...curatorProducts.map((p: any) => p.title?.toLowerCase()),
+    ])
+
     const { data: catalog } = await supabase
       .from('designer_curator_picks')
       .select('id, title, subtitle, category, subcategory, materials, tags, designer_id')
       .limit(500)
 
-    // Get designer names for catalog items
-    const designerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
-    const { data: designers } = await supabase
+    const allDesignerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
+    const { data: allDesigners } = await supabase
       .from('designers')
       .select('id, name')
-      .in('id', designerIds)
+      .in('id', allDesignerIds)
 
-    const designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
+    const designerMap = new Map((allDesigners || []).map((d: any) => [d.id, d.name]))
 
-    // Filter out products already on the board
     const availableCatalog = (catalog || [])
-      .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()))
+      .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
       .map((p: any) => ({
         id: p.id,
         title: p.title,
@@ -106,10 +207,6 @@ Deno.serve(async (req) => {
     }
 
     // Build AI prompt
-    const boardContext = (boardProducts || []).map((p: any) =>
-      `- ${p.product_name} by ${p.brand_name} (${p.category}${p.materials ? ', ' + p.materials : ''})`
-    ).join('\n')
-
     const catalogList = availableCatalog.slice(0, 200).map((p: any, i: number) =>
       `${i}: ${p.title} by ${p.brand} | ${p.category} | ${p.materials} | ${(p.tags || []).join(', ')}`
     ).join('\n')
@@ -121,7 +218,7 @@ Deno.serve(async (req) => {
 - Brand diversity (don't suggest only from one brand)
 Return exactly 8 recommendations as a JSON array.`
 
-    const userPrompt = `## Client Board: "${board.title}"
+    const userPrompt = `## Client Board: "${boardTitle}"
 Current items:
 ${boardContext}
 
@@ -159,7 +256,7 @@ Order by score descending. Pick 8 complementary products.`
 
     const aiData = await aiResponse.json()
     const content = aiData.choices?.[0]?.message?.content || '[]'
-    
+
     let parsed: any[]
     try {
       const obj = JSON.parse(content)
@@ -179,13 +276,12 @@ Order by score descending. Pick 8 complementary products.`
         reason: r.reason || '',
       }))
 
-    // Delete old recommendations for this board, then insert new ones
-    await supabase.from('board_recommendations').delete().eq('board_id', board_id)
-
-    if (recommendations.length > 0) {
+    // Cache if project board
+    if (cacheKey && recommendations.length > 0) {
+      await supabase.from('board_recommendations').delete().eq('board_id', cacheKey)
       await supabase.from('board_recommendations').insert(
         recommendations.map((r: any) => ({
-          board_id,
+          board_id: cacheKey,
           product_id: r.product_id,
           score: r.score,
           reason: r.reason,
@@ -214,7 +310,7 @@ Order by score descending. Pick 8 complementary products.`
       }
     })
 
-    return new Response(JSON.stringify({ recommendations: enriched, board_title: board.title }), {
+    return new Response(JSON.stringify({ recommendations: enriched, board_title: boardTitle }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
