@@ -939,6 +939,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
 
+  // On mount, broadcast URL-param filters to ProductGrid and clean URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    const sub = params.get("subcategory");
+    if (cat || sub) {
+      broadcastFilter(cat || null, sub || null);
+      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat || null, subcategory: sub || null } }));
+      // Clean URL params without triggering navigation
+      params.delete("category");
+      params.delete("subcategory");
+      const clean = params.toString();
+      const hash = window.location.hash;
+      const newUrl = window.location.pathname + (clean ? `?${clean}` : "") + hash;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Listen for external filter sync
   useEffect(() => {
     const handleSync = (e: CustomEvent) => {
