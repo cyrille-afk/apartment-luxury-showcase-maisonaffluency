@@ -236,21 +236,35 @@ Deno.serve(async (req) => {
       `${i}: ${p.title} by ${p.brand} | ${p.category} | ${p.materials} | ${(p.tags || []).join(', ')}`
     ).join('\n')
 
-    const systemPrompt = `You are a luxury interior design consultant for Maison Affluency. Given a client's project board, recommend complementary products from the catalog. Consider:
-- Material harmony (e.g. bronze with brass, marble with stone)
-- Stylistic coherence (don't mix brutalist with rococo)
-- Functional completeness (if board has seating but no lighting, suggest lighting)
-- Brand diversity (don't suggest only from one brand)
+    // Log context for debugging
+    console.log('Board context:', boardContext)
+    console.log('Catalog size:', availableCatalog.length)
+
+    const systemPrompt = `You are a luxury interior design consultant for Maison Affluency, specializing in material-driven curation. Your PRIMARY criterion is MATERIAL and FINISH HARMONY — every recommendation must share a clear material or finish connection with the board items.
+
+## Strict Selection Rules (in priority order):
+1. MATERIAL MATCH (mandatory): Each recommendation MUST share at least one material family with the board. For example: if the board has brass, recommend items with brass/bronze/gold finishes. If the board has natural stone, recommend items with marble/travertine/onyx.
+2. AESTHETIC COHERENCE: Match the design language — sculptural, minimal, organic, etc.
+3. FUNCTIONAL COMPLETENESS: Fill gaps (e.g. if board has tables but no seating, suggest seating in matching materials).
+4. BRAND DIVERSITY: Spread across different brands.
+
+## What NOT to do:
+- Do NOT recommend items that share zero material connection with the board
+- Do NOT pick items just because they're in the same category
+- Do NOT ignore the specific materials listed for each board item
+
 Return exactly 8 recommendations as a JSON array.`
 
     const userPrompt = `## Client Board: "${boardTitle}"
-Current items:
+Current items (PAY CLOSE ATTENTION to the materials):
 ${boardContext}
 
 ## Available Catalog (index: product | category | materials | tags):
 ${catalogList}
 
-Return a JSON array of objects with: {"index": number, "score": number (1-100), "reason": string (one sentence)}
+IMPORTANT: Every recommendation must connect to the board's specific materials: analyze the materials above carefully before selecting.
+
+Return a JSON array of objects with: {"index": number, "score": number (1-100), "reason": string (must explicitly mention which material/finish connects to which board item)}
 Order by score descending. Pick 8 complementary products.`
 
     // Call Lovable AI
@@ -267,7 +281,7 @@ Order by score descending. Pick 8 complementary products.`
           { role: 'user', content: userPrompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.3,
       }),
     })
 
