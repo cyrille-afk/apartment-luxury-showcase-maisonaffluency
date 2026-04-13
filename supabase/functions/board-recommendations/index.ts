@@ -1,5 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,7 +16,6 @@ Deno.serve(async (req) => {
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-    // Authenticate caller
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing auth' }), {
@@ -31,13 +34,11 @@ Deno.serve(async (req) => {
     const body = await req.json()
     const { board_id, product_ids, source } = body
 
-    // Two modes: board_id (project folders) OR product_ids (mood board)
     let boardTitle = 'Mood Board'
     let boardProductIds: string[] = []
     let cacheKey: string | null = null
 
     if (board_id) {
-      // === Mode 1: Project board ===
       const { data: board } = await supabase
         .from('client_boards')
         .select('id, title, user_id')
@@ -66,8 +67,7 @@ Deno.serve(async (req) => {
 
       boardProductIds = boardItems.map((i: any) => i.product_id)
     } else if (product_ids && Array.isArray(product_ids) && product_ids.length > 0) {
-      // === Mode 2: Direct product IDs (mood board) ===
-      boardProductIds = product_ids.slice(0, 20) // Cap at 20
+      boardProductIds = product_ids.slice(0, 20)
       boardTitle = source === 'mood_board' ? 'Your Mood Board' : 'Selection'
     } else {
       return new Response(JSON.stringify({ error: 'board_id or product_ids required' }), {
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check cache if we have a cache key (project boards only)
+    // Check cache for project boards
     if (cacheKey) {
       const { data: cached } = await supabase
         .from('board_recommendations')
@@ -85,34 +85,24 @@ Deno.serve(async (req) => {
 
       if (cached && cached.length > 0) {
         const cacheAge = Date.now() - new Date(cached[0].created_at).getTime()
-        const twentyFourHours = 24 * 60 * 60 * 1000
-
-        if (cacheAge < twentyFourHours) {
+        if (cacheAge < 24 * 60 * 60 * 1000) {
           const productIds = cached.map((r: any) => r.product_id)
           const { data: products } = await supabase
             .from('designer_curator_picks')
             .select('id, title, subtitle, image_url, category, designer_id')
             .in('id', productIds)
 
-          const designerIds = [...new Set((products || []).map((p: any) => p.designer_id))]
-          const { data: designers } = await supabase
-            .from('designers')
-            .select('id, name')
-            .in('id', designerIds)
-
-          const designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
+          const dIds = [...new Set((products || []).map((p: any) => p.designer_id))]
+          const { data: designers } = await supabase.from('designers').select('id, name').in('id', dIds)
+          const dMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
 
           const enriched = cached.map((r: any) => {
             const prod = (products || []).find((p: any) => p.id === r.product_id)
             return {
-              product_id: r.product_id,
-              score: Number(r.score),
-              reason: r.reason,
-              title: prod?.title || '',
-              subtitle: prod?.subtitle || '',
-              image_url: prod?.image_url || '',
-              category: prod?.category || '',
-              brand: designerMap.get(prod?.designer_id) || '',
+              product_id: r.product_id, score: Number(r.score), reason: r.reason,
+              title: prod?.title || '', subtitle: prod?.subtitle || '',
+              image_url: prod?.image_url || '', category: prod?.category || '',
+              brand: dMap.get(prod?.designer_id) || '',
             }
           })
 
@@ -123,7 +113,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Get product details — try trade_products first, then curator_picks
+    // Resolve board items from both tables
     const { data: tradeProducts } = await supabase
       .from('trade_products')
       .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
@@ -141,26 +131,30 @@ Deno.serve(async (req) => {
       curatorProducts = data || []
     }
 
-    // Get designer names for curator products
     const curatorDesignerIds = [...new Set(curatorProducts.map((p: any) => p.designer_id))]
     let curatorDesignerMap = new Map<string, string>()
     if (curatorDesignerIds.length > 0) {
-      const { data: designers } = await supabase
-        .from('designers')
-        .select('id, name')
-        .in('id', curatorDesignerIds)
+      const { data: designers } = await supabase.from('designers').select('id, name').in('id', curatorDesignerIds)
       curatorDesignerMap = new Map((designers || []).map((d: any) => [d.id, d.name]))
     }
 
-    // Build unified board context
-    const boardContext = [
-      ...(tradeProducts || []).map((p: any) =>
-        `- ${p.product_name} by ${p.brand_name} (${p.category}${p.materials ? ', ' + p.materials : ''})`
-      ),
-      ...curatorProducts.map((p: any) =>
-        `- ${p.title} by ${curatorDesignerMap.get(p.designer_id) || 'Unknown'} (${p.category || ''}${p.materials ? ', ' + p.materials : ''})`
-      ),
-    ].join('\n')
+    // Build board context with detailed info
+    const boardItems = [
+      ...(tradeProducts || []).map((p: any) => ({
+        name: p.product_name, brand: p.brand_name,
+        category: p.category, materials: p.materials || 'not specified',
+        dimensions: p.dimensions || '',
+      })),
+      ...curatorProducts.map((p: any) => ({
+        name: p.title, brand: curatorDesignerMap.get(p.designer_id) || 'Unknown',
+        category: p.category || '', materials: p.materials || 'not specified',
+        dimensions: '',
+      })),
+    ]
+
+    const boardContext = boardItems.map(p =>
+      `- "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}`
+    ).join('\n')
 
     if (!boardContext.trim()) {
       return new Response(JSON.stringify({ recommendations: [], reason: 'No product details found' }), {
@@ -168,27 +162,20 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Get catalog products from BOTH sources excluding board items
-    const boardTitles = new Set([
-      ...(tradeProducts || []).map((p: any) => p.product_name?.toLowerCase()),
-      ...curatorProducts.map((p: any) => p.title?.toLowerCase()),
-    ])
+    console.log('Board items:', JSON.stringify(boardItems))
 
-    // Source 1: designer_curator_picks
+    // Build catalog from both sources, excluding board items
+    const boardTitles = new Set(boardItems.map(p => p.name?.toLowerCase()))
+
     const { data: catalog } = await supabase
       .from('designer_curator_picks')
       .select('id, title, subtitle, category, subcategory, materials, tags, designer_id')
       .limit(300)
 
     const allDesignerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
-    const { data: allDesigners } = await supabase
-      .from('designers')
-      .select('id, name')
-      .in('id', allDesignerIds)
-
+    const { data: allDesigners } = await supabase.from('designers').select('id, name').in('id', allDesignerIds)
     const designerMap = new Map((allDesigners || []).map((d: any) => [d.id, d.name]))
 
-    // Source 2: trade_products (active, with images)
     const { data: tradeCatalog } = await supabase
       .from('trade_products')
       .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
@@ -200,28 +187,14 @@ Deno.serve(async (req) => {
       ...(catalog || [])
         .filter((p: any) => !boardTitles.has(p.title?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          subtitle: p.subtitle,
-          category: p.category || '',
-          subcategory: p.subcategory || '',
-          materials: p.materials || '',
-          tags: p.tags || [],
-          brand: designerMap.get(p.designer_id) || '',
-          source: 'curator' as const,
+          id: p.id, title: p.title, category: p.category || '', materials: p.materials || '',
+          tags: p.tags || [], brand: designerMap.get(p.designer_id) || '', source: 'curator' as const,
         })),
       ...(tradeCatalog || [])
         .filter((p: any) => !boardTitles.has(p.product_name?.toLowerCase()) && !boardProductIds.includes(p.id))
         .map((p: any) => ({
-          id: p.id,
-          title: p.product_name,
-          subtitle: '',
-          category: p.category || '',
-          subcategory: p.subcategory || '',
-          materials: p.materials || '',
-          tags: [] as string[],
-          brand: p.brand_name || '',
-          source: 'trade' as const,
+          id: p.id, title: p.product_name, category: p.category || '', materials: p.materials || '',
+          tags: [] as string[], brand: p.brand_name || '', source: 'trade' as const,
         })),
     ]
 
@@ -231,43 +204,51 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Build AI prompt
-    const catalogList = availableCatalog.slice(0, 200).map((p: any, i: number) =>
-      `${i}: ${p.title} by ${p.brand} | ${p.category} | ${p.materials} | ${(p.tags || []).join(', ')}`
+    const catalogList = availableCatalog.slice(0, 200).map((p, i) =>
+      `${i}: "${p.title}" by ${p.brand} | ${p.category} | Materials: ${p.materials || 'n/a'}`
     ).join('\n')
 
-    // Log context for debugging
-    console.log('Board context:', boardContext)
-    console.log('Catalog size:', availableCatalog.length)
+    // Extract key materials and categories from board for the prompt
+    const boardMaterials = boardItems.map(p => p.materials).filter(m => m !== 'not specified').join(', ')
+    const boardCategories = boardItems.map(p => p.category).filter(Boolean).join(', ')
 
-    const systemPrompt = `You are a luxury interior design consultant for Maison Affluency, specializing in material-driven curation. Your PRIMARY criterion is MATERIAL and FINISH HARMONY — every recommendation must share a clear material or finish connection with the board items.
+    const systemPrompt = `You are a luxury interior design consultant curating items for a cohesive room scheme. You must select items that would naturally coexist in the same interior space as the client's existing selections.
 
-## Strict Selection Rules (in priority order):
-1. MATERIAL MATCH (mandatory): Each recommendation MUST share at least one material family with the board. For example: if the board has brass, recommend items with brass/bronze/gold finishes. If the board has natural stone, recommend items with marble/travertine/onyx.
-2. AESTHETIC COHERENCE: Match the design language — sculptural, minimal, organic, etc.
-3. FUNCTIONAL COMPLETENESS: Fill gaps (e.g. if board has tables but no seating, suggest seating in matching materials).
-4. BRAND DIVERSITY: Spread across different brands.
+## How to select (in priority order):
+
+1. ROOM PAIRING — Would this item naturally sit alongside the board items in the same room? A dining table needs dining chairs, pendant lighting, a sideboard, table accessories. A lounge chair needs a side table, floor lamp, rug, art.
+
+2. MATERIAL & FINISH HARMONY — Prioritize items sharing material families with the board. E.g. if the board has travertine + ash wood, favour items in natural stone, light wood, linen, warm metals.
+
+3. FUNCTIONAL COMPLETENESS — Fill the room: if the board has seating but no lighting, add lighting. If it has a table but no seating, add seating. Think about what a real room needs.
+
+4. SCALE & PROPORTION — Items should work at the same scale. Don't pair monumental tables with tiny accessories exclusively.
+
+5. BRAND DIVERSITY — Spread recommendations across different brands/designers.
 
 ## What NOT to do:
-- Do NOT recommend items that share zero material connection with the board
-- Do NOT pick items just because they're in the same category
-- Do NOT ignore the specific materials listed for each board item
+- Do NOT select random items with no spatial or material relationship
+- Do NOT pick items just because they share a category name
+- Do NOT ignore the specific materials listed`
 
-Return exactly 8 recommendations as a JSON array.`
-
-    const userPrompt = `## Client Board: "${boardTitle}"
-Current items (PAY CLOSE ATTENTION to the materials):
+    const userPrompt = `## Board: "${boardTitle}"
+Items currently selected:
 ${boardContext}
 
-## Available Catalog (index: product | category | materials | tags):
+Key materials on this board: ${boardMaterials || 'not specified'}
+Categories present: ${boardCategories || 'mixed'}
+
+## Available catalog:
 ${catalogList}
 
-IMPORTANT: Every recommendation must connect to the board's specific materials: analyze the materials above carefully before selecting.
+Think step by step:
+1. What room type do these items suggest? (dining, living, bedroom, etc.)
+2. What's missing to complete that room?
+3. Which catalog items share materials/finishes with the board?
+4. Select 8 items that would work together in the same space.
 
-Return a JSON array of objects with: {"index": number, "score": number (1-100), "reason": string (must explicitly mention which material/finish connects to which board item)}
-Order by score descending. Pick 8 complementary products.`
+Return a JSON array: [{"index": number, "score": 1-100, "reason": "explain the spatial/material connection to a specific board item"}]`
 
-    // Call Lovable AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -281,13 +262,13 @@ Order by score descending. Pick 8 complementary products.`
           { role: 'user', content: userPrompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.3,
+        temperature: 0.2,
       }),
     })
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text()
-      console.error('AI error:', errText)
+      console.error('AI error:', aiResponse.status, errText)
       return new Response(JSON.stringify({ error: 'AI service error' }), {
         status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -295,6 +276,7 @@ Order by score descending. Pick 8 complementary products.`
 
     const aiData = await aiResponse.json()
     const content = aiData.choices?.[0]?.message?.content || '[]'
+    console.log('AI response:', content.substring(0, 500))
 
     let parsed: any[]
     try {
@@ -305,9 +287,8 @@ Order by score descending. Pick 8 complementary products.`
       parsed = []
     }
 
-    // Map AI output to catalog products, preserving source info
     const recommendations = parsed
-      .filter((r: any) => typeof r.index === 'number' && r.index < availableCatalog.length)
+      .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < availableCatalog.length)
       .slice(0, 8)
       .map((r: any) => ({
         product_id: availableCatalog[r.index].id,
@@ -316,23 +297,20 @@ Order by score descending. Pick 8 complementary products.`
         source: availableCatalog[r.index].source,
       }))
 
-    // Cache if project board (only curator picks can be cached due to FK constraint)
+    // Cache for project boards (curator picks only due to FK)
     if (cacheKey && recommendations.length > 0) {
       const curatorRecs = recommendations.filter((r: any) => r.source === 'curator')
       if (curatorRecs.length > 0) {
         await supabase.from('board_recommendations').delete().eq('board_id', cacheKey)
         await supabase.from('board_recommendations').insert(
           curatorRecs.map((r: any) => ({
-            board_id: cacheKey,
-            product_id: r.product_id,
-            score: r.score,
-            reason: r.reason,
+            board_id: cacheKey, product_id: r.product_id, score: r.score, reason: r.reason,
           }))
         )
       }
     }
 
-    // Enrich from both sources
+    // Enrich results
     const curatorIds = recommendations.filter((r: any) => r.source === 'curator').map((r: any) => r.product_id)
     const tradeIds = recommendations.filter((r: any) => r.source === 'trade').map((r: any) => r.product_id)
 
@@ -342,14 +320,14 @@ Order by score descending. Pick 8 complementary products.`
     if (curatorIds.length > 0) {
       const { data } = await supabase
         .from('designer_curator_picks')
-        .select('id, title, subtitle, image_url, category, materials, designer_id')
+        .select('id, title, subtitle, image_url, category, designer_id')
         .in('id', curatorIds)
       recCuratorProducts = data || []
     }
     if (tradeIds.length > 0) {
       const { data } = await supabase
         .from('trade_products')
-        .select('id, product_name, brand_name, image_url, category, materials')
+        .select('id, product_name, brand_name, image_url, category')
         .in('id', tradeIds)
       recTradeProducts = data || []
     }
@@ -358,25 +336,17 @@ Order by score descending. Pick 8 complementary products.`
       if (r.source === 'trade') {
         const prod = recTradeProducts.find((p: any) => p.id === r.product_id)
         return {
-          product_id: r.product_id,
-          score: r.score,
-          reason: r.reason,
-          title: prod?.product_name || '',
-          subtitle: '',
-          image_url: prod?.image_url || '',
-          category: prod?.category || '',
+          product_id: r.product_id, score: r.score, reason: r.reason,
+          title: prod?.product_name || '', subtitle: '',
+          image_url: prod?.image_url || '', category: prod?.category || '',
           brand: prod?.brand_name || '',
         }
       }
       const prod = recCuratorProducts.find((p: any) => p.id === r.product_id)
       return {
-        product_id: r.product_id,
-        score: r.score,
-        reason: r.reason,
-        title: prod?.title || '',
-        subtitle: prod?.subtitle || '',
-        image_url: prod?.image_url || '',
-        category: prod?.category || '',
+        product_id: r.product_id, score: r.score, reason: r.reason,
+        title: prod?.title || '', subtitle: prod?.subtitle || '',
+        image_url: prod?.image_url || '', category: prod?.category || '',
         brand: designerMap.get(prod?.designer_id) || '',
       }
     })
