@@ -291,7 +291,7 @@ Order by score descending. Pick 8 complementary products.`
       parsed = []
     }
 
-    // Map AI output to catalog products
+    // Map AI output to catalog products, preserving source info
     const recommendations = parsed
       .filter((r: any) => typeof r.index === 'number' && r.index < availableCatalog.length)
       .slice(0, 8)
@@ -299,30 +299,62 @@ Order by score descending. Pick 8 complementary products.`
         product_id: availableCatalog[r.index].id,
         score: r.score || 50,
         reason: r.reason || '',
+        source: availableCatalog[r.index].source,
       }))
 
-    // Cache if project board
+    // Cache if project board (only curator picks can be cached due to FK constraint)
     if (cacheKey && recommendations.length > 0) {
-      await supabase.from('board_recommendations').delete().eq('board_id', cacheKey)
-      await supabase.from('board_recommendations').insert(
-        recommendations.map((r: any) => ({
-          board_id: cacheKey,
+      const curatorRecs = recommendations.filter((r: any) => r.source === 'curator')
+      if (curatorRecs.length > 0) {
+        await supabase.from('board_recommendations').delete().eq('board_id', cacheKey)
+        await supabase.from('board_recommendations').insert(
+          curatorRecs.map((r: any) => ({
+            board_id: cacheKey,
+            product_id: r.product_id,
+            score: r.score,
+            reason: r.reason,
+          }))
+        )
+      }
+    }
+
+    // Enrich from both sources
+    const curatorIds = recommendations.filter((r: any) => r.source === 'curator').map((r: any) => r.product_id)
+    const tradeIds = recommendations.filter((r: any) => r.source === 'trade').map((r: any) => r.product_id)
+
+    let recCuratorProducts: any[] = []
+    let recTradeProducts: any[] = []
+
+    if (curatorIds.length > 0) {
+      const { data } = await supabase
+        .from('designer_curator_picks')
+        .select('id, title, subtitle, image_url, category, materials, designer_id')
+        .in('id', curatorIds)
+      recCuratorProducts = data || []
+    }
+    if (tradeIds.length > 0) {
+      const { data } = await supabase
+        .from('trade_products')
+        .select('id, product_name, brand_name, image_url, category, materials')
+        .in('id', tradeIds)
+      recTradeProducts = data || []
+    }
+
+    const enriched = recommendations.map((r: any) => {
+      if (r.source === 'trade') {
+        const prod = recTradeProducts.find((p: any) => p.id === r.product_id)
+        return {
           product_id: r.product_id,
           score: r.score,
           reason: r.reason,
-        }))
-      )
-    }
-
-    // Return enriched recommendations
-    const recProductIds = recommendations.map((r: any) => r.product_id)
-    const { data: recProducts } = await supabase
-      .from('designer_curator_picks')
-      .select('id, title, subtitle, image_url, category, materials, designer_id')
-      .in('id', recProductIds)
-
-    const enriched = recommendations.map((r: any) => {
-      const prod = (recProducts || []).find((p: any) => p.id === r.product_id)
+          title: prod?.product_name || '',
+          subtitle: '',
+          image_url: prod?.image_url || '',
+          category: prod?.category || '',
+          brand: prod?.brand_name || '',
+        }
+      }
+      const prod = recCuratorProducts.find((p: any) => p.id === r.product_id)
       return {
         product_id: r.product_id,
         score: r.score,
