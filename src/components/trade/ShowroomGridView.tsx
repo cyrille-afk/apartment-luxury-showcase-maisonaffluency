@@ -569,7 +569,7 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="aspect-square bg-muted/30 relative overflow-visible cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.product_image_url ? (
                     <>
                       <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
@@ -634,21 +634,21 @@ const ShowroomGridView = ({
                         <FileDown className="h-3.5 w-3.5" />
                       </a>
                     )}
+                   {product.description && (
+                     <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-40">
+                       <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-4">{product.description}</p>
+                       <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
+                     </div>
+                   )}
                   </div>
                 </div>
-                <div className="p-3 text-center relative group/info">
+                <div className="p-3 text-center relative">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
                   </p>
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">{product.product_name}</h3>
                   {product.dimensions && <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                   {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
-                  {product.description && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover/info:opacity-100 pointer-events-none transition-opacity duration-200 z-30">
-                      <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-4">{product.description}</p>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
-                    </div>
-                  )}
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}
@@ -754,7 +754,6 @@ const ShowroomGridView = ({
           })}
         </div>
       )}
-
       <TradeProductLightbox
         product={lightboxProduct}
         onClose={() => setLightboxProduct(null)}
