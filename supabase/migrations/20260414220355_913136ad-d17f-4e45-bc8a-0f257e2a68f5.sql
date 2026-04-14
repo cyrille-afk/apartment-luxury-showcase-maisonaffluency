@@ -1,0 +1,1 @@
+UPDATE designers SET philosophy = E'I think "artist" is a big word. I like to think of myself as a creative artisan.\nI don''t make conceptual objects. I make objects that are going to be used.\n— Osanna Visconti, Alain Elkann Interviews' WHERE id = 'a4e81e1d-fd28-4ba8-9953-0211f90f4693';
