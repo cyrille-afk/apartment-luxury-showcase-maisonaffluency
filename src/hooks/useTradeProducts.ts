@@ -133,6 +133,36 @@ export function useTradeProducts() {
       });
     }
 
+    // Propagate descriptions from live products to unmatched products via fuzzy name matching
+    // e.g. "Corteza Console" (curator) → "Corteza Console Table" (trade_products)
+    const descriptionsByBrand = new Map<string, { name: string; description: string }[]>();
+    for (const p of liveProducts) {
+      if (!p.description) continue;
+      const brand = p.brand_name.trim().toLowerCase();
+      if (!descriptionsByBrand.has(brand)) descriptionsByBrand.set(brand, []);
+      descriptionsByBrand.get(brand)!.push({ name: p.product_name.trim().toLowerCase(), description: p.description });
+    }
+
+    if (descriptionsByBrand.size > 0) {
+      for (const [, product] of merged) {
+        if (product.description) continue;
+        const brand = product.brand_name.trim().toLowerCase();
+        const candidates = descriptionsByBrand.get(brand);
+        if (!candidates) continue;
+        const pName = product.product_name.trim().toLowerCase();
+        // Match if the candidate name tokens are a subset of the product name tokens (min 2 tokens)
+        for (const c of candidates) {
+          const cTokens = c.name.split(/\s+/).filter(t => t.length > 2);
+          if (cTokens.length < 2) continue;
+          const allPresent = cTokens.every(t => pName.includes(t));
+          if (allPresent) {
+            product.description = c.description;
+            break;
+          }
+        }
+      }
+    }
+
     return Array.from(merged.values());
   }, [staticProducts, liveProducts]);
 
