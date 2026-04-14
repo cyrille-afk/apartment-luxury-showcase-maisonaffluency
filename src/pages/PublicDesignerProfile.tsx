@@ -84,6 +84,7 @@ const PublicDesignerProfile = () => {
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
+  const fromNewIn = searchParams.get("from") === "new-in";
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = designer?.founder === designer?.name;
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
@@ -521,17 +522,19 @@ const PublicDesignerProfile = () => {
               </Link>
             ) : (
               <Link
-                to={(() => {
-                  const isChild = designer?.founder && designer.founder !== designer.name;
-                  const baseName = isChild ? designer.founder : designer?.name;
-                  const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
-                  const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
-                  return `/designers?letter=${letter}${expandParam}`;
-                })()}
+                to={fromNewIn
+                  ? "/new-in"
+                  : (() => {
+                      const isChild = designer?.founder && designer.founder !== designer.name;
+                      const baseName = isChild ? designer.founder : designer?.name;
+                      const letter = encodeURIComponent(baseName?.[0]?.toUpperCase() || "A");
+                      const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
+                      return `/designers?letter=${letter}${expandParam}`;
+                    })()}
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                Designers
+                {fromNewIn ? "New In" : "Designers"}
               </Link>
             )}
           </div>
