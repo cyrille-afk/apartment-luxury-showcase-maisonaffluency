@@ -137,11 +137,13 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
     queryFn: async () => {
       if (!designer) return [];
 
-      // Find sub-designers whose founder matches this designer's name
+      // Find sub-designers whose founder matches this designer's name or display_name
+      const founderNames = [designer.name, designer.display_name, designer.founder].filter((n): n is string => !!n);
+      const uniqueFounderNames = [...new Set(founderNames)];
       const { data: subDesigners } = await supabase
         .from("designers")
         .select("id, name, slug")
-        .eq("founder", designer.name)
+        .in("founder", uniqueFounderNames)
         .neq("id", designer.id);
 
       const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id);
