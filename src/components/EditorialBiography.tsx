@@ -39,6 +39,8 @@ function isVideoUrl(url: string): boolean {
   if (/youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(normalized)) return true;
   if (/vimeo\.com\//i.test(normalized)) return true;
   if (/nowness\.com\/iframe/i.test(normalized)) return true;
+  if (/facebook\.com\/plugins\/video/i.test(normalized)) return true;
+  if (/facebook\.com\/.+\/videos\//i.test(normalized)) return true;
   return false;
 }
 
@@ -57,6 +59,11 @@ function getEmbedUrl(url: string): string | null {
   match = normalized.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
   if (/nowness\.com\/iframe/i.test(normalized)) return normalized;
+  if (/facebook\.com\/plugins\/video/i.test(normalized)) return normalized;
+  if (/facebook\.com\/.+\/videos\/(\d+)/i.test(normalized)) {
+    const fbUrl = encodeURIComponent(normalized);
+    return `https://www.facebook.com/plugins/video.php?href=${fbUrl}&show_text=false&width=560`;
+  }
   return null;
 }
 
