@@ -19,6 +19,7 @@ export interface TradeProductLightboxItem {
   brand_name: string;
   materials?: string | null;
   dimensions?: string | null;
+  description?: string | null;
   category?: string;
   subcategory?: string;
   pdf_url?: string | null;

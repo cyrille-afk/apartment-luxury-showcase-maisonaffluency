@@ -26,6 +26,7 @@ interface ShowroomProduct {
   designer_name: string | null;
   materials: string | null;
   dimensions: string | null;
+  description?: string | null;
   product_image_url: string | null;
   hover_image_url?: string | null;
   link_url: string | null;
