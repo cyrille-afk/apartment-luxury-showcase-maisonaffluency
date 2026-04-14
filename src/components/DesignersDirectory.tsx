@@ -427,11 +427,11 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]> }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
-  const instagramLinks: string[] = (() => {
+  const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
     if (hardcoded) return [hardcoded];
     const fromDb = (item.links as any[])?.filter((l: any) => (l.type === "Instagram" || l.type === "instagram") && l.url).map((l: any) => l.url as string) || [];
