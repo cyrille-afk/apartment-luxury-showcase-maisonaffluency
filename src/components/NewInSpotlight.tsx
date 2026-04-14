@@ -37,7 +37,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
     isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
-  const picks: DesignerCuratorPick[] = isParentOrChild
+  const picks: DesignerCuratorPick[] = isParentBrand
     ? groupedPicks.map(({ designer_name, designer_slug, ...rest }) => rest)
     : simplePicks;
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
