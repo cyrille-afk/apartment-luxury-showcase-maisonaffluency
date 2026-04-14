@@ -563,7 +563,7 @@ const ShowroomGridView = ({
                 key={product.id}
                 ref={isHighlighted ? highlightRef : undefined}
                 className={cn(
-                  "group border rounded-lg overflow-hidden transition-all",
+                  "group border rounded-lg overflow-visible transition-all",
                   isHighlighted
                     ? "border-primary ring-2 ring-primary/30 shadow-md"
                     : "border-border hover:border-foreground/20"
