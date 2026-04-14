@@ -75,14 +75,22 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const firstBioParagraph = useMemo(() => {
     if (!designer.biography) return "";
     const blocks = designer.biography.split(/\n\n+/).map((b) => b.trim()).filter(Boolean);
+    let text = "";
     for (const block of blocks) {
       const firstToken = block.split(/\s*\|\s*/)[0]?.trim() || "";
       // Skip blocks that start with a URL (media / video references)
       if (/^https?:\/\//i.test(firstToken) && !/\s/.test(firstToken)) continue;
       // Strip any remaining HTML tags for clean rendering
-      return block.replace(/<[^>]+>/g, "");
+      text = block.replace(/<[^>]+>/g, "");
+      break;
     }
-    return "";
+    // Truncate long paragraphs at a natural sentence-ending marker
+    const breakAfter = "contemporary sensibility.";
+    const idx = text.toLowerCase().indexOf(breakAfter.toLowerCase());
+    if (idx !== -1) {
+      text = text.slice(0, idx + breakAfter.length);
+    }
+    return text;
   }, [designer.biography]);
 
   return (
