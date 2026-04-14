@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useRef, useLayoutEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
