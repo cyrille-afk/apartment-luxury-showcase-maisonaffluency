@@ -24,7 +24,13 @@ const DesignerProfile = () => {
   const [searchParams] = useSearchParams();
   const fromSection = searchParams.get("from"); // "ateliers" | "designers" | null
   const { data: designer, isLoading } = useDesigner(slug);
-  const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const isParentOrChild = !!designer?.founder;
+  const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
+    isParentOrChild ? designer : undefined,
+    { publicOnly: true }
+  );
+  const picks = isParentOrChild && groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
 
   if (isLoading) {
