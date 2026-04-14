@@ -31,3 +31,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.handle-email-suppression]
     verify_jwt = false
+  [functions.product-description-writer]
+    verify_jwt = false
