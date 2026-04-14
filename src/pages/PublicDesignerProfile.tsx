@@ -122,13 +122,13 @@ const PublicDesignerProfile = () => {
   }, [slug]);
 
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand ? designer : undefined,
+    isParentOrChild ? designer : undefined,
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
-  const isGrouped = isParentBrand && groupedPicks.length > 0;
+  const isGrouped = isParentOrChild && groupedPicks.length > 0;
   const rawPicks = isGrouped ? groupedPicks : ownPicks;
   const displayBiography = isChildDesigner && !designer?.biography && parentDesigner?.biography
     ? parentDesigner.biography
