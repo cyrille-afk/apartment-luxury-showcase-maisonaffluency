@@ -156,16 +156,38 @@ export default function TradeDescriptionWriter() {
             >
               <option value="">Select a product…</option>
               {source === "curator_picks"
-                ? items.map((p: any) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title} — {p.designers?.display_name || p.designers?.name || "Unknown"}
-                    </option>
-                  ))
-                : items.map((p: any) => (
-                    <option key={p.id} value={p.id}>
-                      {p.product_name} — {p.brand_name}
-                    </option>
-                  ))
+                ? (() => {
+                    const groups = new Map<string, typeof items>();
+                    for (const p of items) {
+                      const designer = p.designers?.display_name || p.designers?.name || "Unknown";
+                      if (!groups.has(designer)) groups.set(designer, []);
+                      groups.get(designer)!.push(p);
+                    }
+                    const sorted = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+                    return sorted.map(([designer, picks]) => (
+                      <optgroup key={designer} label={designer}>
+                        {picks.map((p: any) => (
+                          <option key={p.id} value={p.id}>{p.title}</option>
+                        ))}
+                      </optgroup>
+                    ));
+                  })()
+                : (() => {
+                    const groups = new Map<string, typeof items>();
+                    for (const p of items) {
+                      const brand = p.brand_name || "Unknown";
+                      if (!groups.has(brand)) groups.set(brand, []);
+                      groups.get(brand)!.push(p);
+                    }
+                    const sorted = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+                    return sorted.map(([brand, products]) => (
+                      <optgroup key={brand} label={brand}>
+                        {products.map((p: any) => (
+                          <option key={p.id} value={p.id}>{p.product_name}</option>
+                        ))}
+                      </optgroup>
+                    ));
+                  })()
               }
             </select>
           </div>
