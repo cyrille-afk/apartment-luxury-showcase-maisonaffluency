@@ -651,7 +651,7 @@ function LetterGroup({
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]> }) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner, designersWithIgPosts }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]>; designersWithIgPosts?: Set<string> }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
