@@ -148,19 +148,20 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
 
       const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id);
 
-      // If this designer is a child (founder differs from name), also include parent + siblings
+      // If this designer is a child (founder differs from both name and display_name), also include parent + siblings
       let parentAndSiblings: { id: string; name: string; slug: string }[] = [];
-      if (designer.founder && designer.founder !== designer.name) {
+      const isChild = designer.founder && designer.founder !== designer.name && designer.founder !== designer.display_name;
+      if (isChild) {
         const { data: family } = await supabase
           .from("designers")
           .select("id, name, slug")
           .eq("founder", designer.founder)
           .neq("id", designer.id);
-        // Also find the parent itself (whose name matches the founder)
+        // Also find the parent itself (whose name or display_name matches the founder)
         const { data: parent } = await supabase
           .from("designers")
           .select("id, name, slug")
-          .eq("name", designer.founder)
+          .or(`name.eq.${designer.founder},display_name.eq.${designer.founder}`)
           .limit(1);
         parentAndSiblings = [...(parent || []), ...(family || [])];
       }
