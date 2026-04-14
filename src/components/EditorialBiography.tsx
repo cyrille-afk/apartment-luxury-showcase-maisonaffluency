@@ -258,6 +258,9 @@ const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
+  // Try exact match first (needed for YouTube URLs with ?v= params)
+  if (VIDEO_POSTER_FALLBACKS[url]) return VIDEO_POSTER_FALLBACKS[url];
+  // Then try without query string
   const normalized = url.split("?")[0];
   return VIDEO_POSTER_FALLBACKS[normalized];
 }
