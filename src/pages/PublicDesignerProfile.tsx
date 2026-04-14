@@ -88,6 +88,7 @@ const PublicDesignerProfile = () => {
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = designer?.founder === designer?.name;
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
+  const isParentOrChild = !!(designer?.founder);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -121,13 +122,13 @@ const PublicDesignerProfile = () => {
   }, [slug]);
 
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand ? designer : undefined,
+    isParentOrChild ? designer : undefined,
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
-  const isGrouped = isParentBrand && groupedPicks.length > 0;
+  const isGrouped = isParentOrChild && groupedPicks.length > 0;
   const rawPicks = isGrouped ? groupedPicks : ownPicks;
   const displayBiography = isChildDesigner && !designer?.biography && parentDesigner?.biography
     ? parentDesigner.biography
