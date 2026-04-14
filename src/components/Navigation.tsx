@@ -284,22 +284,12 @@ const Navigation = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-0 pb-40">
-                {/* New In — top of mobile menu */}
-                <button
-                  onClick={() => handleNavClick("/new-in")}
-                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-bold animate-fade-in opacity-0 px-3"
-                  style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}
-                >
-                  New In
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-
                 {leftNavItems.map((item, index) => (
                   <Fragment key={item.href}>
                     <button 
                       onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                      style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                      style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                     >
                       {item.mobileLabel}
                       <ChevronRight className="h-4 w-4" />
@@ -309,7 +299,7 @@ const Navigation = () => {
                     {index === 0 && (
                       <div 
                         className="animate-fade-in opacity-0 border-t border-border/30 pt-2 mb-2"
-                        style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                        style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                       >
                         <button
                           onClick={() => { setCategoryPanelOpen(true); setExpandedCategory(null); }}
@@ -322,6 +312,18 @@ const Navigation = () => {
                           <ChevronRight className="h-4 w-4" />
                         </button>
                       </div>
+                    )}
+
+                    {/* Insert New In right after Collectible Design (index 2) */}
+                    {index === 2 && (
+                      <button
+                        onClick={() => handleNavClick("/new-in")}
+                        className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-bold animate-fade-in opacity-0"
+                        style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                      >
+                        New In
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
                     )}
                   </Fragment>
                 ))}
