@@ -524,7 +524,7 @@ const PublicDesignerProfile = () => {
             ) : (
               <Link
                 to={fromNewIn
-                  ? "/new-in"
+                  ? `/new-in?designer=${slug}`
                   : (() => {
                       const isChild = designer?.founder && designer.founder !== designer.name;
                       const baseName = isChild ? designer.founder : designer?.name;
