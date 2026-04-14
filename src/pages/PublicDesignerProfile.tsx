@@ -436,7 +436,6 @@ const PublicDesignerProfile = () => {
                 </div>
               </div>
             </div>
-            </div>
 
             {heritageSlides.length > 0 && (
               <HeritageSlider slides={heritageSlides} />
