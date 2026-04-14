@@ -177,6 +177,7 @@ const TradeAtelierProfile = () => {
     return result;
   }, [rawPicks, bioImageUrls]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
+  const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [showTradePrice, setShowTradePrice] = useState(false);
@@ -438,13 +439,10 @@ const TradeAtelierProfile = () => {
                       </div>
                     </div>
                   )}
-                  {designer.founder && (
-                    <Link
-                      to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
-                    >
-                      {designer.founder}
-                    </Link>
+                  {profileBadgeLabel && (
+                    <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1">
+                      {profileBadgeLabel}
+                    </div>
                   )}
                 </motion.div>
 
@@ -557,7 +555,7 @@ const TradeAtelierProfile = () => {
 
         {/* Curator's Picks */}
         {picks.length > 0 && (() => {
-          const isGrouped = groupedPicks.length > 0;
+          const isGrouped = isParentBrand && groupedPicks.length > 0;
 
           return (
           <motion.div

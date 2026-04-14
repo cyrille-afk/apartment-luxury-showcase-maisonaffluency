@@ -130,46 +130,31 @@ export interface AttributedCuratorPick extends DesignerCuratorPick {
   designer_slug: string;
 }
 
-/** Fetch curator picks for a parent brand and all its sub-designers, with attribution */
+/** Fetch curator picks for a parent brand and its sub-designers, with attribution */
 export function useGroupedDesignerPicks(designer: Designer | null | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
     queryKey: ["designer-grouped-picks", designer?.id, designer?.name, publicOnly],
     queryFn: async () => {
       if (!designer) return [];
+      const isParentBrand = !!designer.founder && [designer.name, designer.display_name].includes(designer.founder);
+      if (!isParentBrand) return [];
 
-      // Find sub-designers whose founder matches this designer's name or display_name
-      const founderNames = [designer.name, designer.display_name, designer.founder].filter((n): n is string => !!n);
+      // Find sub-designers whose founder matches this parent designer's name or display_name
+      const founderNames = [designer.name, designer.display_name].filter((n): n is string => !!n);
       const uniqueFounderNames = [...new Set(founderNames)];
-      const { data: subDesigners } = await supabase
+      const { data: subDesigners, error: subDesignersError } = await supabase
         .from("designers")
         .select("id, name, slug")
         .in("founder", uniqueFounderNames)
         .neq("id", designer.id);
+      if (subDesignersError) throw subDesignersError;
 
       const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id);
 
-      // If this designer is a child (founder differs from both name and display_name), also include parent + siblings
-      let parentAndSiblings: { id: string; name: string; slug: string }[] = [];
-      const isChild = designer.founder && designer.founder !== designer.name && designer.founder !== designer.display_name;
-      if (isChild) {
-        const { data: family } = await supabase
-          .from("designers")
-          .select("id, name, slug")
-          .eq("founder", designer.founder)
-          .neq("id", designer.id);
-        // Also find the parent itself (whose name or display_name matches the founder)
-        const { data: parent } = await supabase
-          .from("designers")
-          .select("id, name, slug")
-          .or(`name.eq.${designer.founder},display_name.eq.${designer.founder}`)
-          .limit(1);
-        parentAndSiblings = [...(parent || []), ...(family || [])];
-      }
-
-      // Deduplicate: current designer + children + parent family
+      // Deduplicate: current parent + children
       const seen = new Set<string>();
       const allDesigners: { id: string; name: string; slug: string }[] = [];
-      for (const d of [{ id: designer.id, name: designer.name, slug: designer.slug }, ...subOnly, ...parentAndSiblings]) {
+      for (const d of [{ id: designer.id, name: designer.name, slug: designer.slug }, ...subOnly]) {
         if (!seen.has(d.id)) { seen.add(d.id); allDesigners.push(d); }
       }
 

@@ -31,10 +31,10 @@ interface NewInSpotlightProps {
 
 const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const navigate = useNavigate();
-  const isParentOrChild = !!(designer.founder);
+  const isParentBrand = !!(designer.founder && designer.founder === designer.name);
   const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentOrChild ? designer : undefined,
+    isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
   const picks: DesignerCuratorPick[] = isParentOrChild
