@@ -51,11 +51,46 @@ function extractYouTubeId(url: string): string | null {
   return match ? match[1] : null;
 }
 
+/** Build a YouTube embed URL with optional autoplay / subtitles / JS API */
+function buildYouTubeEmbedUrl(
+  videoId: string,
+  options?: {
+    autoplay?: boolean;
+    muted?: boolean;
+    subtitles?: boolean;
+    enableJsApi?: boolean;
+  }
+): string {
+  const params = new URLSearchParams({
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1",
+    controls: "1",
+  });
+
+  if (options?.autoplay) params.set("autoplay", "1");
+  params.set("mute", options?.muted === false ? "0" : "1");
+
+  if (options?.subtitles) {
+    params.set("cc_load_policy", "1");
+    params.set("cc_lang_pref", "en");
+  }
+
+  if (options?.enableJsApi) {
+    params.set("enablejsapi", "1");
+    if (typeof window !== "undefined") {
+      params.set("origin", window.location.origin);
+    }
+  }
+
+  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+}
+
 /** Convert YouTube/Vimeo/NOWNESS URLs to embeddable format */
 function getEmbedUrl(url: string): string | null {
   const normalized = normalizeMediaInput(url);
   let match = normalized.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`;
+  if (match) return buildYouTubeEmbedUrl(match[1], { enableJsApi: true });
   match = normalized.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
   if (/nowness\.com\/iframe/i.test(normalized)) return normalized;
