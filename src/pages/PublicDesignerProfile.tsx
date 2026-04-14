@@ -88,6 +88,7 @@ const PublicDesignerProfile = () => {
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = designer?.founder === designer?.name;
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
+  const isParentOrChild = !!(designer?.founder);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
