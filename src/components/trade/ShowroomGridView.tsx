@@ -405,6 +405,7 @@ const ShowroomGridView = ({
     brand_name: product.designer_name || "Unknown",
     materials: product.materials,
     dimensions: product.dimensions,
+    description: product.description,
     category: product.category || inferCategory(product.product_name),
     subcategory: product.subcategory || undefined,
     pdf_url: product.pdf_url,
