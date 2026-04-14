@@ -370,8 +370,8 @@ function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: s
 }
 
 // ─── Parent Brand Card ───────────────────────────────────────────────────────
-function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number }) {
-  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
+function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number; hasIgPosts?: boolean }) {
+  const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
