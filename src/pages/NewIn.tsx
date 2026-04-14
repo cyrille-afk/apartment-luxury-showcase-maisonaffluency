@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useCallback, useEffect, useRef } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
@@ -13,6 +13,13 @@ const Footer = lazy(() => import("@/components/Footer"));
 function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start" });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [containerHeight, setContainerHeight] = useState<number | undefined>(undefined);
+  const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const syncHeight = useCallback(() => {
+    const el = slidesRef.current[selectedIndex];
+    if (el) setContainerHeight(el.scrollHeight);
+  }, [selectedIndex]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -29,6 +36,17 @@ function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof us
       emblaApi.off("reInit", onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  // Sync height whenever selected slide changes or content loads
+  useLayoutEffect(() => {
+    syncHeight();
+    // Also observe resize of the active slide
+    const el = slidesRef.current[selectedIndex];
+    if (!el) return;
+    const ro = new ResizeObserver(() => syncHeight());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [selectedIndex, syncHeight, designers]);
 
   if (!designers || designers.length === 0) return null;
 
@@ -72,10 +90,18 @@ function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof us
       </div>
 
       {/* Carousel */}
-      <div className="overflow-hidden" ref={emblaRef}>
+      <div
+        className="overflow-hidden transition-[height] duration-300 ease-out"
+        ref={emblaRef}
+        style={containerHeight ? { height: containerHeight } : undefined}
+      >
         <div className="flex items-start">
-          {designers.map((designer) => (
-            <div key={designer.slug} className="flex-[0_0_100%] min-w-0">
+          {designers.map((designer, i) => (
+            <div
+              key={designer.slug}
+              className="flex-[0_0_100%] min-w-0"
+              ref={(el) => { slidesRef.current[i] = el; }}
+            >
               <NewInSpotlight designer={designer} />
             </div>
           ))}
