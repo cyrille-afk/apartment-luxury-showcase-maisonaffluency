@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 const Footer = lazy(() => import("@/components/Footer"));
 
 /* ── Mobile carousel with dot indicators ── */
-function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start" });
-  const [selectedIndex, setSelectedIndex] = useState(0);
+function MobileDesignerCarousel({ designers, initialIndex = 0 }: { designers: ReturnType<typeof useNewInDesigners>["data"]; initialIndex?: number }) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start", startIndex: initialIndex });
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
   const [containerHeight, setContainerHeight] = useState<number | undefined>(undefined);
   const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
 
