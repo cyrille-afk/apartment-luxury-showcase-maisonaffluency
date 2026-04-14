@@ -51,11 +51,46 @@ function extractYouTubeId(url: string): string | null {
   return match ? match[1] : null;
 }
 
+/** Build a YouTube embed URL with optional autoplay / subtitles / JS API */
+function buildYouTubeEmbedUrl(
+  videoId: string,
+  options?: {
+    autoplay?: boolean;
+    muted?: boolean;
+    subtitles?: boolean;
+    enableJsApi?: boolean;
+  }
+): string {
+  const params = new URLSearchParams({
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1",
+    controls: "1",
+  });
+
+  if (options?.autoplay) params.set("autoplay", "1");
+  params.set("mute", options?.muted === false ? "0" : "1");
+
+  if (options?.subtitles) {
+    params.set("cc_load_policy", "1");
+    params.set("cc_lang_pref", "en");
+  }
+
+  if (options?.enableJsApi) {
+    params.set("enablejsapi", "1");
+    if (typeof window !== "undefined") {
+      params.set("origin", window.location.origin);
+    }
+  }
+
+  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+}
+
 /** Convert YouTube/Vimeo/NOWNESS URLs to embeddable format */
 function getEmbedUrl(url: string): string | null {
   const normalized = normalizeMediaInput(url);
   let match = normalized.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`;
+  if (match) return buildYouTubeEmbedUrl(match[1], { enableJsApi: true });
   match = normalized.match(/vimeo\.com\/(\d+)/);
   if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
   if (/nowness\.com\/iframe/i.test(normalized)) return normalized;
@@ -292,6 +327,9 @@ function VideoBlock({
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
   const ytId = extractYouTubeId(url);
   const isYouTube = !!ytId;
+  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI"]), []);
+  const startUnmuted = !!ytId && unmutedVideos.has(ytId);
+  const useDirectYouTubeEmbed = startUnmuted;
 
   // Extract YouTube thumbnail automatically — try maxres first, then hqdefault
   const ytThumbnails = ytId
@@ -331,55 +369,41 @@ function VideoBlock({
     video.play().catch(() => undefined);
   }, [playing, isNativeVideo, videoSrc]);
 
-  // Load YouTube IFrame API script once globally
+  // Load YouTube IFrame API script once globally (only for videos using custom controls)
   useEffect(() => {
-    if (!isYouTube) return;
+    if (!isYouTube || useDirectYouTubeEmbed) return;
     if (document.getElementById("yt-iframe-api")) return;
     const tag = document.createElement("script");
     tag.id = "yt-iframe-api";
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
-  }, [isYouTube]);
+  }, [isYouTube, useDirectYouTubeEmbed]);
 
   // Create YT Player when user clicks play
   useEffect(() => {
-    if (!playing || !isYouTube || !ytContainerRef.current) return;
+    if (!playing || !isYouTube || useDirectYouTubeEmbed || !ytContainerRef.current) return;
     if (ytPlayerRef.current) return;
 
     const createPlayer = () => {
       const containerId = `yt-player-${index}-${ytId}`;
       ytContainerRef.current!.id = containerId;
-      // Videos that should start with sound & English subtitles
-      const unmutedVideos = new Set(["hQ0_HOzRKwI"]);
-      const startUnmuted = unmutedVideos.has(ytId!);
 
       ytPlayerRef.current = new (window as any).YT.Player(containerId, {
         videoId: ytId,
         playerVars: {
           autoplay: 1,
-          mute: 1, // Always start muted to guarantee autoplay works
+          mute: 1,
           playsinline: 1,
           rel: 0,
           modestbranding: 1,
           origin: window.location.origin,
-          cc_load_policy: startUnmuted ? 1 : 0,
+          cc_load_policy: 0,
           cc_lang_pref: "en",
         },
         events: {
           onReady: (event: any) => {
             event.target.playVideo();
-            // For unmuted videos, attempt to unmute after playback starts
-            if (startUnmuted) {
-              setTimeout(() => {
-                try {
-                  event.target.unMute();
-                  event.target.setVolume(100);
-                  setIsMuted(false);
-                } catch {}
-              }, 300);
-            } else {
-              setIsMuted(true);
-            }
+            setIsMuted(true);
           },
         },
       });
@@ -399,7 +423,7 @@ function VideoBlock({
       try { ytPlayerRef.current?.destroy?.(); } catch {}
       ytPlayerRef.current = null;
     };
-  }, [playing, isYouTube, ytId, index]);
+  }, [playing, isYouTube, ytId, index, useDirectYouTubeEmbed]);
 
   const toggleMute = useCallback(() => {
     const player = ytPlayerRef.current;
@@ -413,17 +437,16 @@ function VideoBlock({
         player.mute();
         setIsMuted(true);
       }
-      // Reset auto-hide timer on interaction
       setMuteVisible(true);
     } catch {}
   }, []);
 
   // Auto-hide mute button after 5 seconds of playback
   useEffect(() => {
-    if (!playing || !muteVisible) return;
+    if (!playing || !muteVisible || startUnmuted) return;
     const timer = setTimeout(() => setMuteVisible(false), 5000);
     return () => clearTimeout(timer);
-  }, [playing, muteVisible]);
+  }, [playing, muteVisible, startUnmuted]);
 
   const currentPosterUrl = posterCandidates[posterIndex];
 
@@ -470,13 +493,21 @@ function VideoBlock({
               />
               {playOverlay}
             </button>
+          ) : useDirectYouTubeEmbed ? (
+            <iframe
+              src={buildYouTubeEmbedUrl(ytId!, { autoplay: true, muted: false, subtitles: true })}
+              title={caption || `${designerName} — video`}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           ) : (
             <div className="w-full h-full group/yt relative" onMouseEnter={() => setMuteVisible(true)}>
               <div ref={ytContainerRef} className="w-full h-full" />
               {/* Unmute/Mute overlay button — auto-hides, reappears on hover */}
               <button
                 onClick={toggleMute}
-                className={`absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all duration-300 text-[11px] font-body tracking-wide ${muteVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none group-hover/yt:opacity-100 group-hover/yt:translate-y-0 group-hover/yt:pointer-events-auto"}`}
+                className={`absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all duration-300 text-[11px] font-body tracking-wide ${muteVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none group-hover/yt:opacity-100 group-hover/yt:translate-y-0 group-hover/yt:pointer-events-auto"}`}
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
