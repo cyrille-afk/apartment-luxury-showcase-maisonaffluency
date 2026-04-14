@@ -1430,6 +1430,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                           initialExpand={initialExpand}
                           designersWithIgPosts={designersWithIgPosts}
+                        />
                       ))}
                     </div>
                   )}
