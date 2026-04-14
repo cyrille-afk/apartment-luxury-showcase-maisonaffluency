@@ -251,26 +251,60 @@ const ShowroomGridView = ({
           .not("description", "is", null);
 
         const descriptionLookup = new Map<string, string>();
-        const descriptionEntries: { key: string; desc: string }[] = [];
+        const normalizedDescriptionLookup = new Map<string, string>();
+        const descriptionEntries: { normalizedKey: string; tokens: Set<string>; desc: string }[] = [];
         if (curatorDescriptions) {
           for (const cd of curatorDescriptions) {
             if (cd.description?.trim()) {
-              const k = cd.title.trim().toLowerCase();
-              descriptionLookup.set(k, cd.description.trim());
-              descriptionEntries.push({ key: k, desc: cd.description.trim() });
+              const desc = cd.description.trim();
+              const key = cd.title.trim().toLowerCase();
+              const normalizedKey = normalizeProductName(cd.title);
+              descriptionLookup.set(key, desc);
+              if (normalizedKey) normalizedDescriptionLookup.set(normalizedKey, desc);
+              descriptionEntries.push({
+                normalizedKey,
+                tokens: new Set(tokenizeProductName(cd.title)),
+                desc,
+              });
             }
           }
         }
-        // Fuzzy description lookup: find best match when exact key misses
+        // Strong description lookup only: exact match, normalized exact match,
+        // or a multi-token subset match. This prevents generic titles like
+        // "Console" from leaking onto products like "Corteza Console Table".
         const findDescription = (name: string): string | undefined => {
-          const k = name.trim().toLowerCase();
-          const exact = descriptionLookup.get(k);
+          const key = name.trim().toLowerCase();
+          const exact = descriptionLookup.get(key);
           if (exact) return exact;
-          // Check if any curator pick title is contained in the product name or vice-versa
-          for (const entry of descriptionEntries) {
-            if (k.includes(entry.key) || entry.key.includes(k)) return entry.desc;
+
+          const normalizedName = normalizeProductName(name);
+          if (normalizedName) {
+            const normalizedExact = normalizedDescriptionLookup.get(normalizedName);
+            if (normalizedExact) return normalizedExact;
           }
-          return undefined;
+
+          const targetTokens = new Set(tokenizeProductName(name));
+          let bestMatch: string | undefined;
+          let bestTokenCount = 0;
+
+          for (const entry of descriptionEntries) {
+            if (!entry.normalizedKey || entry.tokens.size < 2) continue;
+
+            let isSubset = true;
+            for (const token of entry.tokens) {
+              if (!targetTokens.has(token)) {
+                isSubset = false;
+                break;
+              }
+            }
+
+            if (isSubset && entry.tokens.size > bestTokenCount) {
+              bestMatch = entry.desc;
+              bestTokenCount = entry.tokens.size;
+            }
+          }
+
+          return bestMatch;
         };
 
         const priceLookup = new Map<string, PriceMatch>();
@@ -291,7 +325,9 @@ const ShowroomGridView = ({
             }
             // Add trade_products descriptions to lookup
             if ((pp as any).description?.trim()) {
-              descriptionLookup.set(ppKey, (pp as any).description.trim());
+              const desc = (pp as any).description.trim();
+              descriptionLookup.set(ppKey, desc);
+              if (normalizedName) normalizedDescriptionLookup.set(normalizedName, desc);
             }
             const rrp = pp.rrp_price_cents ?? pp.trade_price_cents;
             if (!rrp) continue;
