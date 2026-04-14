@@ -251,13 +251,27 @@ const ShowroomGridView = ({
           .not("description", "is", null);
 
         const descriptionLookup = new Map<string, string>();
+        const descriptionEntries: { key: string; desc: string }[] = [];
         if (curatorDescriptions) {
           for (const cd of curatorDescriptions) {
             if (cd.description?.trim()) {
-              descriptionLookup.set(cd.title.trim().toLowerCase(), cd.description.trim());
+              const k = cd.title.trim().toLowerCase();
+              descriptionLookup.set(k, cd.description.trim());
+              descriptionEntries.push({ key: k, desc: cd.description.trim() });
             }
           }
         }
+        // Fuzzy description lookup: find best match when exact key misses
+        const findDescription = (name: string): string | undefined => {
+          const k = name.trim().toLowerCase();
+          const exact = descriptionLookup.get(k);
+          if (exact) return exact;
+          // Check if any curator pick title is contained in the product name or vice-versa
+          for (const entry of descriptionEntries) {
+            if (k.includes(entry.key) || entry.key.includes(k)) return entry.desc;
+          }
+          return undefined;
+        };
 
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
