@@ -753,6 +753,7 @@ const ShowroomGridView = ({
             );
           })}
         </div>
+      )}
       <TradeProductLightbox
         product={lightboxProduct}
         onClose={() => setLightboxProduct(null)}
