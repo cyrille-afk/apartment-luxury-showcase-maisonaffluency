@@ -241,8 +241,23 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
+          .select("id, product_name, description, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
           .eq("is_active", true);
+
+        // Fetch descriptions from curator picks
+        const { data: curatorDescriptions } = await supabase
+          .from("designer_curator_picks")
+          .select("title, description")
+          .not("description", "is", null);
+
+        const descriptionLookup = new Map<string, string>();
+        if (curatorDescriptions) {
+          for (const cd of curatorDescriptions) {
+            if (cd.description?.trim()) {
+              descriptionLookup.set(cd.title.trim().toLowerCase(), cd.description.trim());
+            }
+          }
+        }
 
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
