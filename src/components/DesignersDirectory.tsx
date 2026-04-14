@@ -891,6 +891,18 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
+  const { data: designersWithIgPosts = new Set<string>() } = useQuery({
+    queryKey: ["designers-with-ig-posts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_instagram_posts")
+        .select("designer_id")
+        .eq("hidden", false);
+      if (!data) return new Set<string>();
+      return new Set(data.map((r: any) => r.designer_id as string));
+    },
+    staleTime: 1000 * 60 * 10,
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
