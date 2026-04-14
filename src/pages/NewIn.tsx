@@ -73,7 +73,7 @@ function MobileDesignerCarousel({ designers }: { designers: ReturnType<typeof us
 
       {/* Carousel */}
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
+        <div className="flex items-start">
           {designers.map((designer) => (
             <div key={designer.slug} className="flex-[0_0_100%] min-w-0">
               <NewInSpotlight designer={designer} />
