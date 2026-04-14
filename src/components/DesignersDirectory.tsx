@@ -624,7 +624,7 @@ function LetterGroup({
                     const isOpen = openParent === item.name;
                     return (
                       <React.Fragment key={item.slug}>
-                        <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />
+                        <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
                         <AnimatePresence>
                           {isOpen && (
                             <div className="col-span-2 md:col-span-3 lg:col-span-5">
@@ -635,7 +635,7 @@ function LetterGroup({
                       </React.Fragment>
                     );
                   }
-                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
+                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
                 })}
               </div>
             )}
