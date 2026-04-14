@@ -449,7 +449,7 @@ const TradeAtelierProfile = () => {
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
                   {designer.philosophy && (
-                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5">
+                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 whitespace-pre-line">
                       "{designer.philosophy}"
                     </blockquote>
                   )}
@@ -526,7 +526,7 @@ const TradeAtelierProfile = () => {
                   className="flex flex-col mt-4"
                 >
                   {designer.philosophy && (
-                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
+                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 whitespace-pre-line">
                       "{designer.philosophy}"
                     </blockquote>
                   )}
