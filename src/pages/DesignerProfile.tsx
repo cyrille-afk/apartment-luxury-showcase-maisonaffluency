@@ -2,7 +2,7 @@ import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, type Transition } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote } from "lucide-react";
-import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
+import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import ShareMenu from "@/components/ShareMenu";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
