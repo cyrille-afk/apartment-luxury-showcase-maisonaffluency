@@ -783,9 +783,9 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     if (isParentBrand) {
                       const isOpen = openParent === item.name;
-                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />;
+                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
                     }
-                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
+                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
                   })}
                 </div>
               </div>
