@@ -286,6 +286,22 @@ const PublicDesignerProfile = () => {
     );
   };
 
+  const isVideoBlock = (text: string): boolean => {
+    const trimmed = text.trim();
+    if (/^<iframe[\s\S]*(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/plugins\/video)/i.test(trimmed)) return true;
+
+    const url = trimmed.split(/\s*\|\s*/)[0]?.trim() || "";
+    if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
+
+    return (
+      /\.(mp4|webm|mov)(\?|$)/i.test(url) ||
+      /res\.cloudinary\.com\/.+\/video\/upload/i.test(url) ||
+      /vimeo\.com\//i.test(url) ||
+      /youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url) ||
+      /facebook\.com\/plugins\/video|facebook\.com\/.+\/videos\//i.test(url)
+    );
+  };
+
   if (bioBlocks.length > 0) {
     if (mediaEntries.length > 0) {
       // Separate text-only blocks from inline media blocks
@@ -377,6 +393,22 @@ const PublicDesignerProfile = () => {
     }
   }
 
+  const remainingBlocks = remainingBio
+    ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
+    : [];
+  const startsWithInlineImage =
+    bioHasInlineMedia &&
+    heroParagraphs.length > 0 &&
+    remainingBlocks.length > 0 &&
+    isMediaBlock(remainingBlocks[0]) &&
+    !isVideoBlock(remainingBlocks[0]);
+  const introEditorialBio = startsWithInlineImage
+    ? [remainingBlocks[0], ...heroParagraphs].join("\n\n")
+    : "";
+  const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
+  const editorialBio = editorialBlocks.join("\n\n");
+  const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
+
   const biographySection = displayBiography ? (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -418,23 +450,26 @@ const PublicDesignerProfile = () => {
       })()}
 
       {(() => {
-        const remainingBlocks = remainingBio
-          ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
-          : [];
-
-        const editorialBio = remainingBlocks.join("\n\n");
-
         return (
           <>
-            <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
-              <div className="flex-1 min-w-0 order-1 md:order-none">
+            <div className="mt-4">
                 <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
-                <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-                  {heroParagraphs.map((p: string, i: number) => (
-                    <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                  ))}
-                </div>
-              </div>
+                {introEditorialBio ? (
+                  <EditorialBiography
+                    biography={introEditorialBio}
+                    biographyImages={[]}
+                    pickImages={[]}
+                    designerName={designer.name}
+                    allowCollapse={false}
+                    startImageIndex={0}
+                  />
+                ) : (
+                  <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+                    {heroParagraphs.map((p: string, i: number) => (
+                      <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+                    ))}
+                  </div>
+                )}
             </div>
 
             {heritageSlides.length > 0 && (
@@ -442,7 +477,6 @@ const PublicDesignerProfile = () => {
             )}
 
             {editorialBio && (() => {
-              const editorialBlocks = editorialBio.split(/\n\n+/).filter(Boolean);
               const shouldCollapse = editorialBlocks.length > 3;
               return (
                 <ProfileCollapsible shouldCollapse={shouldCollapse}>
@@ -453,7 +487,7 @@ const PublicDesignerProfile = () => {
                       pickImages={[]}
                       designerName={designer.name}
                       allowCollapse={false}
-                      startImageIndex={0}
+                      startImageIndex={editorialStartImageIndex}
                     />
                   </div>
                 </ProfileCollapsible>
