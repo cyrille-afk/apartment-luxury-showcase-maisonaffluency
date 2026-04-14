@@ -26,6 +26,7 @@ interface ShowroomProduct {
   designer_name: string | null;
   materials: string | null;
   dimensions: string | null;
+  description?: string | null;
   product_image_url: string | null;
   hover_image_url?: string | null;
   link_url: string | null;
@@ -222,11 +223,11 @@ const ShowroomGridView = ({
       if (data) {
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
-        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; description?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
         const tradeProductIdLookup = new Map<string, string>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
-          const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
+          const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, description: tp.description, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
           tradeProductIdLookup.set(tpKey, tp.id);
@@ -240,8 +241,23 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
+          .select("id, product_name, description, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
           .eq("is_active", true);
+
+        // Fetch descriptions from curator picks
+        const { data: curatorDescriptions } = await supabase
+          .from("designer_curator_picks")
+          .select("title, description")
+          .not("description", "is", null);
+
+        const descriptionLookup = new Map<string, string>();
+        if (curatorDescriptions) {
+          for (const cd of curatorDescriptions) {
+            if (cd.description?.trim()) {
+              descriptionLookup.set(cd.title.trim().toLowerCase(), cd.description.trim());
+            }
+          }
+        }
 
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
@@ -258,6 +274,10 @@ const ShowroomGridView = ({
             if (gallery && gallery.length > 0) {
               hoverImageLookup.set(ppKey, gallery[0]);
               if (normalizedName) hoverImageLookup.set(normalizedName, gallery[0]);
+            }
+            // Add trade_products descriptions to lookup
+            if ((pp as any).description?.trim()) {
+              descriptionLookup.set(ppKey, (pp as any).description.trim());
             }
             const rrp = pp.rrp_price_cents ?? pp.trade_price_cents;
             if (!rrp) continue;
@@ -292,6 +312,7 @@ const ShowroomGridView = ({
               trade_product_id: dbProductIdLookup.get(key) || tradeProductIdLookup.get(key),
               materials: meta?.materials || item.materials,
               dimensions: meta?.dimensions || item.dimensions,
+              description: descriptionLookup.get(key) || meta?.description || null,
               designer_name: meta?.brand || item.designer_name,
               product_image_url: meta?.image_url || item.product_image_url || null,
               hover_image_url: hoverImageLookup.get(key) || hoverImageLookup.get(normalizeProductName(item.product_name)) || null,
@@ -403,6 +424,7 @@ const ShowroomGridView = ({
     brand_name: product.designer_name || "Unknown",
     materials: product.materials,
     dimensions: product.dimensions,
+    description: product.description,
     category: product.category || inferCategory(product.product_name),
     subcategory: product.subcategory || undefined,
     pdf_url: product.pdf_url,
@@ -600,13 +622,19 @@ const ShowroomGridView = ({
                     )}
                   </div>
                 </div>
-                <div className="p-3 text-center">
+                <div className="p-3 text-center relative group/info">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
                   </p>
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">{product.product_name}</h3>
                   {product.dimensions && <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                   {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
+                  {product.description && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover/info:opacity-100 pointer-events-none transition-opacity duration-200 z-30">
+                      <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-4">{product.description}</p>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
+                    </div>
+                  )}
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}

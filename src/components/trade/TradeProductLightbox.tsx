@@ -19,6 +19,7 @@ export interface TradeProductLightboxItem {
   brand_name: string;
   materials?: string | null;
   dimensions?: string | null;
+  description?: string | null;
   category?: string;
   subcategory?: string;
   pdf_url?: string | null;
@@ -315,6 +316,14 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </div>
               )}
             </div>
+
+            {product.description && (
+              <div className="border-l-2 border-[hsl(var(--gold))]/40 pl-3">
+                <p className="font-body text-xs text-muted-foreground leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+            )}
 
             {product.price && (
               <p className="font-display text-base md:text-lg text-accent font-semibold">
