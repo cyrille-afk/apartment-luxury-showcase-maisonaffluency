@@ -223,11 +223,11 @@ const ShowroomGridView = ({
       if (data) {
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
-        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; description?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
         const tradeProductIdLookup = new Map<string, string>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
-          const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
+          const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, description: tp.description, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
           tradeProductIdLookup.set(tpKey, tp.id);
@@ -293,6 +293,7 @@ const ShowroomGridView = ({
               trade_product_id: dbProductIdLookup.get(key) || tradeProductIdLookup.get(key),
               materials: meta?.materials || item.materials,
               dimensions: meta?.dimensions || item.dimensions,
+              description: meta?.description || null,
               designer_name: meta?.brand || item.designer_name,
               product_image_url: meta?.image_url || item.product_image_url || null,
               hover_image_url: hoverImageLookup.get(key) || hoverImageLookup.get(normalizeProductName(item.product_name)) || null,
