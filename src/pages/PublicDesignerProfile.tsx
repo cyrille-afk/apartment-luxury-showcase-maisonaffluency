@@ -424,8 +424,8 @@ const PublicDesignerProfile = () => {
         if (match) {
           return (
             <blockquote className="font-display italic leading-snug mb-6 text-center">
-              <span className="text-lg md:text-xl text-foreground">"{match[1].trimEnd()}"</span>
-              {match[3] && <span className="text-lg md:text-xl text-foreground"> {match[3]}</span>}
+              <span className="text-lg md:text-xl text-foreground whitespace-pre-line">"{match[1].trimEnd()}"</span>
+              {match[3] && <span className="text-lg md:text-xl text-foreground whitespace-pre-line"> {match[3]}</span>}
               <br />
               <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
             </blockquote>
@@ -438,14 +438,14 @@ const PublicDesignerProfile = () => {
           const attribution = dashMatch[2].trim();
           return (
             <blockquote className="font-display italic leading-snug mb-6 text-center">
-              <span className="text-lg md:text-xl text-foreground">"{quoteBody}"</span>
+              <span className="text-lg md:text-xl text-foreground whitespace-pre-line">"{quoteBody}"</span>
               <br />
               <span className="text-sm md:text-base text-muted-foreground/60 not-italic mt-2 block">{attribution}</span>
             </blockquote>
           );
         }
         return (
-          <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
+          <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line">
             "{clean}"
           </blockquote>
         );
