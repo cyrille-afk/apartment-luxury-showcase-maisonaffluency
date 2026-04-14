@@ -22,7 +22,8 @@ function displayName(name: string): string {
 const DesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
-  const fromSection = searchParams.get("from"); // "ateliers" | "designers" | null
+  const fromSection = searchParams.get("from"); // "new-in" | "ateliers" | "designers" | null
+  const fromJournal = searchParams.get("from_journal"); // journal slug
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentOrChild = !!designer?.founder;
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
@@ -49,7 +50,16 @@ const DesignerProfile = () => {
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const name = displayName(designer.name);
   const firstLetter = designer.name.charAt(0).toUpperCase();
-  const backTo = `/designers?letter=${firstLetter}`;
+  const backTo = fromJournal
+    ? `/journal/${fromJournal}`
+    : fromSection === "new-in"
+      ? "/new-in"
+      : `/designers?letter=${firstLetter}`;
+  const backLabel = fromJournal
+    ? "Article"
+    : fromSection === "new-in"
+      ? "New In"
+      : "Designers";
   const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   return (
