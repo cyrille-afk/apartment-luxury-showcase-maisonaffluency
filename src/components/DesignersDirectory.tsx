@@ -1429,7 +1429,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                           parentDesignerCountByName={parentDesignerCountByName}
                           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                           initialExpand={initialExpand}
-                        />
+                          designersWithIgPosts={designersWithIgPosts}
                       ))}
                     </div>
                   )}
@@ -1497,7 +1497,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                         parentDesignerCountByName={parentDesignerCountByName}
                         fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                         initialExpand={initialExpand}
-                      />
+                        designersWithIgPosts={designersWithIgPosts}
                     ))}
                   </div>
                 )}
