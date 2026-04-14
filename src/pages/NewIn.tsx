@@ -260,7 +260,7 @@ const NewIn = () => {
       <div className="mt-[96px]">
         {/* Mobile: swipeable carousel with dots */}
         <div className="md:hidden">
-          <MobileDesignerCarousel designers={designers} />
+          <MobileDesignerCarousel designers={designers} initialIndex={returnIndex} />
         </div>
 
         {/* Desktop: sticky jump nav + stacked editorial sections */}
