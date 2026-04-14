@@ -611,6 +611,7 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
+  const isMobile = useIsMobile();
   const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[42%]";
 
   return (
@@ -618,7 +619,7 @@ function SplitImageBlock({
       {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
       <div
         className={`shrink-0 w-full ${imageWidthClass} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}
-        style={isPercent ? { width: size! } : undefined}
+        style={isPercent && !isMobile ? { width: size! } : undefined}
       >
         {imageEl}
       </div>
