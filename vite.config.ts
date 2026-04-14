@@ -2,7 +2,6 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 
 /**
  * Convert render-blocking CSS <link> tags to non-blocking preloads.
@@ -52,12 +51,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    ViteImageOptimizer({
-      png: { quality: 70 },
-      jpg: { quality: 70 },
-      jpeg: { quality: 70 },
-      webp: { quality: 75 },
-    }),
     optimizeHtmlPlugin(),
   ].filter(Boolean),
   resolve: {
