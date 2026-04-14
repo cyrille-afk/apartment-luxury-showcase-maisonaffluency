@@ -43,6 +43,10 @@ const analyticsGroup: AdminCard[] = [
   { title: "Audit Log", description: "Track content changes and admin actions", url: "/trade/audit-log", icon: History },
 ];
 
+const aiGroup: AdminCard[] = [
+  { title: "Description Writer", description: "AI-generated product copy — editorial, technical, or SEO", url: "/trade/description-writer", icon: PenLine },
+];
+
 const systemGroup: AdminCard[] = [
   { title: "Axonometric Studio", description: "Manage 3D visualisation requests and gallery", url: "/trade/axonometric", icon: Box },
   { title: "Instagram Audit", description: "Map and verify all designer Instagram accounts", url: "/trade/designers/instagram", icon: Instagram },
@@ -54,6 +58,7 @@ const systemGroup: AdminCard[] = [
 const groups = [
   { label: "Content & Editorial", items: contentGroup },
   { label: "Commerce & Operations", items: commerceGroup },
+  { label: "AI Content Studio", items: aiGroup },
   { label: "Analytics & Intelligence", items: analyticsGroup },
   { label: "System & Tools", items: systemGroup },
 ];
