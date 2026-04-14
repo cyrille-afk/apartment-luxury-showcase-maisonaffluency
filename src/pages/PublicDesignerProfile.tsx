@@ -268,9 +268,12 @@ const PublicDesignerProfile = () => {
   let heroParagraphs: string[] = [];
   let remainingBio = "";
 
-  // Helper: detect standalone media URLs (images, videos, Vimeo, YouTube)
+  // Helper: detect standalone media URLs (images, videos, Vimeo, YouTube, iframe embeds)
   const isMediaBlock = (text: string): boolean => {
-    const pipes = text.split(/\s*\|\s*/);
+    const trimmed = text.trim();
+    if (/^<iframe[\s\S]*facebook\.com\/plugins\/video/i.test(trimmed)) return true;
+
+    const pipes = trimmed.split(/\s*\|\s*/);
     const url = pipes[0]?.trim() || "";
     if (!/^https?:\/\//i.test(url)) return false;
     if (/\s/.test(url)) return false;
@@ -278,7 +281,8 @@ const PublicDesignerProfile = () => {
       /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
       /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
       /vimeo\.com\//i.test(url) ||
-      /youtube\.com\/watch|youtu\.be\//i.test(url)
+      /youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url) ||
+      /facebook\.com\/plugins\/video/i.test(url)
     );
   };
 
