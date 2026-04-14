@@ -572,10 +572,6 @@ const PublicDesignerProfile = () => {
                   </div>
                 </div>
 
-                <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1">
-                  {profileBadgeLabel}
-                </div>
-
                 <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 flex items-end justify-between gap-4">
                   <div>
                     <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
@@ -623,10 +619,6 @@ const PublicDesignerProfile = () => {
                     <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'center 25%' }} loading="eager" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                </div>
-
-                <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1">
-                  {profileBadgeLabel}
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex items-end justify-between">
