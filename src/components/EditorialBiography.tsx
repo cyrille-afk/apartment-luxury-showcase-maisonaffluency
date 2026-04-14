@@ -349,20 +349,26 @@ function VideoBlock({
     const createPlayer = () => {
       const containerId = `yt-player-${index}-${ytId}`;
       ytContainerRef.current!.id = containerId;
+      // Videos that should start with sound & English subtitles
+      const unmutedVideos = new Set(["hQ0_HOzRKwI"]);
+      const startUnmuted = unmutedVideos.has(ytId!);
+
       ytPlayerRef.current = new (window as any).YT.Player(containerId, {
         videoId: ytId,
         playerVars: {
           autoplay: 1,
-          mute: 1,
+          mute: startUnmuted ? 0 : 1,
           playsinline: 1,
           rel: 0,
           modestbranding: 1,
           origin: window.location.origin,
+          cc_load_policy: startUnmuted ? 1 : 0,
+          cc_lang_pref: "en",
         },
         events: {
           onReady: (event: any) => {
             event.target.playVideo();
-            setIsMuted(true);
+            setIsMuted(!startUnmuted);
           },
         },
       });
