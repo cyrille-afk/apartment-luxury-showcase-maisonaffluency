@@ -414,81 +414,20 @@ const PublicDesignerProfile = () => {
           ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
           : [];
 
-        let firstMediaIdx = -1;
-        let firstMediaParsed: { url: string; caption: string | null; size: "small" | null; align: "left" | "right" | null } | null = null;
-        for (let i = 0; i < remainingBlocks.length; i++) {
-          const line = remainingBlocks[i];
-          const pipes = line.split(/\s*\|\s*/);
-          const url = pipes[0]?.trim() || "";
-          if ((/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url)) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
-            let caption: string | null = null;
-            let size: "small" | null = null;
-            let align: "left" | "right" | null = null;
-            for (let j = 1; j < pipes.length; j++) {
-              const seg = pipes[j].trim();
-              if (/^small$/i.test(seg)) size = "small";
-              else if (/^(left|right)$/i.test(seg)) align = seg.toLowerCase() as "left" | "right";
-              else if (/^poster:/i.test(seg)) { /* skip poster */ }
-              else if (!caption) caption = seg;
-            }
-            firstMediaParsed = { url, caption, size, align };
-            firstMediaIdx = i;
-            break;
-          }
-        }
-
-        const firstPairTextIdx = !isMobile && heroParagraphs.length < 2 && firstMediaIdx >= 0
-          ? remainingBlocks.findIndex((block, idx) => idx > firstMediaIdx && !isMediaBlock(block))
-          : -1;
-        const firstPairText = firstPairTextIdx >= 0 ? remainingBlocks[firstPairTextIdx] : null;
-
-        const consumedIndexes = new Set<number>();
-        if (firstMediaIdx >= 0) consumedIndexes.add(firstMediaIdx);
-        if (firstPairTextIdx >= 0) consumedIndexes.add(firstPairTextIdx);
-        const editorialBio = remainingBlocks
-          .filter((_, idx) => !consumedIndexes.has(idx))
-          .join("\n\n");
-
-        const firstMediaOnRight = false;
-
-        const firstMediaFigure = firstMediaParsed ? (
-          <div className={`shrink-0 w-full order-2 md:order-none ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
-            <figure>
-              <div className="rounded-xl overflow-hidden bg-muted/10">
-                <img
-                  src={optimizeImageUrl(firstMediaParsed.url)}
-                  alt={firstMediaParsed.caption || `${designer.name} — editorial`}
-                  className="w-full h-full object-contain"
-                  loading="lazy"
-                />
-              </div>
-              {firstMediaParsed.caption && (
-                <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
-                  {firstMediaParsed.caption}
-                </figcaption>
-              )}
-            </figure>
-          </div>
-        ) : null;
+        const editorialBio = remainingBlocks.join("\n\n");
 
         return (
           <>
             <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
-              {!firstMediaOnRight && firstMediaFigure && (
-                firstMediaFigure
-              )}
               <div className="flex-1 min-w-0 order-1 md:order-none">
                 <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
                 <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
                   {heroParagraphs.map((p: string, i: number) => (
                     <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                   ))}
-                  {firstPairText && (
-                    <p className={heroParagraphs.length > 0 ? "mt-4" : ""}>{renderParagraph(firstPairText)}</p>
-                  )}
                 </div>
               </div>
-              {firstMediaOnRight && firstMediaFigure}
+            </div>
             </div>
 
             {heritageSlides.length > 0 && (
