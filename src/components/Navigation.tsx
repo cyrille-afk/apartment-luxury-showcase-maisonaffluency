@@ -318,7 +318,7 @@ const Navigation = () => {
                     {index === 2 && (
                       <button
                         onClick={() => handleNavClick("/new-in")}
-                        className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-bold animate-fade-in opacity-0"
+                        className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-primary font-bold animate-fade-in opacity-0"
                         style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
                       >
                         New In
