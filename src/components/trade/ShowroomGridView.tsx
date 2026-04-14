@@ -312,7 +312,7 @@ const ShowroomGridView = ({
               trade_product_id: dbProductIdLookup.get(key) || tradeProductIdLookup.get(key),
               materials: meta?.materials || item.materials,
               dimensions: meta?.dimensions || item.dimensions,
-              description: meta?.description || null,
+              description: descriptionLookup.get(key) || meta?.description || null,
               designer_name: meta?.brand || item.designer_name,
               product_image_url: meta?.image_url || item.product_image_url || null,
               hover_image_url: hoverImageLookup.get(key) || hoverImageLookup.get(normalizeProductName(item.product_name)) || null,
