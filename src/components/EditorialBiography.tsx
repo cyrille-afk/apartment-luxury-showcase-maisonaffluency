@@ -329,7 +329,7 @@ function VideoBlock({
   const isYouTube = !!ytId;
   const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI"]), []);
   const startUnmuted = !!ytId && unmutedVideos.has(ytId);
-  const useDirectYouTubeEmbed = startUnmuted;
+  const useDirectYouTubeEmbed = false; // Always use YT IFrame API for reliable autoplay
 
   // Extract YouTube thumbnail automatically — try maxres first, then hqdefault
   const ytThumbnails = ytId
