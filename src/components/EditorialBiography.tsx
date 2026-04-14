@@ -253,6 +253,8 @@ const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
     "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun.jpg",
   "https://youtu.be/OaRgw7VoeY0":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1774856563/Screen_Shot_2026-03-30_at_3.41.52_PM_sezoxs.png",
+  "https://www.youtube.com/watch?v=hQ0_HOzRKwI":
+    "/images/lbv-dior-poster.jpg",
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
