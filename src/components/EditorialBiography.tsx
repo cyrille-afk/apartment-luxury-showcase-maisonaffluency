@@ -660,7 +660,7 @@ function SplitImageBlock({
   ) : null;
 
   const isMobile = useIsMobile();
-  const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[42%]";
+  const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[35%]";
 
   return (
     <div className={`${index === 0 ? "mt-4 md:mt-6 mb-2 md:mb-3" : "mt-5 md:mt-7 mb-2 md:mb-3"} flex flex-col md:flex-row gap-4 md:gap-8 items-center`}>
