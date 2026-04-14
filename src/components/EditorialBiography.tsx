@@ -329,7 +329,7 @@ function VideoBlock({
   const isYouTube = !!ytId;
   const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI"]), []);
   const startUnmuted = !!ytId && unmutedVideos.has(ytId);
-  const useDirectYouTubeEmbed = startUnmuted;
+  const useDirectYouTubeEmbed = false; // Always use YT IFrame API for reliable autoplay
 
   // Extract YouTube thumbnail automatically — try maxres first, then hqdefault
   const ytThumbnails = ytId
@@ -397,13 +397,20 @@ function VideoBlock({
           rel: 0,
           modestbranding: 1,
           origin: window.location.origin,
-          cc_load_policy: 0,
+          cc_load_policy: startUnmuted ? 1 : 0,
           cc_lang_pref: "en",
         },
         events: {
           onReady: (event: any) => {
             event.target.playVideo();
-            setIsMuted(true);
+            if (startUnmuted) {
+              // Unmute immediately after autoplay starts (within API callback)
+              event.target.unMute();
+              event.target.setVolume(100);
+              setIsMuted(false);
+            } else {
+              setIsMuted(true);
+            }
           },
         },
       });
