@@ -370,8 +370,8 @@ function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: s
 }
 
 // ─── Parent Brand Card ───────────────────────────────────────────────────────
-function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number }) {
-  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
+function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number; hasIgPosts?: boolean }) {
+  const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -427,11 +427,11 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]> }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
-  const instagramLinks: string[] = (() => {
+  const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
     if (hardcoded) return [hardcoded];
     const fromDb = (item.links as any[])?.filter((l: any) => (l.type === "Instagram" || l.type === "instagram") && l.url).map((l: any) => l.url as string) || [];
@@ -575,6 +575,7 @@ function LetterGroup({
   parentDesignerCountByName,
   fallbackGalleryIndexByDesigner,
   initialExpand,
+  designersWithIgPosts,
 }: {
   letter: string;
   anchorId: string;
@@ -583,6 +584,7 @@ function LetterGroup({
   parentDesignerCountByName: Record<string, number>;
   fallbackGalleryIndexByDesigner: Record<string, number[]>;
   initialExpand?: string;
+  designersWithIgPosts?: Set<string>;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
@@ -611,6 +613,7 @@ function LetterGroup({
                 setOpenParent={setOpenParent}
                 parentDesignerCountByName={parentDesignerCountByName}
                 fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                designersWithIgPosts={designersWithIgPosts}
               />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
@@ -621,7 +624,7 @@ function LetterGroup({
                     const isOpen = openParent === item.name;
                     return (
                       <React.Fragment key={item.slug}>
-                        <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />
+                        <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
                         <AnimatePresence>
                           {isOpen && (
                             <div className="col-span-2 md:col-span-3 lg:col-span-5">
@@ -632,7 +635,7 @@ function LetterGroup({
                       </React.Fragment>
                     );
                   }
-                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
+                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
                 })}
               </div>
             )}
@@ -648,7 +651,7 @@ function LetterGroup({
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]> }) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner, designersWithIgPosts }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]>; designersWithIgPosts?: Set<string> }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -780,9 +783,9 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     if (isParentBrand) {
                       const isOpen = openParent === item.name;
-                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />;
+                      return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
                     }
-                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
+                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
                   })}
                 </div>
               </div>
@@ -888,6 +891,18 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
+  const { data: designersWithIgPosts = new Set<string>() } = useQuery({
+    queryKey: ["designers-with-ig-posts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_instagram_posts")
+        .select("designer_id")
+        .eq("hidden", false);
+      if (!data) return new Set<string>();
+      return new Set(data.map((r: any) => r.designer_id as string));
+    },
+    staleTime: 1000 * 60 * 10,
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
@@ -1414,6 +1429,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                           parentDesignerCountByName={parentDesignerCountByName}
                           fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                           initialExpand={initialExpand}
+                          designersWithIgPosts={designersWithIgPosts}
                         />
                       ))}
                     </div>
@@ -1482,6 +1498,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                         parentDesignerCountByName={parentDesignerCountByName}
                         fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                         initialExpand={initialExpand}
+                        designersWithIgPosts={designersWithIgPosts}
                       />
                     ))}
                   </div>
