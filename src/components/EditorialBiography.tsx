@@ -357,7 +357,7 @@ function VideoBlock({
         videoId: ytId,
         playerVars: {
           autoplay: 1,
-          mute: startUnmuted ? 0 : 1,
+          mute: 1, // Always start muted to guarantee autoplay works
           playsinline: 1,
           rel: 0,
           modestbranding: 1,
@@ -368,7 +368,18 @@ function VideoBlock({
         events: {
           onReady: (event: any) => {
             event.target.playVideo();
-            setIsMuted(!startUnmuted);
+            // For unmuted videos, attempt to unmute after playback starts
+            if (startUnmuted) {
+              setTimeout(() => {
+                try {
+                  event.target.unMute();
+                  event.target.setVolume(100);
+                  setIsMuted(false);
+                } catch {}
+              }, 300);
+            } else {
+              setIsMuted(true);
+            }
           },
         },
       });
@@ -465,7 +476,7 @@ function VideoBlock({
               {/* Unmute/Mute overlay button — auto-hides, reappears on hover */}
               <button
                 onClick={toggleMute}
-                className={`absolute bottom-3 left-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all duration-300 text-[11px] font-body tracking-wide ${muteVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none group-hover/yt:opacity-100 group-hover/yt:translate-y-0 group-hover/yt:pointer-events-auto"}`}
+                className={`absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white/90 hover:bg-black/80 hover:text-white transition-all duration-300 text-[11px] font-body tracking-wide ${muteVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none group-hover/yt:opacity-100 group-hover/yt:translate-y-0 group-hover/yt:pointer-events-auto"}`}
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
