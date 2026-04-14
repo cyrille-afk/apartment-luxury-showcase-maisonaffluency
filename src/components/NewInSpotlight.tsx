@@ -141,7 +141,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                 onClick={() => {
                   if (ctaPressed) return;
                   setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${designer.slug}?expanded=true`), 380);
+                  window.setTimeout(() => navigate(`/designers/${designer.slug}?expanded=true&from=new-in`), 380);
                 }}
                 className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >
