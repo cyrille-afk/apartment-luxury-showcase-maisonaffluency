@@ -25,13 +25,13 @@ const DesignerProfile = () => {
   const fromSection = searchParams.get("from"); // "new-in" | "ateliers" | "designers" | null
   const fromJournal = searchParams.get("from_journal"); // journal slug
   const { data: designer, isLoading } = useDesigner(slug);
-  const isParentOrChild = !!designer?.founder;
+  const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentOrChild ? designer : undefined,
+    isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
-  const picks = isParentOrChild && groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const picks = isParentBrand && groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
 
   if (isLoading) {

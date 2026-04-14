@@ -88,7 +88,6 @@ const PublicDesignerProfile = () => {
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = designer?.founder === designer?.name;
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
-  const isParentOrChild = !!(designer?.founder);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -122,13 +121,13 @@ const PublicDesignerProfile = () => {
   }, [slug]);
 
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentOrChild ? designer : undefined,
+    isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
-  const isGrouped = isParentOrChild && groupedPicks.length > 0;
+  const isGrouped = isParentBrand && groupedPicks.length > 0;
   const rawPicks = isGrouped ? groupedPicks : ownPicks;
   const displayBiography = isChildDesigner && !designer?.biography && parentDesigner?.biography
     ? parentDesigner.biography
@@ -237,6 +236,7 @@ const PublicDesignerProfile = () => {
   }
 
   const name = displayName(designer.name);
+  const profileBadgeLabel = designer.display_name || designer.name;
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
@@ -572,14 +572,9 @@ const PublicDesignerProfile = () => {
                   </div>
                 </div>
 
-                {designer.founder && designer.founder !== designer.name && (
-                  <Link
-                    to={`/designers/${designer.founder.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
-                  >
-                    {designer.founder}
-                  </Link>
-                )}
+                <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1">
+                  {profileBadgeLabel}
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 flex items-end justify-between gap-4">
                   <div>
@@ -630,14 +625,9 @@ const PublicDesignerProfile = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 </div>
 
-                {designer.founder && designer.founder !== designer.name && (
-                  <Link
-                    to={`/designers/${designer.founder.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
-                  >
-                    {designer.founder}
-                  </Link>
-                )}
+                <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1">
+                  {profileBadgeLabel}
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex items-end justify-between">
                   <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
@@ -739,7 +729,7 @@ const PublicDesignerProfile = () => {
                         subtitle: pick.subtitle,
                         image_url: pick.image_url,
                         hover_image_url: pick.hover_image_url,
-                        brand_name: designer.name,
+                        brand_name: designerLabel || designer.name,
                         materials: pick.materials,
                         dimensions: pick.dimensions,
                         category: pick.category,
