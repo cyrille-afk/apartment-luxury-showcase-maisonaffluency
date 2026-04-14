@@ -208,10 +208,28 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 /* ── Main Page ── */
 const NewIn = () => {
   const { data: designers = [], isLoading } = useNewInDesigners();
+  const [searchParams] = useSearchParams();
+  const returnDesigner = searchParams.get("designer");
 
+  // Find the index of the designer to return to
+  const returnIndex = returnDesigner
+    ? Math.max(0, designers.findIndex((d) => d.slug === returnDesigner))
+    : 0;
+
+  // For desktop: scroll to the designer section on mount
+  const scrolledRef = useRef(false);
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    if (!returnDesigner || designers.length === 0 || scrolledRef.current) {
+      if (!returnDesigner) window.scrollTo(0, 0);
+      return;
+    }
+    scrolledRef.current = true;
+    const el = document.getElementById(`new-in-${returnDesigner}`);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top: y, behavior: "auto" });
+    }
+  }, [returnDesigner, designers]);
 
   const firstDesigner = designers[0];
 
