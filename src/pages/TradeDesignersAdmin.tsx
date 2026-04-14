@@ -568,6 +568,21 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     await (supabase.from("designer_instagram_posts" as any) as any).update({ post_url: postUrl }).eq("id", id);
   };
 
+  const handleMovePost = async (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= posts.length) return;
+    const updated = [...posts];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    const reordered = updated.map((p, i) => ({ ...p, sort_order: i }));
+    setPosts(reordered);
+    for (const p of reordered) {
+      await (supabase.from("designer_instagram_posts" as any) as any)
+        .update({ sort_order: p.sort_order })
+        .eq("id", p.id);
+    }
+    queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
+  };
+
   if (!loaded) return null;
 
   return (
@@ -619,6 +634,24 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
       <div className="mt-2 space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex flex-wrap items-start gap-2 rounded-md border border-border/60 p-2">
+            <div className="flex flex-col gap-0.5 shrink-0 mt-1">
+              <button
+                onClick={() => handleMovePost(posts.indexOf(post), "up")}
+                disabled={posts.indexOf(post) === 0}
+                className="text-muted-foreground hover:text-foreground disabled:opacity-20 transition-colors p-0.5"
+                title="Move up"
+              >
+                <ChevronUp className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => handleMovePost(posts.indexOf(post), "down")}
+                disabled={posts.indexOf(post) === posts.length - 1}
+                className="text-muted-foreground hover:text-foreground disabled:opacity-20 transition-colors p-0.5"
+                title="Move down"
+              >
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
             {post.image_url && (
               <img src={post.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0 mt-0.5" />
             )}
