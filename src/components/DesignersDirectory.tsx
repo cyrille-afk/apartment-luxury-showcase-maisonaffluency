@@ -575,6 +575,7 @@ function LetterGroup({
   parentDesignerCountByName,
   fallbackGalleryIndexByDesigner,
   initialExpand,
+  designersWithIgPosts,
 }: {
   letter: string;
   anchorId: string;
@@ -583,6 +584,7 @@ function LetterGroup({
   parentDesignerCountByName: Record<string, number>;
   fallbackGalleryIndexByDesigner: Record<string, number[]>;
   initialExpand?: string;
+  designersWithIgPosts?: Set<string>;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
