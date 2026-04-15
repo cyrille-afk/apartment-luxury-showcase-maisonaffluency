@@ -1440,7 +1440,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 ) : (
                   <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {filteredPicks.map((pick) => (
-                      <PickCard key={pick.id} pick={pick} />
+                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                     ))}
                   </div>
                 )
@@ -1511,7 +1511,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                 <div className="grid gap-4 grid-cols-2">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                   ))}
                 </div>
               )
