@@ -555,7 +555,7 @@ const TradeGallery = () => {
                        : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                    </p>
                    <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
-                     {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
+                     {product.product_name}
                    </h3>
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
