@@ -231,6 +231,7 @@ type PickItem = {
   id: string;
   designer_id: string;
   image_url: string;
+  hover_image_url?: string | null;
   title: string;
   subtitle: string | null;
   category: string | null;
@@ -238,6 +239,9 @@ type PickItem = {
   tags: string[] | null;
   materials: string | null;
   dimensions: string | null;
+  description?: string | null;
+  pdf_url?: string | null;
+  pdf_urls?: any | null;
   designer_name?: string;
   designer_slug?: string;
 };
@@ -249,7 +253,7 @@ function useFullCuratorPicks(enabled: boolean) {
       const [{ data: picks }, { data: designers }] = await Promise.all([
         supabase
           .from("designer_curator_picks_public")
-          .select("id, designer_id, image_url, title, subtitle, category, subcategory, tags, materials, dimensions"),
+          .select("id, designer_id, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls"),
         supabase
           .from("designers")
           .select("id, name, slug"),
