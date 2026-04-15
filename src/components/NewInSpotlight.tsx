@@ -60,6 +60,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
         brand_name: designer.name,
         materials: p.materials,
         dimensions: p.dimensions,
+        description: (p as any).description ?? null,
         category: p.category,
         subcategory: (p as any).subcategory ?? null,
         pdf_url: p.pdf_url,

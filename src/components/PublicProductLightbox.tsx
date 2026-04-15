@@ -20,6 +20,7 @@ export interface PublicLightboxItem {
   brand_name: string;
   materials?: string | null;
   dimensions?: string | null;
+  description?: string | null;
   category?: string | null;
   subcategory?: string | null;
   pdf_url?: string | null;
@@ -323,6 +324,12 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                 </div>
               )}
             </div>
+
+            {product.description && (
+              <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-relaxed">
+                {product.description}
+              </p>
+            )}
 
             {/* Primary CTA — matches "Add to Quote" visual style */}
             <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
