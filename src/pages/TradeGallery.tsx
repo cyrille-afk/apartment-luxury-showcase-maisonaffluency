@@ -452,8 +452,8 @@ const TradeGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+              <div key={product.id} className="group border border-border rounded-lg overflow-visible hover:border-foreground/20 transition-colors relative">
+                <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
                     <>
                       <img
@@ -547,7 +547,14 @@ const TradeGallery = () => {
                     {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
                   </h3>
                   {product.description && (
-                    <p className="font-body text-[11px] text-muted-foreground leading-relaxed mt-1 line-clamp-3">{product.description}</p>
+                    <p className="font-body text-[11px] text-muted-foreground leading-relaxed mt-1 line-clamp-2">{product.description}</p>
+                  )}
+                  {/* Full description tooltip on card hover */}
+                  {product.description && product.description.length > 80 && (
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-72 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                      <p className="font-body text-[11px] text-foreground leading-relaxed">{product.description}</p>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
+                    </div>
                   )}
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
