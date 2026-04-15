@@ -442,10 +442,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         brand_name: p.brand_name,
         materials: p.materials || null,
         dimensions: p.dimensions || null,
-        description: resolveCuratorPickDescription({ description: p.description
-          materials: p.materials,
-          dimensions: p.dimensions,
-        }),
+        description: resolveCuratorPickDescription({ description: p.description }),
         category: p.category || null,
         subcategory: p.subcategory || null,
         pdf_url: p.pdf_url || null,
