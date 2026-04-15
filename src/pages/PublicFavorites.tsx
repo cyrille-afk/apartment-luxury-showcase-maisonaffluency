@@ -60,7 +60,7 @@ const PublicFavorites = () => {
       setLoading(true);
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, category, subcategory, pdf_url, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id")
         .in("id", favIds);
 
       if (!data || data.length === 0) {
@@ -120,6 +120,7 @@ const PublicFavorites = () => {
         brand_name: p.designer_name || "",
         materials: p.materials,
         dimensions: p.dimensions,
+        description: p.description,
         category: p.category,
         subcategory: p.subcategory,
         pdf_url: p.pdf_url,
