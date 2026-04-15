@@ -2,17 +2,24 @@
 
 ## Problem
 
-The SEO descriptions are **not showing on the published site** because frontend changes require clicking **"Update"** in the publish dialog to go live. Backend changes (database, edge functions) deploy instantly, but UI code does not.
+The description hover tooltip on trade gallery grid cards is not appearing on hover, despite descriptions being correctly saved and displayed in the lightbox. Two issues identified:
 
-The code itself is correct — `description` is:
-1. Present in the `PublicLightboxItem` interface
-2. Fetched from the `designer_curator_picks_public` view (which includes `description`)
-3. Passed through in all consumers (`Gallery.tsx`, `PublicDesignerProfile.tsx`, `NewInSpotlight.tsx`, `PublicFavorites.tsx`)
-4. Rendered in the lightbox below materials/dimensions
+1. **Stacking context conflict**: The hover image uses `transform` (via `scale-105 group-hover:scale-100`), which creates a new stacking context that can visually overlay the tooltip despite the tooltip having `z-10`.
 
-## Action Required
+2. **Overflow clipping**: The tooltip sits inside a container with `overflow-hidden`, which can clip the tooltip if it extends beyond the card boundaries.
 
-**Re-publish the site**: Click the **Publish** button (top-right) → click **Update** to deploy the latest frontend code to the published URL.
+## Fix
 
-No code changes are needed — this is purely a deployment step.
+### Files to edit
+
+**`src/pages/TradeGallery.tsx`** (grid card tooltip)
+- Move the description tooltip **outside** the `overflow-hidden` image container, or increase z-index and ensure the hover image has a lower explicit z-index
+- Give the hover image `z-0` explicitly so the tooltip at `z-10` renders above it reliably
+
+**`src/components/trade/ShowroomGridView.tsx`** (same pattern)
+- Apply the same fix for consistency
+
+### Specific changes
+
+In both files, add explicit `z-0` to the hover image element so the tooltip's `z-10` is respected regardless of transform-induced stacking contexts. This is a minimal, targeted fix that avoids layout restructuring.
 
