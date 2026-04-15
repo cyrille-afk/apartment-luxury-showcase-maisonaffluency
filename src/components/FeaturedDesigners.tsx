@@ -2307,6 +2307,8 @@ const FeaturedDesigners = () => {
       const { category, subcategory } = e.detail || {};
       setSelectedCategoryRaw(category || null);
       setSelectedSubcategoryRaw(subcategory || null);
+      setSidebarOpen(false);
+      setProductGridCols(3);
       // Also broadcast to other sections
       window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: category || null, subcategory: subcategory || null, source: 'designers' } }));
     };
