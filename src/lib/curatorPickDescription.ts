@@ -26,12 +26,33 @@ const cleanMaterials = (value?: string | null) => {
 const cleanDimensions = (value?: string | null) => {
   if (!value) return "";
 
-  return value
+  const lines = value
     .split("\n")
     .map((line) => cleanText(line))
     .filter(Boolean)
-    .filter((line) => !line.toLowerCase().includes(" in"))
+    .filter((line) => !line.toLowerCase().includes(" in"));
+
+  // Collapse "W 189 x D 102 x H 35 cm" → "189 × 102 × 35 cm"
+  return lines
+    .map((line) => {
+      const parts = line.match(/[WDHLØ]?\s*(\d[\d.,]*)\s*/gi);
+      const unit = line.match(/(cm|mm|m|inches|"|')\s*$/i)?.[1] || "";
+      if (parts && parts.length >= 2) {
+        const nums = parts.map((p) => p.replace(/^[A-Z]\s*/i, "").trim());
+        return nums.join(" × ") + (unit ? ` ${unit}` : "");
+      }
+      return line;
+    })
     .join(", ");
+};
+
+const singularize = (word: string) => {
+  const w = word.trim();
+  if (w.endsWith("ches") || w.endsWith("shes") || w.endsWith("sses")) return w.slice(0, -2);
+  if (w.endsWith("ies")) return w.slice(0, -3) + "y";
+  if (w.endsWith("ses") && !w.endsWith("sses")) return w.slice(0, -1);
+  if (w.endsWith("s") && !w.endsWith("ss") && !w.endsWith("us")) return w.slice(0, -1);
+  return w;
 };
 
 export const resolveCuratorPickDescription = ({
@@ -59,7 +80,8 @@ export const resolveCuratorPickDescription = ({
   const cleanMaterialsValue = cleanMaterials(materials);
   const cleanDimensionsValue = cleanDimensions(dimensions);
 
-  const typeLabel = (cleanSubcategory || cleanCategory || cleanSubtitle || "design piece").toLowerCase();
+  const rawLabel = (cleanSubcategory || cleanCategory || cleanSubtitle || "design piece").toLowerCase();
+  const typeLabel = singularize(rawLabel);
   const lead = cleanBrandName && !cleanTitle.toLowerCase().includes(cleanBrandName.toLowerCase())
     ? `${cleanTitle} by ${cleanBrandName}`
     : cleanTitle;
