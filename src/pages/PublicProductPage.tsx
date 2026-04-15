@@ -62,7 +62,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       // Get all picks for this designer
       const { data: picks } = await supabase
-        .from("designer_curator_picks")
+        .from("designer_curator_picks_public" as any)
         .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, designer_id")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
