@@ -1,6 +1,6 @@
 /**
  * In-card description overlay — renders inside the image box on hover.
- * Shows a brief description snippet at the bottom of the card image area.
+ * Shows as a floating cream/white box below the top icon row.
  */
 import { cn } from "@/lib/utils";
 
@@ -15,13 +15,13 @@ const ProductCardDescriptionOverlay = ({ description, className }: Props) => {
   return (
     <div
       className={cn(
-        "absolute inset-x-0 bottom-0 z-10 pointer-events-none",
+        "absolute left-3 right-3 top-12 z-10 pointer-events-none",
         "opacity-0 group-hover:opacity-100 transition-opacity duration-300",
         className
       )}
     >
-      <div className="bg-gradient-to-t from-black/70 via-black/40 to-transparent px-3 pt-6 pb-2.5">
-        <p className="font-body text-[10px] md:text-[11px] text-white/90 leading-relaxed line-clamp-2 drop-shadow-sm">
+      <div className="bg-background/90 backdrop-blur-sm rounded-lg shadow-lg px-3.5 py-2.5 border border-border/30">
+        <p className="font-body text-xs text-foreground leading-relaxed line-clamp-3">
           {description}
         </p>
       </div>
