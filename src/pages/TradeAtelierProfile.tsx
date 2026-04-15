@@ -541,7 +541,7 @@ const TradeAtelierProfile = () => {
                   className="flex flex-col mt-4"
                 >
                   {designer.philosophy && (() => {
-                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
                     const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
                     if (attrMatch) {
                       return (
