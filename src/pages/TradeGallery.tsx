@@ -252,7 +252,7 @@ const TradeGallery = () => {
         p.brand_name.toLowerCase().includes(q) ||
         p.subtitle?.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q);
-      const matchesBrand = selectedBrand === "all" || p.brand_name === selectedBrand;
+      const matchesBrand = selectedBrand === "all" || p.brand_name === selectedBrand || p.reedition_by === selectedBrand;
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
       return matchesSearch && matchesBrand && matchesCategory && matchesSub;
