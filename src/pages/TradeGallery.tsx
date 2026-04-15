@@ -8,7 +8,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { supabase } from "@/integrations/supabase/client";
@@ -457,10 +457,7 @@ const TradeGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <TooltipProvider delayDuration={300} key={product.id}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-              <div className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
+              <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
                     <>
@@ -487,6 +484,7 @@ const TradeGallery = () => {
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
+                  <ProductCardDescriptionOverlay description={product.description} />
                    {/* Favorite button */}
                    <button
                      onClick={(e) => { e.stopPropagation(); handleFavorite(product); }}
@@ -576,14 +574,6 @@ const TradeGallery = () => {
                   )}
                 </div>
               </div>
-                  </TooltipTrigger>
-                  {product.description && (
-                    <TooltipContent side="top" className="max-w-xs z-[100]">
-                      <p className="font-body text-xs leading-relaxed line-clamp-4">{product.description}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </TooltipProvider>
             );
           })}
         </div>
