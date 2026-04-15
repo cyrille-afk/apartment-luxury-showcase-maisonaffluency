@@ -999,18 +999,29 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
   }, []);
 
+  const syncUrlParams = useCallback((cat: string | null, sub: string | null) => {
+    const params = new URLSearchParams(window.location.search);
+    if (cat) params.set("category", cat); else params.delete("category");
+    if (sub) params.set("subcategory", sub); else params.delete("subcategory");
+    const qs = params.toString();
+    const newUrl = window.location.pathname + (qs ? `?${qs}` : "");
+    window.history.replaceState(null, "", newUrl);
+  }, []);
+
   const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
     setSelectedCategoryRaw(cat);
     setSelectedSubcategoryRaw(null);
     if (!skipBroadcast) broadcastFilter(cat, null);
-  }, [broadcastFilter]);
+    syncUrlParams(cat, null);
+  }, [broadcastFilter, syncUrlParams]);
 
   const setSelectedSubcategory = useCallback((sub: string | null) => {
     setSelectedSubcategoryRaw(sub);
     broadcastFilter(selectedCategory, sub);
-  }, [selectedCategory, broadcastFilter]);
+    syncUrlParams(selectedCategory, sub);
+  }, [selectedCategory, broadcastFilter, syncUrlParams]);
 
-  // React to URL param changes (both initial mount and subsequent navigations)
+  // React to URL param changes (initial mount)
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const cat = params.get("category");
@@ -1020,12 +1031,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       setSelectedSubcategoryRaw(sub || null);
       setSidebarOpen(false);
       broadcastFilter(cat || null, sub || null);
-      // Clean URL params without triggering navigation
-      params.delete("category");
-      params.delete("subcategory");
-      const clean = params.toString();
-      const newUrl = window.location.pathname + (clean ? `?${clean}` : "");
-      window.history.replaceState(null, "", newUrl);
     }
   }, [location.search, broadcastFilter]);
 
