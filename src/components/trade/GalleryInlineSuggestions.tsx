@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Sparkles, ChevronRight } from "lucide-react";
 
 interface InlineRec {
   product_id: string;
@@ -10,18 +9,24 @@ interface InlineRec {
   title: string;
   image_url: string;
   brand: string;
+  category?: string;
+  subcategory?: string;
 }
 
-export function GalleryInlineSuggestions() {
+interface Props {
+  selectedCategory?: string;
+  selectedSubcategory?: string;
+}
+
+export function GalleryInlineSuggestions({ selectedCategory, selectedSubcategory }: Props) {
   const { user } = useAuth();
-  const [recs, setRecs] = useState<InlineRec[]>([]);
+  const [allRecs, setAllRecs] = useState<InlineRec[]>([]);
   const [boardTitle, setBoardTitle] = useState("");
 
   useEffect(() => {
     if (!user) return;
 
     (async () => {
-      // Find user's most recently updated board with items
       const { data: boards } = await supabase
         .from("client_boards")
         .select("id, title")
@@ -37,13 +42,13 @@ export function GalleryInlineSuggestions() {
           .select("product_id, reason")
           .eq("board_id", b.id)
           .order("score", { ascending: false })
-          .limit(3);
+          .limit(12);
 
         if (cached && cached.length >= 3) {
           const productIds = cached.map((r) => r.product_id);
           const { data: products } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, image_url, designer_id")
+            .select("id, title, image_url, designer_id, category, subcategory")
             .in("id", productIds);
 
           const designerIds = [...new Set((products || []).map((p) => p.designer_id))];
@@ -54,7 +59,7 @@ export function GalleryInlineSuggestions() {
 
           const dm = new Map((designers || []).map((d) => [d.id, d.name]));
 
-          setRecs(
+          setAllRecs(
             cached.map((r) => {
               const p = (products || []).find((x) => x.id === r.product_id);
               return {
@@ -63,6 +68,8 @@ export function GalleryInlineSuggestions() {
                 title: p?.title || "",
                 image_url: p?.image_url || "",
                 brand: dm.get(p?.designer_id) || "",
+                category: p?.category || undefined,
+                subcategory: p?.subcategory || undefined,
               };
             })
           );
@@ -73,35 +80,43 @@ export function GalleryInlineSuggestions() {
     })();
   }, [user]);
 
-  if (recs.length < 3) return null;
+  // Filter by active category/subcategory
+  const filtered = allRecs.filter((r) => {
+    if (selectedCategory && selectedCategory !== "all" && r.category !== selectedCategory) return false;
+    if (selectedSubcategory && selectedSubcategory !== "all" && r.subcategory !== selectedSubcategory) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) return null;
+
+  const shown = filtered.slice(0, 4);
 
   return (
-    <div className="col-span-full border border-primary/20 rounded-lg p-4 bg-primary/5">
-      <p className="text-xs font-medium text-primary flex items-center gap-1.5 mb-3">
-        <Sparkles className="h-3.5 w-3.5" />
-        Suggested for <em className="not-italic font-semibold">{boardTitle}</em>
+    <div className="flex items-center gap-3 px-1 py-2 mb-2 border-b border-border/40">
+      <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1 whitespace-nowrap shrink-0">
+        <Sparkles className="h-3 w-3 text-primary/60" />
+        <span>For <em className="not-italic text-primary/80 font-semibold">{boardTitle}</em></span>
       </p>
-      <div className="grid grid-cols-3 gap-3">
-        {recs.map((rec) => (
-          <div key={rec.product_id} className="group">
-            <div className="aspect-square rounded overflow-hidden bg-muted mb-1.5">
-              {rec.image_url ? (
-                <img
-                  src={rec.image_url}
-                  alt={rec.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-full bg-muted" />
+      <div className="flex items-center gap-2.5 overflow-x-auto scrollbar-none">
+        {shown.map((rec) => (
+          <div key={rec.product_id} className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded overflow-hidden bg-muted shrink-0">
+              {rec.image_url && (
+                <img src={rec.image_url} alt={rec.title} className="w-full h-full object-cover" loading="lazy" />
               )}
             </div>
-            <p className="text-[11px] font-medium text-foreground truncate">{rec.title}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{rec.brand}</p>
-            <p className="text-[9px] text-primary/60 truncate">{rec.reason}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-medium text-foreground truncate max-w-[120px]">{rec.title}</p>
+              <p className="text-[9px] text-muted-foreground truncate max-w-[120px]">{rec.brand}</p>
+            </div>
           </div>
         ))}
       </div>
+      {filtered.length > 4 && (
+        <span className="text-[9px] text-muted-foreground/60 shrink-0 flex items-center gap-0.5">
+          +{filtered.length - 4} more <ChevronRight className="h-2.5 w-2.5" />
+        </span>
+      )}
     </div>
   );
 }
