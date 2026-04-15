@@ -8,6 +8,7 @@ import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingC
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import EditorialBiography from "@/components/EditorialBiography";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
@@ -86,6 +87,7 @@ function pickToLightboxItem(
     brand_name: brandName,
     materials: pick.materials,
     dimensions: pick.dimensions,
+    description: pick.description,
     category: pick.category || undefined,
     subcategory: pick.subcategory || undefined,
     pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
@@ -681,6 +683,7 @@ const TradeAtelierProfile = () => {
                             <Maximize2 className="h-3 w-3" />
                           </div>
                         </div>
+                        <ProductCardDescriptionOverlay description={pick.description} />
                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           {(isTradeUser || isAdmin) && (
                             <button
