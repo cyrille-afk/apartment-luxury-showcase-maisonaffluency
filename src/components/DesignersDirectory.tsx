@@ -831,11 +831,19 @@ const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
 };
 
 // ─── Product Pick Card (shown when category filter is active) ────────────────
-const PickCard = ({ pick, onFavorite, isFavorited, onClick }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; onClick?: () => void }) => {
+function pickSlugify(s: string) {
+  return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean }) => {
+  const navigate = useNavigate();
+  const productSlug = pickSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        if (pick.designer_slug) navigate(`/designers/${pick.designer_slug}/${productSlug}`);
+      }}
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
