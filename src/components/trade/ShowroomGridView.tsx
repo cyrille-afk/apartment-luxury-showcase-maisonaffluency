@@ -599,13 +599,13 @@ const ShowroomGridView = ({
                 key={product.id}
                 ref={isHighlighted ? highlightRef : undefined}
                 className={cn(
-                  "group border rounded-lg overflow-visible transition-all relative",
+                  "group border rounded-lg overflow-hidden transition-all",
                   isHighlighted
                     ? "border-primary ring-2 ring-primary/30 shadow-md"
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-square bg-muted/30 relative overflow-visible cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.product_image_url ? (
                     <>
                       <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
@@ -641,7 +641,13 @@ const ShowroomGridView = ({
                       <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
                     </button>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Description tooltip inside image */}
+                  {product.description && (
+                    <div className="absolute inset-x-3 top-3 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-20">
+                      <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}
                       disabled={isAdding}
@@ -677,15 +683,6 @@ const ShowroomGridView = ({
                     {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
                   </p>
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">{product.product_name}</h3>
-                  {product.description && (
-                    <p className="font-body text-[11px] text-muted-foreground leading-relaxed mt-1 line-clamp-2">{product.description}</p>
-                  )}
-                  {product.description && product.description.length > 80 && (
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-72 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                      <p className="font-body text-[11px] text-foreground leading-relaxed">{product.description}</p>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
-                    </div>
-                  )}
                   {product.dimensions && <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                   {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
                   {isAdmin ? (
