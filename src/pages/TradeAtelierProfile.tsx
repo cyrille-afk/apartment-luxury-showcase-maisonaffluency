@@ -451,12 +451,12 @@ const TradeAtelierProfile = () => {
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
                   {designer.philosophy && (() => {
-                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
                     const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
                     if (attrMatch) {
                       return (
                         <blockquote className="font-display italic leading-snug mb-5 [text-wrap:pretty]">
-                          <span className="text-base md:text-lg text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim()}"</span>
+                          <span className="text-base md:text-lg text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
                           <br />
                           <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
                         </blockquote>
@@ -541,12 +541,12 @@ const TradeAtelierProfile = () => {
                   className="flex flex-col mt-4"
                 >
                   {designer.philosophy && (() => {
-                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
                     const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
                     if (attrMatch) {
                       return (
                         <blockquote className="font-display italic leading-snug mb-6 [text-wrap:pretty]">
-                          <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim()}"</span>
+                          <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
                           <br />
                           <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
                         </blockquote>

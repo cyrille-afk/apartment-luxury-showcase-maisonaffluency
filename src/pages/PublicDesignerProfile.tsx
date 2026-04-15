@@ -421,12 +421,12 @@ const PublicDesignerProfile = () => {
       className="flex flex-col mt-4"
     >
       {displayPhilosophy && (() => {
-        const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
+        const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
         const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
         if (match) {
           return (
             <blockquote className="font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
-              <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{match[1].trimEnd()}"</span>
+              <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
               {match[3] && <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold"> {match[3]}</span>}
               <br />
               <span className="text-sm md:text-base text-muted-foreground/60 font-normal not-italic">{match[2]}</span>
@@ -436,7 +436,7 @@ const PublicDesignerProfile = () => {
         // Try em-dash or hyphen attribution: "quote text — Author" or "quote text\n- Author"
         const dashMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
         if (dashMatch) {
-          const quoteBody = dashMatch[1].trim();
+          const quoteBody = dashMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '');
           const attribution = dashMatch[2].trim();
           return (
             <blockquote className="font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
