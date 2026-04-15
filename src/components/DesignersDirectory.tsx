@@ -873,9 +873,9 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           {pick.designer_name}
         </p>
         <p className="font-display text-sm tracking-wide leading-tight">
-          {pick.title}
+          {pick.title}{pick.subtitle && /^\d{4}$/.test(pick.subtitle.trim()) ? ` (${pick.subtitle.trim()})` : ''}
         </p>
-        {pick.subtitle && (
+        {pick.subtitle && !/^\d{4}$/.test(pick.subtitle.trim()) && (
           <p className="font-body text-[11px] text-muted-foreground mt-0.5">{pick.subtitle}</p>
         )}
         <p className="font-display text-sm mt-1 text-foreground/70">
