@@ -59,9 +59,8 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
     const childName = designer?.name?.trim();
     if (!childName || !pick.title) return [];
     const founderName = (designer as any)?.founder?.trim();
-    const brandName = normalizeBrandToParent(
-      founderName && founderName !== childName ? founderName : childName,
-    );
+    const brandName = normalizeBrandToParent(childName);
+    const reeditionBy = founderName && founderName.toLowerCase() !== childName.toLowerCase() && founderName.toLowerCase() !== brandName.toLowerCase() ? founderName : undefined;
 
     const hasExplicitCategory = Boolean(pick.category?.trim?.());
     const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.());
@@ -89,6 +88,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         pdf_url: pick.pdf_url ?? undefined,
         pdf_urls: pick.pdf_urls ?? undefined,
         price_prefix: pick.price_prefix ?? undefined,
+        reedition_by: reeditionBy,
         hasExplicitCategory,
         hasExplicitSubcategory,
       } satisfies LiveTradeProduct,

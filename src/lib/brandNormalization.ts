@@ -1,7 +1,6 @@
 const PARENT_BRAND_BY_CHILD_NAME: Record<string, string> = {
   "okha design studio - adam courts": "OKHA",
   "ecart - jean-michel frank": "Ecart",
-  "jean-michel frank": "Ecart",
   "noé duchaufour-lawrance": "NDL Editions",
   "noe duchaufour-lawrance": "NDL Editions",
   "achille salvagni": "AS Atelier",

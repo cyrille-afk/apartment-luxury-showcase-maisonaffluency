@@ -641,12 +641,12 @@ const ShowroomGridView = ({
                       <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
                     </button>
                   )}
-                  {/* Description tooltip inside image */}
-                  {product.description && (
-                    <div className="absolute inset-x-3 top-3 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-20">
-                      <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
-                    </div>
-                  )}
+                   {/* Description tooltip inside image — positioned below icons */}
+                   {product.description && (
+                     <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
+                       <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
+                     </div>
+                   )}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}
