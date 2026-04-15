@@ -858,6 +858,14 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
             <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
           </div>
         )}
+        {/* Description overlay on hover */}
+        {pick.description && (
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 z-[5] pointer-events-none">
+            <p className="font-body text-[11px] leading-relaxed text-white/90 line-clamp-4">
+              {pick.description}
+            </p>
+          </div>
+        )}
         {/* Hover action icons */}
         <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <span
