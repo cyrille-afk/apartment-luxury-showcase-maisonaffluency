@@ -425,11 +425,11 @@ const PublicDesignerProfile = () => {
         const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
         if (match) {
           return (
-            <blockquote className="font-display italic leading-snug mb-6 text-center">
-              <span className="text-lg md:text-xl text-foreground whitespace-pre-line">"{match[1].trimEnd()}"</span>
-              {match[3] && <span className="text-lg md:text-xl text-foreground whitespace-pre-line"> {match[3]}</span>}
+            <blockquote className="font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
+              <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{match[1].trimEnd()}"</span>
+              {match[3] && <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold"> {match[3]}</span>}
               <br />
-              <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
+              <span className="text-sm md:text-base text-muted-foreground/60 font-normal not-italic">{match[2]}</span>
             </blockquote>
           );
         }
@@ -439,15 +439,15 @@ const PublicDesignerProfile = () => {
           const quoteBody = dashMatch[1].trim();
           const attribution = dashMatch[2].trim();
           return (
-            <blockquote className="font-display italic leading-snug mb-6 text-center">
-              <span className="text-lg md:text-xl text-foreground whitespace-pre-line">"{quoteBody}"</span>
+            <blockquote className="font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
+              <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{quoteBody}"</span>
               <br />
-              <span className="text-sm md:text-base text-muted-foreground/60 not-italic mt-2 block">{attribution}</span>
+              <span className="text-sm md:text-base text-muted-foreground/60 not-italic mt-2 block font-normal">{attribution}</span>
             </blockquote>
           );
         }
         return (
-          <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line">
+          <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line font-semibold [text-wrap:pretty]">
             "{clean}"
           </blockquote>
         );
