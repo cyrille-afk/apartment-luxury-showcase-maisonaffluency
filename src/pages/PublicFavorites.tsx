@@ -34,6 +34,7 @@ interface FavPick {
   hover_image_url: string | null;
   materials: string | null;
   dimensions: string | null;
+  description: string | null;
   category: string | null;
   subcategory: string | null;
   pdf_url: string | null;
