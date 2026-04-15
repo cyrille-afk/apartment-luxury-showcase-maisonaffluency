@@ -434,8 +434,8 @@ const TradeGallery = () => {
         </div>
       </div>
 
-      {/* Inline project-aware suggestions — hide when category/subcategory filters are active */}
-      {selectedCategory === "all" && selectedSubcategory === "all" && <GalleryInlineSuggestions />}
+      {/* Minimal suggestion strip above grid */}
+      <GalleryInlineSuggestions selectedCategory={selectedCategory} selectedSubcategory={selectedSubcategory} />
 
       {/* Content */}
       {filtered.length === 0 ? (
