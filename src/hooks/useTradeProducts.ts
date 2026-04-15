@@ -88,6 +88,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         pdf_url: pick.pdf_url ?? undefined,
         pdf_urls: pick.pdf_urls ?? undefined,
         price_prefix: pick.price_prefix ?? undefined,
+        reedition_by: reeditionBy,
         hasExplicitCategory,
         hasExplicitSubcategory,
       } satisfies LiveTradeProduct,
