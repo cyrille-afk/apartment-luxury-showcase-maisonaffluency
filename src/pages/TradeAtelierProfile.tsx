@@ -450,11 +450,24 @@ const TradeAtelierProfile = () => {
                   transition={{ ...transition, delay: 0.15 }}
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
-                  {designer.philosophy && (
-                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 whitespace-pre-line font-semibold [text-wrap:pretty]">
-                      "{designer.philosophy}"
-                    </blockquote>
-                  )}
+                  {designer.philosophy && (() => {
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
+                    if (attrMatch) {
+                      return (
+                        <blockquote className="font-display italic leading-snug mb-5 [text-wrap:pretty]">
+                          <span className="text-base md:text-lg text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim()}"</span>
+                          <br />
+                          <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
+                        </blockquote>
+                      );
+                    }
+                    return (
+                      <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 whitespace-pre-line font-semibold [text-wrap:pretty]">
+                        "{clean}"
+                      </blockquote>
+                    );
+                  })()}
                   {heroParagraphs.length > 0 && (
                     <div className="font-body text-sm leading-relaxed text-foreground/85">
                       {heroParagraphs.map((p: string, i: number) => (
@@ -527,11 +540,24 @@ const TradeAtelierProfile = () => {
                   transition={{ ...transition, delay: 0.2 }}
                   className="flex flex-col mt-4"
                 >
-                  {designer.philosophy && (
-                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 whitespace-pre-line font-semibold [text-wrap:pretty]">
-                      "{designer.philosophy}"
-                    </blockquote>
-                  )}
+                  {designer.philosophy && (() => {
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
+                    if (attrMatch) {
+                      return (
+                        <blockquote className="font-display italic leading-snug mb-6 [text-wrap:pretty]">
+                          <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim()}"</span>
+                          <br />
+                          <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
+                        </blockquote>
+                      );
+                    }
+                    return (
+                      <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 whitespace-pre-line font-semibold [text-wrap:pretty]">
+                        "{clean}"
+                      </blockquote>
+                    );
+                  })()}
                   <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
                     About
                   </h2>
