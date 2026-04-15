@@ -930,6 +930,28 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // ─── Public favorites (localStorage-backed) with auth gate ───
+  const { user } = useAuth();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
+  const [favIds, setFavIds] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem("public_favorites");
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch { return new Set(); }
+  });
+
+  const toggleFavorite = useCallback((id: string) => {
+    requireAuth(() => {
+      setFavIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        localStorage.setItem("public_favorites", JSON.stringify([...next]));
+        window.dispatchEvent(new Event("public_favorites_changed"));
+        return next;
+      });
+    }, "save pieces to your favorites");
+  }, [requireAuth]);
+
   const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
 
   // When category/subcategory is active, show product cards instead of designers
