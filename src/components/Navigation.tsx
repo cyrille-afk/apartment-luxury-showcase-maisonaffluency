@@ -772,7 +772,7 @@ const Navigation = () => {
                           window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                           if (window.location.pathname === "/") setTimeout(() => scrollToSection('designers'), 120);
                         } else {
-                          navigate(`/?category=${encodeURIComponent(cat)}#designers`);
+                          navigate(`/designers?category=${encodeURIComponent(cat)}`);
                         }
                       }}
                       className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
@@ -792,7 +792,7 @@ const Navigation = () => {
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
                                 if (window.location.pathname === "/") setTimeout(() => scrollToSection('designers'), 120);
                               } else {
-                                navigate(`/?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}#designers`);
+                                navigate(`/designers?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}`);
                               }
                             }}
                             className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}

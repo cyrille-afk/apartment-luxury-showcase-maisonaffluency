@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
@@ -900,6 +900,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   showHeader = true,
   showTradeCTA = true,
 }) => {
+  const location = useLocation();
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { data: allDesigners = [], isLoading } = useAllDesigners();
@@ -990,14 +991,16 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
 
-  // On mount, broadcast URL-param filters to ProductGrid and clean URL
+  // React to URL param changes (both initial mount and subsequent navigations)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const cat = params.get("category");
     const sub = params.get("subcategory");
     if (cat || sub) {
+      setSelectedCategoryRaw(cat || null);
+      setSelectedSubcategoryRaw(sub || null);
+      setSidebarOpen(false);
       broadcastFilter(cat || null, sub || null);
-      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat || null, subcategory: sub || null } }));
       // Clean URL params without triggering navigation
       params.delete("category");
       params.delete("subcategory");
@@ -1006,7 +1009,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       const newUrl = window.location.pathname + (clean ? `?${clean}` : "") + hash;
       window.history.replaceState(null, "", newUrl);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.search, broadcastFilter]);
 
   // Listen for external filter sync
   useEffect(() => {
