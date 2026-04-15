@@ -96,8 +96,8 @@ const ParallaxInterlude = ({
           style={{ scaleX: lineScale, backgroundColor: "hsl(36 55% 70%)", boxShadow: "0 0 8px hsl(36 55% 70% / 0.5)" }}
         />
 
-        <blockquote className="max-w-3xl">
-          <p className="font-display text-lg md:text-2xl lg:text-3xl text-white leading-relaxed md:leading-relaxed tracking-wide italic" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6), 0 0 4px rgba(0,0,0,0.3)" }}>
+        <blockquote className="max-w-3xl [text-wrap:pretty]">
+          <p className="font-display text-lg md:text-2xl lg:text-3xl text-white leading-relaxed md:leading-relaxed tracking-wide italic font-semibold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6), 0 0 4px rgba(0,0,0,0.3)" }}>
             "{quote}"
           </p>
         </blockquote>
