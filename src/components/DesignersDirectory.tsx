@@ -1553,6 +1553,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         )}
       </div>
     </div>
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
+    </>
   );
 };
 
