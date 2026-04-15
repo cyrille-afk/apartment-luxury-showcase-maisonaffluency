@@ -1,28 +1,27 @@
 
 
-## The real bug
+## Problem
 
-"Sofas" is a **subcategory** (under Seating), not a category. When the nav dispatches `{category: "Seating", subcategory: "Sofas"}`:
+The product page (`PublicProductPage.tsx`) currently renders the description as static text below materials/dimensions. The user wants it to match the lightbox behavior shown in screenshots 2 and 3:
 
-1. `DesignersDirectory` event handler runs → calls `setSidebarOpen(false)` ✓
-2. CategorySidebar re-renders with `activeSubcategory="Sofas"`
-3. CategorySidebar's `useEffect` on `activeSubcategory` runs → calls `setIsOpen(true)` → `onOpenChange(true)` → `setSidebarOpen(true)` ✗
+1. **Hover overlay** — description appears as a floating card over the product image on hover (like Curators' Picks cards)
+2. **Collapsible dropdown** — at the top of the product image, a compact bar shows a truncated description with a chevron to expand/collapse the full text
 
-The auto-open effect in CategorySidebar **overrides** the close from the nav handler. This also explains the 4-column grid — the sidebar is open, so `sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4'` applies.
+## Changes — `src/pages/PublicProductPage.tsx`
 
-## Fix
+### A. Remove static description block
+Delete lines 270-275 (the `{product.description && ...}` paragraph below materials/dimensions).
 
-**File: `src/components/CategorySidebar.tsx`**
-- Remove or guard the auto-open `useEffect`. The sidebar should not self-open when a subcategory is set externally via nav. The parent (`DesignersDirectory`) already controls `isOpen` via the controlled prop — the sidebar shouldn't fight it.
-- Keep the expand-parent-category logic (so the correct category accordion expands), but remove the `setIsOpen(true)` call.
+### B. Add hover overlay on the main image
+Wrap the main image container in a `group` div. When hovered, show the description as a semi-transparent overlay at the bottom of the image — matching the card hover pattern.
 
-**File: `src/components/DesignersDirectory.tsx`**
-- No changes needed — the existing `setSidebarOpen(false)` in the event handler is correct.
+### C. Add collapsible description bar above the image
+Above the main image, render a compact row with an Info icon, truncated description text, and a chevron toggle. Clicking it expands to show the full description. Uses local state (`descOpen`). Styled with `bg-background/90 backdrop-blur` to match the lightbox pattern from screenshot 3.
 
-**File: `src/components/Navigation.tsx`**
-- No changes needed — the dispatch logic is correct.
+### D. Layout
+- The dropdown sits inside the image column, pinned to the top of the image area
+- The hover overlay sits at the bottom of the image, fading in on hover
+- Both only render when `product.description` exists
 
-## Result
-- Nav click "Sofas" → sidebar stays closed → grid renders 3 columns
-- User can still manually open sidebar via Filter button to see the active subcategory highlighted
+No other files need changes.
 
