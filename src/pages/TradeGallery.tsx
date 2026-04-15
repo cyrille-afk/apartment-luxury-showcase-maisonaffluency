@@ -506,12 +506,12 @@ const TradeGallery = () => {
                    >
                      <Scale className="h-3.5 w-3.5" />
                    </button>
-                  {/* Description tooltip inside image */}
-                  {product.description && (
-                    <div className="absolute inset-x-3 top-3 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-20">
-                      <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
-                    </div>
-                  )}
+                   {/* Description tooltip inside image — positioned below icons */}
+                   {product.description && (
+                     <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
+                       <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
+                     </div>
+                   )}
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button
@@ -546,9 +546,14 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 <div className="p-3 text-center">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                    {product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
-                  </p>
+                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                     {product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                   </p>
+                   {product.reedition_by && (
+                     <p className="font-body text-[9px] text-muted-foreground/70 italic -mt-0.5 mb-0.5">
+                       Re-edition by {product.reedition_by}
+                     </p>
+                   )}
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
                     {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
                   </h3>
