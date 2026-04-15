@@ -290,6 +290,7 @@ const TradeGallery = () => {
       brand_name: product.brand_name,
       materials: product.materials,
       dimensions: product.dimensions,
+      description: product.description,
       category: product.category,
       subcategory: product.subcategory,
       pdf_url: product.pdf_url,
