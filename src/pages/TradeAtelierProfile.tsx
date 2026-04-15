@@ -451,7 +451,7 @@ const TradeAtelierProfile = () => {
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
                   {designer.philosophy && (() => {
-                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
                     const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
                     if (attrMatch) {
                       return (

@@ -421,7 +421,7 @@ const PublicDesignerProfile = () => {
       className="flex flex-col mt-4"
     >
       {displayPhilosophy && (() => {
-        const clean = displayPhilosophy.replace(/<[^>]+>/g, '');
+        const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
         const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
         if (match) {
           return (
