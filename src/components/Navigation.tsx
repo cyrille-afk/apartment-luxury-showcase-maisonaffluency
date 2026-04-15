@@ -506,10 +506,11 @@ const Navigation = () => {
                             onClick={() => {
                           setCategoryPanelOpen(false);
                               setIsOpen(false);
-                              const isHome = window.location.pathname === "/";
-                              if (isHome) {
+                               const isHome = window.location.pathname === "/";
+                              const isDesigners = window.location.pathname === "/designers";
+                              if (isHome || isDesigners) {
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                                handleNavClick('/designers');
+                                if (isHome) handleNavClick('/designers');
                               } else {
                                 navigate(`/designers?category=${encodeURIComponent(cat)}`);
                               }
@@ -525,9 +526,10 @@ const Navigation = () => {
                                 setCategoryPanelOpen(false);
                                 setIsOpen(false);
                                 const isHome = window.location.pathname === "/";
-                                if (isHome) {
+                                const isDesigners = window.location.pathname === "/designers";
+                                if (isHome || isDesigners) {
                                   window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                  handleNavClick('/designers');
+                                  if (isHome) handleNavClick('/designers');
                                 } else {
                                   navigate(`/designers?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}`);
                                 }
