@@ -227,9 +227,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <button
                   onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
                   className={cn(
-                    "flex items-start gap-2 px-3 py-2.5 rounded-lg backdrop-blur-md shadow-lg transition-all text-left",
-                    "bg-foreground/80 text-background",
-                    descExpanded ? "rounded-b-none" : ""
+                    "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left",
+                    "bg-background/40 backdrop-blur-xl border border-white/20 text-foreground",
+                    descExpanded ? "rounded-b-none border-b-0" : ""
                   )}
                 >
                   <Info size={14} className="shrink-0 mt-0.5 opacity-70" />
@@ -250,9 +250,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="overflow-hidden rounded-b-lg bg-foreground/80 backdrop-blur-md shadow-lg"
+                      className="overflow-hidden rounded-b-lg bg-background/40 backdrop-blur-xl border border-white/20 border-t-0 shadow-lg"
                     >
-                      <p className="font-body text-xs text-background leading-relaxed px-3 pb-3 pt-0">
+                      <p className="font-body text-xs text-foreground leading-relaxed px-3 pb-3 pt-0">
                         {product.description}
                       </p>
                     </motion.div>
