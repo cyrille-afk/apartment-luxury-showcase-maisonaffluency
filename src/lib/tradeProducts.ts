@@ -98,7 +98,12 @@ export function getAllTradeProducts(): TradeProduct[] {
 }
 
 export function getAllBrands(products: TradeProduct[]): string[] {
-  return [...new Set(products.map((p) => p.brand_name))].sort();
+  const names = new Set<string>();
+  for (const p of products) {
+    names.add(p.brand_name);
+    if (p.reedition_by) names.add(p.reedition_by);
+  }
+  return [...names].sort();
 }
 
 export function getAllCategories(_products?: TradeProduct[]): string[] {
