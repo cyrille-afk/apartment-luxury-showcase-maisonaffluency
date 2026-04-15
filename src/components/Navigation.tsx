@@ -506,10 +506,11 @@ const Navigation = () => {
                             onClick={() => {
                           setCategoryPanelOpen(false);
                               setIsOpen(false);
-                              const isHome = window.location.pathname === "/";
-                              if (isHome) {
+                               const isHome = window.location.pathname === "/";
+                              const isDesigners = window.location.pathname === "/designers";
+                              if (isHome || isDesigners) {
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                                handleNavClick('/designers');
+                                if (isHome) handleNavClick('/designers');
                               } else {
                                 navigate(`/designers?category=${encodeURIComponent(cat)}`);
                               }
@@ -525,9 +526,10 @@ const Navigation = () => {
                                 setCategoryPanelOpen(false);
                                 setIsOpen(false);
                                 const isHome = window.location.pathname === "/";
-                                if (isHome) {
+                                const isDesigners = window.location.pathname === "/designers";
+                                if (isHome || isDesigners) {
                                   window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                  handleNavClick('/designers');
+                                  if (isHome) handleNavClick('/designers');
                                 } else {
                                   navigate(`/designers?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}`);
                                 }
@@ -766,9 +768,9 @@ const Navigation = () => {
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
                         setMegaMenuOpen(false);
-                        if (window.location.pathname === "/") {
+                        if (window.location.pathname === "/" || window.location.pathname === "/designers") {
                           window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                          setTimeout(() => scrollToSection('designers'), 120);
+                          if (window.location.pathname === "/") setTimeout(() => scrollToSection('designers'), 120);
                         } else {
                           navigate(`/?category=${encodeURIComponent(cat)}#designers`);
                         }
@@ -786,9 +788,9 @@ const Navigation = () => {
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
                               setMegaMenuOpen(false);
-                              if (window.location.pathname === "/") {
+                              if (window.location.pathname === "/" || window.location.pathname === "/designers") {
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                setTimeout(() => scrollToSection('designers'), 120);
+                                if (window.location.pathname === "/") setTimeout(() => scrollToSection('designers'), 120);
                               } else {
                                 navigate(`/?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}#designers`);
                               }
