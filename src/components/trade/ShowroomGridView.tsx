@@ -599,7 +599,7 @@ const ShowroomGridView = ({
                 key={product.id}
                 ref={isHighlighted ? highlightRef : undefined}
                 className={cn(
-                  "group border rounded-lg overflow-hidden transition-all",
+                  "group relative border rounded-lg transition-all",
                   isHighlighted
                     ? "border-primary ring-2 ring-primary/30 shadow-md"
                     : "border-border hover:border-foreground/20"
@@ -641,12 +641,6 @@ const ShowroomGridView = ({
                       <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
                     </button>
                   )}
-                   {/* Description tooltip inside image — positioned below icons */}
-                   {product.description && (
-                     <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
-                       <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
-                     </div>
-                   )}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}
@@ -678,6 +672,12 @@ const ShowroomGridView = ({
                     )}
                   </div>
                 </div>
+                {/* Description tooltip — outside overflow-hidden so it's not clipped */}
+                {product.description && (
+                  <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-30">
+                    <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
+                  </div>
+                )}
                 <div className="p-3 text-center">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}

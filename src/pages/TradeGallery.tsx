@@ -456,7 +456,7 @@ const TradeGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
+              <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
                     <>
@@ -510,12 +510,6 @@ const TradeGallery = () => {
                    >
                      <Scale className="h-3.5 w-3.5" />
                    </button>
-                   {/* Description tooltip inside image — positioned below icons */}
-                   {product.description && (
-                     <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
-                       <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
-                     </div>
-                   )}
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button
@@ -549,6 +543,12 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
+                {/* Description tooltip — outside overflow-hidden so it's not clipped */}
+                {product.description && (
+                  <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-30">
+                    <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
+                  </div>
+                )}
                 <div className="p-3 text-center">
                    <p className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-0.5">
                      {product.reedition_by
