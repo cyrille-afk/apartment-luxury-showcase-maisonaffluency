@@ -445,7 +445,7 @@ const TradeGallery = () => {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className={cn("grid gap-4", viewMode === "grid" ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4")}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
@@ -539,7 +539,7 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
-                <div className="p-3 text-center relative group/info">
+                <div className="p-3 text-center">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                   </p>
@@ -547,10 +547,7 @@ const TradeGallery = () => {
                     {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
                   </h3>
                   {product.description && (
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover/info:opacity-100 pointer-events-none transition-opacity duration-200 z-40">
-                      <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-4">{product.description}</p>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
-                    </div>
+                    <p className="font-body text-[11px] text-muted-foreground leading-relaxed mt-1 line-clamp-3">{product.description}</p>
                   )}
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>

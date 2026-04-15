@@ -496,11 +496,11 @@ const ShowroomGridView = ({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <ProductCardSkeleton key={i} />
-        ))}
-      </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
     );
   }
 
@@ -584,7 +584,7 @@ const ShowroomGridView = ({
           <p className="font-body text-sm text-muted-foreground">No products match your search criteria.</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
@@ -670,19 +670,16 @@ const ShowroomGridView = ({
                         <FileDown className="h-3.5 w-3.5" />
                       </a>
                     )}
-                   {product.description && (
-                     <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-card border border-border rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-40">
-                       <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-4">{product.description}</p>
-                       <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-card border-r border-b border-border rotate-45 -mt-1" />
-                     </div>
-                   )}
                   </div>
                 </div>
-                <div className="p-3 text-center relative">
+                <div className="p-3 text-center">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
                   </p>
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">{product.product_name}</h3>
+                  {product.description && (
+                    <p className="font-body text-[11px] text-muted-foreground leading-relaxed mt-1 line-clamp-3">{product.description}</p>
+                  )}
                   {product.dimensions && <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                   {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
                   {isAdmin ? (
