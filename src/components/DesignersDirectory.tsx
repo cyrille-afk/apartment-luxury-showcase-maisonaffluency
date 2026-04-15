@@ -1016,8 +1016,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       params.delete("category");
       params.delete("subcategory");
       const clean = params.toString();
-      const hash = window.location.hash;
-      const newUrl = window.location.pathname + (clean ? `?${clean}` : "") + hash;
+      const newUrl = window.location.pathname + (clean ? `?${clean}` : "");
       window.history.replaceState(null, "", newUrl);
     }
   }, [location.search, broadcastFilter]);
