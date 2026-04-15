@@ -228,7 +228,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
                   className={cn(
                     "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left",
-                    "bg-background/40 backdrop-blur-xl border border-white/20 text-foreground",
+                    "bg-background/60 backdrop-blur-sm border border-white/15 text-foreground",
                     descExpanded ? "rounded-b-none border-b-0" : ""
                   )}
                 >
@@ -250,7 +250,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="overflow-hidden rounded-b-lg bg-background/40 backdrop-blur-xl border border-white/20 border-t-0 shadow-lg"
+                      className="overflow-hidden rounded-b-lg bg-background/60 backdrop-blur-sm border border-white/15 border-t-0 shadow-lg"
                     >
                       <p className="font-body text-xs text-foreground leading-relaxed px-3 pb-3 pt-0">
                         {product.description}
