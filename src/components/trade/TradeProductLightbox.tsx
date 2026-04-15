@@ -54,6 +54,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
+    setDescExpanded(false);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
@@ -217,6 +218,46 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="font-body text-sm text-muted-foreground">No image</span>
+              </div>
+            )}
+
+            {/* Description overlay on image */}
+            {product.description && (
+              <div className="absolute top-3 left-3 z-10 max-w-[85%]">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
+                  className={cn(
+                    "flex items-start gap-2 px-3 py-2.5 rounded-lg backdrop-blur-md shadow-lg transition-all text-left",
+                    "bg-foreground/80 text-background",
+                    descExpanded ? "rounded-b-none" : ""
+                  )}
+                >
+                  <Info size={14} className="shrink-0 mt-0.5 opacity-70" />
+                  <span className={cn(
+                    "font-body text-xs leading-relaxed",
+                    !descExpanded && "line-clamp-2"
+                  )}>
+                    {descExpanded ? "" : product.description.slice(0, 80) + (product.description.length > 80 ? "…" : "")}
+                  </span>
+                  {product.description.length > 80 && (
+                    descExpanded ? <ChevronUp size={14} className="shrink-0 mt-0.5" /> : <ChevronDown size={14} className="shrink-0 mt-0.5" />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {descExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden rounded-b-lg bg-foreground/80 backdrop-blur-md shadow-lg"
+                    >
+                      <p className="font-body text-xs text-background leading-relaxed px-3 pb-3 pt-0">
+                        {product.description}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
