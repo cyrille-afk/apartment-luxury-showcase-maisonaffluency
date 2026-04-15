@@ -87,6 +87,7 @@ const PublicCollectibles = lazy(() => import("./pages/PublicCollectibles"));
 const PublicGallery = lazy(() => import("./pages/PublicGallery"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
@@ -169,6 +170,7 @@ const App = () => {
                   <Route path="/designer/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerProfile /></Suspense>} />
                   {/* Public designers directory — hidden from nav until all data is populated */}
                   <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
+                  <Route path="/designers/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicProductPage /></Suspense>} />
                   <Route path="/designers/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile /></Suspense>} />
                   <Route path="/favorites" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicFavorites /></Suspense>} />
                   <Route path="/collectibles" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicCollectibles /></Suspense>} />
