@@ -78,9 +78,9 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       if (!product) return null;
 
       return {
-        product: product as ProductRow,
+        product: product as unknown as ProductRow,
         designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug },
-        relatedPicks: (picks as ProductRow[]).filter((p: any) => p.id !== product.id).slice(0, 6),
+        relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id).slice(0, 6),
       };
     },
     enabled: !!designerSlug && !!productSlug,
