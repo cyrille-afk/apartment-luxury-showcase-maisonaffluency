@@ -8,6 +8,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { supabase } from "@/integrations/supabase/client";
@@ -456,7 +457,10 @@ const TradeGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
+              <TooltipProvider delayDuration={300} key={product.id}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+              <div className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
                     <>
@@ -543,12 +547,7 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
-                {/* Description tooltip — outside overflow-hidden so it's not clipped */}
-                {product.description && (
-                  <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-30">
-                    <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
-                  </div>
-                )}
+                {/* Description in portal tooltip */}
                 <div className="p-3 text-center">
                    <p className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-0.5">
                      {product.reedition_by
@@ -577,6 +576,14 @@ const TradeGallery = () => {
                   )}
                 </div>
               </div>
+                  </TooltipTrigger>
+                  {product.description && (
+                    <TooltipContent side="top" className="max-w-xs z-[100]">
+                      <p className="font-body text-xs leading-relaxed line-clamp-4">{product.description}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             );
           })}
         </div>
