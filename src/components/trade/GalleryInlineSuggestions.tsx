@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Sparkles, ChevronRight } from "lucide-react";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 interface InlineRec {
   product_id: string;
@@ -16,9 +17,11 @@ interface InlineRec {
 interface Props {
   selectedCategory?: string;
   selectedSubcategory?: string;
+  selectedBrand?: string;
+  onProductClick?: (productId: string) => void;
 }
 
-export function GalleryInlineSuggestions({ selectedCategory, selectedSubcategory }: Props) {
+export function GalleryInlineSuggestions({ selectedCategory, selectedSubcategory, selectedBrand, onProductClick }: Props) {
   const { user } = useAuth();
   const [allRecs, setAllRecs] = useState<InlineRec[]>([]);
   const [boardTitle, setBoardTitle] = useState("");
@@ -54,20 +57,28 @@ export function GalleryInlineSuggestions({ selectedCategory, selectedSubcategory
           const designerIds = [...new Set((products || []).map((p) => p.designer_id))];
           const { data: designers } = await supabase
             .from("designers")
-            .select("id, name")
+            .select("id, name, founder")
             .in("id", designerIds);
 
-          const dm = new Map((designers || []).map((d) => [d.id, d.name]));
+          const dm = new Map((designers || []).map((d) => [d.id, d]));
 
           setAllRecs(
             cached.map((r) => {
               const p = (products || []).find((x) => x.id === r.product_id);
+              const designer = dm.get(p?.designer_id);
+              const childName = designer?.name?.trim() || "";
+              const brandName = normalizeBrandToParent(childName);
+              const founderName = (designer as any)?.founder?.trim();
+              // Build display: "Designer by Parent" or just brand
+              const displayBrand = founderName && founderName.toLowerCase() !== childName.toLowerCase() && founderName.toLowerCase() !== brandName.toLowerCase()
+                ? `${brandName} by ${founderName}`
+                : brandName;
               return {
                 product_id: r.product_id,
                 reason: r.reason,
                 title: p?.title || "",
                 image_url: p?.image_url || "",
-                brand: dm.get(p?.designer_id) || "",
+                brand: displayBrand,
                 category: p?.category || undefined,
                 subcategory: p?.subcategory || undefined,
               };
@@ -80,10 +91,14 @@ export function GalleryInlineSuggestions({ selectedCategory, selectedSubcategory
     })();
   }, [user]);
 
-  // Filter by active category/subcategory
+  // Filter by active category/subcategory/brand
   const filtered = allRecs.filter((r) => {
     if (selectedCategory && selectedCategory !== "all" && r.category !== selectedCategory) return false;
     if (selectedSubcategory && selectedSubcategory !== "all" && r.subcategory !== selectedSubcategory) return false;
+    if (selectedBrand && selectedBrand !== "all") {
+      // Match if brand display contains the selected brand name
+      if (!r.brand.toLowerCase().includes(selectedBrand.toLowerCase())) return false;
+    }
     return true;
   });
 
@@ -92,24 +107,28 @@ export function GalleryInlineSuggestions({ selectedCategory, selectedSubcategory
   const shown = filtered.slice(0, 4);
 
   return (
-    <div className="flex items-center gap-3 px-1 py-2 mb-2 border-b border-border/40">
+    <div className="flex items-center gap-4 px-1 py-2.5 mb-2 border-b border-border/40">
       <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1 whitespace-nowrap shrink-0">
         <Sparkles className="h-3 w-3 text-primary/60" />
         <span>For <em className="not-italic text-primary/80 font-semibold">{boardTitle}</em></span>
       </p>
-      <div className="flex items-center gap-2.5 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-3 overflow-x-auto scrollbar-none">
         {shown.map((rec) => (
-          <div key={rec.product_id} className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded overflow-hidden bg-muted shrink-0">
+          <button
+            key={rec.product_id}
+            onClick={() => onProductClick?.(rec.product_id)}
+            className="flex items-center gap-2.5 shrink-0 hover:bg-muted/40 rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors cursor-pointer text-left"
+          >
+            <div className="w-11 h-11 rounded overflow-hidden bg-muted shrink-0">
               {rec.image_url && (
                 <img src={rec.image_url} alt={rec.title} className="w-full h-full object-cover" loading="lazy" />
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-medium text-foreground truncate max-w-[120px]">{rec.title}</p>
-              <p className="text-[9px] text-muted-foreground truncate max-w-[120px]">{rec.brand}</p>
+              <p className="text-[11px] font-medium text-foreground truncate max-w-[140px]">{rec.title}</p>
+              <p className="text-[9px] text-muted-foreground truncate max-w-[140px]">{rec.brand}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       {filtered.length > 4 && (

@@ -435,7 +435,10 @@ const TradeGallery = () => {
       </div>
 
       {/* Minimal suggestion strip above grid */}
-      <GalleryInlineSuggestions selectedCategory={selectedCategory} selectedSubcategory={selectedSubcategory} />
+      <GalleryInlineSuggestions selectedCategory={selectedCategory} selectedSubcategory={selectedSubcategory} selectedBrand={selectedBrand} onProductClick={(id) => {
+        const match = allProducts.find(p => p.id === id);
+        if (match) setLightboxProduct(toLightboxItem(match));
+      }} />
 
       {/* Content */}
       {filtered.length === 0 ? (
@@ -547,22 +550,13 @@ const TradeGallery = () => {
                 </div>
                 <div className="p-3 text-center">
                    <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                     {product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                     {product.reedition_by
+                       ? `${product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name} by ${product.reedition_by}`
+                       : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                    </p>
-                   {product.reedition_by && (
-                     <p className="font-body text-[9px] text-muted-foreground/70 italic -mt-0.5 mb-0.5">
-                       Re-edition by {product.reedition_by}
-                     </p>
-                   )}
-                  <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
-                    {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
-                  </h3>
-                  {product.dimensions && (
-                    <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
-                  )}
-                   {product.materials && (
-                    <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
-                  )}
+                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
+                     {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
+                   </h3>
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap")}
@@ -604,11 +598,12 @@ const TradeGallery = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}</p>
-                  <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
-                  <p className="font-body text-[10px] text-muted-foreground truncate">
-                    {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
-                  </p>
+                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
+                     {product.reedition_by
+                       ? `${product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name} by ${product.reedition_by}`
+                       : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                   </p>
+                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
