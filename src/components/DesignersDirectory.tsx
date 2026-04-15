@@ -1487,7 +1487,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 ) : (
                   <div className={`grid gap-4 md:gap-6 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
-                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
+                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} onClick={() => openPickLightbox(pick)} />
                     ))}
                   </div>
                 )
@@ -1558,7 +1558,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                 <div className="grid gap-4 grid-cols-2">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} onClick={() => openPickLightbox(pick)} />
                   ))}
                 </div>
               )
@@ -1601,6 +1601,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       </div>
     </div>
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
+      <PublicProductLightbox
+        product={lightboxPick}
+        allPicks={lightboxItems}
+        onClose={() => setLightboxPick(null)}
+        onSelectRelated={(item) => setLightboxPick(item)}
+      />
     </>
   );
 };
