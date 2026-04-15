@@ -1023,7 +1023,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       const { category, subcategory } = e.detail || {};
       setSelectedCategoryRaw(category || null);
       setSelectedSubcategoryRaw(subcategory || null);
-      setSidebarOpen(false);
+      requestAnimationFrame(() => setSidebarOpen(false));
       broadcastFilter(category || null, subcategory || null);
     };
     window.addEventListener('syncCategoryFilter', handleSync as EventListener);
