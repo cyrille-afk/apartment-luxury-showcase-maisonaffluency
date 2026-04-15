@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
