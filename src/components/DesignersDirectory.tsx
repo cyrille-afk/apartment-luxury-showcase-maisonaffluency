@@ -1020,6 +1020,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       const { category, subcategory } = e.detail || {};
       setSelectedCategoryRaw(category || null);
       setSelectedSubcategoryRaw(subcategory || null);
+      setSidebarOpen(false);
       broadcastFilter(category || null, subcategory || null);
     };
     window.addEventListener('syncCategoryFilter', handleSync as EventListener);
@@ -1439,7 +1440,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  <div className={`grid gap-4 md:gap-6 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
                       <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                     ))}
