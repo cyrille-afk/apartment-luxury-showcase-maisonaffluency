@@ -24,12 +24,6 @@ export function deferHashScrollUntilSheetClosed({
   const finish = () => {
     if (cancelled) return;
 
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${window.location.search}#${id}`,
-    );
-
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (!cancelled) {

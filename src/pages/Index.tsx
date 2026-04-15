@@ -249,12 +249,9 @@ const Index = () => {
     }
   }, [showBelowFoldSections]);
 
-  // Track which section is in view and update the URL hash silently.
-  // Uses replaceState to avoid polluting browser history.
+  // Track which section is in view without mutating the URL.
   useEffect(() => {
     if (!showBelowFoldSections) return;
-
-    // Don't overwrite deep-link hashes (designer/collectible/atelier)
     if (isDeepLink()) return;
 
     const sectionEls = TRACKED_SECTIONS
@@ -263,55 +260,13 @@ const Index = () => {
 
     if (sectionEls.length === 0) return;
 
-    let currentHash = window.location.hash.replace(/^#/, "") || "home";
-    // Debounce to avoid excessive replaceState calls
-    let rafId: number | null = null;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        // Preserve initial section hash on first load (e.g. #designers/#collectibles)
-        // so observer updates don't overwrite it to #gallery before restore scroll runs.
-        const initialSectionHash = parseSectionHash(window.location.hash);
-        if (initialSectionHash && initialSectionHash !== "home" && window.scrollY < 80) {
-          return;
-        }
-
-        // Prefer the first section at/under viewport top; this prevents
-        // deep-link landings from being overwritten by the previous section.
-        let closestPositive: { id: string; top: number } | null = null;
-        let closestNegative: { id: string; top: number } | null = null;
-
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-
-          const top = entry.boundingClientRect.top;
-          const id = entry.target.id;
-
-          if (top >= 0) {
-            if (!closestPositive || top < closestPositive.top) {
-              closestPositive = { id, top };
-            }
-          } else if (!closestNegative || top > closestNegative.top) {
-            closestNegative = { id, top };
-          }
-        }
-
-        const topSection = closestPositive?.id ?? closestNegative?.id ?? null;
-
-        if (topSection && topSection !== currentHash) {
-          currentHash = topSection;
-          if (rafId) cancelAnimationFrame(rafId);
-          rafId = requestAnimationFrame(() => {
-            const newHash = topSection === "home" ? "" : `#${topSection}`;
-            const url = window.location.pathname + window.location.search + newHash;
-            window.history.replaceState(null, "", url);
-          });
-        }
+      () => {
+        // Intentionally keep homepage URLs clean — no section hashes.
       },
       { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
     );
 
-    // Small delay to ensure sections are in the DOM
     const timerId = setTimeout(() => {
       sectionEls.forEach(el => observer.observe(el));
     }, 500);
@@ -319,7 +274,6 @@ const Index = () => {
     return () => {
       clearTimeout(timerId);
       observer.disconnect();
-      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [showBelowFoldSections]);
 
