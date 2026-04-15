@@ -7,6 +7,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import {
   getAllTradeProducts,
   getAllBrands,
@@ -81,7 +82,17 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         tags: pick.tags || [],
         materials: pick.materials ?? undefined,
         dimensions: pick.dimensions ?? undefined,
-        description: pick.description ?? undefined,
+        description: resolveCuratorPickDescription({
+          description: pick.description,
+          title: pick.title,
+          subtitle: pick.subtitle,
+          brandName,
+          category: resolvedCategory,
+          subcategory: resolvedSubcategory,
+          materials: pick.materials,
+          dimensions: pick.dimensions,
+          edition: pick.edition,
+        }) ?? undefined,
         image_url: pick.image_url || null,
         hover_image_url: pick.hover_image_url ?? undefined,
         edition: pick.edition ?? undefined,

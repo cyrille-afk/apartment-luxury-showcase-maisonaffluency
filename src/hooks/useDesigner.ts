@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 
 export interface Designer {
   id: string;
@@ -105,6 +106,16 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
         if (error) throw error;
         return (data || []).map((d) => ({
           ...d,
+          description: resolveCuratorPickDescription({
+            description: d.description,
+            title: d.title,
+            subtitle: d.subtitle,
+            category: d.category,
+            subcategory: d.subcategory,
+            materials: d.materials,
+            dimensions: d.dimensions,
+            edition: d.edition,
+          }),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         })) as DesignerCuratorPick[];
@@ -117,6 +128,16 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
       if (error) throw error;
       return (data || []).map((d) => ({
         ...d,
+        description: resolveCuratorPickDescription({
+          description: d.description,
+          title: d.title,
+          subtitle: d.subtitle,
+          category: d.category,
+          subcategory: d.subcategory,
+          materials: d.materials,
+          dimensions: d.dimensions,
+          edition: d.edition,
+        }),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
       })) as DesignerCuratorPick[];
     },
@@ -170,6 +191,17 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         if (error) throw error;
         return (data || []).map((d) => ({
           ...d,
+          description: resolveCuratorPickDescription({
+            description: d.description,
+            title: d.title,
+            subtitle: d.subtitle,
+            brandName: nameMap[d.designer_id]?.name || designer.name,
+            category: d.category,
+            subcategory: d.subcategory,
+            materials: d.materials,
+            dimensions: d.dimensions,
+            edition: d.edition,
+          }),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
           designer_name: nameMap[d.designer_id]?.name || designer.name,
@@ -187,6 +219,17 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
 
       return (data || []).map((d) => ({
         ...d,
+        description: resolveCuratorPickDescription({
+          description: d.description,
+          title: d.title,
+          subtitle: d.subtitle,
+          brandName: nameMap[d.designer_id]?.name || designer.name,
+          category: d.category,
+          subcategory: d.subcategory,
+          materials: d.materials,
+          dimensions: d.dimensions,
+          edition: d.edition,
+        }),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         designer_name: nameMap[d.designer_id]?.name || designer.name,
         designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
