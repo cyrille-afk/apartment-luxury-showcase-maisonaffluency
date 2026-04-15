@@ -540,11 +540,24 @@ const TradeAtelierProfile = () => {
                   transition={{ ...transition, delay: 0.2 }}
                   className="flex flex-col mt-4"
                 >
-                  {designer.philosophy && (
-                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 whitespace-pre-line font-semibold [text-wrap:pretty]">
-                      "{designer.philosophy}"
-                    </blockquote>
-                  )}
+                  {designer.philosophy && (() => {
+                    const clean = designer.philosophy.replace(/<[^>]+>/g, '');
+                    const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
+                    if (attrMatch) {
+                      return (
+                        <blockquote className="font-display italic leading-snug mb-6 [text-wrap:pretty]">
+                          <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim()}"</span>
+                          <br />
+                          <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
+                        </blockquote>
+                      );
+                    }
+                    return (
+                      <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 whitespace-pre-line font-semibold [text-wrap:pretty]">
+                        "{clean}"
+                      </blockquote>
+                    );
+                  })()}
                   <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
                     About
                   </h2>
