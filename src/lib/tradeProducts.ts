@@ -45,6 +45,25 @@ export function getAllTradeProducts(): TradeProduct[] {
   const addPicks = (brandName: string, picks: CuratorPick[]) => {
     const normalizedBrandName = normalizeBrandToParent(brandName);
 
+    // Detect "Parent - Child" pattern for reedition_by
+    let reeditionBy: string | undefined;
+    if (brandName.includes(' - ')) {
+      const [parentPart, childPart] = brandName.split(' - ').map(s => s.trim());
+      // If normalization collapsed to the parent, the child is the designer
+      if (normalizedBrandName === parentPart) {
+        // The child is the actual designer, parent is the re-edition house
+        reeditionBy = parentPart;
+        // Override brand to child name
+      }
+    }
+
+    // For names like "Ecart - Jean-Michel Frank", use child as brand
+    let displayBrand = normalizedBrandName;
+    if (brandName.includes(' - ') && reeditionBy) {
+      const childPart = brandName.split(' - ').slice(1).join(' - ').trim();
+      displayBrand = childPart;
+    }
+
     for (const pick of picks) {
       if (!pick.title) continue;
       const rawCategory = pick.category || pick.tags?.[0] || undefined;
@@ -54,7 +73,7 @@ export function getAllTradeProducts(): TradeProduct[] {
       const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";
       products.push({
         id: `tp-${idx++}`,
-        brand_name: normalizedBrandName,
+        brand_name: displayBrand,
         product_name: pick.title,
         subtitle: pick.subtitle,
         category: resolvedCategory,
@@ -68,6 +87,7 @@ export function getAllTradeProducts(): TradeProduct[] {
         edition: pick.edition,
         pdf_url: pick.pdfUrl,
         pdf_urls: pick.pdfUrls,
+        reedition_by: reeditionBy,
       });
     }
   };
