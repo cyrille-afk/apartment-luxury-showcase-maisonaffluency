@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
@@ -344,6 +345,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                       <Maximize2 className="h-3 w-3" />
                     </div>
                   </div>
+                  <ProductCardDescriptionOverlay description={(pick as any).description} />
                   {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
                     <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <SpecSheetButton

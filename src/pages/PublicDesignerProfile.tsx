@@ -3,6 +3,7 @@ import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
@@ -786,6 +787,7 @@ const PublicDesignerProfile = () => {
                             <Maximize2 className="h-3 w-3" />
                           </div>
                         </div>
+                        <ProductCardDescriptionOverlay description={pick.description} />
                         {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (
                           <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <SpecSheetButton

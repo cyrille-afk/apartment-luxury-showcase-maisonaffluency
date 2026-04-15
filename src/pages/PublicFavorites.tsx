@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, Trash2 } from "lucide-react";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -216,6 +217,7 @@ const PublicFavorites = () => {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
+                      <ProductCardDescriptionOverlay description={pick.description} />
                     </div>
 
                     {/* Remove button */}
