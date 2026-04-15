@@ -2,9 +2,13 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
+import { useAuth } from "@/hooks/useAuth";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -822,7 +826,7 @@ const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
 };
 
 // ─── Product Pick Card (shown when category filter is active) ────────────────
-const PickCard = ({ pick }: { pick: PickItem }) => {
+const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean }) => {
   const navigate = useNavigate();
   return (
     <button
@@ -837,7 +841,7 @@ const PickCard = ({ pick }: { pick: PickItem }) => {
           <img
             src={pick.image_url}
             alt={pick.title}
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
@@ -845,28 +849,38 @@ const PickCard = ({ pick }: { pick: PickItem }) => {
             <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-            {pick.title}
-          </p>
-          {pick.subtitle && (
-            <p className="font-body text-[10px] text-white/70 mt-0.5">{pick.subtitle}</p>
-          )}
-          <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
-            {pick.designer_name}
-          </p>
-        </div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-          {pick.materials && (
-            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-2 max-w-[90%]">{pick.materials}</p>
-          )}
-          {pick.dimensions && (
-            <p className="font-body text-[10px] text-white/60 text-center mb-4">{pick.dimensions}</p>
-          )}
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-            View
+        {/* Hover action icons */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => { e.stopPropagation(); onFavorite?.(pick.id); }}
+            className={cn(
+              "p-1.5 rounded-full backdrop-blur-sm transition-colors",
+              isFavorited
+                ? "bg-white text-red-500"
+                : "bg-black/40 text-white hover:bg-black/60"
+            )}
+            title={isFavorited ? "Remove from favorites" : "Save to favorites"}
+          >
+            <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
           </span>
         </div>
+      </div>
+      {/* Info below the card */}
+      <div className="px-3 py-3 text-center">
+        <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
+          {pick.designer_name}
+        </p>
+        <p className="font-display text-sm tracking-wide leading-tight">
+          {pick.title}
+        </p>
+        {pick.subtitle && (
+          <p className="font-body text-[11px] text-muted-foreground mt-0.5">{pick.subtitle}</p>
+        )}
+        <p className="font-display text-sm mt-1 text-foreground/70">
+          Price on request
+        </p>
       </div>
     </button>
   );
@@ -918,6 +932,28 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   });
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ─── Public favorites (localStorage-backed) with auth gate ───
+  const { user } = useAuth();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
+  const [favIds, setFavIds] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem("public_favorites");
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch { return new Set(); }
+  });
+
+  const toggleFavorite = useCallback((id: string) => {
+    requireAuth(() => {
+      setFavIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        localStorage.setItem("public_favorites", JSON.stringify([...next]));
+        window.dispatchEvent(new Event("public_favorites_changed"));
+        return next;
+      });
+    }, "save pieces to your favorites");
+  }, [requireAuth]);
 
   const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
 
@@ -1170,6 +1206,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const totalCount = filteredItems.length;
 
   return (
+    <>
     <div ref={sectionRef} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
       {/* Gradient accent band */}
       <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-jade via-jade-light to-accent opacity-80" />
@@ -1404,7 +1441,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 ) : (
                   <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {filteredPicks.map((pick) => (
-                      <PickCard key={pick.id} pick={pick} />
+                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                     ))}
                   </div>
                 )
@@ -1475,7 +1512,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                 <div className="grid gap-4 grid-cols-2">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                   ))}
                 </div>
               )
@@ -1517,6 +1554,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         )}
       </div>
     </div>
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
+    </>
   );
 };
 
