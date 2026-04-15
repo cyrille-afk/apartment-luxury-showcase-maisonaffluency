@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { useQuery } from "@tanstack/react-query";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
