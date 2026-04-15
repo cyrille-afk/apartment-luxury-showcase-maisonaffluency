@@ -46,6 +46,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [imageFailed, setImageFailed] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   // Reset image states when product changes
   useEffect(() => {
