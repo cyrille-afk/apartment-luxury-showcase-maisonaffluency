@@ -17,6 +17,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 
 const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
 const gSet = (id: string) => cloudinarySrcSet(id, [400, 600, 800, 1200, 1600], { quality: "auto:good", crop: "fill" });
@@ -403,21 +404,34 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
       const designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]));
 
-      const mapped: PublicLightboxItem[] = (picks as any[]).map((p) => ({
-        id: p.id,
-        title: p.title,
-        subtitle: p.subtitle || null,
-        image_url: p.image_url,
-        hover_image_url: p.hover_image_url || null,
-        brand_name: designerMap.get(p.designer_id) || "Unknown",
-        materials: p.materials || null,
-        dimensions: p.dimensions || null,
-        description: p.description || null,
-        category: p.category || null,
-        subcategory: p.subcategory || null,
-        pdf_url: p.pdf_url || null,
-        pdf_urls: (p.pdf_urls as any) || null,
-      }));
+      const mapped: PublicLightboxItem[] = (picks as any[]).map((p) => {
+        const brandName = designerMap.get(p.designer_id) || "Unknown";
+
+        return {
+          id: p.id,
+          title: p.title,
+          subtitle: p.subtitle || null,
+          image_url: p.image_url,
+          hover_image_url: p.hover_image_url || null,
+          brand_name: brandName,
+          materials: p.materials || null,
+          dimensions: p.dimensions || null,
+          description: resolveCuratorPickDescription({
+            description: p.description,
+            title: p.title,
+            subtitle: p.subtitle,
+            brandName,
+            category: p.category,
+            subcategory: p.subcategory,
+            materials: p.materials,
+            dimensions: p.dimensions,
+          }),
+          category: p.category || null,
+          subcategory: p.subcategory || null,
+          pdf_url: p.pdf_url || null,
+          pdf_urls: (p.pdf_urls as any) || null,
+        };
+      });
 
       setDbCuratorPicks(mapped);
     };
@@ -437,6 +451,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         brand_name: p.brand_name,
         materials: p.materials || null,
         dimensions: p.dimensions || null,
+        description: resolveCuratorPickDescription({
+          description: p.description,
+          title: p.product_name,
+          subtitle: p.subtitle,
+          brandName: p.brand_name,
+          category: p.category,
+          subcategory: p.subcategory,
+          materials: p.materials,
+          dimensions: p.dimensions,
+        }),
         category: p.category || null,
         subcategory: p.subcategory || null,
         pdf_url: p.pdf_url || null,

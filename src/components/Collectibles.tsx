@@ -21,6 +21,9 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
+import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
+import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { Input } from "@/components/ui/input";
 // Accordion removed — now using card grid layout
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -383,6 +386,34 @@ export const collectibleDesigners: Array<{
     ],
   },
 ];
+
+const resolveCollectiblePickDescription = (
+  pick:
+    | {
+        description?: string;
+        title: string;
+        category?: string;
+        subcategory?: string;
+        materials?: string;
+        dimensions?: string;
+        edition?: string;
+      }
+    | undefined,
+  designerName?: string
+) => {
+  if (!pick) return null;
+
+  return resolveCuratorPickDescription({
+    description: pick.description,
+    title: pick.title,
+    brandName: designerName,
+    category: pick.category,
+    subcategory: pick.subcategory,
+    materials: pick.materials,
+    dimensions: pick.dimensions,
+    edition: pick.edition,
+  });
+};
 
 const Collectibles = () => {
   const navigate = useNavigate();
@@ -1009,6 +1040,7 @@ const Collectibles = () => {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span></div>
                         )}
+                        <ProductCardDescriptionOverlay description={resolveCollectiblePickDescription(pick, designer.name)} />
                         <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
                           <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{pick.title}</p>
                           <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
@@ -1270,6 +1302,12 @@ const Collectibles = () => {
                     onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
                     onMouseLeave={() => setPicksHovered(false)}
                   >
+                    <LightboxDescriptionDropdown
+                      description={resolveCollectiblePickDescription(
+                        curatorPicksDesigner.curatorPicks[curatorPickIndex],
+                        curatorPicksDesigner.name
+                      )}
+                    />
                     {/* Active filter indicator */}
                     {!isZoomed && (selectedCategory || selectedSubcategory) && (
                       <button
