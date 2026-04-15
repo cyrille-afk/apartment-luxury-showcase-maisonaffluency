@@ -403,16 +403,7 @@ const resolveCollectiblePickDescription = (
 ) => {
   if (!pick) return null;
 
-  return resolveCuratorPickDescription({
-    description: pick.description,
-    title: pick.title,
-    brandName: designerName,
-    category: pick.category,
-    subcategory: pick.subcategory,
-    materials: pick.materials,
-    dimensions: pick.dimensions,
-    edition: pick.edition,
-  });
+  return resolveCuratorPickDescription({ description: pick.description });
 };
 
 const Collectibles = () => {
