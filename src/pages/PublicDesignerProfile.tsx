@@ -875,6 +875,7 @@ const PublicDesignerProfile = () => {
           brand_name: designer?.name || "",
           materials: p.materials,
           dimensions: p.dimensions,
+          description: p.description,
           category: p.category,
           subcategory: p.subcategory,
           pdf_url: p.pdf_url || ((p.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
