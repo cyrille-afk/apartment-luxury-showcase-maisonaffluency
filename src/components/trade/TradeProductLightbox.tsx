@@ -359,13 +359,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               )}
             </div>
 
-            {product.description && (
-              <div className="border-l-2 border-[hsl(var(--gold))]/40 pl-3">
-                <p className="font-body text-xs text-muted-foreground leading-relaxed">
-                  {product.description}
-                </p>
-              </div>
-            )}
 
             {product.price && (
               <p className="font-display text-base md:text-lg text-accent font-semibold">
