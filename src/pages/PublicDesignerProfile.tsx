@@ -22,6 +22,7 @@ import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import DesignerInstagramSection from "@/components/DesignerInstagramSection";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -87,8 +88,8 @@ const PublicDesignerProfile = () => {
   const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
   const fromNewIn = searchParams.get("from") === "new-in";
   const { data: designer, isLoading } = useDesigner(slug);
-  const isParentBrand = designer?.founder === designer?.name;
-  const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
+  const isParentBrand = isParentBrandDesigner(designer);
+  const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
