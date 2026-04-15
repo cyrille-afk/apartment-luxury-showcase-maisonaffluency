@@ -978,6 +978,46 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     return fullPicks.filter(matchPick);
   }, [selectedCategory, selectedSubcategory, fullPicks]);
 
+  // ─── Product lightbox state ───
+  const [lightboxPick, setLightboxPick] = useState<PublicLightboxItem | null>(null);
+
+  const lightboxItems = useMemo<PublicLightboxItem[]>(() => {
+    if (!filteredPicks) return [];
+    return filteredPicks.map((p) => ({
+      id: p.id,
+      title: p.title,
+      subtitle: p.subtitle,
+      image_url: p.image_url,
+      hover_image_url: p.hover_image_url,
+      brand_name: p.designer_name || "Unknown",
+      materials: p.materials,
+      dimensions: p.dimensions,
+      description: p.description,
+      category: p.category,
+      subcategory: p.subcategory,
+      pdf_url: p.pdf_url,
+      pdf_urls: p.pdf_urls,
+    }));
+  }, [filteredPicks]);
+
+  const openPickLightbox = useCallback((pick: PickItem) => {
+    setLightboxPick({
+      id: pick.id,
+      title: pick.title,
+      subtitle: pick.subtitle,
+      image_url: pick.image_url,
+      hover_image_url: pick.hover_image_url,
+      brand_name: pick.designer_name || "Unknown",
+      materials: pick.materials,
+      dimensions: pick.dimensions,
+      description: pick.description,
+      category: pick.category,
+      subcategory: pick.subcategory,
+      pdf_url: pick.pdf_url,
+      pdf_urls: pick.pdf_urls,
+    });
+  }, []);
+
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
   }, []);
