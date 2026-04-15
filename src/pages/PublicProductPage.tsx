@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ChevronLeft, Layers, Ruler, Heart, Scale } from "lucide-react";
+import { ChevronDown, Layers, Ruler, Heart, Scale, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -100,6 +100,7 @@ const PublicProductPage: React.FC = () => {
 
   const [favIds, setFavIds] = useState(readFavs);
   const [activeImage, setActiveImage] = useState<"main" | "hover">("main");
+  const [descOpen, setDescOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -222,13 +223,42 @@ const PublicProductPage: React.FC = () => {
               )}
 
               {/* Main image */}
-              <div className="flex-1 aspect-[3/4] bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
-                <img
-                  src={currentImage}
-                  alt={product.title}
-                  className="w-full h-full object-contain"
-                  style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-                />
+              <div className="flex-1 group relative">
+                {/* Collapsible description bar */}
+                {product.description && (
+                  <div
+                    className="absolute top-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-sm border-b border-border/30 cursor-pointer rounded-t-lg"
+                    onClick={() => setDescOpen(!descOpen)}
+                  >
+                    <div className="flex items-center gap-2 px-3.5 py-2.5">
+                      <Info size={14} className="text-muted-foreground shrink-0" />
+                      <p className={cn("font-body text-xs text-foreground leading-relaxed flex-1", !descOpen && "line-clamp-1")}>
+                        {product.description}
+                      </p>
+                      <ChevronDown size={14} className={cn("text-muted-foreground shrink-0 transition-transform duration-200", descOpen && "rotate-180")} />
+                    </div>
+                  </div>
+                )}
+
+                <div className="aspect-[3/4] bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
+                  <img
+                    src={currentImage}
+                    alt={product.title}
+                    className="w-full h-full object-contain"
+                    style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+                  />
+                </div>
+
+                {/* Hover overlay */}
+                {product.description && (
+                  <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-gradient-to-t from-black/60 via-black/30 to-transparent px-5 py-5 rounded-b-lg">
+                      <p className="font-body text-xs text-white leading-relaxed line-clamp-3">
+                        {product.description}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -267,12 +297,6 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Description */}
-              {product.description && (
-                <p className="font-body text-sm text-muted-foreground leading-relaxed">
-                  {product.description}
-                </p>
-              )}
 
               {/* CTAs */}
               <div className="flex flex-col gap-3 mt-2">
