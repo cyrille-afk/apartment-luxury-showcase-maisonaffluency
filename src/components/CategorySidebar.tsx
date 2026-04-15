@@ -24,11 +24,9 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
     onOpenChange?.(open);
   };
 
-  // Auto-open sidebar and expand parent category when a subcategory is selected
+  // Expand parent category accordion when a subcategory is selected (don't force sidebar open)
   useEffect(() => {
     if (activeSubcategory) {
-      setIsOpen(true);
-      // Find and expand parent category
       const parentCat = CATEGORY_ORDER.find(cat => SUBCATEGORY_MAP[cat]?.includes(activeSubcategory));
       if (parentCat) {
         setExpandedCats(prev => {
