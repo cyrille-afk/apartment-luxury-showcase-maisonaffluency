@@ -8,7 +8,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { supabase } from "@/integrations/supabase/client";
@@ -596,9 +596,6 @@ const ShowroomGridView = ({
               ? { cents: rawCents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
-              <TooltipProvider delayDuration={300} key={product.id}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
               <div
                 key={product.id}
                 ref={isHighlighted ? highlightRef : undefined}
@@ -622,6 +619,7 @@ const ShowroomGridView = ({
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
+                  <ProductCardDescriptionOverlay description={product.description} />
                   <button
                     onClick={(e) => { e.stopPropagation(); togglePin(toCompareItem(product)); }}
                     className={cn(
@@ -703,14 +701,6 @@ const ShowroomGridView = ({
                   )}
                 </div>
               </div>
-                  </TooltipTrigger>
-                  {product.description && (
-                    <TooltipContent side="top" className="max-w-xs z-[100]">
-                      <p className="font-body text-xs leading-relaxed line-clamp-4">{product.description}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </TooltipProvider>
             );
           })}
         </div>

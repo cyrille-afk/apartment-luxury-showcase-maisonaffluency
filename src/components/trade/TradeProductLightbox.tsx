@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen, Info } from "lucide-react";
+import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -46,7 +47,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [imageFailed, setImageFailed] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
-  const [descExpanded, setDescExpanded] = useState(false);
+  
 
   // Reset image states when product changes
   useEffect(() => {
@@ -54,7 +55,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
-    setDescExpanded(false);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
@@ -222,44 +222,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             )}
 
             {/* Description overlay on image */}
-            {product.description && (
-              <div className="absolute top-3 left-3 z-10 max-w-[85%]">
-                <button
-                  onClick={(e) => { e.stopPropagation(); setDescExpanded(!descExpanded); }}
-                  className={cn(
-                    "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left",
-                    "bg-background/60 backdrop-blur-sm border border-white/15 text-foreground",
-                    descExpanded ? "rounded-b-none border-b-0" : ""
-                  )}
-                >
-                  <Info size={14} className="shrink-0 mt-0.5 opacity-70" />
-                  <span className={cn(
-                    "font-body text-xs leading-relaxed",
-                    !descExpanded && "line-clamp-2"
-                  )}>
-                    {descExpanded ? "" : product.description.slice(0, 80) + (product.description.length > 80 ? "…" : "")}
-                  </span>
-                  {product.description.length > 80 && (
-                    descExpanded ? <ChevronUp size={14} className="shrink-0 mt-0.5" /> : <ChevronDown size={14} className="shrink-0 mt-0.5" />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {descExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden rounded-b-lg bg-background/60 backdrop-blur-sm border border-white/15 border-t-0 shadow-lg"
-                    >
-                      <p className="font-body text-xs text-foreground leading-relaxed px-3 pb-3 pt-0">
-                        {product.description}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+            <LightboxDescriptionDropdown description={product.description} />
 
             {/* Mobile: secondary action icons overlaid on image bottom-left */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">

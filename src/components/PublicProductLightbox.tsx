@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
+import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -242,6 +243,9 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               <span className="font-body text-sm text-muted-foreground">No image</span>
             )}
 
+            {/* Description overlay on image — mirrors Trade lightbox */}
+            <LightboxDescriptionDropdown description={product.description} />
+
             {/* Mobile: secondary action icons */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
               <button
@@ -325,11 +329,6 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               )}
             </div>
 
-            {product.description && (
-              <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-relaxed">
-                {product.description}
-              </p>
-            )}
 
             {/* Primary CTA — matches "Add to Quote" visual style */}
             <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
