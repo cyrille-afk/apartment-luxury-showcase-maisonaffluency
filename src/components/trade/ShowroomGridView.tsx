@@ -672,6 +672,12 @@ const ShowroomGridView = ({
                     )}
                   </div>
                 </div>
+                {/* Description tooltip — outside overflow-hidden so it's not clipped */}
+                {product.description && (
+                  <div className="absolute inset-x-3 top-12 max-w-[calc(100%-1.5rem)] p-2.5 bg-background/90 backdrop-blur-sm border border-border/50 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-30">
+                    <p className="font-body text-[11px] text-foreground leading-relaxed line-clamp-3">{product.description}</p>
+                  </div>
+                )}
                 <div className="p-3 text-center">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
