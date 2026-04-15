@@ -1,47 +1,82 @@
 
+Goal
+
+Make the description UX identical across Trade and Public:
+- Grid cards: description appears inside the image box, never outside it
+- Lightbox: description lives as an in-image dropdown/info control, not as hardcoded legend text
+- Same data source (`product.description`) everywhere
+
 What I found
 
-- The description data is already flowing into both trade surfaces:
-  - `src/pages/TradeGallery.tsx` gets `description` from `useTradeProducts()`
-  - `src/components/trade/ShowroomGridView.tsx` enriches hotspot products with `description`
-  - `src/components/trade/TradeProductLightbox.tsx` already shows the same description in the lightbox
-- Both grid components already contain the attempted tooltip JSX, so this is no longer a missing-data issue.
-- The current tooltip is still a CSS-only `absolute` box controlled by `group-hover`. Even after moving it outside the image wrapper, it remains fragile inside a dense card grid and can still fail visually because of stacking/hover interactions.
+- Trade grid cards currently use portal tooltips in:
+  - `src/pages/TradeGallery.tsx`
+  - `src/components/trade/ShowroomGridView.tsx`
+- Public lightbox currently shows description in the right-hand text column in:
+  - `src/components/PublicProductLightbox.tsx`
+- Trade lightbox already has the correct direction conceptually: an image-overlay dropdown in:
+  - `src/components/trade/TradeProductLightbox.tsx`
+- Public card grids do not yet mirror the trade card description behavior:
+  - `src/pages/PublicDesignerProfile.tsx`
+  - `src/components/NewInSpotlight.tsx`
+  - `src/pages/PublicFavorites.tsx`
 
-Plan
+Implementation plan
 
-1. Replace the current CSS-only hover box with a real portal-based tooltip
-- Use the existing shared tooltip primitives in `src/components/ui/tooltip.tsx`
-- Render description content through the tooltip portal so it is no longer clipped or buried inside card/grid stacking contexts
+1. Revert the wrong tooltip direction on Trade grids
+- Remove the Radix/portal description tooltip from `TradeGallery.tsx` and `ShowroomGridView.tsx`
+- Put the description back inside the image box as an absolute in-card overlay
+- Keep it clipped within the card bounds on purpose, since that is the requested behavior
 
-2. Apply the same tooltip pattern in both trade card grids
+2. Create one shared in-card description overlay
+- Build a reusable description overlay component for product cards
+- Use the same visual treatment on both Trade and Public product cards
+- Show only when a real trimmed description exists
+- Keep existing hover-image, favorite, pin, quote, and spec-sheet actions working
+
+3. Apply the same in-box overlay to Public product cards
+- Add the shared overlay to:
+  - `PublicDesignerProfile.tsx`
+  - `NewInSpotlight.tsx`
+  - `PublicFavorites.tsx`
+- This makes the Public side mirror the Trade gallery/showroom card behavior
+
+4. Make the lightbox behavior identical on both sides
+- Extract or duplicate the Trade lightbox’s image-based description dropdown pattern into a shared lightbox description component
+- Use it in:
+  - `src/components/trade/TradeProductLightbox.tsx`
+  - `src/components/PublicProductLightbox.tsx`
+- Remove the current hardcoded description paragraph from the Public lightbox legend/details column
+
+5. Keep data flow unchanged, only fix presentation
+- Continue using the existing `description` field already mapped into:
+  - trade lightbox items
+  - public lightbox items
+- No database change needed
+- No change to the description writer logic
+
+Files to update
+
 - `src/pages/TradeGallery.tsx`
 - `src/components/trade/ShowroomGridView.tsx`
-- Remove the current inline `absolute ... group-hover:opacity-100` description block in both files
-- Keep favorite, pin, add-to-quote, and lightbox click behavior unchanged
-
-3. Keep description sourcing aligned with the current lightbox text
-- `TradeGallery`: use the same `product.description` already passed to the lightbox
-- `ShowroomGridView`: keep the current enrichment logic, but normalize empty/whitespace descriptions so the tooltip appears whenever a real description exists
-
-4. Verify the actual surfaces the user is referring to
-- `/trade/gallery`
-- `/trade/showroom` → Product Grid tab
-- Confirm the tooltip appears on hover for cards with descriptions, including items with hover images
+- `src/components/trade/TradeProductLightbox.tsx`
+- `src/components/PublicProductLightbox.tsx`
+- `src/pages/PublicDesignerProfile.tsx`
+- `src/components/NewInSpotlight.tsx`
+- `src/pages/PublicFavorites.tsx`
+- plus 1 shared UI helper for the mirrored description UI
 
 Technical details
 
-- Best implementation: make the image/card area the tooltip trigger and show a compact multi-line tooltip (`max width`, `line clamp`, high z-index)
-- Reason for this approach: the existing code already tried the overflow/z-index fix; a portal tooltip is the robust fix that avoids repeating the same failure mode
-- Files to update:
-  - `src/pages/TradeGallery.tsx`
-  - `src/components/trade/ShowroomGridView.tsx`
-  - possibly a small shared trade tooltip helper component if needed for reuse
+- Card overlay should be rendered inside the image wrapper, not portaled
+- Public lightbox should stop rendering description in the right-side legend/details block
+- Both lightboxes should use the same dropdown trigger, placement, expansion behavior, and truncation rules
+- Empty/whitespace-only descriptions should render nothing
 
 QA checklist
 
-- Hover works in both Trade Gallery and Showroom Product Grid
-- Tooltip is visible above hover image and action buttons
-- Tooltip text matches the lightbox description
-- Cards without descriptions show no empty tooltip
-- Lightbox opening and quote actions still work normally
+- Trade Gallery: description appears inside the card image box
+- Trade Showroom Product Grid: same behavior
+- Public designer/product grids: same in-box behavior
+- Public lightbox: description is no longer hardcoded in the legend
+- Trade and Public lightboxes both show the same dropdown-on-image behavior
+- Hover images, buttons, and lightbox open/close interactions still work normally
