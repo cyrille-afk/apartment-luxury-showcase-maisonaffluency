@@ -47,7 +47,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [imageFailed, setImageFailed] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
-  const [descExpanded, setDescExpanded] = useState(false);
+  
 
   // Reset image states when product changes
   useEffect(() => {
@@ -55,7 +55,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
-    setDescExpanded(false);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
