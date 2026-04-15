@@ -1566,7 +1566,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                 <div className="grid gap-4 grid-cols-2">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} onClick={() => openPickLightbox(pick)} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                   ))}
                 </div>
               )
