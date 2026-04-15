@@ -1,0 +1,1 @@
+UPDATE designers SET founder = NULL WHERE slug = 'kira';
