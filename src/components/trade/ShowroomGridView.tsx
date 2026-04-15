@@ -8,6 +8,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { supabase } from "@/integrations/supabase/client";
