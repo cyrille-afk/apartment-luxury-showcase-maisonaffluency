@@ -457,7 +457,10 @@ const TradeGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
+              <TooltipProvider delayDuration={300} key={product.id}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+              <div className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
                     <>
