@@ -11,6 +11,7 @@ import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
+import { isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { cn } from "@/lib/utils";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
@@ -32,7 +33,7 @@ interface NewInSpotlightProps {
 
 const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const navigate = useNavigate();
-  const isParentBrand = !!(designer.founder && designer.founder === designer.name);
+  const isParentBrand = isParentBrandDesigner(designer);
   const { data: simplePicks = [] } = useDesignerPicks(designer.id, { publicOnly: true });
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
