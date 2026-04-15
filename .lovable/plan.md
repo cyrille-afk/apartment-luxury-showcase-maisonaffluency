@@ -1,82 +1,86 @@
 
-Goal
-
-Make the description UX identical across Trade and Public:
-- Grid cards: description appears inside the image box, never outside it
-- Lightbox: description lives as an in-image dropdown/info control, not as hardcoded legend text
-- Same data source (`product.description`) everywhere
+The issue is real: the previous fixes were aimed at the wrong places and the current behavior is still inconsistent.
 
 What I found
+- The user is on the public `/designers` flow, not a trade category page.
+- `DesignersDirectory` only consumes `category` / `subcategory` URL params on initial mount, then removes them.
+- The nav still uses two different behaviors:
+  - Mobile category panel goes to `/designers?...` when not already on `/` or `/designers`
+  - Desktop mega menu still goes to `/?category=...#designers` when not already on `/` or `/designers`
+- That means filtering can arrive through different routes and different timing paths, which is why the fix keeps looping and feeling “not working”.
 
-- Trade grid cards currently use portal tooltips in:
-  - `src/pages/TradeGallery.tsx`
-  - `src/components/trade/ShowroomGridView.tsx`
-- Public lightbox currently shows description in the right-hand text column in:
-  - `src/components/PublicProductLightbox.tsx`
-- Trade lightbox already has the correct direction conceptually: an image-overlay dropdown in:
-  - `src/components/trade/TradeProductLightbox.tsx`
-- Public card grids do not yet mirror the trade card description behavior:
-  - `src/pages/PublicDesignerProfile.tsx`
-  - `src/components/NewInSpotlight.tsx`
-  - `src/pages/PublicFavorites.tsx`
+Root cause
+- The state change is split between:
+  1. URL params read once on mount
+  2. `setDesignerCategory` event listeners
+- Because those two paths are not unified, some navigations update the page, some only update URL, and some depend on remount timing.
+- Desktop nav is also inconsistent with mobile because it sometimes sends users to homepage designers instead of the dedicated `/designers` page.
 
 Implementation plan
+1. Unify category navigation in `Navigation.tsx`
+- Create one internal helper for category clicks.
+- Behavior:
+  - If current route is `/designers`, dispatch `setDesignerCategory`
+  - If current route is `/`, navigate to `/designers?category=...` (or with subcategory)
+  - For all other public pages, also navigate to `/designers?category=...`
+- Remove the desktop-only fallback to `/?category=...#designers` so both mobile and desktop use the same target.
 
-1. Revert the wrong tooltip direction on Trade grids
-- Remove the Radix/portal description tooltip from `TradeGallery.tsx` and `ShowroomGridView.tsx`
-- Put the description back inside the image box as an absolute in-card overlay
-- Keep it clipped within the card bounds on purpose, since that is the requested behavior
+2. Make `DesignersDirectory` react to URL param changes, not just first mount
+- Replace the mount-only URL-param effect with a reactive effect keyed to location/search params.
+- When category/subcategory appears in the URL:
+  - set selected category/subcategory
+  - close sidebar
+  - keep product grid in its default 3-column state
+  - broadcast the filter once
+  - clean the URL after state is applied
+- This removes the “same page but no visible change” problem.
 
-2. Create one shared in-card description overlay
-- Build a reusable description overlay component for product cards
-- Use the same visual treatment on both Trade and Public product cards
-- Show only when a real trimmed description exists
-- Keep existing hover-image, favorite, pin, quote, and spec-sheet actions working
+3. Remove the self-loop risk inside `DesignersDirectory`
+- Right now URL-param handling dispatches `setDesignerCategory`, which is also listened to in the same component.
+- Refactor so URL-param application updates local state directly instead of rebroadcasting the same event back into itself.
+- Keep `setDesignerCategory` only for true external nav-triggered actions.
 
-3. Apply the same in-box overlay to Public product cards
-- Add the shared overlay to:
-  - `PublicDesignerProfile.tsx`
-  - `NewInSpotlight.tsx`
-  - `PublicFavorites.tsx`
-- This makes the Public side mirror the Trade gallery/showroom card behavior
+4. Keep the grid behavior explicit
+- Preserve the current directory grid rule:
+  - sidebar open = 3/4 columns
+  - sidebar closed = 3 columns
+- Ensure any nav-triggered category selection always forces `sidebarOpen = false`.
 
-4. Make the lightbox behavior identical on both sides
-- Extract or duplicate the Trade lightbox’s image-based description dropdown pattern into a shared lightbox description component
-- Use it in:
-  - `src/components/trade/TradeProductLightbox.tsx`
-  - `src/components/PublicProductLightbox.tsx`
-- Remove the current hardcoded description paragraph from the Public lightbox legend/details column
-
-5. Keep data flow unchanged, only fix presentation
-- Continue using the existing `description` field already mapped into:
-  - trade lightbox items
-  - public lightbox items
-- No database change needed
-- No change to the description writer logic
-
-Files to update
-
-- `src/pages/TradeGallery.tsx`
-- `src/components/trade/ShowroomGridView.tsx`
-- `src/components/trade/TradeProductLightbox.tsx`
-- `src/components/PublicProductLightbox.tsx`
-- `src/pages/PublicDesignerProfile.tsx`
-- `src/components/NewInSpotlight.tsx`
-- `src/pages/PublicFavorites.tsx`
-- plus 1 shared UI helper for the mirrored description UI
+5. Verify both entry points
+- Test these exact cases:
+  - From `/designers`, click “Sofas” in mobile nav
+  - From `/designers`, click “Sofas” in desktop mega menu
+  - From another public page, click “Sofas” and land on `/designers`
+  - Repeat when a filter is already active
+  - Clear filter, then reselect another category
 
 Technical details
+```text
+Current problem:
+nav click
+  -> sometimes dispatch event
+  -> sometimes navigate with query params
+  -> directory reads params only once
+  -> later clicks may not update visible state correctly
 
-- Card overlay should be rendered inside the image wrapper, not portaled
-- Public lightbox should stop rendering description in the right-side legend/details block
-- Both lightboxes should use the same dropdown trigger, placement, expansion behavior, and truncation rules
-- Empty/whitespace-only descriptions should render nothing
+Planned flow:
+nav click
+  -> if on /designers: dispatch event
+  -> else: navigate to /designers?...
+directory
+  -> listens for event
+  -> also reacts to URL search changes
+  -> applies filter directly
+  -> closes sidebar
+  -> renders 3-col product grid
+```
 
-QA checklist
+Files to update
+- `src/components/Navigation.tsx`
+- `src/components/DesignersDirectory.tsx`
 
-- Trade Gallery: description appears inside the card image box
-- Trade Showroom Product Grid: same behavior
-- Public designer/product grids: same in-box behavior
-- Public lightbox: description is no longer hardcoded in the legend
-- Trade and Public lightboxes both show the same dropdown-on-image behavior
-- Hover images, buttons, and lightbox open/close interactions still work normally
+Expected outcome
+- Selecting “Sofas” from All Categories will always close the filter sidebar on `/designers`
+- The product grid will consistently render at the 3-column default
+- Mobile and desktop nav will behave the same
+- No more looping between partial fixes because URL-param and event handling will be unified
