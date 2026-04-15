@@ -549,7 +549,7 @@ const TradeGallery = () => {
                   </div>
                 </div>
                 <div className="p-3 text-center">
-                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                   <p className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-0.5">
                      {product.reedition_by
                        ? `${product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name} by ${product.reedition_by}`
                        : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
