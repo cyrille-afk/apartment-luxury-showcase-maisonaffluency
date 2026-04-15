@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { useQuery } from "@tanstack/react-query";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
@@ -231,6 +232,7 @@ type PickItem = {
   id: string;
   designer_id: string;
   image_url: string;
+  hover_image_url?: string | null;
   title: string;
   subtitle: string | null;
   category: string | null;
@@ -238,6 +240,9 @@ type PickItem = {
   tags: string[] | null;
   materials: string | null;
   dimensions: string | null;
+  description?: string | null;
+  pdf_url?: string | null;
+  pdf_urls?: any | null;
   designer_name?: string;
   designer_slug?: string;
 };
@@ -249,7 +254,7 @@ function useFullCuratorPicks(enabled: boolean) {
       const [{ data: picks }, { data: designers }] = await Promise.all([
         supabase
           .from("designer_curator_picks_public")
-          .select("id, designer_id, image_url, title, subtitle, category, subcategory, tags, materials, dimensions"),
+          .select("id, designer_id, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls"),
         supabase
           .from("designers")
           .select("id, name, slug"),
@@ -826,14 +831,11 @@ const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
 };
 
 // ─── Product Pick Card (shown when category filter is active) ────────────────
-const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean }) => {
-  const navigate = useNavigate();
+const PickCard = ({ pick, onFavorite, isFavorited, onClick }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; onClick?: () => void }) => {
   return (
     <button
       type="button"
-      onClick={() => {
-        if (pick.designer_slug) navigate(`/designers/${pick.designer_slug}`);
-      }}
+      onClick={onClick}
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
@@ -975,6 +977,46 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     };
     return fullPicks.filter(matchPick);
   }, [selectedCategory, selectedSubcategory, fullPicks]);
+
+  // ─── Product lightbox state ───
+  const [lightboxPick, setLightboxPick] = useState<PublicLightboxItem | null>(null);
+
+  const lightboxItems = useMemo<PublicLightboxItem[]>(() => {
+    if (!filteredPicks) return [];
+    return filteredPicks.map((p) => ({
+      id: p.id,
+      title: p.title,
+      subtitle: p.subtitle,
+      image_url: p.image_url,
+      hover_image_url: p.hover_image_url,
+      brand_name: p.designer_name || "Unknown",
+      materials: p.materials,
+      dimensions: p.dimensions,
+      description: p.description,
+      category: p.category,
+      subcategory: p.subcategory,
+      pdf_url: p.pdf_url,
+      pdf_urls: p.pdf_urls,
+    }));
+  }, [filteredPicks]);
+
+  const openPickLightbox = useCallback((pick: PickItem) => {
+    setLightboxPick({
+      id: pick.id,
+      title: pick.title,
+      subtitle: pick.subtitle,
+      image_url: pick.image_url,
+      hover_image_url: pick.hover_image_url,
+      brand_name: pick.designer_name || "Unknown",
+      materials: pick.materials,
+      dimensions: pick.dimensions,
+      description: pick.description,
+      category: pick.category,
+      subcategory: pick.subcategory,
+      pdf_url: pick.pdf_url,
+      pdf_urls: pick.pdf_urls,
+    });
+  }, []);
 
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
@@ -1445,7 +1487,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 ) : (
                   <div className={`grid gap-4 md:gap-6 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
-                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
+                      <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} onClick={() => openPickLightbox(pick)} />
                     ))}
                   </div>
                 )
@@ -1516,7 +1558,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               ) : (
                 <div className="grid gap-4 grid-cols-2">
                   {filteredPicks.map((pick) => (
-                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
+                    <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} onClick={() => openPickLightbox(pick)} />
                   ))}
                 </div>
               )
@@ -1559,6 +1601,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       </div>
     </div>
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
+      <PublicProductLightbox
+        product={lightboxPick}
+        allPicks={lightboxItems}
+        onClose={() => setLightboxPick(null)}
+        onSelectRelated={(item) => setLightboxPick(item)}
+      />
     </>
   );
 };
