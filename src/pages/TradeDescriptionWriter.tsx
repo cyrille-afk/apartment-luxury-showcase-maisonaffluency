@@ -33,7 +33,7 @@ export default function TradeDescriptionWriter() {
         .from("designer_curator_picks")
         .select("id, title, designer_id, designers(display_name, name)")
         .order("title")
-        .limit(500);
+        .limit(1000);
       return (data || []) as any[];
     },
     enabled: source === "curator_picks",
