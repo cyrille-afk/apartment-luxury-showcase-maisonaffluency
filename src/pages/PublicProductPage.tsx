@@ -186,7 +186,7 @@ const PublicProductPage: React.FC = () => {
         <link rel="canonical" href={`https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`} />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground [&_.nav-border]:border-transparent">
+      <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
         <div className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
