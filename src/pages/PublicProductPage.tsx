@@ -188,7 +188,7 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 mb-6 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
             <Link to="/designers" className="hover:text-foreground transition-colors">Designers</Link>
@@ -249,16 +249,6 @@ const PublicProductPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Hover overlay */}
-                {product.description && (
-                  <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-gradient-to-t from-black/60 via-black/30 to-transparent px-5 py-5 rounded-b-lg">
-                      <p className="font-body text-xs text-white leading-relaxed line-clamp-3">
-                        {product.description}
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
