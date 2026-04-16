@@ -81,7 +81,11 @@ const contactOptions = [
 
 const navItems = [...leftNavItems, ...rightNavItems];
 
-const Navigation = () => {
+interface NavigationProps {
+  borderless?: boolean;
+}
+
+const Navigation = ({ borderless = false }: NavigationProps) => {
   const { user } = useAuth();
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
@@ -240,7 +244,12 @@ const Navigation = () => {
     scrollToSection(id);
   };
 
-  return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
+  return <><nav className={cn(
+      "fixed top-0 left-0 right-0 z-50",
+      borderless
+        ? "bg-background border-b border-transparent"
+        : "bg-white backdrop-blur-sm border-b border-border/50"
+    )}>
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
         <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">

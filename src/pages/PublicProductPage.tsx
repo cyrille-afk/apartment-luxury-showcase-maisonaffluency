@@ -35,8 +35,9 @@ interface ProductRow {
   id: string;
   title: string;
   subtitle: string | null;
-  image_url: string;
+  image_url: string | null;
   hover_image_url: string | null;
+  gallery_images?: string[] | null;
   materials: string | null;
   dimensions: string | null;
   description: string | null;
@@ -79,8 +80,33 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       if (!product) return null;
 
+      const brandCandidates = Array.from(new Set([
+        designer.display_name,
+        designer.name,
+      ].filter(Boolean)));
+
+      let tradeProductQuery = supabase
+        .from("trade_products")
+        .select("image_url, gallery_images")
+        .eq("product_name", (product as any).title)
+        .eq("is_active", true)
+        .limit(1);
+
+      if (brandCandidates.length === 1) {
+        tradeProductQuery = tradeProductQuery.eq("brand_name", brandCandidates[0]);
+      } else if (brandCandidates.length > 1) {
+        tradeProductQuery = tradeProductQuery.in("brand_name", brandCandidates);
+      }
+
+      const { data: tradeMatches } = await tradeProductQuery;
+      const tradeProduct = tradeMatches?.[0] as { image_url?: string | null; gallery_images?: string[] | null } | undefined;
+
       return {
-        product: product as unknown as ProductRow,
+        product: {
+          ...(product as unknown as ProductRow),
+          image_url: (product as any).image_url || tradeProduct?.image_url || null,
+          gallery_images: tradeProduct?.gallery_images || null,
+        },
         designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug },
         relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id).slice(0, 6),
       };
@@ -160,7 +186,7 @@ const PublicProductPage: React.FC = () => {
     pick: {
       title: product.title,
       subtitle: product.subtitle || undefined,
-      image: product.image_url,
+      image: product.image_url || "",
       hoverImage: product.hover_image_url || undefined,
       materials: product.materials,
       dimensions: product.dimensions,
@@ -173,7 +199,11 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
-  const images = [product.image_url, product.hover_image_url].filter(Boolean) as string[];
+  const images = Array.from(new Set([
+    product.image_url,
+    ...(product.gallery_images || []),
+    product.hover_image_url,
+  ].filter(Boolean))).slice(0, 4) as string[];
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
@@ -186,7 +216,7 @@ const PublicProductPage: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground">
-        <Navigation />
+        <Navigation borderless />
 
         <div className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main content: image + details */}
@@ -321,8 +351,8 @@ const PublicProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-xl md:text-2xl">{designerDisplay}</h2>
                 </div>
-                <Link
-                  to={`/designers/${designer.slug}`}
+                 <Link
+                   to={`/designers/${designer.slug}?section=picks&expanded=true`}
                   className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
                 >
                   View All

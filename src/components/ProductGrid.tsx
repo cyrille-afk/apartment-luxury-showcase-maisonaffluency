@@ -174,26 +174,45 @@ const _sharedProductList = buildProductList(atelierOnlyPicks);
 
 /** Merge hardcoded + DB picks, deduplicating by designerId + title */
 function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): ProductItem[] {
-  const seen = new Set<string>();
-  const merged: ProductItem[] = [];
+  const merged = new Map<string, ProductItem>();
 
-  // Hardcoded items take precedence
   for (const item of hardcoded) {
     const key = `${item.designerId}::${item.pick.title}`;
-    seen.add(key);
-    merged.push(item);
+    merged.set(key, item);
   }
 
-  // Add DB items not already present
   for (const item of dbPicks) {
     const key = `${item.designerId}::${item.pick.title}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      merged.push(item);
+    const existing = merged.get(key);
+
+    if (!existing) {
+      merged.set(key, item);
+      continue;
     }
+
+    merged.set(key, {
+      ...existing,
+      pick: {
+        ...existing.pick,
+        image: existing.pick.image || item.pick.image,
+        hoverImage: existing.pick.hoverImage || item.pick.hoverImage,
+        subtitle: existing.pick.subtitle || item.pick.subtitle,
+        category: existing.pick.category || item.pick.category,
+        subcategory: existing.pick.subcategory || item.pick.subcategory,
+        tags: existing.pick.tags?.length ? existing.pick.tags : item.pick.tags,
+        materials: existing.pick.materials || item.pick.materials,
+        dimensions: existing.pick.dimensions || item.pick.dimensions,
+        description: existing.pick.description || item.pick.description,
+        photoCredit: existing.pick.photoCredit || item.pick.photoCredit,
+        edition: existing.pick.edition || item.pick.edition,
+        pdfUrl: existing.pick.pdfUrl || item.pick.pdfUrl,
+        pdfFilename: existing.pick.pdfFilename || item.pick.pdfFilename,
+        pdfUrls: existing.pick.pdfUrls || item.pick.pdfUrls,
+      },
+    });
   }
 
-  return merged;
+  return Array.from(merged.values());
 }
 
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
@@ -502,7 +521,7 @@ function singularizeSub(s: string): string {
                   <img
                     src={item.pick.hoverImage}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
-                    className="absolute inset-0 w-full h-full max-w-[90%] max-h-[90%] object-contain m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
                     style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                   />

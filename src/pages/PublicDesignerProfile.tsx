@@ -85,6 +85,7 @@ const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
+  const scrollToSection = searchParams.get("section");
   const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
   const fromNewIn = searchParams.get("from") === "new-in";
   const { data: designer, isLoading } = useDesigner(slug);
@@ -95,6 +96,7 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
+  const picksSectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position
@@ -222,6 +224,16 @@ const PublicDesignerProfile = () => {
 
     return keepOuranosOffFirstRow(arranged.length === stabilizedFiltered.length ? arranged : stabilizedFiltered);
   }, [rawPicks, gridCols, isMobile, displayBiographyImages, displayBiography, designer?.slug, isGrouped]);
+
+  useEffect(() => {
+    if (scrollToSection !== "picks" || picks.length === 0) return;
+
+    const timer = window.setTimeout(() => {
+      picksSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [scrollToSection, picks.length]);
 
   const isDesignerProfile = isChildDesigner;
 
@@ -661,6 +673,8 @@ const PublicDesignerProfile = () => {
 
           {picks.length > 0 && (
             <motion.div
+              id="curators-picks"
+              ref={picksSectionRef}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
