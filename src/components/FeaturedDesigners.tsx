@@ -2411,7 +2411,7 @@ const FeaturedDesigners = () => {
       "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
       "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
     };
-    const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number }[] = [];
+    const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number; isDbPick?: boolean; designerSlug?: string }[] = [];
     const matchPick = (pick: CuratorPick) => {
       if (selectedSubcategory) {
         const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
@@ -2423,15 +2423,34 @@ const FeaturedDesigners = () => {
       }
       return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
     };
+    // Hardcoded designers
+    const seenKeys = new Set<string>();
     for (const designer of featuredDesigners) {
       designer.curatorPicks?.forEach((pick, idx) => {
         if (matchPick(pick)) {
           picks.push({ pick, designer, pickIndex: idx });
+          seenKeys.add(`${designer.id || designer.name}::${pick.title}`);
         }
       });
     }
+    // DB picks (not already in hardcoded)
+    if (dbPicks) {
+      for (const item of dbPicks) {
+        const key = `${item.designerId}::${item.pick.title}`;
+        if (seenKeys.has(key)) continue;
+        if (!matchPick(item.pick)) continue;
+        seenKeys.add(key);
+        picks.push({
+          pick: item.pick,
+          designer: { name: item.designerName, id: item.designerId, curatorPicks: [item.pick] } as any,
+          pickIndex: 0,
+          isDbPick: true,
+          designerSlug: item.designerId,
+        });
+      }
+    }
     return picks;
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, dbPicks]);
 
   // Group filtered designers by first letter for A-Z navigation
   const designerAlphaGroups = useMemo(() => {
