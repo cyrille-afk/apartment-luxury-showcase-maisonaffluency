@@ -186,10 +186,10 @@ const PublicProductPage: React.FC = () => {
         <link rel="canonical" href={`https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`} />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-background text-foreground [&_.nav-border]:border-transparent">
         <Navigation />
 
-        <div className="pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main content: image + details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             {/* Left: Images */}
@@ -232,7 +232,7 @@ const PublicProductPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="aspect-[3/4] bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
+                <div className="aspect-square bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
                   <img
                     src={currentImage}
                     alt={product.title}
