@@ -12,6 +12,7 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -377,13 +378,14 @@ const PublicProductPage: React.FC = () => {
                     to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                     className="group block"
                   >
-                    <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted/10 border border-border group-hover:border-foreground/30 transition-all">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-muted/10 border border-border group-hover:border-foreground/30 transition-all">
                       <img
                         src={rp.image_url}
                         alt={rp.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
+                      <ProductCardDescriptionOverlay description={rp.description} />
                     </div>
                     <div className="mt-2 text-center">
                       <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{designerDisplay}</p>
