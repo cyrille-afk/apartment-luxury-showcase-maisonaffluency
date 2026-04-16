@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
