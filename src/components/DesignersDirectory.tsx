@@ -860,10 +860,12 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
         )}
         {/* Description overlay on hover */}
         {pick.description && (
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 z-[5] pointer-events-none">
-            <p className="font-body text-[11px] leading-relaxed text-white/90 line-clamp-4">
-              {pick.description}
-            </p>
+          <div className="absolute left-3 right-3 top-12 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="bg-background/90 backdrop-blur-sm rounded-lg shadow-lg px-3.5 py-2.5 border border-border/30">
+              <p className="font-body text-xs text-foreground leading-relaxed line-clamp-3">
+                {pick.description}
+              </p>
+            </div>
           </div>
         )}
         {/* Hover action icons */}
