@@ -200,6 +200,10 @@ const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectib
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { data: dbPicks } = useDbCuratorPicks();
+  const [category, setCategory] = useState<string | null>(null);
+  const [subcategory, setSubcategory] = useState<string | null>(null);
+  const [filterSource, setFilterSource] = useState<string | null>(null);
+  const [textQuery, setTextQuery] = useState<string | null>(null);
   const allProducts = useMemo(
     () => mergeWithDbPicks(_sharedProductList, dbPicks || []),
     [dbPicks]
