@@ -2161,11 +2161,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
 ];
 
+function slugifyProduct(s: string) {
+  return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const navigate = useNavigate();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
+  const { data: dbPicks } = useDbCuratorPicks();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [designerGridCols, setDesignerGridCols] = useState<3 | 5>(3);
