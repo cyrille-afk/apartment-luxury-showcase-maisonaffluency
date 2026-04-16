@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
@@ -30,6 +30,7 @@ import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
@@ -2160,11 +2161,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
 ];
 
+function slugifyProduct(s: string) {
+  return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const navigate = useNavigate();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
+  const { data: dbPicks } = useDbCuratorPicks();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [designerGridCols, setDesignerGridCols] = useState<3 | 5>(3);
@@ -2404,7 +2411,7 @@ const FeaturedDesigners = () => {
       "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
       "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
     };
-    const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number }[] = [];
+    const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number; isDbPick?: boolean; designerSlug?: string }[] = [];
     const matchPick = (pick: CuratorPick) => {
       if (selectedSubcategory) {
         const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
@@ -2416,15 +2423,34 @@ const FeaturedDesigners = () => {
       }
       return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
     };
+    // Hardcoded designers
+    const seenKeys = new Set<string>();
     for (const designer of featuredDesigners) {
       designer.curatorPicks?.forEach((pick, idx) => {
         if (matchPick(pick)) {
           picks.push({ pick, designer, pickIndex: idx });
+          seenKeys.add(`${designer.id || designer.name}::${pick.title}`);
         }
       });
     }
+    // DB picks (not already in hardcoded)
+    if (dbPicks) {
+      for (const item of dbPicks) {
+        const key = `${item.designerId}::${item.pick.title}`;
+        if (seenKeys.has(key)) continue;
+        if (!matchPick(item.pick)) continue;
+        seenKeys.add(key);
+        picks.push({
+          pick: item.pick,
+          designer: { name: item.designerName, id: item.designerId, curatorPicks: [item.pick] } as any,
+          pickIndex: 0,
+          isDbPick: true,
+          designerSlug: item.designerId,
+        });
+      }
+    }
     return picks;
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, dbPicks]);
 
   // Group filtered designers by first letter for A-Z navigation
   const designerAlphaGroups = useMemo(() => {
@@ -2743,15 +2769,20 @@ const FeaturedDesigners = () => {
                 : (designerGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-5")
           )}>
               {filteredPicks ? (
-                filteredPicks.map(({ pick, designer, pickIndex }, i) => (
+                filteredPicks.map(({ pick, designer, pickIndex, isDbPick, designerSlug }, i) => (
                   <button
-                    key={`${designer.id}-${pickIndex}`}
+                    key={`${designer.id}-${pickIndex}-${i}`}
                     type="button"
                     onClick={() => {
-                      setCuratorPicksDesigner(designer);
-                      setCuratorPickIndex(pickIndex);
-                      setIsZoomed(false);
-                      setPicksHovered(false);
+                      if (isDbPick && designerSlug) {
+                        const productSlug = slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
+                        navigate(`/designers/${designerSlug}/${productSlug}`);
+                      } else {
+                        setCuratorPicksDesigner(designer);
+                        setCuratorPickIndex(pickIndex);
+                        setIsZoomed(false);
+                        setPicksHovered(false);
+                      }
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
@@ -2920,15 +2951,20 @@ const FeaturedDesigners = () => {
         >
           <div className="grid gap-4 grid-cols-2">
               {filteredPicks ? (
-                filteredPicks.map(({ pick, designer, pickIndex }, i) => (
+                filteredPicks.map(({ pick, designer, pickIndex, isDbPick, designerSlug }, i) => (
                   <button
-                    key={`${designer.id}-${pickIndex}`}
+                    key={`${designer.id}-${pickIndex}-${i}`}
                     type="button"
                     onClick={() => {
-                      setCuratorPicksDesigner(designer);
-                      setCuratorPickIndex(pickIndex);
-                      setIsZoomed(false);
-                      setPicksHovered(false);
+                      if (isDbPick && designerSlug) {
+                        const productSlug = slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
+                        navigate(`/designers/${designerSlug}/${productSlug}`);
+                      } else {
+                        setCuratorPicksDesigner(designer);
+                        setCuratorPickIndex(pickIndex);
+                        setIsZoomed(false);
+                        setPicksHovered(false);
+                      }
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
