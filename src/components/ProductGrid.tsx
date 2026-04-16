@@ -172,14 +172,38 @@ const normalizeSearchText = (value?: string) =>
 // Build once at module level — inputs are static, no need for per-instance useMemo
 const _sharedProductList = buildProductList(atelierOnlyPicks);
 
+/** Merge hardcoded + DB picks, deduplicating by designerId + title */
+function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): ProductItem[] {
+  const seen = new Set<string>();
+  const merged: ProductItem[] = [];
+
+  // Hardcoded items take precedence
+  for (const item of hardcoded) {
+    const key = `${item.designerId}::${item.pick.title}`;
+    seen.add(key);
+    merged.push(item);
+  }
+
+  // Add DB items not already present
+  for (const item of dbPicks) {
+    const key = `${item.designerId}::${item.pick.title}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push(item);
+    }
+  }
+
+  return merged;
+}
+
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
-  const [category, setCategory] = useState<string | null>(null);
-  const [subcategory, setSubcategory] = useState<string | null>(null);
-  const [filterSource, setFilterSource] = useState<string | null>(null);
-  const [textQuery, setTextQuery] = useState<string | null>(null);
-  const allProducts = _sharedProductList;
+  const { data: dbPicks } = useDbCuratorPicks();
+  const allProducts = useMemo(
+    () => mergeWithDbPicks(_sharedProductList, dbPicks || []),
+    [dbPicks]
+  );
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
