@@ -190,15 +190,6 @@ const PublicProductPage: React.FC = () => {
         <Navigation />
 
         <div className="pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 mb-6 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-            <Link to="/designers" className="hover:text-foreground transition-colors">Designers</Link>
-            <span>/</span>
-            <Link to={`/designers/${designer.slug}`} className="hover:text-foreground transition-colors">{designerDisplay}</Link>
-            <span>/</span>
-            <span className="text-foreground">{product.title}</span>
-          </nav>
-
           {/* Main content: image + details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             {/* Left: Images */}
