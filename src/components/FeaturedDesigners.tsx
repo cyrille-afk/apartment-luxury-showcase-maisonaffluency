@@ -2769,15 +2769,20 @@ const FeaturedDesigners = () => {
                 : (designerGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-5")
           )}>
               {filteredPicks ? (
-                filteredPicks.map(({ pick, designer, pickIndex }, i) => (
+                filteredPicks.map(({ pick, designer, pickIndex, isDbPick, designerSlug }, i) => (
                   <button
-                    key={`${designer.id}-${pickIndex}`}
+                    key={`${designer.id}-${pickIndex}-${i}`}
                     type="button"
                     onClick={() => {
-                      setCuratorPicksDesigner(designer);
-                      setCuratorPickIndex(pickIndex);
-                      setIsZoomed(false);
-                      setPicksHovered(false);
+                      if (isDbPick && designerSlug) {
+                        const productSlug = slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
+                        navigate(`/designers/${designerSlug}/${productSlug}`);
+                      } else {
+                        setCuratorPicksDesigner(designer);
+                        setCuratorPickIndex(pickIndex);
+                        setIsZoomed(false);
+                        setPicksHovered(false);
+                      }
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
