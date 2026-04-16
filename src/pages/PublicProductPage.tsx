@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ChevronDown, Layers, Ruler, Heart, Scale, Info } from "lucide-react";
+import { Layers, Ruler, Heart, Scale, Info, ChevronDown } from "lucide-react";
+import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
