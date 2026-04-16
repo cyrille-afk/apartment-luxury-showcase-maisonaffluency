@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ChevronDown, Layers, Ruler, Heart, Scale, Info } from "lucide-react";
+import { Layers, Ruler, Heart, Scale, Info, ChevronDown } from "lucide-react";
+import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
@@ -100,7 +101,6 @@ const PublicProductPage: React.FC = () => {
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const [favIds, setFavIds] = useState(readFavs);
-  const [activeImage, setActiveImage] = useState<"main" | "hover">("main");
   const [descOpen, setDescOpen] = useState(false);
 
   useEffect(() => {
@@ -174,7 +174,6 @@ const PublicProductPage: React.FC = () => {
 
   const pinned = isPinned(product.title, product.id);
   const images = [product.image_url, product.hover_image_url].filter(Boolean) as string[];
-  const currentImage = activeImage === "hover" && product.hover_image_url ? product.hover_image_url : product.image_url;
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
@@ -192,56 +191,24 @@ const PublicProductPage: React.FC = () => {
         <div className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main content: image + details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            {/* Left: Images */}
-            <div className="flex gap-4">
-              {/* Thumbnails */}
-              {images.length > 1 && (
-                <div className="hidden md:flex flex-col gap-2 w-20 shrink-0">
-                  {images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImage(i === 0 ? "main" : "hover")}
-                      className={cn(
-                        "aspect-square rounded-md overflow-hidden border-2 transition-all",
-                        (i === 0 ? activeImage === "main" : activeImage === "hover")
-                          ? "border-foreground"
-                          : "border-border hover:border-foreground/30"
-                      )}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    </button>
-                  ))}
+            {/* Left: Image Gallery */}
+            <div className="relative">
+              {/* Collapsible description bar */}
+              {product.description && (
+                <div
+                  className="absolute top-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-sm border-b border-border/30 cursor-pointer rounded-t-lg"
+                  onClick={() => setDescOpen(!descOpen)}
+                >
+                  <div className="flex items-center gap-2 px-3.5 py-2.5">
+                    <Info size={14} className="text-muted-foreground shrink-0" />
+                    <p className={cn("font-body text-xs text-foreground leading-relaxed flex-1", !descOpen && "line-clamp-1")}>
+                      {product.description}
+                    </p>
+                    <ChevronDown size={14} className={cn("text-muted-foreground shrink-0 transition-transform duration-200", descOpen && "rotate-180")} />
+                  </div>
                 </div>
               )}
-
-              {/* Main image */}
-              <div className="flex-1 group relative">
-                {/* Collapsible description bar */}
-                {product.description && (
-                  <div
-                    className="absolute top-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-sm border-b border-border/30 cursor-pointer rounded-t-lg"
-                    onClick={() => setDescOpen(!descOpen)}
-                  >
-                    <div className="flex items-center gap-2 px-3.5 py-2.5">
-                      <Info size={14} className="text-muted-foreground shrink-0" />
-                      <p className={cn("font-body text-xs text-foreground leading-relaxed flex-1", !descOpen && "line-clamp-1")}>
-                        {product.description}
-                      </p>
-                      <ChevronDown size={14} className={cn("text-muted-foreground shrink-0 transition-transform duration-200", descOpen && "rotate-180")} />
-                    </div>
-                  </div>
-                )}
-
-                <div className="aspect-square bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
-                  <img
-                    src={currentImage}
-                    alt={product.title}
-                    className="w-full h-full object-contain"
-                    style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-                  />
-                </div>
-
-              </div>
+              <ProductImageGallery images={images} alt={product.title} />
             </div>
 
             {/* Right: Product details */}
