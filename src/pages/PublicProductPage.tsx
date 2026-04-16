@@ -101,7 +101,6 @@ const PublicProductPage: React.FC = () => {
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const [favIds, setFavIds] = useState(readFavs);
-  const [activeImage, setActiveImage] = useState<"main" | "hover">("main");
   const [descOpen, setDescOpen] = useState(false);
 
   useEffect(() => {
