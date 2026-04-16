@@ -30,6 +30,7 @@ import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
