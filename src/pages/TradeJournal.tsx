@@ -443,7 +443,7 @@ const TradeJournal = () => {
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
                 Content <span className="text-muted-foreground/50">(Markdown)</span>
               </label>
-              <div className="flex items-center gap-1 mb-1">
+              <div className="flex items-center gap-1 mb-1 flex-wrap">
                 {[
                   { label: "B", wrap: "**", title: "Bold" },
                   { label: "I", wrap: "*", title: "Italic" },
@@ -453,6 +453,7 @@ const TradeJournal = () => {
                   { label: "❝", prefix: "> ", title: "Blockquote" },
                   { label: "—", prefix: "\n---\n", title: "Divider" },
                   { label: "📷", title: "Inline Image" },
+                  { label: "🖼️🖼️", title: "Side-by-side image pair" },
                 ].map((btn) => (
                   <button
                     key={btn.label}
@@ -474,6 +475,17 @@ const TradeJournal = () => {
                         if (!imgUrl) return;
                         const alt = prompt("Alt text / caption (optional):") || "image";
                         replacement = `\n![${alt}](${imgUrl})\n`;
+                        cursorOffset = start + replacement.length;
+                      } else if (btn.label === "🖼️🖼️") {
+                        const url1 = prompt("First image URL:") || "";
+                        if (!url1) return;
+                        const cap1 = prompt("First caption (optional):") || "";
+                        const url2 = prompt("Second image URL:") || "";
+                        if (!url2) return;
+                        const cap2 = prompt("Second caption (optional):") || "";
+                        const line1 = cap1 ? `${url1} | ${cap1}` : url1;
+                        const line2 = cap2 ? `${url2} | ${cap2}` : url2;
+                        replacement = `\n\n:::pair\n${line1}\n${line2}\n:::\n\n`;
                         cursorOffset = start + replacement.length;
                       } else if (btn.label === "Link") {
                         replacement = selected ? `[${selected}](url)` : `[link text](url)`;
