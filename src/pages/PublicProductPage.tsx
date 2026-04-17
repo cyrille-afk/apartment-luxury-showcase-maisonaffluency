@@ -14,8 +14,8 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
-import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
+import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -212,6 +212,19 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
+  const rawSubcategory = product.subcategory?.trim();
+  const normalizedSubcategory = rawSubcategory
+    ? Object.entries(SUBCATEGORY_MAP).find(([, values]) =>
+        values.some((value) => value.toLowerCase() === rawSubcategory.toLowerCase())
+      )?.[0] || rawSubcategory
+    : null;
+
+  const fallbackGridParams = new URLSearchParams();
+  if (product.category) fallbackGridParams.set("category", product.category);
+  if (normalizedSubcategory) fallbackGridParams.set("subcategory", normalizedSubcategory);
+  const fallbackGridQuery = fallbackGridParams.toString();
+  const fallbackGridPath = `/designers${fallbackGridQuery ? `?${fallbackGridQuery}` : ""}`;
+
   // If admin has set gallery_images, use them as the sole source of truth (admin controls order & count).
   // Otherwise fall back to image_url + hover_image_url.
   const galleryFromAdmin = (product.gallery_images || []).filter(Boolean) as string[];
@@ -262,7 +275,6 @@ const PublicProductPage: React.FC = () => {
                 return;
               }
 
-              const fallbackGridPath = designerSlug ? `/designers/${designerSlug}?category=Armchairs` : "/?category=Armchairs";
               navigate(fallbackGridPath);
             }}
             className="inline-flex items-center gap-1.5 mb-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
@@ -280,20 +292,7 @@ const PublicProductPage: React.FC = () => {
             </div>
 
             <div className="relative flex flex-col gap-4">
-              <button
-                onClick={() => {
-                  requireAuth(() => toggleFavorite(product.id), "save pieces to your favorites");
-                }}
-                aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-                className={cn(
-                  "absolute -top-1 right-0 w-9 h-9 rounded-full flex items-center justify-center transition-colors",
-                  favorited ? "text-destructive" : "text-foreground/70 hover:text-foreground"
-                )}
-              >
-                <Heart size={20} className={cn(favorited && "fill-current")} />
-              </button>
-
-              <div className="pr-12">
+              <div>
                 <Link
                   to={`/designers/${designer.slug}`}
                   className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
