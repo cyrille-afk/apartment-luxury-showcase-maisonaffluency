@@ -2944,11 +2944,13 @@ const BrandsAteliers = () => {
         const picks = designerId ? atelierOnlyPicks[designerId]?.curatorPicks || [] : [];
 
         return picks.some((pick) => {
+          const canonicalSub = normalizeSubcategory(pick.subcategory) || pick.subcategory;
           const fields = [
             pick.title,
             pick.subtitle,
             pick.category,
             pick.subcategory,
+            canonicalSub,
             ...(pick.tags || []),
           ]
             .filter(Boolean)
