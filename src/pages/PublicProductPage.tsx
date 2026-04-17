@@ -437,10 +437,10 @@ const PublicProductPage: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Pagination: dots + arrows, bottom-right */}
+                  {/* Pagination: centered dots with arrows on the right */}
                   {relatedPicks.length > visibleCount && (
-                    <div className="mt-6 flex items-center justify-between gap-4">
-                      {/* Dots */}
+                    <div className="mt-6 relative flex items-center justify-center">
+                      {/* Dots (centered) */}
                       <div className="flex items-center gap-1.5">
                         {Array.from({ length: maxIndex + 1 }).map((_, i) => (
                           <button
@@ -457,8 +457,8 @@ const PublicProductPage: React.FC = () => {
                           />
                         ))}
                       </div>
-                      {/* Arrows */}
-                      <div className="flex items-center gap-3">
+                      {/* Arrows (absolute right) */}
+                      <div className="absolute right-0 flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
