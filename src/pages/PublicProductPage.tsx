@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, Layers, Ruler } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
@@ -251,6 +251,7 @@ const PublicProductPage: React.FC = () => {
           <button
             onClick={() => {
               if (fromPath) navigate(fromPath);
+              else if (window.history.length > 1) navigate(-1);
               else navigate(`/designers/${designer.slug}`);
             }}
             className="inline-flex items-center gap-1.5 mb-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
@@ -267,7 +268,7 @@ const PublicProductPage: React.FC = () => {
               />
             </div>
 
-            <div className="relative flex flex-col gap-5">
+            <div className="relative flex flex-col gap-4">
               <button
                 onClick={() => {
                   requireAuth(() => toggleFavorite(product.id), "save pieces to your favorites");
@@ -284,35 +285,73 @@ const PublicProductPage: React.FC = () => {
               <div className="pr-12">
                 <Link
                   to={`/designers/${designer.slug}`}
-                  className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
+                  className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
                 </Link>
-                <h1 className="font-display text-3xl md:text-4xl mt-2 leading-tight">
+                <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
                   {product.title}
                   {product.subtitle && ` ${product.subtitle}`}
                 </h1>
               </div>
 
-              <p className="font-display text-xl text-foreground/80">Price on request</p>
-
-              <Link
-                to="/trade-program"
-                className="flex items-center justify-center px-5 py-4 rounded-md font-body text-xs uppercase tracking-[0.15em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 mt-1"
-              >
-                Request a Quote or a Customisation
-              </Link>
-
-              <div className="flex flex-col gap-4 pt-4 text-foreground/85 font-body text-sm leading-relaxed">
+              {/* Materials & dimensions with gold icons */}
+              <div className="flex flex-col gap-2">
                 {product.materials && (
-                  <p>{product.materials}</p>
+                  <div className="flex gap-1.5 items-start">
+                    <Layers size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      {product.materials}
+                    </p>
+                  </div>
                 )}
                 {product.dimensions && (
-                  <p className="whitespace-pre-line">{product.dimensions}</p>
+                  <div className="flex gap-1.5 items-start">
+                    <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                    <p className="font-body text-xs md:text-sm text-foreground font-medium whitespace-pre-line">
+                      {product.dimensions}
+                    </p>
+                  </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-2">
+              {/* Primary CTA — Price on Request */}
+              <Link
+                to="/trade-program"
+                className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                Price on Request
+              </Link>
+
+              {/* Secondary actions: Favorite / Pin / Spec Sheet */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => toggleFavorite(product.id)}
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    favorited
+                      ? "border-destructive/30 text-destructive bg-destructive/10"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  )}
+                >
+                  <Heart size={13} className={cn(favorited && "fill-current")} />
+                  {favorited ? "Favorited" : "Favorite"}
+                </button>
+
+                <button
+                  onClick={() => togglePin(compareItem)}
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    pinned
+                      ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
+                >
+                  <Scale size={13} />
+                  {pinned ? "Pinned" : "Pin to Selection"}
+                </button>
+
                 {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
                   <SpecSheetButton
                     pdfUrl={product.pdf_url}
@@ -327,26 +366,13 @@ const PublicProductPage: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <button
-                    onClick={() => togglePin(compareItem)}
-                    className={cn(
-                      "flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.15em] transition-all border",
-                      pinned
-                        ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
-                        : "border-foreground text-foreground hover:bg-foreground/5",
-                      compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                    )}
+                  <Link
+                    to="/contact"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   >
-                    <Scale size={14} />
-                    {pinned ? "Pinned" : "Compare"}
-                  </button>
+                    Contact Us
+                  </Link>
                 )}
-                <Link
-                  to="/contact"
-                  className="flex items-center justify-center px-4 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.15em] transition-all bg-foreground text-background hover:bg-foreground/90"
-                >
-                  Contact Us
-                </Link>
               </div>
 
               <a
@@ -356,7 +382,7 @@ const PublicProductPage: React.FC = () => {
                 Send to a Friend
               </a>
 
-              <p className="font-body text-[11px] text-muted-foreground text-center mt-2">
+              <p className="font-body text-[11px] text-muted-foreground text-center">
                 For pricing and availability, please{" "}
                 <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
                   join our Trade Program
