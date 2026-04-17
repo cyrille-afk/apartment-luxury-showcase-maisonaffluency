@@ -683,6 +683,7 @@ export type Database = {
           designer_id: string
           dimensions: string | null
           edition: string | null
+          gallery_images: string[] | null
           hover_image_url: string | null
           id: string
           image_url: string
@@ -708,6 +709,7 @@ export type Database = {
           designer_id: string
           dimensions?: string | null
           edition?: string | null
+          gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string
           image_url?: string
@@ -733,6 +735,7 @@ export type Database = {
           designer_id?: string
           dimensions?: string | null
           edition?: string | null
+          gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string
           image_url?: string
