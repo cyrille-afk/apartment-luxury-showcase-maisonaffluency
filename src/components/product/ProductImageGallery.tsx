@@ -48,14 +48,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             className="w-full h-full object-contain"
             style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
           />
-          {overlay && (
-            <div className="absolute top-3 left-3 z-10 pointer-events-none max-w-[60%]">
-              <div className="pointer-events-auto inline-block max-w-full">
-                {overlay}
-              </div>
-            </div>
-          )}
         </div>
+        {/* Description overlay sits ABOVE the image container so the expanded
+            panel is not clipped by overflow-hidden */}
+        {overlay && (
+          <div className="absolute top-0 left-0 z-20 max-w-[70%]">
+            {overlay}
+          </div>
+        )}
 
         {/* Prev / Next arrows */}
         {images.length > 1 && (
