@@ -57,7 +57,7 @@ serve(async (req) => {
     if (source === "curator_picks") {
       const { data: pick, error } = await supabase
         .from("designer_curator_picks")
-        .select("title, materials, dimensions, category, subcategory, edition, description, lead_time, photo_credit, designer_id")
+        .select("title, subtitle, materials, dimensions, category, subcategory, edition, description, lead_time, photo_credit, designer_id")
         .eq("id", product_id)
         .single();
 
@@ -68,19 +68,25 @@ serve(async (req) => {
         );
       }
 
-      // Fetch designer context
-      const { data: designer } = await supabase
+      // Fetch parent brand/atelier context
+      const { data: brand } = await supabase
         .from("designers")
         .select("name, display_name, specialty, philosophy, biography, founder")
         .eq("id", pick.designer_id)
         .single();
 
-      const designerName = designer?.display_name || designer?.name || "Unknown";
+      const brandName = brand?.display_name || brand?.name || "Unknown";
+
+      // The actual creator of the piece is stored in subtitle (e.g. "Yabu Pushelberg" for a Man of Parts piece).
+      // The `designers` row is the parent atelier/brand (e.g. "Man of Parts").
+      const actualDesigner = (pick.subtitle || "").trim();
+      const isCollaboration = actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
 
       productContext = `
 ## PRODUCT DATA
 - **Title**: ${pick.title}
-- **Designer/Atelier**: ${designerName}
+- **Designed by**: ${actualDesigner || brandName}
+- **Brand / Atelier**: ${brandName}${isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
 - **Materials**: ${pick.materials || "Not specified"}
 - **Dimensions**: ${pick.dimensions || "Not specified"}
 - **Category**: ${pick.category || ""}${pick.subcategory ? ` > ${pick.subcategory}` : ""}
@@ -89,12 +95,17 @@ serve(async (req) => {
 - **Photo Credit**: ${pick.photo_credit || "N/A"}
 - **Existing Description**: ${pick.description || "None — generate from scratch"}
 
-## DESIGNER CONTEXT
-- **Name**: ${designerName}
-- **Founder**: ${designer?.founder || "N/A"}
-- **Specialty**: ${designer?.specialty || "Collectible design"}
-- **Philosophy**: ${designer?.philosophy || "Not available"}
-- **Biography excerpt**: ${(designer?.biography || "").slice(0, 600)}
+## BRAND / ATELIER CONTEXT (publisher of the piece)
+- **Name**: ${brandName}
+- **Founder**: ${brand?.founder || "N/A"}
+- **Specialty**: ${brand?.specialty || "Collectible design"}
+- **Philosophy**: ${brand?.philosophy || "Not available"}
+- **Biography excerpt**: ${(brand?.biography || "").slice(0, 600)}
+${isCollaboration ? `
+## ATTRIBUTION RULE
+This piece was DESIGNED BY ${actualDesigner} and PRODUCED/PUBLISHED BY ${brandName}.
+Always credit the design to ${actualDesigner}. You may reference ${brandName} as the atelier/editor that commissioned or produces the piece.
+Never imply the piece was designed by ${brandName} or its founder.` : ""}
 `;
     } else {
       const { data: product, error } = await supabase
