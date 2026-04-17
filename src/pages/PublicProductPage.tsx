@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, Globe, Lock, BookOpen } from "lucide-react";
+import { Heart, Scale } from "lucide-react";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -332,13 +333,22 @@ const PublicProductPage: React.FC = () => {
 
           <div className="mt-16 pt-10 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
-              { icon: Globe, label: "Insured Worldwide Delivery" },
-              { icon: Lock, label: "Secure Payment" },
-              { icon: BookOpen, label: "Certificate of Authenticity" },
-            ].map(({ icon: Icon, label }) => (
+              {
+                label: "Insured Worldwide Delivery",
+                image: cloudinaryUrl("v1773473193/quality-control_dvxvmb", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
+              },
+              {
+                label: "Secure Payment",
+                image: cloudinaryUrl("v1773730098/Screen_Shot_2026-03-17_at_2.47.21_PM_lg1da3", { width: 480, height: 480, quality: "auto:good", crop: "fill", gravity: "north" }),
+              },
+              {
+                label: "Certificate of Authenticity",
+                image: cloudinaryUrl("details-console_hk6uxt", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
+              },
+            ].map(({ label, image }) => (
               <div key={label} className="flex flex-col items-center text-center gap-3">
-                <div className="w-14 h-14 rounded-full bg-muted/40 flex items-center justify-center text-foreground/70">
-                  <Icon size={22} strokeWidth={1.4} />
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-muted/40">
+                  <img src={image} alt={label} className="w-full h-full object-cover" loading="lazy" />
                 </div>
                 <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
               </div>
