@@ -797,6 +797,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       setActiveMegaCat(null);
                       setActiveMegaSub(null);
                       setMegaMenuOpen(false);
+                      if (window.location.pathname.startsWith("/products-category/")) {
+                        navigate("/");
+                      }
                     }}
                     className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 px-5 py-1.5 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
                   >
