@@ -201,11 +201,13 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
-  const images = Array.from(new Set([
-    ...((product.gallery_images || []).filter(Boolean)),
-    product.image_url,
-    product.hover_image_url,
-  ].filter(Boolean))) as string[];
+  // If admin has set gallery_images, use them as the sole source of truth (admin controls order & count).
+  // Otherwise fall back to image_url + hover_image_url.
+  const galleryFromAdmin = (product.gallery_images || []).filter(Boolean) as string[];
+  const images = (galleryFromAdmin.length > 0
+    ? galleryFromAdmin
+    : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
+  ) as string[];
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
