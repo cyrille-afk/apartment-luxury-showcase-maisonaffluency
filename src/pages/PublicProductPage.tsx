@@ -215,6 +215,27 @@ const PublicProductPage: React.FC = () => {
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
+  // Build brand summary from biography: strip media URLs (lines starting with http) and pipe-delimited captions.
+  const brandSummary = (() => {
+    const bio = (designer as any).biography as string | undefined;
+    if (!bio) return "";
+    const cleaned = bio
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter((line) => line && !/^https?:\/\//i.test(line.split("|")[0].trim()))
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (cleaned.length <= 480) return cleaned;
+    return cleaned.slice(0, 480).replace(/\s+\S*$/, "") + "…";
+  })();
+
+  // Carousel: 3 visible at a time
+  const visibleCount = 3;
+  const maxIndex = Math.max(0, relatedPicks.length - visibleCount);
+  const safeIndex = Math.min(relatedIndex, maxIndex);
+  const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
+
   return (
     <>
       <Helmet>
