@@ -377,7 +377,7 @@ const PublicProductPage: React.FC = () => {
               },
               {
                 label: "Certificate of Authenticity",
-                image: cloudinaryUrl("details-console_hk6uxt", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
+                image: cloudinaryUrl("v1776392079/Screen_Shot_2026-04-17_at_10.14.17_AM_ovaxxl", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
               },
             ].map(({ label, image }) => (
               <div key={label} className="flex flex-col items-center text-center gap-3">
