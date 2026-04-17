@@ -487,13 +487,24 @@ const PublicProductPage: React.FC = () => {
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                       >
-                        <div className="aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
+                        <div className="relative aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           <img
                             src={rp.image_url}
                             alt={rp.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            className={cn(
+                              "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+                              rp.hover_image_url ? "group-hover:opacity-0" : "group-hover:scale-105"
+                            )}
                             loading="lazy"
                           />
+                          {rp.hover_image_url && (
+                            <img
+                              src={rp.hover_image_url}
+                              alt={rp.title}
+                              className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                              loading="lazy"
+                            />
+                          )}
                         </div>
                         <p className="font-body text-xs text-muted-foreground mt-2 text-center group-hover:text-foreground transition-colors truncate">
                           {rp.title}
