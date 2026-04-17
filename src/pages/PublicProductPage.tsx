@@ -300,17 +300,27 @@ const PublicProductPage: React.FC = () => {
             </div>
 
             <div className="relative flex flex-col gap-4">
-              <div>
-                <Link
-                  to={`/designers/${designer.slug}`}
-                  className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
-                >
-                  {designerDisplay}
-                </Link>
-                <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
-                  {product.title}
-                  {product.subtitle && ` by ${product.subtitle}`}
-                </h1>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Link
+                    to={`/designers/${designer.slug}`}
+                    className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
+                  >
+                    {designerDisplay}
+                  </Link>
+                  <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
+                    {product.title}
+                    {product.subtitle && ` by ${product.subtitle}`}
+                  </h1>
+                </div>
+                <div className="shrink-0 mt-1">
+                  <ShareMenu
+                    url={buildPieceOgUrl(designerDisplay, product.title)}
+                    message={`${product.title} by ${designerDisplay} — Maison Affluency: ${buildPieceOgUrl(designerDisplay, product.title)}`}
+                    iconSize="w-4 h-4"
+                    showLabel={false}
+                  />
+                </div>
               </div>
 
               {/* Materials & dimensions with gold icons */}
@@ -328,6 +338,14 @@ const PublicProductPage: React.FC = () => {
                     <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
                     <p className="font-body text-xs md:text-sm text-foreground font-medium whitespace-pre-line">
                       {product.dimensions}
+                    </p>
+                  </div>
+                )}
+                {product.lead_time && (
+                  <div className="flex gap-1.5 items-start">
+                    <Clock size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {product.lead_time}
                     </p>
                   </div>
                 )}
