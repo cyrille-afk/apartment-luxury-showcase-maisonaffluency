@@ -30,12 +30,19 @@ const CategoryRoute = () => {
     const detail = { category, subcategory, source: "url" };
     window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
 
-    // 3. Poll for the scroll target — Suspense chunks may mount late on mobile.
+    // 3. Reset scroll immediately so we don't retain prior page's position
+    // (e.g. scrolled-to-bottom product page) while waiting for the target.
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    // 4. Poll for the scroll target — Suspense chunks may mount late on mobile.
+    // Prefer #product-grid (the filtered products section) over #designers
+    // (the directory below it), so the user lands on the actual results.
     let cancelled = false;
     const start = performance.now();
     const tryScroll = () => {
       if (cancelled) return;
       const target =
+        document.getElementById("product-grid") ||
         document.getElementById("designers") ||
         document.getElementById("featured-designers") ||
         document.querySelector("[data-section='designers']");
@@ -45,7 +52,7 @@ const CategoryRoute = () => {
         target.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
-      if (performance.now() - start < 2500) {
+      if (performance.now() - start < 4000) {
         window.setTimeout(tryScroll, 100);
       }
     };
