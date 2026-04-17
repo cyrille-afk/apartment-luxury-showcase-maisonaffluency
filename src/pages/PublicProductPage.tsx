@@ -126,13 +126,18 @@ const PublicProductPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const stateFrom = (location.state as { from?: string } | null)?.from;
-  const fromPath = stateFrom || (typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") || undefined : undefined);
+  const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
+  const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
+  const fromPath = stateFrom || (isGridUrl(storedFrom) ? storedFrom! : undefined);
 
   useEffect(() => {
     if (stateFrom) {
       try { sessionStorage.setItem("product_from_path", stateFrom); } catch {}
+    } else if (storedFrom && !isGridUrl(storedFrom)) {
+      // Discard stale non-grid path
+      try { sessionStorage.removeItem("product_from_path"); } catch {}
     }
-  }, [stateFrom]);
+  }, [stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
