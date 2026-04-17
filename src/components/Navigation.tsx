@@ -764,7 +764,19 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
                         setMegaMenuOpen(false);
-                        navigate(categoryUrl(cat, null));
+                        const target = categoryUrl(cat, null);
+                        // Always re-broadcast — handles the case where user clicks
+                        // the same category again (navigate is a no-op so the
+                        // CategoryRoute effect doesn't re-fire).
+                        if (window.location.pathname === target) {
+                          window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                            detail: { category: cat, subcategory: null, source: "designers" },
+                          }));
+                          const el = document.getElementById("designers") || document.getElementById("featured-designers");
+                          if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        } else {
+                          navigate(target);
+                        }
                       }}
                       className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
                     >
@@ -779,7 +791,16 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
                               setMegaMenuOpen(false);
-                              navigate(categoryUrl(cat, sub));
+                              const target = categoryUrl(cat, sub);
+                              if (window.location.pathname === target) {
+                                window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                                  detail: { category: cat, subcategory: sub, source: "designers" },
+                                }));
+                                const el = document.getElementById("designers") || document.getElementById("featured-designers");
+                                if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                              } else {
+                                navigate(target);
+                              }
                             }}
                             className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
                           >
