@@ -44,6 +44,13 @@ const PublicDesigners = () => {
   const [searchParams] = useSearchParams();
   const initialLetter = searchParams.get("letter") || undefined;
   const initialExpand = searchParams.get("expand") || undefined;
+  const legacyCat = searchParams.get("category");
+  const legacySub = searchParams.get("subcategory");
+
+  // Redirect legacy ?category=...&subcategory=... → /products-category/<cat>/<sub>
+  if (legacyCat) {
+    return <Navigate to={categoryUrl(legacyCat, legacySub)} replace />;
+  }
 
   return (
     <>
