@@ -70,8 +70,16 @@ function parseSectionHash(hash: string): string | null {
   return (TRACKED_SECTIONS as readonly string[]).includes(clean) ? clean : null;
 }
 
+/** Category route deep-link (e.g. /products-category/seating/armchairs)
+ *  must reveal below-fold sections immediately so the filtered grid mounts
+ *  and the scroll target (#designers) exists for CategoryRoute's poller. */
+const isCategoryRoute = () =>
+  typeof window !== "undefined" &&
+  /^\/products-category\//.test(window.location.pathname);
+
 /** Global flag so components can skip entrance animations on deep-link */
-export const isDeepLink = () => !!parseDeepLink(window.location.hash);
+export const isDeepLink = () =>
+  !!parseDeepLink(window.location.hash) || isCategoryRoute();
 
 /** Check if hash points to a section (for fast restore on refresh) */
 const hasSectionHash = () => !!parseSectionHash(window.location.hash);
