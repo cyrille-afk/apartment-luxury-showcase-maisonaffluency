@@ -146,6 +146,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   type PdfEntry = { label: string; url: string; filename?: string };
   type Pick = {
     id: string; designer_id: string; image_url: string; hover_image_url: string | null;
+    gallery_images: string[] | null;
     title: string; subtitle: string | null; category: string | null; subcategory: string | null;
     materials: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
@@ -292,6 +293,25 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 <div>
                   <label className="text-[10px] text-muted-foreground">Hover Image URL</label>
                   <Input value={pick.hover_image_url || ""} onChange={(e) => updateField(pick.id, "hover_image_url", e.target.value || null)} className="text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnail URLs (one per line — shown on the public product page gallery)</label>
+                  <Textarea
+                    value={(pick.gallery_images || []).join("\n")}
+                    onChange={(e) => {
+                      const arr = e.target.value.split("\n").map((s) => s.trim()).filter(Boolean);
+                      updateField(pick.id, "gallery_images", arr.length ? arr : null);
+                    }}
+                    className="text-xs min-h-[72px] font-mono"
+                    placeholder="https://res.cloudinary.com/.../image1.jpg&#10;https://res.cloudinary.com/.../image2.jpg"
+                  />
+                  {pick.gallery_images && pick.gallery_images.length > 0 && (
+                    <div className="flex gap-1.5 mt-1.5 overflow-x-auto pb-1">
+                      {pick.gallery_images.map((url, i) => (
+                        <img key={i} src={url} alt="" className="w-12 h-12 object-cover rounded border border-border shrink-0" />
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>

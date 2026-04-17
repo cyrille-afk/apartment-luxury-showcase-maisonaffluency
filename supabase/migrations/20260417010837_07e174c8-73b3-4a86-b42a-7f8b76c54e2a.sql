@@ -1,0 +1,1 @@
+ALTER TABLE public.designer_curator_picks ADD COLUMN IF NOT EXISTS gallery_images text[] DEFAULT '{}'::text[];

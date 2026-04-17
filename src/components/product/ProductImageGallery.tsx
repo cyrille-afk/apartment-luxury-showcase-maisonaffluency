@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 interface ProductImageGalleryProps {
   images: string[];
   alt: string;
+  overlay?: React.ReactNode;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const goTo = useCallback((i: number) => {
@@ -40,13 +41,20 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt }
 
       {/* Main image with arrows */}
       <div className="flex-1 relative group">
-        <div className="aspect-square bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center">
+        <div className="aspect-square bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center relative">
           <img
             src={images[activeIndex]}
             alt={alt}
             className="w-full h-full object-contain"
             style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
           />
+          {overlay && (
+            <div className="absolute top-3 left-3 right-3 z-10 pointer-events-none">
+              <div className="pointer-events-auto inline-block max-w-full">
+                {overlay}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Prev / Next arrows */}
