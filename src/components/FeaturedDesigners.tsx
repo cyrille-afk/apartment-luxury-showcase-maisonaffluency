@@ -2752,13 +2752,9 @@ const FeaturedDesigners = () => {
                 activeCategory={selectedCategory}
                 activeSubcategory={selectedSubcategory}
                 onSelect={(cat, sub) => {
-                  if (cat === null) {
-                    setSelectedCategory(null);
-                  } else {
-                    setSelectedCategoryRaw(cat);
-                      if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                      broadcastFilter(cat, sub);
-                    }
+                  setSelectedCategoryRaw(cat);
+                  setSelectedSubcategoryRaw(sub);
+                  broadcastFilter(cat, sub);
                 }}
                 itemCounts={counts}
                 sectionLabel="all Designers"
