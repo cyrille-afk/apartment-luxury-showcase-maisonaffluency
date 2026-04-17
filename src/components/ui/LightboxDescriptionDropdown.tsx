@@ -17,15 +17,16 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
   if (!description || !description.trim()) return null;
 
   return (
-    <div className="absolute top-3 left-3 z-10 max-w-[85%]">
+    <div className="relative max-w-full pointer-events-auto">
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           setExpanded(!expanded);
         }}
         className={cn(
           "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left",
-          "bg-background/60 backdrop-blur-sm border border-white/15 text-foreground",
+          "bg-background/90 backdrop-blur-sm border border-border/30 text-foreground",
           expanded ? "rounded-b-none border-b-0" : ""
         )}
       >
@@ -55,7 +56,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden rounded-b-lg bg-background/60 backdrop-blur-sm border border-white/15 border-t-0 shadow-lg"
+            className="overflow-hidden rounded-b-lg bg-background/90 backdrop-blur-sm border border-border/30 border-t-0 shadow-lg"
           >
             <p className="font-body text-xs text-foreground leading-relaxed px-3 pb-3 pt-0">
               {description}
