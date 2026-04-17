@@ -2184,7 +2184,6 @@ const FeaturedDesigners = () => {
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
     try {
-      const { categoryUrl } = require("@/lib/categorySlugs");
       const target = categoryUrl(cat, sub);
       const current = window.location.pathname;
       const onHomeOrCategory = current === "/" || current.startsWith("/products-category/");
