@@ -16,10 +16,11 @@ Keep it 2-3 paragraphs. Do NOT include dimensions or pricing.`,
 Lead with materials, dimensions, and edition details. Include lead time if available.
 Use clear, professional language. Keep it 1-2 short paragraphs followed by bullet points for key specs.`,
 
-  seo: `Write an SEO-optimized product description for a luxury furniture website.
+  seo: `Write a concise, SEO-optimized product description for a luxury furniture website.
 Naturally incorporate the designer name, brand, material keywords, and category.
-Make it scannable with a compelling opening sentence. 150-250 words.
-Do NOT use keyword stuffing — keep it elegant and informative.`,
+Lead with one compelling sentence, then 1-2 short supporting sentences. 70-110 words MAX.
+Do NOT mention dimensions, measurements, sizes, or lead times — these are shown elsewhere on the product card.
+Do NOT use keyword stuffing — keep it elegant, scannable, and informative.`,
 };
 
 serve(async (req) => {
