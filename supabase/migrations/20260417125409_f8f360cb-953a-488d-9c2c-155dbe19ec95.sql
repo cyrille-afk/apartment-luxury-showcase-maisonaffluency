@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET subtitle = 'C. Delcourt for Collection Particulière' WHERE id = '880f979a-36f1-4539-b87b-622258857d52';
