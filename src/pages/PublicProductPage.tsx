@@ -329,7 +329,7 @@ const PublicProductPage: React.FC = () => {
                 {product.materials && (
                   <div className="flex gap-1.5 items-start">
                     <Layers size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed">
+                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed line-clamp-2">
                       {product.materials}
                     </p>
                   </div>
