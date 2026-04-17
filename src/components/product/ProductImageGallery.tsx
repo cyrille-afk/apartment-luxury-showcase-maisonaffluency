@@ -49,7 +49,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
           />
           {overlay && (
-            <div className="absolute top-3 left-3 right-3 z-10 pointer-events-none">
+            <div className="absolute top-3 left-3 z-10 pointer-events-none max-w-[60%]">
               <div className="pointer-events-auto inline-block max-w-full">
                 {overlay}
               </div>
