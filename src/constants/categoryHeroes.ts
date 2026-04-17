@@ -16,7 +16,7 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
   // ── Seating ────────────────────────────────────────────────
   Armchairs: {
     title: "Armchairs",
-    image: cld("v1772085716/bespoke-sofa_gxidtx.jpg"),
+    image: cld("v1774842686/IMG_2133-resized_urlgal.jpg"),
     summary:
       "Imagine yourself at home, sinking into your favourite armchair. A traditional wing, a sculptural statement, clean geometric lines or generous puffy curves — visible legs or floating volumes, velvet, bouclé, or leather. Maison Affluency presents a curated selection of armchairs whose timeless silhouettes lend each piece a collectible quality.",
   },
