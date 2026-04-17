@@ -2258,26 +2258,19 @@ const FeaturedDesigners = () => {
   // Helper: check if a curator pick matches the active subcategory/category filter
   const pickMatchesFilter = useMemo(() => {
     if (!selectedSubcategory && !selectedCategory) return () => true;
-    const SUB_TAGS: Record<string, string[]> = {
-      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-      "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-      "Centre Tables": ["Centre Table"],
-    };
+    const normalizedSelectedSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
+    const normalizedSelectedCat = selectedCategory ? normalizeCategory(selectedCategory) : null;
     return (pick: any) => {
       if (selectedSubcategory) {
-        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
-        return tags.some(tag => pick.subcategory === tag || pick.category === tag || (pick.tags && pick.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase())));
+        const pickSub = normalizeSubcategory(pick.subcategory) || normalizeSubcategory(pick.category);
+        if (pickSub === normalizedSelectedSub) return true;
+        if (pick.tags && pick.tags.some((t: string) => normalizeSubcategory(t) === normalizedSelectedSub)) return true;
+        return false;
       }
-      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory));
+      const pickCat = normalizeCategory(pick.category, pick.subcategory);
+      if (pickCat === normalizedSelectedCat) return true;
+      if (pick.tags && pick.tags.some((t: string) => normalizeCategory(t) === normalizedSelectedCat)) return true;
+      return false;
     };
   }, [selectedSubcategory, selectedCategory]);
   const minSwipeDistance = 50;
@@ -2364,31 +2357,19 @@ const FeaturedDesigners = () => {
     }
     // Filter by selected category/subcategory — only show designers with matching picks
     if (selectedCategory || selectedSubcategory) {
+      const normalizedSelectedSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
+      const normalizedSelectedCat = selectedCategory ? normalizeCategory(selectedCategory) : null;
       designers = designers.filter((designer) => {
         if (!designer.curatorPicks?.length) return false;
         return designer.curatorPicks.some((pick: any) => {
           if (selectedSubcategory) {
-            const SUB_TAGS: Record<string, string[]> = {
-              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-              "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-            };
-            const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
-            return tags.some(tag =>
-              pick.subcategory === tag ||
-              pick.category === tag ||
-              (pick.tags && pick.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase()))
-            );
+            const pickSub = normalizeSubcategory(pick.subcategory) || normalizeSubcategory(pick.category);
+            if (pickSub === normalizedSelectedSub) return true;
+            return !!(pick.tags && pick.tags.some((t: string) => normalizeSubcategory(t) === normalizedSelectedSub));
           }
-          return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory));
+          const pickCat = normalizeCategory(pick.category, pick.subcategory);
+          if (pickCat === normalizedSelectedCat) return true;
+          return !!(pick.tags && pick.tags.some((t: string) => normalizeCategory(t) === normalizedSelectedCat));
         });
       });
     }
@@ -2398,37 +2379,52 @@ const FeaturedDesigners = () => {
   // When a category/subcategory is active, collect all matching curator picks across all designers
   const filteredPicks = useMemo(() => {
     if (!selectedCategory && !selectedSubcategory) return null;
-    const SUB_TAGS: Record<string, string[]> = {
-      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-      "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-    };
+    const normalizedSelectedSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
+    const normalizedSelectedCat = selectedCategory ? normalizeCategory(selectedCategory) : null;
     const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number; isDbPick?: boolean; designerSlug?: string }[] = [];
     const matchPick = (pick: CuratorPick) => {
       if (selectedSubcategory) {
-        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
-        return tags.some(tag =>
-          pick.subcategory === tag ||
-          pick.category === tag ||
-          (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
-        );
+        const pickSub = normalizeSubcategory(pick.subcategory) || normalizeSubcategory(pick.category);
+        if (pickSub === normalizedSelectedSub) return true;
+        return !!(pick.tags && pick.tags.some(t => normalizeSubcategory(t) === normalizedSelectedSub));
       }
-      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
+      const pickCat = normalizeCategory(pick.category, pick.subcategory);
+      if (pickCat === normalizedSelectedCat) return true;
+      return !!(pick.tags && pick.tags.some(t => normalizeCategory(t) === normalizedSelectedCat));
     };
-    // Hardcoded designers
+    // Build a quick lookup of DB picks by designerName+title so we can enrich hardcoded picks
+    // (e.g., merge DB hover_image_url, gallery_images, description, pdf_urls into the hardcoded entry)
+    const dbByKey = new Map<string, any>();
+    if (dbPicks) {
+      for (const item of dbPicks) {
+        const k = `${(item.designerName || "").toLowerCase()}::${(item.pick.title || "").toLowerCase()}`;
+        dbByKey.set(k, item);
+      }
+    }
+    const enrichPick = (pick: CuratorPick, designerName: string): CuratorPick => {
+      const k = `${(designerName || "").toLowerCase()}::${(pick.title || "").toLowerCase()}`;
+      const dbItem = dbByKey.get(k);
+      if (!dbItem) return pick;
+      const dbPick = dbItem.pick as any;
+      return {
+        ...pick,
+        hoverImage: pick.hoverImage || dbPick.hoverImage || dbPick.hover_image_url || undefined,
+        description: pick.description || dbPick.description || undefined,
+        materials: pick.materials || dbPick.materials || undefined,
+        dimensions: pick.dimensions || dbPick.dimensions || undefined,
+        pdfUrl: pick.pdfUrl || dbPick.pdfUrl || dbPick.pdf_url || undefined,
+        pdfUrls: pick.pdfUrls || dbPick.pdfUrls || dbPick.pdf_urls || undefined,
+        category: pick.category || dbPick.category || undefined,
+        subcategory: pick.subcategory || dbPick.subcategory || undefined,
+      } as CuratorPick;
+    };
+    // Hardcoded designers — enrich each pick with DB-side metadata before adding
     const seenKeys = new Set<string>();
     for (const designer of featuredDesigners) {
       designer.curatorPicks?.forEach((pick, idx) => {
-        if (matchPick(pick)) {
-          picks.push({ pick, designer, pickIndex: idx });
+        const enriched = enrichPick(pick, designer.name);
+        if (matchPick(enriched)) {
+          picks.push({ pick: enriched, designer, pickIndex: idx });
           seenKeys.add(`${designer.id || designer.name}::${pick.title}`);
         }
       });
