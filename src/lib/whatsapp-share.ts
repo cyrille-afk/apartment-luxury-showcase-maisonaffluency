@@ -97,6 +97,7 @@ export const buildParentBrandOgUrl = (name: string) => {
  */
 const PIECE_OG_BRIDGE_OVERRIDES: Record<string, string> = {
   "christopher-boots/prometheus-iii-astraea": "/collectibles/christopher-boots-prometheus-iii-astraea-og.html",
+  "man-of-parts/frenchmen-street-armchair": "/collectibles/man-of-parts-frenchmen-street-armchair-og.html",
 };
 
 /**
