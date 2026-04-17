@@ -909,23 +909,35 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       </div>
       {/* Info below the card */}
       <div className="px-3 py-3 text-center">
-        <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
-          {pick.designer_name}
-        </p>
-        <p className="font-display text-sm tracking-wide leading-tight">
-          {pick.title}{pick.subtitle && /^\d{4}$/.test(pick.subtitle.trim()) ? ` (${pick.subtitle.trim()})` : ''}
-        </p>
-        {pick.subtitle && !/^\d{4}$/.test(pick.subtitle.trim()) && (
-          /re-?edition$/i.test(pick.subtitle.trim()) ? (
-            <div className="mt-1.5 flex justify-center">
-              <span className="inline-block font-body text-[9px] uppercase tracking-[0.14em] text-primary border border-primary/40 rounded-full px-2 py-0.5">
-                {pick.subtitle}
-              </span>
-            </div>
-          ) : (
-            <p className="font-body text-[11px] text-muted-foreground mt-0.5">{pick.subtitle}</p>
-          )
-        )}
+        {(() => {
+          const sub = pick.subtitle?.trim() || "";
+          const isForPattern = / for /i.test(sub);
+          const brandLine = isForPattern ? sub : pick.designer_name;
+          const isYear = /^\d{4}$/.test(sub);
+          const isReEdition = /re-?edition$/i.test(sub);
+          const showSubtitleBelow = sub && !isYear && !isForPattern;
+          return (
+            <>
+              <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
+                {brandLine}
+              </p>
+              <p className="font-display text-sm tracking-wide leading-tight">
+                {pick.title}{isYear ? ` (${sub})` : ''}
+              </p>
+              {showSubtitleBelow && (
+                isReEdition ? (
+                  <div className="mt-1.5 flex justify-center">
+                    <span className="inline-block font-body text-[9px] uppercase tracking-[0.14em] text-primary border border-primary/40 rounded-full px-2 py-0.5">
+                      {sub}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="font-body text-[11px] text-muted-foreground mt-0.5">{sub}</p>
+                )
+              )}
+            </>
+          );
+        })()}
         <p className="font-display text-sm mt-1 text-foreground/70">
           Price on request
         </p>
