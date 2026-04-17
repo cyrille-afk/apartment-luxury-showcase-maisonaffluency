@@ -29,14 +29,6 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const PRODUCT_GALLERY_OVERRIDES: Record<string, string[]> = {
-  "rua-leblon-yabu-pushelberg": [
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776307150/Screen_Shot_2026-04-16_at_10.22.46_AM_bep333.png",
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776307150/Screen_Shot_2026-04-16_at_10.23.10_AM_lgrsqr.png",
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776387468/Screen_Shot_2026-04-17_at_8.57.24_AM_vejuth.png",
-    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776307150/Screen_Shot_2026-04-16_at_10.23.18_AM_g8vsyc.png",
-  ],
-};
 
 /* ------------------------------------------------------------------ */
 /*  Data fetching                                                      */
@@ -74,7 +66,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, designer_id")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -112,7 +104,9 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         product: {
           ...(product as unknown as ProductRow),
           image_url: (product as any).image_url || tradeProduct?.image_url || null,
-          gallery_images: tradeProduct?.gallery_images || null,
+          gallery_images: (product as any).gallery_images?.length
+            ? (product as any).gallery_images
+            : tradeProduct?.gallery_images || null,
         },
         designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug },
         relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id).slice(0, 6),
