@@ -1,46 +1,36 @@
 
 
-## Problem
+## Why mobile lands on the hero
 
-Two issues remaining and the previous AI got stuck in a tool-call loop:
+When you tap "Armchairs" in the mobile menu we now correctly navigate to `/products-category/seating/armchairs`. That route renders the homepage and broadcasts a `syncCategoryFilter` event after 150 ms.
 
-1. **Back button still leads to designer profile**, not the armchair grid.
-2. **Confirm the duplicate top-right heart icon** is actually removed.
+Problem: the homepage sections that listen to that event (`FeaturedDesigners`, `DesignersDirectory`, `Collectibles`, `BrandsAteliers`, `ProductGrid`) are lazy-loaded inside `<Suspense>`. On a fresh load — especially on mobile — they haven't mounted yet, so:
 
-## Root cause analysis
+1. The event fires into the void (no listeners yet) → no filter is applied.
+2. The `#designers` scroll target doesn't exist yet → page stays at the hero.
 
-The file `src/pages/PublicProductPage.tsx` already has:
-- `fromPath = stateFrom || sessionStorage.getItem("product_from_path")`
-- A computed `fallbackGridPath` like `/designers?category=Seating&subcategory=Armchairs`
-- The duplicate heart appears already removed (no absolute-positioned heart in lines 294-306)
+That's why it looks like the landing page with no filter.
 
-The remaining bug: **stale `sessionStorage`**. If the user previously visited a product by clicking from a designer profile page (`/designers/yabu-pushelberg`), that path got written to `product_from_path`. On the next visit from the armchair grid, if React Router state is lost (e.g. hard refresh, hydration timing, or a Link without `state`), the stale designer URL wins over the correct grid fallback.
+## Fix
 
-Also, the fallback uses `/designers?category=...` — but the directory grid filter may actually live on `/` (homepage) or use different param names. Need to verify which route renders the filtered PickCard grid.
+Make the URL the source of truth instead of a one-shot event.
 
-## Plan
+1. **`src/pages/CategoryRoute.tsx`** — keep the event broadcast (for already-mounted sections), but also write the active category/subcategory to a small module-level store (e.g. `window.__activeCategoryFilter`) so late-mounting sections can read it on mount.
 
-1. **Verify which route renders the filtered grid** (`/` vs `/designers`) and the exact query param names by reading `DesignersDirectory.tsx` filter logic and where it's mounted.
+2. **Sections that filter** (`FeaturedDesigners`, `DesignersDirectory`, `Collectibles`, `BrandsAteliers`, `ProductGrid`) — on mount, initialize their selected category/subcategory from that store (or from `window.location.pathname` parsed via `categoryFromSlug` / `subcategoryFromSlugs`). This guarantees the filter is applied even if they mount after the event fires.
 
-2. **Fix `PublicProductPage.tsx` Back logic**:
-   - Prefer fresh `state.from` (current session navigation).
-   - Only use `sessionStorage` value if it contains a grid query (`?category=` or `?subcategory=`); otherwise discard as stale.
-   - Always fall back to the computed `fallbackGridPath` (built from product's category/subcategory) using the correct route confirmed in step 1.
-   - Clear `product_from_path` on unmount/new product to prevent cross-product pollution.
+3. **Scroll**: replace the 150 ms timeout with a poll (up to ~2 s) that waits for `#designers` to exist before calling `scrollIntoView`. This handles the Suspense delay on mobile.
 
-3. **Confirm duplicate heart removal**: lines 294-306 already show no absolute heart; visually verify nothing else renders one.
+4. **No new memory needed** — this just fixes the existing slug-routing flow.
 
-## Files to edit
+### Files to edit
 
-- `src/pages/PublicProductPage.tsx` — refine `fromPath` resolution + fallback route.
+- `src/pages/CategoryRoute.tsx` — set a shared "pending filter" + poll-based scroll.
+- `src/components/FeaturedDesigners.tsx` — read pending filter on mount.
+- `src/components/DesignersDirectory.tsx` — read pending filter on mount.
+- `src/components/Collectibles.tsx` — read pending filter on mount.
+- `src/components/BrandsAteliers.tsx` — read pending filter on mount.
+- `src/components/ProductGrid.tsx` — read pending filter on mount.
 
-## Technical detail
-
-```ts
-const isGridUrl = (p?: string | null) =>
-  !!p && /[?&](category|subcategory)=/.test(p);
-
-const fromPath = stateFrom ?? (isGridUrl(storedFrom) ? storedFrom : null);
-// Back handler: navigate(fromPath ?? fallbackGridPath)
-```
+After this, tapping any mobile category/subcategory will land you on the homepage with the correct filter applied and the grid scrolled into view, regardless of how slowly the lazy chunks load.
 
