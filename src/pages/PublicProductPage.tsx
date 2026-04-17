@@ -411,12 +411,6 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
-              <a
-                href={`mailto:?subject=${encodeURIComponent(`${product.title} by ${designerDisplay}`)}&body=${encodeURIComponent(`I thought you'd love this piece: ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
-                className="self-center font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors mt-1"
-              >
-                Send to a Friend
-              </a>
 
               <p className="font-body text-[11px] text-muted-foreground text-center">
                 For pricing and availability, please{" "}
