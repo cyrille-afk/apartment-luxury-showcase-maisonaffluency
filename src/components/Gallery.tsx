@@ -1156,16 +1156,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              {/* Mobile pill bar — rendered after first section's pictures */}
+              {/* Mobile thumbnail carousel — rendered after first section's pictures */}
               {originalSectionIndex === 0 && (
                 <div className="md:hidden mt-6 mb-2">
                   <div
                     ref={pillBarRef}
-                    className="flex overflow-x-auto scrollbar-hide gap-2 pb-3 snap-x snap-mandatory"
+                    className="flex overflow-x-auto scrollbar-hide gap-2 pb-3 snap-x snap-mandatory px-1"
                     onScroll={() => {
                       const el = pillBarRef.current;
                       if (!el) return;
-                      const buttons = el.querySelectorAll<HTMLButtonElement>('button');
+                      const buttons = el.querySelectorAll<HTMLButtonElement>('button[data-section-thumb]');
                       const center = el.scrollLeft + el.clientWidth / 2;
                       let closestIdx = 0;
                       let closestDist = Infinity;
@@ -1177,27 +1177,45 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       if (closestIdx !== activeMobilePill) setActiveMobilePill(closestIdx);
                     }}
                   >
-                    {galleryExperiences.map((exp, idx) => (
-                      <button
-                        key={exp.experience}
-                        onClick={() => {
-                          setActiveMobilePill(idx);
-                          const el = pillBarRef.current;
-                          const btn = el?.querySelectorAll<HTMLButtonElement>('button')[idx];
-                          if (el && btn) {
-                            const scrollTo = btn.offsetLeft - el.clientWidth / 2 + btn.offsetWidth / 2;
-                            el.scrollTo({ left: scrollTo, behavior: 'smooth' });
-                          }
-                        }}
-                        className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 snap-center ${
-                          activeMobilePill === idx
-                            ? 'bg-foreground text-background border-foreground'
-                            : 'bg-transparent text-foreground border-foreground/30 hover:border-foreground/60'
-                        }`}
-                      >
-                        {exp.experience}
-                      </button>
-                    ))}
+                    {galleryExperiences.map((exp, idx) => {
+                      const thumbImg = exp.items[0]?.image;
+                      const isActive = activeMobilePill === idx;
+                      return (
+                        <button
+                          key={exp.experience}
+                          data-section-thumb
+                          onClick={() => {
+                            setActiveMobilePill(idx);
+                            const el = pillBarRef.current;
+                            const btn = el?.querySelectorAll<HTMLButtonElement>('button[data-section-thumb]')[idx];
+                            if (el && btn) {
+                              const scrollTo = btn.offsetLeft - el.clientWidth / 2 + btn.offsetWidth / 2;
+                              el.scrollTo({ left: scrollTo, behavior: 'smooth' });
+                            }
+                            // Scroll the corresponding section into view
+                            const sectionEl = document.getElementById(`gallery-section-${idx}`);
+                            sectionEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className={`relative flex-none w-[140px] aspect-[4/5] rounded-lg overflow-hidden snap-center transition-all duration-300 ${
+                            isActive ? 'ring-2 ring-foreground' : 'ring-1 ring-foreground/15'
+                          }`}
+                          aria-label={exp.experience}
+                        >
+                          {thumbImg && (
+                            <img
+                              src={thumbImg}
+                              alt={exp.experience}
+                              loading="lazy"
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                          <span className="absolute bottom-2 left-2 right-2 font-serif text-white text-[11px] leading-tight text-left">
+                            {exp.experience}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                   <div className="flex justify-center gap-1 mt-1">
                     {galleryExperiences.map((_, idx) => (
@@ -1206,7 +1224,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         onClick={() => {
                           setActiveMobilePill(idx);
                           const el = pillBarRef.current;
-                          const btn = el?.querySelectorAll<HTMLButtonElement>('button')[idx];
+                          const btn = el?.querySelectorAll<HTMLButtonElement>('button[data-section-thumb]')[idx];
                           if (el && btn) {
                             const scrollTo = btn.offsetLeft - el.clientWidth / 2 + btn.offsetWidth / 2;
                             el.scrollTo({ left: scrollTo, behavior: 'smooth' });
