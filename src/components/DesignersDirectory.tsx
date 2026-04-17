@@ -853,6 +853,13 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
       <div className="aspect-[5/6] bg-muted/20 overflow-hidden relative">
+        {pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
+          <div className="absolute top-3 left-3 z-20 pointer-events-none">
+            <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/75 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
+              {pick.subtitle}
+            </span>
+          </div>
+        )}
         {pick.image_url ? (
           <>
             <img
