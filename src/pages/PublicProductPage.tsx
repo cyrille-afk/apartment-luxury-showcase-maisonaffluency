@@ -124,6 +124,8 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: string } | null)?.from;
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
