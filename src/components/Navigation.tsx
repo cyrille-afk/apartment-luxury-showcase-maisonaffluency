@@ -514,16 +514,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         <div className="pb-3 space-y-0">
                           <button
                             onClick={() => {
-                          setCategoryPanelOpen(false);
+                              setCategoryPanelOpen(false);
                               setIsOpen(false);
-                               const isHome = window.location.pathname === "/";
-                              const isDesigners = window.location.pathname === "/designers";
-                              if (isHome || isDesigners) {
-                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                                if (isHome) handleNavClick('/designers');
-                              } else {
-                                navigate(`/designers?category=${encodeURIComponent(cat)}`);
-                              }
+                              navigate(categoryUrl(cat, null));
                             }}
                             className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
                           >
@@ -535,14 +528,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                               onClick={() => {
                                 setCategoryPanelOpen(false);
                                 setIsOpen(false);
-                                const isHome = window.location.pathname === "/";
-                                const isDesigners = window.location.pathname === "/designers";
-                                if (isHome || isDesigners) {
-                                  window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                  if (isHome) handleNavClick('/designers');
-                                } else {
-                                  navigate(`/designers?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}`);
-                                }
+                                navigate(categoryUrl(cat, sub));
                               }}
                               className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
                             >
