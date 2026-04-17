@@ -3286,12 +3286,10 @@ const BrandsAteliers = () => {
                 activeCategory={selectedCategory}
                 activeSubcategory={selectedSubcategory}
                 onSelect={(cat, sub) => {
-                  if (cat === null) {
-                    setSelectedCategory(null);
-                  } else {
-                    setSelectedCategoryRaw(cat);
-                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                    broadcastFilter(cat, sub);
+                  setSelectedCategoryRaw(cat);
+                  setSelectedSubcategoryRaw(sub);
+                  broadcastFilter(cat, sub);
+                  if (cat !== null) {
                     setTimeout(() => {
                       document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 150);
