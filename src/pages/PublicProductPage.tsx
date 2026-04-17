@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, Layers, Ruler } from "lucide-react";
@@ -212,24 +212,18 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
-  const normalizedSubcategory = useMemo(() => {
-    const raw = product.subcategory?.trim();
-    if (!raw) return null;
+  const rawSubcategory = product.subcategory?.trim();
+  const normalizedSubcategory = rawSubcategory
+    ? Object.entries(SUBCATEGORY_MAP).find(([, values]) =>
+        values.some((value) => value.toLowerCase() === rawSubcategory.toLowerCase())
+      )?.[0] || rawSubcategory
+    : null;
 
-    const matchedGroup = Object.entries(SUBCATEGORY_MAP).find(([, values]) =>
-      values.some((value) => value.toLowerCase() === raw.toLowerCase())
-    );
-
-    return matchedGroup?.[0] || raw;
-  }, [product.subcategory]);
-
-  const fallbackGridPath = useMemo(() => {
-    const params = new URLSearchParams();
-    if (product.category) params.set("category", product.category);
-    if (normalizedSubcategory) params.set("subcategory", normalizedSubcategory);
-    const query = params.toString();
-    return `/designers${query ? `?${query}` : ""}`;
-  }, [product.category, normalizedSubcategory]);
+  const fallbackGridParams = new URLSearchParams();
+  if (product.category) fallbackGridParams.set("category", product.category);
+  if (normalizedSubcategory) fallbackGridParams.set("subcategory", normalizedSubcategory);
+  const fallbackGridQuery = fallbackGridParams.toString();
+  const fallbackGridPath = `/designers${fallbackGridQuery ? `?${fallbackGridQuery}` : ""}`;
 
   // If admin has set gallery_images, use them as the sole source of truth (admin controls order & count).
   // Otherwise fall back to image_url + hover_image_url.
