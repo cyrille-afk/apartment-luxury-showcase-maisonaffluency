@@ -1192,9 +1192,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                               const scrollTo = btn.offsetLeft - el.clientWidth / 2 + btn.offsetWidth / 2;
                               el.scrollTo({ left: scrollTo, behavior: 'smooth' });
                             }
-                            // Scroll the corresponding section into view
-                            const sectionEl = document.getElementById(`gallery-section-${idx}`);
-                            sectionEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           }}
                           className={`relative flex-none w-[140px] aspect-[4/5] rounded-lg overflow-hidden snap-center transition-all duration-300 ${
                             isActive ? 'ring-2 ring-foreground' : 'ring-1 ring-foreground/15'
