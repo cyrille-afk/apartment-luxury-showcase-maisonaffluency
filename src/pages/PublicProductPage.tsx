@@ -131,6 +131,7 @@ const PublicProductPage: React.FC = () => {
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const [favIds, setFavIds] = useState(readFavs);
+  const [relatedIndex, setRelatedIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
