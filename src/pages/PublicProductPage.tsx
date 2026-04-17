@@ -291,7 +291,7 @@ const PublicProductPage: React.FC = () => {
                 </Link>
                 <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
                   {product.title}
-                  {product.subtitle && ` ${product.subtitle}`}
+                  {product.subtitle && ` by ${product.subtitle}`}
                 </h1>
               </div>
 
