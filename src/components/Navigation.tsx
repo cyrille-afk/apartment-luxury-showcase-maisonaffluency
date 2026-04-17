@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
