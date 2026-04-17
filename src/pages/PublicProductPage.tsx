@@ -436,56 +436,39 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-16 pt-10 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                label: "Insured Worldwide Delivery",
-                image: cloudinaryUrl("v1773473193/quality-control_dvxvmb", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
-              },
-              {
-                label: "Certificate of Authenticity",
-                image: cloudinaryUrl("v1776392079/Screen_Shot_2026-04-17_at_10.14.17_AM_ovaxxl", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
-              },
-              {
-                label: "Secure Payment",
-                image: cloudinaryUrl("v1776398554/Screen_Shot_2026-04-17_at_12.02.10_PM_gtnutz", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
-              },
-            ].map(({ label, image }) => (
-              <div key={label} className="flex flex-col items-center text-center gap-3">
-                <div className="w-20 h-20 rounded-full overflow-hidden bg-muted/40">
-                  <img src={image} alt={label} className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-              </div>
-            ))}
-          </div>
-
           {relatedPicks.length > 0 && (
-            <div className="mt-20 pt-8 border-t border-border">
+            <div className="mt-16 pt-8 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-                {/* Left: brand summary */}
-                <div className="lg:col-span-4 lg:pr-4">
-                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                    {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
-                  </p>
-                  <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
-                    <Link
-                      to={`/designers/${designer.slug}`}
-                      className="hover:text-primary transition-colors"
-                    >
-                      {designerDisplay}
-                    </Link>
-                  </h2>
-                  {brandSummary && (
-                    <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
-                      {brandSummary}
-                    </p>
-                  )}
-                </div>
+                {/* Carousel: swipeable on mobile, paginated 3-up on desktop. order-1 on mobile so brand text appears below. */}
+                <div className="lg:col-span-8 flex flex-col order-1 lg:order-2">
+                  {/* Mobile: native horizontal scroll-snap carousel */}
+                  <div className="lg:hidden -mx-4 px-4">
+                    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {relatedPicks.map((rp) => (
+                        <Link
+                          key={rp.id}
+                          to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                          state={{ from: location.pathname + location.search }}
+                          className="group block shrink-0 basis-[70%] snap-start"
+                        >
+                          <div className="relative aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border">
+                            <img
+                              src={rp.image_url}
+                              alt={rp.title}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                          <p className="font-body text-xs text-muted-foreground mt-2 text-center truncate">
+                            {rp.title}
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Right: 3-up product grid */}
-                <div className="lg:col-span-8 flex flex-col">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                  {/* Desktop: 3-up grid */}
+                  <div className="hidden lg:grid grid-cols-3 gap-4 md:gap-6">
                     {visibleRelated.map((rp) => (
                       <Link
                         key={rp.id}
@@ -519,10 +502,9 @@ const PublicProductPage: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Pagination: centered dots with arrows on the right */}
+                  {/* Desktop pagination: centered dots with arrows on the right */}
                   {relatedPicks.length > visibleCount && (
-                    <div className="mt-6 relative flex items-center justify-center">
-                      {/* Dots (centered) */}
+                    <div className="hidden lg:flex mt-6 relative items-center justify-center">
                       <div className="flex items-center gap-1.5">
                         {Array.from({ length: maxIndex + 1 }).map((_, i) => (
                           <button
@@ -539,7 +521,6 @@ const PublicProductPage: React.FC = () => {
                           />
                         ))}
                       </div>
-                      {/* Arrows (absolute right) */}
                       <div className="absolute right-0 flex items-center gap-3">
                         <button
                           type="button"
@@ -561,6 +542,26 @@ const PublicProductPage: React.FC = () => {
                         </button>
                       </div>
                     </div>
+                  )}
+                </div>
+
+                {/* Brand summary — above on desktop (left col), below carousel on mobile */}
+                <div className="lg:col-span-4 lg:pr-4 order-2 lg:order-1">
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                    {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
+                  </p>
+                  <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
+                    <Link
+                      to={`/designers/${designer.slug}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {designerDisplay}
+                    </Link>
+                  </h2>
+                  {brandSummary && (
+                    <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                      {brandSummary}
+                    </p>
                   )}
                 </div>
               </div>
