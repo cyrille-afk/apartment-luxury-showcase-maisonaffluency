@@ -157,7 +157,7 @@ const PublicProductPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="pt-28"><PageLoadingSkeleton /></div>
+        <div className="pt-32 md:pt-[12rem]"><PageLoadingSkeleton /></div>
       </div>
     );
   }
@@ -222,7 +222,7 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation borderless />
 
-        <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-32 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">
               <ProductImageGallery

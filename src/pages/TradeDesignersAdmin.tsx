@@ -297,17 +297,20 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 <div>
                   <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +)</label>
                   {(() => {
-                    const items = pick.gallery_images || [];
-                    const setItems = (next: string[]) =>
-                      updateField(pick.id, "gallery_images", next.length ? next : null);
+                    const MIN_SLOTS = 5;
+                    const stored = pick.gallery_images || [];
+                    // Always show at least MIN_SLOTS rows so the admin can paste into empty slots immediately.
+                    const items = stored.length >= MIN_SLOTS
+                      ? stored
+                      : [...stored, ...Array(MIN_SLOTS - stored.length).fill("")];
+                    const setItems = (next: string[]) => {
+                      // Persist trimmed list — keep trailing empties out of the DB.
+                      const cleaned = [...next];
+                      while (cleaned.length && !cleaned[cleaned.length - 1]) cleaned.pop();
+                      updateField(pick.id, "gallery_images", cleaned.length ? cleaned : null);
+                    };
                     return (
                       <div className="space-y-1.5 mt-1">
-                        {items.length === 0 && (
-                          <button type="button" onClick={() => setItems([""])}
-                            className="text-[11px] px-2 py-1 border border-dashed border-border rounded hover:bg-muted/40">
-                            + Add first thumbnail
-                          </button>
-                        )}
                         {items.map((url, i) => (
                           <div key={i} className="flex items-center gap-1.5">
                             <span className="text-[10px] text-muted-foreground w-5 tabular-nums">{i + 1}.</span>
@@ -340,6 +343,11 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                               className="text-xs px-1.5 py-0.5 border border-border rounded text-destructive hover:bg-destructive/10">×</button>
                           </div>
                         ))}
+                        <button type="button"
+                          onClick={() => setItems([...items, ""])}
+                          className="text-[11px] px-2 py-1 border border-dashed border-border rounded hover:bg-muted/40">
+                          + Add another thumbnail
+                        </button>
                       </div>
                     );
                   })()}
