@@ -2772,7 +2772,9 @@ const FeaturedDesigners = () => {
                     onClick={() => {
                       if (isDbPick && designerSlug) {
                         const productSlug = slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
-                        navigate(`/designers/${designerSlug}/${productSlug}`);
+                        navigate(`/designers/${designerSlug}/${productSlug}`, {
+                          state: { from: window.location.pathname + window.location.search },
+                        });
                       } else {
                         setCuratorPicksDesigner(designer);
                         setCuratorPickIndex(pickIndex);
@@ -2954,7 +2956,9 @@ const FeaturedDesigners = () => {
                     onClick={() => {
                       if (isDbPick && designerSlug) {
                         const productSlug = slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""));
-                        navigate(`/designers/${designerSlug}/${productSlug}`);
+                        navigate(`/designers/${designerSlug}/${productSlug}`, {
+                          state: { from: window.location.pathname + window.location.search },
+                        });
                       } else {
                         setCuratorPicksDesigner(designer);
                         setCuratorPickIndex(pickIndex);
