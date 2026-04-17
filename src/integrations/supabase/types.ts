@@ -689,6 +689,7 @@ export type Database = {
           image_url: string
           lead_time: string | null
           materials: string | null
+          origin: string | null
           pdf_filename: string | null
           pdf_url: string | null
           pdf_urls: Json | null
@@ -715,6 +716,7 @@ export type Database = {
           image_url?: string
           lead_time?: string | null
           materials?: string | null
+          origin?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
@@ -741,6 +743,7 @@ export type Database = {
           image_url?: string
           lead_time?: string | null
           materials?: string | null
+          origin?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
@@ -2168,6 +2171,7 @@ export type Database = {
           is_active: boolean
           lead_time: string | null
           materials: string | null
+          origin: string | null
           price_prefix: string | null
           price_unit: string
           product_name: string
@@ -2191,6 +2195,7 @@ export type Database = {
           is_active?: boolean
           lead_time?: string | null
           materials?: string | null
+          origin?: string | null
           price_prefix?: string | null
           price_unit?: string
           product_name: string
@@ -2214,6 +2219,7 @@ export type Database = {
           is_active?: boolean
           lead_time?: string | null
           materials?: string | null
+          origin?: string | null
           price_prefix?: string | null
           price_unit?: string
           product_name?: string
