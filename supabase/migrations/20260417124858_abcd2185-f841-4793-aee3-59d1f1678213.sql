@@ -1,0 +1,2 @@
+UPDATE public.designers SET name = 'Forest & Giaconia - for Delcourt Collection', founder = NULL WHERE id = '3e3a6022-01f6-46c6-88c0-37f408dc25b9';
+UPDATE public.designer_curator_picks SET subtitle = NULL WHERE id = 'c43761a6-1a71-42cc-908f-d750f55521c5';
