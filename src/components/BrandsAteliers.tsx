@@ -2909,6 +2909,13 @@ const BrandsAteliers = () => {
   }, [picksIndex]);
 
   useEffect(() => {
+    // Hydrate filter from URL/global on mount (handles lazy-mount race).
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setSelectedCategoryRaw(pending.category);
+      setSelectedSubcategoryRaw(pending.subcategory);
+    }
+
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
       // Only sync from designers (Navigation mega-menu); ignore collectibles to avoid cross-section jumps

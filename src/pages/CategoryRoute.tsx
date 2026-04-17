@@ -2,6 +2,10 @@ import { useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import Index from "./Index";
 import { categoryFromSlug, subcategoryFromSlugs } from "@/lib/categorySlugs";
+import {
+  setPendingCategoryFilter,
+  clearPendingCategoryFilter,
+} from "@/lib/pendingCategoryFilter";
 
 /**
  * /products-category/:categorySlug/:subcategorySlug?
@@ -17,23 +21,41 @@ const CategoryRoute = () => {
   // Broadcast on every mount/param change so all listening sections sync.
   useEffect(() => {
     if (!category) return;
-    const detail = {
-      category,
-      subcategory: sub?.subcategory ?? null,
-      source: "designers",
-    };
-    const id = window.setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
-      // Scroll to the designers/products section so the filtered grid is visible.
+    const subcategory = sub?.subcategory ?? null;
+
+    // 1. Persist the filter so late-mounting (lazy) sections can read it.
+    setPendingCategoryFilter({ category, subcategory });
+
+    // 2. Broadcast immediately for sections already mounted.
+    const detail = { category, subcategory, source: "designers" };
+    window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
+
+    // 3. Poll for the scroll target — Suspense chunks may mount late on mobile.
+    let cancelled = false;
+    const start = performance.now();
+    const tryScroll = () => {
+      if (cancelled) return;
       const target =
         document.getElementById("designers") ||
         document.getElementById("featured-designers") ||
         document.querySelector("[data-section='designers']");
       if (target instanceof HTMLElement) {
+        // Re-broadcast in case sections mounted after our first dispatch.
+        window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
         target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
       }
-    }, 150);
-    return () => window.clearTimeout(id);
+      if (performance.now() - start < 2500) {
+        window.setTimeout(tryScroll, 100);
+      }
+    };
+    window.setTimeout(tryScroll, 50);
+
+    return () => {
+      cancelled = true;
+      // Clear once we leave the route so other pages aren't affected.
+      clearPendingCategoryFilter();
+    };
   }, [category, sub?.subcategory]);
 
   if (!category) return <Navigate to="/" replace />;

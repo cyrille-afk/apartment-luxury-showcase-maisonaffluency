@@ -1058,6 +1058,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   // Listen for external filter sync
   useEffect(() => {
+    // Hydrate on mount from URL/global pending filter.
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setSelectedCategoryRaw(pending.category);
+      setSelectedSubcategoryRaw(pending.subcategory);
+      setSidebarOpen(false);
+    }
+
     const handleSync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
       if (source === 'designers') return;

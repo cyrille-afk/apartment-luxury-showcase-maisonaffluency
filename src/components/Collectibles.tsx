@@ -542,6 +542,14 @@ const Collectibles = () => {
   }, [selectedCategory, broadcastFilter]);
 
   useEffect(() => {
+    // Hydrate on mount in case we landed here from /products-category/* and
+    // the section was lazy-loaded after the initial broadcast.
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setSelectedCategoryRaw(pending.category);
+      setSelectedSubcategoryRaw(pending.subcategory);
+    }
+
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
       // Only sync from designers (Navigation mega-menu); ignore brands to avoid cross-section jumps
