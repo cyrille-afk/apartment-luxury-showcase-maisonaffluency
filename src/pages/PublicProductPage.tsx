@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, Layers, Ruler, Clock } from "lucide-react";
+import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, Layers, Ruler, Clock, Globe } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -51,6 +51,7 @@ interface ProductRow {
   pdf_url: string | null;
   pdf_urls: PdfEntry[] | null;
   lead_time: string | null;
+  origin: string | null;
   designer_id: string;
 }
 
@@ -70,7 +71,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -338,6 +339,14 @@ const PublicProductPage: React.FC = () => {
                     <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
                     <p className="font-body text-xs md:text-sm text-foreground font-medium whitespace-pre-line">
                       {product.dimensions}
+                    </p>
+                  </div>
+                )}
+                {product.origin && (
+                  <div className="flex gap-1.5 items-start">
+                    <Globe size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {product.origin}
                     </p>
                   </div>
                 )}
