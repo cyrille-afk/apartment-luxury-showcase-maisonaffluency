@@ -125,13 +125,22 @@ const CATEGORY_SUBCATS: Record<string, string[]> = {
 
 function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
   if (!category && !subcategory) return true;
+
+  // Resolve effective subcategory using title-based inference as fallback,
+  // so picks with only a top-level category (e.g. "Tables") still match
+  // specific subcategory filters (e.g. "Coffee Tables") via their title.
+  const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
+  const effectiveSub = inferSubcategory(pick.category, pick.subcategory, inferenceText);
+
   if (subcategory) {
     const tags = SUB_TAGS[subcategory] || [subcategory];
     return tags.some(tag =>
       categoryMatch(pick.subcategory, tag) ||
       categoryMatch(pick.subcategory, subcategory) ||
       categoryMatch(pick.category, tag) ||
-      (pick.tags && pick.tags.some(t => categoryMatch(t, tag)))
+      (pick.tags && pick.tags.some(t => categoryMatch(t, tag))) ||
+      categoryMatch(effectiveSub, tag) ||
+      categoryMatch(effectiveSub, subcategory)
     );
   }
   // Top-level category: match against all its subcategory tags to avoid false positives
@@ -143,7 +152,9 @@ function pickMatchesFilter(pick: CuratorPick, category: string | null, subcatego
         categoryMatch(pick.subcategory, tag) ||
         categoryMatch(pick.subcategory, sub) ||
         categoryMatch(pick.category, tag) ||
-        (pick.tags && pick.tags.some(t => categoryMatch(t, tag)))
+        (pick.tags && pick.tags.some(t => categoryMatch(t, tag))) ||
+        categoryMatch(effectiveSub, tag) ||
+        categoryMatch(effectiveSub, sub)
       );
     });
   }
