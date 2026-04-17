@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
@@ -513,16 +514,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         <div className="pb-3 space-y-0">
                           <button
                             onClick={() => {
-                          setCategoryPanelOpen(false);
+                              setCategoryPanelOpen(false);
                               setIsOpen(false);
-                               const isHome = window.location.pathname === "/";
-                              const isDesigners = window.location.pathname === "/designers";
-                              if (isHome || isDesigners) {
-                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                                if (isHome) handleNavClick('/designers');
-                              } else {
-                                navigate(`/designers?category=${encodeURIComponent(cat)}`);
-                              }
+                              navigate(categoryUrl(cat, null));
                             }}
                             className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
                           >
@@ -534,14 +528,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                               onClick={() => {
                                 setCategoryPanelOpen(false);
                                 setIsOpen(false);
-                                const isHome = window.location.pathname === "/";
-                                const isDesigners = window.location.pathname === "/designers";
-                                if (isHome || isDesigners) {
-                                  window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                  if (isHome) handleNavClick('/designers');
-                                } else {
-                                  navigate(`/designers?category=${encodeURIComponent(cat)}&subcategory=${encodeURIComponent(sub)}`);
-                                }
+                                navigate(categoryUrl(cat, sub));
                               }}
                               className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
                             >
