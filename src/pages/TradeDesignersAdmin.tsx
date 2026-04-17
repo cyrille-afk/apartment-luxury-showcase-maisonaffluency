@@ -295,23 +295,54 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <Input value={pick.hover_image_url || ""} onChange={(e) => updateField(pick.id, "hover_image_url", e.target.value || null)} className="text-xs" />
                 </div>
                 <div>
-                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnail URLs (one per line — shown on the public product page gallery)</label>
-                  <Textarea
-                    value={(pick.gallery_images || []).join("\n")}
-                    onChange={(e) => {
-                      const arr = e.target.value.split("\n").map((s) => s.trim()).filter(Boolean);
-                      updateField(pick.id, "gallery_images", arr.length ? arr : null);
-                    }}
-                    className="text-xs min-h-[72px] font-mono"
-                    placeholder="https://res.cloudinary.com/.../image1.jpg&#10;https://res.cloudinary.com/.../image2.jpg"
-                  />
-                  {pick.gallery_images && pick.gallery_images.length > 0 && (
-                    <div className="flex gap-1.5 mt-1.5 overflow-x-auto pb-1">
-                      {pick.gallery_images.map((url, i) => (
-                        <img key={i} src={url} alt="" className="w-12 h-12 object-cover rounded border border-border shrink-0" />
-                      ))}
-                    </div>
-                  )}
+                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +)</label>
+                  {(() => {
+                    const items = pick.gallery_images || [];
+                    const setItems = (next: string[]) =>
+                      updateField(pick.id, "gallery_images", next.length ? next : null);
+                    return (
+                      <div className="space-y-1.5 mt-1">
+                        {items.length === 0 && (
+                          <button type="button" onClick={() => setItems([""])}
+                            className="text-[11px] px-2 py-1 border border-dashed border-border rounded hover:bg-muted/40">
+                            + Add first thumbnail
+                          </button>
+                        )}
+                        {items.map((url, i) => (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-muted-foreground w-5 tabular-nums">{i + 1}.</span>
+                            {url ? (
+                              <img src={url} alt="" className="w-10 h-10 object-cover rounded border border-border shrink-0" />
+                            ) : (
+                              <div className="w-10 h-10 rounded border border-dashed border-border shrink-0" />
+                            )}
+                            <Input
+                              value={url}
+                              onChange={(e) => {
+                                const next = [...items];
+                                next[i] = e.target.value.trim();
+                                setItems(next);
+                              }}
+                              placeholder="https://…"
+                              className="text-xs font-mono flex-1"
+                            />
+                            <button type="button" title="Move up" disabled={i === 0}
+                              onClick={() => { const next = [...items]; [next[i-1], next[i]] = [next[i], next[i-1]]; setItems(next); }}
+                              className="text-xs px-1.5 py-0.5 border border-border rounded disabled:opacity-30">↑</button>
+                            <button type="button" title="Move down" disabled={i === items.length - 1}
+                              onClick={() => { const next = [...items]; [next[i+1], next[i]] = [next[i], next[i+1]]; setItems(next); }}
+                              className="text-xs px-1.5 py-0.5 border border-border rounded disabled:opacity-30">↓</button>
+                            <button type="button" title="Insert new thumbnail below"
+                              onClick={() => { const next = [...items]; next.splice(i + 1, 0, ""); setItems(next); }}
+                              className="text-xs px-1.5 py-0.5 border border-border rounded hover:bg-muted/40">+</button>
+                            <button type="button" title="Remove"
+                              onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                              className="text-xs px-1.5 py-0.5 border border-border rounded text-destructive hover:bg-destructive/10">×</button>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
