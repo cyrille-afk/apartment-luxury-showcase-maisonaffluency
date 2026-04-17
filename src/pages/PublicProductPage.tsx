@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, Globe, Lock, BookOpen, Mail } from "lucide-react";
+import { Heart, Scale, Globe, Lock, BookOpen } from "lucide-react";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,15 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+const PRODUCT_GALLERY_OVERRIDES: Record<string, string[]> = {
+  "rua-leblon-yabu-pushelberg": [
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776307150/Screen_Shot_2026-04-16_at_10.22.46_AM_bep333.png",
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776307150/Screen_Shot_2026-04-16_at_10.23.10_AM_lgrsqr.png",
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776387468/Screen_Shot_2026-04-17_at_8.57.24_AM_vejuth.png",
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1776307150/Screen_Shot_2026-04-16_at_10.23.18_AM_g8vsyc.png",
+  ],
+};
+
 /* ------------------------------------------------------------------ */
 /*  Data fetching                                                      */
 /* ------------------------------------------------------------------ */
@@ -55,7 +64,6 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
     queryFn: async () => {
       if (!designerSlug || !productSlug) return null;
 
-      // Get designer by slug
       const { data: designer } = await supabase
         .from("designers")
         .select("id, name, slug, display_name")
@@ -64,7 +72,6 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      // Get all picks for this designer
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
         .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, designer_id")
@@ -73,7 +80,6 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       if (!picks || picks.length === 0) return null;
 
-      // Match by product slug
       const product = picks.find((p: any) => {
         const slug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
         return slug === productSlug;
@@ -133,16 +139,18 @@ const PublicProductPage: React.FC = () => {
     window.scrollTo({ top: 0 });
   }, [designerSlug, productSlug]);
 
-  // Sync favorites from other tabs
   useEffect(() => {
     const onSync = () => setFavIds(readFavs());
     window.addEventListener("public_favorites_changed", onSync);
     window.addEventListener("storage", onSync);
-    return () => { window.removeEventListener("public_favorites_changed", onSync); window.removeEventListener("storage", onSync); };
+    return () => {
+      window.removeEventListener("public_favorites_changed", onSync);
+      window.removeEventListener("storage", onSync);
+    };
   }, []);
 
   const toggleFavorite = (id: string) => {
-    setFavIds(prev => {
+    setFavIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       localStorage.setItem(LS_KEY, JSON.stringify([...next]));
@@ -199,7 +207,8 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
-  const images = Array.from(new Set([
+  const overrideImages = productSlug ? PRODUCT_GALLERY_OVERRIDES[productSlug] : undefined;
+  const images = overrideImages ?? Array.from(new Set([
     product.image_url,
     ...(product.gallery_images || []),
     product.hover_image_url,
@@ -218,10 +227,8 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation borderless />
 
-        <div className="pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Main content: image + details */}
+        <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            {/* Left: Image Gallery with description overlay */}
             <div className="relative">
               <ProductImageGallery images={images} alt={product.title} />
               {product.description && (
@@ -233,9 +240,7 @@ const PublicProductPage: React.FC = () => {
               )}
             </div>
 
-            {/* Right: Product details */}
             <div className="relative flex flex-col gap-5">
-              {/* Floating favorite */}
               <button
                 onClick={() => {
                   requireAuth(() => toggleFavorite(product.id), "save pieces to your favorites");
@@ -249,7 +254,6 @@ const PublicProductPage: React.FC = () => {
                 <Heart size={20} className={cn(favorited && "fill-current")} />
               </button>
 
-              {/* Designer & title */}
               <div className="pr-12">
                 <Link
                   to={`/designers/${designer.slug}`}
@@ -263,10 +267,8 @@ const PublicProductPage: React.FC = () => {
                 </h1>
               </div>
 
-              {/* Price */}
               <p className="font-display text-xl text-foreground/80">Price on request</p>
 
-              {/* Primary CTA */}
               <Link
                 to="/trade-program"
                 className="flex items-center justify-center px-5 py-4 rounded-md font-body text-xs uppercase tracking-[0.15em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 mt-1"
@@ -274,7 +276,6 @@ const PublicProductPage: React.FC = () => {
                 Request a Quote or a Customisation
               </Link>
 
-              {/* Specs only (description lives in image overlay dropdown) */}
               <div className="flex flex-col gap-4 pt-4 text-foreground/85 font-body text-sm leading-relaxed">
                 {product.materials && (
                   <p>{product.materials}</p>
@@ -284,7 +285,6 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Secondary actions: Spec Sheet / Contact */}
               <div className="grid grid-cols-2 gap-3 mt-2">
                 {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
                   <SpecSheetButton
@@ -293,7 +293,11 @@ const PublicProductPage: React.FC = () => {
                     brandName={designerDisplay}
                     productName={product.title}
                     variant="button"
-                    onBeforeOpen={() => { let allowed = false; requireAuth(() => { allowed = true; }, "download this spec sheet"); return allowed; }}
+                    onBeforeOpen={() => {
+                      let allowed = false;
+                      requireAuth(() => { allowed = true; }, "download this spec sheet");
+                      return allowed;
+                    }}
                   />
                 ) : (
                   <button
@@ -318,7 +322,6 @@ const PublicProductPage: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Send to a friend */}
               <a
                 href={`mailto:?subject=${encodeURIComponent(`${product.title} by ${designerDisplay}`)}&body=${encodeURIComponent(`I thought you'd love this piece: ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
                 className="self-center font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors mt-1"
@@ -326,7 +329,6 @@ const PublicProductPage: React.FC = () => {
                 Send to a Friend
               </a>
 
-              {/* Trade CTA */}
               <p className="font-body text-[11px] text-muted-foreground text-center mt-2">
                 For pricing and availability, please{" "}
                 <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
@@ -336,7 +338,6 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Trust badges */}
           <div className="mt-16 pt-10 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
               { icon: Globe, label: "Insured Worldwide Delivery" },
@@ -352,7 +353,6 @@ const PublicProductPage: React.FC = () => {
             ))}
           </div>
 
-          {/* More from this designer */}
           {relatedPicks.length > 0 && (
             <div className="mt-20 pt-8 border-t border-border">
               <div className="flex items-center justify-between mb-6">
@@ -362,8 +362,8 @@ const PublicProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-xl md:text-2xl">{designerDisplay}</h2>
                 </div>
-                 <Link
-                   to={`/designers/${designer.slug}?section=picks&expanded=true`}
+                <Link
+                  to={`/designers/${designer.slug}?section=picks&expanded=true`}
                   className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
                 >
                   View All
