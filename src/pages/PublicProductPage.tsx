@@ -257,9 +257,13 @@ const PublicProductPage: React.FC = () => {
         <div className="pt-32 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             onClick={() => {
-              if (fromPath) navigate(fromPath);
-              else if (window.history.length > 1) navigate(-1);
-              else navigate(`/designers/${designer.slug}`);
+              if (fromPath) {
+                navigate(fromPath);
+                return;
+              }
+
+              const fallbackGridPath = designerSlug ? `/designers/${designerSlug}?category=Armchairs` : "/?category=Armchairs";
+              navigate(fallbackGridPath);
             }}
             className="inline-flex items-center gap-1.5 mb-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
           >

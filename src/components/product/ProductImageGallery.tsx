@@ -49,10 +49,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
           />
         </div>
-        {/* Description overlay sits ABOVE the image container so the expanded
-            panel is not clipped by overflow-hidden */}
         {overlay && (
-          <div className="absolute top-0 left-0 z-20 max-w-[70%]">
+          <div className="absolute -top-6 left-6 z-20 max-w-[70%]">
             {overlay}
           </div>
         )}
