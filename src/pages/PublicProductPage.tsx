@@ -372,12 +372,12 @@ const PublicProductPage: React.FC = () => {
                 image: cloudinaryUrl("v1773473193/quality-control_dvxvmb", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
               },
               {
-                label: "Secure Payment",
-                image: cloudinaryUrl("v1776398457/Screen_Shot_2026-04-17_at_12.00.10_PM_oyeewa", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
-              },
-              {
                 label: "Certificate of Authenticity",
                 image: cloudinaryUrl("v1776392079/Screen_Shot_2026-04-17_at_10.14.17_AM_ovaxxl", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
+              },
+              {
+                label: "Secure Payment",
+                image: cloudinaryUrl("v1776398554/Screen_Shot_2026-04-17_at_12.02.10_PM_gtnutz", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
               },
             ].map(({ label, image }) => (
               <div key={label} className="flex flex-col items-center text-center gap-3">
