@@ -20,12 +20,19 @@ const CategoryRoute = () => {
     const detail = {
       category,
       subcategory: sub?.subcategory ?? null,
-      source: "designers", // matches the existing accepted source on Collectibles/etc.
+      source: "designers",
     };
-    // Dispatch on next tick so consumer effects are mounted.
     const id = window.setTimeout(() => {
       window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
-    }, 0);
+      // Scroll to the designers/products section so the filtered grid is visible.
+      const target =
+        document.getElementById("designers") ||
+        document.getElementById("featured-designers") ||
+        document.querySelector("[data-section='designers']");
+      if (target instanceof HTMLElement) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 150);
     return () => window.clearTimeout(id);
   }, [category, sub?.subcategory]);
 
