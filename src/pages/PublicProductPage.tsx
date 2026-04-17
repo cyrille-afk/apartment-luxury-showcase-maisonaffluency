@@ -373,7 +373,7 @@ const PublicProductPage: React.FC = () => {
               },
               {
                 label: "Secure Payment",
-                image: cloudinaryUrl("v1773730098/Screen_Shot_2026-03-17_at_2.47.21_PM_lg1da3", { width: 480, height: 480, quality: "auto:good", crop: "fill", gravity: "north" }),
+                image: cloudinaryUrl("v1776391855/Screen_Shot_2026-04-17_at_10.10.31_AM_qm67pi", { width: 480, height: 480, quality: "auto:good", crop: "fill" }),
               },
               {
                 label: "Certificate of Authenticity",
