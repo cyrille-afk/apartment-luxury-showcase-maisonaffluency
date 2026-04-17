@@ -34,6 +34,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 

@@ -26,6 +26,7 @@ import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/li
 import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {

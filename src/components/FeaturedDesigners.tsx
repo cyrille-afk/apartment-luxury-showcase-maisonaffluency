@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 
 // Designer profile images — served via Cloudinary CDN

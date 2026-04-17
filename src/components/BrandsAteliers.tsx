@@ -34,6 +34,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1200, quality: "auto:good", crop: "fill" });
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1200, quality: "auto:good", crop: "fill" });
