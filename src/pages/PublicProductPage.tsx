@@ -59,7 +59,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: designer } = await supabase
         .from("designers")
-        .select("id, name, slug, display_name")
+        .select("id, name, slug, display_name, biography")
         .eq("slug", designerSlug)
         .eq("is_published", true)
         .maybeSingle();
@@ -109,8 +109,8 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
             ? (product as any).gallery_images
             : tradeProduct?.gallery_images || null,
         },
-        designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug },
-        relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id).slice(0, 6),
+        designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug, biography: designer.biography || "" },
+        relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
       };
     },
     enabled: !!designerSlug && !!productSlug,
