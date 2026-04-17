@@ -1393,28 +1393,30 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             </p>
           )}
 
-          {/* Desktop: A-Z jump bar — full width */}
-          <div className="hidden md:block mb-6">
-            <div className="h-px bg-border/60 mb-5" />
-            <div
-              ref={letterBarRef}
-              className="flex items-center justify-between"
-            >
-              {LETTERS.map((letter) => {
-                const isActive = activeLetters.has(letter);
-                return (
-                  <button
-                    key={letter}
-                    onClick={() => jumpToLetter(letter)}
-                    className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/20 cursor-default"}`}
-                  >
-                    {letter}
-                  </button>
-                );
-              })}
+          {/* Desktop: A-Z jump bar — hidden when a category/subcategory filter is active */}
+          {!(selectedCategory || selectedSubcategory) && (
+            <div className="hidden md:block mb-6">
+              <div className="h-px bg-border/60 mb-5" />
+              <div
+                ref={letterBarRef}
+                className="flex items-center justify-between"
+              >
+                {LETTERS.map((letter) => {
+                  const isActive = activeLetters.has(letter);
+                  return (
+                    <button
+                      key={letter}
+                      onClick={() => jumpToLetter(letter)}
+                      className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/20 cursor-default"}`}
+                    >
+                      {letter}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="h-px bg-border/60 mt-5" />
             </div>
-            <div className="h-px bg-border/60 mt-5" />
-          </div>
+          )}
 
           {/* Desktop: Filter + Search row */}
           <div className="hidden md:flex items-center gap-3 mb-6">
