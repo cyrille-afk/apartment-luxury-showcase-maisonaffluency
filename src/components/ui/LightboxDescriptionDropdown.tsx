@@ -25,7 +25,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
           setExpanded(!expanded);
         }}
         className={cn(
-          "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left",
+          "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left w-full max-w-md",
           "bg-background/90 backdrop-blur-sm border border-border/30 text-foreground",
           expanded ? "rounded-b-none border-b-0" : ""
         )}
@@ -33,7 +33,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
         <Info size={14} className="shrink-0 mt-0.5 opacity-70" />
         <span
           className={cn(
-            "font-body text-xs leading-relaxed",
+            "font-body text-xs leading-relaxed flex-1 min-w-0",
             !expanded && "line-clamp-2"
           )}
         >
@@ -44,9 +44,9 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
         </span>
         {description.length > 80 &&
           (expanded ? (
-            <ChevronUp size={14} className="shrink-0 mt-0.5" />
+            <ChevronUp size={14} className="shrink-0 mt-0.5 ml-auto" />
           ) : (
-            <ChevronDown size={14} className="shrink-0 mt-0.5" />
+            <ChevronDown size={14} className="shrink-0 mt-0.5 ml-auto" />
           ))}
       </button>
       <AnimatePresence>
