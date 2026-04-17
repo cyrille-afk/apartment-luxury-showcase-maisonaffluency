@@ -296,7 +296,13 @@ const PublicProductPage: React.FC = () => {
               <ProductImageGallery
                 images={images}
                 alt={product.title}
-                overlay={product.description ? <LightboxDescriptionDropdown description={product.description} /> : null}
+                overlay={
+                  product.description ? (
+                    <div className="hidden md:block">
+                      <LightboxDescriptionDropdown description={product.description} />
+                    </div>
+                  ) : null
+                }
               />
             </div>
 
