@@ -125,7 +125,14 @@ const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromPath = (location.state as { from?: string } | null)?.from;
+  const stateFrom = (location.state as { from?: string } | null)?.from;
+  const fromPath = stateFrom || (typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") || undefined : undefined);
+
+  useEffect(() => {
+    if (stateFrom) {
+      try { sessionStorage.setItem("product_from_path", stateFrom); } catch {}
+    }
+  }, [stateFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
