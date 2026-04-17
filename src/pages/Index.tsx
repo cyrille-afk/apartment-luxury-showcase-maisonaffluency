@@ -220,6 +220,14 @@ const Index = () => {
       return;
     }
 
+    // Category deep-links manage their own landing/scroll behavior.
+    // Restoring an old homepage scroll position here can wrongly dump mobile
+    // users back at the landing page after choosing a category/subcategory.
+    if (isCategoryRoute()) {
+      sessionStorage.removeItem("__scroll_y");
+      return;
+    }
+
     if (savedY && Number(savedY) > 0) {
       const targetY = Number(savedY);
       let waitAttempts = 0;

@@ -20,12 +20,22 @@ const StickyBottomNav = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("");
 
-  // Show after scrolling past hero
+  // Show earlier on mobile category landings so the bar remains available
+  // after category/subcategory deep-links scroll users straight into the grid.
   useEffect(() => {
-    const onScroll = () => setIsVisible(window.scrollY > SCROLL_THRESHOLD);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const getThreshold = () => {
+      const isCategoryLanding = /^\/products-category\//.test(window.location.pathname);
+      return isCategoryLanding ? 120 : Math.max(640, Math.round(window.innerHeight * 0.9));
+    };
+
+    const updateVisibility = () => setIsVisible(window.scrollY > getThreshold());
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+    };
   }, []);
 
   // Track active section
