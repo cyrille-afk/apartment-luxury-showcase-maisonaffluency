@@ -33,6 +33,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { categoryUrl } from "@/lib/categorySlugs";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -516,6 +517,15 @@ const Collectibles = () => {
 
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'collectibles' } }));
+    // Sync URL to /products-category/:cat/:sub when on the homepage tree
+    try {
+      const target = categoryUrl(cat, sub);
+      const current = window.location.pathname;
+      const onHomeOrCategory = current === "/" || current.startsWith("/products-category/");
+      if (onHomeOrCategory && current !== target) {
+        window.history.pushState({}, "", target + window.location.hash);
+      }
+    } catch {}
   }, []);
 
   const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {

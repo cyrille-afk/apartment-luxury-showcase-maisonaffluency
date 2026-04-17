@@ -88,6 +88,7 @@ const PublicGallery = lazy(() => import("./pages/PublicGallery"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
+const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
@@ -160,6 +161,8 @@ const App = () => {
               ) : (
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/products-category/:categorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
+                  <Route path="/products-category/:categorySlug/:subcategorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
 
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
