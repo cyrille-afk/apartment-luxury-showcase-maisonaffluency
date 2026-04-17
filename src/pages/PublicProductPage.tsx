@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, Layers, Ruler } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
