@@ -370,7 +370,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(1);
+  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(3);
   const [activeMobilePill, setActiveMobilePill] = useState(0);
   const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
