@@ -393,52 +393,27 @@ const PublicProductPage: React.FC = () => {
             <div className="mt-20 pt-8 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                 {/* Left: brand summary */}
-                <div className="lg:col-span-4 lg:pr-4 flex flex-col justify-between">
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                      From the Same Designer
+                <div className="lg:col-span-4 lg:pr-4">
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                    From the Same Designer
+                  </p>
+                  <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
+                    <Link
+                      to={`/designers/${designer.slug}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {designerDisplay}
+                    </Link>
+                  </h2>
+                  {brandSummary && (
+                    <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                      {brandSummary}
                     </p>
-                    <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
-                      <Link
-                        to={`/designers/${designer.slug}`}
-                        className="hover:text-primary transition-colors"
-                      >
-                        {designerDisplay}
-                      </Link>
-                    </h2>
-                    {brandSummary && (
-                      <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
-                        {brandSummary}
-                      </p>
-                    )}
-                  </div>
-
-                  {relatedPicks.length > visibleCount && (
-                    <div className="hidden lg:flex items-center gap-3 mt-8">
-                      <button
-                        type="button"
-                        onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
-                        disabled={safeIndex === 0}
-                        aria-label="Previous"
-                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
-                        disabled={safeIndex >= maxIndex}
-                        aria-label="Next"
-                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
                   )}
                 </div>
 
                 {/* Right: 3-up product grid */}
-                <div className="lg:col-span-8">
+                <div className="lg:col-span-8 flex flex-col">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                     {visibleRelated.map((rp) => (
                       <Link
@@ -447,44 +422,62 @@ const PublicProductPage: React.FC = () => {
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                       >
-                        <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-muted/10 border border-border group-hover:border-foreground/30 transition-all">
+                        <div className="aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           <img
                             src={rp.image_url}
                             alt={rp.title}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
                           />
-                          <ProductCardDescriptionOverlay description={rp.description} />
                         </div>
-                        <div className="mt-3 text-center">
-                          <p className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{designerDisplay}</p>
-                          <p className="font-display text-base mt-1">{rp.title}</p>
-                        </div>
+                        <p className="font-body text-xs text-muted-foreground mt-2 text-center group-hover:text-foreground transition-colors truncate">
+                          {rp.title}
+                        </p>
                       </Link>
                     ))}
                   </div>
 
-                  {/* Mobile arrows */}
+                  {/* Pagination: dots + arrows, bottom-right */}
                   {relatedPicks.length > visibleCount && (
-                    <div className="flex lg:hidden items-center justify-center gap-3 mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
-                        disabled={safeIndex === 0}
-                        aria-label="Previous"
-                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
-                        disabled={safeIndex >= maxIndex}
-                        aria-label="Next"
-                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
+                    <div className="mt-6 flex items-center justify-between gap-4">
+                      {/* Dots */}
+                      <div className="flex items-center gap-1.5">
+                        {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setRelatedIndex(i)}
+                            aria-label={`Go to page ${i + 1}`}
+                            className={cn(
+                              "h-1.5 rounded-full transition-all",
+                              i === safeIndex
+                                ? "w-6 bg-foreground"
+                                : "w-1.5 bg-foreground/30 hover:bg-foreground/60"
+                            )}
+                          />
+                        ))}
+                      </div>
+                      {/* Arrows */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
+                          disabled={safeIndex === 0}
+                          aria-label="Previous"
+                          className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
+                          disabled={safeIndex >= maxIndex}
+                          aria-label="Next"
+                          className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
