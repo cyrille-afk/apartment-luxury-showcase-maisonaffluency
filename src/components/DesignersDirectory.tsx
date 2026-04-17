@@ -916,7 +916,15 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           {pick.title}{pick.subtitle && /^\d{4}$/.test(pick.subtitle.trim()) ? ` (${pick.subtitle.trim()})` : ''}
         </p>
         {pick.subtitle && !/^\d{4}$/.test(pick.subtitle.trim()) && (
-          <p className="font-body text-[11px] text-muted-foreground mt-0.5">{pick.subtitle}</p>
+          /re-?edition$/i.test(pick.subtitle.trim()) ? (
+            <div className="mt-1.5 flex justify-center">
+              <span className="inline-block font-body text-[9px] uppercase tracking-[0.14em] text-primary border border-primary/40 rounded-full px-2 py-0.5">
+                {pick.subtitle}
+              </span>
+            </div>
+          ) : (
+            <p className="font-body text-[11px] text-muted-foreground mt-0.5">{pick.subtitle}</p>
+          )
         )}
         <p className="font-display text-sm mt-1 text-foreground/70">
           Price on request
