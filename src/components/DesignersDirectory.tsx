@@ -25,6 +25,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { getCategoryHero } from "@/constants/categoryHeroes";
+import { categoryUrl } from "@/lib/categorySlugs";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
@@ -1021,12 +1022,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, []);
 
   const syncUrlParams = useCallback((cat: string | null, sub: string | null) => {
-    const params = new URLSearchParams(window.location.search);
-    if (cat) params.set("category", cat); else params.delete("category");
-    if (sub) params.set("subcategory", sub); else params.delete("subcategory");
-    const qs = params.toString();
-    const newUrl = window.location.pathname + (qs ? `?${qs}` : "");
-    window.history.replaceState(null, "", newUrl);
+    // If a category is selected, push the slug URL. Otherwise return to /designers.
+    const target = cat ? categoryUrl(cat, sub) : "/designers";
+    const current = window.location.pathname + window.location.search;
+    if (current !== target) {
+      window.history.pushState({}, "", target);
+    }
   }, []);
 
   const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
