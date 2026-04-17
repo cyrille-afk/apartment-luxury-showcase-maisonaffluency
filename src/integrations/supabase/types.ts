@@ -2459,6 +2459,7 @@ export type Database = {
           image_url: string | null
           lead_time: string | null
           materials: string | null
+          origin: string | null
           pdf_filename: string | null
           pdf_url: string | null
           pdf_urls: Json | null
@@ -2483,6 +2484,7 @@ export type Database = {
           image_url?: string | null
           lead_time?: string | null
           materials?: string | null
+          origin?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
@@ -2507,6 +2509,7 @@ export type Database = {
           image_url?: string | null
           lead_time?: string | null
           materials?: string | null
+          origin?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
