@@ -852,14 +852,14 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       }}
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
-      <div className="aspect-square bg-muted/20 overflow-hidden relative">
+      <div className="aspect-[5/6] bg-muted/20 overflow-hidden relative">
         {pick.image_url ? (
           <>
             <img
               src={pick.image_url}
               alt={pick.title}
               className={cn(
-                "w-full h-full object-contain transition-all duration-700 group-hover:scale-[1.03]",
+                "w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-[1.03]",
                 pick.hover_image_url && "group-hover:opacity-0"
               )}
               loading="lazy"
@@ -869,7 +869,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
                 src={pick.hover_image_url}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-contain opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 loading="lazy"
               />
             )}
