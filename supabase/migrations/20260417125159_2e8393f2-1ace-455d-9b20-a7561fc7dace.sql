@@ -1,0 +1,2 @@
+UPDATE public.designer_curator_picks SET subtitle = 'Ecart Re-Edition' WHERE id = '1b6a0347-30e3-41e0-a464-5cc998bf6ce6';
+UPDATE public.designer_curator_picks SET subtitle = 'Sebastian Herkner for Man of Parts' WHERE id IN ('f1a56c37-f49a-4ba0-bc00-a5adcbffb887', 'c3efcc98-6d8e-4af6-8317-57274e1ea4ad');
