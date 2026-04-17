@@ -14,6 +14,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
+import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -217,12 +218,19 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation borderless />
 
-        <div className="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main content: image + details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            {/* Left: Image Gallery */}
-            <div>
+            {/* Left: Image Gallery with description overlay */}
+            <div className="relative">
               <ProductImageGallery images={images} alt={product.title} />
+              {product.description && (
+                <div className="absolute top-3 left-3 right-3 z-10 pointer-events-none">
+                  <div className="pointer-events-auto inline-block max-w-full">
+                    <LightboxDescriptionDropdown description={product.description} />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right: Product details */}
@@ -266,11 +274,8 @@ const PublicProductPage: React.FC = () => {
                 Request a Quote or a Customisation
               </Link>
 
-              {/* Description / specs (plain editorial text) */}
+              {/* Specs only (description lives in image overlay dropdown) */}
               <div className="flex flex-col gap-4 pt-4 text-foreground/85 font-body text-sm leading-relaxed">
-                {product.description && (
-                  <p>{product.description}</p>
-                )}
                 {product.materials && (
                   <p>{product.materials}</p>
                 )}
