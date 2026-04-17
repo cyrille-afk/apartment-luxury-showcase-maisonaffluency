@@ -443,7 +443,7 @@ const TradeJournal = () => {
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
                 Content <span className="text-muted-foreground/50">(Markdown)</span>
               </label>
-              <div className="flex items-center gap-1 mb-1">
+              <div className="flex items-center gap-1 mb-1 flex-wrap">
                 {[
                   { label: "B", wrap: "**", title: "Bold" },
                   { label: "I", wrap: "*", title: "Italic" },
@@ -453,6 +453,7 @@ const TradeJournal = () => {
                   { label: "❝", prefix: "> ", title: "Blockquote" },
                   { label: "—", prefix: "\n---\n", title: "Divider" },
                   { label: "📷", title: "Inline Image" },
+                  { label: "🖼️🖼️", title: "Side-by-side image pair" },
                 ].map((btn) => (
                   <button
                     key={btn.label}

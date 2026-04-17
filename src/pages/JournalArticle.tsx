@@ -244,8 +244,9 @@ const JournalArticlePage = () => {
                 // If no gallery images, render content as-is
                 if (galleryItems.length === 0) {
                   return (
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
+                    <JournalMarkdown
+                      content={article.content}
+                      onPairImageClick={(url) => window.open(url, "_blank", "noopener,noreferrer")}
                       components={{
                         h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
@@ -286,9 +287,7 @@ const JournalArticlePage = () => {
                         ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
                         ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
                       }}
-                    >
-                      {article.content}
-                    </ReactMarkdown>
+                    />
                   );
                 }
 
@@ -357,9 +356,11 @@ const JournalArticlePage = () => {
 
                   return (
                     <div key={i}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-                        {section}
-                      </ReactMarkdown>
+                      <JournalMarkdown
+                        content={section}
+                        components={mdComponents}
+                        onPairImageClick={(url) => window.open(url, "_blank", "noopener,noreferrer")}
+                      />
                       {image && (
                         <figure className="my-8 md:my-12">
                           <button
