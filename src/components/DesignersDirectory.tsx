@@ -1519,7 +1519,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
           {/* Mobile: Directory */}
           <div className="md:hidden" data-directory-layout="mobile">
-            {!filteredPicks && (
+            {!(selectedCategory || selectedSubcategory) && (
               /* Mobile A-Z bar — wrapped grid for full visibility and touch-friendly sizing */
               <div className="mb-5">
                 <div className="h-px bg-border/60 mb-3" />
