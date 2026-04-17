@@ -524,7 +524,7 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className={`max-w-[90%] max-h-[90%] object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                  className={`max-w-[96%] max-h-[96%] object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
