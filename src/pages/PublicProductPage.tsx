@@ -251,6 +251,7 @@ const PublicProductPage: React.FC = () => {
           <button
             onClick={() => {
               if (fromPath) navigate(fromPath);
+              else if (window.history.length > 1) navigate(-1);
               else navigate(`/designers/${designer.slug}`);
             }}
             className="inline-flex items-center gap-1.5 mb-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
