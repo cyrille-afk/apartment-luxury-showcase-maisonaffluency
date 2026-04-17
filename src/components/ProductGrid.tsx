@@ -428,9 +428,6 @@ function singularizeSub(s: string): string {
   const activeScope = filterSource ? (SOURCE_TO_SCOPE[filterSource] || "designers") : null;
   if (sectionScope && activeScope !== sectionScope) return null;
 
-  // FeaturedDesigners now shows filtered products inline, so hide this grid for that scope
-  if (sectionScope === "designers" && activeScope === "designers") return null;
-
   if (!isActive) return null;
 
   const filterLabel = subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
