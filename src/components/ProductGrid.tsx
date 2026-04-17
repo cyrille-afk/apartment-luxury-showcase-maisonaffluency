@@ -503,7 +503,7 @@ function singularizeSub(s: string): string {
               className="group cursor-pointer"
               onClick={() => handleCardClick(item, idx)}
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
