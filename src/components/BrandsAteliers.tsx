@@ -34,6 +34,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1200, quality: "auto:good", crop: "fill" });
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -2909,6 +2910,13 @@ const BrandsAteliers = () => {
   }, [picksIndex]);
 
   useEffect(() => {
+    // Hydrate filter from URL/global on mount (handles lazy-mount race).
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setSelectedCategoryRaw(pending.category);
+      setSelectedSubcategoryRaw(pending.subcategory);
+    }
+
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
       // Only sync from designers (Navigation mega-menu); ignore collectibles to avoid cross-section jumps

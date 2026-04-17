@@ -26,6 +26,7 @@ import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/li
 import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
@@ -1058,6 +1059,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   // Listen for external filter sync
   useEffect(() => {
+    // Hydrate on mount from URL/global pending filter.
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setSelectedCategoryRaw(pending.category);
+      setSelectedSubcategoryRaw(pending.subcategory);
+      setSidebarOpen(false);
+    }
+
     const handleSync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
       if (source === 'designers') return;

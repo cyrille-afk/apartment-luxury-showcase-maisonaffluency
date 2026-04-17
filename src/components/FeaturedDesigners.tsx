@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 
 // Designer profile images — served via Cloudinary CDN
@@ -2306,6 +2307,16 @@ const FeaturedDesigners = () => {
   });
 
   useEffect(() => {
+    // Hydrate from pending filter (URL/global) so this section picks up
+    // the active category even if it mounted after the broadcast fired.
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setSelectedCategoryRaw(pending.category);
+      setSelectedSubcategoryRaw(pending.subcategory);
+      setSidebarOpen(false);
+      setProductGridCols(3);
+    }
+
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
       if (source === 'designers') return;

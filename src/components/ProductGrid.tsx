@@ -13,6 +13,7 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -253,6 +254,16 @@ function singularizeSub(s: string): string {
 }
   // Listen for global filter events from all sections
   useEffect(() => {
+    // Hydrate from pending filter on mount (handles late mount via Suspense).
+    const pending = readPendingCategoryFilter();
+    if (pending && (pending.category || pending.subcategory)) {
+      setCategory(pending.category);
+      setSubcategory(pending.subcategory);
+      setFilterSource('designers');
+      setTextQuery(null);
+      if (pending.subcategory) setGridCols(3);
+    }
+
     const handleSetCategory = (e: CustomEvent) => {
       const { category: cat, subcategory: sub } = e.detail || {};
       setCategory(cat || null);
