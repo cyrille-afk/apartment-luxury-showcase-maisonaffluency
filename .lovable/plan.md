@@ -1,36 +1,45 @@
 
 
-## Why mobile lands on the hero
+## Diagnosis (why publishing didn't fix it)
 
-When you tap "Armchairs" in the mobile menu we now correctly navigate to `/products-category/seating/armchairs`. That route renders the homepage and broadcasts a `syncCategoryFilter` event after 150 ms.
+I reproduced the bug live on production: clicking **All Categories → Armchairs** from any page navigates to `/products-category/seating/armchairs` correctly, but the page lands on the **parallax interlude** ("Every piece of furniture tells a story…"), not on the filtered Armchairs grid. The filter never visibly applies, and the Clear-Filter pill never appears.
 
-Problem: the homepage sections that listen to that event (`FeaturedDesigners`, `DesignersDirectory`, `Collectibles`, `BrandsAteliers`, `ProductGrid`) are lazy-loaded inside `<Suspense>`. On a fresh load — especially on mobile — they haven't mounted yet, so:
+Root cause — the previous attempts targeted the wrong component:
 
-1. The event fires into the void (no listeners yet) → no filter is applied.
-2. The `#designers` scroll target doesn't exist yet → page stays at the hero.
+1. `Index.tsx` renders **only one ProductGrid**, with `sectionScope="designers"`.
+2. Inside `ProductGrid.tsx` lines 428–432 there is an early return:
+   ```ts
+   if (sectionScope && activeScope !== sectionScope) return null;
+   if (sectionScope === "designers" && activeScope === "designers") return null;
+   ```
+   When the URL filter is applied, `filterSource` becomes `"designers"` → `activeScope === "designers"` → **the only ProductGrid on the page returns `null`.** So `#product-grid` never exists in the DOM, the Clear-Filter pill never renders, and the Armchairs grid is invisible.
+3. The CategoryRoute poller can't find `#product-grid`, falls back to `#designers` (the DesignersDirectory wrapper), and lands you in the parallax interlude that sits just above it.
+4. `FeaturedDesigners` is supposed to render the "filtered products inline" instead — but **`FeaturedDesigners` isn't even mounted in `Index.tsx`** (only `DesignersDirectory` is). So nothing renders the filtered grid at all.
 
-That's why it looks like the landing page with no filter.
+That second `if` was written for a layout where `FeaturedDesigners` lived on the homepage. It no longer does. The condition is now actively breaking the whole feature, and republishing changed CategoryRoute polling but not this underlying bug, so nothing visibly improved.
 
 ## Fix
 
-Make the URL the source of truth instead of a one-shot event.
+Remove the dead-code early return so the single homepage `ProductGrid` actually renders the filtered results.
 
-1. **`src/pages/CategoryRoute.tsx`** — keep the event broadcast (for already-mounted sections), but also write the active category/subcategory to a small module-level store (e.g. `window.__activeCategoryFilter`) so late-mounting sections can read it on mount.
+**`src/components/ProductGrid.tsx`** (around line 432)
+- Delete the line: `if (sectionScope === "designers" && activeScope === "designers") return null;`
+- Keep the first guard (line 429) — that one is still correct for scoping `collectibles` / `ateliers` instances.
 
-2. **Sections that filter** (`FeaturedDesigners`, `DesignersDirectory`, `Collectibles`, `BrandsAteliers`, `ProductGrid`) — on mount, initialize their selected category/subcategory from that store (or from `window.location.pathname` parsed via `categoryFromSlug` / `subcategoryFromSlugs`). This guarantees the filter is applied even if they mount after the event fires.
+**`src/pages/CategoryRoute.tsx`** — keep current logic; once `#product-grid` actually exists in the DOM the existing poller will scroll to it correctly.
 
-3. **Scroll**: replace the 150 ms timeout with a poll (up to ~2 s) that waits for `#designers` to exist before calling `scrollIntoView`. This handles the Suspense delay on mobile.
+**`src/pages/Index.tsx`** — no change needed; the existing `<ProductGrid sectionScope="designers" />` will now render the Armchairs grid above `#designers`.
 
-4. **No new memory needed** — this just fixes the existing slug-routing flow.
+## Expected result after publish
 
-### Files to edit
+- `/products-category/seating/armchairs` shows the Armchairs product grid with the Clear-Filter pill.
+- The page auto-scrolls to that grid (since `#product-grid` now exists).
+- Switching between subcategories via the mega menu replaces the grid contents (broadcast already works).
+- Mobile menu category taps land on the filtered grid the same way.
 
-- `src/pages/CategoryRoute.tsx` — set a shared "pending filter" + poll-based scroll.
-- `src/components/FeaturedDesigners.tsx` — read pending filter on mount.
-- `src/components/DesignersDirectory.tsx` — read pending filter on mount.
-- `src/components/Collectibles.tsx` — read pending filter on mount.
-- `src/components/BrandsAteliers.tsx` — read pending filter on mount.
-- `src/components/ProductGrid.tsx` — read pending filter on mount.
+## Files to edit
 
-After this, tapping any mobile category/subcategory will land you on the homepage with the correct filter applied and the grid scrolled into view, regardless of how slowly the lazy chunks load.
+- `src/components/ProductGrid.tsx` — remove the one breaking early-return line.
+
+That's the entire fix. One line. Approve and I'll apply it.
 
