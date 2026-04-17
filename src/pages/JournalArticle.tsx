@@ -4,9 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import React from "react";
+import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 import { useAuth } from "@/hooks/useAuth";
