@@ -397,8 +397,20 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground">RRP Price (cents)</label>
-                    <Input type="number" value={pick.trade_price_cents ?? ""} onChange={(e) => updateField(pick.id, "trade_price_cents", e.target.value ? parseInt(e.target.value) : null)} className="text-xs" />
+                    <label className="text-[10px] text-muted-foreground">RRP Price ({pick.currency || "EUR"})</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={pick.trade_price_cents != null ? (pick.trade_price_cents / 100).toString() : ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "") { updateField(pick.id, "trade_price_cents", null); return; }
+                        const num = parseFloat(v);
+                        updateField(pick.id, "trade_price_cents", Number.isFinite(num) ? Math.round(num * 100) : null);
+                      }}
+                      placeholder="e.g. 8500"
+                      className="text-xs"
+                    />
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground">Sort Order</label>
