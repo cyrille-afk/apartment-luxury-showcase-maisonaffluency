@@ -201,12 +201,11 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
-  const overrideImages = productSlug ? PRODUCT_GALLERY_OVERRIDES[productSlug] : undefined;
-  const images = overrideImages ?? Array.from(new Set([
+  const images = Array.from(new Set([
+    ...((product.gallery_images || []).filter(Boolean)),
     product.image_url,
-    ...(product.gallery_images || []),
     product.hover_image_url,
-  ].filter(Boolean))).slice(0, 4) as string[];
+  ].filter(Boolean))) as string[];
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
@@ -224,14 +223,11 @@ const PublicProductPage: React.FC = () => {
         <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">
-              <ProductImageGallery images={images} alt={product.title} />
-              {product.description && (
-                <div className="absolute top-3 left-3 right-3 z-10 pointer-events-none">
-                  <div className="pointer-events-auto inline-block max-w-full">
-                    <LightboxDescriptionDropdown description={product.description} />
-                  </div>
-                </div>
-              )}
+              <ProductImageGallery
+                images={images}
+                alt={product.title}
+                overlay={product.description ? <LightboxDescriptionDropdown description={product.description} /> : null}
+              />
             </div>
 
             <div className="relative flex flex-col gap-5">
