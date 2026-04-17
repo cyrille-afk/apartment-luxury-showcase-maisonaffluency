@@ -1,5 +1,6 @@
 import React from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Navigate } from "react-router-dom";
+import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
