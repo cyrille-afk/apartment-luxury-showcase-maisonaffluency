@@ -32,7 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
-import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeSubcategory } from "@/lib/productTaxonomy";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1200, quality: "auto:good", crop: "fill" });
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -2944,11 +2944,13 @@ const BrandsAteliers = () => {
         const picks = designerId ? atelierOnlyPicks[designerId]?.curatorPicks || [] : [];
 
         return picks.some((pick) => {
+          const canonicalSub = normalizeSubcategory(pick.subcategory) || pick.subcategory;
           const fields = [
             pick.title,
             pick.subtitle,
             pick.category,
             pick.subcategory,
+            canonicalSub,
             ...(pick.tags || []),
           ]
             .filter(Boolean)
@@ -3130,8 +3132,8 @@ const BrandsAteliers = () => {
                           "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
                           "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
                           "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-                          "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-                          "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+                          "Wall Lights": ["Wall Light", "Wall Lights", "Wall Lamp", "Wall Lamps", "Sconce", "Sconces"], "Ceiling Lights": ["Ceiling Light", "Ceiling Lights", "Chandelier", "Chandeliers", "Pendant", "Pendants", "Pendant Light", "Pendant Lights", "Pendant Lamp", "Pendant Lamps", "Suspension", "Suspensions"],
+                          "Floor Lights": ["Floor Light", "Floor Lights", "Floor Lamp", "Floor Lamps"], "Table Lights": ["Table Light", "Table Lights", "Table Lamp", "Table Lamps", "Desk Lamp", "Desk Lamps", "Portable Lamp", "Portable Lamps", "Lantern", "Lanterns"],
                           "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
                           "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
                           "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
@@ -3241,8 +3243,8 @@ const BrandsAteliers = () => {
               "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
               "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
               "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-              "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+              "Wall Lights": ["Wall Light", "Wall Lights", "Wall Lamp", "Wall Lamps", "Sconce", "Sconces"], "Ceiling Lights": ["Ceiling Light", "Ceiling Lights", "Chandelier", "Chandeliers", "Pendant", "Pendants", "Pendant Light", "Pendant Lights", "Pendant Lamp", "Pendant Lamps", "Suspension", "Suspensions"],
+              "Floor Lights": ["Floor Light", "Floor Lights", "Floor Lamp", "Floor Lamps"], "Table Lights": ["Table Light", "Table Lights", "Table Lamp", "Table Lamps", "Desk Lamp", "Desk Lamps", "Portable Lamp", "Portable Lamps", "Lantern", "Lanterns"],
               "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
               "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
               "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
