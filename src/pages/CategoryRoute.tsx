@@ -27,7 +27,7 @@ const CategoryRoute = () => {
     setPendingCategoryFilter({ category, subcategory });
 
     // 2. Broadcast immediately for sections already mounted.
-    const detail = { category, subcategory, source: "designers" };
+    const detail = { category, subcategory, source: "url" };
     window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
 
     // 3. Poll for the scroll target — Suspense chunks may mount late on mobile.
