@@ -439,8 +439,23 @@ const PublicProductPage: React.FC = () => {
           {relatedPicks.length > 0 && (
             <div className="mt-16 pt-8 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-                {/* Carousel: swipeable on mobile, paginated 3-up on desktop. order-1 on mobile so brand text appears below. */}
-                <div className="lg:col-span-8 flex flex-col order-1 lg:order-2">
+                {/* Mobile-only heading: shown above the carousel */}
+                <div className="lg:hidden order-1">
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                    {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
+                  </p>
+                  <h2 className="font-display text-2xl leading-tight">
+                    <Link
+                      to={`/designers/${designer.slug}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {designerDisplay}
+                    </Link>
+                  </h2>
+                </div>
+
+                {/* Carousel: swipeable on mobile, paginated 3-up on desktop. */}
+                <div className="lg:col-span-8 flex flex-col order-2 lg:order-2">
                   {/* Mobile: native horizontal scroll-snap carousel */}
                   <div className="lg:hidden -mx-4 px-4">
                     <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
