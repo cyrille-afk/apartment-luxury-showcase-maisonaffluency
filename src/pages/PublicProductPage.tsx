@@ -560,19 +560,21 @@ const PublicProductPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Brand summary — above on desktop (left col), below carousel on mobile */}
-                <div className="lg:col-span-4 lg:pr-4 order-2 lg:order-1">
-                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                    {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
-                  </p>
-                  <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
-                    <Link
-                      to={`/designers/${designer.slug}`}
-                      className="hover:text-primary transition-colors"
-                    >
-                      {designerDisplay}
-                    </Link>
-                  </h2>
+                {/* Brand summary — above carousel on desktop, below on mobile */}
+                <div className="lg:col-span-4 lg:pr-4 order-3 lg:order-1">
+                  <div className="hidden lg:block">
+                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                      {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
+                    </p>
+                    <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
+                      <Link
+                        to={`/designers/${designer.slug}`}
+                        className="hover:text-primary transition-colors"
+                      >
+                        {designerDisplay}
+                      </Link>
+                    </h2>
+                  </div>
                   {brandSummary && (
                     <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
                       {brandSummary}
