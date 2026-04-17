@@ -460,7 +460,7 @@ const PublicProductPage: React.FC = () => {
                 {/* Left: brand summary */}
                 <div className="lg:col-span-4 lg:pr-4">
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                    From the Same Designer
+                    {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
                   </p>
                   <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                     <Link
