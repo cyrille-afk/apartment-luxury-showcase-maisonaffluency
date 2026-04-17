@@ -376,6 +376,10 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     <Input value={pick.photo_credit || ""} onChange={(e) => updateField(pick.id, "photo_credit", e.target.value || null)} className="text-xs" />
                   </div>
                 </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Origin</label>
+                  <Input value={(pick as any).origin || ""} onChange={(e) => updateField(pick.id, "origin", e.target.value || null)} className="text-xs" placeholder="e.g. Handmade in Europe" />
+                </div>
                 <div className="grid grid-cols-4 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
