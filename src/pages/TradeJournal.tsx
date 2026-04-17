@@ -476,6 +476,17 @@ const TradeJournal = () => {
                         const alt = prompt("Alt text / caption (optional):") || "image";
                         replacement = `\n![${alt}](${imgUrl})\n`;
                         cursorOffset = start + replacement.length;
+                      } else if (btn.label === "🖼️🖼️") {
+                        const url1 = prompt("First image URL:") || "";
+                        if (!url1) return;
+                        const cap1 = prompt("First caption (optional):") || "";
+                        const url2 = prompt("Second image URL:") || "";
+                        if (!url2) return;
+                        const cap2 = prompt("Second caption (optional):") || "";
+                        const line1 = cap1 ? `${url1} | ${cap1}` : url1;
+                        const line2 = cap2 ? `${url2} | ${cap2}` : url2;
+                        replacement = `\n\n:::pair\n${line1}\n${line2}\n:::\n\n`;
+                        cursorOffset = start + replacement.length;
                       } else if (btn.label === "Link") {
                         replacement = selected ? `[${selected}](url)` : `[link text](url)`;
                         cursorOffset = selected ? start + selected.length + 3 : start + 1;
