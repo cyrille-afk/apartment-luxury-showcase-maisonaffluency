@@ -852,12 +852,26 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {pick.image_url ? (
-          <img
-            src={pick.image_url}
-            alt={pick.title}
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
+          <>
+            <img
+              src={pick.image_url}
+              alt={pick.title}
+              className={cn(
+                "w-full h-full object-cover transition-all duration-700 group-hover:scale-105",
+                pick.hover_image_url && "group-hover:opacity-0"
+              )}
+              loading="lazy"
+            />
+            {pick.hover_image_url && (
+              <img
+                src={pick.hover_image_url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                loading="lazy"
+              />
+            )}
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
