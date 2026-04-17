@@ -841,7 +841,11 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
     <button
       type="button"
       onClick={() => {
-        if (pick.designer_slug) navigate(`/designers/${pick.designer_slug}/${productSlug}`);
+        if (pick.designer_slug) {
+          navigate(`/designers/${pick.designer_slug}/${productSlug}`, {
+            state: { from: window.location.pathname + window.location.search },
+          });
+        }
       }}
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale } from "lucide-react";
+import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
@@ -59,7 +59,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: designer } = await supabase
         .from("designers")
-        .select("id, name, slug, display_name")
+        .select("id, name, slug, display_name, biography")
         .eq("slug", designerSlug)
         .eq("is_published", true)
         .maybeSingle();
@@ -109,8 +109,8 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
             ? (product as any).gallery_images
             : tradeProduct?.gallery_images || null,
         },
-        designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug },
-        relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id).slice(0, 6),
+        designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug, biography: designer.biography || "" },
+        relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
       };
     },
     enabled: !!designerSlug && !!productSlug,
@@ -124,11 +124,14 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: string } | null)?.from;
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const [favIds, setFavIds] = useState(readFavs);
+  const [relatedIndex, setRelatedIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -212,6 +215,27 @@ const PublicProductPage: React.FC = () => {
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
+  // Build brand summary from biography: strip media URLs (lines starting with http) and pipe-delimited captions.
+  const brandSummary = (() => {
+    const bio = (designer as any).biography as string | undefined;
+    if (!bio) return "";
+    const cleaned = bio
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter((line) => line && !/^https?:\/\//i.test(line.split("|")[0].trim()))
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (cleaned.length <= 480) return cleaned;
+    return cleaned.slice(0, 480).replace(/\s+\S*$/, "") + "…";
+  })();
+
+  // Carousel: 3 visible at a time
+  const visibleCount = 3;
+  const maxIndex = Math.max(0, relatedPicks.length - visibleCount);
+  const safeIndex = Math.min(relatedIndex, maxIndex);
+  const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
+
   return (
     <>
       <Helmet>
@@ -224,6 +248,16 @@ const PublicProductPage: React.FC = () => {
         <Navigation borderless />
 
         <div className="pt-32 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <button
+            onClick={() => {
+              if (fromPath) navigate(fromPath);
+              else navigate(`/designers/${designer.slug}`);
+            }}
+            className="inline-flex items-center gap-1.5 mb-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft size={14} /> Back
+          </button>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">
               <ProductImageGallery
@@ -357,43 +391,103 @@ const PublicProductPage: React.FC = () => {
 
           {relatedPicks.length > 0 && (
             <div className="mt-20 pt-8 border-t border-border">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-1">
-                    From the Same Designer
-                  </p>
-                  <h2 className="font-display text-xl md:text-2xl">{designerDisplay}</h2>
-                </div>
-                <Link
-                  to={`/designers/${designer.slug}?section=picks&expanded=true`}
-                  className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
-                >
-                  View All
-                </Link>
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+                {/* Left: brand summary */}
+                <div className="lg:col-span-4 lg:pr-4 flex flex-col justify-between">
+                  <div>
+                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                      From the Same Designer
+                    </p>
+                    <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
+                      <Link
+                        to={`/designers/${designer.slug}`}
+                        className="hover:text-primary transition-colors"
+                      >
+                        {designerDisplay}
+                      </Link>
+                    </h2>
+                    {brandSummary && (
+                      <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                        {brandSummary}
+                      </p>
+                    )}
+                  </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {relatedPicks.map((rp) => (
-                  <Link
-                    key={rp.id}
-                    to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
-                    className="group block"
-                  >
-                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-muted/10 border border-border group-hover:border-foreground/30 transition-all">
-                      <img
-                        src={rp.image_url}
-                        alt={rp.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      <ProductCardDescriptionOverlay description={rp.description} />
+                  {relatedPicks.length > visibleCount && (
+                    <div className="hidden lg:flex items-center gap-3 mt-8">
+                      <button
+                        type="button"
+                        onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
+                        disabled={safeIndex === 0}
+                        aria-label="Previous"
+                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
+                        disabled={safeIndex >= maxIndex}
+                        aria-label="Next"
+                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
                     </div>
-                    <div className="mt-2 text-center">
-                      <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{designerDisplay}</p>
-                      <p className="font-display text-sm mt-0.5">{rp.title}</p>
+                  )}
+                </div>
+
+                {/* Right: 3-up product grid */}
+                <div className="lg:col-span-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                    {visibleRelated.map((rp) => (
+                      <Link
+                        key={rp.id}
+                        to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        state={{ from: location.pathname + location.search }}
+                        className="group block"
+                      >
+                        <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-muted/10 border border-border group-hover:border-foreground/30 transition-all">
+                          <img
+                            src={rp.image_url}
+                            alt={rp.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <ProductCardDescriptionOverlay description={rp.description} />
+                        </div>
+                        <div className="mt-3 text-center">
+                          <p className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{designerDisplay}</p>
+                          <p className="font-display text-base mt-1">{rp.title}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Mobile arrows */}
+                  {relatedPicks.length > visibleCount && (
+                    <div className="flex lg:hidden items-center justify-center gap-3 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
+                        disabled={safeIndex === 0}
+                        aria-label="Previous"
+                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
+                        disabled={safeIndex >= maxIndex}
+                        aria-label="Next"
+                        className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
                     </div>
-                  </Link>
-                ))}
+                  )}
+                </div>
               </div>
             </div>
           )}
