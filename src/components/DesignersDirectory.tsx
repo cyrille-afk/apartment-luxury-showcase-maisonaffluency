@@ -922,7 +922,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           const brandLine = isForPattern ? sub : pick.designer_name;
           const isYear = /^\d{4}$/.test(sub);
           const isReEdition = /re-?edition$/i.test(sub);
-          const showSubtitleBelow = sub && !isYear && !isForPattern;
+          const showSubtitleBelow = sub && !isYear && !isForPattern && !isReEdition;
           return (
             <>
               <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
@@ -932,15 +932,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
                 {pick.title}{isYear ? ` (${sub})` : ''}
               </p>
               {showSubtitleBelow && (
-                isReEdition ? (
-                  <div className="mt-1.5 flex justify-center">
-                    <span className="inline-block font-body text-[9px] uppercase tracking-[0.14em] text-primary border border-primary/40 rounded-full px-2 py-0.5">
-                      {sub}
-                    </span>
-                  </div>
-                ) : (
-                  <p className="font-body text-[11px] text-muted-foreground mt-0.5">{sub}</p>
-                )
+                <p className="font-body text-[11px] text-muted-foreground mt-0.5">{sub}</p>
               )}
             </>
           );
