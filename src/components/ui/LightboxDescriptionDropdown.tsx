@@ -27,8 +27,8 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
         aria-label={expanded ? "Hide description" : "Read description"}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5",
-          "bg-white/35 backdrop-blur-md border border-white/40 shadow-sm",
-          "font-display italic text-[12px] leading-none text-white/95 hover:text-white transition-colors [text-shadow:0_1px_2px_rgba(0,0,0,0.4)]"
+          "bg-white/85 backdrop-blur-md border border-white/60 shadow-sm",
+          "font-display italic text-[12px] leading-none text-foreground/90 hover:text-foreground transition-colors"
         )}
       >
         <span>{expanded ? "Close" : "Read more"}</span>
