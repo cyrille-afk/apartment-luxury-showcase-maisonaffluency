@@ -31,7 +31,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
           "font-display italic text-[12px] leading-none text-foreground/90 hover:text-foreground transition-colors"
         )}
       >
-        <span>{expanded ? "Close" : "Read more"}</span>
+        <span>{expanded ? "Close" : "Creation"}</span>
         <ChevronDown
           size={11}
           className={cn(
