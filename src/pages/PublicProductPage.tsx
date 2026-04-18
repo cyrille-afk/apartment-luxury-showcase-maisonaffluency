@@ -256,6 +256,9 @@ const PublicProductPage: React.FC = () => {
       .replace(/\s+/g, " ")
       .trim();
     if (cleaned.length <= 480) return cleaned;
+    // Extend to the end of the sentence containing the 480-char mark so we never cut mid-thought.
+    const sentenceEnd = cleaned.slice(480).search(/[.!?](\s|$)/);
+    if (sentenceEnd !== -1) return cleaned.slice(0, 480 + sentenceEnd + 1).trim();
     return cleaned.slice(0, 480).replace(/\s+\S*$/, "") + "…";
   })();
 
