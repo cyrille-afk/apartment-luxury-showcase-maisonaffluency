@@ -111,10 +111,10 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${
+              className={`w-2.5 h-2.5 rounded-full border border-foreground/60 transition-all ${
                 i === selectedIndex
-                  ? "bg-foreground w-4"
-                  : "bg-foreground/20 hover:bg-foreground/40"
+                  ? "bg-foreground"
+                  : "bg-transparent hover:bg-foreground/20"
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
