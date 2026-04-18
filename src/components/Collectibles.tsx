@@ -1306,12 +1306,14 @@ const Collectibles = () => {
                     onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
                     onMouseLeave={() => setPicksHovered(false)}
                   >
-                    <LightboxDescriptionDropdown
-                      description={resolveCollectiblePickDescription(
-                        curatorPicksDesigner.curatorPicks[curatorPickIndex],
-                        curatorPicksDesigner.name
-                      )}
-                    />
+                    <div className="absolute top-3 right-3 z-20">
+                      <LightboxDescriptionDropdown
+                        description={resolveCollectiblePickDescription(
+                          curatorPicksDesigner.curatorPicks[curatorPickIndex],
+                          curatorPicksDesigner.name
+                        )}
+                      />
+                    </div>
                     {/* Active filter indicator */}
                     {!isZoomed && (selectedCategory || selectedSubcategory) && (
                       <button
