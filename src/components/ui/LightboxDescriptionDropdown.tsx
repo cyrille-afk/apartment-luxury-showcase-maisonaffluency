@@ -1,10 +1,10 @@
 /**
  * Shared image-overlay description dropdown for lightboxes.
- * Mirrors the Trade lightbox pattern: collapsed pill → expandable panel.
+ * Compact icon button — expands a panel to the left so it doesn't cover the image.
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -17,53 +17,40 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
   if (!description || !description.trim()) return null;
 
   return (
-    <div className="relative max-w-full pointer-events-auto">
+    <div className="relative pointer-events-auto flex items-start justify-end gap-2">
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, x: 8, width: 0 }}
+            animate={{ opacity: 1, x: 0, width: "auto" }}
+            exit={{ opacity: 0, x: 8, width: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="w-[min(22rem,70vw)] rounded-lg bg-background/90 backdrop-blur-sm border border-border/30 shadow-lg px-3 py-2.5">
+              <p className="font-body text-xs text-foreground leading-relaxed">
+                {description}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           setExpanded(!expanded);
         }}
+        aria-label={expanded ? "Hide information" : "Show information"}
+        title="More information"
         className={cn(
-          "flex items-start gap-2 px-3 py-2.5 rounded-lg shadow-lg transition-all text-left w-full max-w-md",
-          "bg-background/90 backdrop-blur-sm border border-border/30 text-foreground",
-          expanded ? "rounded-b-none border-b-0" : ""
+          "shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full shadow-lg transition-all",
+          "bg-background/90 backdrop-blur-sm border border-border/30 text-foreground hover:bg-background"
         )}
       >
-        <Info size={14} className="shrink-0 mt-0.5 opacity-70" />
-        <span
-          className={cn(
-            "font-body text-xs leading-relaxed flex-1 min-w-0",
-            !expanded && "line-clamp-2"
-          )}
-        >
-          {expanded
-            ? ""
-            : description.slice(0, 80) +
-              (description.length > 80 ? "…" : "")}
-        </span>
-        {description.length > 80 &&
-          (expanded ? (
-            <ChevronUp size={14} className="shrink-0 mt-0.5 ml-auto" />
-          ) : (
-            <ChevronDown size={14} className="shrink-0 mt-0.5 ml-auto" />
-          ))}
+        {expanded ? <X size={15} /> : <Info size={15} className="opacity-80" />}
       </button>
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden rounded-b-lg bg-background/90 backdrop-blur-sm border border-border/30 border-t-0 shadow-lg"
-          >
-            <p className="font-body text-xs text-foreground leading-relaxed px-3 pb-3 pt-0">
-              {description}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
