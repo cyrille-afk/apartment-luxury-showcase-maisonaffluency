@@ -83,14 +83,24 @@ serve(async (req) => {
 
       const brandName = brand?.display_name || brand?.name || "Unknown";
 
-      // The actual creator of the piece is stored in subtitle (e.g. "Yabu Pushelberg" for a Man of Parts piece).
-      // The `designers` row is the parent atelier/brand (e.g. "Man of Parts").
-      const actualDesigner = (pick.subtitle || "").trim();
+      // The actual creator can be in the subtitle (e.g. "Yabu Pushelberg" for a Man of Parts piece)
+      // OR encoded in the title as "... by [Designer Name]" (e.g. "Achille LTA1 Table Lamp by Lazzarini & Pickering").
+      // The `designers` row is the parent atelier/brand (e.g. "Marta Sala Éditions").
+      let actualDesigner = (pick.subtitle || "").trim();
+      let cleanTitle = pick.title;
+      if (!actualDesigner) {
+        // Match "...by [Designer]" at end of title (case-insensitive, requires space before "by")
+        const m = pick.title.match(/^(.*?)\s+by\s+(.+?)\s*$/i);
+        if (m && m[2] && m[2].toLowerCase() !== brandName.toLowerCase()) {
+          cleanTitle = m[1].trim();
+          actualDesigner = m[2].trim();
+        }
+      }
       const isCollaboration = actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
 
       productContext = `
 ## PRODUCT DATA
-- **Title**: ${pick.title}
+- **Title**: ${cleanTitle}
 - **Designed by**: ${actualDesigner || brandName}
 - **Brand / Atelier**: ${brandName}${isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
 - **Materials**: ${pick.materials || "Not specified"}
