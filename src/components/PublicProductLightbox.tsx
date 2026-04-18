@@ -244,7 +244,9 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             )}
 
             {/* Description overlay on image — mirrors Trade lightbox */}
-            <LightboxDescriptionDropdown description={product.description} />
+            <div className="absolute top-3 right-3 z-20">
+              <LightboxDescriptionDropdown description={product.description} />
+            </div>
 
             {/* Mobile: secondary action icons */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
