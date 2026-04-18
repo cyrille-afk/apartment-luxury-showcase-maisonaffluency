@@ -42,14 +42,16 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
           e.stopPropagation();
           setExpanded(!expanded);
         }}
-        aria-label={expanded ? "Hide information" : "Show information"}
-        title="More information"
+        aria-label={expanded ? "Hide information" : "About this piece"}
         className={cn(
-          "shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full shadow-lg transition-all",
+          "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2.5 pr-3 rounded-full shadow-lg transition-all",
           "bg-background/90 backdrop-blur-sm border border-border/30 text-foreground hover:bg-background"
         )}
       >
-        {expanded ? <X size={15} /> : <Info size={15} className="opacity-80" />}
+        {expanded ? <X size={14} /> : <Info size={14} className="opacity-80" />}
+        <span className="font-body text-[10px] uppercase tracking-[0.15em] whitespace-nowrap">
+          {expanded ? "Close" : "About this piece"}
+        </span>
       </button>
     </div>
   );
