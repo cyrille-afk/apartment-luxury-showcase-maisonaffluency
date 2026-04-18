@@ -17,7 +17,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
   if (!description || !description.trim()) return null;
 
   return (
-    <div className="absolute top-3 right-3 z-20 pointer-events-auto flex items-start justify-end gap-2">
+    <div className="pointer-events-auto flex items-start justify-end gap-2">
       <AnimatePresence>
         {expanded && (
           <motion.div
