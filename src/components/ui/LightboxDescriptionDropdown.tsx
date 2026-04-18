@@ -27,7 +27,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
         aria-label={expanded ? "Hide description" : "Read description"}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5",
-          "bg-white/85 backdrop-blur-md border border-white/60 shadow-sm",
+          "bg-white/35 backdrop-blur-md border border-white/40 shadow-sm",
           "font-display italic text-[12px] leading-none text-foreground/90 hover:text-foreground transition-colors"
         )}
       >
@@ -48,7 +48,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="w-[min(22rem,75vw)] rounded-lg bg-white/85 backdrop-blur-md border border-white/60 shadow-md px-4 py-3"
+            className="w-[min(22rem,75vw)] rounded-lg bg-white/35 backdrop-blur-md border border-white/40 shadow-md px-4 py-3"
           >
             <p className="font-body text-[12px] text-foreground leading-relaxed">
               {description}
