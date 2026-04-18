@@ -50,8 +50,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           />
         </div>
         {overlay && (
-          <div className="absolute -top-6 left-6 z-20 max-w-[70%]">
-            {overlay}
+          <div className="absolute top-3 right-3 z-20 pointer-events-none">
+            <div className="pointer-events-auto">{overlay}</div>
           </div>
         )}
 
