@@ -43,13 +43,13 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
           setExpanded(!expanded);
         }}
         aria-label={expanded ? "Hide description" : "Read description"}
+        style={{ mixBlendMode: "difference" }}
         className={cn(
           "shrink-0 inline-flex items-center gap-1 group",
-          "font-display italic text-[13px] leading-none text-foreground/85 hover:text-foreground transition-colors",
-          "[text-shadow:0_1px_2px_rgba(255,255,255,0.6)]"
+          "font-display italic text-[13px] leading-none text-white"
         )}
       >
-        <span className="border-b border-foreground/30 group-hover:border-foreground/70 transition-colors pb-0.5">
+        <span className="border-b border-white/60 group-hover:border-white pb-0.5 transition-colors">
           {expanded ? "Close" : "Read more"}
         </span>
         <ChevronDown
