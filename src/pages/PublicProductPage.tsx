@@ -442,7 +442,7 @@ const PublicProductPage: React.FC = () => {
                 {/* Mobile-only heading: shown above the carousel */}
                 <div className="lg:hidden order-1">
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                    {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
+                    {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title))) ? "From the Same Maker" : "From the Same Designer"}
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
@@ -564,7 +564,7 @@ const PublicProductPage: React.FC = () => {
                 <div className="lg:col-span-4 lg:pr-4 order-3 lg:order-1">
                   <div className="hidden lg:block">
                     <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                      {(product.subtitle || relatedPicks.some((rp) => rp.subtitle)) ? "From the Same Maker" : "From the Same Designer"}
+                      {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title))) ? "From the Same Maker" : "From the Same Designer"}
                     </p>
                     <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                       <Link
