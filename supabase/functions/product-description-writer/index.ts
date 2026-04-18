@@ -100,7 +100,7 @@ serve(async (req) => {
 
       productContext = `
 ## PRODUCT DATA
-- **Title**: ${pick.title}
+- **Title**: ${cleanTitle}
 - **Designed by**: ${actualDesigner || brandName}
 - **Brand / Atelier**: ${brandName}${isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
 - **Materials**: ${pick.materials || "Not specified"}
