@@ -89,8 +89,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 key={i}
                 onClick={() => goTo(i)}
                 className={cn(
-                  "w-2 h-2 rounded-full transition-all",
-                  i === activeIndex ? "bg-foreground scale-110" : "bg-foreground/30 hover:bg-foreground/50"
+                  "w-2.5 h-2.5 rounded-full border border-foreground/60 transition-all",
+                  i === activeIndex ? "bg-foreground" : "bg-transparent hover:bg-foreground/20"
                 )}
               />
             ))}
