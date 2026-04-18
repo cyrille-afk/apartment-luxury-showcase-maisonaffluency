@@ -1,10 +1,10 @@
 /**
- * Shared image-overlay description dropdown for lightboxes.
- * Compact icon button — expands a panel to the left so it doesn't cover the image.
+ * Editorial "Read more" affordance that reveals the product description.
+ * Minimal text link — expands a soft panel to the left.
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -27,7 +27,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="w-[min(22rem,70vw)] rounded-lg bg-background/90 backdrop-blur-sm border border-border/30 shadow-lg px-3 py-2.5">
+            <div className="w-[min(22rem,70vw)] rounded-md bg-background/85 backdrop-blur-sm border border-border/30 shadow-md px-3.5 py-3">
               <p className="font-body text-xs text-foreground leading-relaxed">
                 {description}
               </p>
@@ -42,16 +42,23 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
           e.stopPropagation();
           setExpanded(!expanded);
         }}
-        aria-label={expanded ? "Hide information" : "About this piece"}
+        aria-label={expanded ? "Hide description" : "Read description"}
         className={cn(
-          "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2.5 pr-3 rounded-full shadow-lg transition-all",
-          "bg-background/90 backdrop-blur-sm border border-border/30 text-foreground hover:bg-background"
+          "shrink-0 inline-flex items-center gap-1 group",
+          "font-display italic text-[13px] leading-none text-foreground/85 hover:text-foreground transition-colors",
+          "[text-shadow:0_1px_2px_rgba(255,255,255,0.6)]"
         )}
       >
-        {expanded ? <X size={14} /> : <Info size={14} className="opacity-80" />}
-        <span className="font-body text-[10px] uppercase tracking-[0.15em] whitespace-nowrap">
-          {expanded ? "Close" : "About this piece"}
+        <span className="border-b border-foreground/30 group-hover:border-foreground/70 transition-colors pb-0.5">
+          {expanded ? "Close" : "Read more"}
         </span>
+        <ChevronDown
+          size={12}
+          className={cn(
+            "transition-transform duration-200 mt-0.5",
+            expanded && "rotate-180"
+          )}
+        />
       </button>
     </div>
   );
