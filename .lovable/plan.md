@@ -1,45 +1,32 @@
 
+The user wants two distinct behaviors based on which top-nav item is active:
 
-## Diagnosis (why publishing didn't fix it)
+1. **All Categories nav** (`/products-category/...`): filters show **product grid**, and "All Categories" link stays highlighted (not "Designers").
+2. **Designers nav** (`/designers`): filters show **designer cards** (filtered by which designers have products in that category/subcategory), never the product grid.
 
-I reproduced the bug live on production: clicking **All Categories → Armchairs** from any page navigates to `/products-category/seating/armchairs` correctly, but the page lands on the **parallax interlude** ("Every piece of furniture tells a story…"), not on the filtered Armchairs grid. The filter never visibly applies, and the Clear-Filter pill never appears.
+Currently `DesignersDirectory.tsx` is shared between both routes (`PublicDesigners` page AND embedded on the homepage `/products-category/*` via `Index`), and it's been flip-flopping between showing product grid vs designer cards globally. The fix: make the behavior **route-aware**.
 
-Root cause — the previous attempts targeted the wrong component:
+## Investigation needed
+- Confirm `DesignersDirectory` is rendered on both `/designers` (PublicDesigners) and on `/products-category/*` (via Index → some section).
+- Check Navigation.tsx for the "All Categories" link and its `isRouteActive` logic for `/products-category/*`.
+- Find where designer cards are filtered by category (need to filter the alphabetical list to only designers who have at least one pick matching the selected cat/subcat).
 
-1. `Index.tsx` renders **only one ProductGrid**, with `sectionScope="designers"`.
-2. Inside `ProductGrid.tsx` lines 428–432 there is an early return:
-   ```ts
-   if (sectionScope && activeScope !== sectionScope) return null;
-   if (sectionScope === "designers" && activeScope === "designers") return null;
-   ```
-   When the URL filter is applied, `filterSource` becomes `"designers"` → `activeScope === "designers"` → **the only ProductGrid on the page returns `null`.** So `#product-grid` never exists in the DOM, the Clear-Filter pill never renders, and the Armchairs grid is invisible.
-3. The CategoryRoute poller can't find `#product-grid`, falls back to `#designers` (the DesignersDirectory wrapper), and lands you in the parallax interlude that sits just above it.
-4. `FeaturedDesigners` is supposed to render the "filtered products inline" instead — but **`FeaturedDesigners` isn't even mounted in `Index.tsx`** (only `DesignersDirectory` is). So nothing renders the filtered grid at all.
+## Plan
 
-That second `if` was written for a layout where `FeaturedDesigners` lived on the homepage. It no longer does. The condition is now actively breaking the whole feature, and republishing changed CategoryRoute polling but not this underlying bug, so nothing visibly improved.
+**1. `src/components/DesignersDirectory.tsx`**
+- Add a prop `mode?: "products" | "designers"` (default `"designers"`).
+- When `mode === "products"`: keep current behavior — filters produce product grid via `filteredPicks`.
+- When `mode === "designers"`: `filteredPicks` always returns `null` (never product grid). Instead, filter the alphabetical designer list — only show designer cards whose picks include at least one item matching the active category/subcategory. If no filter active, show all designers.
 
-## Fix
+**2. `src/pages/PublicDesigners.tsx`**
+- Pass `mode="designers"` to `<DesignersDirectory />`.
 
-Remove the dead-code early return so the single homepage `ProductGrid` actually renders the filtered results.
+**3. Wherever `DesignersDirectory` is used on homepage / `/products-category/*`** (likely `Index.tsx` or a section component)
+- Pass `mode="products"` (or leave existing — verify).
 
-**`src/components/ProductGrid.tsx`** (around line 432)
-- Delete the line: `if (sectionScope === "designers" && activeScope === "designers") return null;`
-- Keep the first guard (line 429) — that one is still correct for scoping `collectibles` / `ateliers` instances.
+**4. `src/components/Navigation.tsx`**
+- Update `isRouteActive` so the "All Categories" / homepage-categories nav link is highlighted when pathname starts with `/products-category/`, and "Designers" only highlights on `/designers*` (not on `/products-category/*`).
 
-**`src/pages/CategoryRoute.tsx`** — keep current logic; once `#product-grid` actually exists in the DOM the existing poller will scroll to it correctly.
+**5. Update memory** `mem://features/directory-product-filtering.md` to reflect: behavior is route-scoped — `/designers` filters designer cards; `/products-category/*` filters product grid.
 
-**`src/pages/Index.tsx`** — no change needed; the existing `<ProductGrid sectionScope="designers" />` will now render the Armchairs grid above `#designers`.
-
-## Expected result after publish
-
-- `/products-category/seating/armchairs` shows the Armchairs product grid with the Clear-Filter pill.
-- The page auto-scrolls to that grid (since `#product-grid` now exists).
-- Switching between subcategories via the mega menu replaces the grid contents (broadcast already works).
-- Mobile menu category taps land on the filtered grid the same way.
-
-## Files to edit
-
-- `src/components/ProductGrid.tsx` — remove the one breaking early-return line.
-
-That's the entire fix. One line. Approve and I'll apply it.
-
+After approval I'll inspect `Navigation.tsx` and `Index.tsx` to wire the exact route checks and prop, then implement.
