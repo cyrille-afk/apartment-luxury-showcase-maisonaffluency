@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
 import Navigation from "@/components/Navigation";
 import NewInSpotlight from "@/components/NewInSpotlight";
+import SliderDots from "@/components/ui/SliderDots";
 import { useNewInDesigners } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 
@@ -54,27 +55,14 @@ function MobileDesignerCarousel({ designers, initialIndex = 0 }: { designers: Re
   return (
     <div>
       {/* Dot indicators */}
-      {designers.length > 1 && (
-        <div className="flex items-center justify-center gap-2 py-4">
-          {designers.map((d, i) => (
-            <button
-              key={d.slug}
-              onClick={() => emblaApi?.scrollTo(i)}
-              className="flex items-center"
-              aria-label={`Go to ${d.display_name || d.name}`}
-            >
-              <span
-                className={cn(
-                  "h-2 w-2 rounded-full transition-all duration-300",
-                  i === selectedIndex
-                    ? "w-6 bg-foreground"
-                    : "bg-muted-foreground/35 hover:bg-muted-foreground/55"
-                )}
-              />
-            </button>
-          ))}
-        </div>
-      )}
+      <SliderDots
+        count={designers.length}
+        activeIndex={selectedIndex}
+        onSelect={(i) => emblaApi?.scrollTo(i)}
+        variant="dark"
+        className="py-4"
+        ariaPrefix="Go to designer"
+      />
 
       {/* Designer name label + share */}
       <div className="px-6 pb-3 flex items-center justify-between">

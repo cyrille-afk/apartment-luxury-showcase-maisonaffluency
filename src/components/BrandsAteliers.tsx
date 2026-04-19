@@ -2507,22 +2507,14 @@ function AlphaStrip({
       </div>
 
       {/* Dot indicators — only show when more than 1 card */}
-      {brands.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
-          {brands.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => scrollTo(i)}
-              className={`rounded-full transition-all duration-300 ${
-                i === activeIndex
-                  ? "w-5 h-1.5 bg-primary"
-                  : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
-              }`}
-              aria-label={`Go to brand ${i + 1}`}
-            />
-          ))}
-        </div>
-      )}
+      <SliderDots
+        count={brands.length}
+        activeIndex={activeIndex}
+        onSelect={scrollTo}
+        variant="dark"
+        className="mt-3"
+        ariaPrefix="Go to brand"
+      />
 
       {/* Parent brand sub-designers collapsible — below the scroll strip */}
       {Object.entries(parentBrandsInStrip).map(([brandName, config]) => (
@@ -3643,13 +3635,15 @@ const BrandsAteliers = () => {
                       </div>
                     )}
 
-                    {picksDesigner.curatorPicks.length > 1 && !picksZoomed && (
-                      <div className="flex items-center gap-2 mt-3">
-                        {picksDesigner.curatorPicks.map((_: CuratorPick, idx: number) => (
-                          <button key={idx} aria-label={`Go to image ${idx + 1}`} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }}
-                            className={`rounded-full transition-all duration-300 ${picksIndex === idx ? 'w-4 h-2 bg-white' : 'w-2 h-2 bg-white/30 hover:bg-white/60'}`} />
-                        ))}
-                      </div>
+                    {!picksZoomed && (
+                      <SliderDots
+                        count={picksDesigner.curatorPicks.length}
+                        activeIndex={picksIndex}
+                        onSelect={(i) => { setPicksIndex(i); setPicksZoomed(false); }}
+                        variant="light"
+                        className="mt-3 justify-start"
+                        ariaPrefix="Go to image"
+                      />
                     )}
 
                     {!picksZoomed && (

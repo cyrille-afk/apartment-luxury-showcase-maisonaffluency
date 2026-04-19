@@ -324,22 +324,14 @@ const DesktopCarouselStrip = ({
         ))}
       </div>
       {/* Dot indicators */}
-      {section.items.length > 1 && (
-        <div className="flex justify-center gap-2 mt-3">
-          {section.items.map((_, dotIndex) => (
-            <button
-              key={dotIndex}
-              aria-label={`Go to photo ${dotIndex + 1}`}
-              onClick={() => scrollToIdx(dotIndex)}
-              className={`rounded-full transition-all duration-300 ${
-                activeIdx === dotIndex
-                  ? 'w-2 h-2 bg-primary'
-                  : 'w-2 h-2 bg-primary/30'
-              }`}
-            />
-          ))}
-        </div>
-      )}
+      <SliderDots
+        count={section.items.length}
+        activeIndex={activeIdx}
+        onSelect={scrollToIdx}
+        variant="dark"
+        className="mt-3"
+        ariaPrefix="Go to photo"
+      />
     </motion.div>
   );
 };
@@ -1132,25 +1124,20 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </div>
                     {/* Dot indicators */}
                     {section.items.length > 1 && (
-                      <div className="flex justify-center gap-1.5 mt-2">
-                        {section.items.map((_, dotIndex) => (
-                          <button
-                            key={dotIndex}
-                            aria-label={`Go to photo ${dotIndex + 1}`}
-                            onClick={() => {
-                              const strip = scrollStripRefs.current[originalSectionIndex];
-                              if (!strip) return;
-                              const cardWidth = strip.scrollWidth / section.items.length;
-                              strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
-                            }}
-                            className={`rounded-full transition-all duration-300 ${
-                              activeIdx === dotIndex
-                                ? 'w-1.5 h-1.5 bg-primary'
-                                : 'w-1.5 h-1.5 bg-primary/30'
-                            }`}
-                          />
-                        ))}
-                      </div>
+                      <SliderDots
+                        count={section.items.length}
+                        activeIndex={activeIdx}
+                        onSelect={(dotIndex) => {
+                          const strip = scrollStripRefs.current[originalSectionIndex];
+                          if (!strip) return;
+                          const cardWidth = strip.scrollWidth / section.items.length;
+                          strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
+                        }}
+                        variant="dark"
+                        size="sm"
+                        className="mt-2"
+                        ariaPrefix="Go to photo"
+                      />
                     )}
                   </div>
                 );

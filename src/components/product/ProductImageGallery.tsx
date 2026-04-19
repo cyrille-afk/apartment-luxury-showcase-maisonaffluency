@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import SliderDots from "@/components/ui/SliderDots";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -82,22 +83,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         )}
 
         {/* Dot indicators */}
-        {images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                className={cn(
-                  "h-2 w-2 rounded-full transition-all duration-300",
-                  i === activeIndex
-                    ? "w-5 bg-foreground"
-                    : "bg-muted-foreground/35 hover:bg-muted-foreground/55"
-                )}
-              />
-            ))}
-          </div>
-        )}
+        <SliderDots
+          count={images.length}
+          activeIndex={activeIndex}
+          onSelect={goTo}
+          variant="dark"
+          ariaPrefix="View image"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2"
+        />
       </div>
     </div>
   );
