@@ -1,6 +1,10 @@
 /**
  * In-card description overlay — renders inside the image box on hover.
  * Shows as a floating cream/white box below the top icon row.
+ *
+ * NOTE: Hidden entirely on touch devices (mobile/tablet) — descriptions on
+ * mobile live inside the product lightbox only, to keep the grid clean and
+ * editorial (matches competitor layouts like Invisible Collection).
  */
 import { cn } from "@/lib/utils";
 
@@ -15,6 +19,8 @@ const ProductCardDescriptionOverlay = ({ description, className }: Props) => {
   return (
     <div
       className={cn(
+        // hidden by default; only revealed on devices that truly support hover
+        "hidden [@media(hover:hover)]:block",
         "absolute left-3 right-3 top-12 z-10 pointer-events-none",
         "opacity-0 group-hover:opacity-100 transition-opacity duration-300",
         className

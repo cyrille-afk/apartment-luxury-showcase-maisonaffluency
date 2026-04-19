@@ -747,7 +747,7 @@ const PublicDesignerProfile = () => {
                         pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
                       })}
                     >
-                      <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
+                      <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
@@ -804,7 +804,7 @@ const PublicDesignerProfile = () => {
                         </div>
                         <ProductCardDescriptionOverlay description={pick.description} />
                         {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (
-                          <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute bottom-2 right-2 hidden md:flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <SpecSheetButton
                               pdfUrl={pick.pdf_url}
                               pdfUrls={pick.pdf_urls as PdfEntry[]}
@@ -816,29 +816,43 @@ const PublicDesignerProfile = () => {
                         )}
                       </div>
 
-                      <div className="flex flex-col flex-1">
-                        <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
+                      {/* Editorial text block — quiet, uniform, line-clamped */}
+                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center md:text-left">
+                        {/* Designer / brand label — small caps, muted (mobile only shows when grouped, like competitor) */}
                         {designerLabel && designerSlug ? (
                           <Link
                             to={`/designers/${designerSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
+                            className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
                           >
                             {designerLabel}
                           </Link>
                         ) : designerLabel ? (
-                          <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
+                          <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
                             {designerLabel}
                           </span>
                         ) : null}
-                        {pick.subtitle && <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>}
+
+                        {/* Product name — primary */}
+                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
+                          {pick.title}
+                        </h3>
+
+                        {/* Subtitle — only shown on desktop, clamped */}
+                        {pick.subtitle && (
+                          <p className="hidden md:block font-body text-[10px] text-muted-foreground leading-tight mt-0.5 line-clamp-1">
+                            {pick.subtitle}
+                          </p>
+                        )}
+
+                        {/* Materials & dimensions — desktop only, never on mobile grid */}
                         {pick.materials && (
-                          <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
+                          <p className="hidden md:block font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
                             {pick.materials}
                           </p>
                         )}
                         {pick.dimensions && (
-                          <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
+                          <p className="hidden md:block font-body text-[9px] text-muted-foreground/50 mt-0.5">
                             {pick.dimensions
                               .split("\n")
                               .filter((line: string) => !line.toLowerCase().includes(" in"))
@@ -846,8 +860,9 @@ const PublicDesignerProfile = () => {
                           </p>
                         )}
 
-                        <div className="mt-auto pt-1">
-                          <p className="font-display text-[11px] md:text-xs text-foreground">
+                        {/* Price slot — consistent across all cards */}
+                        <div className="mt-1 md:mt-auto md:pt-1">
+                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
                             Price on request
                           </p>
                         </div>
