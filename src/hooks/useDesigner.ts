@@ -45,6 +45,7 @@ export interface DesignerCuratorPick {
   sort_order: number;
   trade_price_cents: number | null;
   currency: string;
+  size_variants?: { label: string; price_cents: number }[] | null;
 }
 
 /** Fetch a single designer by slug */
