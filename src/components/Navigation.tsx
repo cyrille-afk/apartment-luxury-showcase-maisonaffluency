@@ -110,9 +110,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   }, []);
   const navigate = useNavigate();
   const location = useLocation();
+  const isOnCategoryRoute = location.pathname.startsWith("/products-category/");
   const isRouteActive = (href: string) => {
     if (!href.startsWith("/")) return false;
     if (href === "/") return location.pathname === "/";
+    // Designers nav should NOT light up while browsing /products-category/*
+    // — that's handled by the "All Categories" mega-menu trigger instead.
+    if (href === "/designers" && isOnCategoryRoute) return false;
     return location.pathname === href || location.pathname.startsWith(href + "/");
   };
   const [isOpen, setIsOpen] = useState(false);
