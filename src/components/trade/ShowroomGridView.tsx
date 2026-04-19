@@ -3,6 +3,7 @@
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -16,9 +17,12 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER } from "@/lib/productTaxonomy";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { useFavorites } from "@/hooks/useFavorites";
+
+/** Local slugify — must match the one used by TradeProductPage / PublicProductPage */
+const slugifyForUrl = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 interface ShowroomProduct {
   id: string;
@@ -151,6 +155,8 @@ const ShowroomGridView = ({
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,9 +170,25 @@ const ShowroomGridView = ({
   const fxRates = useFxRates();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
-  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
   const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
   const highlightRef = useRef<HTMLDivElement>(null);
+
+  /** Navigate to trade product sheet, preserving originating grid URL for back nav. */
+  const openProductSheet = useCallback((product: ShowroomProduct) => {
+    if (!product.designer_name) return;
+    const brand = product.designer_name.includes(" - ")
+      ? product.designer_name.split(" - ")[0].trim()
+      : product.designer_name;
+    const designerSlug =
+      designerSlugMap.get(brand.toLowerCase()) ||
+      designerSlugMap.get((product.designer_name || "").toLowerCase()) ||
+      slugifyForUrl(brand);
+    const productSlug = slugifyForUrl(product.product_name);
+    navigate(`/trade/products/${designerSlug}/${productSlug}`, {
+      state: { from: location.pathname + location.search },
+    });
+  }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   const getDisplayPrice = (price: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!price) return null;
@@ -384,6 +406,23 @@ const ShowroomGridView = ({
     fetchProducts();
   }, []);
 
+  // Fetch designer name → slug map (used to build /trade/products/:slug/:productSlug URLs)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("designers")
+        .select("name, display_name, slug")
+        .eq("is_published", true);
+      if (!data) return;
+      const map = new Map<string, string>();
+      for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
+        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
+        if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
+      }
+      setDesignerSlugMap(map);
+    })();
+  }, []);
+
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
   const categories = useMemo(() => CATEGORY_ORDER.filter((cat) => products.some((p) => p.category === cat)), [products]);
   const sections = useMemo(() => {
@@ -468,29 +507,7 @@ const ShowroomGridView = ({
     })(),
   });
 
-  const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => ({
-    id: product.id,
-    product_name: product.product_name,
-    image_url: product.product_image_url,
-    brand_name: product.designer_name || "Unknown",
-    materials: product.materials,
-    dimensions: product.dimensions,
-    description: product.description,
-    category: product.category || inferCategory(product.product_name),
-    subcategory: product.subcategory || undefined,
-    pdf_url: product.pdf_url,
-    price: (() => {
-      const raw = product.trade_price_cents;
-      if (!raw || !product.currency) return null;
-      const price = getDisplayPrice({ cents: raw, currency: product.currency, price_unit: product.price_unit });
-      return price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null;
-    })(),
-  });
-
-  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
-    const product = products.find((p) => p.id === item.id);
-    if (product) handleAddToQuote(product);
-  };
+  
 
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
@@ -606,7 +623,7 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <>
                       <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
@@ -716,7 +733,7 @@ const ShowroomGridView = ({
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
-                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
@@ -787,14 +804,6 @@ const ShowroomGridView = ({
           })}
         </div>
       )}
-      <TradeProductLightbox
-        product={lightboxProduct}
-        onClose={() => setLightboxProduct(null)}
-        onAddToQuote={handleLightboxAddToQuote}
-        isAdding={!!addingProductId}
-        isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
-        onSelectRelated={(rp) => setLightboxProduct(rp)}
-      />
     </>
   );
 };

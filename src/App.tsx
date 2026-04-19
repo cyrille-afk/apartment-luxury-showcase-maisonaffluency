@@ -69,6 +69,7 @@ const TradeInstagramAudit = lazy(() => import("./pages/TradeInstagramAudit"));
 const TradeAuditLog = lazy(() => import("./pages/TradeAuditLog"));
 const TradeClientProfiles = lazy(() => import("./pages/TradeClientProfiles"));
 const TradeAtelierProfile = lazy(() => import("./pages/TradeAtelierProfile"));
+const TradeProductPage = lazy(() => import("./pages/TradeProductPage"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NewIn = lazy(() => import("./pages/NewIn"));
 const Journal = lazy(() => import("./pages/Journal"));
@@ -217,6 +218,7 @@ const App = () => {
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
+                    <Route path="products/:slug/:productSlug" element={<TradeProductPage />} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
                     {/* spec-sheet moved to public route */}
