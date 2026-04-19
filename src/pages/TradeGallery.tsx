@@ -452,7 +452,7 @@ const TradeGallery = () => {
       {/* Minimal suggestion strip above grid */}
       <GalleryInlineSuggestions selectedCategory={selectedCategory} selectedSubcategory={selectedSubcategory} selectedBrand={selectedBrand} onProductClick={(id) => {
         const match = allProducts.find(p => p.id === id);
-        if (match) setLightboxProduct(toLightboxItem(match));
+        if (match) openProductSheet(match);
       }} />
 
       {/* Content */}
