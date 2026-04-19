@@ -423,7 +423,7 @@ const Index = () => {
             </Suspense>
             <section id="designers" className="scroll-mt-20 md:scroll-mt-24">
               <Suspense fallback={<SectionFallback />}>
-                <DesignersDirectory showTradeCTA={false} />
+                <DesignersDirectory mode="products" showTradeCTA={false} />
               </Suspense>
             </section>
 
