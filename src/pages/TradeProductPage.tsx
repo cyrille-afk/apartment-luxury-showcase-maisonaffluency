@@ -90,10 +90,13 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       if (!picks || picks.length === 0) return null;
 
-      const product = picks.find((p: any) => {
-        const slug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-        return slug === productSlug;
-      }) || picks.find((p: any) => slugify(p.title) === productSlug);
+      // Match priority: exact (title+subtitle) → exact (title) → startsWith (title) → contains (title)
+      // Last two enable resilient deep-links where the slug is partial (e.g. "casque" → "Casque Bar Cabinet")
+      const product =
+        picks.find((p: any) => slugify(p.title + (p.subtitle ? `-${p.subtitle}` : "")) === productSlug) ||
+        picks.find((p: any) => slugify(p.title) === productSlug) ||
+        picks.find((p: any) => slugify(p.title).startsWith(productSlug!)) ||
+        picks.find((p: any) => slugify(p.title).includes(productSlug!));
 
       if (!product) return null;
 
