@@ -784,6 +784,26 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     </button>
                     {SUBCATEGORY_MAP[cat] && (
                       <div className="flex flex-col gap-1 mt-1.5 ml-0">
+                        <button
+                          onClick={() => {
+                            setActiveMegaCat(cat);
+                            setActiveMegaSub(null);
+                            setMegaMenuOpen(false);
+                            const target = categoryUrl(cat, null);
+                            if (window.location.pathname === target) {
+                              window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                                detail: { category: cat, subcategory: null, source: "designers" },
+                              }));
+                              const el = document.getElementById("product-grid") || document.getElementById("designers");
+                              if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                            } else {
+                              navigate(target);
+                            }
+                          }}
+                          className="text-left text-[10px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
+                        >
+                          View all {cat}
+                        </button>
                         {SUBCATEGORY_MAP[cat].map(sub => (
                           <button
                             key={sub}
@@ -796,7 +816,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                                 window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
                                   detail: { category: cat, subcategory: sub, source: "designers" },
                                 }));
-                                const el = document.getElementById("designers") || document.getElementById("featured-designers");
+                                const el = document.getElementById("product-grid") || document.getElementById("designers") || document.getElementById("featured-designers");
                                 if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
                               } else {
                                 navigate(target);
