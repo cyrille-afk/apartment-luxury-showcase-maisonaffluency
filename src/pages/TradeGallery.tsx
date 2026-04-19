@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen, Tag } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
