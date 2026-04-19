@@ -981,18 +981,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
 
-  const isDesignersRoute = location.pathname === "/designers";
-
-  // Category/subcategory filter state — only hydrated from URL/pending state on
-  // the Designers & Makers page. Category landing pages must keep ownership of
-  // the product-grid behavior.
+  // Category/subcategory filter state — initialize from URL params if present
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(() => {
-    if (typeof window === "undefined" || window.location.pathname !== "/designers") return null;
     const params = new URLSearchParams(window.location.search);
     return params.get("category") || null;
   });
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(() => {
-    if (typeof window === "undefined" || window.location.pathname !== "/designers") return null;
     const params = new URLSearchParams(window.location.search);
     return params.get("subcategory") || null;
   });
@@ -1036,17 +1030,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, []);
 
   const syncUrlParams = useCallback((cat: string | null, sub: string | null) => {
-    if (!isDesignersRoute) return;
-    const params = new URLSearchParams(window.location.search);
-    if (cat) params.set("category", cat); else params.delete("category");
-    if (sub) params.set("subcategory", sub); else params.delete("subcategory");
-    const search = params.toString();
-    const target = search ? `/designers?${search}` : "/designers";
+    // If a category is selected, push the slug URL. Otherwise return to /designers.
+    const target = cat ? categoryUrl(cat, sub) : "/designers";
     const current = window.location.pathname + window.location.search;
     if (current !== target) {
       window.history.pushState({}, "", target);
     }
-  }, [isDesignersRoute]);
+  }, []);
 
   const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
     setSelectedCategoryRaw(cat);
@@ -1061,21 +1051,22 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     syncUrlParams(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter, syncUrlParams]);
 
-  // React to URL param changes only on the Designers & Makers route.
+  // React to URL param changes (initial mount)
   useEffect(() => {
-    if (!isDesignersRoute) return;
     const params = new URLSearchParams(location.search);
     const cat = params.get("category");
     const sub = params.get("subcategory");
-    setSelectedCategoryRaw(cat || null);
-    setSelectedSubcategoryRaw(sub || null);
-    if (cat || sub) setSidebarOpen(false);
-  }, [isDesignersRoute, location.search]);
+    if (cat || sub) {
+      setSelectedCategoryRaw(cat || null);
+      setSelectedSubcategoryRaw(sub || null);
+      setSidebarOpen(false);
+      broadcastFilter(cat || null, sub || null);
+    }
+  }, [location.search, broadcastFilter]);
 
-  // Listen for external filter sync from the Designers & Makers UI only.
+  // Listen for external filter sync
   useEffect(() => {
-    if (!isDesignersRoute) return;
-
+    // Hydrate on mount from URL/global pending filter.
     const pending = readPendingCategoryFilter();
     if (pending && (pending.category || pending.subcategory)) {
       setSelectedCategoryRaw(pending.category);
@@ -1083,6 +1074,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       setSidebarOpen(false);
     }
 
+    const handleSync = (e: CustomEvent) => {
+      const { category, subcategory, source } = e.detail || {};
+      if (source === 'designers') return;
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+    };
     const handleDesignerCategory = (e: CustomEvent) => {
       const { category, subcategory } = e.detail || {};
       setSelectedCategoryRaw(category || null);
@@ -1090,12 +1087,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       requestAnimationFrame(() => setSidebarOpen(false));
       broadcastFilter(category || null, subcategory || null);
     };
-
+    window.addEventListener('syncCategoryFilter', handleSync as EventListener);
     window.addEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
     return () => {
+      window.removeEventListener('syncCategoryFilter', handleSync as EventListener);
       window.removeEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
     };
-  }, [broadcastFilter, isDesignersRoute]);
+  }, [broadcastFilter]);
 
   // Build designer→category mapping from curator picks
   const designerIdsByCategory = useMemo(() => {
@@ -1488,10 +1486,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               activeCategory={selectedCategory}
               activeSubcategory={selectedSubcategory}
               onSelect={(cat, sub) => {
-                setSelectedCategory(cat, true);
+                setSelectedCategoryRaw(cat);
                 setSelectedSubcategoryRaw(sub);
                 broadcastFilter(cat, sub);
-                syncUrlParams(cat, sub);
               }}
               itemCounts={itemCounts}
               sectionLabel="all Designers"

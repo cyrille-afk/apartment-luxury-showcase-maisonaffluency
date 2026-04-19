@@ -428,8 +428,9 @@ function singularizeSub(s: string): string {
   const activeScope = filterSource ? (SOURCE_TO_SCOPE[filterSource] || "designers") : null;
   if (sectionScope && activeScope !== sectionScope) return null;
 
-  // Keep the designers-scoped ProductGrid active so /products-category/*
-  // continues to show product results under All Categories/category routes.
+  // Suppress the standalone designers ProductGrid — DesignersDirectory renders
+  // its own filtered grid inline, so showing both creates a duplicate.
+  if (sectionScope === "designers" && activeScope === "designers") return null;
 
   if (!isActive) return null;
 
