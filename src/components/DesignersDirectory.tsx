@@ -951,6 +951,12 @@ interface DesignersDirectoryProps {
   initialExpand?: string;
   showHeader?: boolean;
   showTradeCTA?: boolean;
+  /**
+   * "designers" → filters narrow the alphabetical designer cards (no product grid).
+   * "products"  → filters switch the view to a product grid (PickCard).
+   * Defaults to "designers" so the standalone /designers page never shows products.
+   */
+  mode?: "designers" | "products";
 }
 
 const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
@@ -958,6 +964,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   initialExpand,
   showHeader = true,
   showTradeCTA = true,
+  mode = "designers",
 }) => {
   const location = useLocation();
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -1015,11 +1022,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     }, "save pieces to your favorites");
   }, [requireAuth]);
 
-  const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
+  const { data: fullPicks = [] } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory));
 
-  // When a category or subcategory is selected, switch to product grid view.
-  // Otherwise show alphabetical designer cards.
+  // In "products" mode, when a filter is active we switch to a product grid view.
+  // In "designers" mode (default, used on /designers), filteredPicks is always
+  // null — the alphabetical designer cards remain and are narrowed via filteredItems.
   const filteredPicks = useMemo<PickItem[] | null>(() => {
+    if (mode !== "products") return null;
     if (!selectedCategory && !selectedSubcategory) return null;
     
     const normSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
@@ -1043,13 +1052,16 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, []);
 
   const syncUrlParams = useCallback((cat: string | null, sub: string | null) => {
-    // If a category is selected, push the slug URL. Otherwise return to /designers.
-    const target = cat ? categoryUrl(cat, sub) : "/designers";
+    // In "designers" mode, never rewrite the URL — keep the user on /designers
+    // so the Designers nav item stays highlighted.
+    if (mode === "designers") return;
+    // If a category is selected, push the slug URL. Otherwise return to homepage.
+    const target = cat ? categoryUrl(cat, sub) : "/";
     const current = window.location.pathname + window.location.search;
     if (current !== target) {
       window.history.pushState({}, "", target);
     }
-  }, []);
+  }, [mode]);
 
   const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
     setSelectedCategoryRaw(cat);
