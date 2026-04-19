@@ -471,7 +471,7 @@ const TradeGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
