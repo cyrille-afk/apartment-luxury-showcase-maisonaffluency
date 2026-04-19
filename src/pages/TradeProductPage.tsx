@@ -66,6 +66,7 @@ interface TradePricing {
   price_unit: string | null;
   price_prefix: string | null;
   spec_sheet_url: string | null;
+  size_variants: { label: string; price_cents: number }[] | null;
 }
 
 function useTradeProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -84,7 +85,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -118,6 +119,11 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
       const { data: tradeMatches } = await tradeQuery;
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
+      const rawSizeVariants = Array.isArray((product as any).size_variants)
+        ? ((product as any).size_variants as { label: string; price_cents: number }[])
+            .filter((v) => v && typeof v.label === "string" && v.label.trim() && typeof v.price_cents === "number" && v.price_cents > 0)
+        : [];
+
       const pricing: TradePricing | null = tradeProduct
         ? {
             trade_price_cents: tradeProduct.trade_price_cents ?? null,
@@ -126,16 +132,18 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
             price_unit: tradeProduct.price_unit ?? null,
             price_prefix: tradeProduct.price_prefix ?? null,
             spec_sheet_url: tradeProduct.spec_sheet_url ?? null,
+            size_variants: rawSizeVariants.length ? rawSizeVariants : null,
           }
-        : (product as any).trade_price_cents
+        : (rawSizeVariants.length || (product as any).trade_price_cents)
         ? {
             // Fallback: curator-pick price is treated as RRP; derive trade price below.
             trade_price_cents: null,
-            rrp_price_cents: (product as any).trade_price_cents as number,
+            rrp_price_cents: (product as any).trade_price_cents as number | null,
             currency: (product as any).currency || "EUR",
             price_unit: null,
             price_prefix: (product as any).price_prefix ?? null,
             spec_sheet_url: null,
+            size_variants: rawSizeVariants.length ? rawSizeVariants : null,
           }
         : null;
 
