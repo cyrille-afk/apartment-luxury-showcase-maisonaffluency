@@ -32,8 +32,7 @@ const FeaturedReadBanner = () => {
       .from("journal_articles")
       .select("slug, title, category, author")
       .eq("is_published", true)
-      .eq("is_featured", true)
-      .order("published_at", { ascending: false })
+      .order("published_at", { ascending: false, nullsFirst: false })
       .limit(1)
       .then(({ data }) => {
         if (data && data.length > 0) {
