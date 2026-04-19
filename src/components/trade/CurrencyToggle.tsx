@@ -55,7 +55,9 @@ export function useFxRates() {
 
   useEffect(() => {
     fetchLiveRates().then((r) => {
-      if (Object.keys(r).length > 0) setRates(r);
+      // Merge live rates over fallbacks so a partial/failed API response
+      // never wipes out the cross-currency conversion table.
+      setRates((prev) => ({ ...FALLBACK_RATES, ...prev, ...r }));
     });
   }, []);
 
