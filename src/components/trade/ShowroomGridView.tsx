@@ -3,6 +3,7 @@
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -16,9 +17,12 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER } from "@/lib/productTaxonomy";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { useFavorites } from "@/hooks/useFavorites";
+
+/** Local slugify — must match the one used by TradeProductPage / PublicProductPage */
+const slugifyForUrl = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 interface ShowroomProduct {
   id: string;
