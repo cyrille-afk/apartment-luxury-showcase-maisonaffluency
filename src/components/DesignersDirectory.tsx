@@ -1017,11 +1017,21 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
 
-  // Each category now has a dedicated product page (/products-category/...).
-  // The Designers & Makers directory only filters DESIGNER cards by category —
-  // it never displays product cards. Always return null so the renderer falls
-  // through to the designer-grouped (alphabetical) layout.
-  const filteredPicks = useMemo(() => null as PickItem[] | null, []);
+  // Behavior split:
+  //   • Top-level category selected (no subcategory) → show DESIGNER cards
+  //     (falls through to alphabetical layout, filteredPicks = null).
+  //   • Subcategory selected → show PRODUCT grid (PickCard) of matching pieces.
+  const filteredPicks = useMemo<PickItem[] | null>(() => {
+    if (!selectedSubcategory) return null;
+    const subLower = selectedSubcategory.toLowerCase();
+    const catLower = selectedCategory?.toLowerCase();
+    return fullPicks.filter((p: any) => {
+      const pSub = (p.subcategory || "").toLowerCase();
+      const pCat = (p.category || "").toLowerCase();
+      if (catLower && pCat && pCat !== catLower) return false;
+      return pSub === subLower;
+    }) as PickItem[];
+  }, [selectedCategory, selectedSubcategory, fullPicks]);
 
   // (Product pages handle detail view — no lightbox needed here)
 
