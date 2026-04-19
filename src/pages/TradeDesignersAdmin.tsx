@@ -398,7 +398,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground">RRP Price ({pick.currency || "EUR"})</label>
+                    <label className="text-[10px] text-muted-foreground">Default RRP ({pick.currency || "EUR"})</label>
                     <Input
                       type="number"
                       step="0.01"
@@ -409,7 +409,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         const num = parseFloat(v);
                         updateField(pick.id, "trade_price_cents", Number.isFinite(num) ? Math.round(num * 100) : null);
                       }}
-                      placeholder="e.g. 8500"
+                      placeholder="Used when no size variants"
                       className="text-xs"
                     />
                   </div>
@@ -417,6 +417,69 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     <label className="text-[10px] text-muted-foreground">Sort Order</label>
                     <Input type="number" value={pick.sort_order} onChange={(e) => updateField(pick.id, "sort_order", parseInt(e.target.value) || 0)} className="text-xs" />
                   </div>
+                </div>
+
+                {/* Size-based RRP variants */}
+                <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                      Size Variants (RRP per size)
+                    </label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-[10px]"
+                      onClick={() => {
+                        const current = pick.size_variants || [];
+                        updateField(pick.id, "size_variants", [...current, { label: "", price_cents: 0 }] as any);
+                      }}
+                    >
+                      + Add size
+                    </Button>
+                  </div>
+                  {(pick.size_variants || []).length === 0 && (
+                    <p className="text-[10px] text-muted-foreground italic">
+                      No size variants. The Default RRP above will be used.
+                    </p>
+                  )}
+                  {(pick.size_variants || []).map((variant, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={variant.label}
+                        onChange={(e) => {
+                          const updated = [...(pick.size_variants || [])];
+                          updated[idx] = { ...variant, label: e.target.value };
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                        placeholder="e.g. Small, 200x300 cm"
+                        className="text-xs flex-1"
+                      />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={variant.price_cents ? (variant.price_cents / 100).toString() : ""}
+                        onChange={(e) => {
+                          const updated = [...(pick.size_variants || [])];
+                          const num = parseFloat(e.target.value);
+                          updated[idx] = { ...variant, price_cents: Number.isFinite(num) ? Math.round(num * 100) : 0 };
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                        placeholder={`RRP ${pick.currency || "EUR"}`}
+                        className="text-xs w-32"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0 text-destructive"
+                        onClick={() => {
+                          const updated = (pick.size_variants || []).filter((_, i) => i !== idx);
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
