@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -109,6 +109,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     return () => { window.removeEventListener("storage", onStorage); window.removeEventListener("public_favorites_changed", onLocal); };
   }, []);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRouteActive = (href: string) => {
+    if (!href.startsWith("/")) return false;
+    if (href === "/") return location.pathname === "/";
+    return location.pathname === href || location.pathname.startsWith(href + "/");
+  };
   const [isOpen, setIsOpen] = useState(false);
   const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("#home");
@@ -676,13 +682,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
                     className={cn(
                       "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                      activeSection === item.href && "font-medium"
+                      (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
                     )}
                   >
                     {item.label}
                     <span className={cn(
                       "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                      activeSection === item.href ? "w-full" : "w-0 group-hover:w-full"
+                      (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
                     )} />
                   </button>
 
