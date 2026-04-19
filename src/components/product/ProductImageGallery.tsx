@@ -43,11 +43,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image with arrows */}
       <div className="flex-1 relative group">
         <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative">
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0">
             <img
               src={images[activeIndex]}
               alt={alt}
-              className="w-full h-full object-contain rounded-[inherit]"
+              className="max-w-full max-h-full object-contain rounded-2xl"
               style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
             />
           </div>
