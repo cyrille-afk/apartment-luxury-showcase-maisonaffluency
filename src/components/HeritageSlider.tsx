@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import SliderDots from "@/components/ui/SliderDots";
 import type { HeritageSlide } from "@/hooks/useHeritageSlides";
 
 interface HeritageSliderProps {
@@ -105,22 +106,15 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
       </div>
 
       {/* Dots */}
-      {slides.length > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => emblaApi?.scrollTo(i)}
-              className={`h-2 w-2 rounded-full transition-all duration-300 ${
-                i === selectedIndex
-                  ? "w-5 bg-foreground"
-                  : "bg-muted-foreground/35 hover:bg-muted-foreground/55"
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
-      )}
+      <SliderDots
+        count={slides.length}
+        activeIndex={selectedIndex}
+        onSelect={(i) => emblaApi?.scrollTo(i)}
+        variant="dark"
+        className="mt-4"
+        ariaPrefix="Go to slide"
+      />
+
     </motion.section>
   );
 };

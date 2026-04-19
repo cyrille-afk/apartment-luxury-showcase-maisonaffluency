@@ -3422,7 +3422,7 @@ const FeaturedDesigners = () => {
                           <button
                             key={idx}
                             onClick={() => setCuratorPickIndex(idx)}
-                            className={`h-2 w-2 rounded-full transition-all duration-300 ${idx === curatorPickIndex ? 'w-5 bg-white' : 'bg-white/35 hover:bg-white/55'} ${!matches ? 'opacity-20' : ''}`}
+                            className={`h-2.5 w-2.5 rounded-full border transition-all duration-300 ${idx === curatorPickIndex ? 'bg-white border-white' : 'bg-transparent border-white/60 hover:border-white'} ${!matches ? 'opacity-20' : ''}`}
                             aria-label={`View pick ${idx + 1}`}
                           />
                           );
