@@ -695,6 +695,7 @@ export type Database = {
           pdf_urls: Json | null
           photo_credit: string | null
           price_prefix: string | null
+          size_variants: Json | null
           sort_order: number
           subcategory: string | null
           subtitle: string | null
@@ -722,6 +723,7 @@ export type Database = {
           pdf_urls?: Json | null
           photo_credit?: string | null
           price_prefix?: string | null
+          size_variants?: Json | null
           sort_order?: number
           subcategory?: string | null
           subtitle?: string | null
@@ -749,6 +751,7 @@ export type Database = {
           pdf_urls?: Json | null
           photo_credit?: string | null
           price_prefix?: string | null
+          size_variants?: Json | null
           sort_order?: number
           subcategory?: string | null
           subtitle?: string | null
