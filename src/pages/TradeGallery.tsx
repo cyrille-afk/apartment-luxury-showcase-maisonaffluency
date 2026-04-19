@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen, Tag } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -18,8 +19,10 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
-import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { GalleryInlineSuggestions } from "@/components/trade/GalleryInlineSuggestions";
+
+const slugifyForUrl = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 interface DraftQuote {
   id: string;
@@ -48,9 +51,26 @@ const TradeGallery = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
-  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
   const [lastFavoritedRealId, setLastFavoritedRealId] = useState<string | null>(null);
   const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const openProductSheet = useCallback((product: TradeProduct) => {
+    const brand = product.brand_name.includes(" - ")
+      ? product.brand_name.split(" - ")[0].trim()
+      : product.brand_name;
+    const designerSlug =
+      designerSlugMap.get(brand.toLowerCase()) ||
+      designerSlugMap.get(product.brand_name.toLowerCase()) ||
+      slugifyForUrl(brand);
+    const productSlug = slugifyForUrl(product.product_name);
+    navigate(`/trade/products/${designerSlug}/${productSlug}`, {
+      state: { from: location.pathname + location.search },
+    });
+  }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string }>>(new Map());
@@ -280,29 +300,22 @@ const TradeGallery = () => {
     })(),
   });
 
-  const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
-    const price = getDisplayPrice(getProductPrice(product));
-    return {
-      id: product.id,
-      product_name: product.product_name,
-      subtitle: product.subtitle,
-      image_url: product.image_url,
-      hover_image_url: product.hover_image_url,
-      brand_name: product.brand_name,
-      materials: product.materials,
-      dimensions: product.dimensions,
-      description: product.description,
-      category: product.category,
-      subcategory: product.subcategory,
-      pdf_url: product.pdf_url,
-      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null,
-    };
-  };
-
-  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
-    const product = allProducts.find((p) => p.id === item.id);
-    if (product) handleAddToQuote(product);
-  };
+  // Fetch designer slug map for product-sheet navigation
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("designers")
+        .select("name, display_name, slug")
+        .eq("is_published", true);
+      if (!data) return;
+      const map = new Map<string, string>();
+      for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
+        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
+        if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
+      }
+      setDesignerSlugMap(map);
+    })();
+  }, []);
 
   const handleFavorite = async (product: TradeProduct) => {
     const realId = await toggleFavorite(product.id, {
@@ -439,7 +452,7 @@ const TradeGallery = () => {
       {/* Minimal suggestion strip above grid */}
       <GalleryInlineSuggestions selectedCategory={selectedCategory} selectedSubcategory={selectedSubcategory} selectedBrand={selectedBrand} onProductClick={(id) => {
         const match = allProducts.find(p => p.id === id);
-        if (match) setLightboxProduct(toLightboxItem(match));
+        if (match) openProductSheet(match);
       }} />
 
       {/* Content */}
@@ -458,7 +471,7 @@ const TradeGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group relative border border-border rounded-lg hover:border-foreground/20 transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="aspect-square bg-muted/30 relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
@@ -595,13 +608,13 @@ const TradeGallery = () => {
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProductSheet(product)}>
                    <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
                      {product.reedition_by
                        ? `${product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name} by ${product.reedition_by}`
                        : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                    </p>
-                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
+                   <h3 className="font-display text-sm text-foreground truncate hover:text-primary transition-colors">{product.product_name}</h3>
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
@@ -678,14 +691,6 @@ const TradeGallery = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
-      <TradeProductLightbox
-        product={lightboxProduct}
-        onClose={() => setLightboxProduct(null)}
-        onAddToQuote={handleLightboxAddToQuote}
-        isAdding={!!addingProductId}
-        isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
-        onSelectRelated={(rp) => setLightboxProduct(rp)}
-      />
     </>
   );
 };
