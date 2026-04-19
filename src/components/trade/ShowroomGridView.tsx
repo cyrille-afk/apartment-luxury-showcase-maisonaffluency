@@ -406,6 +406,23 @@ const ShowroomGridView = ({
     fetchProducts();
   }, []);
 
+  // Fetch designer name → slug map (used to build /trade/products/:slug/:productSlug URLs)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("designers")
+        .select("name, display_name, slug")
+        .eq("is_published", true);
+      if (!data) return;
+      const map = new Map<string, string>();
+      for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
+        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
+        if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
+      }
+      setDesignerSlugMap(map);
+    })();
+  }, []);
+
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
   const categories = useMemo(() => CATEGORY_ORDER.filter((cat) => products.some((p) => p.category === cat)), [products]);
   const sections = useMemo(() => {
@@ -490,7 +507,7 @@ const ShowroomGridView = ({
     })(),
   });
 
-  const inputClassPrefix = "";
+  
 
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
