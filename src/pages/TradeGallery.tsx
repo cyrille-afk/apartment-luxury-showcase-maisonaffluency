@@ -300,29 +300,22 @@ const TradeGallery = () => {
     })(),
   });
 
-  const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
-    const price = getDisplayPrice(getProductPrice(product));
-    return {
-      id: product.id,
-      product_name: product.product_name,
-      subtitle: product.subtitle,
-      image_url: product.image_url,
-      hover_image_url: product.hover_image_url,
-      brand_name: product.brand_name,
-      materials: product.materials,
-      dimensions: product.dimensions,
-      description: product.description,
-      category: product.category,
-      subcategory: product.subcategory,
-      pdf_url: product.pdf_url,
-      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null,
-    };
-  };
-
-  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
-    const product = allProducts.find((p) => p.id === item.id);
-    if (product) handleAddToQuote(product);
-  };
+  // Fetch designer slug map for product-sheet navigation
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("designers")
+        .select("name, display_name, slug")
+        .eq("is_published", true);
+      if (!data) return;
+      const map = new Map<string, string>();
+      for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
+        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
+        if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
+      }
+      setDesignerSlugMap(map);
+    })();
+  }, []);
 
   const handleFavorite = async (product: TradeProduct) => {
     const realId = await toggleFavorite(product.id, {
