@@ -60,15 +60,15 @@ function MobileDesignerCarousel({ designers, initialIndex = 0 }: { designers: Re
             <button
               key={d.slug}
               onClick={() => emblaApi?.scrollTo(i)}
-              className="flex items-center gap-1.5 group"
+              className="flex items-center"
               aria-label={`Go to ${d.display_name || d.name}`}
             >
               <span
                 className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
+                  "h-2 w-2 rounded-full transition-all duration-300",
                   i === selectedIndex
                     ? "w-6 bg-foreground"
-                    : "w-1.5 bg-foreground/25 group-hover:bg-foreground/40"
+                    : "bg-muted-foreground/35 hover:bg-muted-foreground/55"
                 )}
               />
             </button>

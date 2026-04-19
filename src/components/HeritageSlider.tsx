@@ -106,15 +106,15 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
 
       {/* Dots */}
       {slides.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-4">
+        <div className="flex justify-center gap-2 mt-4">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
-              className={`w-2.5 h-2.5 rounded-full border border-foreground/60 transition-all ${
+              className={`h-2 w-2 rounded-full transition-all duration-300 ${
                 i === selectedIndex
-                  ? "bg-foreground"
-                  : "bg-transparent hover:bg-foreground/20"
+                  ? "w-5 bg-foreground"
+                  : "bg-muted-foreground/35 hover:bg-muted-foreground/55"
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
