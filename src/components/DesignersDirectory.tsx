@@ -1017,11 +1017,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
 
-  // The Designers & Makers directory ALWAYS shows designer cards (alphabetical
-  // grouping). Category/subcategory filters narrow the list of designers shown
-  // — they never switch to a product grid. Dedicated category pages handle the
-  // product grid view.
-  const filteredPicks = useMemo<PickItem[] | null>(() => null, []);
+  // When a category or subcategory is selected, switch to product grid view.
+  // Otherwise show alphabetical designer cards.
+  const filteredPicks = useMemo<PickItem[] | null>(() => {
+    if (!selectedCategory && !selectedSubcategory) return null;
+    const { normalizeCategory, normalizeSubcategory } = require("@/lib/productTaxonomy");
+    const normSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
+    const normCat = selectedCategory ? normalizeCategory(selectedCategory) : null;
+    return fullPicks.filter((p) => {
+      if (selectedSubcategory) {
+        const pickSub = normalizeSubcategory(p.subcategory || undefined) || normalizeSubcategory(p.category || undefined);
+        if (pickSub === normSub) return true;
+        return !!(p.tags && p.tags.some((t: string) => normalizeSubcategory(t) === normSub));
+      }
+      const pickCat = normalizeCategory(p.category || undefined, p.subcategory || undefined);
+      if (pickCat === normCat) return true;
+      return !!(p.tags && p.tags.some((t: string) => normalizeCategory(t) === normCat));
+    });
+  }, [selectedCategory, selectedSubcategory, fullPicks]);
 
   // (Product pages handle detail view — no lightbox needed here)
 
