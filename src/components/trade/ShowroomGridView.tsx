@@ -155,6 +155,8 @@ const ShowroomGridView = ({
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,9 +170,25 @@ const ShowroomGridView = ({
   const fxRates = useFxRates();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
-  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
   const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
   const highlightRef = useRef<HTMLDivElement>(null);
+
+  /** Navigate to trade product sheet, preserving originating grid URL for back nav. */
+  const openProductSheet = useCallback((product: ShowroomProduct) => {
+    if (!product.designer_name) return;
+    const brand = product.designer_name.includes(" - ")
+      ? product.designer_name.split(" - ")[0].trim()
+      : product.designer_name;
+    const designerSlug =
+      designerSlugMap.get(brand.toLowerCase()) ||
+      designerSlugMap.get((product.designer_name || "").toLowerCase()) ||
+      slugifyForUrl(brand);
+    const productSlug = slugifyForUrl(product.product_name);
+    navigate(`/trade/products/${designerSlug}/${productSlug}`, {
+      state: { from: location.pathname + location.search },
+    });
+  }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   const getDisplayPrice = (price: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!price) return null;
