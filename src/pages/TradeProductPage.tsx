@@ -66,6 +66,7 @@ interface TradePricing {
   price_unit: string | null;
   price_prefix: string | null;
   spec_sheet_url: string | null;
+  size_variants: { label: string; price_cents: number }[] | null;
 }
 
 function useTradeProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -84,7 +85,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -118,6 +119,11 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
       const { data: tradeMatches } = await tradeQuery;
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
+      const rawSizeVariants = Array.isArray((product as any).size_variants)
+        ? ((product as any).size_variants as { label: string; price_cents: number }[])
+            .filter((v) => v && typeof v.label === "string" && v.label.trim() && typeof v.price_cents === "number" && v.price_cents > 0)
+        : [];
+
       const pricing: TradePricing | null = tradeProduct
         ? {
             trade_price_cents: tradeProduct.trade_price_cents ?? null,
@@ -126,16 +132,18 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
             price_unit: tradeProduct.price_unit ?? null,
             price_prefix: tradeProduct.price_prefix ?? null,
             spec_sheet_url: tradeProduct.spec_sheet_url ?? null,
+            size_variants: rawSizeVariants.length ? rawSizeVariants : null,
           }
-        : (product as any).trade_price_cents
+        : (rawSizeVariants.length || (product as any).trade_price_cents)
         ? {
             // Fallback: curator-pick price is treated as RRP; derive trade price below.
             trade_price_cents: null,
-            rrp_price_cents: (product as any).trade_price_cents as number,
+            rrp_price_cents: (product as any).trade_price_cents as number | null,
             currency: (product as any).currency || "EUR",
             price_unit: null,
             price_prefix: (product as any).price_prefix ?? null,
             spec_sheet_url: null,
+            size_variants: rawSizeVariants.length ? rawSizeVariants : null,
           }
         : null;
 
@@ -194,6 +202,7 @@ const TradeProductPage: React.FC = () => {
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [showTradePrice, setShowTradePrice] = useState(true);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -335,9 +344,17 @@ const TradeProductPage: React.FC = () => {
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
   // Trade pricing rendering
+  const sizeVariants = pricing?.size_variants || null;
+  const activeVariant = sizeVariants && sizeVariants[selectedVariantIdx]
+    ? sizeVariants[selectedVariantIdx]
+    : null;
+  const effectiveRrpCents = activeVariant
+    ? activeVariant.price_cents
+    : pricing?.rrp_price_cents ?? null;
+
   const renderPrice = () => {
-    if (!pricing || !pricing.rrp_price_cents) return null;
-    const rrp = pricing.rrp_price_cents;
+    if (!pricing || !effectiveRrpCents) return null;
+    const rrp = effectiveRrpCents;
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
     const formatted = formatPriceConverted(cents, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
@@ -460,9 +477,25 @@ const TradeProductPage: React.FC = () => {
               )}
             </div>
 
-            {/* Trade price + retail/trade toggle */}
-            {pricing?.rrp_price_cents ? (
+            {/* Size variant selector + Trade price + retail/trade toggle */}
+            {effectiveRrpCents ? (
               <div className="flex flex-col gap-2 pt-1">
+                {sizeVariants && sizeVariants.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    <label className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Size
+                    </label>
+                    <select
+                      value={selectedVariantIdx}
+                      onChange={(e) => setSelectedVariantIdx(parseInt(e.target.value, 10))}
+                      className="self-start min-w-[180px] h-9 px-3 rounded-md border border-border bg-background font-body text-sm text-foreground hover:border-foreground/40 transition-colors"
+                    >
+                      {sizeVariants.map((v, idx) => (
+                        <option key={idx} value={idx}>{v.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 {renderPrice()}
                 <button
                   onClick={() => setShowTradePrice((v) => !v)}
