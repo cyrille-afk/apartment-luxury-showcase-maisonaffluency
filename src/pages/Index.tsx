@@ -380,38 +380,43 @@ const Index = () => {
         Skip to main content
       </a>
       <main id="main-content" className="min-h-screen overflow-x-hidden">
-        <section id="home">
-          <Hero />
-        </section>
+        {/* Hero, gallery, interludes are skipped on /products-category/* so the
+            page feels like a real PLP — user lands directly on the filtered grid. */}
+        {!isCategoryRoute() && (
+          <section id="home">
+            <Hero />
+          </section>
+        )}
 
         {showBelowFoldSections ? (
           <>
-            <div className="bg-white">
-              <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
+            {!isCategoryRoute() && (
+              <>
+                <div className="bg-white">
+                  <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
+                    <Suspense fallback={null}>
+                      <ApartmentTourInterlude compact />
+                    </Suspense>
+                  </section>
+                  <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
+                    <Suspense fallback={<SectionFallback />}>
+                      <Gallery />
+                    </Suspense>
+                  </section>
+                </div>
+
+                {/* Interlude 1: After Curating Team → Before Designers */}
                 <Suspense fallback={null}>
-                  <ApartmentTourInterlude compact />
+                  <ParallaxInterlude
+                    imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773373912/Screen_Shot_2026-03-13_at_11.51.17_AM_egvsuz.png"
+                    quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
+                    attribution="The Maison Affluency Curation Philosophy"
+                    overlayOpacity={0}
+                    objectPosition="left center"
+                  />
                 </Suspense>
-              </section>
-              <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
-                <Suspense fallback={<SectionFallback />}>
-                  <Gallery />
-                </Suspense>
-              </section>
-            </div>
-
-
-
-
-            {/* Interlude 1: After Curating Team → Before Designers */}
-            <Suspense fallback={null}>
-              <ParallaxInterlude
-                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773373912/Screen_Shot_2026-03-13_at_11.51.17_AM_egvsuz.png"
-                quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
-                attribution="The Maison Affluency Curation Philosophy"
-                overlayOpacity={0}
-                objectPosition="left center"
-              />
-            </Suspense>
+              </>
+            )}
 
             <Suspense fallback={null}>
               <ProductGrid sectionScope="designers" />
@@ -422,52 +427,56 @@ const Index = () => {
               </Suspense>
             </section>
 
-            {/* Interlude 2: After Designers → Before Collectibles */}
-            <Suspense fallback={null}>
-              <ParallaxInterlude
-                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773372909/Screen_Shot_2026-03-13_at_11.34.42_AM_icbzuz.png"
-                quote="Collectible design exists at the intersection of art and function — where rarity becomes a conversation and craftsmanship becomes legacy"
-                attribution="On Collectible Design"
-                overlayOpacity={0}
-                reverse
-              />
-            </Suspense>
+            {!isCategoryRoute() && (
+              <>
+                {/* Interlude 2: After Designers → Before Collectibles */}
+                <Suspense fallback={null}>
+                  <ParallaxInterlude
+                    imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773372909/Screen_Shot_2026-03-13_at_11.34.42_AM_icbzuz.png"
+                    quote="Collectible design exists at the intersection of art and function — where rarity becomes a conversation and craftsmanship becomes legacy"
+                    attribution="On Collectible Design"
+                    overlayOpacity={0}
+                    reverse
+                  />
+                </Suspense>
 
-            <Suspense fallback={null}>
-              <ProductGrid sectionScope="collectibles" />
-            </Suspense>
-            <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-              <Suspense fallback={<SectionFallback />}>
-                <Collectibles />
-              </Suspense>
-            </section>
+                <Suspense fallback={null}>
+                  <ProductGrid sectionScope="collectibles" />
+                </Suspense>
+                <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+                  <Suspense fallback={<SectionFallback />}>
+                    <Collectibles />
+                  </Suspense>
+                </section>
 
-            {/* Interlude 3: After Collectibles → Before Ateliers */}
-            <Suspense fallback={null}>
-              <ParallaxInterlude
-                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773374192/Screen_Shot_2026-03-13_at_11.55.51_AM_vbstnu.png"
-                quote="An atelier is more than a workshop — it is a sanctuary where tradition meets innovation, and every detail is an act of devotion"
-                attribution="The Atelier Experience"
-                overlayOpacity={0}
-              />
-            </Suspense>
+                {/* Interlude 3: After Collectibles → Before Ateliers */}
+                <Suspense fallback={null}>
+                  <ParallaxInterlude
+                    imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773374192/Screen_Shot_2026-03-13_at_11.55.51_AM_vbstnu.png"
+                    quote="An atelier is more than a workshop — it is a sanctuary where tradition meets innovation, and every detail is an act of devotion"
+                    attribution="The Atelier Experience"
+                    overlayOpacity={0}
+                  />
+                </Suspense>
 
-            <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
-              <Suspense fallback={<SectionFallback />}>
-                <DesignDetails />
-              </Suspense>
-            </section>
-            <section id="contact" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
-              <Suspense fallback={<SectionFallback />}>
-                <ContactInquiry />
-              </Suspense>
-            </section>
-            <Suspense fallback={null}>
-              <JournalTeaser />
-            </Suspense>
-            <Suspense fallback={null}>
-              <InstagramFeed />
-            </Suspense>
+                <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
+                  <Suspense fallback={<SectionFallback />}>
+                    <DesignDetails />
+                  </Suspense>
+                </section>
+                <section id="contact" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
+                  <Suspense fallback={<SectionFallback />}>
+                    <ContactInquiry />
+                  </Suspense>
+                </section>
+                <Suspense fallback={null}>
+                  <JournalTeaser />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <InstagramFeed />
+                </Suspense>
+              </>
+            )}
             <Suspense fallback={null}>
               <Footer />
             </Suspense>
