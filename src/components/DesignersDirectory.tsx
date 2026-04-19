@@ -1017,23 +1017,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
 
-  // When category/subcategory is active, show product cards instead of designers
-  const filteredPicks = useMemo(() => {
-    if (!selectedCategory && !selectedSubcategory) return null;
-    if (!fullPicks.length) return null;
-    const matchPick = (pick: PickItem) => {
-      if (selectedSubcategory) {
-        const tags = SUBCATEGORY_TO_TAGS[selectedSubcategory] || [selectedSubcategory];
-        return tags.some(tag =>
-          pick.subcategory === tag ||
-          pick.category === tag ||
-          (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
-        );
-      }
-      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
-    };
-    return fullPicks.filter(matchPick);
-  }, [selectedCategory, selectedSubcategory, fullPicks]);
+  // Each category now has a dedicated product page (/products-category/...).
+  // The Designers & Makers directory only filters DESIGNER cards by category —
+  // it never displays product cards. Always return null so the renderer falls
+  // through to the designer-grouped (alphabetical) layout.
+  const filteredPicks = useMemo(() => null as PickItem[] | null, []);
 
   // (Product pages handle detail view — no lightbox needed here)
 
