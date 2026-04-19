@@ -51,9 +51,26 @@ const TradeGallery = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
-  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
   const [lastFavoritedRealId, setLastFavoritedRealId] = useState<string | null>(null);
   const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const openProductSheet = useCallback((product: TradeProduct) => {
+    const brand = product.brand_name.includes(" - ")
+      ? product.brand_name.split(" - ")[0].trim()
+      : product.brand_name;
+    const designerSlug =
+      designerSlugMap.get(brand.toLowerCase()) ||
+      designerSlugMap.get(product.brand_name.toLowerCase()) ||
+      slugifyForUrl(brand);
+    const productSlug = slugifyForUrl(product.product_name);
+    navigate(`/trade/products/${designerSlug}/${productSlug}`, {
+      state: { from: location.pathname + location.search },
+    });
+  }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string }>>(new Map());
