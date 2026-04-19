@@ -1017,19 +1017,19 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
 
-  // Behavior split:
-  //   • Top-level category selected (no subcategory) → show DESIGNER cards
-  //     (falls through to alphabetical layout, filteredPicks = null).
-  //   • Subcategory selected → show PRODUCT grid (PickCard) of matching pieces.
+  // Any category or subcategory selection switches the directory to a PRODUCT
+  // grid (PickCard). With nothing selected, falls through to the alphabetical
+  // designer-grouped layout.
   const filteredPicks = useMemo<PickItem[] | null>(() => {
-    if (!selectedSubcategory) return null;
-    const subLower = selectedSubcategory.toLowerCase();
+    if (!selectedCategory && !selectedSubcategory) return null;
+    const subLower = selectedSubcategory?.toLowerCase();
     const catLower = selectedCategory?.toLowerCase();
     return fullPicks.filter((p: any) => {
       const pSub = (p.subcategory || "").toLowerCase();
       const pCat = (p.category || "").toLowerCase();
       if (catLower && pCat && pCat !== catLower) return false;
-      return pSub === subLower;
+      if (subLower && pSub !== subLower) return false;
+      return true;
     }) as PickItem[];
   }, [selectedCategory, selectedSubcategory, fullPicks]);
 
