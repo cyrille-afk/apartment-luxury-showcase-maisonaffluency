@@ -1488,9 +1488,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               activeCategory={selectedCategory}
               activeSubcategory={selectedSubcategory}
               onSelect={(cat, sub) => {
-                setSelectedCategoryRaw(cat);
+                setSelectedCategory(cat, true);
                 setSelectedSubcategoryRaw(sub);
                 broadcastFilter(cat, sub);
+                syncUrlParams(cat, sub);
               }}
               itemCounts={itemCounts}
               sectionLabel="all Designers"
