@@ -168,7 +168,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           if (visibleSections.has(id)) current = id;
         }
         if (current) {
-          setActiveSection(sectionToNav[current] ?? `#${current}`);
+          // On /products-category/* the route owns the highlight (All Categories).
+          // Don't let an in-page #designers section steal it.
+          if (window.location.pathname.startsWith("/products-category/")) {
+            setActiveSection("");
+          } else {
+            setActiveSection(sectionToNav[current] ?? `#${current}`);
+          }
         }
       },
       { rootMargin: "-10% 0px -60% 0px", threshold: 0 }
