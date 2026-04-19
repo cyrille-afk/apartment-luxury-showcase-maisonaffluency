@@ -38,6 +38,12 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
     summary:
       "Sculptural punctuation — at the bar, at the foot of the bed, against a console. Editions in solid wood, cast bronze, hand-stitched leather, and lacquered finishes from ateliers who treat the stool as a small monument.",
   },
+  "Ottomans & Stools": {
+    title: "Ottomans & Stools",
+    image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774339681/AffluencySG_191_3_1_r0dard.jpg",
+    summary:
+      "Sculptural punctuation — at the bar, at the foot of the bed, against a console. Editions in solid wood, cast bronze, hand-stitched leather, and lacquered finishes from ateliers who treat the ottoman and stool as small monuments.",
+  },
 
   // ── Tables ─────────────────────────────────────────────────
   Tables: {
