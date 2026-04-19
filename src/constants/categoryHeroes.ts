@@ -28,7 +28,7 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
   },
   Chairs: {
     title: "Chairs",
-    image: cld("v1772085743/dining-room_ey0bu5.jpg"),
+    image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg",
     summary:
       "Dining chairs, side chairs, lounge chairs — small in scale, vast in influence. Each piece in this selection is a study in proportion and posture by designers who understand that a great chair quietly carries the room.",
   },
