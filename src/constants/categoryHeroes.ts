@@ -44,6 +44,12 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
     summary:
       "Sculptural punctuation — at the bar, at the foot of the bed, against a console. Editions in solid wood, cast bronze, hand-stitched leather, and lacquered finishes from ateliers who treat the ottoman and stool as small monuments.",
   },
+  "Bar Stools": {
+    title: "Bar Stools",
+    image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772085907/small-room-chair_aobzyb.jpg",
+    summary:
+      "Counter-height seating with the same gravitas as the room itself. Sculpted backs, swivel mechanisms, hand-stitched leathers and rare timbers — bar stools that anchor the kitchen island or the private bar with quiet confidence.",
+  },
 
   // ── Tables ─────────────────────────────────────────────────
   Tables: {
