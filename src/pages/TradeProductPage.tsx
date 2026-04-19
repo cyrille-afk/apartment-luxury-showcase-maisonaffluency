@@ -84,7 +84,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
