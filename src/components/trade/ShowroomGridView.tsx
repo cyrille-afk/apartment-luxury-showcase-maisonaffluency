@@ -490,29 +490,7 @@ const ShowroomGridView = ({
     })(),
   });
 
-  const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => ({
-    id: product.id,
-    product_name: product.product_name,
-    image_url: product.product_image_url,
-    brand_name: product.designer_name || "Unknown",
-    materials: product.materials,
-    dimensions: product.dimensions,
-    description: product.description,
-    category: product.category || inferCategory(product.product_name),
-    subcategory: product.subcategory || undefined,
-    pdf_url: product.pdf_url,
-    price: (() => {
-      const raw = product.trade_price_cents;
-      if (!raw || !product.currency) return null;
-      const price = getDisplayPrice({ cents: raw, currency: product.currency, price_unit: product.price_unit });
-      return price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null;
-    })(),
-  });
-
-  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
-    const product = products.find((p) => p.id === item.id);
-    if (product) handleAddToQuote(product);
-  };
+  const inputClassPrefix = "";
 
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
@@ -628,7 +606,7 @@ const ShowroomGridView = ({
                     : "border-border hover:border-foreground/20"
                 )}
               >
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <>
                       <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
@@ -738,7 +716,7 @@ const ShowroomGridView = ({
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
-                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
+                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.product_image_url ? (
                     <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
@@ -809,14 +787,6 @@ const ShowroomGridView = ({
           })}
         </div>
       )}
-      <TradeProductLightbox
-        product={lightboxProduct}
-        onClose={() => setLightboxProduct(null)}
-        onAddToQuote={handleLightboxAddToQuote}
-        isAdding={!!addingProductId}
-        isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
-        onSelectRelated={(rp) => setLightboxProduct(rp)}
-      />
     </>
   );
 };
