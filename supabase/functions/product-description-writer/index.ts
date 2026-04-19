@@ -113,6 +113,7 @@ serve(async (req) => {
 - **Materials**: ${pick.materials || "Not specified"}
 - **Dimensions**: ${pick.dimensions || "Not specified"}
 - **Category**: ${pick.category || ""}${pick.subcategory ? ` > ${pick.subcategory}` : ""}
+- **Variant / Finish**: ${variantDescriptor || "N/A"}
 - **Edition**: ${pick.edition || "Not specified"}
 - **Lead Time**: ${pick.lead_time || "Not specified"}
 - **Photo Credit**: ${pick.photo_credit || "N/A"}
