@@ -83,20 +83,27 @@ serve(async (req) => {
 
       const brandName = brand?.display_name || brand?.name || "Unknown";
 
-      // The actual creator can be in the subtitle (e.g. "Yabu Pushelberg" for a Man of Parts piece)
-      // OR encoded in the title as "... by [Designer Name]" (e.g. "Achille LTA1 Table Lamp by Lazzarini & Pickering").
-      // The `designers` row is the parent atelier/brand (e.g. "Marta Sala Éditions").
-      let actualDesigner = (pick.subtitle || "").trim();
+      // The subtitle MAY contain the actual creator name (e.g. "Yabu Pushelberg" for a Man of Parts piece),
+      // BUT it is often used as a variant/material descriptor (e.g. "Rock Crystal", "Lounge Chair",
+      // "Special Shade", "Natural Distress Shagreen"). We must NOT treat material/variant text as a designer.
+      // Heuristic: only treat subtitle as a designer credit when it looks like a personal/studio name
+      // AND does not match common material/variant vocabulary.
+      const rawSubtitle = (pick.subtitle || "").trim();
+      const VARIANT_KEYWORDS = /\b(crystal|shade|straw|shagreen|bronze|brass|marble|wood|leather|linen|silk|velvet|lacquer|gesso|parchment|stone|glass|ceramic|porcelain|oak|walnut|teak|rosewood|ash|maple|onyx|travertine|alabaster|terracotta|rattan|wicker|cane|metal|steel|iron|copper|gold|silver|nickel|chrome|matte|gloss|satin|polished|brushed|antique|distressed|natural|clear|smoked|tinted|frosted|ombr[ée]|finish|colou?r|wall art|table|chair|lamp|sconce|sofa|bench|console|cabinet|desk|stool|mirror|rug|vase|bowl|box|tray|lounge|dining|side|coffee|floor|ceiling|pendant|chandelier)\b/i;
+      const looksLikePersonName = /^[A-Z][a-zà-ÿ]+(?:[\s&\-][A-Z][a-zà-ÿ]+)+$/.test(rawSubtitle);
+      const subtitleIsLikelyDesigner = !!rawSubtitle && looksLikePersonName && !VARIANT_KEYWORDS.test(rawSubtitle);
+
+      let actualDesigner = subtitleIsLikelyDesigner ? rawSubtitle : "";
+      const variantDescriptor = subtitleIsLikelyDesigner ? "" : rawSubtitle;
       let cleanTitle = pick.title;
       if (!actualDesigner) {
-        // Match "...by [Designer]" at end of title (case-insensitive, requires space before "by")
         const m = pick.title.match(/^(.*?)\s+by\s+(.+?)\s*$/i);
-        if (m && m[2] && m[2].toLowerCase() !== brandName.toLowerCase()) {
+        if (m && m[2] && m[2].toLowerCase() !== brandName.toLowerCase() && !VARIANT_KEYWORDS.test(m[2])) {
           cleanTitle = m[1].trim();
           actualDesigner = m[2].trim();
         }
       }
-      const isCollaboration = actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
+      const isCollaboration = !!actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
 
       productContext = `
 ## PRODUCT DATA
