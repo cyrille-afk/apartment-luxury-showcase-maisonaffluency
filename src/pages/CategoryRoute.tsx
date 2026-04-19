@@ -49,7 +49,13 @@ const CategoryRoute = () => {
       if (target instanceof HTMLElement) {
         // Re-broadcast in case sections mounted after our first dispatch.
         window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Offset by header (and Featured Read banner) so the hero isn't hidden behind the sticky nav.
+        const nav = document.querySelector("nav");
+        const headerOffset = nav instanceof HTMLElement ? nav.getBoundingClientRect().height : 96;
+        const banner = document.querySelector("[data-featured-read-banner]");
+        const bannerOffset = banner instanceof HTMLElement ? banner.getBoundingClientRect().height : 0;
+        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset - bannerOffset - 8;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
         return;
       }
       if (performance.now() - start < 4000) {
