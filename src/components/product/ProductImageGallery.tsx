@@ -42,7 +42,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
       {/* Main image with arrows */}
       <div className="flex-1 relative group">
-        <div className="aspect-square bg-muted/10 rounded-lg overflow-hidden flex items-center justify-center relative">
+        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden flex items-center justify-center relative">
           <img
             src={images[activeIndex]}
             alt={alt}
