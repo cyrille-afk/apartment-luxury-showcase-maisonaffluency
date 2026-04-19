@@ -17,7 +17,7 @@ import CategorySidebar from "@/components/CategorySidebar";
 import { trackCTA } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { GALLERY } from "@/constants/galleryIndex";
@@ -1021,7 +1021,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // Otherwise show alphabetical designer cards.
   const filteredPicks = useMemo<PickItem[] | null>(() => {
     if (!selectedCategory && !selectedSubcategory) return null;
-    const { normalizeCategory, normalizeSubcategory } = require("@/lib/productTaxonomy");
+    
     const normSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
     const normCat = selectedCategory ? normalizeCategory(selectedCategory) : null;
     return fullPicks.filter((p) => {
