@@ -42,13 +42,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
       {/* Main image with arrows */}
       <div className="flex-1 relative group">
-        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden flex items-center justify-center relative">
-          <img
-            src={images[activeIndex]}
-            alt={alt}
-            className="w-full h-full object-contain"
-            style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-          />
+        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative">
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0">
+            <img
+              src={images[activeIndex]}
+              alt={alt}
+              className="max-w-full max-h-full object-contain rounded-2xl"
+              style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+            />
+          </div>
         </div>
         {overlay && (
           <div className="absolute top-3 right-3 z-20 pointer-events-none">
