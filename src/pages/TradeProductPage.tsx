@@ -202,6 +202,7 @@ const TradeProductPage: React.FC = () => {
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [showTradePrice, setShowTradePrice] = useState(true);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -343,9 +344,17 @@ const TradeProductPage: React.FC = () => {
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
   // Trade pricing rendering
+  const sizeVariants = pricing?.size_variants || null;
+  const activeVariant = sizeVariants && sizeVariants[selectedVariantIdx]
+    ? sizeVariants[selectedVariantIdx]
+    : null;
+  const effectiveRrpCents = activeVariant
+    ? activeVariant.price_cents
+    : pricing?.rrp_price_cents ?? null;
+
   const renderPrice = () => {
-    if (!pricing || !pricing.rrp_price_cents) return null;
-    const rrp = pricing.rrp_price_cents;
+    if (!pricing || !effectiveRrpCents) return null;
+    const rrp = effectiveRrpCents;
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
     const formatted = formatPriceConverted(cents, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
