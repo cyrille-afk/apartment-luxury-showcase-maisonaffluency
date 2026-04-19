@@ -1546,27 +1546,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
           {/* Mobile: Directory */}
           <div className="md:hidden" data-directory-layout="mobile">
-            {!(selectedCategory || selectedSubcategory) && (
-              /* Mobile A-Z bar — wrapped grid for full visibility and touch-friendly sizing */
-              <div className="mb-5">
-                <div className="h-px bg-border/60 mb-3" />
-                <div className="grid grid-cols-9 gap-y-2 gap-x-0">
-                  {LETTERS.map((letter) => {
-                    const isActive = activeLetters.has(letter);
-                    return (
-                      <button
-                        key={letter}
-                        onClick={() => jumpToLetter(letter)}
-                        className={`flex items-center justify-center font-serif text-lg min-h-[36px] min-w-[36px] rounded-sm transition-all duration-200 ${isActive ? "text-foreground hover:text-primary active:bg-muted cursor-pointer font-medium" : "text-foreground/20 cursor-default"}`}
-                      >
-                        {letter}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="h-px bg-border/60 mt-3" />
-              </div>
-            )}
+            {/* Mobile A-Z jump bar removed per design — letter section headers (A, B, C…) remain in the list below. */}
             {isLoading && (
               <div className="flex items-center justify-center py-32">
                 <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
