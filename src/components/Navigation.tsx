@@ -281,7 +281,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
               <div className="flex items-center gap-2 -mt-0.5">
                 <span className="h-px w-5 bg-foreground" />
-                <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
+                <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
                 <span className="h-px w-5 bg-foreground" />
               </div>
             </div>
@@ -299,7 +299,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </button>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="h-px w-6 bg-foreground" />
-                  <span className="font-body text-[8px] md:text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
+                  <span className="font-body text-[8px] md:text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
                   <span className="h-px w-6 bg-foreground" />
                 </div>
               </div>
@@ -570,7 +570,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </button>
               <div className="flex items-center gap-3 mt-1 mb-2">
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
-                <span className="font-body text-[10px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
+                <span className="font-body text-[10px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
