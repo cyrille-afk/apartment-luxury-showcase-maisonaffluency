@@ -84,7 +84,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -123,6 +123,16 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
             price_unit: tradeProduct.price_unit ?? null,
             price_prefix: tradeProduct.price_prefix ?? null,
             spec_sheet_url: tradeProduct.spec_sheet_url ?? null,
+          }
+        : (product as any).trade_price_cents
+        ? {
+            // Fallback: curator-pick price is treated as RRP; derive trade price below.
+            trade_price_cents: null,
+            rrp_price_cents: (product as any).trade_price_cents as number,
+            currency: (product as any).currency || "EUR",
+            price_unit: null,
+            price_prefix: (product as any).price_prefix ?? null,
+            spec_sheet_url: null,
           }
         : null;
 
