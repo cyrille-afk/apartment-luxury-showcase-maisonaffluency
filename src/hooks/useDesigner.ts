@@ -110,7 +110,8 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
           description: resolveCuratorPickDescription({ description: d.description }),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
-        })) as DesignerCuratorPick[];
+          size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
+        })) as unknown as DesignerCuratorPick[];
       }
       const { data, error } = await supabase
         .from("designer_curator_picks")
@@ -122,7 +123,8 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
-      })) as DesignerCuratorPick[];
+        size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
+      })) as unknown as DesignerCuratorPick[];
     },
     enabled: !!designerId,
   });
@@ -177,9 +179,10 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
           description: resolveCuratorPickDescription({ description: d.description }),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
+          size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
           designer_name: nameMap[d.designer_id]?.name || designer.name,
           designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
-        })) as AttributedCuratorPick[];
+        })) as unknown as AttributedCuratorPick[];
       }
 
       const { data, error } = await supabase
@@ -194,9 +197,10 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
+        size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
         designer_name: nameMap[d.designer_id]?.name || designer.name,
         designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
-      })) as AttributedCuratorPick[];
+      })) as unknown as AttributedCuratorPick[];
     },
     enabled: !!designer,
   });
