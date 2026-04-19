@@ -13,6 +13,7 @@ import PublicProductLightbox, { type PublicLightboxItem } from "./PublicProductL
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import SliderDots from "@/components/ui/SliderDots";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";

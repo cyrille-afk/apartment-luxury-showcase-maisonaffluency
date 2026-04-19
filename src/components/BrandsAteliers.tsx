@@ -13,6 +13,7 @@ import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote, Scale, Layers } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
+import SliderDots from "@/components/ui/SliderDots";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
