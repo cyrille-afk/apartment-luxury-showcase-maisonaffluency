@@ -1,45 +1,69 @@
 
-Fix the Angelo card mix-up by correcting both the data and the duplicate content source.
 
-1. Restore the deleted Oval card in the database
-- Recreate the deleted curator-pick record for Alinea Design Objects from the audit log entry:
-  - deleted record id: `99696f9a-145c-4294-99f9-10afcad157a0`
-  - title: `Angelo M - Oval Table`
-- Insert it back into `designer_curator_picks` under designer `leo-aerts-alinea` so it returns to:
-  - the Designer Editor
-  - the public designer profile
-  - the trade designer profile
+## Fix curator pick card display issues across public grids
 
-2. Remove the wrong live card from the database
-- Remove or hide the current `Angelo M/O 290` live DB row:
-  - current id: `62a4eaaf-04e6-48fe-b88e-465313a94e31`
-- This fixes the DB-driven designer/profile views where that card is coming from.
+### Problem
+The public homepage product grid (`PickCard` in `DesignersDirectory.tsx`) and `NewInSpotlight.tsx` show several display issues, plus there are duplicate database picks under "Gabriel Hendifar" that should only live under the parent "Apparatus Studio".
 
-3. Remove the duplicate hardcoded Angelo M/O 290 source
-- Update the static fallback data for Alinea in `src/components/FeaturedDesigners.tsx`.
-- Right now `Angelo M/O 290` still exists there as hardcoded curator-pick content, which is why it can continue showing even after DB changes.
-- Remove that hardcoded card, or replace it with the restored Oval card if Alinea still needs a static fallback there.
+### Changes
 
-4. Audit merged curator-pick rendering paths
-- Verify all places using merged static + DB picks so the wrong card cannot persist from a second source:
-  - `src/hooks/useDbCuratorPicks.ts`
-  - `src/components/ProductGrid.tsx`
-  - `src/components/FeaturedDesigners.tsx`
-  - `src/components/BrandsAteliers.tsx`
-- Keep one source of truth for this card so future deletes/restores behave predictably.
+**1. Database cleanup — remove Gabriel Hendifar duplicate picks**
 
-5. Verify Alinea-specific views after the fix
-- Confirm the final state is:
-  - `Angelo M - Oval Table` is back in the Designer Editor
-  - `Angelo M - Oval Table` displays in public/trade Alinea curator picks
-  - `Angelo M/O 290` is hidden everywhere it should be hidden
-- Specifically check:
-  - `/trade/designers/admin`
-  - `/designers/leo-aerts-alinea`
-  - `/trade/designers/leo-aerts-alinea`
-  - any gallery/product grids that still merge hardcoded and DB picks
+The `Apparatus Studio` parent designer already owns all 9 curator picks. The child `Gabriel Hendifar` designer has 3 duplicates that need deletion:
+- `Median 3` (id `bd785c79-e673-4c0c-8b7d-edb7b103e2d5`)
+- `Lariat` (id `bc4e9792-ad98-4c5c-8dc8-12a388219c47`)
+- `Portal` (id `7527dcfe-c685-45d8-b1b4-eb5306a66c0a`)
 
-Technical notes
-- The Designer Editor reads only from `designer_curator_picks`, so deleting the Oval row removed it there completely.
-- The lingering `Angelo M/O 290` is caused by a second hardcoded source in `FeaturedDesigners.tsx`, not only the database.
-- No schema migration is required for this immediate repair; this is a data correction plus a code cleanup.
+Delete via migration. Per the brand-hierarchy rule, the parent (Apparatus Studio) keeps all picks regardless.
+
+**2. Database cleanup — Forest & Giaconia designer name**
+
+The `designers.name` is currently `Forest & Giaconia - for Delcourt Collection`, which renders the ugly suffix everywhere. The actual collection these pieces belong to is `Archimobilier` (already in subtitle). Update designer name to just `Forest & Giaconia` so the brand line reads cleanly.
+
+**3. Database cleanup — Angelo W subtitle → edition badge**
+
+Pick `08d6ee54-7caf-40c7-a68e-764f2a154172` (Angelo W) has:
+- `subtitle = "Limited Edition of 7"` (wrong — duplicates edition info into legend)
+- `edition = "Limited edition of 7 pieces"` (correct — drives the badge)
+
+Clear the subtitle so the legend stops showing "Limited Edition of 7" as a sub-line; the badge already exists.
+
+**4. `src/components/DesignersDirectory.tsx` — `PickCard` legend logic (lines 918–943)**
+
+Update the inline IIFE that builds the brand/title/subtitle block:
+
+- **Strip `" - ..."` suffix from `brandLine`** so any designer name like `"X - for Y"` renders only `"X"`.
+- **Detect generic-category subtitles** (e.g. `Dining Table`, `Pendant`, `Coffee Table`, `Side Table`, `Surface Light`, `Console Table`, `Reading Floor Lamp`, `Cocktail Table`, `Table Lamp`) and **append them to the title on the same line** instead of rendering them as a separate sub-line. Heuristic: subtitle matches a known furniture type token AND title doesn't already include it.
+- **Suppress edition-like subtitles** (regex: `/^(limited\s+)?edition\b/i`) — these belong in the badge only.
+- Keep existing handling for year (`(2024)` suffix), `re-edition` badge, and `for X` brand-line override.
+
+**5. `src/components/NewInSpotlight.tsx` — pick legend block (lines 364–378)**
+
+Apply the same rules to keep the homepage spotlight grid consistent:
+
+- Hide `pick.subtitle` when it matches the edition regex or when it's a generic category that's already merged into the title.
+- **Remove the `pick.materials` line entirely** (lines 366–370). Materials belong to the lightbox detail view, not the public grid card. Keep `pick.dimensions` removed too for symmetry with `PublicDesignerProfile` and `TradeAtelierProfile` (which already hide them on the grid).
+- Merge generic-category subtitle into title using the same helper.
+
+**6. Extract a tiny shared helper**
+
+Create `src/lib/curatorPickLegend.ts` exporting two functions used by both grids:
+- `cleanBrandLine(designerName: string): string` — strips `" - ..."` suffix.
+- `composeTitle(title: string, subtitle?: string): { title: string; remainingSubtitle?: string }` — merges generic category subtitles into the title; returns `remainingSubtitle = undefined` when merged or when subtitle is edition-like.
+
+This keeps a single source of truth for the rules so future grids (presentation builder, tearsheets) can reuse it.
+
+### Verification
+
+After changes, confirm on `/` (homepage) and any `/products-category/*` route:
+- Forest & Giaconia card → brand reads `FOREST & GIACONIA`, no `for Archimobilier` duplicated subtitle if title already mentions Archimobilier; otherwise `for Archimobilier` stays.
+- Apparatus Studio Portal card → reads `Portal Dining Table` on one line, no separate `Dining Table` sub-line. No duplicate Gabriel Hendifar Portal card anywhere.
+- Atelier Pendhapa Astra card → no materials line under the title.
+- Alinea Angelo W card → shows `Limited Edition of 7` only as the badge (top-left of image), not in the legend.
+- De La Espada Orion card → unchanged, `by Anthony Guerrée` stays as the subtitle line (correctly spelled — the database is already correct).
+
+### Technical notes
+- No schema migration. Three data operations: delete 3 picks, update 1 designer name, clear 1 subtitle.
+- No changes to lightbox/detail components — they continue to show full materials/dimensions/edition info.
+- The `TradeAtelierProfile` and `PublicDesignerProfile` grids already hide subtitle/materials/dimensions; this brings the homepage and category grids to parity.
+
