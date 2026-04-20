@@ -19,6 +19,7 @@ import CloudUpload from "@/components/trade/CloudUpload";
 import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
+import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -296,62 +297,11 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <Input value={pick.hover_image_url || ""} onChange={(e) => updateField(pick.id, "hover_image_url", e.target.value || null)} className="text-xs" />
                 </div>
                 <div>
-                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +)</label>
-                  {(() => {
-                    const MIN_SLOTS = 5;
-                    const stored = pick.gallery_images || [];
-                    // Always show at least MIN_SLOTS rows so the admin can paste into empty slots immediately.
-                    const items = stored.length >= MIN_SLOTS
-                      ? stored
-                      : [...stored, ...Array(MIN_SLOTS - stored.length).fill("")];
-                    const setItems = (next: string[]) => {
-                      // Persist trimmed list — keep trailing empties out of the DB.
-                      const cleaned = [...next];
-                      while (cleaned.length && !cleaned[cleaned.length - 1]) cleaned.pop();
-                      updateField(pick.id, "gallery_images", cleaned.length ? cleaned : null);
-                    };
-                    return (
-                      <div className="space-y-1.5 mt-1">
-                        {items.map((url, i) => (
-                          <div key={i} className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-muted-foreground w-5 tabular-nums">{i + 1}.</span>
-                            {url ? (
-                              <img src={url} alt="" className="w-10 h-10 object-cover rounded border border-border shrink-0" />
-                            ) : (
-                              <div className="w-10 h-10 rounded border border-dashed border-border shrink-0" />
-                            )}
-                            <Input
-                              value={url}
-                              onChange={(e) => {
-                                const next = [...items];
-                                next[i] = e.target.value.trim();
-                                setItems(next);
-                              }}
-                              placeholder="https://…"
-                              className="text-xs font-mono flex-1"
-                            />
-                            <button type="button" title="Move up" disabled={i === 0}
-                              onClick={() => { const next = [...items]; [next[i-1], next[i]] = [next[i], next[i-1]]; setItems(next); }}
-                              className="text-xs px-1.5 py-0.5 border border-border rounded disabled:opacity-30">↑</button>
-                            <button type="button" title="Move down" disabled={i === items.length - 1}
-                              onClick={() => { const next = [...items]; [next[i+1], next[i]] = [next[i], next[i+1]]; setItems(next); }}
-                              className="text-xs px-1.5 py-0.5 border border-border rounded disabled:opacity-30">↓</button>
-                            <button type="button" title="Insert new thumbnail below"
-                              onClick={() => { const next = [...items]; next.splice(i + 1, 0, ""); setItems(next); }}
-                              className="text-xs px-1.5 py-0.5 border border-border rounded hover:bg-muted/40">+</button>
-                            <button type="button" title="Remove"
-                              onClick={() => setItems(items.filter((_, idx) => idx !== i))}
-                              className="text-xs px-1.5 py-0.5 border border-border rounded text-destructive hover:bg-destructive/10">×</button>
-                          </div>
-                        ))}
-                        <button type="button"
-                          onClick={() => setItems([...items, ""])}
-                          className="text-[11px] px-2 py-1 border border-dashed border-border rounded hover:bg-muted/40">
-                          + Add another thumbnail
-                        </button>
-                      </div>
-                    );
-                  })()}
+                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +). Unlimited — add as many as you need.</label>
+                  <GalleryThumbnailsEditor
+                    value={pick.gallery_images || []}
+                    onChange={(next) => updateField(pick.id, "gallery_images", next.length ? next : null)}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
