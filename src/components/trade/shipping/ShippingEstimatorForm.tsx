@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { estimateShipping, ShippingBreakdown as Breakdown } from "@/lib/shippingEstimator";
 import { toast } from "sonner";
 import ShippingBreakdown from "./ShippingBreakdown";
+import ShippingDocIntake, { ExtractedShipment } from "./ShippingDocIntake";
 import { supabase } from "@/integrations/supabase/client";
 
 const ORIGINS = [
@@ -70,6 +71,23 @@ export default function ShippingEstimatorForm({
   const [computing, setComputing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
+
+  const ORIGIN_CODES = new Set(ORIGINS.map(o => o.code));
+  const DEST_CODES = new Set(DESTINATIONS.map(o => o.code));
+  const MODE_VALUES = new Set(MODES.map(m => m.value).filter(Boolean));
+  const CAT_VALUES = new Set(CATEGORIES.map(c => c.value));
+  const CURRENCIES = new Set(["EUR","USD","GBP","SGD","HKD","AED"]);
+
+  const applyExtracted = (e: ExtractedShipment) => {
+    if (e.origin_country && ORIGIN_CODES.has(e.origin_country.toUpperCase())) setOrigin(e.origin_country.toUpperCase());
+    if (e.dest_country && DEST_CODES.has(e.dest_country.toUpperCase())) setDest(e.dest_country.toUpperCase());
+    if (e.mode && MODE_VALUES.has(e.mode)) setMode(e.mode);
+    if (e.category && CAT_VALUES.has(e.category)) setCategory(e.category);
+    if (e.total_volume_cbm != null) setCbm(String(e.total_volume_cbm));
+    if (e.total_weight_kg != null) setKg(String(e.total_weight_kg));
+    if (e.declared_value != null) setValue(String(e.declared_value));
+    if (e.currency && CURRENCIES.has(e.currency.toUpperCase())) setCurrency(e.currency.toUpperCase());
+  };
 
   const handleCompute = async () => {
     setComputing(true);
@@ -141,6 +159,7 @@ export default function ShippingEstimatorForm({
 
   return (
     <div className="space-y-5">
+      <ShippingDocIntake onExtracted={applyExtracted} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label className="font-body text-xs">Origin country</Label>
