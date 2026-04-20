@@ -360,7 +360,7 @@ export const collectibleDesigners: Array<{
   },
   {
     id: "achille-salvagni-atelier",
-    name: "AS Atelier",
+    name: "Achille Salvagni Atelier",
     founder: "Achille Salvagni",
     specialty: "Sculptural Furniture & Lighting — Collectible Design from Rome to New York",
     image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/achille-salvagni-portrait",

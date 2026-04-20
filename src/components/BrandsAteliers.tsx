@@ -2059,10 +2059,10 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
   },
   {
     brandName: "Achille Salvagni Atelier",
-    dbParentName: "AS Atelier",
+    dbParentName: "Achille Salvagni Atelier",
     instagram: "https://www.instagram.com/achillesalvagniatelier/",
     profileSlug: "achille-salvagni-atelier",
-    pillLabel: "AS Atelier",
+    pillLabel: "Achille Salvagni",
     highlightDesigner: "Achille Salvagni",
   },
   {
