@@ -19,6 +19,7 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { renderParagraph } from "@/components/EditorialBiography";
+import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
