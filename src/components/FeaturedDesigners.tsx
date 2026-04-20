@@ -85,7 +85,7 @@ const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49
 const leoAertsTwinChairOutdoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-27_at_8.41.52_PM_wlksfq", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1200, quality: "auto:good", crop: "fill" });
-const leoAertsAngeloMO290 = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun", { width: 1200, quality: "auto:good", crop: "fill" });
+
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
