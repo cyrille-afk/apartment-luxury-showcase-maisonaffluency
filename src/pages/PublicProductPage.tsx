@@ -581,11 +581,37 @@ const PublicProductPage: React.FC = () => {
                       </Link>
                     </h2>
                   </div>
-                  {brandSummary && (
-                    <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
-                      {renderParagraph(brandSummary)}
-                    </p>
-                  )}
+                  {brandSummary && (() => {
+                    const PREVIEW_LEN = 240;
+                    const needsToggle = brandSummary.length > PREVIEW_LEN;
+                    let preview = brandSummary;
+                    if (needsToggle) {
+                      const slice = brandSummary.slice(0, PREVIEW_LEN);
+                      const lastSpace = slice.lastIndexOf(" ");
+                      preview = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim() + "…";
+                    }
+                    const shown = bioExpanded || !needsToggle ? brandSummary : preview;
+                    return (
+                      <div>
+                        <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                          {renderParagraph(shown)}
+                        </p>
+                        {needsToggle && (
+                          <button
+                            type="button"
+                            onClick={() => setBioExpanded((v) => !v)}
+                            className="mt-2 inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.15em] text-foreground hover:text-primary transition-colors"
+                          >
+                            {bioExpanded ? "Read less" : "Read more"}
+                            <ChevronDown
+                              size={12}
+                              className={cn("transition-transform duration-200", bioExpanded && "rotate-180")}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
