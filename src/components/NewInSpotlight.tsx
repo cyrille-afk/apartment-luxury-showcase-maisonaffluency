@@ -13,6 +13,7 @@ import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { cn } from "@/lib/utils";
+import { renderParagraph } from "@/components/EditorialBiography";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -73,7 +74,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const displayName = designer.display_name || designer.name;
   const shareUrl = buildDesignerOgUrl(designer.name);
 
-  // Extract only the first plain-text paragraph from the biography
+  // Extract only the first renderable paragraph from the biography
   // (the field contains media URLs, pipe-separated metadata, etc.)
   const firstBioParagraph = useMemo(() => {
     if (!designer.biography) return "";
@@ -83,8 +84,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
       const firstToken = block.split(/\s*\|\s*/)[0]?.trim() || "";
       // Skip blocks that start with a URL (media / video references)
       if (/^https?:\/\//i.test(firstToken) && !/\s/.test(firstToken)) continue;
-      // Strip any remaining HTML tags for clean rendering
-      text = block.replace(/<[^>]+>/g, "");
+      text = block;
       break;
     }
     // Truncate long paragraphs at a natural sentence-ending marker
@@ -143,7 +143,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             </div>
 
             <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left">
-              {firstBioParagraph}
+              {renderParagraph(firstBioParagraph)}
             </p>
 
             <div className="mt-8">
