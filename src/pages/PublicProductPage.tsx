@@ -150,6 +150,7 @@ const PublicProductPage: React.FC = () => {
 
   const [favIds, setFavIds] = useState(readFavs);
   const [relatedIndex, setRelatedIndex] = useState(0);
+  const [bioExpanded, setBioExpanded] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
