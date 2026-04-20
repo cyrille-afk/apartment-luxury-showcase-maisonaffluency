@@ -85,7 +85,7 @@ const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49
 const leoAertsTwinChairOutdoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-27_at_8.41.52_PM_wlksfq", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1200, quality: "auto:good", crop: "fill" });
-const leoAertsAngeloMO290 = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun", { width: 1200, quality: "auto:good", crop: "fill" });
+
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
@@ -565,16 +565,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Angelo M/R 130 dining table is Leo Aerts' most celebrated work. Award-winning design table: Good Design Award – Chicago, USA (2018), People's Choice, AZ Award – Toronto, Canada (2019), German Design Award – Frankfurt, Germany (2020).",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Alinea_Angelo_M_Info.pdf",
         pdfFilename: "Alinea-Angelo_M_Info.pdf"
-      },
-      {
-        image: leoAertsAngeloMO290,
-        title: "Angelo M/O 290",
-        subtitle: "Project: Olivier Lempereur, Amandine & Jules",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base • Solid American walnut",
-        dimensions: "L 290 × H 75 cm",
-        description: "The Angelo M/O 290 is a monumental oval dining table commissioned for a project by Olivier Lempereur — its elongated stone surface creating a sculptural centrepiece that anchors the room with quiet authority."
       },
       {
         image: leoAertsVitrineCabinet,
