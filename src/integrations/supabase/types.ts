@@ -2017,6 +2017,353 @@ export type Database = {
         }
         Relationships: []
       }
+      shipping_duty_rates: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          dest_country: string
+          duty_percent: number
+          hs_chapter: string
+          id: string
+          notes: string | null
+          updated_at: string
+          vat_percent: number
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          dest_country: string
+          duty_percent?: number
+          hs_chapter?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          vat_percent?: number
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          dest_country?: string
+          duty_percent?: number
+          hs_chapter?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          vat_percent?: number
+        }
+        Relationships: []
+      }
+      shipping_lanes: {
+        Row: {
+          active: boolean
+          carrier_name: string
+          created_at: string
+          dest_country: string
+          dest_zone: string
+          id: string
+          mode: string
+          notes: string | null
+          origin_city: string
+          origin_country: string
+          source: string
+          transit_days_max: number
+          transit_days_min: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          carrier_name: string
+          created_at?: string
+          dest_country: string
+          dest_zone?: string
+          id?: string
+          mode: string
+          notes?: string | null
+          origin_city?: string
+          origin_country: string
+          source?: string
+          transit_days_max?: number
+          transit_days_min?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          carrier_name?: string
+          created_at?: string
+          dest_country?: string
+          dest_zone?: string
+          id?: string
+          mode?: string
+          notes?: string | null
+          origin_city?: string
+          origin_country?: string
+          source?: string
+          transit_days_max?: number
+          transit_days_min?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shipping_quotes: {
+        Row: {
+          computed_breakdown: Json
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          customs_cents: number
+          declared_value_cents: number
+          dest_address: string | null
+          dest_city: string
+          dest_country: string
+          dest_zone: string | null
+          duty_cents: number
+          freight_cents: number
+          fuel_cents: number
+          handling_cents: number
+          id: string
+          insurance_cents: number
+          last_mile_cents: number
+          notes: string | null
+          order_timeline_id: string | null
+          origin_address: string | null
+          origin_city: string
+          origin_country: string
+          quote_id: string | null
+          selected_carrier: string | null
+          selected_lane_id: string | null
+          selected_mode: string | null
+          status: string
+          total_cents: number
+          total_volume_cbm: number
+          total_weight_kg: number
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+          vat_cents: number
+        }
+        Insert: {
+          computed_breakdown?: Json
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          customs_cents?: number
+          declared_value_cents?: number
+          dest_address?: string | null
+          dest_city?: string
+          dest_country?: string
+          dest_zone?: string | null
+          duty_cents?: number
+          freight_cents?: number
+          fuel_cents?: number
+          handling_cents?: number
+          id?: string
+          insurance_cents?: number
+          last_mile_cents?: number
+          notes?: string | null
+          order_timeline_id?: string | null
+          origin_address?: string | null
+          origin_city?: string
+          origin_country?: string
+          quote_id?: string | null
+          selected_carrier?: string | null
+          selected_lane_id?: string | null
+          selected_mode?: string | null
+          status?: string
+          total_cents?: number
+          total_volume_cbm?: number
+          total_weight_kg?: number
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+          vat_cents?: number
+        }
+        Update: {
+          computed_breakdown?: Json
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          customs_cents?: number
+          declared_value_cents?: number
+          dest_address?: string | null
+          dest_city?: string
+          dest_country?: string
+          dest_zone?: string | null
+          duty_cents?: number
+          freight_cents?: number
+          fuel_cents?: number
+          handling_cents?: number
+          id?: string
+          insurance_cents?: number
+          last_mile_cents?: number
+          notes?: string | null
+          order_timeline_id?: string | null
+          origin_address?: string | null
+          origin_city?: string
+          origin_country?: string
+          quote_id?: string | null
+          selected_carrier?: string | null
+          selected_lane_id?: string | null
+          selected_mode?: string | null
+          status?: string
+          total_cents?: number
+          total_volume_cbm?: number
+          total_weight_kg?: number
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+          vat_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_quotes_order_timeline_id_fkey"
+            columns: ["order_timeline_id"]
+            isOneToOne: false
+            referencedRelation: "order_timeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipping_quotes_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipping_quotes_selected_lane_id_fkey"
+            columns: ["selected_lane_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_lanes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_rate_brackets: {
+        Row: {
+          base_rate_cents: number
+          created_at: string
+          currency: string
+          id: string
+          lane_id: string
+          max_volume_cbm: number
+          max_weight_kg: number
+          min_charge_cents: number
+          min_volume_cbm: number
+          min_weight_kg: number
+          rate_per_cbm_cents: number
+          rate_per_kg_cents: number
+          source: string
+          updated_at: string
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          base_rate_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          lane_id: string
+          max_volume_cbm?: number
+          max_weight_kg?: number
+          min_charge_cents?: number
+          min_volume_cbm?: number
+          min_weight_kg?: number
+          rate_per_cbm_cents?: number
+          rate_per_kg_cents?: number
+          source?: string
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          base_rate_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          lane_id?: string
+          max_volume_cbm?: number
+          max_weight_kg?: number
+          min_charge_cents?: number
+          min_volume_cbm?: number
+          min_weight_kg?: number
+          rate_per_cbm_cents?: number
+          rate_per_kg_cents?: number
+          source?: string
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_rate_brackets_lane_id_fkey"
+            columns: ["lane_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_lanes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_surcharges: {
+        Row: {
+          active: boolean
+          calc_method: string
+          carrier_name: string | null
+          created_at: string
+          currency: string
+          dest_country: string | null
+          dest_zone: string | null
+          id: string
+          lane_id: string | null
+          notes: string | null
+          scope: string
+          surcharge_type: string
+          updated_at: string
+          value_numeric: number
+        }
+        Insert: {
+          active?: boolean
+          calc_method: string
+          carrier_name?: string | null
+          created_at?: string
+          currency?: string
+          dest_country?: string | null
+          dest_zone?: string | null
+          id?: string
+          lane_id?: string | null
+          notes?: string | null
+          scope?: string
+          surcharge_type: string
+          updated_at?: string
+          value_numeric?: number
+        }
+        Update: {
+          active?: boolean
+          calc_method?: string
+          carrier_name?: string | null
+          created_at?: string
+          currency?: string
+          dest_country?: string | null
+          dest_zone?: string | null
+          id?: string
+          lane_id?: string | null
+          notes?: string | null
+          scope?: string
+          surcharge_type?: string
+          updated_at?: string
+          value_numeric?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_surcharges_lane_id_fkey"
+            columns: ["lane_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_lanes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
