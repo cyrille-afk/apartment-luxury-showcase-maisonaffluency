@@ -7,7 +7,7 @@ import {
   Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
-  ClipboardList, Layers, Settings2, CalendarClock, Users,
+  ClipboardList, Layers, Settings2, CalendarClock, Users, Truck, Percent,
 } from "lucide-react";
 
 interface AdminCard {
@@ -55,9 +55,16 @@ const systemGroup: AdminCard[] = [
   { title: "Taxonomy Audit", description: "Review product category mapping and consistency", url: "/trade/admin", icon: Layers },
 ];
 
+const shippingGroup: AdminCard[] = [
+  { title: "Shipping Estimator", description: "Generate landed-cost quotes for trade users (Phase 1 TMS)", url: "/trade/shipping-estimator", icon: Truck },
+  { title: "Shipping Rate Matrix", description: "Manage carrier lanes, rate brackets, and CSV imports", url: "/trade/admin/shipping-rates", icon: Settings2 },
+  { title: "Shipping Surcharges", description: "Configure fuel, insurance, customs, and duty rates", url: "/trade/admin/shipping-surcharges", icon: Percent },
+];
+
 const groups = [
   { label: "Content & Editorial", items: contentGroup },
   { label: "Commerce & Operations", items: commerceGroup },
+  { label: "Shipping & TMS (Phase 1)", items: shippingGroup },
   { label: "AI Content Studio", items: aiGroup },
   { label: "Analytics & Intelligence", items: analyticsGroup },
   { label: "System & Tools", items: systemGroup },
