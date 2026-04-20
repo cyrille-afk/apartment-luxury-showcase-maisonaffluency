@@ -186,6 +186,61 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           className="absolute bottom-3 left-1/2 -translate-x-1/2"
         />
       </div>
+
+      {/* Fullscreen lightbox */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+        <DialogContent
+          hideClose
+          className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none"
+        >
+          <VisuallyHidden>
+            <DialogTitle>{alt}</DialogTitle>
+          </VisuallyHidden>
+          <button
+            type="button"
+            onClick={() => setZoomOpen(false)}
+            aria-label="Close"
+            className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background transition-colors"
+          >
+            <X size={18} className="text-foreground" />
+          </button>
+          <img
+            src={images[activeIndex]}
+            alt={alt}
+            className="max-w-[95vw] max-h-[92vh] object-contain"
+          />
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); goTo(activeIndex - 1); }}
+                disabled={activeIndex === 0}
+                aria-label="Previous image"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              >
+                <ChevronLeft size={20} className="text-foreground" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); goTo(activeIndex + 1); }}
+                disabled={activeIndex === images.length - 1}
+                aria-label="Next image"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              >
+                <ChevronRight size={20} className="text-foreground" />
+              </button>
+              <SliderDots
+                count={images.length}
+                activeIndex={activeIndex}
+                onSelect={goTo}
+                variant="dark"
+                ariaPrefix="View image"
+                className="absolute bottom-6 left-1/2 -translate-x-1/2"
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
