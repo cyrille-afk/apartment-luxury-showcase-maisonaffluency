@@ -60,7 +60,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     <div className="flex gap-4">
       {/* Vertical thumbnails — scrollable carousel */}
       {images.length > 1 && (
-        <div className="hidden md:flex flex-col w-20 shrink-0 relative self-stretch max-h-[600px]">
+        <div className="hidden md:flex flex-col w-20 shrink-0 relative self-stretch" style={{ maxHeight: "calc(5 * 5rem + 4 * 0.5rem + 2 * 1.75rem + 0.5rem)" }}>
           {/* Up arrow */}
           <button
             type="button"
