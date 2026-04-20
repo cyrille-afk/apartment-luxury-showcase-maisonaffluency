@@ -1,0 +1,1 @@
+UPDATE public.designers SET is_published = false WHERE slug IN ('achille-salvagni', 'achille-salvagni-designer');
