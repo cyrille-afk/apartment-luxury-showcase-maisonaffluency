@@ -553,12 +553,7 @@ const TradeGallery = () => {
                 </div>
                 {/* Description in portal tooltip */}
                 <div className="p-3 text-center">
-                   <p className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-0.5">
-                     {product.reedition_by
-                       ? `${product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name} by ${product.reedition_by}`
-                       : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
-                   </p>
-                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
+                   <h3 className="font-display text-sm text-foreground leading-tight truncate">
                      {product.product_name}
                    </h3>
                   {isAdmin ? (
@@ -602,11 +597,6 @@ const TradeGallery = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProductSheet(product)}>
-                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                     {product.reedition_by
-                       ? `${product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name} by ${product.reedition_by}`
-                       : product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
-                   </p>
                    <h3 className="font-display text-sm text-foreground truncate hover:text-primary transition-colors">{product.product_name}</h3>
                 </div>
                 {isAdmin ? (
