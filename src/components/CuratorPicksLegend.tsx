@@ -44,16 +44,11 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
         </>
       )}
 
-      {/* Dimensions */}
+      {/* Dimensions — each variant on its own line (per content rule) */}
       {p.dimensions && (
-        <>
-          <p className="font-body text-sm text-white font-medium mt-1.5 whitespace-pre-line md:hidden">
-            {preventOrphans(p.dimensions)}
-          </p>
-          <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 hidden md:block">
-            {p.dimensions.replace(/\n/g, " · ")}
-          </p>
-        </>
+        <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
+          {preventOrphans(formatDimensionsMultiline(p.dimensions))}
+        </p>
       )}
 
       {/* Edition info */}
