@@ -13,6 +13,7 @@ interface ProductImageGalleryProps {
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
