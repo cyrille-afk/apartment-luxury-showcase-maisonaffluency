@@ -10,10 +10,37 @@
     <!-- deploy-stamp: 2026-04-08T16:05 -->
     <meta name="keywords" content="luxury furniture, collectible design, interior design Singapore, bespoke furniture, contemporary design, French design, ateliers, curated interiors, Maison Affluency" />
     <meta name="pinterest" content="nopin" />
-    <!-- NOTE: rel="canonical" and og:url intentionally omitted here.
-         They are set per-route by react-helmet-async to avoid every page
-         falsely declaring the homepage as its canonical (which collapses
-         all URLs into one in Google Search Console). -->
+    <!-- Pre-hydration canonical injector.
+         Runs synchronously during HTML parse so Googlebot sees a self-referential
+         <link rel="canonical"> on every route BEFORE React/Helmet boots.
+         Helmet may later override this with a more specific value (e.g. designer
+         slugs that include extra params); the script writes a sane default that
+         matches the requested path on the canonical host. -->
+    <script>
+      (function () {
+        try {
+          var CANONICAL_HOST = 'https://www.maisonaffluency.com';
+          var path = window.location.pathname || '/';
+          // Strip trailing slash on non-root paths for consistency
+          if (path.length > 1 && path.charAt(path.length - 1) === '/') {
+            path = path.slice(0, -1);
+          }
+          // Skip bridge files / static HTML — they manage their own canonical
+          if (/\.html$/i.test(path)) return;
+          var href = CANONICAL_HOST + path;
+          var link = document.createElement('link');
+          link.setAttribute('rel', 'canonical');
+          link.setAttribute('data-rh-default', 'true');
+          link.setAttribute('href', href);
+          document.head.appendChild(link);
+          var og = document.createElement('meta');
+          og.setAttribute('property', 'og:url');
+          og.setAttribute('data-rh-default', 'true');
+          og.setAttribute('content', href);
+          document.head.appendChild(og);
+        } catch (e) { /* no-op */ }
+      })();
+    </script>
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
