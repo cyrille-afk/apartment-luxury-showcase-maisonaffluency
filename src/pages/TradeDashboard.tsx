@@ -282,26 +282,40 @@ const TradeDashboard = () => {
           </div>
         ) : (
           <div className="border border-border rounded-lg divide-y divide-border">
-            {activity.map((item) => (
-              <Link
-                key={item.id}
-                to={item.link || "#"}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
-              >
-                {item.type === "document" ? (
-                  <FileDown className="h-4 w-4 text-[hsl(var(--pdf-red))] shrink-0" />
-                ) : (
-                  <FileText className="h-4 w-4 text-primary shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-body text-sm text-foreground truncate">{item.title}</p>
-                  <p className="font-body text-[10px] text-muted-foreground">{item.subtitle}</p>
+            {activity.map((item) => {
+              const inner = (
+                <>
+                  {item.type === "document" ? (
+                    <FileDown className="h-4 w-4 text-[hsl(var(--pdf-red))] shrink-0" />
+                  ) : (
+                    <FileText className="h-4 w-4 text-primary shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body text-sm text-foreground truncate">{item.title}</p>
+                    <p className="font-body text-[10px] text-muted-foreground">{item.subtitle}</p>
+                  </div>
+                  <span className="font-body text-[10px] text-muted-foreground shrink-0">
+                    {formatRelativeDate(item.date)}
+                  </span>
+                </>
+              );
+              return item.link ? (
+                <Link
+                  key={item.id}
+                  to={item.link}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 px-4 py-3"
+                >
+                  {inner}
                 </div>
-                <span className="font-body text-[10px] text-muted-foreground shrink-0">
-                  {formatRelativeDate(item.date)}
-                </span>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
