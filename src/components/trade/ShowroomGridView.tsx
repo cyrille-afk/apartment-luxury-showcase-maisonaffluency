@@ -693,12 +693,7 @@ const ShowroomGridView = ({
                 </div>
                 {/* Description in portal tooltip */}
                 <div className="p-3 text-center">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                    {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
-                  </p>
-                  <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">{product.product_name}</h3>
-                  {product.dimensions && <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
-                  {product.materials && <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>}
+                  <h3 className="font-display text-sm text-foreground leading-tight truncate">{product.product_name}</h3>
                   {isAdmin ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}
@@ -741,13 +736,7 @@ const ShowroomGridView = ({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                    {product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : product.designer_name}
-                  </p>
                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
-                  <p className="font-body text-[10px] text-muted-foreground truncate">
-                    {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
-                  </p>
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
