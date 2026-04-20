@@ -567,16 +567,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alinea-Angelo_M_Info.pdf"
       },
       {
-        image: leoAertsTwinChairOutdoor,
-        title: "Twin Chair",
-        subtitle: "Outdoor",
-        category: "Seating",
-        tags: ["Seating", "Chair", "Outdoor"],
-        materials: "Weather-resistant materials",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
-      },
-      {
         image: leoAertsAngeloMO290,
         title: "Angelo M/O 290",
         subtitle: "Project: Olivier Lempereur, Amandine & Jules",
@@ -595,16 +585,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Bottom part in natural stone with aluminium frame",
         dimensions: "VHS/M 120-45/60 glass: 120 × 45 × 45/60 cm\nVHS/M 120-60 glass: 120 × 45 × 60 cm\nVHS/M 150-45/60 glass: 150 × 45 × 45/60 cm",
         description: "Visible M conveys the story behind each object to its collector and admirer and adds a personal touch to the interior. Via this way, the collector can express his identity and cherish memories associated with the exposed objects."
-      },
-      {
-        image: leoAertsTwinChairIndoor,
-        title: "Twin Chair Indoor",
-        subtitle: "Leather Seat — Ash Bleached",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Upholstered leather seat • Ash bleached frame\n(Also available in ashwood light gray, ashwood mid gray, ashwood dark brown, ashwood black, walnut)",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "The Twin Indoor Chair in leather and bleached ash — its considered proportions and refined materiality making it a quietly sculptural presence in any interior."
       },
       {
         image: leoAertsAngeloMDining,
