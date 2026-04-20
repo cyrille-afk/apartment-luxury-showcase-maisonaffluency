@@ -19,7 +19,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
-import { GalleryInlineSuggestions } from "@/components/trade/GalleryInlineSuggestions";
+
 
 const slugifyForUrl = (s: string) =>
   s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -448,13 +448,6 @@ const TradeGallery = () => {
           </button>
         </div>
       </div>
-
-      {/* Minimal suggestion strip above grid */}
-      <GalleryInlineSuggestions selectedCategory={selectedCategory} selectedSubcategory={selectedSubcategory} selectedBrand={selectedBrand} onProductClick={(id) => {
-        const match = allProducts.find(p => p.id === id);
-        if (match) openProductSheet(match);
-      }} />
-
       {/* Content */}
       {filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
