@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
-import EditorialBiography from "@/components/EditorialBiography";
+import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -471,7 +471,7 @@ const TradeAtelierProfile = () => {
                   {heroParagraphs.length > 0 && (
                     <div className="font-body text-sm leading-relaxed text-foreground/85">
                       {heroParagraphs.map((p: string, i: number) => (
-                        <p key={i} className={i > 0 ? "mt-4" : ""}>{p}</p>
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                       ))}
                     </div>
                   )}
