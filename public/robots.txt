@@ -1,5 +1,10 @@
-# Allow social preview crawlers to access OG bridge pages
+# Allow social preview crawlers full access to OG bridge pages.
+# These crawlers ignore robots meta tags and need the static OG markup
+# in *-og.html / *-card.html / *-share.html bridges to render rich link previews.
 User-agent: facebookexternalhit
+Allow: /
+
+User-agent: facebookcatalog
 Allow: /
 
 User-agent: LinkedInBot
@@ -11,14 +16,40 @@ Allow: /
 User-agent: WhatsApp
 Allow: /
 
+User-agent: Slackbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Pinterest
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+# Default policy for all other crawlers (Google, Bing, etc.)
+# Bridge files are blocked here AND carry <meta name="robots" content="noindex">
+# so they don't compete with the real React routes for canonical selection.
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
-Disallow: /*-share.html
-Disallow: /designers/*-share.html
-Disallow: /journal/*-share.html
+Disallow: /*-og.html$
+Disallow: /*-og-v2.html$
+Disallow: /*-card.html$
+Disallow: /*-share.html$
+Disallow: /*-share-v6.html$
+Disallow: /designers/*-og.html$
+Disallow: /designers/*-og-v2.html$
+Disallow: /designers/*-card.html$
+Disallow: /journal/*-og.html$
+Disallow: /journal/*-share.html$
+Disallow: /ateliers/*-og.html$
+Disallow: /ateliers/*-og-v2.html$
+Disallow: /ateliers/*-card.html$
+Disallow: /collectibles/*-og.html$
 
 User-agent: ia_archiver
 Disallow: /
