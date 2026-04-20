@@ -58,9 +58,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   return (
     <div className="flex gap-4">
-      {/* Vertical thumbnails — scrollable carousel */}
+      {/* Vertical thumbnails — scrollable carousel (cap at 5 visible) */}
       {images.length > 1 && (
-        <div className="hidden md:flex flex-col w-20 shrink-0 relative self-stretch" style={{ maxHeight: "calc(5 * 5rem + 4 * 0.5rem + 2 * 1.75rem + 0.5rem)" }}>
+        <div className="hidden md:flex flex-col w-20 shrink-0 relative">
+
           {/* Up arrow */}
           <button
             type="button"
@@ -77,8 +78,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           <div
             ref={thumbsRef}
-            className="flex-1 overflow-y-auto flex flex-col gap-2 scrollbar-hide scroll-smooth"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="overflow-y-auto flex flex-col gap-2 scrollbar-hide scroll-smooth"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              // Exactly 5 thumbnails (5rem each) + 4 gaps (0.5rem each) = 27rem
+              maxHeight: "27rem",
+            }}
           >
             {images.map((img, i) => (
               <button
