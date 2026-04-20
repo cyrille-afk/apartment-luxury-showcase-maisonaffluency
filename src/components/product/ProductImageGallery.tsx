@@ -124,13 +124,24 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image with arrows */}
       <div className="flex-1 relative group">
         <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative">
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0">
+          <button
+            type="button"
+            onClick={() => setZoomOpen(true)}
+            aria-label="Expand image"
+            className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
+          >
             <img
               src={images[activeIndex]}
               alt={alt}
               className="max-w-full max-h-full object-contain rounded-2xl"
               style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
             />
+          </button>
+          {/* Expand affordance */}
+          <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
+            <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Maximize2 size={14} className="text-foreground" />
+            </div>
           </div>
         </div>
         {overlay && (
