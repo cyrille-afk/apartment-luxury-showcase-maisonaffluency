@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { renderParagraph } from "@/components/EditorialBiography";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -580,7 +581,7 @@ const PublicProductPage: React.FC = () => {
                   </div>
                   {brandSummary && (
                     <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
-                      {brandSummary}
+                      {renderParagraph(brandSummary)}
                     </p>
                   )}
                 </div>
