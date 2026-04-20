@@ -361,21 +361,17 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                 </div>
 
                 <div className="flex flex-col flex-1">
-                  <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
-                  {pick.subtitle && <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>}
-                  {pick.materials && (
-                    <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
-                      {pick.materials}
-                    </p>
-                  )}
-                  {pick.dimensions && (
-                    <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                      {pick.dimensions
-                        .split("\n")
-                        .filter((line: string) => !line.toLowerCase().includes(" in"))
-                        .join("\n")}
-                    </p>
-                  )}
+                  {(() => {
+                    const composed = composeTitle(pick.title, pick.subtitle);
+                    return (
+                      <>
+                        <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{composed.title}</h3>
+                        {composed.remainingSubtitle && (
+                          <p className="font-body text-[10px] text-muted-foreground leading-tight">{composed.remainingSubtitle}</p>
+                        )}
+                      </>
+                    );
+                  })()}
                   <div className="mt-auto pt-1">
                     <p className="font-display text-[11px] md:text-xs text-foreground">
                       Price on request
