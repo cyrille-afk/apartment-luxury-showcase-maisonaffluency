@@ -756,19 +756,7 @@ const TradeAtelierProfile = () => {
                             {designerLabel}
                           </span>
                         ) : null}
-                        {pick.subtitle && (
-                          <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
-                        )}
-                        {pick.materials && (
-                          <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
-                            {pick.materials}
-                          </p>
-                        )}
-                        {pick.dimensions && (
-                          <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                            {pick.dimensions.split('\n').filter(line => !line.toLowerCase().includes(' in')).join('\n')}
-                          </p>
-                        )}
+                        {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
                         <div className="mt-auto pt-1">
                           <p className="font-display text-sm text-center inline-flex items-center justify-center gap-1.5 flex-wrap w-full">
                             {pick.trade_price_cents != null

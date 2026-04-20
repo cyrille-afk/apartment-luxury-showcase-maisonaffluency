@@ -838,27 +838,7 @@ const PublicDesignerProfile = () => {
                           {pick.title}
                         </h3>
 
-                        {/* Subtitle — only shown on desktop, clamped */}
-                        {pick.subtitle && (
-                          <p className="hidden md:block font-body text-[10px] text-muted-foreground leading-tight mt-0.5 line-clamp-1">
-                            {pick.subtitle}
-                          </p>
-                        )}
-
-                        {/* Materials & dimensions — desktop only, never on mobile grid */}
-                        {pick.materials && (
-                          <p className="hidden md:block font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
-                            {pick.materials}
-                          </p>
-                        )}
-                        {pick.dimensions && (
-                          <p className="hidden md:block font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                            {pick.dimensions
-                              .split("\n")
-                              .filter((line: string) => !line.toLowerCase().includes(" in"))
-                              .join("\n")}
-                          </p>
-                        )}
+                        {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
 
                         {/* Price slot — consistent across all cards */}
                         <div className="mt-1 md:mt-auto md:pt-1">
