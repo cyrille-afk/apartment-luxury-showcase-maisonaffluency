@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { estimateShipping, ShippingBreakdown as Breakdown } from "@/lib/shippingEstimator";
 import { toast } from "sonner";
 import ShippingBreakdown from "./ShippingBreakdown";
+import ShippingDocIntake, { ExtractedShipment } from "./ShippingDocIntake";
 import { supabase } from "@/integrations/supabase/client";
 
 const ORIGINS = [
