@@ -92,7 +92,7 @@ export default function TradeAdminShippingRates() {
       <Helmet><title>Shipping Rates Admin — Trade Portal</title></Helmet>
 
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 md:pr-36">
           <div>
             <h1 className="font-display text-2xl text-foreground">Shipping rate matrix</h1>
             <p className="font-body text-sm text-muted-foreground mt-1">
