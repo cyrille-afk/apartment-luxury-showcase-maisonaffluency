@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SliderDots from "@/components/ui/SliderDots";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -11,6 +13,7 @@ interface ProductImageGalleryProps {
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -121,13 +124,24 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image with arrows */}
       <div className="flex-1 relative group">
         <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative">
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0">
+          <button
+            type="button"
+            onClick={() => setZoomOpen(true)}
+            aria-label="Expand image"
+            className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
+          >
             <img
               src={images[activeIndex]}
               alt={alt}
               className="max-w-full max-h-full object-contain rounded-2xl"
               style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
             />
+          </button>
+          {/* Expand affordance */}
+          <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
+            <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Maximize2 size={14} className="text-foreground" />
+            </div>
           </div>
         </div>
         {overlay && (
@@ -172,6 +186,61 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           className="absolute bottom-3 left-1/2 -translate-x-1/2"
         />
       </div>
+
+      {/* Fullscreen lightbox */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+        <DialogContent
+          hideClose
+          className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none"
+        >
+          <VisuallyHidden>
+            <DialogTitle>{alt}</DialogTitle>
+          </VisuallyHidden>
+          <button
+            type="button"
+            onClick={() => setZoomOpen(false)}
+            aria-label="Close"
+            className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background transition-colors"
+          >
+            <X size={18} className="text-foreground" />
+          </button>
+          <img
+            src={images[activeIndex]}
+            alt={alt}
+            className="max-w-[95vw] max-h-[92vh] object-contain"
+          />
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); goTo(activeIndex - 1); }}
+                disabled={activeIndex === 0}
+                aria-label="Previous image"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              >
+                <ChevronLeft size={20} className="text-foreground" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); goTo(activeIndex + 1); }}
+                disabled={activeIndex === images.length - 1}
+                aria-label="Next image"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              >
+                <ChevronRight size={20} className="text-foreground" />
+              </button>
+              <SliderDots
+                count={images.length}
+                activeIndex={activeIndex}
+                onSelect={goTo}
+                variant="dark"
+                ariaPrefix="View image"
+                className="absolute bottom-6 left-1/2 -translate-x-1/2"
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
