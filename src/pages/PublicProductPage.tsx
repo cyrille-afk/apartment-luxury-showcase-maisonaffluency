@@ -19,6 +19,7 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { renderParagraph } from "@/components/EditorialBiography";
+import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -348,7 +349,7 @@ const PublicProductPage: React.FC = () => {
                   <div className="flex gap-1.5 items-start">
                     <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
                     <p className="font-body text-xs md:text-sm text-foreground font-medium whitespace-pre-line">
-                      {product.dimensions}
+                      {formatDimensionsMultiline(product.dimensions)}
                     </p>
                   </div>
                 )}

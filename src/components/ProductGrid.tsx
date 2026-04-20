@@ -15,6 +15,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory } from "@/lib/productTaxonomy";
+import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -855,8 +856,8 @@ function singularizeSub(s: string): string {
                       </p>
                     )}
                     {currentItem.pick.dimensions && (
-                      <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
-                        {currentItem.pick.dimensions.replace(/\n/g, " · ")}
+                      <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
+                        {formatDimensionsMultiline(currentItem.pick.dimensions)}
                       </p>
                     )}
                   </div>
