@@ -11,6 +11,7 @@ const ORIGINS = [
   { code: "IT", label: "Italy" },
   { code: "FR", label: "France" },
   { code: "DE", label: "Germany" },
+  { code: "BE", label: "Belgium" },
   { code: "ES", label: "Spain" },
   { code: "GB", label: "United Kingdom" },
   { code: "US", label: "United States" },
