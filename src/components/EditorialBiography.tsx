@@ -164,8 +164,11 @@ function InternalLink({ href, isInternal, children }: { href: string; isInternal
 
 /** Render a single line of inline HTML */
 function renderSingleLine(text: string): React.ReactNode[] {
+  // Normalize markdown-style **bold** into <strong>...</strong> so a single
+  // tokenizer can handle both syntaxes (admins paste content from many sources).
+  const normalized = text.replace(/\*\*([\s\S]+?)\*\*/g, "<strong>$1</strong>");
   // Split on <strong>...</strong>, <em>...</em>, and <a href="...">...</a> tags
-  const parts = text.split(/(<strong>[\s\S]*?<\/strong>|<em>[\s\S]*?<\/em>|<a\s+href="[^"]*"[^>]*>[\s\S]*?<\/a>)/g);
+  const parts = normalized.split(/(<strong>[\s\S]*?<\/strong>|<em>[\s\S]*?<\/em>|<a\s+href="[^"]*"[^>]*>[\s\S]*?<\/a>)/g);
   return parts.map((part, i) => {
     const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/);
     if (strongMatch) {
