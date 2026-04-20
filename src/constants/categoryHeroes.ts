@@ -66,7 +66,7 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
   },
   "Dining Tables": {
     title: "Dining Tables",
-    image: cld("v1772085743/dining-room_ey0bu5.jpg"),
+    image: cld("v1772085864/intimate-table-detail_aqxvvm.jpg"),
     summary:
       "The room's gathering point. Solid timbers, single-slab marbles, bronze pedestals — dining tables conceived as long-term commitments by ateliers who specialise in pieces meant to be inherited.",
   },
