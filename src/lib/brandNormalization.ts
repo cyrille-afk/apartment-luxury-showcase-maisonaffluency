@@ -3,7 +3,8 @@ const PARENT_BRAND_BY_CHILD_NAME: Record<string, string> = {
   "ecart - jean-michel frank": "Ecart",
   "noé duchaufour-lawrance": "NDL Editions",
   "noe duchaufour-lawrance": "NDL Editions",
-  "achille salvagni": "AS Atelier",
+  "achille salvagni": "Achille Salvagni Atelier",
+  "as atelier": "Achille Salvagni Atelier",
 };
 
 export function normalizeBrandToParent(brandName: string | null | undefined): string {
