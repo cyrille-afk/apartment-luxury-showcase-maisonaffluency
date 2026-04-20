@@ -296,20 +296,12 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <Input value={pick.hover_image_url || ""} onChange={(e) => updateField(pick.id, "hover_image_url", e.target.value || null)} className="text-xs" />
                 </div>
                 <div>
-                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +)</label>
-                  {(() => {
-                    const MIN_SLOTS = 5;
-                    const stored = pick.gallery_images || [];
-                    // Always show at least MIN_SLOTS rows so the admin can paste into empty slots immediately.
-                    const items = stored.length >= MIN_SLOTS
-                      ? stored
-                      : [...stored, ...Array(MIN_SLOTS - stored.length).fill("")];
-                    const setItems = (next: string[]) => {
-                      // Persist trimmed list — keep trailing empties out of the DB.
-                      const cleaned = [...next];
-                      while (cleaned.length && !cleaned[cleaned.length - 1]) cleaned.pop();
-                      updateField(pick.id, "gallery_images", cleaned.length ? cleaned : null);
-                    };
+                  <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +). Unlimited — add as many as you need.</label>
+                  <GalleryThumbnailsEditor
+                    value={pick.gallery_images || []}
+                    onChange={(next) => updateField(pick.id, "gallery_images", next.length ? next : null)}
+                  />
+                  {false && (() => {
                     return (
                       <div className="space-y-1.5 mt-1">
                         {items.map((url, i) => (
