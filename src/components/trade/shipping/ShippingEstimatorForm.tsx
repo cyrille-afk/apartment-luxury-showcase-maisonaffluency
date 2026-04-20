@@ -172,7 +172,7 @@ export default function ShippingEstimatorForm({
         </div>
         <div>
           <Label className="font-body text-xs">Total volume (cbm)</Label>
-          <Input type="number" step="0.01" value={cbm} onChange={e => setCbm(e.target.value)} className="mt-1" />
+          <Input type="number" step="0.001" min="0" value={cbm} onChange={e => setCbm(e.target.value)} className="mt-1" />
         </div>
         <div>
           <Label className="font-body text-xs">Total weight (kg)</Label>
