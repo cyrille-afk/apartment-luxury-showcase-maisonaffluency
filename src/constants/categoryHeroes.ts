@@ -60,7 +60,7 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
   },
   "Coffee Tables": {
     title: "Coffee Tables",
-    image: cld("v1772085856/intimate-lounge_tf4sm1.jpg"),
+    image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772536395/AffluencySG_194-22.jpg_macpwj.jpg",
     summary:
       "Low, sculptural and central — the coffee table sets the tone of the seating arrangement. From monolithic stone slabs to delicate metalwork, each piece in our edit is collectible by intent.",
   },
