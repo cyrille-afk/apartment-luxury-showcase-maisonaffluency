@@ -5,6 +5,9 @@ const PARENT_BRAND_BY_CHILD_NAME: Record<string, string> = {
   "noe duchaufour-lawrance": "NDL Editions",
   "achille salvagni": "Achille Salvagni Atelier",
   "as atelier": "Achille Salvagni Atelier",
+  "alinea": "Alinea Design Objects",
+  "alinéa": "Alinea Design Objects",
+  "leo aerts": "Alinea Design Objects",
 };
 
 export function normalizeBrandToParent(brandName: string | null | undefined): string {

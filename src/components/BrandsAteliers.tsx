@@ -2043,11 +2043,11 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
   },
   {
     brandName: "Alinea Design Objects",
-    dbParentName: "Alinéa Design Objects",
+    dbParentName: "Alinea Design Objects",
     instagram: "https://instagram.com/alinea_design_objects",
     profileSlug: "leo-aerts-alinea",
-    pillLabel: "Alinéa",
-    highlightDesigner: "Leo Aerts",
+    pillLabel: "Alinea",
+    highlightDesigner: null,
   },
   {
     brandName: "Apparatus Studio",
