@@ -19,6 +19,7 @@ import CloudUpload from "@/components/trade/CloudUpload";
 import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
+import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
