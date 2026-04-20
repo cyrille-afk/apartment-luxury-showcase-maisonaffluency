@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SliderDots from "@/components/ui/SliderDots";
 
@@ -11,32 +11,104 @@ interface ProductImageGalleryProps {
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const thumbsRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
 
   const goTo = useCallback((i: number) => {
     setActiveIndex(Math.max(0, Math.min(i, images.length - 1)));
   }, [images.length]);
 
+  const updateScrollState = useCallback(() => {
+    const el = thumbsRef.current;
+    if (!el) return;
+    setCanScrollUp(el.scrollTop > 2);
+    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 2);
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+    const el = thumbsRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    const ro = new ResizeObserver(updateScrollState);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      ro.disconnect();
+    };
+  }, [updateScrollState, images.length]);
+
+  // Keep active thumbnail in view when navigating with arrows
+  useEffect(() => {
+    const el = thumbsRef.current;
+    if (!el) return;
+    const child = el.children[activeIndex] as HTMLElement | undefined;
+    child?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeIndex]);
+
+  const scrollThumbs = (dir: "up" | "down") => {
+    const el = thumbsRef.current;
+    if (!el) return;
+    const delta = (el.clientHeight * 0.8) * (dir === "up" ? -1 : 1);
+    el.scrollBy({ top: delta, behavior: "smooth" });
+  };
+
   if (images.length === 0) return null;
 
   return (
     <div className="flex gap-4">
-      {/* Vertical thumbnails */}
+      {/* Vertical thumbnails — scrollable carousel */}
       {images.length > 1 && (
-        <div className="hidden md:flex flex-col gap-2 w-20 shrink-0">
-          {images.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              className={cn(
-                "aspect-square rounded-md overflow-hidden border-2 transition-all",
-                i === activeIndex
-                  ? "border-foreground"
-                  : "border-border hover:border-foreground/30"
-              )}
-            >
-              <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-            </button>
-          ))}
+        <div className="hidden md:flex flex-col w-20 shrink-0 relative self-stretch max-h-[600px]">
+          {/* Up arrow */}
+          <button
+            type="button"
+            onClick={() => scrollThumbs("up")}
+            disabled={!canScrollUp}
+            aria-label="Scroll thumbnails up"
+            className={cn(
+              "h-7 w-full flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm border border-border/50 mb-1 transition-opacity",
+              canScrollUp ? "opacity-100 hover:bg-background" : "opacity-0 pointer-events-none"
+            )}
+          >
+            <ChevronUp size={16} className="text-foreground" />
+          </button>
+
+          <div
+            ref={thumbsRef}
+            className="flex-1 overflow-y-auto flex flex-col gap-2 scrollbar-hide scroll-smooth"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {images.map((img, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                className={cn(
+                  "aspect-square rounded-md overflow-hidden border-2 transition-all shrink-0",
+                  i === activeIndex
+                    ? "border-foreground"
+                    : "border-border hover:border-foreground/30"
+                )}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </button>
+            ))}
+          </div>
+
+          {/* Down arrow */}
+          <button
+            type="button"
+            onClick={() => scrollThumbs("down")}
+            disabled={!canScrollDown}
+            aria-label="Scroll thumbnails down"
+            className={cn(
+              "h-7 w-full flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm border border-border/50 mt-1 transition-opacity",
+              canScrollDown ? "opacity-100 hover:bg-background" : "opacity-0 pointer-events-none"
+            )}
+          >
+            <ChevronDown size={16} className="text-foreground" />
+          </button>
         </div>
       )}
 
