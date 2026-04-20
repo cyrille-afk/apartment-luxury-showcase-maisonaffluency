@@ -14,6 +14,7 @@ import { buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import { isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
+import { composeTitle } from "@/lib/curatorPickLegend";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
