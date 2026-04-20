@@ -27,6 +27,7 @@ import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
+import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
@@ -919,20 +920,23 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
         {(() => {
           const sub = pick.subtitle?.trim() || "";
           const isForPattern = / for /i.test(sub);
-          const brandLine = isForPattern ? sub : pick.designer_name;
           const isYear = /^\d{4}$/.test(sub);
           const isReEdition = /re-?edition$/i.test(sub);
-          const showSubtitleBelow = sub && !isYear && !isForPattern && !isReEdition;
+          const brandLine = isForPattern ? sub : cleanBrandLine(pick.designer_name);
+          const composed = (!isYear && !isForPattern && !isReEdition)
+            ? composeTitle(pick.title, sub)
+            : { title: pick.title, remainingSubtitle: undefined as string | undefined };
+          const showSubtitleBelow = !!composed.remainingSubtitle && !isYear && !isForPattern && !isReEdition;
           return (
             <>
               <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
                 {brandLine}
               </p>
               <p className="font-display text-sm tracking-wide leading-tight">
-                {pick.title}{isYear ? ` (${sub})` : ''}
+                {composed.title}{isYear ? ` (${sub})` : ''}
               </p>
               {showSubtitleBelow && (
-                <p className="font-body text-[11px] text-muted-foreground mt-0.5">{sub}</p>
+                <p className="font-body text-[11px] text-muted-foreground mt-0.5">{composed.remainingSubtitle}</p>
               )}
             </>
           );
