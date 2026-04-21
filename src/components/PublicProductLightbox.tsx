@@ -29,6 +29,7 @@ export interface PublicLightboxItem {
   subcategory?: string | null;
   pdf_url?: string | null;
   pdf_urls?: PdfEntry[] | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
 }
 
 interface Props {
