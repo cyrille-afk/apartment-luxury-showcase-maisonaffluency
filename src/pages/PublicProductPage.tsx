@@ -56,6 +56,7 @@ interface ProductRow {
   lead_time: string | null;
   origin: string | null;
   designer_id: string;
+  size_variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -74,7 +75,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -339,14 +340,42 @@ const PublicProductPage: React.FC = () => {
 
               {/* Materials & dimensions with gold icons — multi-line collapses to dropdown */}
               <div className="flex flex-col gap-2">
-                {product.materials && (
-                  <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-                    text={product.materials}
-                    placeholder="Select your material choice"
-                    autoSplit
-                  />
-                )}
+                {(() => {
+                  const sv = product.size_variants || [];
+                  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+                  const baseOptions = isDualAxis
+                    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
+                    : [];
+                  const topOptions = isDualAxis
+                    ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
+                    : [];
+                  if (isDualAxis) {
+                    return (
+                      <>
+                        <ExpandableSpec
+                          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                          text={baseOptions.join("\n")}
+                          placeholder="Select your material choice for the base"
+                          emphasized
+                        />
+                        <ExpandableSpec
+                          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                          text={topOptions.join("\n")}
+                          placeholder="Select your material choice for the top"
+                          emphasized
+                        />
+                      </>
+                    );
+                  }
+                  return product.materials ? (
+                    <ExpandableSpec
+                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      text={product.materials}
+                      placeholder="Select your material choice"
+                      autoSplit
+                    />
+                  ) : null;
+                })()}
                 {product.dimensions && (
                   <ExpandableSpec
                     icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
