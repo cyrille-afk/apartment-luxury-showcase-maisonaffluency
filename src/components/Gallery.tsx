@@ -386,7 +386,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const [{ data: picks }, { data: designers }] = await Promise.all([
         supabase
           .from("designer_curator_picks_public")
-          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,description,category,subcategory,pdf_url,pdf_urls,designer_id")
+          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants")
           .not("image_url", "is", null),
         supabase
           .from("designers")
