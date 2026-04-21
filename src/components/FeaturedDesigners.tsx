@@ -293,7 +293,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   // OKHA / Adam Courts: merged into the single OKHA designer record (DB) on 2026-04-21.
   // All curator picks now live in `designer_curator_picks` and load via useTradeProducts.
   // Keeping a hardcoded fallback here would re-create duplicate cards across the site.
-
+  {
+    id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
     image: alexanderLamontImg,
