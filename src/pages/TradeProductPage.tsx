@@ -461,15 +461,20 @@ const TradeProductPage: React.FC = () => {
                     sizeVariants && sizeVariants.length > 0
                       ? sizeVariants
                           .map((v) => {
-                            // Strip leading "Product Name:" prefix and trailing
-                            // material word(s) so the size row shows ONLY the dimension.
+                            // Strip a leading "Product Name:" prefix so the row shows
+                            // just the variant identifier (size + material/finish).
                             let label = v.label.trim();
                             const colonIdx = label.indexOf(":");
                             if (colonIdx > -1 && colonIdx < 60) {
                               label = label.slice(colonIdx + 1).trim();
                             }
-                            const m = label.match(/^(.*?\b(?:cm|mm|in|m)\b)/i);
-                            if (m) label = m[1].trim();
+                            // Only trim a trailing material suffix when the label
+                            // actually contains a dimension unit (cm/mm/in or a
+                            // standalone "m"/"M" word). Without this guard, labels
+                            // like "VHS/M 120-45 Kynos" collapse to "VHS/M".
+                            const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
+                              || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
+                            if (dimMatch) label = dimMatch[1].trim();
                             return label;
                           })
                           .join("\n")
