@@ -204,7 +204,7 @@ const TradeProductPage: React.FC = () => {
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [showTradePrice, setShowTradePrice] = useState(true);
-  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -347,11 +347,12 @@ const TradeProductPage: React.FC = () => {
 
   // Trade pricing rendering
   const sizeVariants = pricing?.size_variants || null;
-  const activeVariant = sizeVariants && sizeVariants[selectedVariantIdx]
-    ? sizeVariants[selectedVariantIdx]
+  const hasVariants = !!(sizeVariants && sizeVariants.length > 0);
+  const activeVariant = hasVariants && selectedVariantIdx != null
+    ? sizeVariants![selectedVariantIdx]
     : null;
-  const effectiveRrpCents = activeVariant
-    ? activeVariant.price_cents
+  const effectiveRrpCents = hasVariants
+    ? (activeVariant ? activeVariant.price_cents : null)
     : pricing?.rrp_price_cents ?? null;
 
   const renderPrice = () => {
@@ -476,8 +477,8 @@ const TradeProductPage: React.FC = () => {
                   }
                   emphasized
                   placeholder="Select your size"
-                  value={sizeVariants && sizeVariants.length > 0 ? selectedVariantIdx : undefined}
-                  onChange={sizeVariants && sizeVariants.length > 0 ? setSelectedVariantIdx : undefined}
+                  value={hasVariants ? (selectedVariantIdx ?? undefined) : undefined}
+                  onChange={hasVariants ? setSelectedVariantIdx : undefined}
                 />
               )}
               {product.origin && (
