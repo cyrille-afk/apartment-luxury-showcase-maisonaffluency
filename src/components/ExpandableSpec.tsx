@@ -128,7 +128,6 @@ export default function ExpandableSpec({
   }
 
   // Multi, no placeholder → simple inline expandable
-  const [open, setOpen] = useState(false);
   const remaining = lines.length - 1;
   return (
     <div className="flex gap-2 items-start">
