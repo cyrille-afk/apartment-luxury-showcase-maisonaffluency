@@ -566,16 +566,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Alinea_Angelo_M_Info.pdf",
         pdfFilename: "Alinea-Angelo_M_Info.pdf"
       },
-      {
-        image: leoAertsVitrineCabinet,
-        title: "Visible M Horizontal",
-        subtitle: "Display Cabinet",
-        category: "Storage",
-        tags: ["Storage", "Cabinet"],
-        materials: "Bottom part in natural stone with aluminium frame",
-        dimensions: "VHS/M 120-45/60 glass: 120 × 45 × 45/60 cm\nVHS/M 120-60 glass: 120 × 45 × 60 cm\nVHS/M 150-45/60 glass: 150 × 45 × 45/60 cm",
-        description: "Visible M conveys the story behind each object to its collector and admirer and adds a personal touch to the interior. Via this way, the collector can express his identity and cherish memories associated with the exposed objects."
-      },
+      // "Visible M Horizontal" removed — superseded by the database-managed
+      // "Visible M & W Display Cabinet" curator pick (with full size variants & per-variant pricing).
       {
         image: leoAertsAngeloMDining,
         title: "Angelo M Side Table Collection",
