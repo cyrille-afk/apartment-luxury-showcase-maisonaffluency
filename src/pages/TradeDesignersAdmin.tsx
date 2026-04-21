@@ -154,7 +154,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
     price_prefix: string | null; sort_order: number; created_at: string;
-    size_variants: { label: string; price_cents: number }[] | null;
+    size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
