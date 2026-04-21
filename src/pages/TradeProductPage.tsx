@@ -456,9 +456,15 @@ const TradeProductPage: React.FC = () => {
               {product.dimensions && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={formatDimensionsMultiline(product.dimensions)}
+                  text={
+                    sizeVariants && sizeVariants.length > 0
+                      ? sizeVariants.map((v) => v.label).join("\n")
+                      : formatDimensionsMultiline(product.dimensions)
+                  }
                   emphasized
                   placeholder="Select your size"
+                  value={sizeVariants && sizeVariants.length > 0 ? selectedVariantIdx : undefined}
+                  onChange={sizeVariants && sizeVariants.length > 0 ? setSelectedVariantIdx : undefined}
                 />
               )}
               {product.origin && (
