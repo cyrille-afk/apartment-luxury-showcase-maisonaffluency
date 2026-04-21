@@ -611,7 +611,7 @@ const TradeProductPage: React.FC = () => {
                 </p>
                 <h2 className="font-display text-xl md:text-2xl leading-tight">
                   <Link
-                    to={`/trade/designers/${designer.slug}`}
+                    to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
                     className="hover:text-primary transition-colors"
                   >
                     {designerDisplay}
