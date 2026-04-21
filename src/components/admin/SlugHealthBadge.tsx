@@ -120,6 +120,9 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [overrideCurated, setOverrideCurated] = useState(false);
+
+  const curated = isCuratedSlug(designer);
 
   const proposedSlug = useMemo(() => {
     const taken = new Set(
@@ -132,6 +135,22 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
 
   const fixMutation = useMutation({
     mutationFn: async () => {
+      // Hard guard: never overwrite a curated slug without explicit override.
+      if (curated && !overrideCurated) {
+        throw new Error(
+          "This slug appears to be intentionally curated (e.g. founder-atelier format). Confirm override to proceed.",
+        );
+      }
+      // Soft guard: re-check duplicates server-side at write time.
+      const { data: conflict } = await supabase
+        .from("designers")
+        .select("id")
+        .eq("slug", proposedSlug)
+        .neq("id", designer.id)
+        .maybeSingle();
+      if (conflict) {
+        throw new Error(`Slug "${proposedSlug}" is already used by another designer.`);
+      }
       const { error } = await supabase
         .from("designers")
         .update({ slug: proposedSlug, updated_at: new Date().toISOString() })
@@ -145,9 +164,10 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
       });
       await queryClient.invalidateQueries({ queryKey: ["admin-designers"] });
       setIsOpen(false);
+      setOverrideCurated(false);
     },
     onError: (err: any) => {
-      toast({ title: "Fix failed", description: err.message, variant: "destructive" });
+      toast({ title: "Fix blocked", description: err.message, variant: "destructive" });
     },
   });
 
@@ -155,6 +175,8 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
     issue.kind === "missing" ? "Missing slug"
       : issue.kind === "invalid" ? "Invalid slug"
         : "Duplicate slug";
+
+  const fixDisabled = fixMutation.isPending || (curated && !overrideCurated);
 
   return (
     <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -173,7 +195,7 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
         </Badge>
       </button>
       {isOpen && (
-        <div className="absolute z-30 left-0 top-full mt-1 w-72 rounded-md border border-border bg-background p-3 shadow-lg">
+        <div className="absolute z-30 left-0 top-full mt-1 w-80 rounded-md border border-border bg-background p-3 shadow-lg">
           <p className="text-xs text-muted-foreground mb-2">
             Current: <code className="px-1 bg-muted rounded">{designer.slug || "—"}</code>
           </p>
@@ -185,16 +207,42 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
               This slug is shared with {issue.conflictsWith.length} other designer(s). Fixing will rename only this row.
             </p>
           )}
+          {curated && (
+            <div className="mb-3 rounded border border-amber-500/40 bg-amber-500/5 p-2">
+              <div className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-400">
+                <ShieldAlert className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-medium mb-1">Curated slug detected</p>
+                  <p className="leading-snug">
+                    This slug doesn't match the designer name and may be intentional
+                    (e.g. founder-atelier format). Overwriting will break existing public URLs,
+                    SEO indexing, and shared links.
+                  </p>
+                </div>
+              </div>
+              <label className="flex items-center gap-1.5 mt-2 text-[11px] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={overrideCurated}
+                  onChange={(e) => setOverrideCurated(e.target.checked)}
+                  className="h-3 w-3"
+                />
+                <span>I understand and want to overwrite anyway</span>
+              </label>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button
               size="sm"
-              variant="default"
+              variant={curated ? "destructive" : "default"}
               className="flex-1 h-7 text-xs"
               onClick={() => fixMutation.mutate()}
-              disabled={fixMutation.isPending}
+              disabled={fixDisabled}
             >
               {fixMutation.isPending ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
+              ) : curated ? (
+                "Force overwrite"
               ) : (
                 "Apply fix"
               )}
@@ -203,7 +251,10 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
               size="sm"
               variant="ghost"
               className="h-7 text-xs"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                setOverrideCurated(false);
+              }}
             >
               Cancel
             </Button>
