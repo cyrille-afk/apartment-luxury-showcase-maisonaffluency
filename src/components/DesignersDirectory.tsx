@@ -1184,6 +1184,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     [allDesigners]
   );
 
+  const parentNames = useMemo(() => new Set(items.map((d) => d.name)), [items]);
+
   // Apply text search
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return items;
@@ -1192,13 +1194,18 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       const name = d.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const specialty = (d.specialty || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const founder = (d.founder || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return name.includes(q) || specialty.includes(q) || founder.includes(q);
+      const displayName = (d.display_name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return name.includes(q) || displayName.includes(q) || specialty.includes(q) || founder.includes(q);
     });
   }, [items, searchQuery]);
 
+  const topLevelItems = useMemo(() => {
+    return searchFiltered.filter((d) => !(d.founder && d.founder !== d.name && parentNames.has(d.founder)));
+  }, [searchFiltered, parentNames]);
+
   // Apply category/subcategory filter
   const filteredItems = useMemo(() => {
-    if (!selectedCategory && !selectedSubcategory) return searchFiltered;
+    if (!selectedCategory && !selectedSubcategory) return topLevelItems;
 
     // Get designer IDs that match
     let matchingIds: Set<string> | null = null;
@@ -1209,10 +1216,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       matchingIds = designerIdsByCategory.byCategory[selectedCategory] || new Set();
     }
 
-    if (!matchingIds) return searchFiltered;
+    if (!matchingIds) return topLevelItems;
 
-    return searchFiltered.filter((d) => matchingIds!.has(d.id));
-  }, [searchFiltered, selectedCategory, selectedSubcategory, designerIdsByCategory]);
+    return topLevelItems.filter((d) => matchingIds!.has(d.id));
+  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory]);
 
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
