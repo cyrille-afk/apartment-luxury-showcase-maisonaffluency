@@ -460,9 +460,9 @@ const TradeProductPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Materials & dimensions — multi-line collapses to dropdown */}
+            {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
-              {product.materials && (
+              {!isDualAxis && product.materials && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={product.materials}
@@ -476,7 +476,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={baseOptions.join("\n")}
-                    placeholder="Select base"
+                    placeholder="Select your material choice for the base"
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
@@ -484,7 +484,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={topOptions.join("\n")}
-                    placeholder="Select top"
+                    placeholder="Select your material choice for the top"
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
                     onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}
