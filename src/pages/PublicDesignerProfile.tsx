@@ -88,6 +88,7 @@ const PublicDesignerProfile = () => {
   const scrollToSection = searchParams.get("section");
   const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
   const fromNewIn = searchParams.get("from") === "new-in";
+  const fromProduct = searchParams.get("from_product");
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
@@ -527,7 +528,15 @@ const PublicDesignerProfile = () => {
 
         <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-1 md:space-y-1.5">
           <div className="flex items-center justify-between">
-            {fromJournal ? (
+            {fromProduct ? (
+              <Link
+                to={fromProduct}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to Product
+              </Link>
+            ) : fromJournal ? (
               <Link
                 to={`/journal/${fromJournal}`}
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"

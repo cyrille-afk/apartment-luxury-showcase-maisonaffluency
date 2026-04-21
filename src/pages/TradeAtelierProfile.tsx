@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2, Maximize2, Tag } from "lucide-react";
@@ -99,6 +99,8 @@ const TradeAtelierProfile = () => {
   const { isTradeUser, isAdmin, user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromProduct = searchParams.get("from_product");
   const { toast } = useToast();
   const { data: designer, isLoading } = useDesigner(slug);
   const { isPinned, togglePin } = useCompare();
@@ -302,13 +304,17 @@ const TradeAtelierProfile = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => {
+              if (fromProduct) {
+                navigate(fromProduct);
+                return;
+              }
               const atelierName = designer.founder || designer.name;
               navigate(`/trade/designers?brand=${encodeURIComponent(atelierName)}`);
             }}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            {designer.founder ? `Back to ${designer.founder}` : "All Ateliers"}
+            {fromProduct ? "Back to product" : (designer.founder ? `Back to ${designer.founder}` : "All Ateliers")}
           </button>
           <WhatsAppShareButton
             onClick={(e) => {
