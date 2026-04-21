@@ -42,6 +42,33 @@ function loadDesignerSlugMap(): Promise<Map<string, string>> {
   return designerSlugPromise;
 }
 
+/** Direct DB lookup as a last-resort fallback when the cache misses. */
+async function resolveDesignerSlugFromDb(
+  candidates: string[],
+): Promise<string | null> {
+  const cleaned = Array.from(
+    new Set(candidates.map((c) => c?.trim()).filter(Boolean)),
+  );
+  if (cleaned.length === 0) return null;
+  // Try name OR display_name match (case-insensitive)
+  const orFilter = cleaned
+    .flatMap((c) => [`name.ilike.${c}`, `display_name.ilike.${c}`])
+    .join(",");
+  const { data } = await supabase
+    .from("designers")
+    .select("name, display_name, slug")
+    .or(orFilter)
+    .limit(5);
+  if (!data || data.length === 0) return null;
+  const lowered = cleaned.map((c) => c.toLowerCase());
+  const exact = data.find(
+    (d) =>
+      lowered.includes((d.name || "").trim().toLowerCase()) ||
+      lowered.includes((d.display_name || "").trim().toLowerCase()),
+  );
+  return (exact || data[0]).slug || null;
+}
+
 export interface PublicLightboxItem {
   id: string;
   title: string;
