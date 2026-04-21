@@ -1,19 +1,24 @@
 import { useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ExpandableSpecProps {
   icon: ReactNode;
-  /** Pre-formatted text. Newlines split into lines (each one collapsible item). */
+  /** Pre-formatted text. Newlines split into options. */
   text: string;
   /** Override default emphasis (dimensions get foreground/medium; others muted). */
   emphasized?: boolean;
-  /** Force expanded by default (rarely needed). */
-  defaultExpanded?: boolean;
   /**
-   * When provided AND there are multiple lines, renders as a select-style
-   * dropdown with this placeholder label (e.g. "Select your material choice").
-   * Single-line values still render as plain text.
+   * When provided AND there are multiple options, renders a real <Select>
+   * with this placeholder (e.g. "Select your material choice").
+   * Single option → plain text row.
    */
   placeholder?: string;
   /**
@@ -22,42 +27,46 @@ interface ExpandableSpecProps {
    * Preserves any "Prefix:" portion before the first split-character.
    */
   autoSplit?: boolean;
+  /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
+  value?: number;
+  onChange?: (index: number) => void;
 }
 
 /**
- * Renders a spec block (materials / dimensions / origin / lead time).
- *
- * Modes:
- *  - Single line → plain text, no toggle.
- *  - Multi-line + placeholder → select-style dropdown with placeholder label.
- *  - Multi-line, no placeholder → inline "first line +N" collapsible.
+ * Renders a spec row (materials / dimensions / origin / lead time).
+ * - Single option → icon + plain text.
+ * - Multiple options + placeholder → real Select dropdown.
+ *   After selecting, the trigger shows the chosen value (replacing placeholder).
+ * - Multiple options without placeholder → simple inline expandable list.
  */
 export default function ExpandableSpec({
   icon,
   text,
   emphasized = false,
-  defaultExpanded = false,
   placeholder,
   autoSplit = false,
+  value,
+  onChange,
 }: ExpandableSpecProps) {
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  let prefix: string | null = null;
 
   // Auto-split single-line text on `,` and `/` for materials-style lists
   if (autoSplit && lines.length === 1) {
     const raw = lines[0];
     const colonIdx = raw.indexOf(":");
+    let prefix = "";
     let body = raw;
     if (colonIdx > -1 && colonIdx < 40) {
-      prefix = raw.slice(0, colonIdx).trim();
+      prefix = raw.slice(0, colonIdx + 1).trim() + " ";
       body = raw.slice(colonIdx + 1).trim();
     }
     const parts = body.split(/\s*[,/]\s*/).map((s) => s.trim()).filter(Boolean);
-    if (parts.length > 1) lines = parts;
-    else prefix = null;
+    if (parts.length > 1) lines = parts.map((p) => prefix + p);
   }
 
-  const [open, setOpen] = useState(defaultExpanded);
+  const [internalIdx, setInternalIdx] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
+  const selectedIdx = value ?? internalIdx;
 
   if (lines.length === 0) return null;
 
@@ -66,66 +75,62 @@ export default function ExpandableSpec({
     emphasized ? "text-foreground font-medium" : "text-muted-foreground"
   );
 
-  // Single line — plain render, no toggle
+  // Single value → plain row
   if (lines.length === 1) {
     return (
-      <div className="flex gap-1.5 items-start">
+      <div className="flex gap-2 items-start">
         <span className="mt-0.5 shrink-0">{icon}</span>
         <p className={textClasses}>{lines[0]}</p>
       </div>
     );
   }
 
-  // Multi-line + placeholder → select-style dropdown
+  // Multi + placeholder → real Select
   if (placeholder) {
+    const handleChange = (v: string) => {
+      const idx = parseInt(v, 10);
+      if (onChange) onChange(idx);
+      else setInternalIdx(idx);
+    };
+    const currentVal = selectedIdx != null ? String(selectedIdx) : undefined;
+
     return (
-      <div className="flex gap-1.5 items-start">
-        <span className="mt-0.5 shrink-0">{icon}</span>
-        <div className="flex-1 min-w-0">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            className="group w-full flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2 text-left hover:border-foreground/40 transition-colors"
+      <div className="flex gap-2 items-center">
+        <span className="shrink-0">{icon}</span>
+        <Select value={currentVal} onValueChange={handleChange}>
+          <SelectTrigger
+            className={cn(
+              "h-auto py-2 px-3 bg-background border-border rounded-md font-body text-xs md:text-sm",
+              "hover:border-foreground/40 focus:ring-0 focus:ring-offset-0",
+              selectedIdx == null
+                ? "text-muted-foreground"
+                : emphasized
+                ? "text-foreground font-medium"
+                : "text-foreground"
+            )}
           >
-            <span className="font-body text-xs md:text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-              {placeholder}
-              <span className="ml-1.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70">
-                ({lines.length})
-              </span>
-            </span>
-            <ChevronDown
-              size={14}
-              className={cn(
-                "text-muted-foreground/70 group-hover:text-foreground transition-all shrink-0",
-                open && "rotate-180"
-              )}
-            />
-          </button>
-          {open && (
-            <ul className="mt-1.5 flex flex-col rounded-md border border-border bg-background overflow-hidden">
-              {lines.map((line, i) => (
-                <li
-                  key={i}
-                  className={cn(
-                    textClasses,
-                    "px-3 py-2 border-b border-border/60 last:border-b-0"
-                  )}
-                >
-                  {line}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-border">
+            {lines.map((line, i) => (
+              <SelectItem
+                key={i}
+                value={String(i)}
+                className="font-body text-xs md:text-sm cursor-pointer"
+              >
+                {line}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     );
   }
 
-  // Multi-line — inline collapsible (legacy)
+  // Multi, no placeholder → simple inline expandable
   const remaining = lines.length - 1;
   return (
-    <div className="flex gap-1.5 items-start">
+    <div className="flex gap-2 items-start">
       <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
         <button
@@ -137,7 +142,7 @@ export default function ExpandableSpec({
           <p className={textClasses}>{lines[0]}</p>
           <span className="flex items-center gap-1 mt-0.5 shrink-0">
             {!open && (
-              <span className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 group-hover:text-foreground transition-colors">
+              <span className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70">
                 +{remaining}
               </span>
             )}

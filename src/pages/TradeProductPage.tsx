@@ -456,9 +456,15 @@ const TradeProductPage: React.FC = () => {
               {product.dimensions && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={formatDimensionsMultiline(product.dimensions)}
+                  text={
+                    sizeVariants && sizeVariants.length > 0
+                      ? sizeVariants.map((v) => v.label).join("\n")
+                      : formatDimensionsMultiline(product.dimensions)
+                  }
                   emphasized
                   placeholder="Select your size"
+                  value={sizeVariants && sizeVariants.length > 0 ? selectedVariantIdx : undefined}
+                  onChange={sizeVariants && sizeVariants.length > 0 ? setSelectedVariantIdx : undefined}
                 />
               )}
               {product.origin && (
@@ -475,25 +481,9 @@ const TradeProductPage: React.FC = () => {
               )}
             </div>
 
-            {/* Size variant selector + Trade price + retail/trade toggle */}
+            {/* Trade price + retail/trade toggle (size driven by selector above) */}
             {effectiveRrpCents ? (
               <div className="flex flex-col gap-2 pt-1">
-                {sizeVariants && sizeVariants.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    <label className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                      Size
-                    </label>
-                    <select
-                      value={selectedVariantIdx}
-                      onChange={(e) => setSelectedVariantIdx(parseInt(e.target.value, 10))}
-                      className="self-start min-w-[180px] h-9 px-3 rounded-md border border-border bg-background font-body text-sm text-foreground hover:border-foreground/40 transition-colors"
-                    >
-                      {sizeVariants.map((v, idx) => (
-                        <option key={idx} value={idx}>{v.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
                 {renderPrice()}
                 <button
                   onClick={() => setShowTradePrice((v) => !v)}
