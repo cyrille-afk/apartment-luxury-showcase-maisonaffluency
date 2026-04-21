@@ -38,8 +38,25 @@ export default function ExpandableSpec({
   emphasized = false,
   defaultExpanded = false,
   placeholder,
+  autoSplit = false,
 }: ExpandableSpecProps) {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  let prefix: string | null = null;
+
+  // Auto-split single-line text on `,` and `/` for materials-style lists
+  if (autoSplit && lines.length === 1) {
+    const raw = lines[0];
+    const colonIdx = raw.indexOf(":");
+    let body = raw;
+    if (colonIdx > -1 && colonIdx < 40) {
+      prefix = raw.slice(0, colonIdx).trim();
+      body = raw.slice(colonIdx + 1).trim();
+    }
+    const parts = body.split(/\s*[,/]\s*/).map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 1) lines = parts;
+    else prefix = null;
+  }
+
   const [open, setOpen] = useState(defaultExpanded);
 
   if (lines.length === 0) return null;
