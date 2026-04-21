@@ -20,6 +20,7 @@ import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
+import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -956,6 +957,9 @@ const TradeDesignersAdmin = () => {
     return counts;
   }, [designers]);
 
+  // Detect broken/missing/duplicate slugs (read-only audit, never auto-mutates)
+  const slugHealthMap = useSlugHealthMap(designers);
+
   const getField = useCallback(
     (id: string, field: keyof DesignerRow) => {
       return (editBuffer[id]?.[field] ?? designers.find((d) => d.id === id)?.[field]) as string;
@@ -1216,6 +1220,13 @@ const TradeDesignersAdmin = () => {
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-secondary text-secondary">
                             Unsaved
                           </Badge>
+                        )}
+                        {slugHealthMap.get(d.id) && (
+                          <SlugHealthBadge
+                            designer={d}
+                            issue={slugHealthMap.get(d.id)!}
+                            allDesigners={designers}
+                          />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{d.specialty}</p>
