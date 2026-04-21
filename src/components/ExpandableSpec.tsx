@@ -121,7 +121,7 @@ export default function ExpandableSpec({
             <SelectValue placeholder={placeholder} />
           </span>
         </SelectTrigger>
-        <SelectContent className="bg-background border-border">
+        <SelectContent className="z-[130] bg-background border-border">
           {lines.map((line, i) => (
             <SelectItem
               key={i}

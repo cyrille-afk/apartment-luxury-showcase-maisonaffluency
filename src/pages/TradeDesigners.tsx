@@ -177,10 +177,10 @@ const TradeDesigners = () => {
     let result = enriched.slice();
 
     if (selectedBrand !== "all") {
-      // Show the selected entry + any records where founder matches (for ateliers)
-      result = result.filter(
-        (d) => d.name === selectedBrand || d.founder === selectedBrand
-      );
+      // Brand carousel selections should show only the selected card itself.
+      // Child designers stay accessible via their own dedicated profiles, not as
+      // duplicate cards under the atelier selection.
+      result = result.filter((d) => d.name === selectedBrand);
     }
 
     if (search) {
