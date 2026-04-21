@@ -416,7 +416,13 @@ const ShowroomGridView = ({
       if (!data) return;
       const map = new Map<string, string>();
       for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
-        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
+        if (d.name) {
+          map.set(d.name.trim().toLowerCase(), d.slug);
+          // Also index by normalized parent brand (e.g. "Okha Design Studio - Adam Courts" → "okha")
+          // so hotspots authored with the parent brand name resolve to the designer's slug.
+          const parent = normalizeBrandToParent(d.name).trim().toLowerCase();
+          if (parent && !map.has(parent)) map.set(parent, d.slug);
+        }
         if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
       }
       setDesignerSlugMap(map);
