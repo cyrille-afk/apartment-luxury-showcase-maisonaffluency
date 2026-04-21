@@ -68,7 +68,7 @@ interface TradePricing {
   price_unit: string | null;
   price_prefix: string | null;
   spec_sheet_url: string | null;
-  size_variants: { label: string; price_cents: number }[] | null;
+  size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
 }
 
 function useTradeProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -122,8 +122,12 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
       const rawSizeVariants = Array.isArray((product as any).size_variants)
-        ? ((product as any).size_variants as { label: string; price_cents: number }[])
-            .filter((v) => v && typeof v.label === "string" && v.label.trim() && typeof v.price_cents === "number" && v.price_cents > 0)
+        ? ((product as any).size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
+            .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
+              (typeof v.label === "string" && v.label.trim()) ||
+              (typeof v.base === "string" && v.base.trim()) ||
+              (typeof v.top === "string" && v.top.trim())
+            ))
         : [];
 
       const pricing: TradePricing | null = tradeProduct
@@ -205,6 +209,8 @@ const TradeProductPage: React.FC = () => {
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [showTradePrice, setShowTradePrice] = useState(true);
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
+  const [selectedBase, setSelectedBase] = useState<string | null>(null);
+  const [selectedTop, setSelectedTop] = useState<string | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -345,12 +351,22 @@ const TradeProductPage: React.FC = () => {
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
-  // Trade pricing rendering
+  // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top)
   const sizeVariants = pricing?.size_variants || null;
   const hasVariants = !!(sizeVariants && sizeVariants.length > 0);
-  const activeVariant = hasVariants && selectedVariantIdx != null
-    ? sizeVariants![selectedVariantIdx]
+  const isDualAxis = hasVariants && sizeVariants!.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  const baseOptions = isDualAxis
+    ? Array.from(new Set(sizeVariants!.map((v) => (v.base || "").trim()).filter(Boolean)))
+    : [];
+  const topOptions = isDualAxis
+    ? Array.from(new Set(sizeVariants!.map((v) => (v.top || "").trim()).filter(Boolean)))
+    : [];
+  const dualVariant = isDualAxis
+    ? sizeVariants!.find((v) => (v.base || "").trim() === (selectedBase || "") && (v.top || "").trim() === (selectedTop || ""))
     : null;
+  const activeVariant = isDualAxis
+    ? dualVariant
+    : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
   const effectiveRrpCents = hasVariants
     ? (activeVariant ? activeVariant.price_cents : null)
     : pricing?.rrp_price_cents ?? null;
@@ -454,7 +470,28 @@ const TradeProductPage: React.FC = () => {
                   autoSplit
                 />
               )}
-              {product.dimensions && (
+              {/* Dual-axis: Base × Top finish dropdowns */}
+              {isDualAxis && (
+                <>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={baseOptions.join("\n")}
+                    placeholder="Select base"
+                    emphasized
+                    value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
+                    onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
+                  />
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={topOptions.join("\n")}
+                    placeholder="Select top"
+                    emphasized
+                    value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
+                    onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}
+                  />
+                </>
+              )}
+              {product.dimensions && !isDualAxis && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
@@ -463,7 +500,7 @@ const TradeProductPage: React.FC = () => {
                           .map((v) => {
                             // Strip a leading "Product Name:" prefix so the row shows
                             // just the variant identifier (size + material/finish).
-                            let label = v.label.trim();
+                            let label = (v.label || "").trim();
                             const colonIdx = label.indexOf(":");
                             if (colonIdx > -1 && colonIdx < 60) {
                               label = label.slice(colonIdx + 1).trim();
@@ -484,6 +521,13 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your size"
                   value={hasVariants ? (selectedVariantIdx ?? undefined) : undefined}
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
+                />
+              )}
+              {product.dimensions && isDualAxis && (
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={formatDimensionsMultiline(product.dimensions)}
+                  emphasized
                 />
               )}
               {product.origin && (
