@@ -11,6 +11,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import ExpandableSpec from "@/components/ExpandableSpec";
+import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
 export interface PublicLightboxItem {
   id: string;
