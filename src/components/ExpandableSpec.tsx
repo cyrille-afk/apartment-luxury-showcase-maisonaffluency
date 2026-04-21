@@ -75,17 +75,21 @@ export default function ExpandableSpec({
     emphasized ? "text-foreground font-medium" : "text-muted-foreground"
   );
 
+  // Shared row wrapper — borderless list with hairline dividers
+  const rowClasses =
+    "flex items-center gap-3 w-full py-3 border-b border-border/60 first:border-t";
+
   // Single value → plain row
   if (lines.length === 1) {
     return (
-      <div className="flex gap-2 items-start">
-        <span className="mt-0.5 shrink-0">{icon}</span>
-        <p className={textClasses}>{lines[0]}</p>
+      <div className={rowClasses}>
+        <span className="shrink-0">{icon}</span>
+        <p className={cn(textClasses, "flex-1")}>{lines[0]}</p>
       </div>
     );
   }
 
-  // Multi + placeholder → real Select
+  // Multi + placeholder → real Select (borderless list row)
   if (placeholder) {
     const handleChange = (v: string) => {
       const idx = parseInt(v, 10);
@@ -95,42 +99,47 @@ export default function ExpandableSpec({
     const currentVal = selectedIdx != null ? String(selectedIdx) : undefined;
 
     return (
-      <div className="flex gap-2 items-center">
-        <span className="shrink-0">{icon}</span>
-        <Select value={currentVal} onValueChange={handleChange}>
-          <SelectTrigger
-            className={cn(
-              "h-auto py-2 px-3 bg-background border-border rounded-md font-body text-xs md:text-sm",
-              "hover:border-foreground/40 focus:ring-0 focus:ring-offset-0",
-              selectedIdx == null
-                ? "text-muted-foreground"
-                : emphasized
-                ? "text-foreground font-medium"
-                : "text-foreground"
-            )}
-          >
+      <Select value={currentVal} onValueChange={handleChange}>
+        <SelectTrigger
+          className={cn(
+            rowClasses,
+            "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
+            "border-b border-border/60 first:border-t",
+            "font-body text-xs md:text-sm text-left",
+            "focus:ring-0 focus:ring-offset-0 focus:outline-none",
+            "hover:text-foreground transition-colors",
+            "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
+            selectedIdx == null
+              ? "text-muted-foreground"
+              : emphasized
+              ? "text-foreground font-medium"
+              : "text-foreground"
+          )}
+        >
+          <span className="shrink-0">{icon}</span>
+          <span className="flex-1 truncate">
             <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          <SelectContent className="bg-background border-border">
-            {lines.map((line, i) => (
-              <SelectItem
-                key={i}
-                value={String(i)}
-                className="font-body text-xs md:text-sm cursor-pointer"
-              >
-                {line}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </span>
+        </SelectTrigger>
+        <SelectContent className="bg-background border-border">
+          {lines.map((line, i) => (
+            <SelectItem
+              key={i}
+              value={String(i)}
+              className="font-body text-xs md:text-sm cursor-pointer"
+            >
+              {line}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
   }
 
-  // Multi, no placeholder → simple inline expandable
+  // Multi, no placeholder → simple inline expandable (borderless list row)
   const remaining = lines.length - 1;
   return (
-    <div className="flex gap-2 items-start">
+    <div className={cn(rowClasses, "items-start")}>
       <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
         <button
