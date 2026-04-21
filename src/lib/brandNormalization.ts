@@ -1,5 +1,5 @@
 const PARENT_BRAND_BY_CHILD_NAME: Record<string, string> = {
-  "okha design studio - adam courts": "OKHA",
+  // "Okha Design Studio - Adam Courts" merged into single OKHA record (DB-side) on 2026-04-21.
   "ecart - jean-michel frank": "Ecart",
   "noé duchaufour-lawrance": "NDL Editions",
   "noe duchaufour-lawrance": "NDL Editions",

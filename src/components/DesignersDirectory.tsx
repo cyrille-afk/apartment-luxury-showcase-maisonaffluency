@@ -97,7 +97,7 @@ const IMAGE_IDENTIFIER_TO_INDEX: Record<string, number> = {
 
 // ─── Gallery room thumbnails (keyed by DB slug) ─────────────────────────────
 const CARD_THUMBNAILS: Record<string, string[]> = {
-  "adam-courts-okha": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085686/bedroom-alt_yk0j0d.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340485/AffluencySG_030_1_pncaim.jpg"],
+  "okha": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085686/bedroom-alt_yk0j0d.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340485/AffluencySG_030_1_pncaim.jpg"],
   "alexander-lamont": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085716/bespoke-sofa_gxidtx.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085533/art-master-bronze_hf6bad.jpg"],
   "leo-aerts-alinea": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085743/dining-room_ey0bu5.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085856/intimate-lounge_tf4sm1.jpg"],
   "apparatus-studio": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085919/small-room-personality_wvxz6y.png", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085690/bedroom-second_cyfmdj.jpg"],
@@ -128,7 +128,7 @@ const CARD_THUMBNAILS: Record<string, string[]> = {
 
 // ─── Instagram links (keyed by DB slug) ─────────────────────────────────────
 const INSTAGRAM_LINKS: Record<string, string> = {
-  "adam-courts-okha": "https://www.instagram.com/__okha/",
+  "okha": "https://www.instagram.com/__okha/",
   "alexander-lamont": "https://instagram.com/alexanderlamont",
   "leo-aerts-alinea": "https://www.instagram.com/alinea_design_objects/",
   "apparatus-studio": "https://instagram.com/apparatusstudio",
