@@ -316,15 +316,6 @@ const TradeAtelierProfile = () => {
             <ArrowLeft className="w-4 h-4" />
             {fromProduct ? "Back to product" : (designer.founder ? `Back to ${designer.founder}` : "All Ateliers")}
           </button>
-          {/* DEBUG: from_product indicator (remove after verification) */}
-          <div className="px-3 py-2 rounded border border-dashed border-yellow-500/60 bg-yellow-500/10 text-[11px] font-mono break-all max-w-md">
-            <span className="font-semibold text-yellow-700">DEBUG from_product:</span>{" "}
-            {fromProduct ? (
-              <span>present → <span className="underline">{fromProduct}</span></span>
-            ) : (
-              <span className="text-destructive">MISSING (no ?from_product= in URL)</span>
-            )}
-          </div>
           <WhatsAppShareButton
             onClick={(e) => {
               e.preventDefault();

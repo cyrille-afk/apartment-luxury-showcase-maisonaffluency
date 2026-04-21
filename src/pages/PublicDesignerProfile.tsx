@@ -563,16 +563,6 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {/* DEBUG: from_product indicator (remove after verification) */}
-          <div className="mt-2 px-3 py-2 rounded border border-dashed border-yellow-500/60 bg-yellow-500/10 text-[11px] font-mono break-all">
-            <span className="font-semibold text-yellow-700">DEBUG from_product:</span>{" "}
-            {fromProduct ? (
-              <span className="text-foreground">present → <span className="underline">{fromProduct}</span></span>
-            ) : (
-              <span className="text-destructive">MISSING (no ?from_product= in URL)</span>
-            )}
-          </div>
-
           {isDesignerProfile ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
