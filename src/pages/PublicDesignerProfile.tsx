@@ -88,6 +88,7 @@ const PublicDesignerProfile = () => {
   const scrollToSection = searchParams.get("section");
   const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
   const fromNewIn = searchParams.get("from") === "new-in";
+  const fromProduct = searchParams.get("from_product");
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
