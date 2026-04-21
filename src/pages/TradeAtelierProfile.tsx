@@ -99,6 +99,8 @@ const TradeAtelierProfile = () => {
   const { isTradeUser, isAdmin, user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromProduct = searchParams.get("from_product");
   const { toast } = useToast();
   const { data: designer, isLoading } = useDesigner(slug);
   const { isPinned, togglePin } = useCompare();
