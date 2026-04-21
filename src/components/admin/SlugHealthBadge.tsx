@@ -3,8 +3,35 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+/**
+ * Detect a "curated" slug — one that intentionally diverges from a naive
+ * slugify(name/display_name). Example: designer "Alinea Design Objects" with
+ * slug "leo-aerts-alinea" — the slug encodes the founder + atelier and must
+ * NEVER be auto-overwritten, even if it would otherwise look "wrong".
+ *
+ * A slug is considered curated when it does not start with the slugified
+ * name OR display_name. We're intentionally permissive: any plausible
+ * derivation (prefix match) is treated as non-curated.
+ */
+export function isCuratedSlug(d: { name: string; display_name?: string | null; slug: string | null }): boolean {
+  if (!d.slug) return false;
+  const candidates = [d.name, d.display_name].filter(Boolean) as string[];
+  if (candidates.length === 0) return false;
+  const slugBases = candidates.map((c) =>
+    c
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, ""),
+  );
+  // Curated = slug doesn't start with any naive derivation of name/display_name
+  return !slugBases.some((base) => base && (d.slug === base || d.slug!.startsWith(base + "-")));
+}
 
 export interface SlugHealthDesigner {
   id: string;
