@@ -386,7 +386,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const [{ data: picks }, { data: designers }] = await Promise.all([
         supabase
           .from("designer_curator_picks_public")
-          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,description,category,subcategory,pdf_url,pdf_urls,designer_id")
+          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants")
           .not("image_url", "is", null),
         supabase
           .from("designers")
@@ -414,6 +414,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           subcategory: p.subcategory || null,
           pdf_url: p.pdf_url || null,
           pdf_urls: (p.pdf_urls as any) || null,
+          size_variants: (p.size_variants as any) || null,
         };
       });
 
