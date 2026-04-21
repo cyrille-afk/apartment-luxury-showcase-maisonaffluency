@@ -209,6 +209,8 @@ const TradeProductPage: React.FC = () => {
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [showTradePrice, setShowTradePrice] = useState(true);
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
+  const [selectedBase, setSelectedBase] = useState<string | null>(null);
+  const [selectedTop, setSelectedTop] = useState<string | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -349,12 +351,22 @@ const TradeProductPage: React.FC = () => {
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
-  // Trade pricing rendering
+  // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top)
   const sizeVariants = pricing?.size_variants || null;
   const hasVariants = !!(sizeVariants && sizeVariants.length > 0);
-  const activeVariant = hasVariants && selectedVariantIdx != null
-    ? sizeVariants![selectedVariantIdx]
+  const isDualAxis = hasVariants && sizeVariants!.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  const baseOptions = isDualAxis
+    ? Array.from(new Set(sizeVariants!.map((v) => (v.base || "").trim()).filter(Boolean)))
+    : [];
+  const topOptions = isDualAxis
+    ? Array.from(new Set(sizeVariants!.map((v) => (v.top || "").trim()).filter(Boolean)))
+    : [];
+  const dualVariant = isDualAxis
+    ? sizeVariants!.find((v) => (v.base || "").trim() === (selectedBase || "") && (v.top || "").trim() === (selectedTop || ""))
     : null;
+  const activeVariant = isDualAxis
+    ? dualVariant
+    : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
   const effectiveRrpCents = hasVariants
     ? (activeVariant ? activeVariant.price_cents : null)
     : pricing?.rrp_price_cents ?? null;
