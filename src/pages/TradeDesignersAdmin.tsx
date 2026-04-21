@@ -370,40 +370,101 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   </div>
                 </div>
 
-                {/* Size-based RRP variants */}
+                {/* Variant pricing — supports single-axis (Size) and dual-axis (Base × Top) */}
                 <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                      Size Variants (RRP per size)
+                      Variant Pricing (per Size, or Base × Top)
                     </label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 text-[10px]"
-                      onClick={() => {
-                        const current = pick.size_variants || [];
-                        updateField(pick.id, "size_variants", [...current, { label: "", price_cents: 0 }] as any);
-                      }}
-                    >
-                      + Add size
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[10px]"
+                        onClick={() => {
+                          const current = pick.size_variants || [];
+                          updateField(pick.id, "size_variants", [...current, { label: "", base: "", top: "", price_cents: 0 }] as any);
+                        }}
+                      >
+                        + Add row
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[10px]"
+                        title="Auto-fill all Base × Top combinations from rows that have only Base or only Top set"
+                        onClick={() => {
+                          const current = pick.size_variants || [];
+                          const bases = Array.from(new Set(current.map((v) => (v.base || "").trim()).filter(Boolean)));
+                          const tops = Array.from(new Set(current.map((v) => (v.top || "").trim()).filter(Boolean)));
+                          if (bases.length === 0 || tops.length === 0) {
+                            toast({ title: "Need at least 1 Base and 1 Top", description: "Add some rows with Base and Top filled in, then click Build matrix.", variant: "destructive" });
+                            return;
+                          }
+                          // Preserve any existing prices for matching combos
+                          const priceMap = new Map<string, number>();
+                          current.forEach((v) => {
+                            if (v.base && v.top) priceMap.set(`${v.base}|${v.top}`, v.price_cents || 0);
+                          });
+                          const matrix = bases.flatMap((b) =>
+                            tops.map((t) => ({ base: b, top: t, price_cents: priceMap.get(`${b}|${t}`) || 0 }))
+                          );
+                          updateField(pick.id, "size_variants", matrix as any);
+                          toast({ title: "Matrix built", description: `${bases.length} bases × ${tops.length} tops = ${matrix.length} rows` });
+                        }}
+                      >
+                        Build matrix
+                      </Button>
+                    </div>
                   </div>
+                  <p className="text-[10px] text-muted-foreground italic leading-snug">
+                    For a single dropdown (size only), fill <em>Label</em> + <em>Price</em>. For two dropdowns (e.g. Base × Top finish), fill <em>Base</em> and <em>Top</em>; the product sheet will render two selectors and price by combination.
+                  </p>
                   {(pick.size_variants || []).length === 0 && (
                     <p className="text-[10px] text-muted-foreground italic">
-                      No size variants. The Default RRP above will be used.
+                      No variants. The Default RRP above will be used.
                     </p>
                   )}
+                  {(pick.size_variants || []).length > 0 && (
+                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                      <span>Label / Size</span>
+                      <span>Base</span>
+                      <span>Top</span>
+                      <span>Price ({pick.currency || "EUR"})</span>
+                      <span></span>
+                    </div>
+                  )}
                   {(pick.size_variants || []).map((variant, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
+                    <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_7rem_1.75rem] gap-1.5 items-center">
                       <Input
-                        value={variant.label}
+                        value={variant.label || ""}
                         onChange={(e) => {
                           const updated = [...(pick.size_variants || [])];
                           updated[idx] = { ...variant, label: e.target.value };
                           updateField(pick.id, "size_variants", updated as any);
                         }}
-                        placeholder="e.g. Small, 200x300 cm"
-                        className="text-xs flex-1"
+                        placeholder="e.g. M 130"
+                        className="text-xs h-8"
+                      />
+                      <Input
+                        value={variant.base || ""}
+                        onChange={(e) => {
+                          const updated = [...(pick.size_variants || [])];
+                          updated[idx] = { ...variant, base: e.target.value };
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                        placeholder="e.g. Brass"
+                        className="text-xs h-8"
+                      />
+                      <Input
+                        value={variant.top || ""}
+                        onChange={(e) => {
+                          const updated = [...(pick.size_variants || [])];
+                          updated[idx] = { ...variant, top: e.target.value };
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                        placeholder="e.g. Carrara"
+                        className="text-xs h-8"
                       />
                       <Input
                         type="number"
@@ -415,8 +476,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           updated[idx] = { ...variant, price_cents: Number.isFinite(num) ? Math.round(num * 100) : 0 };
                           updateField(pick.id, "size_variants", updated as any);
                         }}
-                        placeholder={`RRP ${pick.currency || "EUR"}`}
-                        className="text-xs w-32"
+                        placeholder="0.00"
+                        className="text-xs h-8"
                       />
                       <Button
                         variant="ghost"
