@@ -65,6 +65,7 @@ export default function ExpandableSpec({
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
   const selectedIdx = value ?? internalIdx;
 
   if (lines.length === 0) return null;
