@@ -13,61 +13,7 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
-import { supabase } from "@/integrations/supabase/client";
-
-/* ------------------------------------------------------------------ */
-/*  Designer slug resolver — caches DB lookup so the brand link in    */
-/*  the lightbox always navigates to the canonical profile slug       */
-/*  (e.g. "Alinea Design Objects" → "leo-aerts-alinea") instead of    */
-/*  a naive slugified display name.                                   */
-/* ------------------------------------------------------------------ */
-let designerSlugCache: Map<string, string> | null = null;
-let designerSlugPromise: Promise<Map<string, string>> | null = null;
-
-function loadDesignerSlugMap(): Promise<Map<string, string>> {
-  if (designerSlugCache) return Promise.resolve(designerSlugCache);
-  if (designerSlugPromise) return designerSlugPromise;
-  designerSlugPromise = (async () => {
-    const { data } = await supabase
-      .from("designers")
-      .select("name, display_name, slug");
-    const map = new Map<string, string>();
-    for (const d of data || []) {
-      if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
-      if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
-    }
-    designerSlugCache = map;
-    return map;
-  })();
-  return designerSlugPromise;
-}
-
-/** Direct DB lookup as a last-resort fallback when the cache misses. */
-async function resolveDesignerSlugFromDb(
-  candidates: string[],
-): Promise<string | null> {
-  const cleaned = Array.from(
-    new Set(candidates.map((c) => c?.trim()).filter(Boolean)),
-  );
-  if (cleaned.length === 0) return null;
-  // Try name OR display_name match (case-insensitive)
-  const orFilter = cleaned
-    .flatMap((c) => [`name.ilike.${c}`, `display_name.ilike.${c}`])
-    .join(",");
-  const { data } = await supabase
-    .from("designers")
-    .select("name, display_name, slug")
-    .or(orFilter)
-    .limit(5);
-  if (!data || data.length === 0) return null;
-  const lowered = cleaned.map((c) => c.toLowerCase());
-  const exact = data.find(
-    (d) =>
-      lowered.includes((d.name || "").trim().toLowerCase()) ||
-      lowered.includes((d.display_name || "").trim().toLowerCase()),
-  );
-  return (exact || data[0]).slug || null;
-}
+import { useDesignerByName } from "@/hooks/useDesigner";
 
 export interface PublicLightboxItem {
   id: string;
