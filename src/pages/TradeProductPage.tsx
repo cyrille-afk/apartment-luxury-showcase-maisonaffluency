@@ -458,7 +458,20 @@ const TradeProductPage: React.FC = () => {
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
                     sizeVariants && sizeVariants.length > 0
-                      ? sizeVariants.map((v) => v.label).join("\n")
+                      ? sizeVariants
+                          .map((v) => {
+                            // Strip leading "Product Name:" prefix and trailing
+                            // material word(s) so the size row shows ONLY the dimension.
+                            let label = v.label.trim();
+                            const colonIdx = label.indexOf(":");
+                            if (colonIdx > -1 && colonIdx < 60) {
+                              label = label.slice(colonIdx + 1).trim();
+                            }
+                            const m = label.match(/^(.*?\b(?:cm|mm|in|m)\b)/i);
+                            if (m) label = m[1].trim();
+                            return label;
+                          })
+                          .join("\n")
                       : formatDimensionsMultiline(product.dimensions)
                   }
                   emphasized
