@@ -344,6 +344,7 @@ const PublicProductPage: React.FC = () => {
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={product.materials}
                     placeholder="Select your material choice"
+                    autoSplit
                   />
                 )}
                 {product.dimensions && (
