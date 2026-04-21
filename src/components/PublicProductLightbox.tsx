@@ -105,12 +105,14 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const [imageFailed, setImageFailed] = useState(false);
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
-  const [slugMap, setSlugMap] = useState<Map<string, string> | null>(designerSlugCache);
 
-  useEffect(() => {
-    if (slugMap) return;
-    loadDesignerSlugMap().then(setSlugMap);
-  }, [slugMap]);
+  // Resolve canonical designer slug (same hook used by product pages)
+  const designerDisplayName = product
+    ? (product.brand_name.includes(" - ")
+        ? product.brand_name.split(" - ")[0].trim()
+        : product.brand_name)
+    : undefined;
+  const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
 
   useEffect(() => {
     setImageLoaded(false);
