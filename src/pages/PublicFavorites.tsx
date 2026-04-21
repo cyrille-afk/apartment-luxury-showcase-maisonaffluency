@@ -126,6 +126,7 @@ const PublicFavorites = () => {
         category: p.category,
         subcategory: p.subcategory,
         pdf_url: p.pdf_url,
+        size_variants: (p as any).size_variants ?? null,
       })),
     [picks]
   );
