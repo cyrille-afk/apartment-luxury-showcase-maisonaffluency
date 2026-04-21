@@ -128,7 +128,7 @@ const CARD_THUMBNAILS: Record<string, string[]> = {
 
 // ─── Instagram links (keyed by DB slug) ─────────────────────────────────────
 const INSTAGRAM_LINKS: Record<string, string> = {
-  "okha": "https://www.instagram.com/__okha/",
+  // okha: see entry below (deduplicated)
   "alexander-lamont": "https://instagram.com/alexanderlamont",
   "leo-aerts-alinea": "https://www.instagram.com/alinea_design_objects/",
   "apparatus-studio": "https://instagram.com/apparatusstudio",
