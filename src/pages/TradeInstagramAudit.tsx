@@ -24,7 +24,7 @@ interface DesignerIG {
 
 // Hardcoded fallback map (mirrors PublicDesigners.tsx)
 const INSTAGRAM_LINKS: Record<string, string> = {
-  "adam-courts-okha": "https://www.instagram.com/__okha/",
+  // okha: see entry below (deduplicated)
   "alexander-lamont": "https://instagram.com/alexanderlamont",
   "leo-aerts-alinea": "https://www.instagram.com/alinea_design_objects/",
   "apparatus-studio": "https://instagram.com/apparatusstudio",
