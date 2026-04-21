@@ -33,6 +33,8 @@ import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
+import ExpandableSpec from "@/components/ExpandableSpec";
+import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
 const TRADE_DISCOUNT = 0.08;
 

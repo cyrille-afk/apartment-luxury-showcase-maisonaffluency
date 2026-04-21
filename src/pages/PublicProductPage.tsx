@@ -20,6 +20,7 @@ import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDrop
 import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import ExpandableSpec from "@/components/ExpandableSpec";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
