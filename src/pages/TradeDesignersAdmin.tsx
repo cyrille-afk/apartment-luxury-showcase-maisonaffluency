@@ -1221,6 +1221,13 @@ const TradeDesignersAdmin = () => {
                             Unsaved
                           </Badge>
                         )}
+                        {slugHealthMap.get(d.id) && (
+                          <SlugHealthBadge
+                            designer={d}
+                            issue={slugHealthMap.get(d.id)!}
+                            allDesigners={designers}
+                          />
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{d.specialty}</p>
                     </div>
