@@ -308,32 +308,14 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             <div>
               <button
                 type="button"
-                onClick={async () => {
-                  const fallbackSlug = designerDisplay
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")
-                    .replace(/[^a-z0-9-]/g, "");
-                  let slug =
-                    slugMap?.get(designerDisplay.trim().toLowerCase()) ||
-                    slugMap?.get(product.brand_name.trim().toLowerCase()) ||
-                    null;
-                  // Cache miss → query DB directly before falling back to a naive slug
-                  if (!slug) {
-                    try {
-                      slug = await resolveDesignerSlugFromDb([
-                        designerDisplay,
-                        product.brand_name,
-                      ]);
-                    } catch {
-                      slug = null;
-                    }
-                  }
-                  if (!slug) slug = fallbackSlug;
-                  const params = new URLSearchParams({ expanded: "true" });
-                  params.set("from_product", `${location.pathname}${location.search}`);
+                onClick={() => {
+                  if (!linkedDesigner?.slug) return;
                   onClose();
-                  navigate(`/designers/${slug}?${params.toString()}`);
+                  navigate(
+                    `/designers/${linkedDesigner.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`
+                  );
                 }}
+                disabled={!linkedDesigner?.slug}
                 className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
               >
                 {designerDisplay}
