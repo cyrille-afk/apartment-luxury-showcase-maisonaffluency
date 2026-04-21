@@ -304,13 +304,17 @@ const TradeAtelierProfile = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => {
+              if (fromProduct) {
+                navigate(fromProduct);
+                return;
+              }
               const atelierName = designer.founder || designer.name;
               navigate(`/trade/designers?brand=${encodeURIComponent(atelierName)}`);
             }}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            {designer.founder ? `Back to ${designer.founder}` : "All Ateliers"}
+            {fromProduct ? "Back to product" : (designer.founder ? `Back to ${designer.founder}` : "All Ateliers")}
           </button>
           <WhatsAppShareButton
             onClick={(e) => {
