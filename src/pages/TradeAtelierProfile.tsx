@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2, Maximize2, Tag } from "lucide-react";
