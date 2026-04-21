@@ -957,6 +957,9 @@ const TradeDesignersAdmin = () => {
     return counts;
   }, [designers]);
 
+  // Detect broken/missing/duplicate slugs (read-only audit, never auto-mutates)
+  const slugHealthMap = useSlugHealthMap(designers);
+
   const getField = useCallback(
     (id: string, field: keyof DesignerRow) => {
       return (editBuffer[id]?.[field] ?? designers.find((d) => d.id === id)?.[field]) as string;
