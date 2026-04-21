@@ -68,7 +68,7 @@ interface TradePricing {
   price_unit: string | null;
   price_prefix: string | null;
   spec_sheet_url: string | null;
-  size_variants: { label: string; price_cents: number }[] | null;
+  size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
 }
 
 function useTradeProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -122,8 +122,12 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
       const rawSizeVariants = Array.isArray((product as any).size_variants)
-        ? ((product as any).size_variants as { label: string; price_cents: number }[])
-            .filter((v) => v && typeof v.label === "string" && v.label.trim() && typeof v.price_cents === "number" && v.price_cents > 0)
+        ? ((product as any).size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
+            .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
+              (typeof v.label === "string" && v.label.trim()) ||
+              (typeof v.base === "string" && v.base.trim()) ||
+              (typeof v.top === "string" && v.top.trim())
+            ))
         : [];
 
       const pricing: TradePricing | null = tradeProduct
