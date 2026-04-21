@@ -208,12 +208,12 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
             </p>
           )}
           {curated && (
-            <div className="mb-3 rounded border border-amber-500/40 bg-amber-500/5 p-2">
-              <div className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-400">
+            <div className="mb-3 rounded border border-destructive/40 bg-destructive/5 p-2">
+              <div className="flex items-start gap-1.5 text-[11px] text-destructive">
                 <ShieldAlert className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-medium mb-1">Curated slug detected</p>
-                  <p className="leading-snug">
+                  <p className="leading-snug text-muted-foreground">
                     This slug doesn't match the designer name and may be intentional
                     (e.g. founder-atelier format). Overwriting will break existing public URLs,
                     SEO indexing, and shared links.
