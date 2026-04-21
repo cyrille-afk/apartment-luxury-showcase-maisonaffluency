@@ -20,6 +20,7 @@ import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDrop
 import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import ExpandableSpec from "@/components/ExpandableSpec";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -336,39 +337,32 @@ const PublicProductPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Materials & dimensions with gold icons */}
+              {/* Materials & dimensions with gold icons — multi-line collapses to dropdown */}
               <div className="flex flex-col gap-2">
                 {product.materials && (
-                  <div className="flex gap-1.5 items-start">
-                    <Layers size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                      {product.materials}
-                    </p>
-                  </div>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={product.materials}
+                  />
                 )}
                 {product.dimensions && (
-                  <div className="flex gap-1.5 items-start">
-                    <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                    <p className="font-body text-xs md:text-sm text-foreground font-medium whitespace-pre-line">
-                      {formatDimensionsMultiline(product.dimensions)}
-                    </p>
-                  </div>
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={formatDimensionsMultiline(product.dimensions)}
+                    emphasized
+                  />
                 )}
                 {product.origin && (
-                  <div className="flex gap-1.5 items-start">
-                    <Globe size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {product.origin}
-                    </p>
-                  </div>
+                  <ExpandableSpec
+                    icon={<Globe size={14} className="text-[hsl(var(--gold))]" />}
+                    text={product.origin}
+                  />
                 )}
                 {product.lead_time && (
-                  <div className="flex gap-1.5 items-start">
-                    <Clock size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                    <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {product.lead_time}
-                    </p>
-                  </div>
+                  <ExpandableSpec
+                    icon={<Clock size={14} className="text-[hsl(var(--gold))]" />}
+                    text={product.lead_time}
+                  />
                 )}
               </div>
 
