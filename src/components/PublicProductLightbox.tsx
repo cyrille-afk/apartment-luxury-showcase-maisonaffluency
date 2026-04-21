@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
@@ -95,6 +95,7 @@ function useLocalFavorites() {
 
 const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
@@ -300,8 +301,10 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                 type="button"
                 onClick={() => {
                   const slug = designerDisplay.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+                  const params = new URLSearchParams({ expanded: "true" });
+                  params.set("from_product", `${location.pathname}${location.search}`);
                   onClose();
-                  navigate(`/designers/${slug}?expanded=true`);
+                  navigate(`/designers/${slug}?${params.toString()}`);
                 }}
                 className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
               >
