@@ -42,6 +42,33 @@ function loadDesignerSlugMap(): Promise<Map<string, string>> {
   return designerSlugPromise;
 }
 
+/** Direct DB lookup as a last-resort fallback when the cache misses. */
+async function resolveDesignerSlugFromDb(
+  candidates: string[],
+): Promise<string | null> {
+  const cleaned = Array.from(
+    new Set(candidates.map((c) => c?.trim()).filter(Boolean)),
+  );
+  if (cleaned.length === 0) return null;
+  // Try name OR display_name match (case-insensitive)
+  const orFilter = cleaned
+    .flatMap((c) => [`name.ilike.${c}`, `display_name.ilike.${c}`])
+    .join(",");
+  const { data } = await supabase
+    .from("designers")
+    .select("name, display_name, slug")
+    .or(orFilter)
+    .limit(5);
+  if (!data || data.length === 0) return null;
+  const lowered = cleaned.map((c) => c.toLowerCase());
+  const exact = data.find(
+    (d) =>
+      lowered.includes((d.name || "").trim().toLowerCase()) ||
+      lowered.includes((d.display_name || "").trim().toLowerCase()),
+  );
+  return (exact || data[0]).slug || null;
+}
+
 export interface PublicLightboxItem {
   id: string;
   title: string;
@@ -333,15 +360,27 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             <div>
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   const fallbackSlug = designerDisplay
                     .toLowerCase()
                     .replace(/\s+/g, "-")
                     .replace(/[^a-z0-9-]/g, "");
-                  const slug =
+                  let slug =
                     slugMap?.get(designerDisplay.trim().toLowerCase()) ||
                     slugMap?.get(product.brand_name.trim().toLowerCase()) ||
-                    fallbackSlug;
+                    null;
+                  // Cache miss → query DB directly before falling back to a naive slug
+                  if (!slug) {
+                    try {
+                      slug = await resolveDesignerSlugFromDb([
+                        designerDisplay,
+                        product.brand_name,
+                      ]);
+                    } catch {
+                      slug = null;
+                    }
+                  }
+                  if (!slug) slug = fallbackSlug;
                   const params = new URLSearchParams({ expanded: "true" });
                   params.set("from_product", `${location.pathname}${location.search}`);
                   onClose();
