@@ -16,6 +16,12 @@ interface ExpandableSpecProps {
    * Single-line values still render as plain text.
    */
   placeholder?: string;
+  /**
+   * If true and the input has no newlines, split on `,` and `/` to detect
+   * multiple options (used for materials like "Oak, Walnut / Brass").
+   * Preserves any "Prefix:" portion before the first split-character.
+   */
+  autoSplit?: boolean;
 }
 
 /**
