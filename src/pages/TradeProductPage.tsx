@@ -470,7 +470,28 @@ const TradeProductPage: React.FC = () => {
                   autoSplit
                 />
               )}
-              {product.dimensions && (
+              {/* Dual-axis: Base × Top finish dropdowns */}
+              {isDualAxis && (
+                <>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={baseOptions.join("\n")}
+                    placeholder="Select base"
+                    emphasized
+                    value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
+                    onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
+                  />
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={topOptions.join("\n")}
+                    placeholder="Select top"
+                    emphasized
+                    value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
+                    onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}
+                  />
+                </>
+              )}
+              {product.dimensions && !isDualAxis && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
@@ -479,7 +500,7 @@ const TradeProductPage: React.FC = () => {
                           .map((v) => {
                             // Strip a leading "Product Name:" prefix so the row shows
                             // just the variant identifier (size + material/finish).
-                            let label = v.label.trim();
+                            let label = (v.label || "").trim();
                             const colonIdx = label.indexOf(":");
                             if (colonIdx > -1 && colonIdx < 60) {
                               label = label.slice(colonIdx + 1).trim();
@@ -500,6 +521,13 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your size"
                   value={hasVariants ? (selectedVariantIdx ?? undefined) : undefined}
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
+                />
+              )}
+              {product.dimensions && isDualAxis && (
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={formatDimensionsMultiline(product.dimensions)}
+                  emphasized
                 />
               )}
               {product.origin && (
