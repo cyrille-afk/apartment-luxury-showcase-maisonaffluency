@@ -360,15 +360,27 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             <div>
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   const fallbackSlug = designerDisplay
                     .toLowerCase()
                     .replace(/\s+/g, "-")
                     .replace(/[^a-z0-9-]/g, "");
-                  const slug =
+                  let slug =
                     slugMap?.get(designerDisplay.trim().toLowerCase()) ||
                     slugMap?.get(product.brand_name.trim().toLowerCase()) ||
-                    fallbackSlug;
+                    null;
+                  // Cache miss → query DB directly before falling back to a naive slug
+                  if (!slug) {
+                    try {
+                      slug = await resolveDesignerSlugFromDb([
+                        designerDisplay,
+                        product.brand_name,
+                      ]);
+                    } catch {
+                      slug = null;
+                    }
+                  }
+                  if (!slug) slug = fallbackSlug;
                   const params = new URLSearchParams({ expanded: "true" });
                   params.set("from_product", `${location.pathname}${location.search}`);
                   onClose();
