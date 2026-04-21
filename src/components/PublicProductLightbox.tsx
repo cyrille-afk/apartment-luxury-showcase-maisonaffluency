@@ -312,22 +312,22 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               </h2>
             </div>
 
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <div className="flex flex-col">
               {product.materials && (
-                <div className="flex gap-1.5 items-start">
-                  <Layers size={12} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                  <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-relaxed">
-                    {product.materials}
-                  </p>
-                </div>
+                <ExpandableSpec
+                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  text={product.materials}
+                  placeholder="Select your material choice"
+                  autoSplit
+                />
               )}
               {product.dimensions && (
-                <div className="flex gap-1.5 items-start">
-                  <Ruler size={12} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                  <p className="font-body text-[11px] md:text-sm text-foreground font-medium">
-                    {product.dimensions}
-                  </p>
-                </div>
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={formatDimensionsMultiline(product.dimensions)}
+                  emphasized
+                  placeholder="Select your size"
+                />
               )}
             </div>
 
