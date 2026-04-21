@@ -56,6 +56,7 @@ interface ProductRow {
   lead_time: string | null;
   origin: string | null;
   designer_id: string;
+  size_variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -74,7 +75,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
