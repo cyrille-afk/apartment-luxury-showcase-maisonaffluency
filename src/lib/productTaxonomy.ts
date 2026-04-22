@@ -5,7 +5,7 @@ export const SUBCATEGORY_MAP: Record<string, string[]> = {
   Tables: ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
   Lighting: ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   Storage: ["Bookcases", "Cabinets"],
-  "Bedroom Furniture": ["Headboards"],
+  "Bedroom Furniture": ["Headboards", "Bedside Tables"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
   Décor: ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
 };
@@ -53,7 +53,7 @@ const STORAGE_SUBCATEGORIES = new Set([
 ]);
 
 const BEDROOM_SUBCATEGORIES = new Set([
-  "Headboards", "Headboard",
+  "Headboards", "Headboard", "Bedside Tables", "Bedside Table", "Nightstand", "Nightstands",
 ]);
 
 /**
@@ -173,6 +173,9 @@ const SUBCATEGORY_NORMALIZE: Record<string, string> = {
   "Display Cabinet": "Cabinets",
   "High Table": "Side Tables",
   Headboard: "Headboards",
+  "Bedside Table": "Bedside Tables",
+  Nightstand: "Bedside Tables",
+  Nightstands: "Bedside Tables",
   Table: "Side Tables",
 };
 
@@ -267,7 +270,8 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\bcredenza\b/i, "Cabinets"],
   [/\bsideboard\b/i, "Cabinets"],
   [/\bcabinet\b/i, "Cabinets"],
-  [/\bnightstand\b/i, "Cabinets"],
+  [/\bnightstand\b/i, "Bedside Tables"],
+  [/\bbedside\s*table\b/i, "Bedside Tables"],
   // Bedroom Furniture
   [/\bheadboard\b/i, "Headboards"],
   // Décor
