@@ -157,6 +157,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     price_prefix: string | null; sort_order: number; created_at: string;
     size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
     variant_placeholder: string | null;
+    base_axis_label: string | null;
+    top_axis_label: string | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -381,6 +383,30 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                       className="text-xs"
                     />
                   </div>
+                  <div className="col-span-2 md:col-span-3 grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">
+                        Base axis label <span className="italic">(e.g. "Plinth", "Frame", "Base")</span>
+                      </label>
+                      <Input
+                        value={pick.base_axis_label || ""}
+                        onChange={(e) => updateField(pick.id, "base_axis_label", e.target.value || null)}
+                        placeholder="Base"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">
+                        Top axis label <span className="italic">(e.g. "Fabric", "Upholstery", "Top")</span>
+                      </label>
+                      <Input
+                        value={pick.top_axis_label || ""}
+                        onChange={(e) => updateField(pick.id, "top_axis_label", e.target.value || null)}
+                        placeholder="Top"
+                        className="text-xs"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Variant pricing — supports single-axis (Size) and dual-axis (Base × Top) */}
@@ -512,6 +538,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   dimensions={pick.dimensions}
                   materials={pick.materials}
                   currency={pick.currency}
+                  baseAxisLabel={pick.base_axis_label}
+                  topAxisLabel={pick.top_axis_label}
                 />
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>

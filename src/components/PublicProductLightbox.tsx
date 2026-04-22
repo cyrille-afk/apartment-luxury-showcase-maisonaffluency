@@ -31,6 +31,8 @@ export interface PublicLightboxItem {
   pdf_urls?: PdfEntry[] | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_placeholder?: string | null;
+  base_axis_label?: string | null;
+  top_axis_label?: string | null;
 }
 
 interface Props {
@@ -341,13 +343,13 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={baseOptions.join("\n")}
-                        placeholder="Select your material choice for the base"
+                        placeholder={`Select your ${(product.base_axis_label || "base").toLowerCase()} choice`}
                         emphasized
                       />
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={topOptions.join("\n")}
-                        placeholder={product.variant_placeholder || "Select your material choice for the top"}
+                        placeholder={product.variant_placeholder || `Select your ${(product.top_axis_label || "top").toLowerCase()} choice`}
                         emphasized
                       />
                     </>

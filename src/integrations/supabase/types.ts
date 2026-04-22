@@ -676,6 +676,7 @@ export type Database = {
       }
       designer_curator_picks: {
         Row: {
+          base_axis_label: string | null
           category: string | null
           created_at: string
           currency: string
@@ -701,10 +702,12 @@ export type Database = {
           subtitle: string | null
           tags: string[] | null
           title: string
+          top_axis_label: string | null
           trade_price_cents: number | null
           variant_placeholder: string | null
         }
         Insert: {
+          base_axis_label?: string | null
           category?: string | null
           created_at?: string
           currency?: string
@@ -730,10 +733,12 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string
+          top_axis_label?: string | null
           trade_price_cents?: number | null
           variant_placeholder?: string | null
         }
         Update: {
+          base_axis_label?: string | null
           category?: string | null
           created_at?: string
           currency?: string
@@ -759,6 +764,7 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string
+          top_axis_label?: string | null
           trade_price_cents?: number | null
           variant_placeholder?: string | null
         }
@@ -2799,6 +2805,7 @@ export type Database = {
     Views: {
       designer_curator_picks_public: {
         Row: {
+          base_axis_label: string | null
           category: string | null
           created_at: string | null
           currency: string | null
@@ -2823,9 +2830,11 @@ export type Database = {
           subtitle: string | null
           tags: string[] | null
           title: string | null
+          top_axis_label: string | null
           variant_placeholder: string | null
         }
         Insert: {
+          base_axis_label?: string | null
           category?: string | null
           created_at?: string | null
           currency?: string | null
@@ -2850,9 +2859,11 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string | null
+          top_axis_label?: string | null
           variant_placeholder?: string | null
         }
         Update: {
+          base_axis_label?: string | null
           category?: string | null
           created_at?: string | null
           currency?: string | null
@@ -2877,6 +2888,7 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string | null
+          top_axis_label?: string | null
           variant_placeholder?: string | null
         }
         Relationships: [
