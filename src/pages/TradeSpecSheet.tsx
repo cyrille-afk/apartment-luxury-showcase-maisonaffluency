@@ -42,9 +42,16 @@ export default function TradeSpecSheet() {
         .limit(1)
         .maybeSingle();
 
-      // Resolve from pdf_url (legacy) or pdf_urls (multi-PDF) — take the first entry
-      const resolvedUrl = pick?.pdf_url
-        || ((pick?.pdf_urls as any[] | null)?.[0]?.url ?? null);
+      // Resolve from pdf_urls (multi-PDF) — match by label if provided, else first entry.
+      // Fall back to legacy pdf_url.
+      const pdfList = (pick?.pdf_urls as any[] | null) ?? [];
+      const matched = sheetLabel
+        ? pdfList.find((p) => (p?.label || "").trim().toLowerCase() === sheetLabel.trim().toLowerCase())
+        : null;
+      const resolvedUrl = matched?.url
+        || pdfList[0]?.url
+        || pick?.pdf_url
+        || null;
 
       if (resolvedUrl) {
         const signed = await getSignedSpecSheetUrl(resolvedUrl);
