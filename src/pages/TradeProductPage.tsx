@@ -361,8 +361,22 @@ const TradeProductPage: React.FC = () => {
   const topOptions = isDualAxis
     ? Array.from(new Set(sizeVariants!.map((v) => (v.top || "").trim()).filter(Boolean)))
     : [];
+  // For dual-axis variants, expose unique sizes (from `label`) as a third selector.
+  // Price is the row matching (size × base × top).
+  const dualSizeOptions = isDualAxis
+    ? Array.from(new Set(sizeVariants!.map((v) => (v.label || "").trim()).filter(Boolean)))
+    : [];
+  const hasDualSize = dualSizeOptions.length > 0;
+  const [selectedDualSize, setSelectedDualSize] = (() => {
+    // inline-managed state declared at the top of the component below
+    return [null, () => {}] as any;
+  })();
   const dualVariant = isDualAxis
-    ? sizeVariants!.find((v) => (v.base || "").trim() === (selectedBase || "") && (v.top || "").trim() === (selectedTop || ""))
+    ? sizeVariants!.find((v) =>
+        (v.base || "").trim() === (selectedBase || "") &&
+        (v.top || "").trim() === (selectedTop || "") &&
+        (!hasDualSize || (v.label || "").trim() === (selectedDualSizeState || ""))
+      )
     : null;
   const activeVariant = isDualAxis
     ? dualVariant
