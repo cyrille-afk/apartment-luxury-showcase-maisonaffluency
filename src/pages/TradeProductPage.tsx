@@ -512,7 +512,18 @@ const TradeProductPage: React.FC = () => {
 
             {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
-              {!isDualAxis && product.materials && (
+              {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
+              {!isDualAxis && hasSingleAxisSplit && (
+                <ExpandableSpec
+                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  text={singleMaterialOptions.join("\n")}
+                  placeholder="Select your material choice"
+                  emphasized
+                  value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : undefined}
+                  onChange={(idx) => setSelectedSingleMaterial(singleMaterialOptions[idx] ?? null)}
+                />
+              )}
+              {!isDualAxis && !hasSingleAxisSplit && product.materials && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={product.materials}
@@ -541,24 +552,30 @@ const TradeProductPage: React.FC = () => {
                   />
                 </>
               )}
-              {product.dimensions && !isDualAxis && (
+              {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
+              {!isDualAxis && hasSingleAxisSplit && (
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={singleSizeOptions.join("\n")}
+                  emphasized
+                  placeholder="Select your size"
+                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : undefined}
+                  onChange={(idx) => setSelectedSingleSize(singleSizeOptions[idx] ?? null)}
+                />
+              )}
+              {/* Single-axis (no material split): show stripped size labels indexed by variant */}
+              {product.dimensions && !isDualAxis && !hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
                     sizeVariants && sizeVariants.length > 0
                       ? sizeVariants
                           .map((v) => {
-                            // Strip a leading "Product Name:" prefix so the row shows
-                            // just the variant identifier (size + material/finish).
                             let label = (v.label || "").trim();
                             const colonIdx = label.indexOf(":");
                             if (colonIdx > -1 && colonIdx < 60) {
                               label = label.slice(colonIdx + 1).trim();
                             }
-                            // Only trim a trailing material suffix when the label
-                            // actually contains a dimension unit (cm/mm/in or a
-                            // standalone "m"/"M" word). Without this guard, labels
-                            // like "VHS/M 120-45 Kynos" collapse to "VHS/M".
                             const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
                               || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
                             if (dimMatch) label = dimMatch[1].trim();
