@@ -11,6 +11,7 @@ export interface VariantPreviewProps {
   variantPlaceholder?: string | null;
   dimensions?: string | null;
   materials?: string | null;
+  currency?: string | null;
 }
 
 export default function VariantPreviewPanel({
@@ -18,6 +19,7 @@ export default function VariantPreviewPanel({
   variantPlaceholder,
   dimensions,
   materials,
+  currency,
 }: VariantPreviewProps) {
   const sv = sizeVariants || [];
   const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
