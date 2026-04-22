@@ -378,6 +378,7 @@ const PublicProductPage: React.FC = () => {
                       text={product.materials}
                       placeholder="Select your material choice"
                       autoSplit
+                      autoDetectedHint
                     />
                   ) : null;
                 })()}
