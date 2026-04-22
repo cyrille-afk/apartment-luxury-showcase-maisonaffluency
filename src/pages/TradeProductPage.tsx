@@ -379,9 +379,44 @@ const TradeProductPage: React.FC = () => {
         (!hasDualSize || (v.label || "").trim() === (selectedDualSize || ""))
       )
     : null;
+
+  // Single-axis label parser: split a combined "Prefix: <dimensions> <material>" label
+  // into a { size, material } pair. Falls back gracefully when the pattern doesn't match.
+  const parseSingleAxisLabel = (raw: string): { size: string; material: string } => {
+    let label = raw.trim();
+    const colonIdx = label.indexOf(":");
+    if (colonIdx > -1 && colonIdx < 60) label = label.slice(colonIdx + 1).trim();
+    const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
+      || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
+    if (dimMatch) {
+      const size = dimMatch[1].trim();
+      const material = label.slice(dimMatch[1].length).trim();
+      return { size, material };
+    }
+    return { size: label, material: "" };
+  };
+
+  const singleAxisParsed = !isDualAxis && hasVariants
+    ? sizeVariants!.map((v) => ({ ...parseSingleAxisLabel(v.label || ""), variant: v }))
+    : [];
+  const singleSizeOptions = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
+  const singleMaterialOptions = Array.from(new Set(singleAxisParsed.map((p) => p.material).filter(Boolean)));
+  const hasSingleAxisSplit = !isDualAxis && hasVariants
+    && singleSizeOptions.length > 0
+    && singleMaterialOptions.length > 0
+    && singleAxisParsed.length > singleSizeOptions.length; // i.e. multiple materials per size
+  const singleAxisActive = hasSingleAxisSplit
+    ? singleAxisParsed.find((p) =>
+        p.size === (selectedSingleSize || "") &&
+        p.material === (selectedSingleMaterial || "")
+      )?.variant ?? null
+    : null;
+
   const activeVariant = isDualAxis
     ? dualVariant
-    : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+    : hasSingleAxisSplit
+      ? singleAxisActive
+      : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
   const effectiveRrpCents = hasVariants
     ? (activeVariant ? activeVariant.price_cents : null)
     : pricing?.rrp_price_cents ?? null;
