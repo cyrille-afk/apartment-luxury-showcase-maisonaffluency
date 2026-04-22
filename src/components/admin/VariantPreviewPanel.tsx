@@ -11,6 +11,7 @@ export interface VariantPreviewProps {
   variantPlaceholder?: string | null;
   dimensions?: string | null;
   materials?: string | null;
+  currency?: string | null;
 }
 
 export default function VariantPreviewPanel({
@@ -18,6 +19,7 @@ export default function VariantPreviewPanel({
   variantPlaceholder,
   dimensions,
   materials,
+  currency,
 }: VariantPreviewProps) {
   const sv = sizeVariants || [];
   const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
@@ -146,7 +148,14 @@ export default function VariantPreviewPanel({
           {matched?.price_cents != null && matched.price_cents > 0 && (
             <div className="text-[11px] text-foreground">
               Price for selection:{" "}
-              <span className="font-medium">€{(matched.price_cents / 100).toLocaleString()}</span>
+              <span className="font-medium">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: currency || "EUR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(matched.price_cents / 100)}
+              </span>
             </div>
           )}
           {!matched && (selectedSize || selectedBase || selectedTop) && (
