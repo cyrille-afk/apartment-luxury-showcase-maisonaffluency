@@ -162,34 +162,34 @@ describe("computeVariantAxes — dual-axis", () => {
 });
 
 describe("parseMaterialsFallback — concatenated materials field", () => {
-  it("splits the Clash Coffee Table example (repeated base with finish prefixes)", () => {
+  it("splits the Clash Coffee Table example and sorts alphabetically", () => {
     expect(
       parseMaterialsFallback(
         "Cast Bronze Green Cast Bronze White Cast Bronze Black Cast Bronze"
       )
     ).toEqual([
+      "Black Cast Bronze",
       "Cast Bronze",
       "Green Cast Bronze",
       "White Cast Bronze",
-      "Black Cast Bronze",
     ]);
   });
 
-  it("collapses double-spaces from messy data", () => {
+  it("collapses double-spaces and sorts alphabetically", () => {
     expect(
       parseMaterialsFallback("Cast Bronze  Green Cast  Bronze  White Cast  Bronze")
     ).toEqual(["Cast Bronze", "Green Cast Bronze", "White Cast Bronze"]);
   });
 
-  it("splits on commas", () => {
-    expect(parseMaterialsFallback("Oak, Walnut, Brass")).toEqual(["Oak", "Walnut", "Brass"]);
+  it("splits on commas and sorts alphabetically", () => {
+    expect(parseMaterialsFallback("Walnut, Oak, Brass")).toEqual(["Brass", "Oak", "Walnut"]);
   });
 
-  it("splits on slashes and pipes", () => {
-    expect(parseMaterialsFallback("Marble / Travertine | Limestone")).toEqual([
+  it("splits on slashes and pipes and sorts alphabetically", () => {
+    expect(parseMaterialsFallback("Travertine / Marble | Limestone")).toEqual([
+      "Limestone",
       "Marble",
       "Travertine",
-      "Limestone",
     ]);
   });
 
@@ -203,7 +203,25 @@ describe("parseMaterialsFallback — concatenated materials field", () => {
     expect(parseMaterialsFallback(undefined)).toEqual([]);
   });
 
-  it("dedupes identical entries", () => {
-    expect(parseMaterialsFallback("Oak, Oak, Walnut")).toEqual(["Oak", "Walnut"]);
+  it("dedupes case-insensitively, keeping first-seen casing", () => {
+    expect(parseMaterialsFallback("Oak, oak, OAK, Walnut")).toEqual(["Oak", "Walnut"]);
+  });
+
+  it("is deterministic — same input always yields same order", () => {
+    const input = "Zinc, Brass, Copper, Aluminum";
+    const a = parseMaterialsFallback(input);
+    const b = parseMaterialsFallback(input);
+    const c = parseMaterialsFallback("Brass, Aluminum, Zinc, Copper");
+    expect(a).toEqual(b);
+    expect(a).toEqual(c);
+    expect(a).toEqual(["Aluminum", "Brass", "Copper", "Zinc"]);
+  });
+
+  it("sorts case-insensitively (lowercase and uppercase interleave naturally)", () => {
+    expect(parseMaterialsFallback("brass, Aluminum, COPPER")).toEqual([
+      "Aluminum",
+      "brass",
+      "COPPER",
+    ]);
   });
 });
