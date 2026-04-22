@@ -96,37 +96,47 @@ export function parseSingleAxisLabel(raw: string): { size: string; material: str
  *  1. Explicit separators: comma, slash, semicolon, " | ", " / ".
  *  2. Repeated base material with finish prefixes, e.g.
  *     "Cast Bronze Green Cast Bronze White Cast Bronze Black Cast Bronze"
- *     → ["Cast Bronze", "Green Cast Bronze", "White Cast Bronze", "Black Cast Bronze"]
+ *     → ["Black Cast Bronze", "Cast Bronze", "Green Cast Bronze", "White Cast Bronze"]
  *  3. Single material → returns one option.
  *
- * Always returns deduped, non-empty values.
+ * Output is always:
+ *  - non-empty
+ *  - case-insensitively deduped (first-seen casing wins)
+ *  - alphabetically sorted (locale-aware, case-insensitive) for stable display
  */
+const stableDedupeAndSort = (parts: string[]): string[] => {
+  const seen = new Map<string, string>();
+  for (const p of parts) {
+    const trimmed = p.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLocaleLowerCase();
+    if (!seen.has(key)) seen.set(key, trimmed);
+  }
+  return Array.from(seen.values()).sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
+  );
+};
+
 export function parseMaterialsFallback(raw: string | null | undefined): string[] {
   const text = (raw || "").replace(/\s+/g, " ").trim();
   if (!text) return [];
 
   // 1. Explicit separators
   if (/[,;|/]/.test(text)) {
-    const parts = text
-      .split(/\s*[,;|/]\s*/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return Array.from(new Set(parts));
+    const parts = text.split(/\s*[,;|/]\s*/);
+    return stableDedupeAndSort(parts);
   }
 
   // 2. Repeated-base detection. Find the longest trailing token sequence that
   //    repeats at the end of the string, then split on each occurrence.
   const tokens = text.split(" ");
   if (tokens.length >= 4) {
-    // Try base lengths from 1 up to half the tokens
     for (let baseLen = Math.min(4, Math.floor(tokens.length / 2)); baseLen >= 1; baseLen--) {
       const base = tokens.slice(-baseLen).join(" ");
-      // Need at least 2 occurrences for a repeat pattern
       const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const re = new RegExp(`\\b${escaped}\\b`, "g");
       const matches = text.match(re);
       if (matches && matches.length >= 2) {
-        // Split at each base occurrence; segment = (optional prefix) + base
         const parts: string[] = [];
         let cursor = 0;
         let m: RegExpExecArray | null;
@@ -137,9 +147,8 @@ export function parseMaterialsFallback(raw: string | null | undefined): string[]
           if (segment) parts.push(segment);
           cursor = end;
         }
-        // Reject if any segment is empty or excessively long (likely wrong base)
         if (parts.length >= 2 && parts.every((p) => p.length > 0 && p.length < 80)) {
-          return Array.from(new Set(parts));
+          return stableDedupeAndSort(parts);
         }
       }
     }
