@@ -211,6 +211,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
+  const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
