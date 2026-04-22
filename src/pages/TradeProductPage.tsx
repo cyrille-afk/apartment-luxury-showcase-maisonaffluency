@@ -505,6 +505,7 @@ const TradeProductPage: React.FC = () => {
                   text={product.materials}
                   placeholder="Select your material choice"
                   autoSplit
+                  autoDetectedHint
                 />
               )}
               {/* Dual-axis: Base × Top finish dropdowns */}
