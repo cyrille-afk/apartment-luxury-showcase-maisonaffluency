@@ -61,6 +61,8 @@ interface ProductRow {
   origin: string | null;
   designer_id: string;
   variant_placeholder: string | null;
+  base_axis_label: string | null;
+  top_axis_label: string | null;
 }
 
 interface TradePricing {
@@ -89,7 +91,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -515,7 +517,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={baseOptions.join("\n")}
-                    placeholder="Select your material choice for the base"
+                    placeholder={`Select your ${(product.base_axis_label || "base").toLowerCase()} choice`}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
@@ -523,7 +525,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={topOptions.join("\n")}
-                    placeholder={product.variant_placeholder || "Select your material choice for the top"}
+                    placeholder={product.variant_placeholder || `Select your ${(product.top_axis_label || "top").toLowerCase()} choice`}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
                     onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}
