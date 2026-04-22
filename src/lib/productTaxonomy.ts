@@ -187,9 +187,19 @@ export function normalizeCategory(value?: string, subcategory?: string): string 
   return mapped;
 }
 
+// Case-insensitive lookup map built from SUBCATEGORY_NORMALIZE
+const SUBCATEGORY_NORMALIZE_CI: Record<string, string> = Object.fromEntries(
+  Object.entries(SUBCATEGORY_NORMALIZE).map(([k, v]) => [k.toLowerCase(), v])
+);
+
 export function normalizeSubcategory(value?: string): string | undefined {
   if (!value) return value;
-  return SUBCATEGORY_NORMALIZE[value] || value;
+  const trimmed = value.trim();
+  return (
+    SUBCATEGORY_NORMALIZE[trimmed] ||
+    SUBCATEGORY_NORMALIZE_CI[trimmed.toLowerCase()] ||
+    trimmed
+  );
 }
 
 // Title-based keyword patterns → canonical subcategory (order matters: specific before generic)
