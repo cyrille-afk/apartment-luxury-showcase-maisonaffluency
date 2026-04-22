@@ -361,14 +361,31 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                   />
                 ) : null;
               })()}
-              {product.dimensions && (
-                <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={formatDimensionsMultiline(product.dimensions)}
-                  emphasized
-                  placeholder="Select your size"
-                />
-              )}
+              {(() => {
+                const sv = product.size_variants || [];
+                const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+                const dualSizeOptions = isDualAxis
+                  ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean)))
+                  : [];
+                if (isDualAxis && dualSizeOptions.length > 0) {
+                  return (
+                    <ExpandableSpec
+                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      text={dualSizeOptions.join("\n")}
+                      emphasized
+                      placeholder="Select your size"
+                    />
+                  );
+                }
+                return product.dimensions ? (
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={formatDimensionsMultiline(product.dimensions)}
+                    emphasized
+                    placeholder="Select your size"
+                  />
+                ) : null;
+              })()}
             </div>
 
 

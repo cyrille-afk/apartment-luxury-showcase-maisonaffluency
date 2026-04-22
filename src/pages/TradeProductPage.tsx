@@ -211,6 +211,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
+  const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -361,8 +362,18 @@ const TradeProductPage: React.FC = () => {
   const topOptions = isDualAxis
     ? Array.from(new Set(sizeVariants!.map((v) => (v.top || "").trim()).filter(Boolean)))
     : [];
+  // For dual-axis variants, expose unique sizes (from `label`) as a third selector.
+  // Price is the row matching (size × base × top).
+  const dualSizeOptions = isDualAxis
+    ? Array.from(new Set(sizeVariants!.map((v) => (v.label || "").trim()).filter(Boolean)))
+    : [];
+  const hasDualSize = dualSizeOptions.length > 0;
   const dualVariant = isDualAxis
-    ? sizeVariants!.find((v) => (v.base || "").trim() === (selectedBase || "") && (v.top || "").trim() === (selectedTop || ""))
+    ? sizeVariants!.find((v) =>
+        (v.base || "").trim() === (selectedBase || "") &&
+        (v.top || "").trim() === (selectedTop || "") &&
+        (!hasDualSize || (v.label || "").trim() === (selectedDualSize || ""))
+      )
     : null;
   const activeVariant = isDualAxis
     ? dualVariant
@@ -523,7 +534,17 @@ const TradeProductPage: React.FC = () => {
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
                 />
               )}
-              {product.dimensions && isDualAxis && (
+              {isDualAxis && hasDualSize && (
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={dualSizeOptions.join("\n")}
+                  emphasized
+                  placeholder="Select your size"
+                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
+                  onChange={(idx) => setSelectedDualSize(dualSizeOptions[idx] ?? null)}
+                />
+              )}
+              {product.dimensions && isDualAxis && !hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={formatDimensionsMultiline(product.dimensions)}
