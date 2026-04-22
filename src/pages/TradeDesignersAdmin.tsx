@@ -21,6 +21,7 @@ import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
+import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
