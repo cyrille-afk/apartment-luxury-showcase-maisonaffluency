@@ -28,6 +28,12 @@ interface ExpandableSpecProps {
    * Preserves any "Prefix:" portion before the first split-character.
    */
   autoSplit?: boolean;
+  /**
+   * When true and autoSplit produces multiple options, render a small muted
+   * caption below the dropdown explaining the options were auto-detected
+   * from the materials field. Has no effect if the dropdown isn't auto-split.
+   */
+  autoDetectedHint?: boolean;
   /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
   value?: number;
   onChange?: (index: number) => void;
