@@ -22,9 +22,9 @@ describe("parseSingleAxisLabel", () => {
     expect(b.material).toBe("Marble");
   });
 
-  it("supports inches and quote unit", () => {
-    expect(parseSingleAxisLabel('Side table: 24" × 18" Oak')).toEqual({
-      size: '24" × 18"',
+  it("supports inches unit (word form)", () => {
+    expect(parseSingleAxisLabel("Side table: 24 inches Oak")).toEqual({
+      size: "24 inches",
       material: "Oak",
     });
   });
