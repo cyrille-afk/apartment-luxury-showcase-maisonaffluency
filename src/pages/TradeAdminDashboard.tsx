@@ -52,7 +52,7 @@ const systemGroup: AdminCard[] = [
   { title: "Instagram Audit", description: "Map and verify all designer Instagram accounts", url: "/trade/designers/instagram", icon: Instagram },
   { title: "OG & Social Previews", description: "Re-scrape Open Graph metadata for social sharing", url: "/trade/admin", icon: Globe },
   { title: "Section Heroes", description: "Manage hero banner images across the portal", url: "/trade/admin", icon: Image },
-  { title: "Taxonomy Audit", description: "Review product category mapping and consistency", url: "/trade/admin", icon: Layers },
+  { title: "Taxonomy Audit", description: "Find curator picks with non-canonical or mismatched categories", url: "/trade/admin/taxonomy-audit", icon: Layers },
 ];
 
 const shippingGroup: AdminCard[] = [
