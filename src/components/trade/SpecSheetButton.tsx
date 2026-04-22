@@ -43,8 +43,8 @@ export default function SpecSheetButton({
 
   if (entries.length === 0) return null;
 
-  const openPdf = (url: string, label?: string) => {
-    window.open(buildSpecSheetUrl(url, brandName, productName, label), "_blank");
+  const openPdf = (url: string, label?: string, index?: number) => {
+    window.open(buildSpecSheetUrl(url, brandName, productName, label, index), "_blank");
   };
 
   // Single PDF — direct link
@@ -107,7 +107,7 @@ export default function SpecSheetButton({
               key={i}
               onClick={() => {
                 if (onBeforeOpen && !onBeforeOpen()) return;
-                openPdf(entry.url, entry.label);
+                openPdf(entry.url, entry.label, i);
               }}
               className="flex items-center gap-2 cursor-pointer font-body text-xs"
             >
@@ -137,7 +137,7 @@ export default function SpecSheetButton({
             key={i}
             onClick={() => {
               if (onBeforeOpen && !onBeforeOpen()) return;
-              openPdf(entry.url, entry.label);
+              openPdf(entry.url, entry.label, i);
             }}
             className="flex items-center gap-2 cursor-pointer font-body text-xs"
           >

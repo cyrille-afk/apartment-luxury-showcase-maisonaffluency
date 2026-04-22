@@ -21,11 +21,21 @@ export default function TradeSpecSheet() {
   const brand = params.get("brand") || "Spec Sheet";
   const product = params.get("product") || "";
   const sheetLabel = params.get("sheet") || "";
+  const sheetIndexParam = params.get("sheetIndex");
+  const sheetIndex = sheetIndexParam !== null ? Number(sheetIndexParam) : null;
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
   const { user, loading: authLoading } = useAuth();
   const [gateOpen, setGateOpen] = useState(false);
+
+  const normalizeSheetKey = (value?: string | null) =>
+    (value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, " ")
+      .trim()
+      .toLowerCase();
 
   const pageTitle = product
     ? `${brand} — ${product} Spec Sheet`
@@ -42,13 +52,16 @@ export default function TradeSpecSheet() {
         .limit(1)
         .maybeSingle();
 
-      // Resolve from pdf_urls (multi-PDF) — match by label if provided, else first entry.
-      // Fall back to legacy pdf_url.
-      const pdfList = (pick?.pdf_urls as any[] | null) ?? [];
-      const matched = sheetLabel
-        ? pdfList.find((p) => (p?.label || "").trim().toLowerCase() === sheetLabel.trim().toLowerCase())
+      const pdfList = (pick?.pdf_urls as { label?: string; url?: string }[] | null) ?? [];
+      const matchedByIndex = Number.isInteger(sheetIndex) && sheetIndex !== null && sheetIndex >= 0
+        ? pdfList[sheetIndex] ?? null
         : null;
-      const resolvedUrl = matched?.url
+      const normalizedRequestedLabel = normalizeSheetKey(sheetLabel);
+      const matchedByLabel = normalizedRequestedLabel
+        ? pdfList.find((p) => normalizeSheetKey(p?.label) === normalizedRequestedLabel)
+        : null;
+      const resolvedUrl = matchedByIndex?.url
+        || matchedByLabel?.url
         || pdfList[0]?.url
         || pick?.pdf_url
         || null;
@@ -76,7 +89,7 @@ export default function TradeSpecSheet() {
     };
 
     resolve();
-  }, [product, user, sheetLabel]);
+  }, [product, user, sheetLabel, sheetIndex]);
 
   if (loading || authLoading) {
     return (
