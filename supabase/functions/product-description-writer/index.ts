@@ -7,6 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Brands where a single creative director is responsible for the entire collection.
+// When the product has no explicit designer subtitle, fall back to crediting this person.
+const CREATIVE_DIRECTOR_BY_BRAND: Record<string, string> = {
+  "okha": "Adam Court",
+};
+
 const TONE_INSTRUCTIONS: Record<string, string> = {
   editorial: `Write in an evocative, editorial tone suited for a luxury design journal or Instagram caption. 
 Reference the designer's philosophy and creative vision. Use sensory language about materials and craftsmanship. 
@@ -103,13 +109,20 @@ serve(async (req) => {
           actualDesigner = m[2].trim();
         }
       }
+      // Creative director fallback — for brands like OKHA, Adam Court should always be credited
+      // even when the product subtitle is empty or holds a variant descriptor.
+      const creativeDirector = CREATIVE_DIRECTOR_BY_BRAND[brandName.toLowerCase()];
+      if (!actualDesigner && creativeDirector) {
+        actualDesigner = creativeDirector;
+      }
       const isCollaboration = !!actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
+      const isCreativeDirectorCredit = !!creativeDirector && actualDesigner === creativeDirector;
 
       productContext = `
 ## PRODUCT DATA
 - **Title**: ${cleanTitle}
 - **Designed by**: ${actualDesigner || brandName}
-- **Brand / Atelier**: ${brandName}${isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
+- **Brand / Atelier**: ${brandName}${isCreativeDirectorCredit ? ` (${actualDesigner} is creative director)` : isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
 - **Materials**: ${pick.materials || "Not specified"}
 - **Dimensions**: ${pick.dimensions || "Not specified"}
 - **Category**: ${pick.category || ""}${pick.subcategory ? ` > ${pick.subcategory}` : ""}
@@ -125,7 +138,11 @@ serve(async (req) => {
 - **Specialty**: ${brand?.specialty || "Collectible design"}
 - **Philosophy**: ${brand?.philosophy || "Not available"}
 - **Biography excerpt**: ${(brand?.biography || "").slice(0, 600)}
-${isCollaboration ? `
+${isCreativeDirectorCredit ? `
+## ATTRIBUTION RULE
+${actualDesigner} is the CREATIVE DIRECTOR of ${brandName} and is responsible for the design of this piece.
+Always credit the design to ${actualDesigner} for ${brandName} (e.g. "by ${actualDesigner} for ${brandName}").
+Never imply the piece was designed anonymously by ${brandName} alone — ${actualDesigner}'s authorship must be named.` : isCollaboration ? `
 ## ATTRIBUTION RULE
 This piece was DESIGNED BY ${actualDesigner} and PRODUCED/PUBLISHED BY ${brandName}.
 Always credit the design to ${actualDesigner}. You may reference ${brandName} as the atelier/editor that commissioned or produces the piece.
