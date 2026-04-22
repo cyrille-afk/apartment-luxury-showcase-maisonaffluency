@@ -378,6 +378,22 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     />
                   );
                 }
+                // Single-axis variants (label + price only) — surface labels as size dropdown.
+                if (!isDualAxis && sv.length > 1) {
+                  const labels = Array.from(
+                    new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
+                  );
+                  if (labels.length > 1) {
+                    return (
+                      <ExpandableSpec
+                        icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                        text={labels.join("\n")}
+                        emphasized
+                        placeholder="Select your size"
+                      />
+                    );
+                  }
+                }
                 return product.dimensions ? (
                   <ExpandableSpec
                     icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}

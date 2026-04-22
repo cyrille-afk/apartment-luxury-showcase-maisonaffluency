@@ -385,7 +385,7 @@ const PublicProductPage: React.FC = () => {
                 })()}
                 {(() => {
                   const axes = computeVariantAxes(product.size_variants);
-                  const { isDualAxis, dualSizeOptions, hasSingleAxisSplit, singleSizeOptions } = axes;
+                  const { isDualAxis, dualSizeOptions, hasSingleAxisSplit, singleSizeOptions, hasVariants, singleAxisParsed } = axes;
                   if (isDualAxis && dualSizeOptions.length > 0) {
                     return (
                       <ExpandableSpec
@@ -405,6 +405,23 @@ const PublicProductPage: React.FC = () => {
                         placeholder="Select your size"
                       />
                     );
+                  }
+                  // Single-axis variants where labels are clean dimensions (no material suffix) —
+                  // still surface them as a size dropdown instead of falling back to the single dimensions string.
+                  if (hasVariants && !isDualAxis && singleAxisParsed.length > 1) {
+                    const labels = Array.from(
+                      new Set(singleAxisParsed.map((p) => p.size).filter(Boolean))
+                    );
+                    if (labels.length > 1) {
+                      return (
+                        <ExpandableSpec
+                          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                          text={labels.join("\n")}
+                          emphasized
+                          placeholder="Select your size"
+                        />
+                      );
+                    }
                   }
                   return product.dimensions ? (
                     <ExpandableSpec
