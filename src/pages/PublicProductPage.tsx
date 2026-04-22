@@ -59,6 +59,7 @@ interface ProductRow {
   designer_id: string;
   size_variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_placeholder: string | null;
+}
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
   return useQuery({
