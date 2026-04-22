@@ -201,12 +201,20 @@ const SUBCATEGORY_NORMALIZE_CI: Record<string, string> = Object.fromEntries(
   Object.entries(SUBCATEGORY_NORMALIZE).map(([k, v]) => [k.toLowerCase(), v])
 );
 
+// Case-insensitive lookup for canonical subcategories (handles casing typos like "Coffee tables")
+const CANONICAL_SUBCATEGORIES_CI: Record<string, string> = Object.fromEntries(
+  Array.from(
+    new Set(Object.values(SUBCATEGORY_MAP).flat())
+  ).map((s) => [s.toLowerCase(), s])
+);
+
 export function normalizeSubcategory(value?: string): string | undefined {
   if (!value) return value;
   const trimmed = value.trim();
   return (
     SUBCATEGORY_NORMALIZE[trimmed] ||
     SUBCATEGORY_NORMALIZE_CI[trimmed.toLowerCase()] ||
+    CANONICAL_SUBCATEGORIES_CI[trimmed.toLowerCase()] ||
     trimmed
   );
 }
