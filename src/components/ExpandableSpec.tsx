@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import {
   Select,
   SelectContent,
