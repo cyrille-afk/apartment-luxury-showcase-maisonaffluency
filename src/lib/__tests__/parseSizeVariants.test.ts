@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   parseSingleAxisLabel,
   computeVariantAxes,
+  parseMaterialsFallback,
   type SizeVariant,
 } from "../parseSizeVariants";
 
