@@ -270,7 +270,8 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\bcredenza\b/i, "Cabinets"],
   [/\bsideboard\b/i, "Cabinets"],
   [/\bcabinet\b/i, "Cabinets"],
-  [/\bnightstand\b/i, "Cabinets"],
+  [/\bnightstand\b/i, "Bedside Tables"],
+  [/\bbedside\s*table\b/i, "Bedside Tables"],
   // Bedroom Furniture
   [/\bheadboard\b/i, "Headboards"],
   // Décor
