@@ -43,8 +43,8 @@ export default function SpecSheetButton({
 
   if (entries.length === 0) return null;
 
-  const openPdf = (url: string) => {
-    window.open(buildSpecSheetUrl(url, brandName, productName), "_blank");
+  const openPdf = (url: string, label?: string) => {
+    window.open(buildSpecSheetUrl(url, brandName, productName, label), "_blank");
   };
 
   // Single PDF — direct link
