@@ -12,6 +12,8 @@ export interface VariantPreviewProps {
   dimensions?: string | null;
   materials?: string | null;
   currency?: string | null;
+  baseAxisLabel?: string | null;
+  topAxisLabel?: string | null;
 }
 
 export default function VariantPreviewPanel({
@@ -20,6 +22,8 @@ export default function VariantPreviewPanel({
   dimensions,
   materials,
   currency,
+  baseAxisLabel,
+  topAxisLabel,
 }: VariantPreviewProps) {
   const sv = sizeVariants || [];
   const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
