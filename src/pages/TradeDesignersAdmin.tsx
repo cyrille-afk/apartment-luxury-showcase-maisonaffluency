@@ -413,7 +413,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                      Variant Pricing (per Size, or Base × Top)
+                      Variant Pricing (per Size, or {pick.base_axis_label || "Base"} × {pick.top_axis_label || "Top"})
                     </label>
                     <div className="flex items-center gap-1">
                       <Button
@@ -467,8 +467,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   {(pick.size_variants || []).length > 0 && (
                     <div className="grid grid-cols-[1fr_1fr_1fr_7rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
                       <span>Label / Size</span>
-                      <span>Base</span>
-                      <span>Top</span>
+                      <span>{pick.base_axis_label || "Base"}</span>
+                      <span>{pick.top_axis_label || "Top"}</span>
                       <span>Price ({pick.currency || "EUR"})</span>
                       <span></span>
                     </div>
