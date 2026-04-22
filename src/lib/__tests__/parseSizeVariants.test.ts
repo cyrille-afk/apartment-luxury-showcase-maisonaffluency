@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   parseSingleAxisLabel,
   computeVariantAxes,
+  parseMaterialsFallback,
   type SizeVariant,
 } from "../parseSizeVariants";
 
@@ -157,5 +158,52 @@ describe("computeVariantAxes — dual-axis", () => {
     expect(axes.isDualAxis).toBe(true);
     expect(axes.baseOptions).toEqual(["Oak"]);
     expect(axes.topOptions).toEqual(["Marble"]);
+  });
+});
+
+describe("parseMaterialsFallback — concatenated materials field", () => {
+  it("splits the Clash Coffee Table example (repeated base with finish prefixes)", () => {
+    expect(
+      parseMaterialsFallback(
+        "Cast Bronze Green Cast Bronze White Cast Bronze Black Cast Bronze"
+      )
+    ).toEqual([
+      "Cast Bronze",
+      "Green Cast Bronze",
+      "White Cast Bronze",
+      "Black Cast Bronze",
+    ]);
+  });
+
+  it("collapses double-spaces from messy data", () => {
+    expect(
+      parseMaterialsFallback("Cast Bronze  Green Cast  Bronze  White Cast  Bronze")
+    ).toEqual(["Cast Bronze", "Green Cast Bronze", "White Cast Bronze"]);
+  });
+
+  it("splits on commas", () => {
+    expect(parseMaterialsFallback("Oak, Walnut, Brass")).toEqual(["Oak", "Walnut", "Brass"]);
+  });
+
+  it("splits on slashes and pipes", () => {
+    expect(parseMaterialsFallback("Marble / Travertine | Limestone")).toEqual([
+      "Marble",
+      "Travertine",
+      "Limestone",
+    ]);
+  });
+
+  it("returns single value when no separators or repeats are detected", () => {
+    expect(parseMaterialsFallback("Solid Oak")).toEqual(["Solid Oak"]);
+  });
+
+  it("handles empty/null/undefined safely", () => {
+    expect(parseMaterialsFallback("")).toEqual([]);
+    expect(parseMaterialsFallback(null)).toEqual([]);
+    expect(parseMaterialsFallback(undefined)).toEqual([]);
+  });
+
+  it("dedupes identical entries", () => {
+    expect(parseMaterialsFallback("Oak, Oak, Walnut")).toEqual(["Oak", "Walnut"]);
   });
 });

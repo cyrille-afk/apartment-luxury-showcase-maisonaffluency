@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import {
   Select,
   SelectContent,
@@ -50,7 +51,10 @@ export default function ExpandableSpec({
 }: ExpandableSpecProps) {
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
-  // Auto-split single-line text on `,` and `/` for materials-style lists
+  // Auto-split single-line text into multiple finish options. Uses the shared
+  // parseMaterialsFallback which handles both explicit separators (, / ; |)
+  // and concatenated repeated-base patterns like
+  // "Cast Bronze Green Cast Bronze White Cast Bronze".
   if (autoSplit && lines.length === 1) {
     const raw = lines[0];
     const colonIdx = raw.indexOf(":");
@@ -60,7 +64,7 @@ export default function ExpandableSpec({
       prefix = raw.slice(0, colonIdx + 1).trim() + " ";
       body = raw.slice(colonIdx + 1).trim();
     }
-    const parts = body.split(/\s*[,/]\s*/).map((s) => s.trim()).filter(Boolean);
+    const parts = parseMaterialsFallback(body);
     if (parts.length > 1) lines = parts.map((p) => prefix + p);
   }
 
