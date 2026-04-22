@@ -20,6 +20,7 @@ export default function TradeSpecSheet() {
   const [params] = useSearchParams();
   const brand = params.get("brand") || "Spec Sheet";
   const product = params.get("product") || "";
+  const sheetLabel = params.get("sheet") || "";
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
