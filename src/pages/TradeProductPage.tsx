@@ -35,6 +35,7 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates 
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { computeVariantAxes } from "@/lib/parseSizeVariants";
 
 const TRADE_DISCOUNT = 0.08;
 
