@@ -53,7 +53,7 @@ const STORAGE_SUBCATEGORIES = new Set([
 ]);
 
 const BEDROOM_SUBCATEGORIES = new Set([
-  "Headboards", "Headboard",
+  "Headboards", "Headboard", "Bedside Tables", "Bedside Table", "Nightstand", "Nightstands",
 ]);
 
 /**
