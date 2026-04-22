@@ -538,6 +538,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   dimensions={pick.dimensions}
                   materials={pick.materials}
                   currency={pick.currency}
+                  baseAxisLabel={pick.base_axis_label}
+                  topAxisLabel={pick.top_axis_label}
                 />
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
