@@ -107,7 +107,7 @@ export default function SpecSheetButton({
               key={i}
               onClick={() => {
                 if (onBeforeOpen && !onBeforeOpen()) return;
-                openPdf(entry.url, entry.label);
+                openPdf(entry.url, entry.label, i);
               }}
               className="flex items-center gap-2 cursor-pointer font-body text-xs"
             >
@@ -137,7 +137,7 @@ export default function SpecSheetButton({
             key={i}
             onClick={() => {
               if (onBeforeOpen && !onBeforeOpen()) return;
-              openPdf(entry.url, entry.label);
+              openPdf(entry.url, entry.label, i);
             }}
             className="flex items-center gap-2 cursor-pointer font-body text-xs"
           >
