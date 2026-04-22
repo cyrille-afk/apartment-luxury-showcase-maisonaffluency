@@ -756,6 +756,8 @@ const PublicDesignerProfile = () => {
                         pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
                         size_variants: (pick as any).size_variants ?? null,
                         variant_placeholder: (pick as any).variant_placeholder ?? null,
+                        base_axis_label: (pick as any).base_axis_label ?? null,
+                        top_axis_label: (pick as any).top_axis_label ?? null,
                       })}
                     >
                       <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center">
@@ -905,6 +907,8 @@ const PublicDesignerProfile = () => {
           pdf_urls: p.pdf_urls as PdfEntry[] | undefined,
           size_variants: (p as any).size_variants ?? null,
           variant_placeholder: (p as any).variant_placeholder ?? null,
+          base_axis_label: (p as any).base_axis_label ?? null,
+          top_axis_label: (p as any).top_axis_label ?? null,
         }))}
         onClose={() => setLightboxItem(null)}
         onSelectRelated={(item) => setLightboxItem(item)}
