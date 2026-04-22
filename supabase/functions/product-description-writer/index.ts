@@ -138,7 +138,11 @@ serve(async (req) => {
 - **Specialty**: ${brand?.specialty || "Collectible design"}
 - **Philosophy**: ${brand?.philosophy || "Not available"}
 - **Biography excerpt**: ${(brand?.biography || "").slice(0, 600)}
-${isCollaboration ? `
+${isCreativeDirectorCredit ? `
+## ATTRIBUTION RULE
+${actualDesigner} is the CREATIVE DIRECTOR of ${brandName} and is responsible for the design of this piece.
+Always credit the design to ${actualDesigner} for ${brandName} (e.g. "by ${actualDesigner} for ${brandName}").
+Never imply the piece was designed anonymously by ${brandName} alone — ${actualDesigner}'s authorship must be named.` : isCollaboration ? `
 ## ATTRIBUTION RULE
 This piece was DESIGNED BY ${actualDesigner} and PRODUCED/PUBLISHED BY ${brandName}.
 Always credit the design to ${actualDesigner}. You may reference ${brandName} as the atelier/editor that commissioned or produces the piece.
