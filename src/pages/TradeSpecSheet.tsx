@@ -76,7 +76,7 @@ export default function TradeSpecSheet() {
     };
 
     resolve();
-  }, [product, user]);
+  }, [product, user, sheetLabel]);
 
   if (loading || authLoading) {
     return (
