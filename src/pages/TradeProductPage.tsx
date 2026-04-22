@@ -534,7 +534,17 @@ const TradeProductPage: React.FC = () => {
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
                 />
               )}
-              {product.dimensions && isDualAxis && (
+              {isDualAxis && hasDualSize && (
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={dualSizeOptions.join("\n")}
+                  emphasized
+                  placeholder="Select your size"
+                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
+                  onChange={(idx) => setSelectedDualSize(dualSizeOptions[idx] ?? null)}
+                />
+              )}
+              {product.dimensions && isDualAxis && !hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={formatDimensionsMultiline(product.dimensions)}
