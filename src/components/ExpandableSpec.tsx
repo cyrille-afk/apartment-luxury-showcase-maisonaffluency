@@ -52,10 +52,12 @@ export default function ExpandableSpec({
   emphasized = false,
   placeholder,
   autoSplit = false,
+  autoDetectedHint = false,
   value,
   onChange,
 }: ExpandableSpecProps) {
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  let didAutoSplit = false;
 
   // Auto-split single-line text into multiple finish options. Uses the shared
   // parseMaterialsFallback which handles both explicit separators (, / ; |)
@@ -71,12 +73,16 @@ export default function ExpandableSpec({
       body = raw.slice(colonIdx + 1).trim();
     }
     const parts = parseMaterialsFallback(body);
-    if (parts.length > 1) lines = parts.map((p) => prefix + p);
+    if (parts.length > 1) {
+      lines = parts.map((p) => prefix + p);
+      didAutoSplit = true;
+    }
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const selectedIdx = value ?? internalIdx;
+  const showAutoHint = autoDetectedHint && didAutoSplit;
 
   if (lines.length === 0) return null;
 
