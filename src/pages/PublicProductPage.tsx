@@ -59,6 +59,8 @@ interface ProductRow {
   designer_id: string;
   size_variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_placeholder: string | null;
+  base_axis_label: string | null;
+  top_axis_label: string | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
