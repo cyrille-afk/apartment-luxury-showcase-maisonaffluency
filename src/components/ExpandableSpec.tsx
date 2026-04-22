@@ -28,6 +28,12 @@ interface ExpandableSpecProps {
    * Preserves any "Prefix:" portion before the first split-character.
    */
   autoSplit?: boolean;
+  /**
+   * When true and autoSplit produces multiple options, render a small muted
+   * caption below the dropdown explaining the options were auto-detected
+   * from the materials field. Has no effect if the dropdown isn't auto-split.
+   */
+  autoDetectedHint?: boolean;
   /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
   value?: number;
   onChange?: (index: number) => void;
@@ -46,10 +52,12 @@ export default function ExpandableSpec({
   emphasized = false,
   placeholder,
   autoSplit = false,
+  autoDetectedHint = false,
   value,
   onChange,
 }: ExpandableSpecProps) {
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  let didAutoSplit = false;
 
   // Auto-split single-line text into multiple finish options. Uses the shared
   // parseMaterialsFallback which handles both explicit separators (, / ; |)
@@ -65,12 +73,16 @@ export default function ExpandableSpec({
       body = raw.slice(colonIdx + 1).trim();
     }
     const parts = parseMaterialsFallback(body);
-    if (parts.length > 1) lines = parts.map((p) => prefix + p);
+    if (parts.length > 1) {
+      lines = parts.map((p) => prefix + p);
+      didAutoSplit = true;
+    }
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const selectedIdx = value ?? internalIdx;
+  const showAutoHint = autoDetectedHint && didAutoSplit;
 
   if (lines.length === 0) return null;
 
@@ -103,40 +115,50 @@ export default function ExpandableSpec({
     const currentVal = selectedIdx != null ? String(selectedIdx) : undefined;
 
     return (
-      <Select value={currentVal} onValueChange={handleChange}>
-        <SelectTrigger
-          className={cn(
-            rowClasses,
-            "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
-            "border-b border-border/60 first:border-t",
-            "font-body text-xs md:text-sm text-left",
-            "focus:ring-0 focus:ring-offset-0 focus:outline-none",
-            "hover:text-foreground transition-colors",
-            "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
-            selectedIdx == null
-              ? "text-muted-foreground"
-              : emphasized
-              ? "text-foreground font-medium"
-              : "text-foreground"
-          )}
-        >
-          <span className="shrink-0">{icon}</span>
-          <span className="flex-1 truncate">
-            <SelectValue placeholder={placeholder} />
-          </span>
-        </SelectTrigger>
-        <SelectContent className="z-[130] bg-background border-border">
-          {lines.map((line, i) => (
-            <SelectItem
-              key={i}
-              value={String(i)}
-              className="font-body text-xs md:text-sm cursor-pointer"
-            >
-              {line}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <>
+        <Select value={currentVal} onValueChange={handleChange}>
+          <SelectTrigger
+            className={cn(
+              rowClasses,
+              "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
+              "border-b border-border/60 first:border-t",
+              "font-body text-xs md:text-sm text-left",
+              "focus:ring-0 focus:ring-offset-0 focus:outline-none",
+              "hover:text-foreground transition-colors",
+              "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
+              selectedIdx == null
+                ? "text-muted-foreground"
+                : emphasized
+                ? "text-foreground font-medium"
+                : "text-foreground"
+            )}
+          >
+            <span className="shrink-0">{icon}</span>
+            <span className="flex-1 truncate">
+              <SelectValue placeholder={placeholder} />
+            </span>
+          </SelectTrigger>
+          <SelectContent className="z-[130] bg-background border-border">
+            {lines.map((line, i) => (
+              <SelectItem
+                key={i}
+                value={String(i)}
+                className="font-body text-xs md:text-sm cursor-pointer"
+              >
+                {line}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {showAutoHint && (
+          <p
+            className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 mt-1 pl-[26px]"
+            role="note"
+          >
+            Finishes auto-detected — please confirm at quote
+          </p>
+        )}
+      </>
     );
   }
 
