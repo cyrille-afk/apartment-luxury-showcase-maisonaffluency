@@ -60,6 +60,7 @@ interface ProductRow {
   lead_time: string | null;
   origin: string | null;
   designer_id: string;
+  variant_placeholder: string | null;
 }
 
 interface TradePricing {
@@ -88,7 +89,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -522,7 +523,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={topOptions.join("\n")}
-                    placeholder={/repose sofa/i.test(product.title || "") ? "Select your fabric choice" : "Select your material choice for the top"}
+                    placeholder={product.variant_placeholder || "Select your material choice for the top"}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
                     onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}

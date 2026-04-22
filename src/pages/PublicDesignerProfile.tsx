@@ -755,6 +755,7 @@ const PublicDesignerProfile = () => {
                         pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
                         pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
                         size_variants: (pick as any).size_variants ?? null,
+                        variant_placeholder: (pick as any).variant_placeholder ?? null,
                       })}
                     >
                       <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center">

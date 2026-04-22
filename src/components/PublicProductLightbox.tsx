@@ -30,6 +30,7 @@ export interface PublicLightboxItem {
   pdf_url?: string | null;
   pdf_urls?: PdfEntry[] | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  variant_placeholder?: string | null;
 }
 
 interface Props {
@@ -346,7 +347,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={topOptions.join("\n")}
-                        placeholder={/repose sofa/i.test(product.title || "") ? "Select your fabric choice" : "Select your material choice for the top"}
+                        placeholder={product.variant_placeholder || "Select your material choice for the top"}
                         emphasized
                       />
                     </>
