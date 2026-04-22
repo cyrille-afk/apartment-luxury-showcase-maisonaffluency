@@ -109,13 +109,20 @@ serve(async (req) => {
           actualDesigner = m[2].trim();
         }
       }
+      // Creative director fallback — for brands like OKHA, Adam Court should always be credited
+      // even when the product subtitle is empty or holds a variant descriptor.
+      const creativeDirector = CREATIVE_DIRECTOR_BY_BRAND[brandName.toLowerCase()];
+      if (!actualDesigner && creativeDirector) {
+        actualDesigner = creativeDirector;
+      }
       const isCollaboration = !!actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
+      const isCreativeDirectorCredit = !!creativeDirector && actualDesigner === creativeDirector;
 
       productContext = `
 ## PRODUCT DATA
 - **Title**: ${cleanTitle}
 - **Designed by**: ${actualDesigner || brandName}
-- **Brand / Atelier**: ${brandName}${isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
+- **Brand / Atelier**: ${brandName}${isCreativeDirectorCredit ? ` (${actualDesigner} is creative director)` : isCollaboration ? ` (commissioned the piece from ${actualDesigner})` : ""}
 - **Materials**: ${pick.materials || "Not specified"}
 - **Dimensions**: ${pick.dimensions || "Not specified"}
 - **Category**: ${pick.category || ""}${pick.subcategory ? ` > ${pick.subcategory}` : ""}
