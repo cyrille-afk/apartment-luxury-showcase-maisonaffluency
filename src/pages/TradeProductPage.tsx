@@ -212,6 +212,10 @@ const TradeProductPage: React.FC = () => {
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
+  // Single-axis split: when each variant label encodes both size + material,
+  // we expose two independent dropdowns and resolve the active variant by both.
+  const [selectedSingleSize, setSelectedSingleSize] = useState<string | null>(null);
+  const [selectedSingleMaterial, setSelectedSingleMaterial] = useState<string | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
