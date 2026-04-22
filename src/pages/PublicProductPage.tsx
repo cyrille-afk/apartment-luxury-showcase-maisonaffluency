@@ -368,6 +368,15 @@ const PublicProductPage: React.FC = () => {
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={singleMaterialOptions.join("\n")}
                         placeholder={product.variant_placeholder || "Select your material choice"}
+                        emphasized
+                      />
+                    );
+                  }
+                  return product.materials ? (
+                    <ExpandableSpec
+                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      text={product.materials}
+                      placeholder={product.variant_placeholder || "Select your material choice"}
                       autoSplit
                       autoDetectedHint
                     />
