@@ -62,7 +62,7 @@ const PublicFavorites = () => {
       setLoading(true);
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id, size_variants")
+        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder")
         .in("id", favIds);
 
       if (!data || data.length === 0) {
@@ -127,6 +127,7 @@ const PublicFavorites = () => {
         subcategory: p.subcategory,
         pdf_url: p.pdf_url,
         size_variants: (p as any).size_variants ?? null,
+        variant_placeholder: (p as any).variant_placeholder ?? null,
       })),
     [picks]
   );
