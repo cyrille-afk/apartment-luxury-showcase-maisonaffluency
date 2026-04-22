@@ -283,7 +283,7 @@ function inferSubcategoryFromTitle(title: string): string | undefined {
 }
 
 // Set of all canonical subcategory values (values in SUBCATEGORY_MAP)
-const ALL_CANONICAL_SUBCATEGORIES = new Set(
+export const ALL_CANONICAL_SUBCATEGORIES = new Set(
   Object.values(SUBCATEGORY_MAP).flat()
 );
 
