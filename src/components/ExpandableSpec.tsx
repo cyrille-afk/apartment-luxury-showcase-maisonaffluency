@@ -115,40 +115,50 @@ export default function ExpandableSpec({
     const currentVal = selectedIdx != null ? String(selectedIdx) : undefined;
 
     return (
-      <Select value={currentVal} onValueChange={handleChange}>
-        <SelectTrigger
-          className={cn(
-            rowClasses,
-            "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
-            "border-b border-border/60 first:border-t",
-            "font-body text-xs md:text-sm text-left",
-            "focus:ring-0 focus:ring-offset-0 focus:outline-none",
-            "hover:text-foreground transition-colors",
-            "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
-            selectedIdx == null
-              ? "text-muted-foreground"
-              : emphasized
-              ? "text-foreground font-medium"
-              : "text-foreground"
-          )}
-        >
-          <span className="shrink-0">{icon}</span>
-          <span className="flex-1 truncate">
-            <SelectValue placeholder={placeholder} />
-          </span>
-        </SelectTrigger>
-        <SelectContent className="z-[130] bg-background border-border">
-          {lines.map((line, i) => (
-            <SelectItem
-              key={i}
-              value={String(i)}
-              className="font-body text-xs md:text-sm cursor-pointer"
-            >
-              {line}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <>
+        <Select value={currentVal} onValueChange={handleChange}>
+          <SelectTrigger
+            className={cn(
+              rowClasses,
+              "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
+              "border-b border-border/60 first:border-t",
+              "font-body text-xs md:text-sm text-left",
+              "focus:ring-0 focus:ring-offset-0 focus:outline-none",
+              "hover:text-foreground transition-colors",
+              "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
+              selectedIdx == null
+                ? "text-muted-foreground"
+                : emphasized
+                ? "text-foreground font-medium"
+                : "text-foreground"
+            )}
+          >
+            <span className="shrink-0">{icon}</span>
+            <span className="flex-1 truncate">
+              <SelectValue placeholder={placeholder} />
+            </span>
+          </SelectTrigger>
+          <SelectContent className="z-[130] bg-background border-border">
+            {lines.map((line, i) => (
+              <SelectItem
+                key={i}
+                value={String(i)}
+                className="font-body text-xs md:text-sm cursor-pointer"
+              >
+                {line}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {showAutoHint && (
+          <p
+            className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 mt-1 pl-[26px]"
+            role="note"
+          >
+            Finishes auto-detected — please confirm at quote
+          </p>
+        )}
+      </>
     );
   }
 
