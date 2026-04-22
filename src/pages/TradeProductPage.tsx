@@ -368,15 +368,11 @@ const TradeProductPage: React.FC = () => {
     ? Array.from(new Set(sizeVariants!.map((v) => (v.label || "").trim()).filter(Boolean)))
     : [];
   const hasDualSize = dualSizeOptions.length > 0;
-  const [selectedDualSize, setSelectedDualSize] = (() => {
-    // inline-managed state declared at the top of the component below
-    return [null, () => {}] as any;
-  })();
   const dualVariant = isDualAxis
     ? sizeVariants!.find((v) =>
         (v.base || "").trim() === (selectedBase || "") &&
         (v.top || "").trim() === (selectedTop || "") &&
-        (!hasDualSize || (v.label || "").trim() === (selectedDualSizeState || ""))
+        (!hasDualSize || (v.label || "").trim() === (selectedDualSize || ""))
       )
     : null;
   const activeVariant = isDualAxis
