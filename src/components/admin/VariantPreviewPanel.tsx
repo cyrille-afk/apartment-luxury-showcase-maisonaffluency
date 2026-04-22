@@ -84,14 +84,17 @@ export default function VariantPreviewPanel({
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Layers className="h-3 w-3" /> Base
+                  <Layers className="h-3 w-3" /> {baseAxisLabel || "Base"}
                 </span>
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
                   value={selectedBase}
                   onChange={(e) => setSelectedBase(e.target.value)}
                 >
-                  <option value="">{materialPlaceholder}</option>
+                  <option value="">
+                    {variantPlaceholder ||
+                      `Select your ${(baseAxisLabel || "base").toLowerCase()} choice`}
+                  </option>
                   {baseOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
                   ))}
@@ -99,14 +102,17 @@ export default function VariantPreviewPanel({
               </label>
               <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Layers className="h-3 w-3" /> Top
+                  <Layers className="h-3 w-3" /> {topAxisLabel || "Top"}
                 </span>
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
                   value={selectedTop}
                   onChange={(e) => setSelectedTop(e.target.value)}
                 >
-                  <option value="">{variantPlaceholder || "Select your material choice for the top"}</option>
+                  <option value="">
+                    {variantPlaceholder ||
+                      `Select your ${(topAxisLabel || "top").toLowerCase()} choice`}
+                  </option>
                   {topOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
                   ))}
