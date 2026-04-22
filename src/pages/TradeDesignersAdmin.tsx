@@ -21,6 +21,7 @@ import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
+import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -505,6 +506,12 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     </div>
                   ))}
                 </div>
+                <VariantPreviewPanel
+                  sizeVariants={pick.size_variants}
+                  variantPlaceholder={pick.variant_placeholder}
+                  dimensions={pick.dimensions}
+                  materials={pick.materials}
+                />
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
                   <Textarea value={pick.description || ""} onChange={(e) => updateField(pick.id, "description", e.target.value || null)} className="text-xs min-h-[60px]" />
