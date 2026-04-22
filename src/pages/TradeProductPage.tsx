@@ -212,6 +212,10 @@ const TradeProductPage: React.FC = () => {
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
+  // Single-axis split: when each variant label encodes both size + material,
+  // we expose two independent dropdowns and resolve the active variant by both.
+  const [selectedSingleSize, setSelectedSingleSize] = useState<string | null>(null);
+  const [selectedSingleMaterial, setSelectedSingleMaterial] = useState<string | null>(null);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -375,9 +379,44 @@ const TradeProductPage: React.FC = () => {
         (!hasDualSize || (v.label || "").trim() === (selectedDualSize || ""))
       )
     : null;
+
+  // Single-axis label parser: split a combined "Prefix: <dimensions> <material>" label
+  // into a { size, material } pair. Falls back gracefully when the pattern doesn't match.
+  const parseSingleAxisLabel = (raw: string): { size: string; material: string } => {
+    let label = raw.trim();
+    const colonIdx = label.indexOf(":");
+    if (colonIdx > -1 && colonIdx < 60) label = label.slice(colonIdx + 1).trim();
+    const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
+      || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
+    if (dimMatch) {
+      const size = dimMatch[1].trim();
+      const material = label.slice(dimMatch[1].length).trim();
+      return { size, material };
+    }
+    return { size: label, material: "" };
+  };
+
+  const singleAxisParsed = !isDualAxis && hasVariants
+    ? sizeVariants!.map((v) => ({ ...parseSingleAxisLabel(v.label || ""), variant: v }))
+    : [];
+  const singleSizeOptions = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
+  const singleMaterialOptions = Array.from(new Set(singleAxisParsed.map((p) => p.material).filter(Boolean)));
+  const hasSingleAxisSplit = !isDualAxis && hasVariants
+    && singleSizeOptions.length > 0
+    && singleMaterialOptions.length > 0
+    && singleAxisParsed.length > singleSizeOptions.length; // i.e. multiple materials per size
+  const singleAxisActive = hasSingleAxisSplit
+    ? singleAxisParsed.find((p) =>
+        p.size === (selectedSingleSize || "") &&
+        p.material === (selectedSingleMaterial || "")
+      )?.variant ?? null
+    : null;
+
   const activeVariant = isDualAxis
     ? dualVariant
-    : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+    : hasSingleAxisSplit
+      ? singleAxisActive
+      : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
   const effectiveRrpCents = hasVariants
     ? (activeVariant ? activeVariant.price_cents : null)
     : pricing?.rrp_price_cents ?? null;
@@ -473,7 +512,18 @@ const TradeProductPage: React.FC = () => {
 
             {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
-              {!isDualAxis && product.materials && (
+              {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
+              {!isDualAxis && hasSingleAxisSplit && (
+                <ExpandableSpec
+                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  text={singleMaterialOptions.join("\n")}
+                  placeholder="Select your material choice"
+                  emphasized
+                  value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : undefined}
+                  onChange={(idx) => setSelectedSingleMaterial(singleMaterialOptions[idx] ?? null)}
+                />
+              )}
+              {!isDualAxis && !hasSingleAxisSplit && product.materials && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={product.materials}
@@ -502,24 +552,30 @@ const TradeProductPage: React.FC = () => {
                   />
                 </>
               )}
-              {product.dimensions && !isDualAxis && (
+              {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
+              {!isDualAxis && hasSingleAxisSplit && (
+                <ExpandableSpec
+                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  text={singleSizeOptions.join("\n")}
+                  emphasized
+                  placeholder="Select your size"
+                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : undefined}
+                  onChange={(idx) => setSelectedSingleSize(singleSizeOptions[idx] ?? null)}
+                />
+              )}
+              {/* Single-axis (no material split): show stripped size labels indexed by variant */}
+              {product.dimensions && !isDualAxis && !hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
                     sizeVariants && sizeVariants.length > 0
                       ? sizeVariants
                           .map((v) => {
-                            // Strip a leading "Product Name:" prefix so the row shows
-                            // just the variant identifier (size + material/finish).
                             let label = (v.label || "").trim();
                             const colonIdx = label.indexOf(":");
                             if (colonIdx > -1 && colonIdx < 60) {
                               label = label.slice(colonIdx + 1).trim();
                             }
-                            // Only trim a trailing material suffix when the label
-                            // actually contains a dimension unit (cm/mm/in or a
-                            // standalone "m"/"M" word). Without this guard, labels
-                            // like "VHS/M 120-45 Kynos" collapse to "VHS/M".
                             const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
                               || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
                             if (dimMatch) label = dimMatch[1].trim();
