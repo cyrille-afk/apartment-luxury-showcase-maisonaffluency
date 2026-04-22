@@ -21,6 +21,7 @@ import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
+import { computeVariantAxes } from "@/lib/parseSizeVariants";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
