@@ -339,17 +339,11 @@ const PublicProductPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Materials & dimensions with gold icons — multi-line collapses to dropdown */}
+              {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
               <div className="flex flex-col gap-2">
                 {(() => {
-                  const sv = product.size_variants || [];
-                  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
-                  const baseOptions = isDualAxis
-                    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
-                    : [];
-                  const topOptions = isDualAxis
-                    ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
-                    : [];
+                  const axes = computeVariantAxes(product.size_variants);
+                  const { isDualAxis, baseOptions, topOptions, hasSingleAxisSplit, singleMaterialOptions } = axes;
                   if (isDualAxis) {
                     return (
                       <>
@@ -368,6 +362,16 @@ const PublicProductPage: React.FC = () => {
                       </>
                     );
                   }
+                  if (hasSingleAxisSplit) {
+                    return (
+                      <ExpandableSpec
+                        icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                        text={singleMaterialOptions.join("\n")}
+                        placeholder="Select your material choice"
+                        emphasized
+                      />
+                    );
+                  }
                   return product.materials ? (
                     <ExpandableSpec
                       icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -378,16 +382,23 @@ const PublicProductPage: React.FC = () => {
                   ) : null;
                 })()}
                 {(() => {
-                  const sv = product.size_variants || [];
-                  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
-                  const dualSizeOptions = isDualAxis
-                    ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean)))
-                    : [];
+                  const axes = computeVariantAxes(product.size_variants);
+                  const { isDualAxis, dualSizeOptions, hasSingleAxisSplit, singleSizeOptions } = axes;
                   if (isDualAxis && dualSizeOptions.length > 0) {
                     return (
                       <ExpandableSpec
                         icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                         text={dualSizeOptions.join("\n")}
+                        emphasized
+                        placeholder="Select your size"
+                      />
+                    );
+                  }
+                  if (hasSingleAxisSplit) {
+                    return (
+                      <ExpandableSpec
+                        icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                        text={singleSizeOptions.join("\n")}
                         emphasized
                         placeholder="Select your size"
                       />
