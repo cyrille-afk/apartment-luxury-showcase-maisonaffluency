@@ -9,9 +9,122 @@ const corsHeaders = {
 
 // Brands where a single creative director is responsible for the entire collection.
 // When the product has no explicit designer subtitle, fall back to crediting this person.
+// Keys are lowercased, trimmed brand names; aliases for the same brand can be repeated.
 const CREATIVE_DIRECTOR_BY_BRAND: Record<string, string> = {
   "okha": "Adam Court",
 };
+
+// Vocabulary that disqualifies a string from being a personal/studio name.
+// Used both for subtitle parsing and for "X by Y" title patterns.
+const VARIANT_KEYWORDS = /\b(crystal|shade|straw|shagreen|bronze|brass|marble|wood|leather|linen|silk|velvet|lacquer|gesso|parchment|stone|glass|ceramic|porcelain|oak|walnut|teak|rosewood|ash|maple|onyx|travertine|alabaster|terracotta|rattan|wicker|cane|metal|steel|iron|copper|gold|silver|nickel|chrome|matte|gloss|satin|polished|brushed|antique|distressed|natural|clear|smoked|tinted|frosted|ombr[ée]|fabric|finish|colou?r|edition|option|size|small|medium|large|wall art|table|chair|lamp|sconce|sofa|bench|console|cabinet|desk|stool|mirror|rug|vase|bowl|box|tray|lounge|dining|side|coffee|floor|ceiling|pendant|chandelier)\b/i;
+
+// Photo-credit prefixes we strip before testing whether a string is a person name.
+const PHOTO_CREDIT_PREFIX = /^(photo(?:graphy)?|image|courtesy|credit)\s*[:\-—–]?\s*/i;
+
+/** Collapse whitespace and strip surrounding punctuation/quotes. */
+function normalizeName(input: string | null | undefined): string {
+  if (!input) return "";
+  return String(input)
+    .replace(/[\u2018\u2019\u201C\u201D"']/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^[,.\-–—:;]+|[,.\-–—:;]+$/g, "")
+    .trim();
+}
+
+/** Heuristic: does the string look like a person or studio name (and not a material/variant)? */
+function looksLikeDesignerName(value: string): boolean {
+  const v = normalizeName(value);
+  if (!v) return false;
+  if (v.length < 3 || v.length > 80) return false;
+  if (VARIANT_KEYWORDS.test(v)) return false;
+  // Two+ capitalized tokens, allowing diacritics, ampersands, hyphens, apostrophes, dots.
+  // Examples that should match: "Adam Court", "Yabu Pushelberg", "Studio KO", "Pierre-Yves Rochon".
+  return /^[A-ZÀ-Ý][A-Za-zÀ-ÿ'.]+(?:[\s&\-][A-ZÀ-Ý0-9][A-Za-zÀ-ÿ'.]*)+$/.test(v);
+}
+
+/** Extract "<title> by <designer>" patterns from any text field. */
+function extractByPattern(text: string | null | undefined, brandName: string): { cleanTitle?: string; designer?: string } {
+  const t = normalizeName(text);
+  if (!t) return {};
+  const m = t.match(/^(.*?)\s+by\s+(.+?)(?:\s+for\s+.+)?\s*$/i);
+  if (!m) return {};
+  const candidate = normalizeName(m[2]);
+  if (!candidate) return {};
+  if (candidate.toLowerCase() === brandName.toLowerCase()) return {};
+  if (!looksLikeDesignerName(candidate)) return {};
+  return { cleanTitle: normalizeName(m[1]), designer: candidate };
+}
+
+/**
+ * Resolve the designer/creative director from a curator pick using every available signal.
+ * Resolution order: subtitle → "X by Y" in title → "X by Y" in description → photo_credit person →
+ * creative-director map for the brand. Falls back to brand name with no attribution.
+ */
+function resolveDesigner(args: {
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  photoCredit: string | null;
+  brandName: string;
+}): { actualDesigner: string; cleanTitle: string; variantDescriptor: string; source: "subtitle" | "title" | "description" | "photo_credit" | "creative_director" | "none"; isCreativeDirectorCredit: boolean } {
+  const brandName = normalizeName(args.brandName);
+  const rawSubtitle = normalizeName(args.subtitle);
+  let cleanTitle = normalizeName(args.title);
+  let actualDesigner = "";
+  let source: "subtitle" | "title" | "description" | "photo_credit" | "creative_director" | "none" = "none";
+
+  // 1) Subtitle as a person name.
+  if (rawSubtitle && looksLikeDesignerName(rawSubtitle) && rawSubtitle.toLowerCase() !== brandName.toLowerCase()) {
+    actualDesigner = rawSubtitle;
+    source = "subtitle";
+  }
+
+  // 2) "X by Y" in the title.
+  if (!actualDesigner) {
+    const fromTitle = extractByPattern(args.title, brandName);
+    if (fromTitle.designer) {
+      actualDesigner = fromTitle.designer;
+      cleanTitle = fromTitle.cleanTitle || cleanTitle;
+      source = "title";
+    }
+  }
+
+  // 3) "X by Y" in the existing description (first 240 chars to avoid false positives).
+  if (!actualDesigner) {
+    const fromDescription = extractByPattern((args.description || "").slice(0, 240), brandName);
+    if (fromDescription.designer) {
+      actualDesigner = fromDescription.designer;
+      source = "description";
+    }
+  }
+
+  // 4) Photo credit, after stripping "Photo by ..." style prefixes.
+  if (!actualDesigner && args.photoCredit) {
+    const stripped = normalizeName(args.photoCredit.replace(PHOTO_CREDIT_PREFIX, ""));
+    const byPart = extractByPattern(stripped, brandName).designer;
+    const candidate = byPart || stripped;
+    if (candidate && looksLikeDesignerName(candidate) && candidate.toLowerCase() !== brandName.toLowerCase()) {
+      // Photo credit usually names the photographer, NOT the designer — only use as a last
+      // resort when nothing else worked AND the candidate clearly looks like a studio/designer
+      // (multi-token capitalized name without "photo" terms left in it). We deliberately skip
+      // this path and reserve it for future expansion to avoid mis-attribution.
+      // actualDesigner = candidate; source = "photo_credit";
+    }
+  }
+
+  // 5) Creative-director fallback for brands like OKHA.
+  const creativeDirector = CREATIVE_DIRECTOR_BY_BRAND[brandName.toLowerCase()];
+  if (!actualDesigner && creativeDirector) {
+    actualDesigner = creativeDirector;
+    source = "creative_director";
+  }
+
+  const isCreativeDirectorCredit = source === "creative_director" || (!!creativeDirector && actualDesigner === creativeDirector);
+  const variantDescriptor = source === "subtitle" ? "" : rawSubtitle;
+
+  return { actualDesigner, cleanTitle, variantDescriptor, source, isCreativeDirectorCredit };
+}
 
 const TONE_INSTRUCTIONS: Record<string, string> = {
   editorial: `Write in an evocative, editorial tone suited for a luxury design journal or Instagram caption. 
