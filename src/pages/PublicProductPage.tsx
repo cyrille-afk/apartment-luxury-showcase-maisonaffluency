@@ -58,6 +58,7 @@ interface ProductRow {
   origin: string | null;
   designer_id: string;
   size_variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  variant_placeholder: string | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -76,7 +77,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -356,7 +357,7 @@ const PublicProductPage: React.FC = () => {
                         <ExpandableSpec
                           icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                           text={topOptions.join("\n")}
-                          placeholder={/repose sofa/i.test(product.title || "") ? "Select your fabric choice" : "Select your material choice for the top"}
+                          placeholder={product.variant_placeholder || "Select your material choice for the top"}
                           emphasized
                         />
                       </>
@@ -367,7 +368,7 @@ const PublicProductPage: React.FC = () => {
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={singleMaterialOptions.join("\n")}
-                        placeholder="Select your material choice"
+                        placeholder={product.variant_placeholder || "Select your material choice"}
                         emphasized
                       />
                     );
@@ -376,7 +377,7 @@ const PublicProductPage: React.FC = () => {
                     <ExpandableSpec
                       icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                       text={product.materials}
-                      placeholder="Select your material choice"
+                      placeholder={product.variant_placeholder || "Select your material choice"}
                       autoSplit
                       autoDetectedHint
                     />

@@ -155,6 +155,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
     price_prefix: string | null; sort_order: number; created_at: string;
     size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
+    variant_placeholder: string | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -367,6 +368,17 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <div>
                     <label className="text-[10px] text-muted-foreground">Sort Order</label>
                     <Input type="number" value={pick.sort_order} onChange={(e) => updateField(pick.id, "sort_order", parseInt(e.target.value) || 0)} className="text-xs" />
+                  </div>
+                  <div className="col-span-2 md:col-span-3">
+                    <label className="text-[10px] text-muted-foreground">
+                      Variant Dropdown Label <span className="italic">(optional — overrides default "Select your material choice…")</span>
+                    </label>
+                    <Input
+                      value={pick.variant_placeholder || ""}
+                      onChange={(e) => updateField(pick.id, "variant_placeholder", e.target.value || null)}
+                      placeholder='e.g. "Select your fabric choice", "Select your finish"'
+                      className="text-xs"
+                    />
                   </div>
                 </div>
 

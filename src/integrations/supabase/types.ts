@@ -702,6 +702,7 @@ export type Database = {
           tags: string[] | null
           title: string
           trade_price_cents: number | null
+          variant_placeholder: string | null
         }
         Insert: {
           category?: string | null
@@ -730,6 +731,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           trade_price_cents?: number | null
+          variant_placeholder?: string | null
         }
         Update: {
           category?: string | null
@@ -758,6 +760,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           trade_price_cents?: number | null
+          variant_placeholder?: string | null
         }
         Relationships: [
           {
@@ -2820,6 +2823,7 @@ export type Database = {
           subtitle: string | null
           tags: string[] | null
           title: string | null
+          variant_placeholder: string | null
         }
         Insert: {
           category?: string | null
@@ -2846,6 +2850,7 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string | null
+          variant_placeholder?: string | null
         }
         Update: {
           category?: string | null
@@ -2872,6 +2877,7 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string | null
+          variant_placeholder?: string | null
         }
         Relationships: [
           {
