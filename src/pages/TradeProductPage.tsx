@@ -356,21 +356,21 @@ const TradeProductPage: React.FC = () => {
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
-  // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top)
+  // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top).
+  // Parsing/deduping logic is shared with PublicProductPage via computeVariantAxes.
   const sizeVariants = pricing?.size_variants || null;
-  const hasVariants = !!(sizeVariants && sizeVariants.length > 0);
-  const isDualAxis = hasVariants && sizeVariants!.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
-  const baseOptions = isDualAxis
-    ? Array.from(new Set(sizeVariants!.map((v) => (v.base || "").trim()).filter(Boolean)))
-    : [];
-  const topOptions = isDualAxis
-    ? Array.from(new Set(sizeVariants!.map((v) => (v.top || "").trim()).filter(Boolean)))
-    : [];
-  // For dual-axis variants, expose unique sizes (from `label`) as a third selector.
-  // Price is the row matching (size × base × top).
-  const dualSizeOptions = isDualAxis
-    ? Array.from(new Set(sizeVariants!.map((v) => (v.label || "").trim()).filter(Boolean)))
-    : [];
+  const axes = computeVariantAxes(sizeVariants);
+  const {
+    hasVariants,
+    isDualAxis,
+    baseOptions,
+    topOptions,
+    dualSizeOptions,
+    singleAxisParsed,
+    singleSizeOptions,
+    singleMaterialOptions,
+    hasSingleAxisSplit,
+  } = axes;
   const hasDualSize = dualSizeOptions.length > 0;
   const dualVariant = isDualAxis
     ? sizeVariants!.find((v) =>
@@ -380,64 +380,6 @@ const TradeProductPage: React.FC = () => {
       )
     : null;
 
-  // Single-axis label parser: split a combined "Prefix: <dimensions> <material>" label
-  // into a { size, material } pair. Falls back gracefully when the pattern doesn't match
-  // the expected "<prefix>: <size> <material>" shape so the dropdown still renders
-  // sensible options instead of empty/duplicate entries.
-  const parseSingleAxisLabel = (raw: string): { size: string; material: string } => {
-    const original = (raw || "").trim();
-    if (!original) return { size: "", material: "" };
-
-    let label = original;
-    let prefix = "";
-    const colonIdx = label.indexOf(":");
-    if (colonIdx > -1 && colonIdx < 60) {
-      prefix = label.slice(0, colonIdx).trim();
-      label = label.slice(colonIdx + 1).trim();
-    }
-
-    // Try to isolate a leading dimension chunk: explicit unit, or a numeric/symbolic
-    // cluster (Ø, ×, x, digits, decimals) followed by a non-numeric word (= material).
-    const unitMatch = label.match(/^(.*?\b(?:cm|mm|in|inches?|")\b)/i)
-      || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
-    let size = "";
-    let material = "";
-    if (unitMatch) {
-      size = unitMatch[1].trim();
-      material = label.slice(unitMatch[1].length).trim();
-    } else {
-      // No unit token — try splitting at the first run of letters that follows a
-      // numeric/symbol cluster (e.g. "Ø 130 H 75 Kynos" → size "Ø 130 H 75", material "Kynos").
-      const symbolicMatch = label.match(/^([\d×xØ⌀\.\s\/H WLDhwld]+?)\s+([A-Za-zÀ-ÿ].*)$/);
-      if (symbolicMatch) {
-        size = symbolicMatch[1].trim();
-        material = symbolicMatch[2].trim();
-      } else {
-        // Could not split cleanly. Keep the whole label as the "size" so the
-        // dropdown still shows a meaningful option, and prefer the prefix when
-        // the post-colon body is empty.
-        size = label || prefix || original;
-        material = "";
-      }
-    }
-
-    // Strip dangling separators that can appear when the source label uses
-    // commas/dashes between size and material.
-    size = size.replace(/[,\-–—]\s*$/, "").trim();
-    material = material.replace(/^[,\-–—]\s*/, "").trim();
-
-    return { size, material };
-  };
-
-  const singleAxisParsed = !isDualAxis && hasVariants
-    ? sizeVariants!.map((v) => ({ ...parseSingleAxisLabel(v.label || ""), variant: v }))
-    : [];
-  const singleSizeOptions = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
-  const singleMaterialOptions = Array.from(new Set(singleAxisParsed.map((p) => p.material).filter(Boolean)));
-  const hasSingleAxisSplit = !isDualAxis && hasVariants
-    && singleSizeOptions.length > 0
-    && singleMaterialOptions.length > 0
-    && singleAxisParsed.length > singleSizeOptions.length; // i.e. multiple materials per size
   const singleAxisActive = hasSingleAxisSplit
     ? singleAxisParsed.find((p) =>
         p.size === (selectedSingleSize || "") &&
