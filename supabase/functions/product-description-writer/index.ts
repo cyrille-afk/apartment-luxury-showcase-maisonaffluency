@@ -200,36 +200,25 @@ serve(async (req) => {
         .eq("id", pick.designer_id)
         .single();
 
-      const brandName = brand?.display_name || brand?.name || "Unknown";
+      const brandName = normalizeName(brand?.display_name || brand?.name || "Unknown");
 
-      // The subtitle MAY contain the actual creator name (e.g. "Yabu Pushelberg" for a Man of Parts piece),
-      // BUT it is often used as a variant/material descriptor (e.g. "Rock Crystal", "Lounge Chair",
-      // "Special Shade", "Natural Distress Shagreen"). We must NOT treat material/variant text as a designer.
-      // Heuristic: only treat subtitle as a designer credit when it looks like a personal/studio name
-      // AND does not match common material/variant vocabulary.
-      const rawSubtitle = (pick.subtitle || "").trim();
-      const VARIANT_KEYWORDS = /\b(crystal|shade|straw|shagreen|bronze|brass|marble|wood|leather|linen|silk|velvet|lacquer|gesso|parchment|stone|glass|ceramic|porcelain|oak|walnut|teak|rosewood|ash|maple|onyx|travertine|alabaster|terracotta|rattan|wicker|cane|metal|steel|iron|copper|gold|silver|nickel|chrome|matte|gloss|satin|polished|brushed|antique|distressed|natural|clear|smoked|tinted|frosted|ombr[ée]|finish|colou?r|wall art|table|chair|lamp|sconce|sofa|bench|console|cabinet|desk|stool|mirror|rug|vase|bowl|box|tray|lounge|dining|side|coffee|floor|ceiling|pendant|chandelier)\b/i;
-      const looksLikePersonName = /^[A-Z][a-zà-ÿ]+(?:[\s&\-][A-Z][a-zà-ÿ]+)+$/.test(rawSubtitle);
-      const subtitleIsLikelyDesigner = !!rawSubtitle && looksLikePersonName && !VARIANT_KEYWORDS.test(rawSubtitle);
-
-      let actualDesigner = subtitleIsLikelyDesigner ? rawSubtitle : "";
-      const variantDescriptor = subtitleIsLikelyDesigner ? "" : rawSubtitle;
-      let cleanTitle = pick.title;
-      if (!actualDesigner) {
-        const m = pick.title.match(/^(.*?)\s+by\s+(.+?)\s*$/i);
-        if (m && m[2] && m[2].toLowerCase() !== brandName.toLowerCase() && !VARIANT_KEYWORDS.test(m[2])) {
-          cleanTitle = m[1].trim();
-          actualDesigner = m[2].trim();
-        }
-      }
-      // Creative director fallback — for brands like OKHA, Adam Court should always be credited
-      // even when the product subtitle is empty or holds a variant descriptor.
-      const creativeDirector = CREATIVE_DIRECTOR_BY_BRAND[brandName.toLowerCase()];
-      if (!actualDesigner && creativeDirector) {
-        actualDesigner = creativeDirector;
-      }
+      // Resolve designer from every available signal: subtitle, "X by Y" patterns in
+      // title/description, photo credit (guarded), and a brand→creative-director map.
+      const resolved = resolveDesigner({
+        title: pick.title,
+        subtitle: pick.subtitle,
+        description: pick.description,
+        photoCredit: pick.photo_credit,
+        brandName,
+      });
+      const { actualDesigner, cleanTitle, variantDescriptor, isCreativeDirectorCredit } = resolved;
       const isCollaboration = !!actualDesigner && actualDesigner.toLowerCase() !== brandName.toLowerCase();
-      const isCreativeDirectorCredit = !!creativeDirector && actualDesigner === creativeDirector;
+      console.log("[product-description-writer] designer resolution", {
+        product_id,
+        brand: brandName,
+        designer: actualDesigner || null,
+        source: resolved.source,
+      });
 
       productContext = `
 ## PRODUCT DATA
