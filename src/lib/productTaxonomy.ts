@@ -5,7 +5,7 @@ export const SUBCATEGORY_MAP: Record<string, string[]> = {
   Tables: ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
   Lighting: ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   Storage: ["Bookcases", "Cabinets"],
-  "Bedroom Furniture": ["Headboards"],
+  "Bedroom Furniture": ["Headboards", "Bedside Tables"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
   Décor: ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
 };
