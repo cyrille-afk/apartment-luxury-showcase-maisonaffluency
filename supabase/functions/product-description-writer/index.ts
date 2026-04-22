@@ -7,6 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Brands where a single creative director is responsible for the entire collection.
+// When the product has no explicit designer subtitle, fall back to crediting this person.
+const CREATIVE_DIRECTOR_BY_BRAND: Record<string, string> = {
+  "okha": "Adam Court",
+};
+
 const TONE_INSTRUCTIONS: Record<string, string> = {
   editorial: `Write in an evocative, editorial tone suited for a luxury design journal or Instagram caption. 
 Reference the designer's philosophy and creative vision. Use sensory language about materials and craftsmanship. 
