@@ -511,6 +511,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   variantPlaceholder={pick.variant_placeholder}
                   dimensions={pick.dimensions}
                   materials={pick.materials}
+                  currency={pick.currency}
                 />
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
