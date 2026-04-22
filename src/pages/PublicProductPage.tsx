@@ -356,7 +356,7 @@ const PublicProductPage: React.FC = () => {
                         <ExpandableSpec
                           icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                           text={topOptions.join("\n")}
-                          placeholder="Select your material choice for the top"
+                          placeholder={/repose sofa/i.test(product.title || "") ? "Select your fabric choice" : "Select your material choice for the top"}
                           emphasized
                         />
                       </>
