@@ -148,7 +148,14 @@ export default function VariantPreviewPanel({
           {matched?.price_cents != null && matched.price_cents > 0 && (
             <div className="text-[11px] text-foreground">
               Price for selection:{" "}
-              <span className="font-medium">€{(matched.price_cents / 100).toLocaleString()}</span>
+              <span className="font-medium">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: currency || "EUR",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(matched.price_cents / 100)}
+              </span>
             </div>
           )}
           {!matched && (selectedSize || selectedBase || selectedTop) && (
