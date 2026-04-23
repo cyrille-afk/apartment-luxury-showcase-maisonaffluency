@@ -517,7 +517,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={baseOptions.join("\n")}
-                    placeholder={`Select your ${(product.base_axis_label || "base").toLowerCase()} choice`}
+                    placeholder={product.variant_placeholder || `Select your ${(product.base_axis_label || "base").toLowerCase()} choice`}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
