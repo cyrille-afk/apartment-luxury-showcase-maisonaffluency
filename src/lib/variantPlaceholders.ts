@@ -1,11 +1,17 @@
 /**
  * Shared logic for variant dropdown placeholders.
  *
- * Rule (matches the admin preview panel):
- * - If `variant_placeholder` is set, it overrides BOTH Base and Top dropdowns.
- * - Otherwise, fall back to the axis-label template:
- *     "Select your {base_axis_label || 'base'} choice"
- *     "Select your {top_axis_label  || 'top'}  choice"
+ * Resolution order for Base / Top dropdowns:
+ *   1. `variant_placeholder` (curator override) — applied to BOTH dropdowns when set.
+ *   2. Axis-specific label → "Select your {label} choice"
+ *      (e.g. "Plinth" → "Select your plinth choice")
+ *   3. Generic per-axis default — Base: "Select your base finish",
+ *                                 Top:  "Select your top finish".
+ *      We avoid the meta-words "base"/"top" alone (e.g. "Select your base choice")
+ *      because they read awkwardly to end users; "finish" reads naturally for
+ *      furniture/lighting variants which is the dominant use case.
+ *
+ * All string inputs are trimmed and treated as missing if empty/whitespace.
  */
 
 export interface VariantPlaceholderInput {
@@ -14,21 +20,42 @@ export interface VariantPlaceholderInput {
   top_axis_label?: string | null;
 }
 
+const DEFAULT_BASE_PLACEHOLDER = "Select your base finish";
+const DEFAULT_TOP_PLACEHOLDER = "Select your top finish";
+const DEFAULT_MATERIAL_PLACEHOLDER = "Select your material choice";
+
+/** Returns the input string trimmed, or null if empty/whitespace/nullish. */
+function clean(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function placeholderFromAxisLabel(label: string): string {
+  return `Select your ${label.toLowerCase()} choice`;
+}
+
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
-  return (
-    p.variant_placeholder ||
-    `Select your ${(p.base_axis_label || "base").toLowerCase()} choice`
-  );
+  const override = clean(p.variant_placeholder);
+  if (override) return override;
+
+  const axis = clean(p.base_axis_label);
+  if (axis) return placeholderFromAxisLabel(axis);
+
+  return DEFAULT_BASE_PLACEHOLDER;
 }
 
 export function getTopPlaceholder(p: VariantPlaceholderInput): string {
-  return (
-    p.variant_placeholder ||
-    `Select your ${(p.top_axis_label || "top").toLowerCase()} choice`
-  );
+  const override = clean(p.variant_placeholder);
+  if (override) return override;
+
+  const axis = clean(p.top_axis_label);
+  if (axis) return placeholderFromAxisLabel(axis);
+
+  return DEFAULT_TOP_PLACEHOLDER;
 }
 
 /** Default placeholder for non-dual-axis material/size dropdowns. */
 export function getMaterialPlaceholder(p: VariantPlaceholderInput): string {
-  return p.variant_placeholder || "Select your material choice";
+  return clean(p.variant_placeholder) || DEFAULT_MATERIAL_PLACEHOLDER;
 }
