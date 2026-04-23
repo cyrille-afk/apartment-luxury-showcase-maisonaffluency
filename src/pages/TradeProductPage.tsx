@@ -517,7 +517,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={baseOptions.join("\n")}
-                    placeholder={product.variant_placeholder || `Select your ${(product.base_axis_label || "base").toLowerCase()} choice`}
+                    placeholder={getBasePlaceholder(product)}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
@@ -525,7 +525,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={topOptions.join("\n")}
-                    placeholder={product.variant_placeholder || `Select your ${(product.top_axis_label || "top").toLowerCase()} choice`}
+                    placeholder={getTopPlaceholder(product)}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
                     onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}

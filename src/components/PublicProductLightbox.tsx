@@ -343,13 +343,13 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={baseOptions.join("\n")}
-                        placeholder={product.variant_placeholder || `Select your ${(product.base_axis_label || "base").toLowerCase()} choice`}
+                        placeholder={getBasePlaceholder(product)}
                         emphasized
                       />
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={topOptions.join("\n")}
-                        placeholder={product.variant_placeholder || `Select your ${(product.top_axis_label || "top").toLowerCase()} choice`}
+                        placeholder={getTopPlaceholder(product)}
                         emphasized
                       />
                     </>
