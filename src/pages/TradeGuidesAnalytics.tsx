@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Check, Eye, Link2, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
