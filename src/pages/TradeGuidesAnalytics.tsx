@@ -424,8 +424,16 @@ export default function TradeGuidesAnalytics() {
                         : row.totalUsers;
                   const pct = maxEngagement > 0 ? Math.round((primary / maxEngagement) * 100) : 0;
                   return (
-                    <li key={row.brand} className="px-4 py-3 bg-card">
-                      <div className="flex items-center justify-between gap-4">
+                    <li
+                      key={row.brand}
+                      className="px-4 py-3 bg-card"
+                      aria-label={`Rank ${i + 1}: ${row.brand}`}
+                    >
+                      <div
+                        role="group"
+                        aria-label={`${row.brand} actions`}
+                        className="flex items-center justify-between gap-4"
+                      >
                         <div className="flex items-center gap-3 min-w-0">
                           <span className="font-body text-xs text-muted-foreground tabular-nums w-5">
                             {i + 1}.
@@ -441,7 +449,8 @@ export default function TradeGuidesAnalytics() {
                             return slug ? (
                               <Link
                                 to={`/designers/${slug}`}
-                                className="font-body text-sm text-foreground hover:text-primary truncate flex items-center gap-1.5"
+                                aria-label={`Open ${row.brand} profile`}
+                                className="font-body text-sm text-foreground hover:text-primary truncate flex items-center gap-1.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                               >
                                 {inner}
                               </Link>
@@ -465,7 +474,7 @@ export default function TradeGuidesAnalytics() {
                             type="button"
                             onClick={() => setDrillBrand(row.brand)}
                             aria-label={`View users contributing to ${row.brand}`}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                           >
                             <Users className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
