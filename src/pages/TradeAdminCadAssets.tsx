@@ -145,6 +145,7 @@ const TradeAdminCadAssets = () => {
     setPendingUrl(null);
     setPendingSize(null);
     loadAssets(productId);
+    loadAllAssets();
   };
 
   const handleToggleActive = async (asset: CadAsset) => {
@@ -157,6 +158,7 @@ const TradeAdminCadAssets = () => {
       return;
     }
     if (productId) loadAssets(productId);
+    loadAllAssets();
   };
 
   const handleDelete = async (asset: CadAsset) => {
@@ -172,6 +174,8 @@ const TradeAdminCadAssets = () => {
     toast({ title: "Asset deleted" });
     if (productId) loadAssets(productId);
     loadAllAssets();
+  };
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
