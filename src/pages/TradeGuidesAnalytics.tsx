@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BarChart3, Eye, Loader2 } from "lucide-react";
+import { ArrowLeft, BarChart3, Eye, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 type ViewRow = { slug: string; created_at: string; user_id: string | null };
+type EngagementRow = {
+  brand_name: string;
+  quote_users: number;
+  quote_lines: number;
+  board_users: number;
+  board_items: number;
+};
 type Window = 7 | 30;
+type EngagementSort = "all" | "quotes" | "boards";
 
 export default function TradeGuidesAnalytics() {
   const [windowDays, setWindowDays] = useState<Window>(7);
