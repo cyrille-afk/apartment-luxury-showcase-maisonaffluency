@@ -88,13 +88,29 @@ export default function TradeGuidesAnalytics() {
     }
   }, [drillBrand, engagementSort, windowDays]);
 
-  // On first load with ?section=engagement, scroll the section into view
+  // Persist deep-linked scroll target: re-run whenever data/filters update so
+  // the requested section (?section=… or #hash) stays in view after layout shifts.
+  const scrollTarget =
+    searchParams.get("section") ||
+    (typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "");
   useEffect(() => {
-    if (searchParams.get("section") !== "engagement") return;
-    const el = document.getElementById("engagement");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!scrollTarget) return;
+    let cancelled = false;
+    let attempts = 0;
+    const tryScroll = () => {
+      if (cancelled) return;
+      const el = document.getElementById(scrollTarget);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (attempts++ < 20) setTimeout(tryScroll, 100);
+    };
+    tryScroll();
+    return () => {
+      cancelled = true;
+    };
+  }, [scrollTarget, rows, engagement, engagementSort, windowDays]);
 
   useEffect(() => {
     if (!drillBrand) return;
