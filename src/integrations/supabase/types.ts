@@ -3034,6 +3034,12 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_admin_user_ids: {
+        Args: never
+        Returns: {
+          user_id: string
+        }[]
+      }
       get_board_by_token: {
         Args: { _token: string }
         Returns: {
