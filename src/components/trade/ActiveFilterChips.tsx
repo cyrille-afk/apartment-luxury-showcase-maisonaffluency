@@ -127,8 +127,8 @@ export default function ActiveFilterChips({
         <button
           ref={(el) => { itemsRef.current[clearAllSlot] = el; }}
           type="button"
-          onClick={() => (confirmClearAll ? setConfirmOpen(true) : handleClearAll())}
-          className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        onClick={() => (confirmClearAll ? setConfirmOpen(true) : handleClearAll())}
+          className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-sm px-1.5 py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:bg-primary focus-visible:text-primary-foreground"
         >
           Clear all
         </button>
