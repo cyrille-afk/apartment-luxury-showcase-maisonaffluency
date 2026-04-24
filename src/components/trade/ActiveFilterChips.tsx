@@ -57,16 +57,32 @@ export default function ActiveFilterChips({
     window.setTimeout(() => setAnnouncement(""), 1000);
   };
 
-  const handleClearProject = () => { clearProjectFilter(); announceCleared(`Project ${projectName || ""}`.trim()); };
-  const handleClearDesigner = () => { clearDesignerFilter(); announceCleared(`Designer ${designerLabel || designerFilter || ""}`.trim()); };
-  const handleClearAll = () => { clearAllFilters(); announceCleared("All"); };
-
   // Roving focus across the chip clear buttons + "Clear all".
   const itemsRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const regionRef = useRef<HTMLDivElement | null>(null);
+  // After a clear, restore focus to a sensible next target on re-render.
+  const pendingFocusRef = useRef<"project" | "designer" | "region" | null>(null);
+
   const focusableCount =
     (projectFilter ? 1 : 0) +
     (designerFilter ? 1 : 0) +
     (projectFilter && designerFilter ? 1 : 0);
+
+  const handleClearProject = () => {
+    pendingFocusRef.current = designerFilter ? "designer" : "region";
+    clearProjectFilter();
+    announceCleared(`Project ${projectName || ""}`.trim());
+  };
+  const handleClearDesigner = () => {
+    pendingFocusRef.current = projectFilter ? "project" : "region";
+    clearDesignerFilter();
+    announceCleared(`Designer ${designerLabel || designerFilter || ""}`.trim());
+  };
+  const handleClearAll = () => {
+    pendingFocusRef.current = "region";
+    clearAllFilters();
+    announceCleared("All");
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const key = e.key;
@@ -84,6 +100,25 @@ export default function ActiveFilterChips({
     items[nextIndex]?.focus();
   };
 
+  // Resolve pending focus once the filter set has changed and refs are reattached.
+  useEffect(() => {
+    const target = pendingFocusRef.current;
+    if (!target) return;
+    pendingFocusRef.current = null;
+
+    let s = 0;
+    const projectSlot = projectFilter ? s++ : -1;
+    const designerSlot = designerFilter ? s++ : -1;
+
+    if (target === "project" && projectSlot >= 0) {
+      itemsRef.current[projectSlot]?.focus();
+    } else if (target === "designer" && designerSlot >= 0) {
+      itemsRef.current[designerSlot]?.focus();
+    } else if (regionRef.current) {
+      regionRef.current.focus();
+    }
+  }, [projectFilter, designerFilter]);
+
   if (!projectFilter && !designerFilter) return null;
 
   // Reset slots when filter set changes.
@@ -96,10 +131,12 @@ export default function ActiveFilterChips({
 
   return (
     <div
+      ref={regionRef}
       role="region"
       aria-label="Active filters"
+      tabIndex={-1}
       onKeyDown={handleKeyDown}
-      className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 ${className}`}
+      className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 outline-none ${className}`}
     >
       <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
         Filters:
