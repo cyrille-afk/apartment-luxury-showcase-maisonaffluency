@@ -98,7 +98,15 @@ const TradeBoards = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchBoards(); }, [user]);
+  useEffect(() => { fetchBoards(); }, [user, projectFilter]);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectFilterName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
+      setProjectFilterName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const handleCreate = async () => {
     if (!user || !title.trim()) return;
@@ -167,6 +175,22 @@ const TradeBoards = () => {
             </DialogContent>
           </Dialog>
         </SectionHero>
+
+        {projectFilter && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
+            <div className="flex items-center gap-2 font-body text-xs text-foreground">
+              <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Filtered by project:</span>
+              <span className="font-medium">{projectFilterName || "…"}</span>
+            </div>
+            <button
+              onClick={() => { searchParams.delete("project"); setSearchParams(searchParams); }}
+              className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
