@@ -419,7 +419,106 @@ export default function TradeGuidesAnalytics() {
           </section>
         </>
       )}
+
+      <Dialog open={!!drillBrand} onOpenChange={(open) => !open && setDrillBrand(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              {drillBrand} — top contributors
+            </DialogTitle>
+            <DialogDescription className="font-body text-xs text-muted-foreground">
+              Trade users who quoted or saved {drillBrand} pieces in the last {windowDays} days.
+            </DialogDescription>
+          </DialogHeader>
+          {!drillRows ? (
+            <div className="flex items-center gap-2 text-muted-foreground py-8">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <span className="font-body text-sm">Loading…</span>
+            </div>
+          ) : drillRows.length === 0 ? (
+            <p className="font-body text-sm text-muted-foreground border border-dashed border-border rounded-md p-6 text-center">
+              No contributors found in this window.
+            </p>
+          ) : (
+            <BrandUsersTables rows={drillRows} />
+          )}
+        </DialogContent>
+      </Dialog>
     </article>
+  );
+}
+
+function BrandUsersTables({ rows }: { rows: BrandUserRow[] }) {
+  const quoters = rows
+    .filter((r) => r.quote_lines > 0)
+    .sort((a, b) => b.quote_lines - a.quote_lines)
+    .slice(0, 10);
+  const boarders = rows
+    .filter((r) => r.board_items > 0)
+    .sort((a, b) => b.board_items - a.board_items)
+    .slice(0, 10);
+
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      <UserList title="Top quoters" metricLabel="lines" rows={quoters} metric={(r) => r.quote_lines} />
+      <UserList
+        title="Top board contributors"
+        metricLabel="picks"
+        rows={boarders}
+        metric={(r) => r.board_items}
+      />
+    </div>
+  );
+}
+
+function UserList({
+  title,
+  metricLabel,
+  rows,
+  metric,
+}: {
+  title: string;
+  metricLabel: string;
+  rows: BrandUserRow[];
+  metric: (r: BrandUserRow) => number;
+}) {
+  return (
+    <div className="space-y-2">
+      <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        {title}
+      </h3>
+      {rows.length === 0 ? (
+        <p className="font-body text-xs text-muted-foreground italic">None in this window.</p>
+      ) : (
+        <ol className="divide-y divide-border rounded-md border border-border overflow-hidden">
+          {rows.map((r, i) => {
+            const name =
+              [r.first_name, r.last_name].filter(Boolean).join(" ").trim() ||
+              r.email ||
+              r.user_id.slice(0, 8);
+            return (
+              <li key={r.user_id} className="px-3 py-2 bg-card flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-body text-sm text-foreground truncate">
+                    <span className="text-muted-foreground tabular-nums mr-1">{i + 1}.</span>
+                    {name}
+                  </p>
+                  {r.company && (
+                    <p className="font-body text-[11px] text-muted-foreground truncate">
+                      {r.company}
+                    </p>
+                  )}
+                </div>
+                <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
+                  {metric(r)}{" "}
+                  <span className="text-muted-foreground text-xs">{metricLabel}</span>
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
   );
 }
 
