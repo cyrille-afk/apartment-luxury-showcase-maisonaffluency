@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +40,9 @@ interface Board {
   token_expires_at: string | null;
   token_rotated_at: string | null;
   project_id: string | null;
+  studio_logo_url: string | null;
+  studio_name: string | null;
+  hide_maison_branding: boolean;
 }
 
 interface BoardItem {
@@ -440,6 +445,98 @@ const TradeBoardBuilder = () => {
             )}
           </div>
         </div>
+
+        {/* Client Portal white-label settings */}
+        {isEditable && (
+          <details className="mb-6 rounded-md border border-border bg-card/40 group">
+            <summary className="cursor-pointer list-none flex items-center justify-between gap-2 px-4 py-3">
+              <span className="flex items-center gap-2">
+                <Palette className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                <span className="font-body text-xs uppercase tracking-[0.18em] text-foreground">
+                  Client Portal Branding
+                </span>
+                {board.hide_maison_branding && (
+                  <Badge variant="secondary" className="text-[10px]">White-label active</Badge>
+                )}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="px-4 pb-4 pt-1 space-y-4 border-t border-border/60">
+              <p className="font-body text-xs text-muted-foreground">
+                When the client opens your share link, they'll see your studio's branding instead of Maison Affluency's.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="studio-name" className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Studio name
+                  </Label>
+                  <Input
+                    id="studio-name"
+                    value={board.studio_name || ""}
+                    placeholder="e.g. Atelier Riviera"
+                    onBlur={async (e) => {
+                      const v = e.target.value.trim() || null;
+                      if (v === (board.studio_name || null)) return;
+                      setBoard({ ...board, studio_name: v });
+                      await supabase.from("client_boards").update({ studio_name: v } as any).eq("id", board.id);
+                      toast({ title: "Studio name saved" });
+                    }}
+                    onChange={(e) => setBoard({ ...board, studio_name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="studio-logo" className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Studio logo URL
+                  </Label>
+                  <Input
+                    id="studio-logo"
+                    value={board.studio_logo_url || ""}
+                    placeholder="https://yourstudio.com/logo.png"
+                    onBlur={async (e) => {
+                      const v = e.target.value.trim() || null;
+                      if (v === (board.studio_logo_url || null)) return;
+                      setBoard({ ...board, studio_logo_url: v });
+                      await supabase.from("client_boards").update({ studio_logo_url: v } as any).eq("id", board.id);
+                      toast({ title: "Logo URL saved" });
+                    }}
+                    onChange={(e) => setBoard({ ...board, studio_logo_url: e.target.value })}
+                  />
+                </div>
+              </div>
+              {board.studio_logo_url && (
+                <div className="flex items-center gap-3 px-3 py-2 rounded border border-border/60 bg-background">
+                  <img
+                    src={board.studio_logo_url}
+                    alt="Logo preview"
+                    className="h-8 w-auto max-w-[120px] object-contain"
+                  />
+                  <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Logo preview
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div>
+                  <Label htmlFor="hide-maison" className="font-body text-sm text-foreground cursor-pointer">
+                    Hide Maison Affluency branding
+                  </Label>
+                  <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+                    Recommended once your studio name &amp; logo are set.
+                  </p>
+                </div>
+                <Switch
+                  id="hide-maison"
+                  checked={board.hide_maison_branding}
+                  onCheckedChange={async (v) => {
+                    setBoard({ ...board, hide_maison_branding: v });
+                    await supabase.from("client_boards").update({ hide_maison_branding: v } as any).eq("id", board.id);
+                    toast({ title: v ? "White-label enabled" : "Maison branding restored" });
+                  }}
+                />
+              </div>
+            </div>
+          </details>
+        )}
 
         {/* Items grouped by sub-folder */}
         {items.length === 0 ? (

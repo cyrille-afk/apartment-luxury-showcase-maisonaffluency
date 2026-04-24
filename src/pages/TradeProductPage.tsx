@@ -23,6 +23,7 @@ import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
+import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -692,6 +693,9 @@ const TradeProductPage: React.FC = () => {
                 </Link>
               )}
             </div>
+
+            {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
+            <CadAssetsSection productId={tradeProductId} productName={product.title} />
 
             {/* Inline subtle nudge: Sample Requests live in Procurement */}
             <p className="font-body text-[11px] text-muted-foreground text-center">

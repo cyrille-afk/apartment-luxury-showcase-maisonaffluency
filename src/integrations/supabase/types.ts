@@ -239,6 +239,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cad_asset_downloads: {
+        Row: {
+          cad_asset_id: string
+          country: string
+          created_at: string
+          file_format: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          cad_asset_id: string
+          country?: string
+          created_at?: string
+          file_format: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          cad_asset_id?: string
+          country?: string
+          created_at?: string
+          file_format?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_board_comments: {
         Row: {
           author_name: string
@@ -337,10 +367,13 @@ export type Database = {
           client_email: string | null
           client_name: string
           created_at: string
+          hide_maison_branding: boolean
           id: string
           project_id: string | null
           share_token: string
           status: string
+          studio_logo_url: string | null
+          studio_name: string | null
           title: string
           token_expires_at: string | null
           token_rotated_at: string | null
@@ -351,10 +384,13 @@ export type Database = {
           client_email?: string | null
           client_name?: string
           created_at?: string
+          hide_maison_branding?: boolean
           id?: string
           project_id?: string | null
           share_token?: string
           status?: string
+          studio_logo_url?: string | null
+          studio_name?: string | null
           title?: string
           token_expires_at?: string | null
           token_rotated_at?: string | null
@@ -365,10 +401,13 @@ export type Database = {
           client_email?: string | null
           client_name?: string
           created_at?: string
+          hide_maison_branding?: boolean
           id?: string
           project_id?: string | null
           share_token?: string
           status?: string
+          studio_logo_url?: string | null
+          studio_name?: string | null
           title?: string
           token_expires_at?: string | null
           token_rotated_at?: string | null
@@ -2603,6 +2642,48 @@ export type Database = {
           },
         ]
       }
+      trade_product_cad_assets: {
+        Row: {
+          created_at: string
+          file_format: string
+          file_size_bytes: number | null
+          file_url: string
+          id: string
+          is_active: boolean
+          product_id: string
+          updated_at: string
+          uploaded_by: string | null
+          variant_label: string | null
+          version: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_format: string
+          file_size_bytes?: number | null
+          file_url: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          updated_at?: string
+          uploaded_by?: string | null
+          variant_label?: string | null
+          version?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_format?: string
+          file_size_bytes?: number | null
+          file_url?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          variant_label?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       trade_products: {
         Row: {
           brand_name: string
@@ -3046,10 +3127,13 @@ export type Database = {
           client_email: string | null
           client_name: string
           created_at: string
+          hide_maison_branding: boolean
           id: string
           project_id: string | null
           share_token: string
           status: string
+          studio_logo_url: string | null
+          studio_name: string | null
           title: string
           token_expires_at: string | null
           token_rotated_at: string | null
