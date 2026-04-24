@@ -338,6 +338,7 @@ export type Database = {
           client_name: string
           created_at: string
           id: string
+          project_id: string | null
           share_token: string
           status: string
           title: string
@@ -351,6 +352,7 @@ export type Database = {
           client_name?: string
           created_at?: string
           id?: string
+          project_id?: string | null
           share_token?: string
           status?: string
           title?: string
@@ -364,6 +366,7 @@ export type Database = {
           client_name?: string
           created_at?: string
           id?: string
+          project_id?: string | null
           share_token?: string
           status?: string
           title?: string
@@ -372,7 +375,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_boards_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_taste_profiles: {
         Row: {
@@ -1379,6 +1390,7 @@ export type Database = {
           production_end_at: string | null
           production_start_at: string | null
           production_weeks: number
+          project_id: string | null
           quote_id: string
           shipping_end_at: string | null
           shipping_start_at: string | null
@@ -1402,6 +1414,7 @@ export type Database = {
           production_end_at?: string | null
           production_start_at?: string | null
           production_weeks?: number
+          project_id?: string | null
           quote_id: string
           shipping_end_at?: string | null
           shipping_start_at?: string | null
@@ -1425,6 +1438,7 @@ export type Database = {
           production_end_at?: string | null
           production_start_at?: string | null
           production_weeks?: number
+          project_id?: string | null
           quote_id?: string
           shipping_end_at?: string | null
           shipping_start_at?: string | null
@@ -1433,6 +1447,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "order_timeline_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_timeline_quote_id_fkey"
             columns: ["quote_id"]
@@ -1654,6 +1675,51 @@ export type Database = {
           id?: string
           last_name?: string
           phone?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          client_name: string
+          color: string
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          location: string
+          name: string
+          notes: string | null
+          status: string
+          target_completion_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_name?: string
+          color?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          target_completion_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_name?: string
+          color?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          target_completion_date?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2648,6 +2714,7 @@ export type Database = {
           currency: string
           id: string
           notes: string | null
+          project_id: string | null
           responded_at: string | null
           status: string
           submitted_at: string | null
@@ -2662,6 +2729,7 @@ export type Database = {
           currency?: string
           id?: string
           notes?: string | null
+          project_id?: string | null
           responded_at?: string | null
           status?: string
           submitted_at?: string | null
@@ -2676,13 +2744,22 @@ export type Database = {
           currency?: string
           id?: string
           notes?: string | null
+          project_id?: string | null
           responded_at?: string | null
           status?: string
           submitted_at?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trade_quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_sample_requests: {
         Row: {
@@ -2943,6 +3020,7 @@ export type Database = {
           client_name: string
           created_at: string
           id: string
+          project_id: string | null
           share_token: string
           status: string
           title: string
