@@ -47,9 +47,17 @@ export function useProjectFilter() {
   const clear = () => {
     const next = new URLSearchParams(searchParams);
     next.delete("project");
-    setSearchParams(next, { replace: true });
+    // Push (not replace) so browser back restores the previous filter.
+    setSearchParams(next);
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
   };
 
-  return { projectFilter: urlValue, clearProjectFilter: clear, searchParams, setSearchParams };
+  const setProjectFilter = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("project", id); else next.delete("project");
+    // Push so back/forward navigates between filter states.
+    setSearchParams(next);
+  };
+
+  return { projectFilter: urlValue, clearProjectFilter: clear, setProjectFilter, searchParams, setSearchParams };
 }
