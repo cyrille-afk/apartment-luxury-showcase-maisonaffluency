@@ -30,6 +30,9 @@ const guides: Guide[] = [
 
 export default function TradeGuides() {
   const { isAdmin } = useAuth();
+  useEffect(() => {
+    trackEvent("trade_guides_list_open", { event_category: "Trade Guides" });
+  }, []);
   return (
     <div className="max-w-5xl mx-auto space-y-10">
       <header className="flex items-start justify-between gap-4">
