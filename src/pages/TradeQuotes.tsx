@@ -38,8 +38,12 @@ const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
-  const designerFilter = searchParams.get("designer");
+  const {
+    projectFilter,
+    designerFilter,
+    clearDesignerFilter,
+    clearAllFilters,
+  } = useProjectFilter();
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [matchingQuoteIds, setMatchingQuoteIds] = useState<Set<string> | null>(null);
@@ -47,19 +51,6 @@ const TradeQuotes = () => {
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-
-  const clearAllFilters = () => {
-    const next = new URLSearchParams(searchParams);
-    next.delete("project");
-    next.delete("designer");
-    setSearchParams(next);
-    try { sessionStorage.removeItem("trade:lastProjectFilter"); } catch {}
-  };
-  const clearDesignerOnly = () => {
-    const next = new URLSearchParams(searchParams);
-    next.delete("designer");
-    setSearchParams(next);
-  };
 
   const fetchQuotes = async () => {
     if (!user) return;
@@ -130,6 +121,14 @@ const TradeQuotes = () => {
     fetchQuotes();
   }, [user, showAll, projectFilter]);
 
+  useEffect(() => {
+    if (!projectFilter) { setProjectFilterName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
+      setProjectFilterName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
+
   // Resolve which quotes contain the selected designer/brand
   useEffect(() => {
     if (!designerFilter) { setMatchingQuoteIds(null); return; }
@@ -141,14 +140,6 @@ const TradeQuotes = () => {
       setMatchingQuoteIds(new Set(((data as any[]) || []).map((r) => r.quote_id)));
     })();
   }, [designerFilter]);
-
-  useEffect(() => {
-    if (!projectFilter) { setProjectFilterName(null); return; }
-    (async () => {
-      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
-      setProjectFilterName((data as any)?.name || null);
-    })();
-  }, [projectFilter]);
 
   const handleCreateQuote = async () => {
     if (!user) return;
@@ -233,7 +224,7 @@ const TradeQuotes = () => {
                 <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
                 <span className="font-medium">{designerFilter}</span>
                 <button
-                  onClick={clearDesignerOnly}
+                  onClick={clearDesignerFilter}
                   className="text-muted-foreground hover:text-foreground"
                   aria-label="Clear designer filter"
                 >×</button>

@@ -45,8 +45,12 @@ const TradeBoards = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
-  const designerFilter = searchParams.get("designer");
+  const {
+    projectFilter,
+    designerFilter,
+    clearDesignerFilter,
+    clearAllFilters,
+  } = useProjectFilter();
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [matchingBoardIds, setMatchingBoardIds] = useState<Set<string> | null>(null);
@@ -56,19 +60,6 @@ const TradeBoards = () => {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [creating, setCreating] = useState(false);
-
-  const clearAllFilters = () => {
-    const next = new URLSearchParams(searchParams);
-    next.delete("project");
-    next.delete("designer");
-    setSearchParams(next);
-    try { sessionStorage.removeItem("trade:lastProjectFilter"); } catch {}
-  };
-  const clearDesignerOnly = () => {
-    const next = new URLSearchParams(searchParams);
-    next.delete("designer");
-    setSearchParams(next);
-  };
 
   const fetchBoards = async () => {
     if (!user) return;
@@ -116,6 +107,14 @@ const TradeBoards = () => {
   useEffect(() => { fetchBoards(); }, [user, projectFilter]);
 
   useEffect(() => {
+    if (!projectFilter) { setProjectFilterName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
+      setProjectFilterName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
+
+  useEffect(() => {
     if (!designerFilter) { setMatchingBoardIds(null); return; }
     (async () => {
       const { data } = await supabase
@@ -125,14 +124,6 @@ const TradeBoards = () => {
       setMatchingBoardIds(new Set(((data as any[]) || []).map((r) => r.board_id)));
     })();
   }, [designerFilter]);
-
-  useEffect(() => {
-    if (!projectFilter) { setProjectFilterName(null); return; }
-    (async () => {
-      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
-      setProjectFilterName((data as any)?.name || null);
-    })();
-  }, [projectFilter]);
 
   const handleCreate = async () => {
     if (!user || !title.trim()) return;
@@ -217,7 +208,7 @@ const TradeBoards = () => {
                   <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
                   <span className="font-medium">{designerFilter}</span>
                   <button
-                    onClick={clearDesignerOnly}
+                    onClick={clearDesignerFilter}
                     className="text-muted-foreground hover:text-foreground"
                     aria-label="Clear designer filter"
                   >×</button>

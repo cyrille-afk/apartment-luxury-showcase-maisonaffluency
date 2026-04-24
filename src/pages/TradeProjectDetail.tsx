@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
@@ -39,14 +40,7 @@ export default function TradeProjectDetail() {
   const [quoteItemCount, setQuoteItemCount] = useState(0);
   const [boardItemCount, setBoardItemCount] = useState(0);
   const [designerBreakdown, setDesignerBreakdown] = useState<{ name: string; count: number }[]>([]);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const selectedDesigner = searchParams.get("designer");
-  const setSelectedDesigner = (name: string | null) => {
-    const next = new URLSearchParams(searchParams);
-    if (name) next.set("designer", name); else next.delete("designer");
-    // Push so back/forward navigates between designer-filter states.
-    setSearchParams(next);
-  };
+  const { designerFilter: selectedDesigner, setDesignerFilter: setSelectedDesigner } = useProjectFilter();
   const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
 
@@ -287,13 +281,13 @@ export default function TradeProjectDetail() {
         <div className="flex flex-wrap items-center gap-2 mb-5">
           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">Quick filter:</span>
           <Link
-            to={`/trade/quotes?project=${project.id}${selectedDesigner ? `&designer=${encodeURIComponent(selectedDesigner)}` : ""}`}
+            to={`/trade/quotes?project=${project.id}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
           >
             <FileText className="h-3 w-3" /> View quotes for this project
           </Link>
           <Link
-            to={`/trade/boards?project=${project.id}${selectedDesigner ? `&designer=${encodeURIComponent(selectedDesigner)}` : ""}`}
+            to={`/trade/boards?project=${project.id}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
           >
             <FolderArchive className="h-3 w-3" /> View boards for this project
