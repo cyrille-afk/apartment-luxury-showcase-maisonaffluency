@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Plus, Share2, FileText, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -189,6 +189,15 @@ const TradeBoards = () => {
                   </div>
                   <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
                 </div>
+                {board.project_name && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/trade/projects/${board.project_id}`); }}
+                    className="inline-flex items-center gap-1 mb-2 text-[10px] font-body uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <FolderOpen className="h-3 w-3" />
+                    {board.project_name}
+                  </button>
+                )}
                 <p className="font-body text-xs text-muted-foreground mb-4">
                   {board.item_count} {board.item_count === 1 ? "item" : "items"}
                   {board.status !== "draft" && board.token_expires_at && (
