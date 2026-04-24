@@ -1110,6 +1110,27 @@ export type Database = {
         }
         Relationships: []
       }
+      guide_views: {
+        Row: {
+          created_at: string
+          id: string
+          slug: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slug: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slug?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       journal_articles: {
         Row: {
           author: string
