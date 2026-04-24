@@ -478,24 +478,35 @@ export default function TradeGuidesAnalytics() {
                             ];
                             return tabs.map(({ tab, label, short }) => {
                               const isCopied = copiedSlug === `${slug}:${tab}`;
+                              const tabLabel = tab === "quotes" ? "Quotes" : "Boards";
                               return (
-                                <button
-                                  key={tab}
-                                  type="button"
-                                  onClick={() => copyDesignerLink(slug, row.brand, tab)}
-                                  aria-label={`${label} for ${row.brand}`}
-                                  title={label}
-                                  className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                                >
-                                  {isCopied ? (
-                                    <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                                  ) : (
-                                    <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-                                  )}
-                                  <span className="font-body text-[10px] uppercase tracking-wider">
-                                    {short}
+                                <span key={tab} className="relative inline-flex">
+                                  <button
+                                    type="button"
+                                    onClick={() => copyDesignerLink(slug, row.brand, tab)}
+                                    aria-label={`${label} for ${row.brand}`}
+                                    title={label}
+                                    className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                                  >
+                                    {isCopied ? (
+                                      <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                                    ) : (
+                                      <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                    )}
+                                    <span className="font-body text-[10px] uppercase tracking-wider">
+                                      {short}
+                                    </span>
+                                  </button>
+                                  <span
+                                    role="status"
+                                    aria-live="polite"
+                                    className={`pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-2 py-0.5 font-body text-[10px] uppercase tracking-wider text-background shadow-md transition-opacity duration-150 ${
+                                      isCopied ? "opacity-100" : "opacity-0"
+                                    }`}
+                                  >
+                                    Copied {tabLabel} link
                                   </span>
-                                </button>
+                                </span>
                               );
                             });
                           })()}
