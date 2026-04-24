@@ -193,36 +193,57 @@ const TradeBoards = () => {
           </Dialog>
         </SectionHero>
 
-        {projectFilter && (
+        {(projectFilter || designerFilter) && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
-            <div className="flex items-center gap-2 font-body text-xs text-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-xs text-foreground">
               <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Filtered by project:</span>
-              <span className="font-medium">{projectFilterName || "…"}</span>
+              {projectFilter && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Project:</span>
+                  <span className="font-medium">{projectFilterName || "…"}</span>
+                </span>
+              )}
+              {designerFilter && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
+                  <span className="font-medium">{designerFilter}</span>
+                  <button
+                    onClick={clearDesignerFilter}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Clear designer filter"
+                  >×</button>
+                </span>
+              )}
             </div>
             <button
-              onClick={clearProjectFilter}
+              onClick={clearAllFilters}
               className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
-              Clear filter
+              Clear all
             </button>
           </div>
         )}
 
-        {loading ? (
+        {(() => {
+          const visibleBoards = designerFilter && matchingBoardIds
+            ? boards.filter((b) => matchingBoardIds.has(b.id))
+            : boards;
+          return loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1,2,3].map(i => <div key={i} className="h-40 bg-muted/50 rounded-lg animate-pulse" />)}
           </div>
-        ) : boards.length === 0 ? (
+        ) : visibleBoards.length === 0 ? (
           <div className="text-center py-20">
-            <p className="font-body text-sm text-muted-foreground mb-4">No project folders yet</p>
+            <p className="font-body text-sm text-muted-foreground mb-4">
+              {designerFilter ? `No boards contain ${designerFilter}.` : "No project folders yet"}
+            </p>
             <Button variant="outline" onClick={() => setCreateOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" /> Create Your First Folder
             </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {boards.map(board => (
+            {visibleBoards.map(board => (
               <div
                 key={board.id}
                 className="border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
