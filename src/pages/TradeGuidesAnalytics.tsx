@@ -1,20 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BarChart3, Eye, Loader2 } from "lucide-react";
+import { ArrowLeft, BarChart3, Eye, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 type ViewRow = { slug: string; created_at: string; user_id: string | null };
+type EngagementRow = {
+  brand_name: string;
+  quote_users: number;
+  quote_lines: number;
+  board_users: number;
+  board_items: number;
+};
 type Window = 7 | 30;
+type EngagementSort = "all" | "quotes" | "boards";
 
 export default function TradeGuidesAnalytics() {
   const [windowDays, setWindowDays] = useState<Window>(7);
   const [rows, setRows] = useState<ViewRow[] | null>(null);
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
+  const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
+  const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setRows(null);
+    setEngagement(null);
     setError(null);
     const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
 
@@ -26,7 +38,8 @@ export default function TradeGuidesAnalytics() {
         .order("created_at", { ascending: false })
         .limit(5000),
       supabase.rpc("get_admin_user_ids"),
-    ]).then(([viewsRes, adminsRes]) => {
+      supabase.rpc("get_designer_engagement", { _since: since }),
+    ]).then(([viewsRes, adminsRes, engagementRes]) => {
       if (cancelled) return;
       if (viewsRes.error) {
         setError(viewsRes.error.message);
@@ -35,6 +48,7 @@ export default function TradeGuidesAnalytics() {
       setRows((viewsRes.data ?? []) as ViewRow[]);
       const ids = (adminsRes.data ?? []) as { user_id: string }[];
       setAdminIds(new Set(ids.map((r) => r.user_id)));
+      setEngagement((engagementRes.data ?? []) as EngagementRow[]);
     });
     return () => {
       cancelled = true;
@@ -92,6 +106,48 @@ export default function TradeGuidesAnalytics() {
       perSlug,
     };
   }, [rows, adminIds]);
+
+  const designerRanking = useMemo(() => {
+    if (!engagement) return [];
+    const merged = new Map<
+      string,
+      { brand: string; quoteUsers: number; quoteLines: number; boardUsers: number; boardItems: number }
+    >();
+    for (const r of engagement) {
+      const parent = normalizeBrandToParent(r.brand_name) || r.brand_name;
+      const existing = merged.get(parent) ?? {
+        brand: parent,
+        quoteUsers: 0,
+        quoteLines: 0,
+        boardUsers: 0,
+        boardItems: 0,
+      };
+      existing.quoteUsers += Number(r.quote_users) || 0;
+      existing.quoteLines += Number(r.quote_lines) || 0;
+      existing.boardUsers += Number(r.board_users) || 0;
+      existing.boardItems += Number(r.board_items) || 0;
+      merged.set(parent, existing);
+    }
+    const arr = Array.from(merged.values()).map((r) => ({
+      ...r,
+      totalUsers: r.quoteUsers + r.boardUsers,
+    }));
+    const key =
+      engagementSort === "quotes"
+        ? (r: typeof arr[number]) => r.quoteUsers * 1000 + r.quoteLines
+        : engagementSort === "boards"
+          ? (r: typeof arr[number]) => r.boardUsers * 1000 + r.boardItems
+          : (r: typeof arr[number]) => r.totalUsers * 1000 + r.quoteLines + r.boardItems;
+    return arr.sort((a, b) => key(b) - key(a)).slice(0, 20);
+  }, [engagement, engagementSort]);
+
+  const maxEngagement = designerRanking[0]
+    ? engagementSort === "quotes"
+      ? designerRanking[0].quoteUsers
+      : engagementSort === "boards"
+        ? designerRanking[0].boardUsers
+        : designerRanking[0].totalUsers
+    : 0;
 
   const max = perSlug[0]?.count ?? 0;
 
@@ -192,6 +248,88 @@ export default function TradeGuidesAnalytics() {
                           <span className="text-muted-foreground">
                             {" "}
                             · {row.uniqueTrade} trade · {row.uniqueAdmin} staff
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        className="mt-2 h-1 rounded-full bg-muted overflow-hidden"
+                        aria-hidden="true"
+                      >
+                        <div
+                          className="h-full bg-primary transition-[width] duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-body text-xs uppercase tracking-wider text-muted-foreground">
+                Designer engagement (trade users only)
+              </h2>
+              <div
+                role="tablist"
+                aria-label="Engagement filter"
+                className="inline-flex rounded-md border border-border overflow-hidden"
+              >
+                {([
+                  ["all", "All"],
+                  ["quotes", "Quotes"],
+                  ["boards", "Boards"],
+                ] as const).map(([key, label]) => (
+                  <button
+                    key={key}
+                    role="tab"
+                    aria-selected={engagementSort === key}
+                    onClick={() => setEngagementSort(key)}
+                    className={`px-3 py-1.5 font-body text-[10px] uppercase tracking-wider transition-colors ${
+                      engagementSort === key
+                        ? "bg-foreground text-background"
+                        : "bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {designerRanking.length === 0 ? (
+              <p className="font-body text-sm text-muted-foreground border border-dashed border-border rounded-md p-6 text-center">
+                No designer engagement recorded in this window.
+              </p>
+            ) : (
+              <ol className="divide-y divide-border rounded-md border border-border overflow-hidden">
+                {designerRanking.map((row, i) => {
+                  const primary =
+                    engagementSort === "quotes"
+                      ? row.quoteUsers
+                      : engagementSort === "boards"
+                        ? row.boardUsers
+                        : row.totalUsers;
+                  const pct = maxEngagement > 0 ? Math.round((primary / maxEngagement) * 100) : 0;
+                  return (
+                    <li key={row.brand} className="px-4 py-3 bg-card">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="font-body text-xs text-muted-foreground tabular-nums w-5">
+                            {i + 1}.
+                          </span>
+                          <span className="font-body text-sm text-foreground truncate flex items-center gap-1.5">
+                            <Sparkles className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                            {row.brand}
+                          </span>
+                        </div>
+                        <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
+                          {primary}
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · {row.quoteUsers}q / {row.quoteLines} lines · {row.boardUsers}b /{" "}
+                            {row.boardItems} picks
                           </span>
                         </span>
                       </div>
