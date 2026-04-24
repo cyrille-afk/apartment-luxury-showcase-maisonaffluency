@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,9 @@ const TradeBoards = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const projectFilter = searchParams.get("project");
+  const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -54,11 +57,13 @@ const TradeBoards = () => {
 
   const fetchBoards = async () => {
     if (!user) return;
-    const { data } = await supabase
+    let q = supabase
       .from("client_boards")
       .select("*")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
+    if (projectFilter) q = q.eq("project_id", projectFilter);
+    const { data } = await q;
 
     if (data) {
       // Fetch item counts
