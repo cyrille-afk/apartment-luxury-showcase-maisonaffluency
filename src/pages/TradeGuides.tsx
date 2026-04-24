@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
-import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet } from "lucide-react";
+import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet, FileText } from "lucide-react";
 import { prefetchGuide } from "./guides/registry";
 import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/lib/analytics";
@@ -35,6 +35,16 @@ const guides: Guide[] = [
     audience: "Specifiers & procurement",
     pdfUrl: "/guides/studio-ffe-schedule.pdf",
     icon: FileSpreadsheet,
+  },
+  {
+    slug: "tearsheets",
+    eyebrow: "Specification essentials",
+    title: "Building a Tearsheet",
+    description:
+      "How to assemble client-ready, one-page tearsheets from curator picks and trade products — with branding, spec blocks, pricing toggles and deck exports.",
+    audience: "Designers & client-facing leads",
+    pdfUrl: "/guides/studio-tearsheets.pdf",
+    icon: FileText,
   },
 ];
 
