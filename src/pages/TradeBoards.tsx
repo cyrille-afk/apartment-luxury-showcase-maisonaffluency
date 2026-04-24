@@ -45,9 +45,15 @@ const TradeBoards = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
+  const {
+    projectFilter,
+    designerFilter,
+    clearDesignerFilter,
+    clearAllFilters,
+  } = useProjectFilter();
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
+  const [matchingBoardIds, setMatchingBoardIds] = useState<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -107,6 +113,17 @@ const TradeBoards = () => {
       setProjectFilterName((data as any)?.name || null);
     })();
   }, [projectFilter]);
+
+  useEffect(() => {
+    if (!designerFilter) { setMatchingBoardIds(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("client_board_items")
+        .select("board_id, trade_products!inner(brand_name)")
+        .eq("trade_products.brand_name", designerFilter);
+      setMatchingBoardIds(new Set(((data as any[]) || []).map((r) => r.board_id)));
+    })();
+  }, [designerFilter]);
 
   const handleCreate = async () => {
     if (!user || !title.trim()) return;
