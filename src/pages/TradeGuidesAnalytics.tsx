@@ -383,14 +383,24 @@ export default function TradeGuidesAnalytics() {
                             );
                           })()}
                         </div>
-                        <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
-                          {primary}
-                          <span className="text-muted-foreground">
-                            {" "}
-                            · {row.quoteUsers}q / {row.quoteLines} lines · {row.boardUsers}b /{" "}
-                            {row.boardItems} picks
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <span className="font-body text-sm tabular-nums text-foreground">
+                            {primary}
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {row.quoteUsers}q / {row.quoteLines} lines · {row.boardUsers}b /{" "}
+                              {row.boardItems} picks
+                            </span>
                           </span>
-                        </span>
+                          <button
+                            type="button"
+                            onClick={() => setDrillBrand(row.brand)}
+                            aria-label={`View users contributing to ${row.brand}`}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          >
+                            <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                       <div
                         className="mt-2 h-1 rounded-full bg-muted overflow-hidden"
