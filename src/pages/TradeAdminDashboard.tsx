@@ -7,7 +7,7 @@ import {
   Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
-  ClipboardList, Layers, Settings2, CalendarClock, Users, Truck, Percent,
+  ClipboardList, Layers, Settings2, CalendarClock, Users, Truck, Percent, FileBox,
 } from "lucide-react";
 
 interface AdminCard {
@@ -53,6 +53,7 @@ const systemGroup: AdminCard[] = [
   { title: "OG & Social Previews", description: "Re-scrape Open Graph metadata for social sharing", url: "/trade/admin", icon: Globe },
   { title: "Section Heroes", description: "Manage hero banner images across the portal", url: "/trade/admin", icon: Image },
   { title: "Taxonomy Audit", description: "Find curator picks with non-canonical or mismatched categories", url: "/trade/admin/taxonomy-audit", icon: Layers },
+  { title: "CAD & 3D Assets", description: "Upload .dwg, .rfa, .skp files per product and per variant", url: "/trade/admin/cad-assets", icon: FileBox },
 ];
 
 const shippingGroup: AdminCard[] = [
