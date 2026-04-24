@@ -131,10 +131,12 @@ export default function ActiveFilterChips({
 
   return (
     <div
+      ref={regionRef}
       role="region"
       aria-label="Active filters"
+      tabIndex={-1}
       onKeyDown={handleKeyDown}
-      className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 ${className}`}
+      className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 outline-none ${className}`}
     >
       <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
         Filters:
