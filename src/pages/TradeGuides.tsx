@@ -67,3 +67,64 @@ export default function TradeGuides() {
     </div>
   );
 }
+
+function GuideCard({ guide: g, Icon }: { guide: Guide; Icon: any }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      // Fallback: prefetch immediately if IO unsupported.
+      prefetchGuide(g.slug);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            prefetchGuide(g.slug);
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [g.slug]);
+
+  const handlePrefetch = () => prefetchGuide(g.slug);
+
+  return (
+    <Link
+      ref={ref}
+      to={`/trade/guides/${g.slug}`}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+      onTouchStart={handlePrefetch}
+      className="group flex flex-col gap-3 rounded-md border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-muted/30"
+    >
+      <div className="flex items-center gap-3">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+          {g.eyebrow}
+        </span>
+      </div>
+      <h2 className="font-display text-lg text-foreground leading-snug">
+        {g.title}
+      </h2>
+      <p className="font-body text-sm text-muted-foreground">{g.description}</p>
+      <div className="mt-auto flex items-center justify-between pt-3 border-t border-border">
+        <span className="font-body text-xs text-muted-foreground">
+          {g.audience}
+        </span>
+        <span className="inline-flex items-center gap-1 font-body text-xs text-foreground group-hover:text-primary">
+          Read guide <ChevronRight className="h-3 w-3" aria-hidden="true" />
+        </span>
+      </div>
+    </Link>
+  );
+}
