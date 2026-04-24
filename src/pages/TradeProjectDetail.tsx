@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
+  Package, Users,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +36,10 @@ export default function TradeProjectDetail() {
   const [boards, setBoards] = useState<LinkedBoard[]>([]);
   const [timelines, setTimelines] = useState<LinkedTimeline[]>([]);
   const [loadingLinks, setLoadingLinks] = useState(true);
+  const [quoteItemCount, setQuoteItemCount] = useState(0);
+  const [boardItemCount, setBoardItemCount] = useState(0);
+  const [designerBreakdown, setDesignerBreakdown] = useState<{ name: string; count: number }[]>([]);
+  const [selectedDesigner, setSelectedDesigner] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) {
@@ -58,9 +63,43 @@ export default function TradeProjectDetail() {
         sb.from("client_boards").select("id, title, status, created_at").eq("project_id", id).order("created_at", { ascending: false }),
         sb.from("order_timeline").select("id, quote_id, kanban_status, estimated_delivery_at").eq("project_id", id),
       ]);
-      setQuotes((q.data as any) || []);
-      setBoards((b.data as any) || []);
+      const qList: LinkedQuote[] = (q.data as any) || [];
+      const bList: LinkedBoard[] = (b.data as any) || [];
+      setQuotes(qList);
+      setBoards(bList);
       setTimelines((t.data as any) || []);
+
+      // Aggregate item counts + designer breakdown
+      const quoteIds = qList.map((x) => x.id);
+      const boardIds = bList.map((x) => x.id);
+      const [qItems, bItems] = await Promise.all([
+        quoteIds.length
+          ? sb.from("trade_quote_items").select("quantity, trade_products(brand_name)").in("quote_id", quoteIds)
+          : Promise.resolve({ data: [] }),
+        boardIds.length
+          ? sb.from("client_board_items").select("id, trade_products(brand_name)").in("board_id", boardIds)
+          : Promise.resolve({ data: [] }),
+      ]);
+      const qItemsData: any[] = qItems.data || [];
+      const bItemsData: any[] = bItems.data || [];
+      const qCount = qItemsData.reduce((sum, r) => sum + (r.quantity || 1), 0);
+      setQuoteItemCount(qCount);
+      setBoardItemCount(bItemsData.length);
+
+      const tally = new Map<string, number>();
+      qItemsData.forEach((r) => {
+        const name = r.trade_products?.brand_name;
+        if (name) tally.set(name, (tally.get(name) || 0) + (r.quantity || 1));
+      });
+      bItemsData.forEach((r) => {
+        const name = r.trade_products?.brand_name;
+        if (name) tally.set(name, (tally.get(name) || 0) + 1);
+      });
+      const breakdown = Array.from(tally.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      setDesignerBreakdown(breakdown);
+
       setLoadingLinks(false);
     })();
   }, [id, user]);
@@ -214,6 +253,68 @@ export default function TradeProjectDetail() {
         )}
       </div>
 
+      {/* Summary panel */}
+      <div className="border border-border rounded-md p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">Project summary</h2>
+          {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+          <Stat icon={FileText} label="Quotes" value={quotes.length} />
+          <Stat icon={FolderArchive} label="Boards" value={boards.length} />
+          <Stat icon={Package} label="Quote items" value={quoteItemCount} />
+          <Stat icon={ListChecks} label="Board items" value={boardItemCount} />
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground">By designer / brand</h3>
+            </div>
+            {selectedDesigner && (
+              <button
+                onClick={() => setSelectedDesigner(null)}
+                className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {designerBreakdown.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">
+              {loadingLinks ? "Loading…" : "No items linked to this project yet."}
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {designerBreakdown.map((d) => {
+                const active = selectedDesigner === d.name;
+                return (
+                  <button
+                    key={d.name}
+                    onClick={() => setSelectedDesigner(active ? null : d.name)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-body text-xs transition-colors ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border bg-background text-foreground hover:bg-muted/40"
+                    }`}
+                  >
+                    <span className="truncate max-w-[160px]">{d.name}</span>
+                    <span className={`text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>{d.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {selectedDesigner && (
+            <p className="mt-3 font-body text-[11px] text-muted-foreground">
+              <span className="text-foreground">{selectedDesigner}</span> contributes{" "}
+              {designerBreakdown.find((d) => d.name === selectedDesigner)?.count || 0} item
+              {(designerBreakdown.find((d) => d.name === selectedDesigner)?.count || 0) === 1 ? "" : "s"} across this project's quotes and boards.
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* Linked items */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Section
@@ -355,5 +456,17 @@ function Row({ to, title, meta }: { to: string; title: string; meta: string }) {
       </div>
       <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0 ml-2" />
     </Link>
+  );
+}
+
+function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-3 rounded-md border border-border bg-muted/10 p-3">
+      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+      <div className="min-w-0">
+        <div className="font-display text-xl text-foreground leading-none">{value}</div>
+        <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{label}</div>
+      </div>
+    </div>
   );
 }
