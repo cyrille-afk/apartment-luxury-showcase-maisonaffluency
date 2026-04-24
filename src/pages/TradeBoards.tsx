@@ -288,7 +288,8 @@ const TradeBoards = () => {
               </div>
             ))}
           </div>
-        )}
+        );
+        })()}
       </div>
     </>
   );
