@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
+import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -51,6 +52,7 @@ const TradeBoards = () => {
     clearDesignerFilter,
     clearAllFilters,
   } = useProjectFilter();
+  const designerLabel = useDesignerDisplayName(designerFilter);
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [matchingBoardIds, setMatchingBoardIds] = useState<Set<string> | null>(null);
