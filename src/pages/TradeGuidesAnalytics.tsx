@@ -266,6 +266,88 @@ export default function TradeGuidesAnalytics() {
               </ol>
             )}
           </section>
+
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-body text-xs uppercase tracking-wider text-muted-foreground">
+                Designer engagement (trade users only)
+              </h2>
+              <div
+                role="tablist"
+                aria-label="Engagement filter"
+                className="inline-flex rounded-md border border-border overflow-hidden"
+              >
+                {([
+                  ["all", "All"],
+                  ["quotes", "Quotes"],
+                  ["boards", "Boards"],
+                ] as const).map(([key, label]) => (
+                  <button
+                    key={key}
+                    role="tab"
+                    aria-selected={engagementSort === key}
+                    onClick={() => setEngagementSort(key)}
+                    className={`px-3 py-1.5 font-body text-[10px] uppercase tracking-wider transition-colors ${
+                      engagementSort === key
+                        ? "bg-foreground text-background"
+                        : "bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {designerRanking.length === 0 ? (
+              <p className="font-body text-sm text-muted-foreground border border-dashed border-border rounded-md p-6 text-center">
+                No designer engagement recorded in this window.
+              </p>
+            ) : (
+              <ol className="divide-y divide-border rounded-md border border-border overflow-hidden">
+                {designerRanking.map((row, i) => {
+                  const primary =
+                    engagementSort === "quotes"
+                      ? row.quoteUsers
+                      : engagementSort === "boards"
+                        ? row.boardUsers
+                        : row.totalUsers;
+                  const pct = maxEngagement > 0 ? Math.round((primary / maxEngagement) * 100) : 0;
+                  return (
+                    <li key={row.brand} className="px-4 py-3 bg-card">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="font-body text-xs text-muted-foreground tabular-nums w-5">
+                            {i + 1}.
+                          </span>
+                          <span className="font-body text-sm text-foreground truncate flex items-center gap-1.5">
+                            <Sparkles className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                            {row.brand}
+                          </span>
+                        </div>
+                        <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
+                          {primary}
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · {row.quoteUsers}q / {row.quoteLines} lines · {row.boardUsers}b /{" "}
+                            {row.boardItems} picks
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        className="mt-2 h-1 rounded-full bg-muted overflow-hidden"
+                        aria-hidden="true"
+                      >
+                        <div
+                          className="h-full bg-primary transition-[width] duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </section>
         </>
       )}
     </article>
