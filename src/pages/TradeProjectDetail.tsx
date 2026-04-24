@@ -52,10 +52,11 @@ export default function TradeProjectDetail() {
     if (!id || !user) return;
     (async () => {
       setLoadingLinks(true);
+      const sb = supabase as any;
       const [q, b, t] = await Promise.all([
-        supabase.from("trade_quotes").select("id, status, created_at, client_name").eq("project_id" as any, id).order("created_at", { ascending: false }),
-        supabase.from("client_boards").select("id, title, status, created_at").eq("project_id" as any, id).order("created_at", { ascending: false }),
-        supabase.from("order_timeline").select("id, quote_id, kanban_status, estimated_delivery_at").eq("project_id" as any, id),
+        sb.from("trade_quotes").select("id, status, created_at, client_name").eq("project_id", id).order("created_at", { ascending: false }),
+        sb.from("client_boards").select("id, title, status, created_at").eq("project_id", id).order("created_at", { ascending: false }),
+        sb.from("order_timeline").select("id, quote_id, kanban_status, estimated_delivery_at").eq("project_id", id),
       ]);
       setQuotes((q.data as any) || []);
       setBoards((b.data as any) || []);
