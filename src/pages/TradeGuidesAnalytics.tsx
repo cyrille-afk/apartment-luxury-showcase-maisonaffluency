@@ -107,6 +107,48 @@ export default function TradeGuidesAnalytics() {
     };
   }, [rows, adminIds]);
 
+  const designerRanking = useMemo(() => {
+    if (!engagement) return [];
+    const merged = new Map<
+      string,
+      { brand: string; quoteUsers: number; quoteLines: number; boardUsers: number; boardItems: number }
+    >();
+    for (const r of engagement) {
+      const parent = normalizeBrandToParent(r.brand_name) || r.brand_name;
+      const existing = merged.get(parent) ?? {
+        brand: parent,
+        quoteUsers: 0,
+        quoteLines: 0,
+        boardUsers: 0,
+        boardItems: 0,
+      };
+      existing.quoteUsers += Number(r.quote_users) || 0;
+      existing.quoteLines += Number(r.quote_lines) || 0;
+      existing.boardUsers += Number(r.board_users) || 0;
+      existing.boardItems += Number(r.board_items) || 0;
+      merged.set(parent, existing);
+    }
+    const arr = Array.from(merged.values()).map((r) => ({
+      ...r,
+      totalUsers: r.quoteUsers + r.boardUsers,
+    }));
+    const key =
+      engagementSort === "quotes"
+        ? (r: typeof arr[number]) => r.quoteUsers * 1000 + r.quoteLines
+        : engagementSort === "boards"
+          ? (r: typeof arr[number]) => r.boardUsers * 1000 + r.boardItems
+          : (r: typeof arr[number]) => r.totalUsers * 1000 + r.quoteLines + r.boardItems;
+    return arr.sort((a, b) => key(b) - key(a)).slice(0, 20);
+  }, [engagement, engagementSort]);
+
+  const maxEngagement = designerRanking[0]
+    ? engagementSort === "quotes"
+      ? designerRanking[0].quoteUsers
+      : engagementSort === "boards"
+        ? designerRanking[0].boardUsers
+        : designerRanking[0].totalUsers
+    : 0;
+
   const max = perSlug[0]?.count ?? 0;
 
   return (
