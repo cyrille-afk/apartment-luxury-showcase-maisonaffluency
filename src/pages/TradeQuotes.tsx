@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,8 +38,7 @@ const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const projectFilter = searchParams.get("project");
+  const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
