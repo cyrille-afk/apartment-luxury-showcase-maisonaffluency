@@ -65,6 +65,8 @@ const TradePresentationViewer = lazy(() => import("./pages/TradePresentationView
 const TradeFavorites = lazy(() => import("./pages/TradeFavorites"));
 const TradeBoards = lazy(() => import("./pages/TradeBoards"));
 const TradeBoardBuilder = lazy(() => import("./pages/TradeBoardBuilder"));
+const TradeProjects = lazy(() => import("./pages/TradeProjects"));
+const TradeProjectDetail = lazy(() => import("./pages/TradeProjectDetail"));
 const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const TradeDesigners = lazy(() => import("./pages/TradeDesigners"));
@@ -225,6 +227,8 @@ const App = () => {
                     <Route path="products/:slug/:productSlug" element={<TradeProductPage />} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
+                    <Route path="projects" element={<TradeProjects />} />
+                    <Route path="projects/:id" element={<TradeProjectDetail />} />
                     {/* spec-sheet moved to public route */}
                     <Route path="audit-log" element={<TradeAuditLog />} />
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
