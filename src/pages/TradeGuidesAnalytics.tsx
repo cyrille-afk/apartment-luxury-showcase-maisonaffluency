@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, BarChart3, Eye, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-type ViewRow = { slug: string; created_at: string };
+type ViewRow = { slug: string; created_at: string; user_id: string | null };
 type Window = 7 | 30;
 
 export default function TradeGuidesAnalytics() {
@@ -18,7 +18,7 @@ export default function TradeGuidesAnalytics() {
     const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
     supabase
       .from("guide_views")
-      .select("slug, created_at")
+      .select("slug, created_at, user_id")
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(5000)
@@ -32,14 +32,28 @@ export default function TradeGuidesAnalytics() {
     };
   }, [windowDays]);
 
-  const { total, perSlug } = useMemo(() => {
-    if (!rows) return { total: 0, perSlug: [] as { slug: string; count: number }[] };
+  const { total, uniqueVisits, perSlug } = useMemo(() => {
+    if (!rows)
+      return {
+        total: 0,
+        uniqueVisits: 0,
+        perSlug: [] as { slug: string; count: number; unique: number }[],
+      };
     const counts = new Map<string, number>();
-    for (const r of rows) counts.set(r.slug, (counts.get(r.slug) ?? 0) + 1);
+    const uniqueKeys = new Map<string, Set<string>>();
+    const globalUnique = new Set<string>();
+    for (const r of rows) {
+      counts.set(r.slug, (counts.get(r.slug) ?? 0) + 1);
+      const visitorKey = r.user_id ?? `anon:${r.created_at}`;
+      const key = `${r.slug}::${visitorKey}`;
+      if (!uniqueKeys.has(r.slug)) uniqueKeys.set(r.slug, new Set());
+      uniqueKeys.get(r.slug)!.add(visitorKey);
+      globalUnique.add(key);
+    }
     const perSlug = Array.from(counts.entries())
-      .map(([slug, count]) => ({ slug, count }))
+      .map(([slug, count]) => ({ slug, count, unique: uniqueKeys.get(slug)?.size ?? 0 }))
       .sort((a, b) => b.count - a.count);
-    return { total: rows.length, perSlug };
+    return { total: rows.length, uniqueVisits: globalUnique.size, perSlug };
   }, [rows]);
 
   const max = perSlug[0]?.count ?? 0;
@@ -103,8 +117,9 @@ export default function TradeGuidesAnalytics() {
 
       {rows && (
         <>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Stat label="Total views" value={total} icon={Eye} />
+            <Stat label="Unique visits" value={uniqueVisits} icon={Eye} />
             <Stat label="Unique guides" value={perSlug.length} icon={BarChart3} />
           </div>
 
@@ -134,8 +149,9 @@ export default function TradeGuidesAnalytics() {
                             <code className="text-xs">{row.slug}</code>
                           </Link>
                         </div>
-                        <span className="font-body text-sm tabular-nums text-foreground">
+                        <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
                           {row.count}
+                          <span className="text-muted-foreground"> · {row.unique} unique</span>
                         </span>
                       </div>
                       <div
