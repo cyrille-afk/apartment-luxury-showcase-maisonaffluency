@@ -36,6 +36,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
 const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
