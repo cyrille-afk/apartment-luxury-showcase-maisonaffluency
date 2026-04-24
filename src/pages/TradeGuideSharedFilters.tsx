@@ -3,7 +3,7 @@ import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck } from "lucide
 import { trackEvent } from "@/lib/analytics";
 
 const SLUG = "multi-user-studio-shared-filters";
-const PDF_URL = "/guides/studio-shared-filters.pdf";
+const PDF_URL = "/guides/multi-user-studio-shared-filters.pdf";
 
 export default function TradeGuideSharedFilters() {
   const { slug } = useParams();

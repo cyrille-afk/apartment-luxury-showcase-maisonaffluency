@@ -23,7 +23,7 @@ const guides: Guide[] = [
     description:
       "How shared project & designer filters flow across Quotes, Boards and Tearsheets — plus keyboard, accessibility, and multi-user workflow patterns.",
     audience: "All studio members",
-    pdfUrl: "/guides/studio-shared-filters.pdf",
+    pdfUrl: "/guides/multi-user-studio-shared-filters.pdf",
     icon: Users,
   },
   {
