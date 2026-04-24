@@ -34,32 +34,38 @@ export default function TradeTearsheets() {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterSubcategory, setFilterSubcategory] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const urlProject = searchParams.get("project");
-  const [filterProjectId, setFilterProjectIdState] = useState<string | null>(() => {
-    if (urlProject) return urlProject;
-    try { return sessionStorage.getItem("trade:lastProjectFilter"); } catch { return null; }
-  });
+  const filterProjectId = searchParams.get("project");
   const setFilterProjectId = (id: string | null) => {
-    setFilterProjectIdState(id);
     try {
       if (id) sessionStorage.setItem("trade:lastProjectFilter", id);
       else sessionStorage.removeItem("trade:lastProjectFilter");
     } catch {}
     const next = new URLSearchParams(searchParams);
     if (id) next.set("project", id); else next.delete("project");
-    setSearchParams(next, { replace: true });
+    // Push so browser back/forward restores prior filter state.
+    setSearchParams(next);
   };
-  // Sync URL param → state if URL changes externally
+  // On first mount: if no URL param, hydrate from sessionStorage (replace, no history entry).
   useEffect(() => {
-    if (urlProject && urlProject !== filterProjectId) setFilterProjectIdState(urlProject);
-    // If state has value but URL doesn't (initial load from storage), reflect into URL
-    if (!urlProject && filterProjectId) {
+    if (filterProjectId) {
+      try { sessionStorage.setItem("trade:lastProjectFilter", filterProjectId); } catch {}
+      return;
+    }
+    let stored: string | null = null;
+    try { stored = sessionStorage.getItem("trade:lastProjectFilter"); } catch {}
+    if (stored) {
       const next = new URLSearchParams(searchParams);
-      next.set("project", filterProjectId);
+      next.set("project", stored);
       setSearchParams(next, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlProject]);
+  }, []);
+  // Keep storage in sync with URL on subsequent navigations (back/forward included).
+  useEffect(() => {
+    try {
+      if (filterProjectId) sessionStorage.setItem("trade:lastProjectFilter", filterProjectId);
+    } catch {}
+  }, [filterProjectId]);
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
