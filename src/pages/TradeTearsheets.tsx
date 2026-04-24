@@ -182,6 +182,7 @@ export default function TradeTearsheets() {
     if (filterDesigner && p.parent_brand !== filterDesigner) return false;
     if (filterCategory && p.category !== filterCategory) return false;
     if (filterSubcategory && p.subcategory !== filterSubcategory) return false;
+    if (filterProjectId && projectProductIds && !projectProductIds.has(p.id)) return false;
     return true;
   });
 
