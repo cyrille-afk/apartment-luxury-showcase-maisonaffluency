@@ -10,6 +10,7 @@ import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, Chevron
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
 import SectionHero from "@/components/trade/SectionHero";
+import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 
 interface Quote {
   id: string;
