@@ -3100,6 +3100,16 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_designer_engagement: {
+        Args: { _since: string }
+        Returns: {
+          board_items: number
+          board_users: number
+          brand_name: string
+          quote_lines: number
+          quote_users: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
