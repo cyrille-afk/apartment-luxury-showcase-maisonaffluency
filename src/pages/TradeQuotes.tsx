@@ -267,7 +267,7 @@ const TradeQuotes = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {quotes.map((quote) => {
+          {visibleQuotes.map((quote) => {
             const config = statusConfig[quote.status] || statusConfig.draft;
             const StatusIcon = config.icon;
 
@@ -332,7 +332,8 @@ const TradeQuotes = () => {
             );
           })}
         </div>
-      )}
+      );
+      })()}
     </div>
     </>
   );
