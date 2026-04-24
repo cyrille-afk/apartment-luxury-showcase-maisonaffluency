@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
