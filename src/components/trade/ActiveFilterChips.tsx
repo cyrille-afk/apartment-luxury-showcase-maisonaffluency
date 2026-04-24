@@ -46,10 +46,24 @@ export default function ActiveFilterChips({
     })();
   }, [projectFilter]);
 
+  // Track the most recently cleared filter so we can announce it to screen readers.
+  const [announcement, setAnnouncement] = useState("");
+  const announceCleared = (what: string) => {
+    setAnnouncement(`${what} filter cleared`);
+    // Reset shortly after so re-clearing the same thing re-announces.
+    window.setTimeout(() => setAnnouncement(""), 1000);
+  };
+
+  const handleClearProject = () => { clearProjectFilter(); announceCleared(`Project ${projectName || ""}`.trim()); };
+  const handleClearDesigner = () => { clearDesignerFilter(); announceCleared(`Designer ${designerLabel || designerFilter || ""}`.trim()); };
+  const handleClearAll = () => { clearAllFilters(); announceCleared("All"); };
+
   if (!projectFilter && !designerFilter) return null;
 
   return (
     <div
+      role="region"
+      aria-label="Active filters"
       className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 ${className}`}
     >
       <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -60,7 +74,7 @@ export default function ActiveFilterChips({
         <Chip
           label="Project"
           value={projectName || "…"}
-          onClear={clearProjectFilter}
+          onClear={handleClearProject}
         />
       )}
 
@@ -68,18 +82,24 @@ export default function ActiveFilterChips({
         <Chip
           label="Designer"
           value={designerLabel || designerFilter}
-          onClear={clearDesignerFilter}
+          onClear={handleClearDesigner}
         />
       )}
 
       {projectFilter && designerFilter && (
         <button
-          onClick={() => (confirmClearAll ? setConfirmOpen(true) : clearAllFilters())}
-          className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+          type="button"
+          onClick={() => (confirmClearAll ? setConfirmOpen(true) : handleClearAll())}
+          className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           Clear all
         </button>
       )}
+
+      {/* SR-only live region announces clear actions */}
+      <span aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </span>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
@@ -91,7 +111,7 @@ export default function ActiveFilterChips({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { clearAllFilters(); setConfirmOpen(false); }}>
+            <AlertDialogAction onClick={() => { handleClearAll(); setConfirmOpen(false); }}>
               Clear all
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -107,11 +127,12 @@ function Chip({ label, value, onClear }: { label: string; value: string; onClear
       <span className="text-muted-foreground uppercase tracking-wider text-[10px]">{label}:</span>
       <span className="font-medium">{value}</span>
       <button
+        type="button"
         onClick={onClear}
-        className="text-muted-foreground hover:text-foreground"
-        aria-label={`Clear ${label.toLowerCase()} filter`}
+        aria-label={`Clear ${label.toLowerCase()} filter: ${value}`}
+        className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
       >
-        <X className="h-3 w-3" />
+        <X className="h-3 w-3" aria-hidden="true" />
       </button>
     </span>
   );
