@@ -22,7 +22,7 @@ const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
-const TradeGuideSharedFilters = lazy(() => import("./pages/TradeGuideSharedFilters"));
+const TradeGuideDetail = lazy(() => import("./pages/TradeGuideDetail"));
 const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBoundary"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
@@ -253,7 +253,7 @@ const App = () => {
                     <Route path="comparator" element={<TradeComparator />} />
                     <Route path="tools" element={<TradeTools />} />
                     <Route path="guides" element={<TradeGuides />} />
-                    <Route path="guides/shared-filters" element={<TradeGuideSharedFilters />} />
+                    <Route path="guides/:slug" element={<TradeGuideDetail />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
