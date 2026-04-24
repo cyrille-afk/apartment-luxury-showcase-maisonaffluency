@@ -40,7 +40,8 @@ export default function TradeGuidesAnalytics() {
         .limit(5000),
       supabase.rpc("get_admin_user_ids"),
       supabase.rpc("get_designer_engagement", { _since: since }),
-    ]).then(([viewsRes, adminsRes, engagementRes]) => {
+      supabase.from("designers").select("name, slug"),
+    ]).then(([viewsRes, adminsRes, engagementRes, designersRes]) => {
       if (cancelled) return;
       if (viewsRes.error) {
         setError(viewsRes.error.message);
@@ -50,6 +51,11 @@ export default function TradeGuidesAnalytics() {
       const ids = (adminsRes.data ?? []) as { user_id: string }[];
       setAdminIds(new Set(ids.map((r) => r.user_id)));
       setEngagement((engagementRes.data ?? []) as EngagementRow[]);
+      const slugMap = new Map<string, string>();
+      for (const d of (designersRes.data ?? []) as { name: string; slug: string }[]) {
+        if (d?.name && d?.slug) slugMap.set(d.name.toLowerCase(), d.slug);
+      }
+      setDesignerSlugs(slugMap);
     });
     return () => {
       cancelled = true;
