@@ -29,7 +29,25 @@ export default function TradeGuidesAnalytics() {
   const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
   const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
   const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
+  const [drillBrand, setDrillBrand] = useState<string | null>(null);
+  const [drillRows, setDrillRows] = useState<BrandUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!drillBrand) return;
+    let cancelled = false;
+    setDrillRows(null);
+    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .rpc("get_brand_engagement_users", { _brand_name: drillBrand, _since: since })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setDrillRows((data ?? []) as BrandUserRow[]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [drillBrand, windowDays]);
 
   useEffect(() => {
     let cancelled = false;
