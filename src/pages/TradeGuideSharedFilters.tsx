@@ -1,5 +1,5 @@
 import { Link, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 const SLUG = "multi-user-studio-shared-filters";
@@ -25,6 +25,18 @@ export default function TradeGuideSharedFilters() {
         >
           <ArrowLeft className="h-3 w-3" aria-hidden="true" /> All guides
         </Link>
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 font-body text-xs text-foreground/80"
+        >
+          <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" aria-hidden="true" />
+          <span>
+            You're viewing the canonical{" "}
+            <strong className="text-foreground">Multi-User Studio · Shared Filters</strong>{" "}
+            guide. Older links to <code className="text-[11px]">/trade/guides/shared-filters</code>{" "}
+            redirect here automatically.
+          </span>
+        </div>
         <p className="font-body text-[10px] uppercase tracking-[0.2em] text-primary">
           Studio essentials · v1.0
         </p>
