@@ -250,6 +250,8 @@ const App = () => {
                     <Route path="cpd" element={<TradeCPD />} />
                     <Route path="comparator" element={<TradeComparator />} />
                     <Route path="tools" element={<TradeTools />} />
+                    <Route path="guides" element={<TradeGuides />} />
+                    <Route path="guides/shared-filters" element={<TradeGuideSharedFilters />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
