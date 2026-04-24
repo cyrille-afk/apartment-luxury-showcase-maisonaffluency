@@ -71,7 +71,8 @@ RULE       = HexColor("#D9D2C2")
 # Fonts — embedded TTFs so output is consistent in every viewer
 # ---------------------------------------------------------------------------
 FONT_DIR = os.environ.get("MA_FONT_DIR", "/tmp/fonts")
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "affluency-logo.jpg")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "affluency-logo.png")
+LOGO_LIGHT = os.path.join(os.path.dirname(__file__), "assets", "affluency-logo-cream.png")
 
 SERIF       = "MA-Serif"
 SERIF_BOLD  = "MA-Serif-Bold"
@@ -142,9 +143,9 @@ def _draw_cover(canv, doc, title: str, subtitle: str, version: str) -> None:
     # Logo + wordmark
     x = MARGIN_L
     y = PAGE_H - 50 * mm
-    if os.path.exists(LOGO_PATH):
+    if os.path.exists(LOGO_LIGHT):
         try:
-            canv.drawImage(LOGO_PATH, x, y - 4, width=22 * mm, height=22 * mm,
+            canv.drawImage(LOGO_LIGHT, x, y - 4, width=22 * mm, height=22 * mm,
                            preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
