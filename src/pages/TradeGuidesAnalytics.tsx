@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BarChart3, Eye, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, BarChart3, Eye, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type ViewRow = { slug: string; created_at: string; user_id: string | null };
 type EngagementRow = {
@@ -14,6 +21,16 @@ type EngagementRow = {
 };
 type Window = 7 | 30;
 type EngagementSort = "all" | "quotes" | "boards";
+type BrandUserRow = {
+  user_id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  company: string | null;
+  quote_lines: number;
+  board_items: number;
+  source: "quote" | "board" | "both";
+};
 
 export default function TradeGuidesAnalytics() {
   const [windowDays, setWindowDays] = useState<Window>(7);
@@ -22,7 +39,25 @@ export default function TradeGuidesAnalytics() {
   const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
   const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
   const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
+  const [drillBrand, setDrillBrand] = useState<string | null>(null);
+  const [drillRows, setDrillRows] = useState<BrandUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!drillBrand) return;
+    let cancelled = false;
+    setDrillRows(null);
+    const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .rpc("get_brand_engagement_users", { _brand_name: drillBrand, _since: since })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setDrillRows((data ?? []) as BrandUserRow[]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [drillBrand, windowDays]);
 
   useEffect(() => {
     let cancelled = false;
@@ -348,14 +383,24 @@ export default function TradeGuidesAnalytics() {
                             );
                           })()}
                         </div>
-                        <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
-                          {primary}
-                          <span className="text-muted-foreground">
-                            {" "}
-                            · {row.quoteUsers}q / {row.quoteLines} lines · {row.boardUsers}b /{" "}
-                            {row.boardItems} picks
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <span className="font-body text-sm tabular-nums text-foreground">
+                            {primary}
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {row.quoteUsers}q / {row.quoteLines} lines · {row.boardUsers}b /{" "}
+                              {row.boardItems} picks
+                            </span>
                           </span>
-                        </span>
+                          <button
+                            type="button"
+                            onClick={() => setDrillBrand(row.brand)}
+                            aria-label={`View users contributing to ${row.brand}`}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          >
+                            <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                       <div
                         className="mt-2 h-1 rounded-full bg-muted overflow-hidden"
@@ -374,7 +419,106 @@ export default function TradeGuidesAnalytics() {
           </section>
         </>
       )}
+
+      <Dialog open={!!drillBrand} onOpenChange={(open) => !open && setDrillBrand(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              {drillBrand} — top contributors
+            </DialogTitle>
+            <DialogDescription className="font-body text-xs text-muted-foreground">
+              Trade users who quoted or saved {drillBrand} pieces in the last {windowDays} days.
+            </DialogDescription>
+          </DialogHeader>
+          {!drillRows ? (
+            <div className="flex items-center gap-2 text-muted-foreground py-8">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <span className="font-body text-sm">Loading…</span>
+            </div>
+          ) : drillRows.length === 0 ? (
+            <p className="font-body text-sm text-muted-foreground border border-dashed border-border rounded-md p-6 text-center">
+              No contributors found in this window.
+            </p>
+          ) : (
+            <BrandUsersTables rows={drillRows} />
+          )}
+        </DialogContent>
+      </Dialog>
     </article>
+  );
+}
+
+function BrandUsersTables({ rows }: { rows: BrandUserRow[] }) {
+  const quoters = rows
+    .filter((r) => r.quote_lines > 0)
+    .sort((a, b) => b.quote_lines - a.quote_lines)
+    .slice(0, 10);
+  const boarders = rows
+    .filter((r) => r.board_items > 0)
+    .sort((a, b) => b.board_items - a.board_items)
+    .slice(0, 10);
+
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      <UserList title="Top quoters" metricLabel="lines" rows={quoters} metric={(r) => r.quote_lines} />
+      <UserList
+        title="Top board contributors"
+        metricLabel="picks"
+        rows={boarders}
+        metric={(r) => r.board_items}
+      />
+    </div>
+  );
+}
+
+function UserList({
+  title,
+  metricLabel,
+  rows,
+  metric,
+}: {
+  title: string;
+  metricLabel: string;
+  rows: BrandUserRow[];
+  metric: (r: BrandUserRow) => number;
+}) {
+  return (
+    <div className="space-y-2">
+      <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        {title}
+      </h3>
+      {rows.length === 0 ? (
+        <p className="font-body text-xs text-muted-foreground italic">None in this window.</p>
+      ) : (
+        <ol className="divide-y divide-border rounded-md border border-border overflow-hidden">
+          {rows.map((r, i) => {
+            const name =
+              [r.first_name, r.last_name].filter(Boolean).join(" ").trim() ||
+              r.email ||
+              r.user_id.slice(0, 8);
+            return (
+              <li key={r.user_id} className="px-3 py-2 bg-card flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-body text-sm text-foreground truncate">
+                    <span className="text-muted-foreground tabular-nums mr-1">{i + 1}.</span>
+                    {name}
+                  </p>
+                  {r.company && (
+                    <p className="font-body text-[11px] text-muted-foreground truncate">
+                      {r.company}
+                    </p>
+                  )}
+                </div>
+                <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
+                  {metric(r)}{" "}
+                  <span className="text-muted-foreground text-xs">{metricLabel}</span>
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
   );
 }
 
