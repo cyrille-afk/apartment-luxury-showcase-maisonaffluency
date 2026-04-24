@@ -14,7 +14,7 @@ from brand_template import build_guide  # noqa: E402
 
 
 SHARED_FILTERS = {
-    "filename": "public/guides/studio-shared-filters.pdf",
+    "filename": "public/guides/multi-user-studio-shared-filters.pdf",
     "title": "Working as a studio in the Trade Portal",
     "subtitle": "Shared project & designer filters, focus-aware navigation, and best practices for multi-user design studios.",
     "running": "Studio Guide — Shared Filters & Multi-User Workflow",

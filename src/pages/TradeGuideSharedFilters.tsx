@@ -3,7 +3,7 @@ import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck } from "lucide
 import { trackEvent } from "@/lib/analytics";
 
 const SLUG = "multi-user-studio-shared-filters";
-const PDF_URL = "/guides/studio-shared-filters.pdf";
+const PDF_URL = "/guides/multi-user-studio-shared-filters.pdf";
 
 export default function TradeGuideSharedFilters() {
   const { slug } = useParams();
@@ -38,10 +38,17 @@ export default function TradeGuideSharedFilters() {
         <a
           href={PDF_URL}
           download
-          className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground px-4 py-2 font-body text-xs uppercase tracking-wider text-background hover:bg-foreground/90 transition-colors"
+          onClick={() =>
+            trackEvent("trade_guide_pdf_download", {
+              event_category: "Trade Guides",
+              event_label: SLUG,
+              guide_slug: SLUG,
+            })
+          }
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 font-body text-xs uppercase tracking-[0.18em] text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md transition-all"
         >
-          <Download className="h-3.5 w-3.5" aria-hidden="true" />
-          Download PDF
+          <Download className="h-4 w-4" aria-hidden="true" />
+          Download the PDF guide
         </a>
       </header>
 
