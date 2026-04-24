@@ -20,6 +20,7 @@ export default function TradeGuidesAnalytics() {
   const [rows, setRows] = useState<ViewRow[] | null>(null);
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
+  const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
   const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +40,8 @@ export default function TradeGuidesAnalytics() {
         .limit(5000),
       supabase.rpc("get_admin_user_ids"),
       supabase.rpc("get_designer_engagement", { _since: since }),
-    ]).then(([viewsRes, adminsRes, engagementRes]) => {
+      supabase.from("designers").select("name, slug"),
+    ]).then(([viewsRes, adminsRes, engagementRes, designersRes]) => {
       if (cancelled) return;
       if (viewsRes.error) {
         setError(viewsRes.error.message);
@@ -49,6 +51,11 @@ export default function TradeGuidesAnalytics() {
       const ids = (adminsRes.data ?? []) as { user_id: string }[];
       setAdminIds(new Set(ids.map((r) => r.user_id)));
       setEngagement((engagementRes.data ?? []) as EngagementRow[]);
+      const slugMap = new Map<string, string>();
+      for (const d of (designersRes.data ?? []) as { name: string; slug: string }[]) {
+        if (d?.name && d?.slug) slugMap.set(d.name.toLowerCase(), d.slug);
+      }
+      setDesignerSlugs(slugMap);
     });
     return () => {
       cancelled = true;
@@ -319,10 +326,27 @@ export default function TradeGuidesAnalytics() {
                           <span className="font-body text-xs text-muted-foreground tabular-nums w-5">
                             {i + 1}.
                           </span>
-                          <span className="font-body text-sm text-foreground truncate flex items-center gap-1.5">
-                            <Sparkles className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-                            {row.brand}
-                          </span>
+                          {(() => {
+                            const slug = designerSlugs.get(row.brand.toLowerCase());
+                            const inner = (
+                              <>
+                                <Sparkles className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                                {row.brand}
+                              </>
+                            );
+                            return slug ? (
+                              <Link
+                                to={`/designers/${slug}`}
+                                className="font-body text-sm text-foreground hover:text-primary truncate flex items-center gap-1.5"
+                              >
+                                {inner}
+                              </Link>
+                            ) : (
+                              <span className="font-body text-sm text-foreground truncate flex items-center gap-1.5">
+                                {inner}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
                           {primary}
