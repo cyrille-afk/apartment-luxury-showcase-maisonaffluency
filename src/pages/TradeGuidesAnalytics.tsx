@@ -355,7 +355,7 @@ export default function TradeGuidesAnalytics() {
             )}
           </section>
 
-          <section className="space-y-3">
+          <section id="engagement" className="space-y-3 scroll-mt-24">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-body text-xs uppercase tracking-wider text-muted-foreground">
                 Designer engagement (trade users only)
