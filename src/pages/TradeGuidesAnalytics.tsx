@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Check, Eye, Link2, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
@@ -34,21 +34,32 @@ type BrandUserRow = {
 };
 
 export default function TradeGuidesAnalytics() {
-  const [windowDays, setWindowDays] = useState<Window>(7);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialWindow = searchParams.get("window") === "30" ? 30 : 7;
+  const initialTab = (() => {
+    const t = searchParams.get("tab");
+    return t === "quotes" || t === "boards" ? (t as EngagementSort) : "all";
+  })();
+  const [windowDays, setWindowDays] = useState<Window>(initialWindow as Window);
   const [rows, setRows] = useState<ViewRow[] | null>(null);
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
   const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
-  const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
-  const [drillBrand, setDrillBrand] = useState<string | null>(null);
+  const [engagementSort, setEngagementSort] = useState<EngagementSort>(initialTab);
+  const [drillBrand, setDrillBrand] = useState<string | null>(searchParams.get("brand"));
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
   const copyDesignerLink = async (slug: string, brand: string) => {
-    const url = `${window.location.origin}/designers/${slug}`;
+    const params = new URLSearchParams();
+    params.set("brand", brand);
+    if (engagementSort !== "all") params.set("tab", engagementSort);
+    params.set("window", String(windowDays));
+    params.set("section", "engagement");
+    const url = `${window.location.origin}/trade/designers/admin?${params.toString()}#engagement`;
     try {
       await navigator.clipboard.writeText(url);
       setCopiedSlug(slug);
-      toast.success(`Link to ${brand} copied`);
+      toast.success(`Analytics link for ${brand} copied`);
       setTimeout(() => setCopiedSlug((s) => (s === slug ? null : s)), 1500);
     } catch {
       toast.error("Could not copy link");
@@ -56,6 +67,27 @@ export default function TradeGuidesAnalytics() {
   };
   const [drillRows, setDrillRows] = useState<BrandUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Sync drill open/close + tab back to URL so the link stays shareable
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (drillBrand) next.set("brand", drillBrand);
+    else next.delete("brand");
+    if (engagementSort !== "all") next.set("tab", engagementSort);
+    else next.delete("tab");
+    next.set("window", String(windowDays));
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [drillBrand, engagementSort, windowDays]);
+
+  // On first load with ?section=engagement, scroll the section into view
+  useEffect(() => {
+    if (searchParams.get("section") !== "engagement") return;
+    const el = document.getElementById("engagement");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!drillBrand) return;
@@ -323,7 +355,7 @@ export default function TradeGuidesAnalytics() {
             )}
           </section>
 
-          <section className="space-y-3">
+          <section id="engagement" className="space-y-3 scroll-mt-24">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-body text-xs uppercase tracking-wider text-muted-foreground">
                 Designer engagement (trade users only)
