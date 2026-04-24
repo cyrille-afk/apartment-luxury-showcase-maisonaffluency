@@ -71,6 +71,7 @@ RULE       = HexColor("#D9D2C2")
 # Fonts — embedded TTFs so output is consistent in every viewer
 # ---------------------------------------------------------------------------
 FONT_DIR = os.environ.get("MA_FONT_DIR", "/tmp/fonts")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "affluency-logo.jpg")
 
 SERIF       = "MA-Serif"
 SERIF_BOLD  = "MA-Serif-Bold"
@@ -138,18 +139,24 @@ def _draw_cover(canv, doc, title: str, subtitle: str, version: str) -> None:
     canv.setFillColor(JADE)
     canv.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
 
-    # Wordmark
+    # Logo + wordmark
     x = MARGIN_L
     y = PAGE_H - 50 * mm
+    if os.path.exists(LOGO_PATH):
+        try:
+            canv.drawImage(LOGO_PATH, x, y - 4, width=22 * mm, height=22 * mm,
+                           preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
     canv.setFillColor(CREAM)
     canv.setFont(SANS_BOLD, 11)
-    canv.drawString(x, y, "MAISON AFFLUENCY")
+    canv.drawString(x + 26 * mm, y + 8, "MAISON AFFLUENCY")
     canv.setFillColor(GOLD)
     canv.setFont(SANS, 9)
-    canv.drawString(x, y - 14, "TRADE PORTAL  ·  STUDIO GUIDE")
+    canv.drawString(x + 26 * mm, y - 6, "TRADE PORTAL  ·  STUDIO GUIDE")
     canv.setStrokeColor(GOLD)
     canv.setLineWidth(1.2)
-    canv.line(x, y - 24, x + 55 * mm, y - 24)
+    canv.line(x, y - 18, x + 55 * mm, y - 18)
 
     # Title block
     ty = PAGE_H / 2 + 20 * mm
@@ -181,10 +188,17 @@ def _draw_cover(canv, doc, title: str, subtitle: str, version: str) -> None:
 
 def _draw_content(canv, doc, running_title: str) -> None:
     canv.saveState()
-    # Header
+    # Header — logo + wordmark
+    if os.path.exists(LOGO_PATH):
+        try:
+            canv.drawImage(LOGO_PATH, MARGIN_L, PAGE_H - 22 * mm,
+                           width=8 * mm, height=8 * mm,
+                           preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
     canv.setFillColor(JADE)
     canv.setFont(SANS_BOLD, 9)
-    canv.drawString(MARGIN_L, PAGE_H - 18 * mm,
+    canv.drawString(MARGIN_L + 10 * mm, PAGE_H - 18 * mm,
                     "MAISON AFFLUENCY  ·  TRADE PORTAL")
     canv.setFillColor(MUTE)
     canv.setFont(SANS, 9)
