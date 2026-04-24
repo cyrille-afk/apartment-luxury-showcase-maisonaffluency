@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +37,9 @@ const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const projectFilter = searchParams.get("project");
+  const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -54,6 +57,10 @@ const TradeQuotes = () => {
     // Super admins can toggle between own quotes and all quotes
     if (!showAll || !isSuperAdmin) {
       query = query.eq("user_id", user.id);
+    }
+
+    if (projectFilter) {
+      query = query.eq("project_id", projectFilter);
     }
 
     const { data: quotesData } = await query;
@@ -106,7 +113,15 @@ const TradeQuotes = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [user, showAll]);
+  }, [user, showAll, projectFilter]);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectFilterName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
+      setProjectFilterName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const handleCreateQuote = async () => {
     if (!user) return;
@@ -175,6 +190,22 @@ const TradeQuotes = () => {
           New Quote
         </button>
       </SectionHero>
+
+      {projectFilter && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
+          <div className="flex items-center gap-2 font-body text-xs text-foreground">
+            <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Filtered by project:</span>
+            <span className="font-medium">{projectFilterName || "…"}</span>
+          </div>
+          <button
+            onClick={() => { searchParams.delete("project"); setSearchParams(searchParams); }}
+            className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+          >
+            Clear filter
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="space-y-3">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,9 @@ const TradeBoards = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const projectFilter = searchParams.get("project");
+  const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -54,11 +57,13 @@ const TradeBoards = () => {
 
   const fetchBoards = async () => {
     if (!user) return;
-    const { data } = await supabase
+    let q = supabase
       .from("client_boards")
       .select("*")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
+    if (projectFilter) q = q.eq("project_id", projectFilter);
+    const { data } = await q;
 
     if (data) {
       // Fetch item counts
@@ -93,7 +98,15 @@ const TradeBoards = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchBoards(); }, [user]);
+  useEffect(() => { fetchBoards(); }, [user, projectFilter]);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectFilterName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
+      setProjectFilterName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const handleCreate = async () => {
     if (!user || !title.trim()) return;
@@ -162,6 +175,22 @@ const TradeBoards = () => {
             </DialogContent>
           </Dialog>
         </SectionHero>
+
+        {projectFilter && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
+            <div className="flex items-center gap-2 font-body text-xs text-foreground">
+              <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Filtered by project:</span>
+              <span className="font-medium">{projectFilterName || "…"}</span>
+            </div>
+            <button
+              onClick={() => { searchParams.delete("project"); setSearchParams(searchParams); }}
+              className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
