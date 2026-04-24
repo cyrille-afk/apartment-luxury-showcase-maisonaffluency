@@ -44,7 +44,8 @@ export default function TradeProjectDetail() {
   const setSelectedDesigner = (name: string | null) => {
     const next = new URLSearchParams(searchParams);
     if (name) next.set("designer", name); else next.delete("designer");
-    setSearchParams(next, { replace: true });
+    // Push so back/forward navigates between designer-filter states.
+    setSearchParams(next);
   };
   const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
