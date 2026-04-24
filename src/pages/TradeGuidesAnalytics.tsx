@@ -154,10 +154,11 @@ export default function TradeGuidesAnalytics() {
 
       {rows && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Stat label="Total views" value={total} icon={Eye} />
             <Stat label="Unique visits" value={uniqueVisits} icon={Eye} />
-            <Stat label="Unique guides" value={perSlug.length} icon={BarChart3} />
+            <Stat label="Trade users" value={uniqueTrade} icon={BarChart3} />
+            <Stat label="Admins / staff" value={uniqueAdmin} icon={BarChart3} />
           </div>
 
           <section className="space-y-3">
@@ -188,7 +189,10 @@ export default function TradeGuidesAnalytics() {
                         </div>
                         <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
                           {row.count}
-                          <span className="text-muted-foreground"> · {row.unique} unique</span>
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · {row.uniqueTrade} trade · {row.uniqueAdmin} staff
+                          </span>
                         </span>
                       </div>
                       <div
