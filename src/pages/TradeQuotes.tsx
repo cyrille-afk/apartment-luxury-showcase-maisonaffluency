@@ -191,6 +191,22 @@ const TradeQuotes = () => {
         </button>
       </SectionHero>
 
+      {projectFilter && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
+          <div className="flex items-center gap-2 font-body text-xs text-foreground">
+            <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Filtered by project:</span>
+            <span className="font-medium">{projectFilterName || "…"}</span>
+          </div>
+          <button
+            onClick={() => { searchParams.delete("project"); setSearchParams(searchParams); }}
+            className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+          >
+            Clear filter
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => <QuoteCardSkeleton key={i} />)}
