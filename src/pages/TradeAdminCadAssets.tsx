@@ -318,6 +318,80 @@ const TradeAdminCadAssets = () => {
           )}
         </section>
 
+        {/* Inline preview panel */}
+        {previewAsset && (
+          <section className="border border-primary/30 rounded-md p-4 bg-primary/5 relative">
+            <button
+              type="button"
+              onClick={() => setPreviewAsset(null)}
+              className="absolute top-3 right-3 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+              title="Close preview"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-start gap-3 mb-3">
+              <FileBox className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <h3 className="font-display text-sm text-foreground truncate">
+                  {previewAsset.product?.product_name || "Unknown product"}
+                </h3>
+                <p className="font-body text-[11px] text-muted-foreground truncate">
+                  {previewAsset.product?.brand_name}
+                  {previewAsset.variant_label ? ` · ${previewAsset.variant_label}` : ""}
+                </p>
+              </div>
+            </div>
+            <dl className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+              <div>
+                <dt className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Format</dt>
+                <dd className="font-body text-xs text-foreground uppercase tracking-wider">.{previewAsset.file_format}</dd>
+              </div>
+              <div>
+                <dt className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Size</dt>
+                <dd className="font-body text-xs text-foreground">
+                  {previewAsset.file_size_bytes
+                    ? previewAsset.file_size_bytes < 1024 * 1024
+                      ? `${(previewAsset.file_size_bytes / 1024).toFixed(0)} KB`
+                      : `${(previewAsset.file_size_bytes / (1024 * 1024)).toFixed(2)} MB`
+                    : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Version</dt>
+                <dd className="font-body text-xs text-foreground">{previewAsset.version || "—"}</dd>
+              </div>
+              <div>
+                <dt className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Uploaded</dt>
+                <dd className="font-body text-xs text-foreground">
+                  {new Date(previewAsset.created_at).toLocaleDateString(undefined, {
+                    year: "numeric", month: "short", day: "numeric",
+                  })}
+                </dd>
+              </div>
+            </dl>
+            <div className="flex items-center gap-2 flex-wrap">
+              <a
+                href={previewAsset.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground font-body text-xs hover:bg-primary/90 transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Open
+              </a>
+              <a
+                href={previewAsset.file_url}
+                download
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background text-foreground font-body text-xs hover:border-foreground/30 transition-colors"
+              >
+                <Download className="h-3.5 w-3.5" /> Download
+              </a>
+              <span className="font-body text-[10px] text-muted-foreground truncate max-w-full">
+                {previewAsset.file_url.split("/").pop()}
+              </span>
+            </div>
+          </section>
+        )}
+
         {/* Product picker */}
         <section className="border border-border rounded-md p-4 bg-card/40 space-y-3">
           <label className="block font-body text-xs uppercase tracking-[0.18em] text-muted-foreground">Product</label>
