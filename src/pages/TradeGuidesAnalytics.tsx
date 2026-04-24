@@ -414,6 +414,26 @@ export default function TradeGuidesAnalytics() {
                           >
                             <Users className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
+                          {(() => {
+                            const slug = designerSlugs.get(row.brand.toLowerCase());
+                            if (!slug) return null;
+                            const isCopied = copiedSlug === slug;
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => copyDesignerLink(slug, row.brand)}
+                                aria-label={`Copy share link for ${row.brand}`}
+                                title="Copy share link"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              >
+                                {isCopied ? (
+                                  <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                                ) : (
+                                  <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                )}
+                              </button>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div
