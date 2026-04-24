@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
@@ -39,7 +39,13 @@ export default function TradeProjectDetail() {
   const [quoteItemCount, setQuoteItemCount] = useState(0);
   const [boardItemCount, setBoardItemCount] = useState(0);
   const [designerBreakdown, setDesignerBreakdown] = useState<{ name: string; count: number }[]>([]);
-  const [selectedDesigner, setSelectedDesigner] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDesigner = searchParams.get("designer");
+  const setSelectedDesigner = (name: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (name) next.set("designer", name); else next.delete("designer");
+    setSearchParams(next, { replace: true });
+  };
   const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
 
