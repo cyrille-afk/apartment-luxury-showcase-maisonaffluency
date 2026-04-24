@@ -211,36 +211,7 @@ const TradeQuotes = () => {
         </button>
       </SectionHero>
 
-      {(projectFilter || designerFilter) && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-xs text-foreground">
-            <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
-            {projectFilter && (
-              <span className="inline-flex items-center gap-1.5">
-                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Project:</span>
-                <span className="font-medium">{projectFilterName || "…"}</span>
-              </span>
-            )}
-            {designerFilter && (
-              <span className="inline-flex items-center gap-1.5">
-                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
-                <span className="font-medium">{designerLabel}</span>
-                <button
-                  onClick={clearDesignerFilter}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Clear designer filter"
-                >×</button>
-              </span>
-            )}
-          </div>
-          <button
-            onClick={clearAllFilters}
-            className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
-          >
-            Clear all
-          </button>
-        </div>
-      )}
+      <ActiveFilterChips className="mb-4" />
 
       {(() => {
         const visibleQuotes = designerFilter && matchingQuoteIds
