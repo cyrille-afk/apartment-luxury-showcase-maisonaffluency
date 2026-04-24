@@ -205,6 +205,110 @@ const TradeAdminCadAssets = () => {
           </p>
         </header>
 
+        {/* All assets table */}
+        <section className="border border-border rounded-md p-4 bg-card/40 space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="font-display text-sm text-foreground">All uploaded assets ({allAssets.length})</h2>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                placeholder="Filter by product, brand, variant, format…"
+                className="w-72 max-w-full pl-8 pr-3 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground/30"
+              />
+            </div>
+          </div>
+          {loadingAll ? (
+            <p className="font-body text-xs text-muted-foreground">Loading…</p>
+          ) : allAssets.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">No CAD/3D files have been uploaded yet.</p>
+          ) : (
+            <div className="overflow-x-auto rounded-md border border-border/60">
+              <table className="w-full text-left">
+                <thead className="bg-muted/40">
+                  <tr className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <th className="px-3 py-2 font-medium">Product</th>
+                    <th className="px-3 py-2 font-medium">Variant</th>
+                    <th className="px-3 py-2 font-medium">Format</th>
+                    <th className="px-3 py-2 font-medium">Version</th>
+                    <th className="px-3 py-2 font-medium">File</th>
+                    <th className="px-3 py-2 font-medium text-center">Active</th>
+                    <th className="px-3 py-2 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {allAssets
+                    .filter((a) => {
+                      const q = globalFilter.trim().toLowerCase();
+                      if (!q) return true;
+                      return (
+                        (a.product?.product_name || "").toLowerCase().includes(q) ||
+                        (a.product?.brand_name || "").toLowerCase().includes(q) ||
+                        (a.variant_label || "").toLowerCase().includes(q) ||
+                        a.file_format.toLowerCase().includes(q) ||
+                        (a.version || "").toLowerCase().includes(q)
+                      );
+                    })
+                    .map((a) => (
+                      <tr key={a.id} className="font-body text-xs text-foreground bg-background hover:bg-muted/20">
+                        <td className="px-3 py-2 min-w-[180px]">
+                          <button
+                            type="button"
+                            onClick={() => setProductId(a.product_id)}
+                            className="text-left hover:underline"
+                            title="Select this product"
+                          >
+                            <div className="truncate max-w-[240px]">{a.product?.product_name || <span className="text-muted-foreground italic">Unknown product</span>}</div>
+                            {a.product?.brand_name && (
+                              <div className="text-[10px] text-muted-foreground truncate max-w-[240px]">{a.product.brand_name}</div>
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">
+                          {a.variant_label || <span className="italic">Default</span>}
+                        </td>
+                        <td className="px-3 py-2 uppercase tracking-wider">.{a.file_format}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{a.version || "—"}</td>
+                        <td className="px-3 py-2 max-w-[200px]">
+                          <a
+                            href={a.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-muted-foreground hover:text-foreground truncate block"
+                          >
+                            {a.file_url.split("/").pop()}
+                          </a>
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={a.is_active}
+                              onChange={() => handleToggleActive(a)}
+                              className="h-3.5 w-3.5 accent-primary"
+                            />
+                          </label>
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(a)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
         {/* Product picker */}
         <section className="border border-border rounded-md p-4 bg-card/40 space-y-3">
           <label className="block font-body text-xs uppercase tracking-[0.18em] text-muted-foreground">Product</label>
