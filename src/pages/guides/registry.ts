@@ -3,6 +3,7 @@
 
 export const GUIDE_LOADERS: Record<string, () => Promise<unknown>> = {
   "shared-filters": () => import("../TradeGuideSharedFilters"),
+  "ffe-schedule": () => import("../TradeGuideFFE"),
 };
 
 const prefetched = new Set<string>();

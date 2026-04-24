@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
-import { BookOpen, Users, ChevronRight, BarChart3 } from "lucide-react";
+import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet } from "lucide-react";
 import { prefetchGuide } from "./guides/registry";
 import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/lib/analytics";
@@ -25,6 +25,16 @@ const guides: Guide[] = [
     audience: "All studio members",
     pdfUrl: "/guides/studio-shared-filters.pdf",
     icon: Users,
+  },
+  {
+    slug: "ffe-schedule",
+    eyebrow: "Specification essentials",
+    title: "Building an FF&E Schedule",
+    description:
+      "How quotes, boards and tearsheets aggregate into a single procurement-ready schedule — with rooms, codes, tags, PDF/CSV exports and revision control.",
+    audience: "Specifiers & procurement",
+    pdfUrl: "/guides/studio-ffe-schedule.pdf",
+    icon: FileSpreadsheet,
   },
 ];
 
