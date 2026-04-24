@@ -1,7 +1,7 @@
 import { useParams, Navigate } from "react-router-dom";
 import { lazy, Suspense, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { GUIDE_LOADERS } from "./guides/registry";
+import { GUIDE_LOADERS, GUIDE_SLUG_ALIASES } from "./guides/registry";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import logoMark from "@/assets/maison-affluency-mark.jpg";
@@ -9,12 +9,15 @@ import logoMark from "@/assets/maison-affluency-mark.jpg";
 export default function TradeGuideDetail() {
   const { slug } = useParams();
 
+  // Redirect legacy slugs to their canonical form.
+  const aliasTarget = slug ? GUIDE_SLUG_ALIASES[slug] : undefined;
+
   const GuideComponent = useMemo(() => {
-    if (!slug) return null;
+    if (!slug || aliasTarget) return null;
     const loader = GUIDE_LOADERS[slug];
     if (!loader) return null;
     return lazy(loader as () => Promise<{ default: React.ComponentType }>);
-  }, [slug]);
+  }, [slug, aliasTarget]);
 
   useEffect(() => {
     if (!slug || !GUIDE_LOADERS[slug]) return;
@@ -47,6 +50,7 @@ export default function TradeGuideDetail() {
     });
   }, [slug]);
 
+  if (aliasTarget) return <Navigate to={`/trade/guides/${aliasTarget}`} replace />;
   if (!slug || !GuideComponent) return <Navigate to="/trade/guides" replace />;
 
   return (

@@ -2,11 +2,12 @@ import { Link, useParams, Navigate } from "react-router-dom";
 import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
+const SLUG = "multi-user-studio-shared-filters";
 const PDF_URL = "/guides/studio-shared-filters.pdf";
 
 export default function TradeGuideSharedFilters() {
   const { slug } = useParams();
-  if (slug && slug !== "shared-filters") return <Navigate to="/trade/guides" replace />;
+  if (slug && slug !== SLUG) return <Navigate to="/trade/guides" replace />;
 
   return (
     <article className="max-w-3xl mx-auto space-y-10">
@@ -16,8 +17,8 @@ export default function TradeGuideSharedFilters() {
           onClick={() =>
             trackEvent("trade_guide_back_to_list", {
               event_category: "Trade Guides",
-              event_label: "shared-filters",
-              guide_slug: "shared-filters",
+              event_label: SLUG,
+              guide_slug: SLUG,
             })
           }
           className="inline-flex items-center gap-1 font-body text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
