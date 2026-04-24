@@ -349,17 +349,25 @@ export default function TradeProjectDetail() {
       </div>
 
       {/* Linked items */}
+      {(() => {
+        const visibleQuotes = selectedDesigner
+          ? quotes.filter((q) => brandQuoteIds[selectedDesigner]?.has(q.id))
+          : quotes;
+        const visibleBoards = selectedDesigner
+          ? boards.filter((b) => brandBoardIds[selectedDesigner]?.has(b.id))
+          : boards;
+        return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Section
           icon={FileText}
           title="Quotes"
-          count={quotes.length}
+          count={visibleQuotes.length}
           loading={loadingLinks}
-          empty="No quotes linked yet."
+          empty={selectedDesigner ? `No quotes contain ${selectedDesigner}.` : "No quotes linked yet."}
           link="/trade/quotes"
           linkLabel="Manage quotes"
         >
-          {quotes.map((q) => (
+          {visibleQuotes.map((q) => (
             <Row
               key={q.id}
               to="/trade/quotes"
@@ -372,13 +380,13 @@ export default function TradeProjectDetail() {
         <Section
           icon={FolderArchive}
           title="Project folders / boards"
-          count={boards.length}
+          count={visibleBoards.length}
           loading={loadingLinks}
-          empty="No mood boards linked yet."
+          empty={selectedDesigner ? `No boards contain ${selectedDesigner}.` : "No mood boards linked yet."}
           link="/trade/boards"
           linkLabel="Manage boards"
         >
-          {boards.map((b) => (
+          {visibleBoards.map((b) => (
             <Row
               key={b.id}
               to={`/trade/boards/${b.id}`}
