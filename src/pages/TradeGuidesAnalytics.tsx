@@ -456,22 +456,32 @@ export default function TradeGuidesAnalytics() {
                           {(() => {
                             const slug = designerSlugs.get(row.brand.toLowerCase());
                             if (!slug) return null;
-                            const isCopied = copiedSlug === slug;
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => copyDesignerLink(slug, row.brand)}
-                                aria-label={`Copy share link for ${row.brand}`}
-                                title="Copy share link"
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                              >
-                                {isCopied ? (
-                                  <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                                ) : (
-                                  <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-                                )}
-                              </button>
-                            );
+                            const tabs: { tab: EngagementSort; label: string; short: string }[] = [
+                              { tab: "quotes", label: "Copy Quotes deep link", short: "Q" },
+                              { tab: "boards", label: "Copy Boards deep link", short: "B" },
+                            ];
+                            return tabs.map(({ tab, label, short }) => {
+                              const isCopied = copiedSlug === `${slug}:${tab}`;
+                              return (
+                                <button
+                                  key={tab}
+                                  type="button"
+                                  onClick={() => copyDesignerLink(slug, row.brand, tab)}
+                                  aria-label={`${label} for ${row.brand}`}
+                                  title={label}
+                                  className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                                >
+                                  {isCopied ? (
+                                    <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                                  ) : (
+                                    <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                  )}
+                                  <span className="font-body text-[10px] uppercase tracking-wider">
+                                    {short}
+                                  </span>
+                                </button>
+                              );
+                            });
                           })()}
                         </div>
                       </div>
