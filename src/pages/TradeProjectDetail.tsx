@@ -449,6 +449,8 @@ export default function TradeProjectDetail() {
           </Link>
         </Section>
       </div>
+        );
+      })()}
     </div>
   );
 }
