@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
-  CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box,
+  CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
 } from "lucide-react";
 
 type Tool = { title: string; description: string; url: string; icon: any };
@@ -44,6 +44,7 @@ const categories: ToolCategory[] = [
   {
     label: "Learn",
     tools: [
+      { title: "Guides", description: "Studio playbooks for using the Trade Portal", url: "/trade/guides", icon: BookOpen },
       { title: "CPD & Education", description: "Webinars, workshops & CPD tracking", url: "/trade/cpd", icon: GraduationCap },
       { title: "3D Studio", description: "3ds Max + Corona/V-Ray rendering pipeline", url: "/trade/axonometric-requests", icon: Box },
     ],
