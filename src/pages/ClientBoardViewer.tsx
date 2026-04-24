@@ -14,6 +14,9 @@ interface Board {
   title: string;
   client_name: string;
   status: string;
+  studio_logo_url?: string | null;
+  studio_name?: string | null;
+  hide_maison_branding?: boolean | null;
 }
 
 interface BoardItem {
@@ -174,19 +177,39 @@ const ClientBoardViewer = () => {
   }
 
 
+  const studioLogo = board?.studio_logo_url || null;
+  const studioName = board?.studio_name?.trim() || null;
+  const whiteLabel = !!board?.hide_maison_branding;
+  const headerBrandLabel = whiteLabel ? (studioName || "Curated Selection") : "Maison Affluency";
+
   return (
     <>
-      <Helmet><title>{board?.title} — Maison Affluency</title></Helmet>
+      <Helmet><title>{board?.title}{studioName ? ` — ${studioName}` : whiteLabel ? "" : " — Maison Affluency"}</title></Helmet>
       <div className="min-h-screen bg-background">
-        {/* Branded header */}
+        {/* Branded header — swaps to studio branding when hide_maison_branding is on */}
         <header className="border-b border-border bg-background sticky top-0 z-10">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div>
-              <span className="font-display text-sm text-foreground tracking-wide">Maison Affluency</span>
-              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.2em] ml-3">Curated Selection</span>
+          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {studioLogo ? (
+                <img
+                  src={studioLogo}
+                  alt={studioName || "Studio"}
+                  className="h-8 w-auto max-w-[160px] object-contain"
+                />
+              ) : null}
+              <div className="min-w-0">
+                <span className="font-display text-sm text-foreground tracking-wide block truncate">
+                  {whiteLabel ? (studioName || "Curated Selection") : "Maison Affluency"}
+                </span>
+                {!whiteLabel && (
+                  <span className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+                    Curated Selection
+                  </span>
+                )}
+              </div>
             </div>
             {board?.client_name && (
-              <span className="font-body text-xs text-muted-foreground">Prepared for {board.client_name}</span>
+              <span className="font-body text-xs text-muted-foreground shrink-0">Prepared for {board.client_name}</span>
             )}
           </div>
         </header>
@@ -344,8 +367,10 @@ const ClientBoardViewer = () => {
         </main>
 
         <footer className="border-t border-border mt-16 py-6 text-center">
-          <span className="font-display text-xs text-muted-foreground tracking-wide">Maison Affluency</span>
-          <p className="font-body text-[10px] text-muted-foreground/60 mt-1">Curated luxury furnishings for discerning professionals</p>
+          <span className="font-display text-xs text-muted-foreground tracking-wide">{headerBrandLabel}</span>
+          {!whiteLabel && (
+            <p className="font-body text-[10px] text-muted-foreground/60 mt-1">Curated luxury furnishings for discerning professionals</p>
+          )}
         </footer>
       </div>
     </>
