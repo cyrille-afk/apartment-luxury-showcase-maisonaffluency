@@ -458,3 +458,15 @@ function Row({ to, title, meta }: { to: string; title: string; meta: string }) {
     </Link>
   );
 }
+
+function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-3 rounded-md border border-border bg-muted/10 p-3">
+      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+      <div className="min-w-0">
+        <div className="font-display text-xl text-foreground leading-none">{value}</div>
+        <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{label}</div>
+      </div>
+    </div>
+  );
+}
