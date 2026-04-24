@@ -39,12 +39,27 @@ const TradeQuotes = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
+  const designerFilter = searchParams.get("designer");
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [matchingQuoteIds, setMatchingQuoteIds] = useState<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+
+  const clearAllFilters = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("project");
+    next.delete("designer");
+    setSearchParams(next);
+    try { sessionStorage.removeItem("trade:lastProjectFilter"); } catch {}
+  };
+  const clearDesignerOnly = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("designer");
+    setSearchParams(next);
+  };
 
   const fetchQuotes = async () => {
     if (!user) return;
@@ -114,6 +129,18 @@ const TradeQuotes = () => {
   useEffect(() => {
     fetchQuotes();
   }, [user, showAll, projectFilter]);
+
+  // Resolve which quotes contain the selected designer/brand
+  useEffect(() => {
+    if (!designerFilter) { setMatchingQuoteIds(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("trade_quote_items")
+        .select("quote_id, trade_products!inner(brand_name)")
+        .eq("trade_products.brand_name", designerFilter);
+      setMatchingQuoteIds(new Set(((data as any[]) || []).map((r) => r.quote_id)));
+    })();
+  }, [designerFilter]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
