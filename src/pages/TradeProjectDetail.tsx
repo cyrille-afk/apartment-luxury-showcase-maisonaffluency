@@ -40,6 +40,8 @@ export default function TradeProjectDetail() {
   const [boardItemCount, setBoardItemCount] = useState(0);
   const [designerBreakdown, setDesignerBreakdown] = useState<{ name: string; count: number }[]>([]);
   const [selectedDesigner, setSelectedDesigner] = useState<string | null>(null);
+  const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
+  const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
 
   useEffect(() => {
     if (project) {
@@ -74,10 +76,10 @@ export default function TradeProjectDetail() {
       const boardIds = bList.map((x) => x.id);
       const [qItems, bItems] = await Promise.all([
         quoteIds.length
-          ? sb.from("trade_quote_items").select("quantity, trade_products(brand_name)").in("quote_id", quoteIds)
+          ? sb.from("trade_quote_items").select("quote_id, quantity, trade_products(brand_name)").in("quote_id", quoteIds)
           : Promise.resolve({ data: [] }),
         boardIds.length
-          ? sb.from("client_board_items").select("id, trade_products(brand_name)").in("board_id", boardIds)
+          ? sb.from("client_board_items").select("id, board_id, trade_products(brand_name)").in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
       const qItemsData: any[] = qItems.data || [];
@@ -87,14 +89,24 @@ export default function TradeProjectDetail() {
       setBoardItemCount(bItemsData.length);
 
       const tally = new Map<string, number>();
+      const qByBrand: Record<string, Set<string>> = {};
+      const bByBrand: Record<string, Set<string>> = {};
       qItemsData.forEach((r) => {
         const name = r.trade_products?.brand_name;
-        if (name) tally.set(name, (tally.get(name) || 0) + (r.quantity || 1));
+        if (name) {
+          tally.set(name, (tally.get(name) || 0) + (r.quantity || 1));
+          (qByBrand[name] ||= new Set()).add(r.quote_id);
+        }
       });
       bItemsData.forEach((r) => {
         const name = r.trade_products?.brand_name;
-        if (name) tally.set(name, (tally.get(name) || 0) + 1);
+        if (name) {
+          tally.set(name, (tally.get(name) || 0) + 1);
+          (bByBrand[name] ||= new Set()).add(r.board_id);
+        }
       });
+      setBrandQuoteIds(qByBrand);
+      setBrandBoardIds(bByBrand);
       const breakdown = Array.from(tally.entries())
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
