@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,10 @@ import {
  *
  * Each chip clears just its own filter; "Clear all" wipes both.
  * Renders nothing when no filter is active.
+ *
+ * Keyboard: chips form a roving-focus group — ArrowLeft/ArrowRight move
+ * focus between the clear buttons (including "Clear all"), Home/End jump
+ * to the first/last, and Enter/Space activate.
  */
 export default function ActiveFilterChips({
   className = "",
@@ -50,7 +54,6 @@ export default function ActiveFilterChips({
   const [announcement, setAnnouncement] = useState("");
   const announceCleared = (what: string) => {
     setAnnouncement(`${what} filter cleared`);
-    // Reset shortly after so re-clearing the same thing re-announces.
     window.setTimeout(() => setAnnouncement(""), 1000);
   };
 
@@ -58,12 +61,44 @@ export default function ActiveFilterChips({
   const handleClearDesigner = () => { clearDesignerFilter(); announceCleared(`Designer ${designerLabel || designerFilter || ""}`.trim()); };
   const handleClearAll = () => { clearAllFilters(); announceCleared("All"); };
 
+  // Roving focus across the chip clear buttons + "Clear all".
+  const itemsRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const focusableCount =
+    (projectFilter ? 1 : 0) +
+    (designerFilter ? 1 : 0) +
+    (projectFilter && designerFilter ? 1 : 0);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const key = e.key;
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(key)) return;
+    const items = itemsRef.current.filter(Boolean) as HTMLButtonElement[];
+    if (items.length === 0) return;
+    const active = document.activeElement as HTMLElement | null;
+    const currentIndex = items.findIndex((el) => el === active);
+    let nextIndex = currentIndex;
+    if (key === "ArrowRight") nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
+    else if (key === "ArrowLeft") nextIndex = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
+    else if (key === "Home") nextIndex = 0;
+    else if (key === "End") nextIndex = items.length - 1;
+    e.preventDefault();
+    items[nextIndex]?.focus();
+  };
+
   if (!projectFilter && !designerFilter) return null;
+
+  // Reset slots when filter set changes.
+  itemsRef.current = new Array(focusableCount).fill(null);
+
+  let slot = 0;
+  const projectSlot = projectFilter ? slot++ : -1;
+  const designerSlot = designerFilter ? slot++ : -1;
+  const clearAllSlot = projectFilter && designerFilter ? slot++ : -1;
 
   return (
     <div
       role="region"
       aria-label="Active filters"
+      onKeyDown={handleKeyDown}
       className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 ${className}`}
     >
       <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -75,6 +110,7 @@ export default function ActiveFilterChips({
           label="Project"
           value={projectName || "…"}
           onClear={handleClearProject}
+          buttonRef={(el) => { itemsRef.current[projectSlot] = el; }}
         />
       )}
 
@@ -83,11 +119,13 @@ export default function ActiveFilterChips({
           label="Designer"
           value={designerLabel || designerFilter}
           onClear={handleClearDesigner}
+          buttonRef={(el) => { itemsRef.current[designerSlot] = el; }}
         />
       )}
 
       {projectFilter && designerFilter && (
         <button
+          ref={(el) => { itemsRef.current[clearAllSlot] = el; }}
           type="button"
           onClick={() => (confirmClearAll ? setConfirmOpen(true) : handleClearAll())}
           className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -96,7 +134,6 @@ export default function ActiveFilterChips({
         </button>
       )}
 
-      {/* SR-only live region announces clear actions */}
       <span aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </span>
@@ -121,12 +158,23 @@ export default function ActiveFilterChips({
   );
 }
 
-function Chip({ label, value, onClear }: { label: string; value: string; onClear: () => void }) {
+function Chip({
+  label,
+  value,
+  onClear,
+  buttonRef,
+}: {
+  label: string;
+  value: string;
+  onClear: () => void;
+  buttonRef?: (el: HTMLButtonElement | null) => void;
+}) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 font-body text-xs text-foreground">
       <span className="text-muted-foreground uppercase tracking-wider text-[10px]">{label}:</span>
       <span className="font-medium">{value}</span>
       <button
+        ref={buttonRef}
         type="button"
         onClick={onClear}
         aria-label={`Clear ${label.toLowerCase()} filter: ${value}`}
