@@ -252,7 +252,7 @@ const TradeBoards = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {boards.map(board => (
+            {visibleBoards.map(board => (
               <div
                 key={board.id}
                 className="border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
@@ -297,7 +297,8 @@ const TradeBoards = () => {
               </div>
             ))}
           </div>
-        )}
+        );
+        })()}
       </div>
     </>
   );
