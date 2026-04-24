@@ -49,18 +49,25 @@ export default function TradeGuidesAnalytics() {
   const [drillBrand, setDrillBrand] = useState<string | null>(searchParams.get("brand"));
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
-  const copyDesignerLink = async (slug: string, brand: string) => {
+  const copyDesignerLink = async (
+    slug: string,
+    brand: string,
+    tab: EngagementSort = engagementSort,
+  ) => {
     const params = new URLSearchParams();
     params.set("brand", brand);
-    if (engagementSort !== "all") params.set("tab", engagementSort);
+    if (tab !== "all") params.set("tab", tab);
     params.set("window", String(windowDays));
     params.set("section", "engagement");
     const url = `${window.location.origin}/trade/designers/admin?${params.toString()}#engagement`;
+    const key = `${slug}:${tab}`;
     try {
       await navigator.clipboard.writeText(url);
-      setCopiedSlug(slug);
-      toast.success(`Analytics link for ${brand} copied`);
-      setTimeout(() => setCopiedSlug((s) => (s === slug ? null : s)), 1500);
+      setCopiedSlug(key);
+      const label =
+        tab === "quotes" ? "Quotes" : tab === "boards" ? "Boards" : "Analytics";
+      toast.success(`${label} link for ${brand} copied`);
+      setTimeout(() => setCopiedSlug((s) => (s === key ? null : s)), 1500);
     } catch {
       toast.error("Could not copy link");
     }
