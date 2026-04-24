@@ -19,11 +19,14 @@ export default function TradeGuidesAnalytics() {
   const [windowDays, setWindowDays] = useState<Window>(7);
   const [rows, setRows] = useState<ViewRow[] | null>(null);
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
+  const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
+  const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setRows(null);
+    setEngagement(null);
     setError(null);
     const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
 
@@ -35,7 +38,8 @@ export default function TradeGuidesAnalytics() {
         .order("created_at", { ascending: false })
         .limit(5000),
       supabase.rpc("get_admin_user_ids"),
-    ]).then(([viewsRes, adminsRes]) => {
+      supabase.rpc("get_designer_engagement", { _since: since }),
+    ]).then(([viewsRes, adminsRes, engagementRes]) => {
       if (cancelled) return;
       if (viewsRes.error) {
         setError(viewsRes.error.message);
@@ -44,6 +48,7 @@ export default function TradeGuidesAnalytics() {
       setRows((viewsRes.data ?? []) as ViewRow[]);
       const ids = (adminsRes.data ?? []) as { user_id: string }[];
       setAdminIds(new Set(ids.map((r) => r.user_id)));
+      setEngagement((engagementRes.data ?? []) as EngagementRow[]);
     });
     return () => {
       cancelled = true;
