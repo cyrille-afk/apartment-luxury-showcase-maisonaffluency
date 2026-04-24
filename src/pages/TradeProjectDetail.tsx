@@ -253,6 +253,68 @@ export default function TradeProjectDetail() {
         )}
       </div>
 
+      {/* Summary panel */}
+      <div className="border border-border rounded-md p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">Project summary</h2>
+          {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+          <Stat icon={FileText} label="Quotes" value={quotes.length} />
+          <Stat icon={FolderArchive} label="Boards" value={boards.length} />
+          <Stat icon={Package} label="Quote items" value={quoteItemCount} />
+          <Stat icon={ListChecks} label="Board items" value={boardItemCount} />
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground">By designer / brand</h3>
+            </div>
+            {selectedDesigner && (
+              <button
+                onClick={() => setSelectedDesigner(null)}
+                className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {designerBreakdown.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">
+              {loadingLinks ? "Loading…" : "No items linked to this project yet."}
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {designerBreakdown.map((d) => {
+                const active = selectedDesigner === d.name;
+                return (
+                  <button
+                    key={d.name}
+                    onClick={() => setSelectedDesigner(active ? null : d.name)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-body text-xs transition-colors ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border bg-background text-foreground hover:bg-muted/40"
+                    }`}
+                  >
+                    <span className="truncate max-w-[160px]">{d.name}</span>
+                    <span className={`text-[10px] ${active ? "text-background/70" : "text-muted-foreground"}`}>{d.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {selectedDesigner && (
+            <p className="mt-3 font-body text-[11px] text-muted-foreground">
+              <span className="text-foreground">{selectedDesigner}</span> contributes{" "}
+              {designerBreakdown.find((d) => d.name === selectedDesigner)?.count || 0} item
+              {(designerBreakdown.find((d) => d.name === selectedDesigner)?.count || 0) === 1 ? "" : "s"} across this project's quotes and boards.
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* Linked items */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Section
