@@ -393,7 +393,7 @@ const TradeBoardBuilder = () => {
           <div>
             <h1 className="font-display text-2xl text-foreground">{board.title}</h1>
             {board.client_name && <p className="font-body text-sm text-muted-foreground mt-1">For {board.client_name}</p>}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               <Badge variant="secondary">{board.status}</Badge>
               {items.length > 0 && (
                 <span className="font-body text-xs text-muted-foreground">
@@ -401,6 +401,17 @@ const TradeBoardBuilder = () => {
                   {subfolders.length > 0 && ` · ${subfolders.length} sub-folders`}
                 </span>
               )}
+            </div>
+            <div className="mt-3">
+              <ProjectPicker
+                value={board.project_id}
+                onChange={async (id) => {
+                  setBoard((prev) => (prev ? { ...prev, project_id: id } : prev));
+                  await supabase.from("client_boards").update({ project_id: id } as any).eq("id", board.id);
+                  toast({ title: id ? "Folder assigned to project" : "Removed from project" });
+                }}
+                compact
+              />
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
