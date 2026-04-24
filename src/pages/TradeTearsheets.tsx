@@ -32,7 +32,16 @@ export default function TradeTearsheets() {
   const [filterDesigner, setFilterDesigner] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterSubcategory, setFilterSubcategory] = useState("");
-  const [filterProjectId, setFilterProjectId] = useState<string | null>(null);
+  const [filterProjectId, setFilterProjectIdState] = useState<string | null>(() => {
+    try { return sessionStorage.getItem("trade:lastProjectFilter"); } catch { return null; }
+  });
+  const setFilterProjectId = (id: string | null) => {
+    setFilterProjectIdState(id);
+    try {
+      if (id) sessionStorage.setItem("trade:lastProjectFilter", id);
+      else sessionStorage.removeItem("trade:lastProjectFilter");
+    } catch {}
+  };
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
