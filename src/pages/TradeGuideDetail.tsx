@@ -17,6 +17,18 @@ export default function TradeGuideDetail() {
 
   useEffect(() => {
     if (!slug || !GUIDE_LOADERS[slug]) return;
+
+    // Session-based dedupe: ignore repeat views of the same slug within the window.
+    const DEDUPE_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+    const storageKey = `guide_view_seen:${slug}`;
+    try {
+      const last = sessionStorage.getItem(storageKey);
+      if (last && Date.now() - Number(last) < DEDUPE_WINDOW_MS) return;
+      sessionStorage.setItem(storageKey, String(Date.now()));
+    } catch {
+      // sessionStorage unavailable (private mode, SSR) — fall through and log.
+    }
+
     trackEvent("trade_guide_view", {
       event_category: "Trade Guides",
       event_label: slug,
