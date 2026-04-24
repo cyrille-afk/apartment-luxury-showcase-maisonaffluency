@@ -326,10 +326,27 @@ export default function TradeGuidesAnalytics() {
                           <span className="font-body text-xs text-muted-foreground tabular-nums w-5">
                             {i + 1}.
                           </span>
-                          <span className="font-body text-sm text-foreground truncate flex items-center gap-1.5">
-                            <Sparkles className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-                            {row.brand}
-                          </span>
+                          {(() => {
+                            const slug = designerSlugs.get(row.brand.toLowerCase());
+                            const inner = (
+                              <>
+                                <Sparkles className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                                {row.brand}
+                              </>
+                            );
+                            return slug ? (
+                              <Link
+                                to={`/designers/${slug}`}
+                                className="font-body text-sm text-foreground hover:text-primary truncate flex items-center gap-1.5"
+                              >
+                                {inner}
+                              </Link>
+                            ) : (
+                              <span className="font-body text-sm text-foreground truncate flex items-center gap-1.5">
+                                {inner}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
                           {primary}
