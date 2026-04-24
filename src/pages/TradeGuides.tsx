@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { BookOpen, Users, ChevronRight, BarChart3 } from "lucide-react";
 import { prefetchGuide } from "./guides/registry";
 import { useAuth } from "@/hooks/useAuth";
+import { trackEvent } from "@/lib/analytics";
 
 type Guide = {
   slug: string;
