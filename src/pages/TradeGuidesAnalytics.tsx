@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BarChart3, Eye, Loader2, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Check, Eye, Link2, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
