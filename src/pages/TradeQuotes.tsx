@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, Users, XCircle } from "lucide-react";
+import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, Users, XCircle, FolderOpen } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
 import SectionHero from "@/components/trade/SectionHero";
@@ -17,6 +17,8 @@ interface Quote {
   created_at: string;
   updated_at: string;
   item_count: number;
+  project_id?: string | null;
+  project_name?: string | null;
   profiles?: { first_name: string; last_name: string; company: string; email: string } | null;
 }
 
@@ -78,11 +80,23 @@ const TradeQuotes = () => {
       });
     }
 
+    // Fetch project names for assigned projects
+    const projectIds = [...new Set(((quotesData || []) as any[]).map((q) => q.project_id).filter(Boolean))] as string[];
+    let projectMap: Record<string, string> = {};
+    if (projectIds.length > 0) {
+      const { data: projects } = await supabase
+        .from("projects" as any)
+        .select("id, name")
+        .in("id", projectIds);
+      (projects || []).forEach((p: any) => { projectMap[p.id] = p.name; });
+    }
+
     setQuotes(
       (quotesData || []).map((q: any) => ({
         ...q,
         item_count: itemCounts[q.id] || 0,
         profiles: profileMap[q.user_id] || null,
+        project_name: q.project_id ? projectMap[q.project_id] || null : null,
       }))
     );
     setLoading(false);
@@ -204,6 +218,12 @@ const TradeQuotes = () => {
                       {quote.item_count > 0 && (
                         <span className="font-body text-[10px] text-muted-foreground">
                           {quote.item_count} {quote.item_count === 1 ? "item" : "items"}
+                        </span>
+                      )}
+                      {quote.project_name && (
+                        <span className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground">
+                          <FolderOpen className="h-3 w-3" />
+                          {quote.project_name}
                         </span>
                       )}
                     </div>

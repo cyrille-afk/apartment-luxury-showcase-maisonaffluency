@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Plus, Share2, FileText, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,6 +28,8 @@ interface Board {
   created_at: string;
   updated_at: string;
   token_expires_at: string | null;
+  project_id: string | null;
+  project_name?: string | null;
   item_count?: number;
 }
 
@@ -71,7 +73,22 @@ const TradeBoards = () => {
         counts[item.board_id] = (counts[item.board_id] || 0) + 1;
       });
 
-      setBoards(data.map((b: any) => ({ ...b, item_count: counts[b.id] || 0 })));
+      // Fetch project names for any assigned projects
+      const projectIds = [...new Set(data.map((b: any) => b.project_id).filter(Boolean))] as string[];
+      let projectMap: Record<string, string> = {};
+      if (projectIds.length > 0) {
+        const { data: projects } = await supabase
+          .from("projects" as any)
+          .select("id, name")
+          .in("id", projectIds);
+        (projects || []).forEach((p: any) => { projectMap[p.id] = p.name; });
+      }
+
+      setBoards(data.map((b: any) => ({
+        ...b,
+        item_count: counts[b.id] || 0,
+        project_name: b.project_id ? projectMap[b.project_id] || null : null,
+      })));
     }
     setLoading(false);
   };
@@ -172,6 +189,15 @@ const TradeBoards = () => {
                   </div>
                   <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
                 </div>
+                {board.project_name && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/trade/projects/${board.project_id}`); }}
+                    className="inline-flex items-center gap-1 mb-2 text-[10px] font-body uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <FolderOpen className="h-3 w-3" />
+                    {board.project_name}
+                  </button>
+                )}
                 <p className="font-body text-xs text-muted-foreground mb-4">
                   {board.item_count} {board.item_count === 1 ? "item" : "items"}
                   {board.status !== "draft" && board.token_expires_at && (

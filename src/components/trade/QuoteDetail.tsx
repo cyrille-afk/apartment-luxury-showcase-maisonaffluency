@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
+import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
@@ -68,6 +69,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [gstRate, setGstRate] = useState(9);
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
@@ -138,7 +140,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, admin_notes").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, admin_notes, project_id").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -215,6 +217,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
+      if ((quoteRes.data as any)?.project_id !== undefined) setProjectId((quoteRes.data as any).project_id);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
@@ -319,18 +322,31 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   return (
     <div className="max-w-4xl">
-      {/* Back + Print — hidden in print */}
-      <div className="flex items-center justify-between mb-4 md:mb-6 print:hidden">
-        <button onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
+      {/* Back + Project + Print — hidden in print */}
+      <div className="flex items-center justify-between gap-3 mb-4 md:mb-6 print:hidden">
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0">
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">All Quotes</span>
           <span className="sm:hidden">Back</span>
         </button>
-        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
-          <Printer className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Print / PDF</span>
-          <span className="sm:hidden">Print</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {(isDraft || isSuperAdmin) && (
+            <ProjectPicker
+              value={projectId}
+              onChange={async (id) => {
+                setProjectId(id);
+                await supabase.from("trade_quotes").update({ project_id: id } as any).eq("id", quoteId);
+                toast({ title: id ? "Quote assigned to project" : "Removed from project" });
+              }}
+              compact
+            />
+          )}
+          <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
+            <Printer className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Print / PDF</span>
+            <span className="sm:hidden">Print</span>
+          </button>
+        </div>
       </div>
 
       {/* Quote document */}
