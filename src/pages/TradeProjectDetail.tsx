@@ -287,13 +287,13 @@ export default function TradeProjectDetail() {
         <div className="flex flex-wrap items-center gap-2 mb-5">
           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">Quick filter:</span>
           <Link
-            to={`/trade/quotes?project=${project.id}`}
+            to={`/trade/quotes?project=${project.id}${selectedDesigner ? `&designer=${encodeURIComponent(selectedDesigner)}` : ""}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
           >
             <FileText className="h-3 w-3" /> View quotes for this project
           </Link>
           <Link
-            to={`/trade/boards?project=${project.id}`}
+            to={`/trade/boards?project=${project.id}${selectedDesigner ? `&designer=${encodeURIComponent(selectedDesigner)}` : ""}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
           >
             <FolderArchive className="h-3 w-3" /> View boards for this project
