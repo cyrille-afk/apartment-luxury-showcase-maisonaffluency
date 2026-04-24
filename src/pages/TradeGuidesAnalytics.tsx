@@ -9,6 +9,7 @@ type Window = 7 | 30;
 export default function TradeGuidesAnalytics() {
   const [windowDays, setWindowDays] = useState<Window>(7);
   const [rows, setRows] = useState<ViewRow[] | null>(null);
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -16,45 +17,81 @@ export default function TradeGuidesAnalytics() {
     setRows(null);
     setError(null);
     const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
-    supabase
-      .from("guide_views")
-      .select("slug, created_at, user_id")
-      .gte("created_at", since)
-      .order("created_at", { ascending: false })
-      .limit(5000)
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) setError(error.message);
-        else setRows((data ?? []) as ViewRow[]);
-      });
+
+    Promise.all([
+      supabase
+        .from("guide_views")
+        .select("slug, created_at, user_id")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(5000),
+      supabase.rpc("get_admin_user_ids"),
+    ]).then(([viewsRes, adminsRes]) => {
+      if (cancelled) return;
+      if (viewsRes.error) {
+        setError(viewsRes.error.message);
+        return;
+      }
+      setRows((viewsRes.data ?? []) as ViewRow[]);
+      const ids = (adminsRes.data ?? []) as { user_id: string }[];
+      setAdminIds(new Set(ids.map((r) => r.user_id)));
+    });
     return () => {
       cancelled = true;
     };
   }, [windowDays]);
 
-  const { total, uniqueVisits, perSlug } = useMemo(() => {
+  const { total, uniqueVisits, uniqueTrade, uniqueAdmin, perSlug } = useMemo(() => {
     if (!rows)
       return {
         total: 0,
         uniqueVisits: 0,
-        perSlug: [] as { slug: string; count: number; unique: number }[],
+        uniqueTrade: 0,
+        uniqueAdmin: 0,
+        perSlug: [] as {
+          slug: string;
+          count: number;
+          unique: number;
+          uniqueTrade: number;
+          uniqueAdmin: number;
+        }[],
       };
     const counts = new Map<string, number>();
     const uniqueKeys = new Map<string, Set<string>>();
+    const tradeKeys = new Map<string, Set<string>>();
+    const adminKeys = new Map<string, Set<string>>();
     const globalUnique = new Set<string>();
+    const globalTrade = new Set<string>();
+    const globalAdmin = new Set<string>();
     for (const r of rows) {
       counts.set(r.slug, (counts.get(r.slug) ?? 0) + 1);
       const visitorKey = r.user_id ?? `anon:${r.created_at}`;
-      const key = `${r.slug}::${visitorKey}`;
+      const isAdmin = !!r.user_id && adminIds.has(r.user_id);
       if (!uniqueKeys.has(r.slug)) uniqueKeys.set(r.slug, new Set());
+      if (!tradeKeys.has(r.slug)) tradeKeys.set(r.slug, new Set());
+      if (!adminKeys.has(r.slug)) adminKeys.set(r.slug, new Set());
       uniqueKeys.get(r.slug)!.add(visitorKey);
-      globalUnique.add(key);
+      (isAdmin ? adminKeys : tradeKeys).get(r.slug)!.add(visitorKey);
+      globalUnique.add(`${r.slug}::${visitorKey}`);
+      (isAdmin ? globalAdmin : globalTrade).add(visitorKey);
     }
     const perSlug = Array.from(counts.entries())
-      .map(([slug, count]) => ({ slug, count, unique: uniqueKeys.get(slug)?.size ?? 0 }))
+      .map(([slug, count]) => ({
+        slug,
+        count,
+        unique: uniqueKeys.get(slug)?.size ?? 0,
+        uniqueTrade: tradeKeys.get(slug)?.size ?? 0,
+        uniqueAdmin: adminKeys.get(slug)?.size ?? 0,
+      }))
       .sort((a, b) => b.count - a.count);
-    return { total: rows.length, uniqueVisits: globalUnique.size, perSlug };
-  }, [rows]);
+    return {
+      total: rows.length,
+      uniqueVisits: globalUnique.size,
+      uniqueTrade: globalTrade.size,
+      uniqueAdmin: globalAdmin.size,
+      perSlug,
+    };
+  }, [rows, adminIds]);
 
   const max = perSlug[0]?.count ?? 0;
 
@@ -117,10 +154,11 @@ export default function TradeGuidesAnalytics() {
 
       {rows && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Stat label="Total views" value={total} icon={Eye} />
             <Stat label="Unique visits" value={uniqueVisits} icon={Eye} />
-            <Stat label="Unique guides" value={perSlug.length} icon={BarChart3} />
+            <Stat label="Trade users" value={uniqueTrade} icon={BarChart3} />
+            <Stat label="Admins / staff" value={uniqueAdmin} icon={BarChart3} />
           </div>
 
           <section className="space-y-3">
@@ -151,7 +189,10 @@ export default function TradeGuidesAnalytics() {
                         </div>
                         <span className="font-body text-sm tabular-nums text-foreground whitespace-nowrap">
                           {row.count}
-                          <span className="text-muted-foreground"> · {row.unique} unique</span>
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · {row.uniqueTrade} trade · {row.uniqueAdmin} staff
+                          </span>
                         </span>
                       </div>
                       <div
