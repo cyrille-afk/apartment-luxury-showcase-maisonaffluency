@@ -3100,6 +3100,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_brand_engagement_users: {
+        Args: { _brand_name: string; _since: string }
+        Returns: {
+          board_items: number
+          company: string
+          email: string
+          first_name: string
+          last_name: string
+          quote_lines: number
+          source: string
+          user_id: string
+        }[]
+      }
       get_designer_engagement: {
         Args: { _since: string }
         Returns: {
