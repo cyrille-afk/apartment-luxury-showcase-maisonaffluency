@@ -7,6 +7,7 @@ import { FileText, Loader2, Search, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
+import { ProjectPicker } from "@/components/trade/ProjectPicker";
 
 interface TearsheetProduct {
   id: string;
