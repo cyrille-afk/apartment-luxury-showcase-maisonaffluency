@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -44,8 +45,7 @@ const TradeBoards = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const projectFilter = searchParams.get("project");
+  const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
@@ -184,7 +184,7 @@ const TradeBoards = () => {
               <span className="font-medium">{projectFilterName || "…"}</span>
             </div>
             <button
-              onClick={() => { searchParams.delete("project"); setSearchParams(searchParams); }}
+              onClick={clearProjectFilter}
               className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
               Clear filter

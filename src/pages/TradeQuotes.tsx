@@ -199,7 +199,7 @@ const TradeQuotes = () => {
             <span className="font-medium">{projectFilterName || "…"}</span>
           </div>
           <button
-            onClick={() => { searchParams.delete("project"); setSearchParams(searchParams); }}
+            onClick={clearProjectFilter}
             className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
           >
             Clear filter
