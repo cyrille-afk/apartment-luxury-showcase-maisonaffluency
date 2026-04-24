@@ -21,6 +21,16 @@ type EngagementRow = {
 };
 type Window = 7 | 30;
 type EngagementSort = "all" | "quotes" | "boards";
+type BrandUserRow = {
+  user_id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  company: string | null;
+  quote_lines: number;
+  board_items: number;
+  source: "quote" | "board" | "both";
+};
 
 export default function TradeGuidesAnalytics() {
   const [windowDays, setWindowDays] = useState<Window>(7);
