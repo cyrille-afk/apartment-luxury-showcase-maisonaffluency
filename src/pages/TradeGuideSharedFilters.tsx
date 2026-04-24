@@ -1,5 +1,6 @@
 import { Link, useParams, Navigate } from "react-router-dom";
 import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 const PDF_URL = "/guides/studio-shared-filters.pdf";
 
@@ -12,6 +13,13 @@ export default function TradeGuideSharedFilters() {
       <header className="space-y-4">
         <Link
           to="/trade/guides"
+          onClick={() =>
+            trackEvent("trade_guide_back_to_list", {
+              event_category: "Trade Guides",
+              event_label: "shared-filters",
+              guide_slug: "shared-filters",
+            })
+          }
           className="inline-flex items-center gap-1 font-body text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3 w-3" aria-hidden="true" /> All guides
