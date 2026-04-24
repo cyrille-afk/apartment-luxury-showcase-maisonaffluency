@@ -41,6 +41,19 @@ export default function TradeGuidesAnalytics() {
   const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
   const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
   const [drillBrand, setDrillBrand] = useState<string | null>(null);
+  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+
+  const copyDesignerLink = async (slug: string, brand: string) => {
+    const url = `${window.location.origin}/designers/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedSlug(slug);
+      toast.success(`Link to ${brand} copied`);
+      setTimeout(() => setCopiedSlug((s) => (s === slug ? null : s)), 1500);
+    } catch {
+      toast.error("Could not copy link");
+    }
+  };
   const [drillRows, setDrillRows] = useState<BrandUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
