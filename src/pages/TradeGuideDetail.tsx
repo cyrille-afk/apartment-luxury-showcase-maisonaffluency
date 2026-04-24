@@ -1,19 +1,19 @@
 import { useParams, Navigate } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { Loader2 } from "lucide-react";
-
-const SharedFiltersGuide = lazy(() => import("./TradeGuideSharedFilters"));
-
-const GUIDE_REGISTRY: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
-  "shared-filters": SharedFiltersGuide,
-};
+import { GUIDE_LOADERS } from "./guides/registry";
 
 export default function TradeGuideDetail() {
   const { slug } = useParams();
-  if (!slug) return <Navigate to="/trade/guides" replace />;
 
-  const GuideComponent = GUIDE_REGISTRY[slug];
-  if (!GuideComponent) return <Navigate to="/trade/guides" replace />;
+  const GuideComponent = useMemo(() => {
+    if (!slug) return null;
+    const loader = GUIDE_LOADERS[slug];
+    if (!loader) return null;
+    return lazy(loader as () => Promise<{ default: React.ComponentType }>);
+  }, [slug]);
+
+  if (!slug || !GuideComponent) return <Navigate to="/trade/guides" replace />;
 
   return (
     <Suspense
