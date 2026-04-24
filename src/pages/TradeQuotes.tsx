@@ -220,6 +220,12 @@ const TradeQuotes = () => {
                           {quote.item_count} {quote.item_count === 1 ? "item" : "items"}
                         </span>
                       )}
+                      {quote.project_name && (
+                        <span className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground">
+                          <FolderOpen className="h-3 w-3" />
+                          {quote.project_name}
+                        </span>
+                      )}
                     </div>
                     <p className="font-body text-[10px] text-muted-foreground">
                       {showAll && quote.profiles && (
