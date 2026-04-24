@@ -36,6 +36,10 @@ export default function TradeProjectDetail() {
   const [boards, setBoards] = useState<LinkedBoard[]>([]);
   const [timelines, setTimelines] = useState<LinkedTimeline[]>([]);
   const [loadingLinks, setLoadingLinks] = useState(true);
+  const [quoteItemCount, setQuoteItemCount] = useState(0);
+  const [boardItemCount, setBoardItemCount] = useState(0);
+  const [designerBreakdown, setDesignerBreakdown] = useState<{ name: string; count: number }[]>([]);
+  const [selectedDesigner, setSelectedDesigner] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) {
@@ -59,9 +63,43 @@ export default function TradeProjectDetail() {
         sb.from("client_boards").select("id, title, status, created_at").eq("project_id", id).order("created_at", { ascending: false }),
         sb.from("order_timeline").select("id, quote_id, kanban_status, estimated_delivery_at").eq("project_id", id),
       ]);
-      setQuotes((q.data as any) || []);
-      setBoards((b.data as any) || []);
+      const qList: LinkedQuote[] = (q.data as any) || [];
+      const bList: LinkedBoard[] = (b.data as any) || [];
+      setQuotes(qList);
+      setBoards(bList);
       setTimelines((t.data as any) || []);
+
+      // Aggregate item counts + designer breakdown
+      const quoteIds = qList.map((x) => x.id);
+      const boardIds = bList.map((x) => x.id);
+      const [qItems, bItems] = await Promise.all([
+        quoteIds.length
+          ? sb.from("trade_quote_items").select("quantity, trade_products(brand_name)").in("quote_id", quoteIds)
+          : Promise.resolve({ data: [] }),
+        boardIds.length
+          ? sb.from("client_board_items").select("id, trade_products(brand_name)").in("board_id", boardIds)
+          : Promise.resolve({ data: [] }),
+      ]);
+      const qItemsData: any[] = qItems.data || [];
+      const bItemsData: any[] = bItems.data || [];
+      const qCount = qItemsData.reduce((sum, r) => sum + (r.quantity || 1), 0);
+      setQuoteItemCount(qCount);
+      setBoardItemCount(bItemsData.length);
+
+      const tally = new Map<string, number>();
+      qItemsData.forEach((r) => {
+        const name = r.trade_products?.brand_name;
+        if (name) tally.set(name, (tally.get(name) || 0) + (r.quantity || 1));
+      });
+      bItemsData.forEach((r) => {
+        const name = r.trade_products?.brand_name;
+        if (name) tally.set(name, (tally.get(name) || 0) + 1);
+      });
+      const breakdown = Array.from(tally.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      setDesignerBreakdown(breakdown);
+
       setLoadingLinks(false);
     })();
   }, [id, user]);
