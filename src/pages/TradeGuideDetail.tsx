@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { GUIDE_LOADERS } from "./guides/registry";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
+import logoMark from "@/assets/maison-affluency-mark.jpg";
 
 export default function TradeGuideDetail() {
   const { slug } = useParams();
@@ -57,6 +58,19 @@ export default function TradeGuideDetail() {
       }
     >
       <GuideComponent />
+      <footer className="max-w-3xl mx-auto mt-16 pt-8 border-t border-border">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <img
+            src={logoMark}
+            alt="Maison Affluency"
+            className="h-10 w-auto opacity-80"
+            loading="lazy"
+          />
+          <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            © 2026 Maison Affluency · Trade Portal Guide
+          </p>
+        </div>
+      </footer>
     </Suspense>
   );
 }
