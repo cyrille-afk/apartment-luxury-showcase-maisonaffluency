@@ -168,7 +168,7 @@ export default function TradeProjectDetail() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <ActiveFilterChips className="mb-4" />
+      <ActiveFilterChips className="mb-4" confirmClearAll />
       {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <Link to="/trade/projects" className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground">

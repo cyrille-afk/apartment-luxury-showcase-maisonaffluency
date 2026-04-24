@@ -212,7 +212,7 @@ const TradeQuotes = () => {
         </button>
       </SectionHero>
 
-      <ActiveFilterChips className="mb-4" />
+      <ActiveFilterChips className="mb-4" confirmClearAll />
 
       {(() => {
         const visibleQuotes = designerFilter && matchingQuoteIds
