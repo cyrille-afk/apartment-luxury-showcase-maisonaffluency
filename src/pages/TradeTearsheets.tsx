@@ -2,7 +2,8 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FileText, Loader2, Search, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,10 @@ export default function TradeTearsheets() {
   const [filterDesigner, setFilterDesigner] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterSubcategory, setFilterSubcategory] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlProject = searchParams.get("project");
   const [filterProjectId, setFilterProjectIdState] = useState<string | null>(() => {
+    if (urlProject) return urlProject;
     try { return sessionStorage.getItem("trade:lastProjectFilter"); } catch { return null; }
   });
   const setFilterProjectId = (id: string | null) => {
@@ -41,7 +45,21 @@ export default function TradeTearsheets() {
       if (id) sessionStorage.setItem("trade:lastProjectFilter", id);
       else sessionStorage.removeItem("trade:lastProjectFilter");
     } catch {}
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("project", id); else next.delete("project");
+    setSearchParams(next, { replace: true });
   };
+  // Sync URL param → state if URL changes externally
+  useEffect(() => {
+    if (urlProject && urlProject !== filterProjectId) setFilterProjectIdState(urlProject);
+    // If state has value but URL doesn't (initial load from storage), reflect into URL
+    if (!urlProject && filterProjectId) {
+      const next = new URLSearchParams(searchParams);
+      next.set("project", filterProjectId);
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlProject]);
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
