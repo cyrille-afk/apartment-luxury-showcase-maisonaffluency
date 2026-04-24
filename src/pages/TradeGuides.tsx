@@ -17,7 +17,7 @@ type Guide = {
 
 const guides: Guide[] = [
   {
-    slug: "shared-filters",
+    slug: "multi-user-studio-shared-filters",
     eyebrow: "Studio essentials",
     title: "Working as a studio in the Trade Portal",
     description:
