@@ -74,12 +74,29 @@ export default function ActiveFilterChips({
 
       {projectFilter && designerFilter && (
         <button
-          onClick={clearAllFilters}
+          onClick={() => (confirmClearAll ? setConfirmOpen(true) : clearAllFilters())}
           className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
         >
           Clear all
         </button>
       )}
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all filters?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove both the project and designer filters across the Trade portal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { clearAllFilters(); setConfirmOpen(false); }}>
+              Clear all
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
