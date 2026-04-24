@@ -59,6 +59,10 @@ const TradeQuotes = () => {
       query = query.eq("user_id", user.id);
     }
 
+    if (projectFilter) {
+      query = query.eq("project_id", projectFilter);
+    }
+
     const { data: quotesData } = await query;
 
     // Fetch profiles for super admin view
@@ -109,7 +113,15 @@ const TradeQuotes = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [user, showAll]);
+  }, [user, showAll, projectFilter]);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectFilterName(null); return; }
+    (async () => {
+      const { data } = await supabase.from("projects" as any).select("name").eq("id", projectFilter).maybeSingle();
+      setProjectFilterName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const handleCreateQuote = async () => {
     if (!user) return;
