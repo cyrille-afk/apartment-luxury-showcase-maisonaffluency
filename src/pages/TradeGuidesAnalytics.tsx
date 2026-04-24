@@ -49,18 +49,25 @@ export default function TradeGuidesAnalytics() {
   const [drillBrand, setDrillBrand] = useState<string | null>(searchParams.get("brand"));
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
-  const copyDesignerLink = async (slug: string, brand: string) => {
+  const copyDesignerLink = async (
+    slug: string,
+    brand: string,
+    tab: EngagementSort = engagementSort,
+  ) => {
     const params = new URLSearchParams();
     params.set("brand", brand);
-    if (engagementSort !== "all") params.set("tab", engagementSort);
+    if (tab !== "all") params.set("tab", tab);
     params.set("window", String(windowDays));
     params.set("section", "engagement");
     const url = `${window.location.origin}/trade/designers/admin?${params.toString()}#engagement`;
+    const key = `${slug}:${tab}`;
     try {
       await navigator.clipboard.writeText(url);
-      setCopiedSlug(slug);
-      toast.success(`Analytics link for ${brand} copied`);
-      setTimeout(() => setCopiedSlug((s) => (s === slug ? null : s)), 1500);
+      setCopiedSlug(key);
+      const label =
+        tab === "quotes" ? "Quotes" : tab === "boards" ? "Boards" : "Analytics";
+      toast.success(`${label} link for ${brand} copied`);
+      setTimeout(() => setCopiedSlug((s) => (s === key ? null : s)), 1500);
     } catch {
       toast.error("Could not copy link");
     }
@@ -449,22 +456,32 @@ export default function TradeGuidesAnalytics() {
                           {(() => {
                             const slug = designerSlugs.get(row.brand.toLowerCase());
                             if (!slug) return null;
-                            const isCopied = copiedSlug === slug;
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => copyDesignerLink(slug, row.brand)}
-                                aria-label={`Copy share link for ${row.brand}`}
-                                title="Copy share link"
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                              >
-                                {isCopied ? (
-                                  <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                                ) : (
-                                  <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-                                )}
-                              </button>
-                            );
+                            const tabs: { tab: EngagementSort; label: string; short: string }[] = [
+                              { tab: "quotes", label: "Copy Quotes deep link", short: "Q" },
+                              { tab: "boards", label: "Copy Boards deep link", short: "B" },
+                            ];
+                            return tabs.map(({ tab, label, short }) => {
+                              const isCopied = copiedSlug === `${slug}:${tab}`;
+                              return (
+                                <button
+                                  key={tab}
+                                  type="button"
+                                  onClick={() => copyDesignerLink(slug, row.brand, tab)}
+                                  aria-label={`${label} for ${row.brand}`}
+                                  title={label}
+                                  className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                                >
+                                  {isCopied ? (
+                                    <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                                  ) : (
+                                    <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                  )}
+                                  <span className="font-body text-[10px] uppercase tracking-wider">
+                                    {short}
+                                  </span>
+                                </button>
+                              );
+                            });
                           })()}
                         </div>
                       </div>
