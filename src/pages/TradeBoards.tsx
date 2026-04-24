@@ -46,14 +46,29 @@ const TradeBoards = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
+  const designerFilter = searchParams.get("designer");
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
+  const [matchingBoardIds, setMatchingBoardIds] = useState<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [creating, setCreating] = useState(false);
+
+  const clearAllFilters = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("project");
+    next.delete("designer");
+    setSearchParams(next);
+    try { sessionStorage.removeItem("trade:lastProjectFilter"); } catch {}
+  };
+  const clearDesignerOnly = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("designer");
+    setSearchParams(next);
+  };
 
   const fetchBoards = async () => {
     if (!user) return;
@@ -99,6 +114,17 @@ const TradeBoards = () => {
   };
 
   useEffect(() => { fetchBoards(); }, [user, projectFilter]);
+
+  useEffect(() => {
+    if (!designerFilter) { setMatchingBoardIds(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("client_board_items")
+        .select("board_id, trade_products!inner(brand_name)")
+        .eq("trade_products.brand_name", designerFilter);
+      setMatchingBoardIds(new Set(((data as any[]) || []).map((r) => r.board_id)));
+    })();
+  }, [designerFilter]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
