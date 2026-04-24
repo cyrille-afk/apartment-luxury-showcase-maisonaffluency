@@ -479,14 +479,16 @@ export default function TradeGuidesAnalytics() {
                             return tabs.map(({ tab, label, short }) => {
                               const isCopied = copiedSlug === `${slug}:${tab}`;
                               const tabLabel = tab === "quotes" ? "Quotes" : "Boards";
+                              const tipId = `copy-tip-${slug}-${tab}`;
                               return (
                                 <span key={tab} className="relative inline-flex">
                                   <button
                                     type="button"
                                     onClick={() => copyDesignerLink(slug, row.brand, tab)}
                                     aria-label={`${label} for ${row.brand}`}
+                                    aria-describedby={isCopied ? tipId : undefined}
                                     title={label}
-                                    className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                                    className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                   >
                                     {isCopied ? (
                                       <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -497,14 +499,23 @@ export default function TradeGuidesAnalytics() {
                                       {short}
                                     </span>
                                   </button>
+                                  {/* Visual tooltip — hidden from AT to avoid duplicate announcement */}
                                   <span
-                                    role="status"
-                                    aria-live="polite"
+                                    aria-hidden="true"
                                     className={`pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-2 py-0.5 font-body text-[10px] uppercase tracking-wider text-background shadow-md transition-opacity duration-150 ${
                                       isCopied ? "opacity-100" : "opacity-0"
                                     }`}
                                   >
                                     Copied {tabLabel} link
+                                  </span>
+                                  {/* Screen-reader-only live region: announces only after copy */}
+                                  <span
+                                    id={tipId}
+                                    role="status"
+                                    aria-live="polite"
+                                    className="sr-only"
+                                  >
+                                    {isCopied ? `Copied ${tabLabel} link for ${row.brand}` : ""}
                                   </span>
                                 </span>
                               );
