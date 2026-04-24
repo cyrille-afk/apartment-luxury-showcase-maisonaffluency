@@ -259,11 +259,32 @@ export default function TradeProjectDetail() {
           <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">Project summary</h2>
           {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <Stat icon={FileText} label="Quotes" value={quotes.length} />
           <Stat icon={FolderArchive} label="Boards" value={boards.length} />
           <Stat icon={Package} label="Quote items" value={quoteItemCount} />
           <Stat icon={ListChecks} label="Board items" value={boardItemCount} />
+        </div>
+        <div className="flex flex-wrap items-center gap-2 mb-5">
+          <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">Quick filter:</span>
+          <Link
+            to={`/trade/quotes?project=${project.id}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
+          >
+            <FileText className="h-3 w-3" /> View quotes for this project
+          </Link>
+          <Link
+            to={`/trade/boards?project=${project.id}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
+          >
+            <FolderArchive className="h-3 w-3" /> View boards for this project
+          </Link>
+          <Link
+            to={`/trade/tearsheets?project=${project.id}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-muted/40 px-3 py-1 font-body text-xs text-foreground transition-colors"
+          >
+            <ImageIcon className="h-3 w-3" /> Tearsheets
+          </Link>
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
