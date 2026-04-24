@@ -1,7 +1,8 @@
 import { useParams, Navigate } from "react-router-dom";
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { GUIDE_LOADERS } from "./guides/registry";
+import { trackEvent } from "@/lib/analytics";
 
 export default function TradeGuideDetail() {
   const { slug } = useParams();
@@ -11,6 +12,15 @@ export default function TradeGuideDetail() {
     const loader = GUIDE_LOADERS[slug];
     if (!loader) return null;
     return lazy(loader as () => Promise<{ default: React.ComponentType }>);
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug || !GUIDE_LOADERS[slug]) return;
+    trackEvent("trade_guide_view", {
+      event_category: "Trade Guides",
+      event_label: slug,
+      guide_slug: slug,
+    });
   }, [slug]);
 
   if (!slug || !GuideComponent) return <Navigate to="/trade/guides" replace />;
