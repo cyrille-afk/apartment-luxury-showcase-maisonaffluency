@@ -28,6 +28,10 @@ interface ProductLite {
   brand_name: string | null;
 }
 
+interface CadAssetWithProduct extends CadAsset {
+  product?: ProductLite | null;
+}
+
 const TradeAdminCadAssets = () => {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
@@ -36,6 +40,31 @@ const TradeAdminCadAssets = () => {
   const [productId, setProductId] = useState<string | null>(null);
   const [assets, setAssets] = useState<CadAsset[]>([]);
   const [loadingAssets, setLoadingAssets] = useState(false);
+  const [allAssets, setAllAssets] = useState<CadAssetWithProduct[]>([]);
+  const [loadingAll, setLoadingAll] = useState(true);
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const loadAllAssets = async () => {
+    setLoadingAll(true);
+    const { data: rows } = await supabase
+      .from("trade_product_cad_assets")
+      .select("*")
+      .order("created_at", { ascending: false });
+    const list = (rows as CadAsset[]) || [];
+    const ids = Array.from(new Set(list.map((a) => a.product_id)));
+    let productMap = new Map<string, ProductLite>();
+    if (ids.length > 0) {
+      const { data: prods } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name")
+        .in("id", ids);
+      for (const p of (prods as ProductLite[]) || []) productMap.set(p.id, p);
+    }
+    setAllAssets(list.map((a) => ({ ...a, product: productMap.get(a.product_id) || null })));
+    setLoadingAll(false);
+  };
+
+  useEffect(() => { loadAllAssets(); }, []);
 
   // Add-form state
   const [variantLabel, setVariantLabel] = useState("");
