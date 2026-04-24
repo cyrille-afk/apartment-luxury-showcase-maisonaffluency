@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +36,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
 const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -221,7 +223,19 @@ const TradeQuotes = () => {
                         </span>
                       )}
                       {quote.project_name && (
-                        <span className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground">
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/trade/projects/${quote.project_id}`); }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/trade/projects/${quote.project_id}`);
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                        >
                           <FolderOpen className="h-3 w-3" />
                           {quote.project_name}
                         </span>
