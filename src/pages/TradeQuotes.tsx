@@ -223,7 +223,19 @@ const TradeQuotes = () => {
                         </span>
                       )}
                       {quote.project_name && (
-                        <span className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground">
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/trade/projects/${quote.project_id}`); }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/trade/projects/${quote.project_id}`);
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                        >
                           <FolderOpen className="h-3 w-3" />
                           {quote.project_name}
                         </span>
