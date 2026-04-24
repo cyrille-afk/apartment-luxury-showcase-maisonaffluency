@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ProjectPicker } from "@/components/trade/ProjectPicker";
 
 interface Board {
   id: string;
@@ -36,6 +37,7 @@ interface Board {
   status: string;
   token_expires_at: string | null;
   token_rotated_at: string | null;
+  project_id: string | null;
 }
 
 interface BoardItem {
