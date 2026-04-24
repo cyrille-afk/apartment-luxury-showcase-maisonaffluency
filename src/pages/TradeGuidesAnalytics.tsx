@@ -20,6 +20,7 @@ export default function TradeGuidesAnalytics() {
   const [rows, setRows] = useState<ViewRow[] | null>(null);
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [engagement, setEngagement] = useState<EngagementRow[] | null>(null);
+  const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
   const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
   const [error, setError] = useState<string | null>(null);
 
