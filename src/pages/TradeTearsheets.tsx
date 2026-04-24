@@ -312,15 +312,21 @@ export default function TradeTearsheets() {
                   {subcategories.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               )}
-              {(filterDesigner || filterCategory || filterSubcategory) && (
+              <ProjectPicker value={filterProjectId} onChange={setFilterProjectId} compact />
+              {(filterDesigner || filterCategory || filterSubcategory || filterProjectId) && (
                 <button
-                  onClick={() => { setFilterDesigner(""); setFilterCategory(""); setFilterSubcategory(""); }}
+                  onClick={() => { setFilterDesigner(""); setFilterCategory(""); setFilterSubcategory(""); setFilterProjectId(null); }}
                   className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Clear filters
                 </button>
               )}
             </div>
+            {filterProjectId && (
+              <p className="font-body text-[11px] text-muted-foreground -mt-1">
+                Showing only products from this project's quotes and boards.
+              </p>
+            )}
             {isLoading ? (
               <div className="flex justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
             ) : filtered.length === 0 ? (
