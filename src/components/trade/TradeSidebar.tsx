@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive,
+  LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -17,6 +17,7 @@ const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
   { title: "Quotes", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
