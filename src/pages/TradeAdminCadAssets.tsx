@@ -171,8 +171,7 @@ const TradeAdminCadAssets = () => {
     }
     toast({ title: "Asset deleted" });
     if (productId) loadAssets(productId);
-  };
-
+    loadAllAssets();
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
