@@ -38,9 +38,15 @@ const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { projectFilter, clearProjectFilter, searchParams, setSearchParams } = useProjectFilter();
+  const {
+    projectFilter,
+    designerFilter,
+    clearDesignerFilter,
+    clearAllFilters,
+  } = useProjectFilter();
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [matchingQuoteIds, setMatchingQuoteIds] = useState<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
@@ -123,6 +129,18 @@ const TradeQuotes = () => {
     })();
   }, [projectFilter]);
 
+  // Resolve which quotes contain the selected designer/brand
+  useEffect(() => {
+    if (!designerFilter) { setMatchingQuoteIds(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("trade_quote_items")
+        .select("quote_id, trade_products!inner(brand_name)")
+        .eq("trade_products.brand_name", designerFilter);
+      setMatchingQuoteIds(new Set(((data as any[]) || []).map((r) => r.quote_id)));
+    })();
+  }, [designerFilter]);
+
   const handleCreateQuote = async () => {
     if (!user) return;
     setCreating(true);
@@ -191,31 +209,52 @@ const TradeQuotes = () => {
         </button>
       </SectionHero>
 
-      {projectFilter && (
+      {(projectFilter || designerFilter) && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-4 py-2.5">
-          <div className="flex items-center gap-2 font-body text-xs text-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-xs text-foreground">
             <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Filtered by project:</span>
-            <span className="font-medium">{projectFilterName || "…"}</span>
+            {projectFilter && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Project:</span>
+                <span className="font-medium">{projectFilterName || "…"}</span>
+              </span>
+            )}
+            {designerFilter && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
+                <span className="font-medium">{designerFilter}</span>
+                <button
+                  onClick={clearDesignerFilter}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Clear designer filter"
+                >×</button>
+              </span>
+            )}
           </div>
           <button
-            onClick={clearProjectFilter}
+            onClick={clearAllFilters}
             className="font-body text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
           >
-            Clear filter
+            Clear all
           </button>
         </div>
       )}
 
-      {loading ? (
+      {(() => {
+        const visibleQuotes = designerFilter && matchingQuoteIds
+          ? quotes.filter((q) => matchingQuoteIds.has(q.id))
+          : quotes;
+        return loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => <QuoteCardSkeleton key={i} />)}
         </div>
-      ) : quotes.length === 0 ? (
+      ) : visibleQuotes.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <ShoppingCart className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
           <p className="font-body text-sm text-muted-foreground mb-4">
-            No quotes yet. Create your first quote to start building a product selection.
+            {designerFilter
+              ? `No quotes contain ${designerFilter}.`
+              : "No quotes yet. Create your first quote to start building a product selection."}
           </p>
           <button
             onClick={handleCreateQuote}
