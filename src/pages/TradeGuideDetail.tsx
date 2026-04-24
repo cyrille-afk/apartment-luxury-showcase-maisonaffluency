@@ -3,6 +3,7 @@ import { lazy, Suspense, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { GUIDE_LOADERS } from "./guides/registry";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function TradeGuideDetail() {
   const { slug } = useParams();
@@ -20,6 +21,16 @@ export default function TradeGuideDetail() {
       event_category: "Trade Guides",
       event_label: slug,
       guide_slug: slug,
+    });
+    // Best-effort persisted log for the internal analytics dashboard.
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      await supabase.from("guide_views").insert({
+        slug,
+        user_id: data.user?.id ?? null,
+      });
+    })().catch(() => {
+      // Swallow — analytics must never break UX.
     });
   }, [slug]);
 
