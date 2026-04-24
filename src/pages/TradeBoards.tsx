@@ -28,6 +28,8 @@ interface Board {
   created_at: string;
   updated_at: string;
   token_expires_at: string | null;
+  project_id: string | null;
+  project_name?: string | null;
   item_count?: number;
 }
 
@@ -71,7 +73,22 @@ const TradeBoards = () => {
         counts[item.board_id] = (counts[item.board_id] || 0) + 1;
       });
 
-      setBoards(data.map((b: any) => ({ ...b, item_count: counts[b.id] || 0 })));
+      // Fetch project names for any assigned projects
+      const projectIds = [...new Set(data.map((b: any) => b.project_id).filter(Boolean))] as string[];
+      let projectMap: Record<string, string> = {};
+      if (projectIds.length > 0) {
+        const { data: projects } = await supabase
+          .from("projects" as any)
+          .select("id, name")
+          .in("id", projectIds);
+        (projects || []).forEach((p: any) => { projectMap[p.id] = p.name; });
+      }
+
+      setBoards(data.map((b: any) => ({
+        ...b,
+        item_count: counts[b.id] || 0,
+        project_name: b.project_id ? projectMap[b.project_id] || null : null,
+      })));
     }
     setLoading(false);
   };
