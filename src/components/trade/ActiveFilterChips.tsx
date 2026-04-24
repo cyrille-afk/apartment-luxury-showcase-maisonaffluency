@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /**
  * Renders the currently-active project + designer filters as removable chips.
@@ -11,7 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
  * Each chip clears just its own filter; "Clear all" wipes both.
  * Renders nothing when no filter is active.
  */
-export default function ActiveFilterChips({ className = "" }: { className?: string }) {
+export default function ActiveFilterChips({
+  className = "",
+  confirmClearAll = false,
+}: {
+  className?: string;
+  /** When true, "Clear all" prompts the user before wiping both filters. */
+  confirmClearAll?: boolean;
+}) {
   const {
     projectFilter,
     designerFilter,
@@ -21,6 +32,7 @@ export default function ActiveFilterChips({ className = "" }: { className?: stri
   } = useProjectFilter();
   const designerLabel = useDesignerDisplayName(designerFilter);
   const [projectName, setProjectName] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!projectFilter) { setProjectName(null); return; }
@@ -62,12 +74,29 @@ export default function ActiveFilterChips({ className = "" }: { className?: stri
 
       {projectFilter && designerFilter && (
         <button
-          onClick={clearAllFilters}
+          onClick={() => (confirmClearAll ? setConfirmOpen(true) : clearAllFilters())}
           className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
         >
           Clear all
         </button>
       )}
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all filters?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove both the project and designer filters across the Trade portal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { clearAllFilters(); setConfirmOpen(false); }}>
+              Clear all
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

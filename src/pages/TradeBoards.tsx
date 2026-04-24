@@ -196,7 +196,7 @@ const TradeBoards = () => {
           </Dialog>
         </SectionHero>
 
-        <ActiveFilterChips className="mb-4" />
+        <ActiveFilterChips className="mb-4" confirmClearAll />
 
         {(() => {
           const visibleBoards = designerFilter && matchingBoardIds
