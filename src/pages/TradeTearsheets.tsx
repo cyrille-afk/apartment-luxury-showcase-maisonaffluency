@@ -32,8 +32,35 @@ export default function TradeTearsheets() {
   const [filterDesigner, setFilterDesigner] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterSubcategory, setFilterSubcategory] = useState("");
+  const [filterProjectId, setFilterProjectId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Fetch the set of product IDs (from quotes + boards) belonging to the selected project
+  const { data: projectProductIds } = useQuery({
+    queryKey: ["tearsheet-project-product-ids", filterProjectId, user?.id],
+    enabled: !!filterProjectId && !!user,
+    queryFn: async () => {
+      const ids = new Set<string>();
+      const [quotesRes, boardsRes] = await Promise.all([
+        supabase.from("trade_quotes").select("id").eq("project_id", filterProjectId!),
+        supabase.from("client_boards").select("id").eq("project_id", filterProjectId!),
+      ]);
+      const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
+      const boardIds = (boardsRes.data || []).map((b: any) => b.id);
+      const [qItems, bItems] = await Promise.all([
+        quoteIds.length
+          ? supabase.from("trade_quote_items").select("product_id").in("quote_id", quoteIds)
+          : Promise.resolve({ data: [] as any[] }),
+        boardIds.length
+          ? supabase.from("client_board_items").select("product_id").in("board_id", boardIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      (qItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+      (bItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+      return ids;
+    },
+  });
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["tearsheet-products-merged"],
