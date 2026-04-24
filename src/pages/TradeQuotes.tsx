@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
+import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +45,7 @@ const TradeQuotes = () => {
     clearDesignerFilter,
     clearAllFilters,
   } = useProjectFilter();
+  const designerLabel = useDesignerDisplayName(designerFilter);
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [matchingQuoteIds, setMatchingQuoteIds] = useState<Set<string> | null>(null);
@@ -222,7 +224,7 @@ const TradeQuotes = () => {
             {designerFilter && (
               <span className="inline-flex items-center gap-1.5">
                 <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
-                <span className="font-medium">{designerFilter}</span>
+                <span className="font-medium">{designerLabel}</span>
                 <button
                   onClick={clearDesignerFilter}
                   className="text-muted-foreground hover:text-foreground"
@@ -253,7 +255,7 @@ const TradeQuotes = () => {
           <ShoppingCart className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
           <p className="font-body text-sm text-muted-foreground mb-4">
             {designerFilter
-              ? `No quotes contain ${designerFilter}.`
+              ? `No quotes contain ${designerLabel}.`
               : "No quotes yet. Create your first quote to start building a product selection."}
           </p>
           <button

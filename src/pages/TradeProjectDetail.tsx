@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
+import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
@@ -41,6 +42,7 @@ export default function TradeProjectDetail() {
   const [boardItemCount, setBoardItemCount] = useState(0);
   const [designerBreakdown, setDesignerBreakdown] = useState<{ name: string; count: number }[]>([]);
   const { designerFilter: selectedDesigner, setDesignerFilter: setSelectedDesigner } = useProjectFilter();
+  const selectedDesignerLabel = useDesignerDisplayName(selectedDesigner);
   const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
 
@@ -341,7 +343,7 @@ export default function TradeProjectDetail() {
           )}
           {selectedDesigner && (
             <p className="mt-3 font-body text-[11px] text-muted-foreground">
-              <span className="text-foreground">{selectedDesigner}</span> contributes{" "}
+              <span className="text-foreground">{selectedDesignerLabel}</span> contributes{" "}
               {designerBreakdown.find((d) => d.name === selectedDesigner)?.count || 0} item
               {(designerBreakdown.find((d) => d.name === selectedDesigner)?.count || 0) === 1 ? "" : "s"} across this project's quotes and boards.
             </p>
@@ -364,7 +366,7 @@ export default function TradeProjectDetail() {
           title="Quotes"
           count={visibleQuotes.length}
           loading={loadingLinks}
-          empty={selectedDesigner ? `No quotes contain ${selectedDesigner}.` : "No quotes linked yet."}
+          empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
           link="/trade/quotes"
           linkLabel="Manage quotes"
         >
@@ -383,7 +385,7 @@ export default function TradeProjectDetail() {
           title="Project folders / boards"
           count={visibleBoards.length}
           loading={loadingLinks}
-          empty={selectedDesigner ? `No boards contain ${selectedDesigner}.` : "No mood boards linked yet."}
+          empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
           link="/trade/boards"
           linkLabel="Manage boards"
         >

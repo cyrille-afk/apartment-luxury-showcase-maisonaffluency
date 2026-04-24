@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
+import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -51,6 +52,7 @@ const TradeBoards = () => {
     clearDesignerFilter,
     clearAllFilters,
   } = useProjectFilter();
+  const designerLabel = useDesignerDisplayName(designerFilter);
   const [projectFilterName, setProjectFilterName] = useState<string | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [matchingBoardIds, setMatchingBoardIds] = useState<Set<string> | null>(null);
@@ -206,7 +208,7 @@ const TradeBoards = () => {
               {designerFilter && (
                 <span className="inline-flex items-center gap-1.5">
                   <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Designer:</span>
-                  <span className="font-medium">{designerFilter}</span>
+                  <span className="font-medium">{designerLabel}</span>
                   <button
                     onClick={clearDesignerFilter}
                     className="text-muted-foreground hover:text-foreground"
@@ -235,7 +237,7 @@ const TradeBoards = () => {
         ) : visibleBoards.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-body text-sm text-muted-foreground mb-4">
-              {designerFilter ? `No boards contain ${designerFilter}.` : "No project folders yet"}
+              {designerFilter ? `No boards contain ${designerLabel}.` : "No project folders yet"}
             </p>
             <Button variant="outline" onClick={() => setCreateOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" /> Create Your First Folder
