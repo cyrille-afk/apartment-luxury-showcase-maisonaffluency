@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
+import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
@@ -167,6 +168,7 @@ export default function TradeProjectDetail() {
 
   return (
     <div className="max-w-6xl mx-auto">
+      <ActiveFilterChips className="mb-4" />
       {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <Link to="/trade/projects" className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground">
