@@ -292,7 +292,15 @@ const TradeAdminCadAssets = () => {
                             />
                           </label>
                         </td>
-                        <td className="px-3 py-2 text-right">
+                        <td className="px-3 py-2 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewAsset(a)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                            title="Preview"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(a)}
