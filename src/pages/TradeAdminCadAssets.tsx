@@ -43,6 +43,7 @@ const TradeAdminCadAssets = () => {
   const [allAssets, setAllAssets] = useState<CadAssetWithProduct[]>([]);
   const [loadingAll, setLoadingAll] = useState(true);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [previewAsset, setPreviewAsset] = useState<CadAssetWithProduct | null>(null);
 
   const loadAllAssets = async () => {
     setLoadingAll(true);
