@@ -178,7 +178,7 @@ function Chip({
         type="button"
         onClick={onClear}
         aria-label={`Clear ${label.toLowerCase()} filter: ${value}`}
-        className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
+        className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:bg-primary focus-visible:text-primary-foreground focus-visible:scale-110"
       >
         <X className="h-3 w-3" aria-hidden="true" />
       </button>
