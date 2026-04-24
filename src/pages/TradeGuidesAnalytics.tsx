@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BarChart3, Eye, Loader2, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Check, Eye, Link2, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,19 @@ export default function TradeGuidesAnalytics() {
   const [designerSlugs, setDesignerSlugs] = useState<Map<string, string>>(new Map());
   const [engagementSort, setEngagementSort] = useState<EngagementSort>("all");
   const [drillBrand, setDrillBrand] = useState<string | null>(null);
+  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+
+  const copyDesignerLink = async (slug: string, brand: string) => {
+    const url = `${window.location.origin}/designers/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedSlug(slug);
+      toast.success(`Link to ${brand} copied`);
+      setTimeout(() => setCopiedSlug((s) => (s === slug ? null : s)), 1500);
+    } catch {
+      toast.error("Could not copy link");
+    }
+  };
   const [drillRows, setDrillRows] = useState<BrandUserRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -400,6 +414,26 @@ export default function TradeGuidesAnalytics() {
                           >
                             <Users className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
+                          {(() => {
+                            const slug = designerSlugs.get(row.brand.toLowerCase());
+                            if (!slug) return null;
+                            const isCopied = copiedSlug === slug;
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => copyDesignerLink(slug, row.brand)}
+                                aria-label={`Copy share link for ${row.brand}`}
+                                title="Copy share link"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              >
+                                {isCopied ? (
+                                  <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                                ) : (
+                                  <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                )}
+                              </button>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div
