@@ -594,6 +594,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     }
   }
 
+  emit({ stage: "finalizing", ratio: 0.92, label: "Adding page footers…" });
+  await tick();
+
   // Footer on every page (except cover)
   const pageCount = doc.getNumberOfPages();
   for (let i = 2; i <= pageCount; i++) {
@@ -612,7 +615,11 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.text(`${i} / ${pageCount}`, pageWidth - marginX, pageHeight - marginBottom + 44, { align: "right" });
   }
 
-  return doc.output("blob");
+  emit({ stage: "finalizing", ratio: 0.97, label: "Encoding PDF…" });
+  await tick();
+  const blob = doc.output("blob");
+  emit({ stage: "done", ratio: 1, label: "Ready" });
+  return blob;
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
