@@ -843,8 +843,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       const ratio = img.width / img.height;
       // Cap figure size so a single image never dominates the page —
-      // limit to ~46% of the page height, then scale width to match.
-      const maxImgH = (pageHeight - marginBottom - 120) * 0.62;
+      // ~42% of full page height keeps room for the next paragraph(s)
+      // to flow on the SAME page instead of leaving big blank gaps.
+      const maxImgH = pageHeight * 0.42;
       let drawW = contentWidth;
       let drawH = drawW / ratio;
       if (drawH > maxImgH) {
