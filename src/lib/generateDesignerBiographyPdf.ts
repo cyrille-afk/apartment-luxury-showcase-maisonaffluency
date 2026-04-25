@@ -857,7 +857,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       if (block.media.isVideo) {
         // Subtle play badge — smaller, refined
-        const cx = marginX + drawW / 2;
+        const cx = imgX + drawW / 2;
         const cy = cursorY + drawH / 2;
         doc.setFillColor(20, 20, 20);
         doc.setDrawColor(255, 255, 255);
