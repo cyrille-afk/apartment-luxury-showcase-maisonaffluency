@@ -412,6 +412,18 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   emit({ stage: "parsing", ratio: 0.02, label: "Reading biography…" });
   const blocks = parseBiography(input.biography);
 
+  // Personalized "Prepared for …" line for footers (only when we have a name)
+  const recipient = (input.recipientName ?? "").trim();
+  const downloadDate = input.downloadedAt ?? new Date();
+  const formattedDate = downloadDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const preparedLine = recipient
+    ? `Prepared for ${recipient} · ${formattedDate}`
+    : `Downloaded ${formattedDate}`;
+
   // If biography has no inline media, fold biographyImages in
   const hasInlineMedia = blocks.some((b) => b.type === "media");
   if (!hasInlineMedia && input.biographyImages?.length) {
