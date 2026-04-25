@@ -535,7 +535,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setDrawColor(...rule);
     doc.setLineWidth(0.4);
     doc.line(marginX, cursorY + 8, marginX + 40, cursorY + 8);
-    cursorY += 28;
+    cursorY += 20;
   };
 
   // Pull quote — oversized opening curly quote, centered narrow column,
@@ -684,20 +684,20 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     );
     const totalLines = wrappedParagraphs.reduce((n, p) => n + p.length, 0);
     const blockHeight =
-      60 /* opening glyph */ +
+      44 /* opening glyph */ +
       totalLines * lineHeight +
       (wrappedParagraphs.length - 1) * paragraphGap +
-      36 /* attribution */;
+      28 /* attribution */;
     ensureSpace(blockHeight);
 
     // Oversized opening quote glyph (decorative, in hairline color)
     doc.setFont("times", "normal");
     doc.setFontSize(72);
     doc.setTextColor(...rule);
-    doc.text("\u201C", pageWidth / 2, cursorY + 44, { align: "center" });
+    doc.text("\u201C", pageWidth / 2, cursorY + 32, { align: "center" });
 
     // Quote body — italic base, with bold/non-italic emphasis preserved
-    let qy = cursorY + 60;
+    let qy = cursorY + 44;
     for (let p = 0; p < wrappedParagraphs.length; p++) {
       const wrapped = wrappedParagraphs[p];
       for (const line of wrapped) {
@@ -720,7 +720,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.text(input.designerName.toUpperCase(), pageWidth / 2, qy, { align: "center" });
     doc.setCharSpace(0);
 
-    cursorY = qy + 24;
+    cursorY = qy + 18;
   };
 
   if (input.philosophy) renderPullQuote(input.philosophy);
@@ -843,8 +843,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       const ratio = img.width / img.height;
       // Cap figure size so a single image never dominates the page —
-      // limit to ~46% of the page height, then scale width to match.
-      const maxImgH = (pageHeight - marginBottom - 120) * 0.62;
+      // ~42% of full page height keeps room for the next paragraph(s)
+      // to flow on the SAME page instead of leaving big blank gaps.
+      const maxImgH = pageHeight * 0.36;
       let drawW = contentWidth;
       let drawH = drawW / ratio;
       if (drawH > maxImgH) {
@@ -867,14 +868,14 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
-      const figureH = 8 /* top pad */ + drawH + 12 /* gap */ + captionH + linkH + 28 /* bottom pad — clear footer */;
+      const figureH = 6 /* top pad */ + drawH + 10 /* gap */ + captionH + linkH + 16 /* bottom pad */;
 
       // If the figure is taller than a single page's content area, just
       // start on a fresh page (it will still overflow but at least the
       // caption stays attached to the bottom of the image).
       ensureSpace(figureH);
 
-      cursorY += 8;
+      cursorY += 6;
       doc.addImage(img.dataUrl, img.format, imgX, cursorY, drawW, drawH, undefined, "FAST");
 
       if (block.media.isVideo) {
@@ -918,7 +919,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media.url)}`, marginX, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
-      cursorY += 40;
+      cursorY += 18;
     }
   }
 
