@@ -535,7 +535,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setDrawColor(...rule);
     doc.setLineWidth(0.4);
     doc.line(marginX, cursorY + 8, marginX + 40, cursorY + 8);
-    cursorY += 28;
+    cursorY += 20;
   };
 
   // Pull quote — oversized opening curly quote, centered narrow column,
