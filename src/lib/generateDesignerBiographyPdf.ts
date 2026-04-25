@@ -875,7 +875,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       // caption stays attached to the bottom of the image).
       ensureSpace(figureH);
 
-      cursorY += 8;
+      cursorY += 6;
       doc.addImage(img.dataUrl, img.format, imgX, cursorY, drawW, drawH, undefined, "FAST");
 
       if (block.media.isVideo) {
