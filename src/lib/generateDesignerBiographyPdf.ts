@@ -919,7 +919,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media.url)}`, marginX, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
-      cursorY += 40;
+      cursorY += 18;
     }
   }
 
