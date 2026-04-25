@@ -471,7 +471,18 @@ const PublicDesignerProfile = () => {
         return (
           <>
             <div className="mt-4">
-                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
+                <div className="flex items-center justify-between gap-4 mb-3 flex-wrap">
+                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground">About</h2>
+                  <BiographyPdfButton
+                    designerName={designer.name}
+                    specialty={designer.specialty}
+                    philosophy={displayPhilosophy}
+                    biography={displayBiography || ""}
+                    biographyImages={displayBiographyImages}
+                    heroImageUrl={heroImage}
+                    profileUrl={typeof window !== "undefined" ? window.location.href : null}
+                  />
+                </div>
                 {introEditorialBio ? (
                   <EditorialBiography
                     biography={introEditorialBio}
