@@ -820,8 +820,16 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       if (!img) continue;
 
       const ratio = img.width / img.height;
-      const drawW = contentWidth;
-      const drawH = drawW / ratio;
+      // Cap figure size so a single image never dominates the page —
+      // limit to ~46% of the page height, then scale width to match.
+      const maxImgH = (pageHeight - marginBottom - 120) * 0.62;
+      let drawW = contentWidth;
+      let drawH = drawW / ratio;
+      if (drawH > maxImgH) {
+        drawH = maxImgH;
+        drawW = drawH * ratio;
+      }
+      const imgX = marginX + (contentWidth - drawW) / 2;
 
       // Pre-wrap caption to know its true height, so the WHOLE figure
       // (image + caption + video link) is treated as one indivisible block
