@@ -74,14 +74,157 @@ function parseMediaLine(text: string): MediaItem | null {
   return { url, caption, poster, isVideo: video };
 }
 
-function stripHtml(text: string): string {
+function decodeEntities(text: string): string {
   return text
-    .replace(/<\/?strong>/gi, "")
-    .replace(/<\/?em>/gi, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&mdash;/gi, "\u2014")
+    .replace(/&ndash;/gi, "\u2013")
+    .replace(/&hellip;/gi, "\u2026")
+    .replace(/&laquo;/gi, "\u00AB")
+    .replace(/&raquo;/gi, "\u00BB")
+    .replace(/&ldquo;/gi, "\u201C")
+    .replace(/&rdquo;/gi, "\u201D")
+    .replace(/&lsquo;/gi, "\u2018")
+    .replace(/&rsquo;/gi, "\u2019")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+}
+
+/**
+ * Convert straight quotes/apostrophes into typographic ones, leaving any
+ * already-curly quotes (and French guillemets) untouched.
+ */
+function smartenQuotes(text: string): string {
+  let out = text;
+  out = out.replace(/([A-Za-zÀ-ÿ])'([A-Za-zÀ-ÿ])/g, "$1\u2019$2");
+  out = out.replace(/([A-Za-zÀ-ÿ])'/g, "$1\u2019");
+  out = out.replace(/(^|[\s(\[{\u2014\u2013-])'/g, "$1\u2018");
+  out = out.replace(/'/g, "\u2019");
+  out = out.replace(/(^|[\s(\[{\u2014\u2013-])"/g, "$1\u201C");
+  out = out.replace(/"/g, "\u201D");
+  return out;
+}
+
+function stripHtml(text: string): string {
+  return smartenQuotes(
+    decodeEntities(text)
+      .replace(/<\/?strong>/gi, "")
+      .replace(/<\/?em>/gi, "")
+      .replace(/<\/?i>/gi, "")
+      .replace(/<\/?b>/gi, "")
+      .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
+      .replace(/\*\*([\s\S]+?)\*\*/g, "$1")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\u00A0/g, " "),
+  );
+}
+
+/* -------------------- Rich inline parsing for quotes -------------------- */
+
+export interface RichRun {
+  text: string;
+  italic: boolean;
+  bold: boolean;
+}
+
+/**
+ * Parse a fragment of HTML / lightweight markdown into styled inline runs.
+ * Supports <em>/<i>, <strong>/<b>, *italic*, **bold**.
+ * Decodes entities and applies smart-quote transformation.
+ */
+export function parseRichInline(input: string): RichRun[] {
+  const decoded = decodeEntities(input).replace(/\u00A0/g, " ");
+  const cleaned = decoded
     .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
-    .replace(/\*\*([\s\S]+?)\*\*/g, "$1")
-    .replace(/<[^>]+>/g, "")
-    .replace(/\u00A0/g, " ");
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/?p[^>]*>/gi, "");
+
+  const runs: RichRun[] = [];
+  let italic = 0;
+  let bold = 0;
+  let buf = "";
+
+  const flush = () => {
+    if (!buf) return;
+    runs.push({ text: buf, italic: italic > 0, bold: bold > 0 });
+    buf = "";
+  };
+
+  let i = 0;
+  while (i < cleaned.length) {
+    const ch = cleaned[i];
+
+    if (ch === "<") {
+      const close = cleaned.indexOf(">", i);
+      if (close !== -1) {
+        const tag = cleaned.slice(i + 1, close).trim().toLowerCase();
+        if (/^(em|i)$/.test(tag)) { flush(); italic++; i = close + 1; continue; }
+        if (/^\/(em|i)$/.test(tag)) { flush(); italic = Math.max(0, italic - 1); i = close + 1; continue; }
+        if (/^(strong|b)$/.test(tag)) { flush(); bold++; i = close + 1; continue; }
+        if (/^\/(strong|b)$/.test(tag)) { flush(); bold = Math.max(0, bold - 1); i = close + 1; continue; }
+        i = close + 1;
+        continue;
+      }
+    }
+
+    if (ch === "*" && cleaned[i + 1] === "*") {
+      const end = cleaned.indexOf("**", i + 2);
+      if (end !== -1) {
+        flush();
+        const inner = cleaned.slice(i + 2, end);
+        for (const r of parseRichInline(inner)) {
+          runs.push({ ...r, bold: true });
+        }
+        i = end + 2;
+        continue;
+      }
+    }
+
+    if (ch === "*" && cleaned[i + 1] !== "*" && (i === 0 || cleaned[i - 1] !== "*")) {
+      const end = cleaned.indexOf("*", i + 1);
+      if (end !== -1 && cleaned[end + 1] !== "*") {
+        flush();
+        const inner = cleaned.slice(i + 1, end);
+        for (const r of parseRichInline(inner)) {
+          runs.push({ ...r, italic: true });
+        }
+        i = end + 1;
+        continue;
+      }
+    }
+
+    buf += ch;
+    i++;
+  }
+  flush();
+
+  // Apply smart quotes across the joined text, then re-split by run boundaries.
+  const joined = runs.map((r) => r.text).join("\u0001");
+  const smart = smartenQuotes(joined.replace(/[ \t]+/g, " "));
+  const parts = smart.split("\u0001");
+  return runs
+    .map((r, idx) => ({ ...r, text: parts[idx] ?? r.text }))
+    .filter((r) => r.text.length > 0);
+}
+
+/** Split philosophy/quote source into rich paragraphs (split on <p>, double-<br>, or blank lines). */
+export function splitRichParagraphs(input: string): RichRun[][] {
+  const normalized = input
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<\/?p[^>]*>/gi, "\n\n")
+    .replace(/(?:<br\s*\/?>\s*){2,}/gi, "\n\n")
+    .replace(/\r\n?/g, "\n");
+  return normalized
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => parseRichInline(p))
+    .filter((runs) => runs.some((r) => r.text.trim().length > 0));
 }
 
 function parseBiography(biography: string): ParsedBlock[] {
@@ -372,39 +515,173 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     cursorY += 28;
   };
 
-  // Pull quote — oversized opening curly quote, centered narrow column, em-dash attribution
+  // Pull quote — oversized opening curly quote, centered narrow column,
+  // multi-paragraph, italic/bold-aware, smart-quote preserved.
   let firstParagraphRendered = false;
+
+  /** Set jsPDF font for a given run style (using Times for body emphasis). */
+  const setRunFont = (italic: boolean, bold: boolean) => {
+    const style = bold && italic ? "bolditalic" : bold ? "bold" : italic ? "italic" : "normal";
+    doc.setFont("times", style as "bolditalic" | "bold" | "italic" | "normal");
+  };
+
+  /** Word-wrap a single rich paragraph into lines of runs that fit `maxWidth`. */
+  const wrapRichRuns = (
+    runs: RichRun[],
+    maxWidth: number,
+    fontSize: number,
+    baseItalic: boolean,
+  ): RichRun[][] => {
+    doc.setFontSize(fontSize);
+
+    type Token = { text: string; italic: boolean; bold: boolean; isSpace: boolean };
+    const tokens: Token[] = [];
+    for (const run of runs) {
+      const italic = run.italic || baseItalic;
+      const bold = run.bold;
+      // Split into words + preserve internal spaces as their own tokens
+      const parts = run.text.split(/(\s+)/);
+      for (const part of parts) {
+        if (!part) continue;
+        tokens.push({ text: part, italic, bold, isSpace: /^\s+$/.test(part) });
+      }
+    }
+
+    const measure = (t: Token) => {
+      setRunFont(t.italic, t.bold);
+      return doc.getTextWidth(t.text);
+    };
+
+    const lines: RichRun[][] = [];
+    let line: Token[] = [];
+    let lineWidth = 0;
+
+    const pushLine = () => {
+      // Trim trailing spaces
+      while (line.length && line[line.length - 1].isSpace) line.pop();
+      if (!line.length) {
+        lines.push([]);
+      } else {
+        // Merge adjacent same-style tokens for clean drawing
+        const merged: RichRun[] = [];
+        for (const t of line) {
+          const last = merged[merged.length - 1];
+          if (last && last.italic === t.italic && last.bold === t.bold) {
+            last.text += t.text;
+          } else {
+            merged.push({ text: t.text, italic: t.italic, bold: t.bold });
+          }
+        }
+        lines.push(merged);
+      }
+      line = [];
+      lineWidth = 0;
+    };
+
+    for (const tok of tokens) {
+      const w = measure(tok);
+      if (tok.isSpace) {
+        if (line.length === 0) continue; // skip leading whitespace
+        if (lineWidth + w > maxWidth) {
+          pushLine();
+        } else {
+          line.push(tok);
+          lineWidth += w;
+        }
+        continue;
+      }
+      // Non-space word
+      if (lineWidth + w > maxWidth && line.length > 0) {
+        pushLine();
+      }
+      line.push(tok);
+      lineWidth += w;
+    }
+    if (line.length) pushLine();
+    return lines;
+  };
+
+  /** Draw a wrapped line of runs centered on a given y baseline. */
+  const drawCenteredRichLine = (
+    line: RichRun[],
+    centerX: number,
+    y: number,
+    fontSize: number,
+    baseItalic: boolean,
+    color: readonly [number, number, number],
+  ) => {
+    if (!line.length) return;
+    doc.setFontSize(fontSize);
+    doc.setTextColor(...color);
+    // Measure full width
+    let totalW = 0;
+    const widths: number[] = [];
+    for (const r of line) {
+      setRunFont(r.italic || baseItalic, r.bold);
+      const w = doc.getTextWidth(r.text);
+      widths.push(w);
+      totalW += w;
+    }
+    let x = centerX - totalW / 2;
+    for (let i = 0; i < line.length; i++) {
+      const r = line[i];
+      setRunFont(r.italic || baseItalic, r.bold);
+      doc.text(r.text, x, y);
+      x += widths[i];
+    }
+  };
+
   const renderPullQuote = (raw: string) => {
-    const quote = stripHtml(raw)
-      .replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, "")
-      .trim();
-    if (!quote) return;
+    const paragraphs = splitRichParagraphs(raw)
+      // Strip surrounding quote glyphs from the very first/last text run
+      .map((runs, idx, arr) => {
+        if (!runs.length) return runs;
+        const out = runs.map((r) => ({ ...r }));
+        if (idx === 0) {
+          out[0].text = out[0].text.replace(/^[\s"\u201C\u201D\u00AB\u00BB]+/, "");
+        }
+        if (idx === arr.length - 1) {
+          const last = out[out.length - 1];
+          last.text = last.text.replace(/[\s"\u201C\u201D\u00AB\u00BB]+$/, "");
+        }
+        return out.filter((r) => r.text.length > 0);
+      })
+      .filter((runs) => runs.length > 0);
 
-    // Reserve space estimate before drawing
+    if (paragraphs.length === 0) return;
+
     const quoteWidth = contentWidth * 0.78;
-    const quoteX = marginX + (contentWidth - quoteWidth) / 2;
-
-    doc.setFont("times", "italic");
-    doc.setFontSize(16);
-    const lines = doc.splitTextToSize(quote, quoteWidth);
     const lineHeight = 22;
-    const blockHeight = 60 /* opening glyph */ + lines.length * lineHeight + 36 /* attribution + spacing */;
+    const fontSize = 15;
+    const paragraphGap = 12;
+
+    // Pre-wrap to estimate height
+    const wrappedParagraphs = paragraphs.map((runs) =>
+      wrapRichRuns(runs, quoteWidth, fontSize, true /* base italic */),
+    );
+    const totalLines = wrappedParagraphs.reduce((n, p) => n + p.length, 0);
+    const blockHeight =
+      60 /* opening glyph */ +
+      totalLines * lineHeight +
+      (wrappedParagraphs.length - 1) * paragraphGap +
+      36 /* attribution */;
     ensureSpace(blockHeight);
 
-    // Oversized opening quote glyph (decorative)
+    // Oversized opening quote glyph (decorative, in hairline color)
     doc.setFont("times", "normal");
     doc.setFontSize(72);
     doc.setTextColor(...rule);
     doc.text("\u201C", pageWidth / 2, cursorY + 44, { align: "center" });
 
-    // Quote body
-    doc.setFont("times", "italic");
-    doc.setFontSize(15);
-    doc.setTextColor(...ink);
+    // Quote body — italic base, with bold/non-italic emphasis preserved
     let qy = cursorY + 60;
-    for (const line of lines) {
-      doc.text(line, pageWidth / 2, qy, { align: "center" });
-      qy += lineHeight;
+    for (let p = 0; p < wrappedParagraphs.length; p++) {
+      const wrapped = wrappedParagraphs[p];
+      for (const line of wrapped) {
+        drawCenteredRichLine(line, pageWidth / 2, qy, fontSize, true, ink);
+        qy += lineHeight;
+      }
+      if (p < wrappedParagraphs.length - 1) qy += paragraphGap;
     }
 
     // Attribution rule + name
