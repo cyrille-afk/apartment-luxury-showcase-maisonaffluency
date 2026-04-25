@@ -329,7 +329,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.setTextColor(40, 40, 40);
-        doc.text(`▶ Video: ${block.media.caption || "Watch online"}`, margin + 12, cursorY + 16);
+        doc.text(`Video: ${block.media.caption || "Watch online"}`, margin + 12, cursorY + 16);
         doc.setTextColor(80, 80, 200);
         doc.textWithLink(sanitizeUrlForDisplay(block.media.url), margin + 12, cursorY + 32, { url: block.media.url });
         cursorY += 52;
