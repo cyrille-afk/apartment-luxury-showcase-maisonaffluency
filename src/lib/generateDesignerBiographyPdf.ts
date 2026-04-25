@@ -846,9 +846,122 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       if (!img) continue;
 
       const ratio = img.width / img.height;
-      // Cap figure size so a single image never dominates the page —
-      // ~42% of full page height keeps room for the next paragraph(s)
-      // to flow on the SAME page instead of leaving big blank gaps.
+
+      // Look ahead: if the NEXT block is text and the drop cap has already
+      // been used, render side-by-side (image left, text right) to pull
+      // content up and avoid orphaned takeaways on later pages.
+      const nextBlock = blocks[blockIdx + 1];
+      const canSideBySide =
+        firstParagraphRendered &&
+        nextBlock &&
+        nextBlock.type === "text" &&
+        !!nextBlock.text &&
+        nextBlock.text.trim().length > 0;
+
+      if (canSideBySide) {
+        // Half-column figure on the LEFT, text wraps on the RIGHT
+        const gutter = 18;
+        const colW = (contentWidth - gutter) / 2;
+        let drawW = colW;
+        let drawH = drawW / ratio;
+        const maxFigH = pageHeight * 0.42;
+        if (drawH > maxFigH) {
+          drawH = maxFigH;
+          drawW = drawH * ratio;
+        }
+
+        // Caption setup
+        let capLines: string[] = [];
+        const capLineH = 12;
+        if (block.media!.caption) {
+          doc.setFont("times", "italic");
+          doc.setFontSize(9);
+          capLines = doc.splitTextToSize(block.media!.caption, colW - 12);
+        }
+        const captionH = capLines.length ? 8 + capLines.length * capLineH + 6 : 0;
+        const linkH = block.media!.isVideo ? 14 : 0;
+        const figureH = drawH + 10 + captionH + linkH;
+
+        // Wrap right-column text
+        const rightText = nextBlock!.text!.trim();
+        doc.setFont("times", "normal");
+        doc.setFontSize(11);
+        const bodyLineH = 16.5;
+        const rightLines = doc.splitTextToSize(rightText, colW);
+        const rightTextH = rightLines.length * bodyLineH;
+
+        const blockH = Math.max(figureH, rightTextH) + 18;
+        ensureSpace(blockH);
+
+        const startY = cursorY + 6;
+        const imgX = marginX;
+        // Image
+        doc.addImage(img.dataUrl, img.format, imgX, startY, drawW, drawH, undefined, "FAST");
+        if (block.media!.isVideo) {
+          const cx = imgX + drawW / 2;
+          const cy = startY + drawH / 2;
+          doc.setFillColor(20, 20, 20);
+          doc.setDrawColor(255, 255, 255);
+          doc.setLineWidth(1);
+          doc.circle(cx, cy, 14, "FD");
+          doc.setFillColor(255, 255, 255);
+          doc.triangle(cx - 4, cy - 6, cx - 4, cy + 6, cx + 7, cy, "F");
+        }
+
+        // Caption beneath image
+        let leftY = startY + drawH + 10;
+        if (capLines.length) {
+          doc.setFont("times", "italic");
+          doc.setFontSize(9);
+          doc.setTextColor(...inkSoft);
+          for (const line of capLines) {
+            doc.text(line, imgX + 12, leftY);
+            leftY += capLineH;
+          }
+          doc.setDrawColor(...rule);
+          doc.setLineWidth(0.6);
+          doc.line(imgX, startY + drawH + 12, imgX, leftY);
+          leftY += 4;
+        }
+        if (block.media!.isVideo) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(80, 80, 160);
+          doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media!.url)}`, imgX, leftY + 8, { url: block.media!.url });
+          leftY += 14;
+        }
+
+        // Right-column text
+        const rightX = marginX + colW + gutter;
+        doc.setFont("times", "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(...ink);
+        let rightY = startY;
+        const rightMaxY = startY + Math.max(figureH, rightTextH);
+        let rightLineIdx = 0;
+        for (; rightLineIdx < rightLines.length; rightLineIdx++) {
+          if (rightY + bodyLineH > rightMaxY + bodyLineH) break;
+          doc.text(rightLines[rightLineIdx], rightX, rightY + 4);
+          rightY += bodyLineH;
+        }
+
+        cursorY = startY + Math.max(leftY - startY, rightY - startY) + 10;
+
+        // If text overflowed the right column, continue it full-width below
+        if (rightLineIdx < rightLines.length) {
+          const remaining = rightLines.slice(rightLineIdx);
+          for (const line of remaining) {
+            ensureSpace(bodyLineH);
+            doc.text(line, marginX, cursorY + 4);
+            cursorY += bodyLineH;
+          }
+        }
+        cursorY += 12;
+        consumedTextIdx.add(blockIdx + 1);
+        continue;
+      }
+
+      // Default: full-width figure (existing behaviour)
       const maxImgH = pageHeight * 0.36;
       let drawW = contentWidth;
       let drawH = drawW / ratio;
@@ -858,9 +971,6 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const imgX = marginX + (contentWidth - drawW) / 2;
 
-      // Pre-wrap caption to know its true height, so the WHOLE figure
-      // (image + caption + video link) is treated as one indivisible block
-      // and never split across pages.
       let capLines: string[] = [];
       const capLineH = 12;
       const capPadTop = 8;
@@ -872,18 +982,14 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
-      const figureH = 6 /* top pad */ + drawH + 10 /* gap */ + captionH + linkH + 16 /* bottom pad */;
+      const figureH = 6 + drawH + 10 + captionH + linkH + 16;
 
-      // If the figure is taller than a single page's content area, just
-      // start on a fresh page (it will still overflow but at least the
-      // caption stays attached to the bottom of the image).
       ensureSpace(figureH);
 
       cursorY += 6;
       doc.addImage(img.dataUrl, img.format, imgX, cursorY, drawW, drawH, undefined, "FAST");
 
       if (block.media.isVideo) {
-        // Subtle play badge — smaller, refined
         const cx = imgX + drawW / 2;
         const cy = cursorY + drawH / 2;
         doc.setFillColor(20, 20, 20);
@@ -897,8 +1003,6 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       cursorY += drawH + 12;
 
       if (capLines.length) {
-        // Italic caption with leading vertical rule — drawn together so
-        // the rule cannot bleed onto a different page than the text.
         const capStartY = cursorY;
         doc.setFont("times", "italic");
         doc.setFontSize(9);
