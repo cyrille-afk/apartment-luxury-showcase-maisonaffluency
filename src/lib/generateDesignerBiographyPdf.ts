@@ -374,6 +374,10 @@ export interface DesignerBiographyPdfInput {
   heroImageUrl?: string | null;
   /** Public profile URL (printed on cover footer) */
   profileUrl?: string | null;
+  /** Authenticated trade user's display name — printed in footer as "Prepared for …" */
+  recipientName?: string | null;
+  /** Download date (defaults to now) — printed alongside recipient name */
+  downloadedAt?: Date | null;
   /** Optional progress callback for inline UI feedback */
   onProgress?: (p: PdfProgress) => void;
 }
