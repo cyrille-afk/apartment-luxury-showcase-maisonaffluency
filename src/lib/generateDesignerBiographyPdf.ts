@@ -217,8 +217,18 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 56;
-  const contentWidth = pageWidth - margin * 2;
+
+  // Editorial margins: generous outer whitespace, asymmetric vertical rhythm
+  const marginX = 64;
+  const marginTop = 72;
+  const marginBottom = 80;
+  const contentWidth = pageWidth - marginX * 2;
+
+  // Editorial palette (subtle warm neutrals)
+  const ink = [28, 28, 30] as const;        // body
+  const inkSoft = [70, 70, 74] as const;    // secondary
+  const muted = [140, 138, 132] as const;   // labels / meta
+  const rule = [200, 196, 188] as const;    // hairline rules
 
   const blocks = parseBiography(input.biography);
 
@@ -236,169 +246,312 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   if (input.heroImageUrl) heroLoaded = await loadImage(input.heroImageUrl);
 
   if (heroLoaded) {
-    // Full-bleed hero (top half)
-    const heroH = pageHeight * 0.55;
+    // Full-bleed hero (top ~62% — editorial proportion)
+    const heroH = pageHeight * 0.62;
     const ratio = heroLoaded.width / heroLoaded.height;
     const drawW = pageWidth;
     const drawH = drawW / ratio;
     const offsetY = drawH > heroH ? -(drawH - heroH) / 2 : 0;
-    // Add as background then overlay a soft white block for text readability
     doc.addImage(heroLoaded.dataUrl, heroLoaded.format, 0, offsetY, drawW, drawH, undefined, "FAST");
-    // Bottom block
-    doc.setFillColor(255, 255, 255);
+    // Bottom block (cream-white)
+    doc.setFillColor(252, 250, 246);
     doc.rect(0, heroH, pageWidth, pageHeight - heroH, "F");
+  } else {
+    doc.setFillColor(252, 250, 246);
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
   }
 
-  const titleY = heroLoaded ? pageHeight * 0.55 + 80 : pageHeight / 2 - 40;
+  // Eyebrow label above the title
+  const titleBlockTop = heroLoaded ? pageHeight * 0.62 + 56 : pageHeight * 0.32;
 
-  doc.setTextColor(20, 20, 20);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...muted);
+  doc.setCharSpace(2.4);
+  doc.text("MAISON AFFLUENCY  ·  DESIGNER BIOGRAPHY", marginX, titleBlockTop);
+  doc.setCharSpace(0);
+
+  // Hairline under eyebrow
+  doc.setDrawColor(...rule);
+  doc.setLineWidth(0.4);
+  doc.line(marginX, titleBlockTop + 10, marginX + 56, titleBlockTop + 10);
+
+  // Designer name — display serif, generous size
   doc.setFont("times", "normal");
-  doc.setFontSize(34);
-  doc.text(input.designerName, margin, titleY, { maxWidth: contentWidth });
+  doc.setFontSize(40);
+  doc.setTextColor(...ink);
+  doc.text(input.designerName, marginX, titleBlockTop + 50, { maxWidth: contentWidth });
 
   if (input.specialty) {
+    doc.setFont("times", "italic");
     doc.setFontSize(13);
-    doc.setTextColor(100, 100, 100);
-    doc.text(input.specialty, margin, titleY + 30, { maxWidth: contentWidth });
+    doc.setTextColor(...inkSoft);
+    doc.text(input.specialty, marginX, titleBlockTop + 76, { maxWidth: contentWidth });
   }
 
-  // Footer brand
-  doc.setFontSize(9);
-  doc.setTextColor(140, 140, 140);
-  doc.text("Maison Affluency", margin, pageHeight - margin);
+  // Cover footer: brand left, URL right, hairline above
+  doc.setDrawColor(...rule);
+  doc.setLineWidth(0.4);
+  doc.line(marginX, pageHeight - marginBottom + 18, pageWidth - marginX, pageHeight - marginBottom + 18);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...muted);
+  doc.setCharSpace(1.6);
+  doc.text("MAISON AFFLUENCY", marginX, pageHeight - marginBottom + 34);
+  doc.setCharSpace(0);
   if (input.profileUrl) {
-    doc.text(input.profileUrl, pageWidth - margin, pageHeight - margin, { align: "right" });
+    doc.setFontSize(8);
+    doc.text(sanitizeUrlForDisplay(input.profileUrl), pageWidth - marginX, pageHeight - marginBottom + 34, { align: "right" });
   }
 
   /* -------------------- BODY -------------------- */
   doc.addPage();
-  let cursorY = margin;
+  doc.setFillColor(252, 250, 246);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
+  let cursorY = marginTop;
 
   const ensureSpace = (needed: number) => {
-    if (cursorY + needed > pageHeight - margin) {
+    if (cursorY + needed > pageHeight - marginBottom) {
       doc.addPage();
-      cursorY = margin;
+      doc.setFillColor(252, 250, 246);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+      cursorY = marginTop;
     }
   };
 
-  // Philosophy quote
-  if (input.philosophy) {
-    const quote = stripHtml(input.philosophy).replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, "").trim();
-    if (quote) {
-      doc.setFont("times", "italic");
-      doc.setFontSize(14);
-      doc.setTextColor(40, 40, 40);
-      const lines = doc.splitTextToSize(`"${quote}"`, contentWidth);
-      ensureSpace(lines.length * 18 + 24);
-      doc.text(lines, pageWidth / 2, cursorY + 14, { align: "center" });
-      cursorY += lines.length * 18 + 28;
-    }
-  }
+  const drawSectionLabel = (label: string) => {
+    ensureSpace(40);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.setCharSpace(2.6);
+    doc.text(label.toUpperCase(), marginX, cursorY);
+    doc.setCharSpace(0);
+    // Hairline rule underneath
+    doc.setDrawColor(...rule);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, cursorY + 8, marginX + 40, cursorY + 8);
+    cursorY += 28;
+  };
 
-  // Section heading
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(120, 120, 120);
-  ensureSpace(20);
-  doc.text("ABOUT", margin, cursorY);
-  cursorY += 18;
+  // Pull quote — oversized opening curly quote, centered narrow column, em-dash attribution
+  let firstParagraphRendered = false;
+  const renderPullQuote = (raw: string) => {
+    const quote = stripHtml(raw)
+      .replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, "")
+      .trim();
+    if (!quote) return;
+
+    // Reserve space estimate before drawing
+    const quoteWidth = contentWidth * 0.78;
+    const quoteX = marginX + (contentWidth - quoteWidth) / 2;
+
+    doc.setFont("times", "italic");
+    doc.setFontSize(16);
+    const lines = doc.splitTextToSize(quote, quoteWidth);
+    const lineHeight = 22;
+    const blockHeight = 60 /* opening glyph */ + lines.length * lineHeight + 36 /* attribution + spacing */;
+    ensureSpace(blockHeight);
+
+    // Oversized opening quote glyph (decorative)
+    doc.setFont("times", "normal");
+    doc.setFontSize(72);
+    doc.setTextColor(...rule);
+    doc.text("\u201C", pageWidth / 2, cursorY + 44, { align: "center" });
+
+    // Quote body
+    doc.setFont("times", "italic");
+    doc.setFontSize(15);
+    doc.setTextColor(...ink);
+    let qy = cursorY + 60;
+    for (const line of lines) {
+      doc.text(line, pageWidth / 2, qy, { align: "center" });
+      qy += lineHeight;
+    }
+
+    // Attribution rule + name
+    qy += 10;
+    doc.setDrawColor(...rule);
+    doc.setLineWidth(0.4);
+    doc.line(pageWidth / 2 - 18, qy, pageWidth / 2 + 18, qy);
+    qy += 14;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.setCharSpace(2);
+    doc.text(input.designerName.toUpperCase(), pageWidth / 2, qy, { align: "center" });
+    doc.setCharSpace(0);
+
+    cursorY = qy + 24;
+  };
+
+  if (input.philosophy) renderPullQuote(input.philosophy);
+
+  drawSectionLabel("About");
 
   // Render blocks
   for (const block of blocks) {
     if (block.type === "text" && block.text) {
+      const text = block.text.trim();
+      if (!text) continue;
+
       doc.setFont("times", "normal");
       doc.setFontSize(11);
-      doc.setTextColor(35, 35, 35);
-      const lines = doc.splitTextToSize(block.text, contentWidth);
-      const lineHeight = 15;
-      // Paragraph-by-paragraph pagination (don't split mid-paragraph if it fits next page)
+      doc.setTextColor(...ink);
+      const lineHeight = 16.5; // generous leading
+
+      // Drop cap on the very first paragraph for editorial flair
+      if (!firstParagraphRendered && text.length > 80) {
+        firstParagraphRendered = true;
+        const dropChar = text.charAt(0);
+        const restText = text.slice(1).replace(/^\s+/, "");
+
+        // Drop cap glyph
+        doc.setFont("times", "normal");
+        doc.setFontSize(48);
+        doc.setTextColor(...ink);
+        const dropCapWidth = 32;
+        ensureSpace(lineHeight * 3 + 8);
+        doc.text(dropChar, marginX, cursorY + 36);
+
+        // First 3 lines wrap around the drop cap; remainder full width
+        doc.setFont("times", "normal");
+        doc.setFontSize(11);
+        const indentedWidth = contentWidth - dropCapWidth;
+        const allLines = doc.splitTextToSize(restText, indentedWidth);
+        const wrapLines = allLines.slice(0, 3);
+        const restLines = doc.splitTextToSize(allLines.slice(3).join(" "), contentWidth);
+
+        let lineIdx = 0;
+        for (const line of wrapLines) {
+          doc.text(line, marginX + dropCapWidth, cursorY + 12 + lineIdx * lineHeight);
+          lineIdx++;
+        }
+        cursorY += wrapLines.length * lineHeight + 6;
+
+        for (const line of restLines) {
+          ensureSpace(lineHeight);
+          doc.text(line, marginX, cursorY + 4);
+          cursorY += lineHeight;
+        }
+        cursorY += 12;
+        continue;
+      }
+
+      const lines = doc.splitTextToSize(text, contentWidth);
       for (const line of lines) {
         ensureSpace(lineHeight);
-        doc.text(line, margin, cursorY);
+        doc.text(line, marginX, cursorY + 4);
         cursorY += lineHeight;
       }
-      cursorY += 8; // paragraph spacing
+      cursorY += 14; // paragraph spacing
     } else if (block.type === "media" && block.media) {
       const displayUrl = resolveDisplayImageUrl(block.media);
       if (!displayUrl) {
-        // Video w/o poster — render link card
-        ensureSpace(48);
-        doc.setDrawColor(220, 220, 220);
-        doc.setFillColor(248, 248, 248);
-        doc.roundedRect(margin, cursorY, contentWidth, 40, 4, 4, "FD");
+        // Video w/o poster — minimal editorial link card (no rounded pill)
+        ensureSpace(64);
+        cursorY += 6;
+        doc.setDrawColor(...rule);
+        doc.setLineWidth(0.4);
+        doc.line(marginX, cursorY, pageWidth - marginX, cursorY);
+        cursorY += 16;
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(40, 40, 40);
-        doc.text(`Video: ${block.media.caption || "Watch online"}`, margin + 12, cursorY + 16);
-        doc.setTextColor(80, 80, 200);
-        doc.textWithLink(sanitizeUrlForDisplay(block.media.url), margin + 12, cursorY + 32, { url: block.media.url });
-        cursorY += 52;
+        doc.setFontSize(8);
+        doc.setTextColor(...muted);
+        doc.setCharSpace(2);
+        doc.text("VIDEO", marginX, cursorY);
+        doc.setCharSpace(0);
+        cursorY += 14;
+        if (block.media.caption) {
+          doc.setFont("times", "italic");
+          doc.setFontSize(11);
+          doc.setTextColor(...ink);
+          doc.text(block.media.caption, marginX, cursorY);
+          cursorY += 16;
+        }
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(80, 80, 160);
+        doc.textWithLink(sanitizeUrlForDisplay(block.media.url), marginX, cursorY, { url: block.media.url });
+        cursorY += 14;
+        doc.setDrawColor(...rule);
+        doc.line(marginX, cursorY, pageWidth - marginX, cursorY);
+        cursorY += 22;
         continue;
       }
 
       const img = await loadImage(displayUrl);
-      if (!img) {
-        // Skip if cannot load
-        continue;
-      }
+      if (!img) continue;
 
       const ratio = img.width / img.height;
       const drawW = contentWidth;
       const drawH = drawW / ratio;
-      const captionH = block.media.caption ? 14 : 0;
-      const playOverlayH = block.media.isVideo ? 16 : 0;
-      ensureSpace(drawH + captionH + playOverlayH + 16);
+      const captionH = block.media.caption ? 28 : 0;
+      const linkH = block.media.isVideo ? 18 : 0;
+      ensureSpace(drawH + captionH + linkH + 28);
 
-      doc.addImage(img.dataUrl, img.format, margin, cursorY, drawW, drawH, undefined, "FAST");
+      cursorY += 8;
+      doc.addImage(img.dataUrl, img.format, marginX, cursorY, drawW, drawH, undefined, "FAST");
 
       if (block.media.isVideo) {
-        // Play badge
-        const cx = margin + drawW / 2;
+        // Subtle play badge — smaller, refined
+        const cx = marginX + drawW / 2;
         const cy = cursorY + drawH / 2;
-        doc.setFillColor(0, 0, 0);
+        doc.setFillColor(20, 20, 20);
         doc.setDrawColor(255, 255, 255);
-        doc.circle(cx, cy, 18, "FD");
+        doc.setLineWidth(1);
+        doc.circle(cx, cy, 16, "FD");
         doc.setFillColor(255, 255, 255);
-        doc.triangle(cx - 6, cy - 8, cx - 6, cy + 8, cx + 9, cy, "F");
+        doc.triangle(cx - 5, cy - 7, cx - 5, cy + 7, cx + 8, cy, "F");
       }
 
-      cursorY += drawH + 6;
+      cursorY += drawH + 12;
 
       if (block.media.caption) {
+        // Italic caption with leading vertical rule
+        doc.setDrawColor(...rule);
+        doc.setLineWidth(0.6);
+        const capStartY = cursorY;
         doc.setFont("times", "italic");
         doc.setFontSize(9);
-        doc.setTextColor(110, 110, 110);
-        const capLines = doc.splitTextToSize(block.media.caption, contentWidth);
+        doc.setTextColor(...inkSoft);
+        const capLines = doc.splitTextToSize(block.media.caption, contentWidth - 16);
         for (const line of capLines) {
           ensureSpace(12);
-          doc.text(line, margin, cursorY + 10);
+          doc.text(line, marginX + 12, cursorY + 8);
           cursorY += 12;
         }
+        doc.line(marginX, capStartY + 2, marginX, cursorY);
       }
 
       if (block.media.isVideo) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
-        doc.setTextColor(80, 80, 200);
-        ensureSpace(12);
-        doc.textWithLink(`Watch video: ${sanitizeUrlForDisplay(block.media.url)}`, margin, cursorY + 10, { url: block.media.url });
+        doc.setTextColor(80, 80, 160);
+        ensureSpace(14);
+        doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media.url)}`, marginX, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
-      cursorY += 12;
+      cursorY += 22;
     }
   }
 
-  // Footer on every page
+  // Footer on every page (except cover)
   const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
+  for (let i = 2; i <= pageCount; i++) {
     doc.setPage(i);
+    // Hairline above footer
+    doc.setDrawColor(...rule);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, pageHeight - marginBottom + 28, pageWidth - marginX, pageHeight - marginBottom + 28);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(160, 160, 160);
-    if (i > 1) {
-      doc.text(`${input.designerName} — Maison Affluency`, margin, pageHeight - 24);
-      doc.text(`${i} / ${pageCount}`, pageWidth - margin, pageHeight - 24, { align: "right" });
-    }
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.setCharSpace(1.6);
+    doc.text(input.designerName.toUpperCase(), marginX, pageHeight - marginBottom + 44);
+    doc.text("MAISON AFFLUENCY", pageWidth / 2, pageHeight - marginBottom + 44, { align: "center" });
+    doc.setCharSpace(0);
+    doc.text(`${i} / ${pageCount}`, pageWidth - marginX, pageHeight - marginBottom + 44, { align: "right" });
   }
 
   return doc.output("blob");
