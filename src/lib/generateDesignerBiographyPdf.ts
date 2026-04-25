@@ -868,7 +868,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
-      const figureH = 8 /* top pad */ + drawH + 12 /* gap */ + captionH + linkH + 28 /* bottom pad — clear footer */;
+      const figureH = 6 /* top pad */ + drawH + 10 /* gap */ + captionH + linkH + 16 /* bottom pad */;
 
       // If the figure is taller than a single page's content area, just
       // start on a fresh page (it will still overflow but at least the
