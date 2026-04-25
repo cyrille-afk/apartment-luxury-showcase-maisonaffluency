@@ -9,6 +9,7 @@ import {
 } from "@/lib/generateDesignerBiographyPdf";
 import { trackDownload } from "@/lib/trackDownload";
 import { useAuthGate } from "@/hooks/useAuthGate";
+import { useAuth } from "@/hooks/useAuth";
 import AuthGateDialog from "@/components/AuthGateDialog";
 
 interface BiographyPdfButtonProps extends Omit<DesignerBiographyPdfInput, "onProgress"> {
