@@ -501,6 +501,12 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(8);
     doc.text(sanitizeUrlForDisplay(input.profileUrl), pageWidth - marginX, pageHeight - marginBottom + 34, { align: "right" });
   }
+  // Personalized recipient line (centered, smaller, italic)
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...muted);
+  doc.text(preparedLine, pageWidth / 2, pageHeight - marginBottom + 48, { align: "center" });
+  doc.setFont("helvetica", "normal");
 
   /* -------------------- BODY -------------------- */
   doc.addPage();
