@@ -48,6 +48,7 @@
     "fast-check": "^3",
     "framer-motion": "^12.23.25",
     "jsdom": "^20.0.3",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "pdfjs-dist": "4.9.155",
