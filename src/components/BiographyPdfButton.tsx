@@ -46,17 +46,21 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
   };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      size="sm"
       onClick={handleDownload}
       disabled={loading}
-      className={className}
+      className={`group inline-flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${className ?? ""}`}
       aria-label={`Download ${input.designerName} biography as PDF`}
     >
-      {loading ? <Loader2 className="animate-spin" /> : <Download />}
-      {loading ? "Preparing PDF…" : "Download biography (PDF)"}
-    </Button>
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Download className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
+      )}
+      <span className="underline-offset-4 group-hover:underline">
+        {loading ? "Preparing…" : "Download biography"}
+      </span>
+    </button>
   );
 }
