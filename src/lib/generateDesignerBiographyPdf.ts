@@ -694,10 +694,10 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFont("times", "normal");
     doc.setFontSize(72);
     doc.setTextColor(...rule);
-    doc.text("\u201C", pageWidth / 2, cursorY + 44, { align: "center" });
+    doc.text("\u201C", pageWidth / 2, cursorY + 32, { align: "center" });
 
     // Quote body — italic base, with bold/non-italic emphasis preserved
-    let qy = cursorY + 60;
+    let qy = cursorY + 44;
     for (let p = 0; p < wrappedParagraphs.length; p++) {
       const wrapped = wrappedParagraphs[p];
       for (const line of wrapped) {
