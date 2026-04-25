@@ -35,6 +35,16 @@ vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+// Pretend the user is authenticated so the auth gate lets the click through.
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ user: { id: "test-user" }, loading: false }),
+}));
+
+// The AuthGateDialog isn't relevant to this test — render nothing.
+vi.mock("@/components/AuthGateDialog", () => ({
+  default: () => null,
+}));
+
 import BiographyPdfButton from "@/components/BiographyPdfButton";
 
 describe("Biography PDF footer URL", () => {
