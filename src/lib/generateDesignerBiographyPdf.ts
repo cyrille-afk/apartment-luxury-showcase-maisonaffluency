@@ -120,28 +120,84 @@ interface LoadedImage {
   format: "JPEG" | "PNG";
 }
 
+/**
+ * Load any remote image URL and re-encode to a clean JPEG data URL via canvas.
+ * This avoids jsPDF rendering glitches (vertical stripes) when the source is
+ * AVIF / WebP / progressive JPEG / CORS-tainted, and guarantees a valid payload.
+ */
 async function loadImage(url: string): Promise<LoadedImage | null> {
-  try {
-    const res = await fetch(absoluteUrl(url), { mode: "cors" });
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    const dims = await new Promise<{ w: number; h: number }>((resolve, reject) => {
+  const tryLoadElement = (src: string, useCrossOrigin: boolean) =>
+    new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+      if (useCrossOrigin) img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
       img.onerror = reject;
-      img.src = dataUrl;
+      img.src = src;
     });
-    const format: "JPEG" | "PNG" = /image\/png/i.test(blob.type) ? "PNG" : "JPEG";
-    return { dataUrl, width: dims.w, height: dims.h, format };
+
+  const absolute = absoluteUrl(url);
+
+  // Strategy 1: load <img crossOrigin> directly (works for Cloudinary etc.)
+  let imgEl: HTMLImageElement | null = null;
+  try {
+    imgEl = await tryLoadElement(absolute, true);
+  } catch {
+    // Strategy 2: fetch → blob → object URL → load
+    try {
+      const res = await fetch(absolute, { mode: "cors" });
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      try {
+        imgEl = await tryLoadElement(objectUrl, false);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  if (!imgEl) return null;
+
+  // Cap to a reasonable resolution to keep PDF size manageable
+  const MAX_DIM = 1600;
+  const naturalW = imgEl.naturalWidth || imgEl.width;
+  const naturalH = imgEl.naturalHeight || imgEl.height;
+  if (!naturalW || !naturalH) return null;
+  const scale = Math.min(1, MAX_DIM / Math.max(naturalW, naturalH));
+  const w = Math.max(1, Math.round(naturalW * scale));
+  const h = Math.max(1, Math.round(naturalH * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  // White background in case of transparency (JPEG has no alpha)
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+  try {
+    ctx.drawImage(imgEl, 0, 0, w, h);
   } catch {
     return null;
   }
+
+  let dataUrl: string;
+  try {
+    dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+  } catch {
+    // Tainted canvas — fallback fail
+    return null;
+  }
+  if (!dataUrl || dataUrl === "data:,") return null;
+
+  return { dataUrl, width: w, height: h, format: "JPEG" };
+}
+
+/** Sanitize a URL for printing inside the PDF (remove control chars/whitespace). */
+function sanitizeUrlForDisplay(url: string): string {
+  return url.replace(/[\r\n\t]+/g, "").trim();
 }
 
 export interface DesignerBiographyPdfInput {
