@@ -515,39 +515,173 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     cursorY += 28;
   };
 
-  // Pull quote — oversized opening curly quote, centered narrow column, em-dash attribution
+  // Pull quote — oversized opening curly quote, centered narrow column,
+  // multi-paragraph, italic/bold-aware, smart-quote preserved.
   let firstParagraphRendered = false;
+
+  /** Set jsPDF font for a given run style (using Times for body emphasis). */
+  const setRunFont = (italic: boolean, bold: boolean) => {
+    const style = bold && italic ? "bolditalic" : bold ? "bold" : italic ? "italic" : "normal";
+    doc.setFont("times", style as "bolditalic" | "bold" | "italic" | "normal");
+  };
+
+  /** Word-wrap a single rich paragraph into lines of runs that fit `maxWidth`. */
+  const wrapRichRuns = (
+    runs: RichRun[],
+    maxWidth: number,
+    fontSize: number,
+    baseItalic: boolean,
+  ): RichRun[][] => {
+    doc.setFontSize(fontSize);
+
+    type Token = { text: string; italic: boolean; bold: boolean; isSpace: boolean };
+    const tokens: Token[] = [];
+    for (const run of runs) {
+      const italic = run.italic || baseItalic;
+      const bold = run.bold;
+      // Split into words + preserve internal spaces as their own tokens
+      const parts = run.text.split(/(\s+)/);
+      for (const part of parts) {
+        if (!part) continue;
+        tokens.push({ text: part, italic, bold, isSpace: /^\s+$/.test(part) });
+      }
+    }
+
+    const measure = (t: Token) => {
+      setRunFont(t.italic, t.bold);
+      return doc.getTextWidth(t.text);
+    };
+
+    const lines: RichRun[][] = [];
+    let line: Token[] = [];
+    let lineWidth = 0;
+
+    const pushLine = () => {
+      // Trim trailing spaces
+      while (line.length && line[line.length - 1].isSpace) line.pop();
+      if (!line.length) {
+        lines.push([]);
+      } else {
+        // Merge adjacent same-style tokens for clean drawing
+        const merged: RichRun[] = [];
+        for (const t of line) {
+          const last = merged[merged.length - 1];
+          if (last && last.italic === t.italic && last.bold === t.bold) {
+            last.text += t.text;
+          } else {
+            merged.push({ text: t.text, italic: t.italic, bold: t.bold });
+          }
+        }
+        lines.push(merged);
+      }
+      line = [];
+      lineWidth = 0;
+    };
+
+    for (const tok of tokens) {
+      const w = measure(tok);
+      if (tok.isSpace) {
+        if (line.length === 0) continue; // skip leading whitespace
+        if (lineWidth + w > maxWidth) {
+          pushLine();
+        } else {
+          line.push(tok);
+          lineWidth += w;
+        }
+        continue;
+      }
+      // Non-space word
+      if (lineWidth + w > maxWidth && line.length > 0) {
+        pushLine();
+      }
+      line.push(tok);
+      lineWidth += w;
+    }
+    if (line.length) pushLine();
+    return lines;
+  };
+
+  /** Draw a wrapped line of runs centered on a given y baseline. */
+  const drawCenteredRichLine = (
+    line: RichRun[],
+    centerX: number,
+    y: number,
+    fontSize: number,
+    baseItalic: boolean,
+    color: readonly [number, number, number],
+  ) => {
+    if (!line.length) return;
+    doc.setFontSize(fontSize);
+    doc.setTextColor(...color);
+    // Measure full width
+    let totalW = 0;
+    const widths: number[] = [];
+    for (const r of line) {
+      setRunFont(r.italic || baseItalic, r.bold);
+      const w = doc.getTextWidth(r.text);
+      widths.push(w);
+      totalW += w;
+    }
+    let x = centerX - totalW / 2;
+    for (let i = 0; i < line.length; i++) {
+      const r = line[i];
+      setRunFont(r.italic || baseItalic, r.bold);
+      doc.text(r.text, x, y);
+      x += widths[i];
+    }
+  };
+
   const renderPullQuote = (raw: string) => {
-    const quote = stripHtml(raw)
-      .replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, "")
-      .trim();
-    if (!quote) return;
+    const paragraphs = splitRichParagraphs(raw)
+      // Strip surrounding quote glyphs from the very first/last text run
+      .map((runs, idx, arr) => {
+        if (!runs.length) return runs;
+        const out = runs.map((r) => ({ ...r }));
+        if (idx === 0) {
+          out[0].text = out[0].text.replace(/^[\s"\u201C\u201D\u00AB\u00BB]+/, "");
+        }
+        if (idx === arr.length - 1) {
+          const last = out[out.length - 1];
+          last.text = last.text.replace(/[\s"\u201C\u201D\u00AB\u00BB]+$/, "");
+        }
+        return out.filter((r) => r.text.length > 0);
+      })
+      .filter((runs) => runs.length > 0);
 
-    // Reserve space estimate before drawing
+    if (paragraphs.length === 0) return;
+
     const quoteWidth = contentWidth * 0.78;
-    const quoteX = marginX + (contentWidth - quoteWidth) / 2;
-
-    doc.setFont("times", "italic");
-    doc.setFontSize(16);
-    const lines = doc.splitTextToSize(quote, quoteWidth);
     const lineHeight = 22;
-    const blockHeight = 60 /* opening glyph */ + lines.length * lineHeight + 36 /* attribution + spacing */;
+    const fontSize = 15;
+    const paragraphGap = 12;
+
+    // Pre-wrap to estimate height
+    const wrappedParagraphs = paragraphs.map((runs) =>
+      wrapRichRuns(runs, quoteWidth, fontSize, true /* base italic */),
+    );
+    const totalLines = wrappedParagraphs.reduce((n, p) => n + p.length, 0);
+    const blockHeight =
+      60 /* opening glyph */ +
+      totalLines * lineHeight +
+      (wrappedParagraphs.length - 1) * paragraphGap +
+      36 /* attribution */;
     ensureSpace(blockHeight);
 
-    // Oversized opening quote glyph (decorative)
+    // Oversized opening quote glyph (decorative, in hairline color)
     doc.setFont("times", "normal");
     doc.setFontSize(72);
     doc.setTextColor(...rule);
     doc.text("\u201C", pageWidth / 2, cursorY + 44, { align: "center" });
 
-    // Quote body
-    doc.setFont("times", "italic");
-    doc.setFontSize(15);
-    doc.setTextColor(...ink);
+    // Quote body — italic base, with bold/non-italic emphasis preserved
     let qy = cursorY + 60;
-    for (const line of lines) {
-      doc.text(line, pageWidth / 2, qy, { align: "center" });
-      qy += lineHeight;
+    for (let p = 0; p < wrappedParagraphs.length; p++) {
+      const wrapped = wrappedParagraphs[p];
+      for (const line of wrapped) {
+        drawCenteredRichLine(line, pageWidth / 2, qy, fontSize, true, ink);
+        qy += lineHeight;
+      }
+      if (p < wrappedParagraphs.length - 1) qy += paragraphGap;
     }
 
     // Attribution rule + name
