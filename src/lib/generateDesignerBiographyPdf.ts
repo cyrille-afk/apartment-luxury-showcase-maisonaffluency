@@ -428,7 +428,27 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   drawSectionLabel("About");
 
   // Render blocks
+  let mediaIdx = 0;
+  // Reserve 0.20..0.90 of the bar for media work, 0.90..1.0 for finalize
+  const mediaStart = 0.20;
+  const mediaEnd = 0.90;
   for (const block of blocks) {
+    if (block.type === "media") {
+      mediaIdx += 1;
+      const ratio = totalMedia > 0
+        ? mediaStart + ((mediaIdx - 1) / totalMedia) * (mediaEnd - mediaStart)
+        : mediaStart;
+      emit({
+        stage: "media",
+        ratio,
+        current: mediaIdx,
+        total: totalMedia,
+        label: totalMedia > 1
+          ? `Embedding media ${mediaIdx} of ${totalMedia}…`
+          : "Embedding media…",
+      });
+      await tick();
+    }
     if (block.type === "text" && block.text) {
       const text = block.text.trim();
       if (!text) continue;
