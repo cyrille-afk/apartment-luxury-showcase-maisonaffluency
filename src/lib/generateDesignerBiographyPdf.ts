@@ -820,8 +820,16 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       if (!img) continue;
 
       const ratio = img.width / img.height;
-      const drawW = contentWidth;
-      const drawH = drawW / ratio;
+      // Cap figure size so a single image never dominates the page —
+      // limit to ~46% of the page height, then scale width to match.
+      const maxImgH = (pageHeight - marginBottom - 120) * 0.62;
+      let drawW = contentWidth;
+      let drawH = drawW / ratio;
+      if (drawH > maxImgH) {
+        drawH = maxImgH;
+        drawW = drawH * ratio;
+      }
+      const imgX = marginX + (contentWidth - drawW) / 2;
 
       // Pre-wrap caption to know its true height, so the WHOLE figure
       // (image + caption + video link) is treated as one indivisible block
@@ -837,7 +845,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
-      const figureH = 8 /* top pad */ + drawH + 12 /* gap */ + captionH + linkH + 12 /* bottom pad */;
+      const figureH = 8 /* top pad */ + drawH + 12 /* gap */ + captionH + linkH + 28 /* bottom pad — clear footer */;
 
       // If the figure is taller than a single page's content area, just
       // start on a fresh page (it will still overflow but at least the
@@ -845,11 +853,11 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       ensureSpace(figureH);
 
       cursorY += 8;
-      doc.addImage(img.dataUrl, img.format, marginX, cursorY, drawW, drawH, undefined, "FAST");
+      doc.addImage(img.dataUrl, img.format, imgX, cursorY, drawW, drawH, undefined, "FAST");
 
       if (block.media.isVideo) {
         // Subtle play badge — smaller, refined
-        const cx = marginX + drawW / 2;
+        const cx = imgX + drawW / 2;
         const cy = cursorY + drawH / 2;
         doc.setFillColor(20, 20, 20);
         doc.setDrawColor(255, 255, 255);
@@ -888,7 +896,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media.url)}`, marginX, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
-      cursorY += 22;
+      cursorY += 40;
     }
   }
 
