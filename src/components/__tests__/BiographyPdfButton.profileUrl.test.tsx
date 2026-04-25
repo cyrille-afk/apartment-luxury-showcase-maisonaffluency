@@ -23,8 +23,8 @@ const generateSpy = vi.fn(async () => new Blob(["%PDF-1.4"], { type: "applicatio
 const downloadSpy = vi.fn();
 
 vi.mock("@/lib/generateDesignerBiographyPdf", () => ({
-  generateDesignerBiographyPdf: (...args: unknown[]) => generateSpy(...args),
-  downloadBlob: (...args: unknown[]) => downloadSpy(...args),
+  generateDesignerBiographyPdf: (...args: unknown[]) => (generateSpy as (...a: unknown[]) => unknown)(...args),
+  downloadBlob: (...args: unknown[]) => (downloadSpy as (...a: unknown[]) => unknown)(...args),
 }));
 
 vi.mock("@/lib/trackDownload", () => ({
@@ -89,7 +89,7 @@ describe("Biography PDF footer URL", () => {
 
     await waitFor(() => expect(generateSpy).toHaveBeenCalledTimes(1));
 
-    const args = generateSpy.mock.calls[0][0] as { profileUrl?: string };
+    const args = (generateSpy.mock.calls[0] as unknown[])[0] as { profileUrl?: string };
     expect(args.profileUrl).toBeDefined();
     expect(args.profileUrl).toMatch(/^https:\/\/www\.maisonaffluency\.com\//);
     expect(args.profileUrl).toBe("https://www.maisonaffluency.com/designers/thierry-lemaire");
