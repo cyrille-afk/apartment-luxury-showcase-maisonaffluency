@@ -853,7 +853,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       ensureSpace(figureH);
 
       cursorY += 8;
-      doc.addImage(img.dataUrl, img.format, marginX, cursorY, drawW, drawH, undefined, "FAST");
+      doc.addImage(img.dataUrl, img.format, imgX, cursorY, drawW, drawH, undefined, "FAST");
 
       if (block.media.isVideo) {
         // Subtle play badge — smaller, refined
