@@ -200,6 +200,25 @@ function sanitizeUrlForDisplay(url: string): string {
   return url.replace(/[\r\n\t]+/g, "").trim();
 }
 
+export type PdfProgressStage =
+  | "parsing"
+  | "cover"
+  | "media"
+  | "finalizing"
+  | "done";
+
+export interface PdfProgress {
+  stage: PdfProgressStage;
+  /** 0..1 overall progress */
+  ratio: number;
+  /** Human-readable label for inline display */
+  label: string;
+  /** When stage is "media", which item index (1-based) */
+  current?: number;
+  /** When stage is "media", total media items */
+  total?: number;
+}
+
 export interface DesignerBiographyPdfInput {
   designerName: string;
   specialty?: string | null;
@@ -211,6 +230,8 @@ export interface DesignerBiographyPdfInput {
   heroImageUrl?: string | null;
   /** Public profile URL (printed on cover footer) */
   profileUrl?: string | null;
+  /** Optional progress callback for inline UI feedback */
+  onProgress?: (p: PdfProgress) => void;
 }
 
 export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfInput): Promise<Blob> {
@@ -230,6 +251,17 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   const muted = [140, 138, 132] as const;   // labels / meta
   const rule = [200, 196, 188] as const;    // hairline rules
 
+  const emit = (p: PdfProgress) => {
+    try {
+      input.onProgress?.(p);
+    } catch {
+      /* ignore consumer errors */
+    }
+  };
+  // Yield to the event loop so the UI can paint between heavy steps
+  const tick = () => new Promise<void>((r) => setTimeout(r, 0));
+
+  emit({ stage: "parsing", ratio: 0.02, label: "Reading biography…" });
   const blocks = parseBiography(input.biography);
 
   // If biography has no inline media, fold biographyImages in
@@ -241,9 +273,15 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     }
   }
 
+  const mediaBlocks = blocks.filter((b) => b.type === "media");
+  const totalMedia = mediaBlocks.length;
+
   /* -------------------- COVER -------------------- */
+  emit({ stage: "cover", ratio: 0.08, label: "Composing cover…" });
+  await tick();
   let heroLoaded: LoadedImage | null = null;
   if (input.heroImageUrl) heroLoaded = await loadImage(input.heroImageUrl);
+  emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
   if (heroLoaded) {
     // Full-bleed hero (top ~62% — editorial proportion)
@@ -390,7 +428,27 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   drawSectionLabel("About");
 
   // Render blocks
+  let mediaIdx = 0;
+  // Reserve 0.20..0.90 of the bar for media work, 0.90..1.0 for finalize
+  const mediaStart = 0.20;
+  const mediaEnd = 0.90;
   for (const block of blocks) {
+    if (block.type === "media") {
+      mediaIdx += 1;
+      const ratio = totalMedia > 0
+        ? mediaStart + ((mediaIdx - 1) / totalMedia) * (mediaEnd - mediaStart)
+        : mediaStart;
+      emit({
+        stage: "media",
+        ratio,
+        current: mediaIdx,
+        total: totalMedia,
+        label: totalMedia > 1
+          ? `Embedding media ${mediaIdx} of ${totalMedia}…`
+          : "Embedding media…",
+      });
+      await tick();
+    }
     if (block.type === "text" && block.text) {
       const text = block.text.trim();
       if (!text) continue;
@@ -536,6 +594,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     }
   }
 
+  emit({ stage: "finalizing", ratio: 0.92, label: "Adding page footers…" });
+  await tick();
+
   // Footer on every page (except cover)
   const pageCount = doc.getNumberOfPages();
   for (let i = 2; i <= pageCount; i++) {
@@ -554,7 +615,11 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.text(`${i} / ${pageCount}`, pageWidth - marginX, pageHeight - marginBottom + 44, { align: "right" });
   }
 
-  return doc.output("blob");
+  emit({ stage: "finalizing", ratio: 0.97, label: "Encoding PDF…" });
+  await tick();
+  const blob = doc.output("blob");
+  emit({ stage: "done", ratio: 1, label: "Ready" });
+  return blob;
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
