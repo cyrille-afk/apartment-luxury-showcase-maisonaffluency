@@ -821,9 +821,27 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       const ratio = img.width / img.height;
       const drawW = contentWidth;
       const drawH = drawW / ratio;
-      const captionH = block.media.caption ? 28 : 0;
+
+      // Pre-wrap caption to know its true height, so the WHOLE figure
+      // (image + caption + video link) is treated as one indivisible block
+      // and never split across pages.
+      let capLines: string[] = [];
+      const capLineH = 12;
+      const capPadTop = 8;
+      const capPadBottom = 6;
+      if (block.media.caption) {
+        doc.setFont("times", "italic");
+        doc.setFontSize(9);
+        capLines = doc.splitTextToSize(block.media.caption, contentWidth - 16);
+      }
+      const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
-      ensureSpace(drawH + captionH + linkH + 28);
+      const figureH = 8 /* top pad */ + drawH + 12 /* gap */ + captionH + linkH + 12 /* bottom pad */;
+
+      // If the figure is taller than a single page's content area, just
+      // start on a fresh page (it will still overflow but at least the
+      // caption stays attached to the bottom of the image).
+      ensureSpace(figureH);
 
       cursorY += 8;
       doc.addImage(img.dataUrl, img.format, marginX, cursorY, drawW, drawH, undefined, "FAST");
@@ -842,22 +860,24 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       cursorY += drawH + 12;
 
-      if (block.media.caption) {
-        // Italic caption with leading vertical rule
-        doc.setDrawColor(...rule);
-        doc.setLineWidth(0.6);
+      if (capLines.length) {
+        // Italic caption with leading vertical rule — drawn together so
+        // the rule cannot bleed onto a different page than the text.
         const capStartY = cursorY;
         doc.setFont("times", "italic");
         doc.setFontSize(9);
         doc.setTextColor(...inkSoft);
-        const capLines = doc.splitTextToSize(block.media.caption, contentWidth - 16);
         for (const line of capLines) {
-          ensureSpace(12);
-          doc.text(line, marginX + 12, cursorY + 8);
-          cursorY += 12;
+          doc.text(line, marginX + 12, cursorY + capPadTop);
+          cursorY += capLineH;
         }
-        doc.line(marginX, capStartY + 2, marginX, cursorY);
+        const capEndY = cursorY;
+        doc.setDrawColor(...rule);
+        doc.setLineWidth(0.6);
+        doc.line(marginX, capStartY + 2, marginX, capEndY);
+        cursorY += capPadBottom;
       }
+
 
       if (block.media.isVideo) {
         doc.setFont("helvetica", "normal");
