@@ -74,14 +74,157 @@ function parseMediaLine(text: string): MediaItem | null {
   return { url, caption, poster, isVideo: video };
 }
 
-function stripHtml(text: string): string {
+function decodeEntities(text: string): string {
   return text
-    .replace(/<\/?strong>/gi, "")
-    .replace(/<\/?em>/gi, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&mdash;/gi, "\u2014")
+    .replace(/&ndash;/gi, "\u2013")
+    .replace(/&hellip;/gi, "\u2026")
+    .replace(/&laquo;/gi, "\u00AB")
+    .replace(/&raquo;/gi, "\u00BB")
+    .replace(/&ldquo;/gi, "\u201C")
+    .replace(/&rdquo;/gi, "\u201D")
+    .replace(/&lsquo;/gi, "\u2018")
+    .replace(/&rsquo;/gi, "\u2019")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+}
+
+/**
+ * Convert straight quotes/apostrophes into typographic ones, leaving any
+ * already-curly quotes (and French guillemets) untouched.
+ */
+function smartenQuotes(text: string): string {
+  let out = text;
+  out = out.replace(/([A-Za-zÀ-ÿ])'([A-Za-zÀ-ÿ])/g, "$1\u2019$2");
+  out = out.replace(/([A-Za-zÀ-ÿ])'/g, "$1\u2019");
+  out = out.replace(/(^|[\s(\[{\u2014\u2013-])'/g, "$1\u2018");
+  out = out.replace(/'/g, "\u2019");
+  out = out.replace(/(^|[\s(\[{\u2014\u2013-])"/g, "$1\u201C");
+  out = out.replace(/"/g, "\u201D");
+  return out;
+}
+
+function stripHtml(text: string): string {
+  return smartenQuotes(
+    decodeEntities(text)
+      .replace(/<\/?strong>/gi, "")
+      .replace(/<\/?em>/gi, "")
+      .replace(/<\/?i>/gi, "")
+      .replace(/<\/?b>/gi, "")
+      .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
+      .replace(/\*\*([\s\S]+?)\*\*/g, "$1")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\u00A0/g, " "),
+  );
+}
+
+/* -------------------- Rich inline parsing for quotes -------------------- */
+
+export interface RichRun {
+  text: string;
+  italic: boolean;
+  bold: boolean;
+}
+
+/**
+ * Parse a fragment of HTML / lightweight markdown into styled inline runs.
+ * Supports <em>/<i>, <strong>/<b>, *italic*, **bold**.
+ * Decodes entities and applies smart-quote transformation.
+ */
+export function parseRichInline(input: string): RichRun[] {
+  const decoded = decodeEntities(input).replace(/\u00A0/g, " ");
+  const cleaned = decoded
     .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
-    .replace(/\*\*([\s\S]+?)\*\*/g, "$1")
-    .replace(/<[^>]+>/g, "")
-    .replace(/\u00A0/g, " ");
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/?p[^>]*>/gi, "");
+
+  const runs: RichRun[] = [];
+  let italic = 0;
+  let bold = 0;
+  let buf = "";
+
+  const flush = () => {
+    if (!buf) return;
+    runs.push({ text: buf, italic: italic > 0, bold: bold > 0 });
+    buf = "";
+  };
+
+  let i = 0;
+  while (i < cleaned.length) {
+    const ch = cleaned[i];
+
+    if (ch === "<") {
+      const close = cleaned.indexOf(">", i);
+      if (close !== -1) {
+        const tag = cleaned.slice(i + 1, close).trim().toLowerCase();
+        if (/^(em|i)$/.test(tag)) { flush(); italic++; i = close + 1; continue; }
+        if (/^\/(em|i)$/.test(tag)) { flush(); italic = Math.max(0, italic - 1); i = close + 1; continue; }
+        if (/^(strong|b)$/.test(tag)) { flush(); bold++; i = close + 1; continue; }
+        if (/^\/(strong|b)$/.test(tag)) { flush(); bold = Math.max(0, bold - 1); i = close + 1; continue; }
+        i = close + 1;
+        continue;
+      }
+    }
+
+    if (ch === "*" && cleaned[i + 1] === "*") {
+      const end = cleaned.indexOf("**", i + 2);
+      if (end !== -1) {
+        flush();
+        const inner = cleaned.slice(i + 2, end);
+        for (const r of parseRichInline(inner)) {
+          runs.push({ ...r, bold: true });
+        }
+        i = end + 2;
+        continue;
+      }
+    }
+
+    if (ch === "*" && cleaned[i + 1] !== "*" && (i === 0 || cleaned[i - 1] !== "*")) {
+      const end = cleaned.indexOf("*", i + 1);
+      if (end !== -1 && cleaned[end + 1] !== "*") {
+        flush();
+        const inner = cleaned.slice(i + 1, end);
+        for (const r of parseRichInline(inner)) {
+          runs.push({ ...r, italic: true });
+        }
+        i = end + 1;
+        continue;
+      }
+    }
+
+    buf += ch;
+    i++;
+  }
+  flush();
+
+  // Apply smart quotes across the joined text, then re-split by run boundaries.
+  const joined = runs.map((r) => r.text).join("\u0001");
+  const smart = smartenQuotes(joined.replace(/[ \t]+/g, " "));
+  const parts = smart.split("\u0001");
+  return runs
+    .map((r, idx) => ({ ...r, text: parts[idx] ?? r.text }))
+    .filter((r) => r.text.length > 0);
+}
+
+/** Split philosophy/quote source into rich paragraphs (split on <p>, double-<br>, or blank lines). */
+export function splitRichParagraphs(input: string): RichRun[][] {
+  const normalized = input
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<\/?p[^>]*>/gi, "\n\n")
+    .replace(/(?:<br\s*\/?>\s*){2,}/gi, "\n\n")
+    .replace(/\r\n?/g, "\n");
+  return normalized
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => parseRichInline(p))
+    .filter((runs) => runs.some((r) => r.text.trim().length > 0));
 }
 
 function parseBiography(biography: string): ParsedBlock[] {
