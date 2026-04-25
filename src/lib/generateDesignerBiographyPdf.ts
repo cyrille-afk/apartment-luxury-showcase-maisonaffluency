@@ -720,7 +720,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.text(input.designerName.toUpperCase(), pageWidth / 2, qy, { align: "center" });
     doc.setCharSpace(0);
 
-    cursorY = qy + 24;
+    cursorY = qy + 18;
   };
 
   if (input.philosophy) renderPullQuote(input.philosophy);
