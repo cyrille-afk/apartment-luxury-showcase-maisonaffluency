@@ -200,6 +200,25 @@ function sanitizeUrlForDisplay(url: string): string {
   return url.replace(/[\r\n\t]+/g, "").trim();
 }
 
+export type PdfProgressStage =
+  | "parsing"
+  | "cover"
+  | "media"
+  | "finalizing"
+  | "done";
+
+export interface PdfProgress {
+  stage: PdfProgressStage;
+  /** 0..1 overall progress */
+  ratio: number;
+  /** Human-readable label for inline display */
+  label: string;
+  /** When stage is "media", which item index (1-based) */
+  current?: number;
+  /** When stage is "media", total media items */
+  total?: number;
+}
+
 export interface DesignerBiographyPdfInput {
   designerName: string;
   specialty?: string | null;
@@ -211,6 +230,8 @@ export interface DesignerBiographyPdfInput {
   heroImageUrl?: string | null;
   /** Public profile URL (printed on cover footer) */
   profileUrl?: string | null;
+  /** Optional progress callback for inline UI feedback */
+  onProgress?: (p: PdfProgress) => void;
 }
 
 export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfInput): Promise<Blob> {
