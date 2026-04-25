@@ -684,10 +684,10 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     );
     const totalLines = wrappedParagraphs.reduce((n, p) => n + p.length, 0);
     const blockHeight =
-      60 /* opening glyph */ +
+      44 /* opening glyph */ +
       totalLines * lineHeight +
       (wrappedParagraphs.length - 1) * paragraphGap +
-      36 /* attribution */;
+      28 /* attribution */;
     ensureSpace(blockHeight);
 
     // Oversized opening quote glyph (decorative, in hairline color)
