@@ -72,7 +72,7 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
           type="button"
           onClick={handleClick}
           disabled={loading}
-          className="group inline-flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors disabled:opacity-70 disabled:cursor-wait"
+          className="group inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 disabled:opacity-70 disabled:cursor-wait"
           aria-label={`Download ${input.designerName} biography as PDF`}
           aria-busy={loading}
         >
