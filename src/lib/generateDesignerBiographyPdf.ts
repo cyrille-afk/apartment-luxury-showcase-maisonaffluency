@@ -732,7 +732,11 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   // Reserve 0.20..0.90 of the bar for media work, 0.90..1.0 for finalize
   const mediaStart = 0.20;
   const mediaEnd = 0.90;
-  for (const block of blocks) {
+  // Track which text blocks have already been consumed by side-by-side figures
+  const consumedTextIdx = new Set<number>();
+  for (let blockIdx = 0; blockIdx < blocks.length; blockIdx++) {
+    const block = blocks[blockIdx];
+    if (consumedTextIdx.has(blockIdx)) continue;
     if (block.type === "media") {
       mediaIdx += 1;
       const ratio = totalMedia > 0
