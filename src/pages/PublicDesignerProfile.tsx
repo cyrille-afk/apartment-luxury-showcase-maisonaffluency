@@ -480,7 +480,7 @@ const PublicDesignerProfile = () => {
                     biography={displayBiography || ""}
                     biographyImages={displayBiographyImages}
                     heroImageUrl={heroImage}
-                    profileUrl={typeof window !== "undefined" ? window.location.href : null}
+                    profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
                   />
                 </div>
                 {introEditorialBio ? (
