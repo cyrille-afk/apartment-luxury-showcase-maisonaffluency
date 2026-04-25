@@ -251,6 +251,17 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   const muted = [140, 138, 132] as const;   // labels / meta
   const rule = [200, 196, 188] as const;    // hairline rules
 
+  const emit = (p: PdfProgress) => {
+    try {
+      input.onProgress?.(p);
+    } catch {
+      /* ignore consumer errors */
+    }
+  };
+  // Yield to the event loop so the UI can paint between heavy steps
+  const tick = () => new Promise<void>((r) => setTimeout(r, 0));
+
+  emit({ stage: "parsing", ratio: 0.02, label: "Reading biography…" });
   const blocks = parseBiography(input.biography);
 
   // If biography has no inline media, fold biographyImages in
@@ -262,9 +273,15 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     }
   }
 
+  const mediaBlocks = blocks.filter((b) => b.type === "media");
+  const totalMedia = mediaBlocks.length;
+
   /* -------------------- COVER -------------------- */
+  emit({ stage: "cover", ratio: 0.08, label: "Composing cover…" });
+  await tick();
   let heroLoaded: LoadedImage | null = null;
   if (input.heroImageUrl) heroLoaded = await loadImage(input.heroImageUrl);
+  emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
   if (heroLoaded) {
     // Full-bleed hero (top ~62% — editorial proportion)
