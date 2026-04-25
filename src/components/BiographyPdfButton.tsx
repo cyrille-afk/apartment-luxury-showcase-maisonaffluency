@@ -9,6 +9,7 @@ import {
 } from "@/lib/generateDesignerBiographyPdf";
 import { trackDownload } from "@/lib/trackDownload";
 import { useAuthGate } from "@/hooks/useAuthGate";
+import { useAuth } from "@/hooks/useAuth";
 import AuthGateDialog from "@/components/AuthGateDialog";
 
 interface BiographyPdfButtonProps extends Omit<DesignerBiographyPdfInput, "onProgress"> {
@@ -27,8 +28,17 @@ function slugify(name: string) {
 export default function BiographyPdfButton({ className, ...input }: BiographyPdfButtonProps) {
   const { toast } = useToast();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
+  const { profile, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<PdfProgress | null>(null);
+
+  const recipientName = (() => {
+    const first = profile?.first_name?.trim() ?? "";
+    const last = profile?.last_name?.trim() ?? "";
+    const full = `${first} ${last}`.trim();
+    if (full) return full;
+    return profile?.email ?? user?.email ?? null;
+  })();
 
   const runDownload = async () => {
     if (loading) return;
@@ -37,6 +47,8 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
     try {
       const blob = await generateDesignerBiographyPdf({
         ...input,
+        recipientName,
+        downloadedAt: new Date(),
         onProgress: (p) => setProgress(p),
       });
       downloadBlob(blob, `${slugify(input.designerName)}-biography.pdf`);

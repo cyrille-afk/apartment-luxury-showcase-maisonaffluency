@@ -374,6 +374,10 @@ export interface DesignerBiographyPdfInput {
   heroImageUrl?: string | null;
   /** Public profile URL (printed on cover footer) */
   profileUrl?: string | null;
+  /** Authenticated trade user's display name — printed in footer as "Prepared for …" */
+  recipientName?: string | null;
+  /** Download date (defaults to now) — printed alongside recipient name */
+  downloadedAt?: Date | null;
   /** Optional progress callback for inline UI feedback */
   onProgress?: (p: PdfProgress) => void;
 }
@@ -407,6 +411,18 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
   emit({ stage: "parsing", ratio: 0.02, label: "Reading biography…" });
   const blocks = parseBiography(input.biography);
+
+  // Personalized "Prepared for …" line for footers (only when we have a name)
+  const recipient = (input.recipientName ?? "").trim();
+  const downloadDate = input.downloadedAt ?? new Date();
+  const formattedDate = downloadDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const preparedLine = recipient
+    ? `Prepared for ${recipient} · ${formattedDate}`
+    : `Downloaded ${formattedDate}`;
 
   // If biography has no inline media, fold biographyImages in
   const hasInlineMedia = blocks.some((b) => b.type === "media");
@@ -485,6 +501,12 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(8);
     doc.text(sanitizeUrlForDisplay(input.profileUrl), pageWidth - marginX, pageHeight - marginBottom + 34, { align: "right" });
   }
+  // Personalized recipient line (centered, smaller, italic)
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...muted);
+  doc.text(preparedLine, pageWidth / 2, pageHeight - marginBottom + 48, { align: "center" });
+  doc.setFont("helvetica", "normal");
 
   /* -------------------- BODY -------------------- */
   doc.addPage();
@@ -919,6 +941,12 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.text("MAISON AFFLUENCY", pageWidth / 2, pageHeight - marginBottom + 44, { align: "center" });
     doc.setCharSpace(0);
     doc.text(`${i} / ${pageCount}`, pageWidth - marginX, pageHeight - marginBottom + 44, { align: "right" });
+    // Personalized recipient line under the main footer row
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7);
+    doc.setTextColor(...muted);
+    doc.text(preparedLine, pageWidth / 2, pageHeight - marginBottom + 56, { align: "center" });
+    doc.setFont("helvetica", "normal");
   }
 
   emit({ stage: "finalizing", ratio: 0.97, label: "Encoding PDF…" });
