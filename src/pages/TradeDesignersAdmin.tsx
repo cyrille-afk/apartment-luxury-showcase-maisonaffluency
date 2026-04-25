@@ -1222,13 +1222,24 @@ const TradeDesignersAdmin = () => {
               {designers.length} designers · Search, filter, and edit biographies inline.
             </p>
           </div>
-          <Link
-            to="/trade/designers/instagram"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
-          >
-            <Instagram className="h-3.5 w-3.5" />
-            IG Audit
-          </Link>
+          <div className="flex items-center gap-2">
+            <a
+              href="/downloads/thierry-lemaire-biography.pdf"
+              download="Thierry-Lemaire-Biography.pdf"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+              title="Download a clean PDF summary of Thierry Lemaire's biography & highlights"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              Lemaire PDF
+            </a>
+            <Link
+              to="/trade/designers/instagram"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+            >
+              <Instagram className="h-3.5 w-3.5" />
+              IG Audit
+            </Link>
+          </div>
         </div>
 
         {/* Completeness Audit */}
