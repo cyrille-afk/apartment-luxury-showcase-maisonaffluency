@@ -859,16 +859,36 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         nextBlock.text.trim().length > 0;
 
       if (canSideBySide) {
-        // Half-column figure on the LEFT, text wraps on the RIGHT
-        const gutter = 18;
+        // Half-column figure on the LEFT, text wraps on the RIGHT.
+        // Size the image so the right column reads as a balanced block —
+        // not a tall photo with a short text stub beside it.
+        const gutter = 22;
         const colW = (contentWidth - gutter) / 2;
-        let drawW = colW;
-        let drawH = drawW / ratio;
-        const maxFigH = pageHeight * 0.42;
-        if (drawH > maxFigH) {
-          drawH = maxFigH;
-          drawW = drawH * ratio;
+        const bodyLineH = 16.5;
+        const paragraphGap = 10;
+
+        // Gather up to 2 consecutive text blocks to pair with the figure.
+        const pairedTexts: string[] = [];
+        const pairedIndices: number[] = [];
+        let lookahead = blockIdx + 1;
+        while (lookahead < blocks.length && blocks[lookahead].type === "text") {
+          const t = blocks[lookahead].text?.trim();
+          if (!t) { lookahead++; continue; }
+          pairedTexts.push(t);
+          pairedIndices.push(lookahead);
+          lookahead++;
+          if (pairedTexts.length >= 2) break;
         }
+
+        // Pre-wrap right-column text to know its true height
+        doc.setFont("times", "normal");
+        doc.setFontSize(11);
+        const rightParagraphs: string[][] = pairedTexts.map((t) =>
+          doc.splitTextToSize(t, colW),
+        );
+        const rightTextH =
+          rightParagraphs.reduce((acc, p) => acc + p.length * bodyLineH, 0) +
+          Math.max(0, rightParagraphs.length - 1) * paragraphGap;
 
         // Caption setup
         let capLines: string[] = [];
@@ -880,22 +900,29 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         }
         const captionH = capLines.length ? 8 + capLines.length * capLineH + 6 : 0;
         const linkH = block.media!.isVideo ? 14 : 0;
+
+        // Target image height: match the right-column text height for a balanced
+        // spread, clamped so it never becomes a stamp or a giant.
+        const minImgH = Math.min(pageHeight * 0.28, contentWidth * 0.45);
+        const maxImgH = pageHeight * 0.48;
+        const targetImgH = Math.max(
+          minImgH,
+          Math.min(maxImgH, rightTextH - captionH - linkH),
+        );
+
+        let drawH = targetImgH;
+        let drawW = drawH * ratio;
+        if (drawW > colW) {
+          drawW = colW;
+          drawH = drawW / ratio;
+        }
+
         const figureH = drawH + 10 + captionH + linkH;
-
-        // Wrap right-column text
-        const rightText = nextBlock!.text!.trim();
-        doc.setFont("times", "normal");
-        doc.setFontSize(11);
-        const bodyLineH = 16.5;
-        const rightLines = doc.splitTextToSize(rightText, colW);
-        const rightTextH = rightLines.length * bodyLineH;
-
         const blockH = Math.max(figureH, rightTextH) + 18;
         ensureSpace(blockH);
 
         const startY = cursorY + 6;
         const imgX = marginX;
-        // Image
         doc.addImage(img.dataUrl, img.format, imgX, startY, drawW, drawH, undefined, "FAST");
         if (block.media!.isVideo) {
           const cx = imgX + drawW / 2;
@@ -931,33 +958,56 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
           leftY += 14;
         }
 
-        // Right-column text
+        // Right-column text — render ALL paired paragraphs; overflow continues
+        // full-width below the figure so no copy is dropped.
         const rightX = marginX + colW + gutter;
         doc.setFont("times", "normal");
         doc.setFontSize(11);
         doc.setTextColor(...ink);
         let rightY = startY;
-        const rightMaxY = startY + Math.max(figureH, rightTextH);
-        let rightLineIdx = 0;
-        for (; rightLineIdx < rightLines.length; rightLineIdx++) {
-          if (rightY + bodyLineH > rightMaxY + bodyLineH) break;
-          doc.text(rightLines[rightLineIdx], rightX, rightY + 4);
-          rightY += bodyLineH;
+        // Allow text to flow up to ~2 lines past the bottom of the image+caption
+        // before spilling underneath, to avoid orphan single lines.
+        const rightFlowMaxY = startY + figureH + bodyLineH * 2;
+
+        const remainder: string[] = [];
+        let stoppedEarly = false;
+        for (let p = 0; p < rightParagraphs.length; p++) {
+          const para = rightParagraphs[p];
+          for (let l = 0; l < para.length; l++) {
+            if (stoppedEarly || rightY + bodyLineH > rightFlowMaxY) {
+              stoppedEarly = true;
+              remainder.push(para[l]);
+              continue;
+            }
+            doc.text(para[l], rightX, rightY + 4);
+            rightY += bodyLineH;
+          }
+          if (p < rightParagraphs.length - 1) {
+            if (stoppedEarly) remainder.push("");
+            else rightY += paragraphGap;
+          }
         }
 
-        cursorY = startY + Math.max(leftY - startY, rightY - startY) + 10;
+        cursorY = startY + Math.max(leftY - startY, rightY - startY) + 12;
 
-        // If text overflowed the right column, continue it full-width below
-        if (rightLineIdx < rightLines.length) {
-          const remaining = rightLines.slice(rightLineIdx);
-          for (const line of remaining) {
+        if (remainder.length) {
+          doc.setFont("times", "normal");
+          doc.setFontSize(11);
+          doc.setTextColor(...ink);
+          for (const line of remainder) {
+            if (line === "") { cursorY += paragraphGap; continue; }
             ensureSpace(bodyLineH);
-            doc.text(line, marginX, cursorY + 4);
-            cursorY += bodyLineH;
+            // Re-wrap to full width in case original wrap was narrower
+            const wide = doc.splitTextToSize(line, contentWidth);
+            for (const wl of wide) {
+              ensureSpace(bodyLineH);
+              doc.text(wl, marginX, cursorY + 4);
+              cursorY += bodyLineH;
+            }
           }
         }
         cursorY += 12;
-        consumedTextIdx.add(blockIdx + 1);
+        for (const idx of pairedIndices) consumedTextIdx.add(idx);
         continue;
       }
 
