@@ -381,7 +381,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 200);
         ensureSpace(12);
-        doc.textWithLink(`▶ Watch video: ${block.media.url}`, margin, cursorY + 10, { url: block.media.url });
+        doc.textWithLink(`Watch video: ${sanitizeUrlForDisplay(block.media.url)}`, margin, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
       cursorY += 12;
