@@ -119,6 +119,7 @@ function stripHtml(text: string): string {
       .replace(/<\/?b>/gi, "")
       .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
       .replace(/\*\*([\s\S]+?)\*\*/g, "$1")
+      .replace(/(^|[^*])\*(?!\s)([^*\n]+?)\*(?!\*)/g, "$1$2")
       .replace(/<[^>]+>/g, "")
       .replace(/\u00A0/g, " "),
   );
