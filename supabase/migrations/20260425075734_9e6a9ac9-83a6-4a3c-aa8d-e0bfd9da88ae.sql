@@ -1,0 +1,1 @@
+UPDATE designers SET biography = replace(biography, 'https://dz.fashionnetwork.com/videos/video/23568,French-touch-thierry-lemaire-the-designer-that-seduced-macron.html', 'https://videos.fashionnetwork.com/en/PMV20055_EN.mp4') WHERE slug = 'thierry-lemaire';
