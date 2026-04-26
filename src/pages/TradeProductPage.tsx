@@ -825,6 +825,16 @@ const TradeProductPage: React.FC = () => {
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
       />
+
+      <CustomRequestModal
+        open={customRequestOpen}
+        onClose={() => setCustomRequestOpen(false)}
+        product={{
+          id: tradeProductId || null,
+          product_name: product?.title || "",
+          brand_name: designerDisplay || null,
+        }}
+      />
     </>
   );
 };
