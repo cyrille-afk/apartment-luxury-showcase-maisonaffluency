@@ -15,6 +15,7 @@ import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
@@ -43,7 +44,7 @@ const TradeGallery = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
-  const [showTradePrice, setShowTradePrice] = useState(false);
+  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const fxRates = useFxRates();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
