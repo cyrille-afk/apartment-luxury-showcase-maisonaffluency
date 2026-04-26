@@ -755,13 +755,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             step={1}
                             defaultValue={item.lead_time_weeks_override ?? ""}
                             placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const raw = e.target.value.trim();
                               const v = raw === "" ? null : parseInt(raw, 10);
                               if (v !== item.lead_time_weeks_override) updateItemField(item.id, { lead_time_weeks_override: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
