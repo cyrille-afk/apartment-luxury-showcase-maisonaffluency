@@ -32,6 +32,8 @@ interface FFEItem {
   cost_code: string | null;
   lead_time_weeks_override: number | null;
   deposit_pct_override: number | null;
+  pdf_url: string | null;
+  pdf_urls: string[] | null;
 }
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
