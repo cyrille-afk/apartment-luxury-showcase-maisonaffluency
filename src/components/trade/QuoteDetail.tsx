@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
@@ -437,6 +437,35 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </button>
         </div>
       </div>
+
+      {/* Read-only mode banner */}
+      {isReadOnly && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-4 md:mb-6 flex items-start gap-3 rounded-md border border-border bg-muted/40 px-4 py-3 print:hidden"
+        >
+          <Lock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <p className="font-body text-xs uppercase tracking-[0.12em] text-foreground">
+              Read-only mode
+            </p>
+            <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">
+              {isCancelled
+                ? "This quote has been cancelled and can no longer be edited."
+                : isFullyPaid
+                ? "This quote is fully paid and locked. Procurement fields are preserved as a record."
+                : isDepositPaid
+                ? "Deposit has been paid — line items, PO #, cost codes, lead times and deposit % are locked."
+                : isConfirmed
+                ? "This quote has been confirmed. Edits are no longer permitted to keep procurement records consistent."
+                : isPriced
+                ? "This quote has been priced and sent. Contact your concierge to request changes."
+                : "Editing is disabled for this quote."}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Quote document */}
       <div className="border border-border rounded-lg bg-background">
