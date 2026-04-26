@@ -104,6 +104,7 @@ export default function TradeFFESchedule() {
           cost_code: item.cost_code ?? null,
           lead_time_weeks_override: item.lead_time_weeks_override ?? null,
           deposit_pct_override: item.deposit_pct_override ?? null,
+          spec_sheet_url: p?.spec_sheet_url ?? null,
         } as FFEItem;
       });
     },
