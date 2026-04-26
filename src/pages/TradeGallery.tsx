@@ -436,7 +436,7 @@ const TradeGallery = () => {
           )}
           <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
           <button
-            onClick={() => setShowTradePrice((v) => !v)}
+            onClick={() => setShowTradePrice(!showTradePrice)}
             className={cn(
               "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
               showTradePrice
