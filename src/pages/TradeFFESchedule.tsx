@@ -222,10 +222,16 @@ export default function TradeFFESchedule() {
               Procurement-grade FF&E generated from your confirmed quotes — Excel export with PO numbers, lead times, deposit schedule and cost codes.
             </p>
           </div>
-          <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
-            {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-            Export Excel (.xlsx)
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleSpecPackage} disabled={!items.length || packaging} variant="outline" size="sm">
+              {packaging ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Package className="h-4 w-4 mr-2" />}
+              Spec Package (.zip)
+            </Button>
+            <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
+              {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+              Export Excel (.xlsx)
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
