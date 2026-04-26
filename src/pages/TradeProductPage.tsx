@@ -99,13 +99,29 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       if (!picks || picks.length === 0) return null;
 
-      // Match priority: exact (title+subtitle) → exact (title) → startsWith (title) → contains (title)
-      // Last two enable resilient deep-links where the slug is partial (e.g. "casque" → "Casque Bar Cabinet")
-      const product =
+      // Match priority: exact (title+subtitle) → exact (title) → startsWith (title) → contains (title) → token overlap.
+      // Token overlap covers cases where the gallery card uses a trade_products name (e.g. "Angelo M Side Table Collection")
+      // that doesn't slug-match the underlying curator pick title (e.g. "Angelo M/SR 45/55/80 Side Table Collection").
+      const slugTokens = (s: string) =>
+        s.split("-").filter((t) => t.length >= 3);
+      const targetTokens = productSlug ? slugTokens(productSlug) : [];
+      const overlapScore = (pickTitle: string) => {
+        const ts = new Set(slugTokens(slugify(pickTitle)));
+        return targetTokens.reduce((n, t) => n + (ts.has(t) ? 1 : 0), 0);
+      };
+      let product: any =
         picks.find((p: any) => slugify(p.title + (p.subtitle ? `-${p.subtitle}` : "")) === productSlug) ||
         picks.find((p: any) => slugify(p.title) === productSlug) ||
         picks.find((p: any) => slugify(p.title).startsWith(productSlug!)) ||
         picks.find((p: any) => slugify(p.title).includes(productSlug!));
+
+      if (!product && targetTokens.length >= 2) {
+        const ranked = picks
+          .map((p: any) => ({ p, score: overlapScore(p.title) }))
+          .filter((r) => r.score >= Math.max(2, Math.ceil(targetTokens.length * 0.6)))
+          .sort((a, b) => b.score - a.score);
+        product = ranked[0]?.p ?? null;
+      }
 
       if (!product) return null;
 
