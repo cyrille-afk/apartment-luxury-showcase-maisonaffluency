@@ -663,7 +663,7 @@ const TradeAtelierProfile = () => {
                     <div
                       key={pick.id}
                       className="group cursor-pointer flex flex-col"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice))}
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice, TRADE_DISCOUNT))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
                         {/* Tag badges — upper-left */}
@@ -723,7 +723,7 @@ const TradeAtelierProfile = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice));
+                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice, TRADE_DISCOUNT));
                               }}
                               className={cn(
                                 "p-2 rounded-md text-white transition-colors",
@@ -812,7 +812,7 @@ const TradeAtelierProfile = () => {
         isAdding={!!lightboxProduct && addingProductId === lightboxProduct.id}
         isAdded={!!lightboxProduct && addedProductIds.has(lightboxProduct.id)}
         onSelectRelated={(rp) => setLightboxProduct(rp)}
-        allPicks={picks.map(p => pickToLightboxItem(p, designer?.name || "", displayCurrency, fxRates))}
+        allPicks={picks.map(p => pickToLightboxItem(p, designer?.name || "", displayCurrency, fxRates, false, TRADE_DISCOUNT))}
       />
     </>
   );
