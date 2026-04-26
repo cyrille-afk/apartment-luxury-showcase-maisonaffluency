@@ -263,6 +263,8 @@ const App = () => {
                     <Route path="guides" element={<TradeGuides />} />
                     <Route path="guides/analytics" element={<TradeGuidesAnalytics />} />
                     <Route path="guides/:slug" element={<TradeGuideDetail />} />
+                    <Route path="custom-requests" element={<TradeCustomRequests />} />
+                    <Route path="calendar" element={<TradeFairCalendar />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
