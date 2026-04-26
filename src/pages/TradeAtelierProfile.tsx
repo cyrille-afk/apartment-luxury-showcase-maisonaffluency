@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -66,11 +67,12 @@ function pickToLightboxItem(
   displayCurrency?: DisplayCurrency,
   fxRates?: Record<string, number>,
   showTradeDiscount?: boolean,
+  discountPct: number = 0.08,
 ): TradeProductLightboxItem {
   const currency = pick.currency || "EUR";
   let price: string | undefined;
   if (pick.trade_price_cents != null) {
-    const cents = showTradeDiscount ? Math.round(pick.trade_price_cents * 0.92) : pick.trade_price_cents;
+    const cents = showTradeDiscount ? Math.round(pick.trade_price_cents * (1 - discountPct)) : pick.trade_price_cents;
     if (displayCurrency && fxRates) {
       price = formatPriceConverted(cents, currency, displayCurrency, fxRates);
     } else {
@@ -185,7 +187,7 @@ const TradeAtelierProfile = () => {
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [showTradePrice, setShowTradePrice] = useState(false);
-  const TRADE_DISCOUNT = 0.08;
+  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const fxRates = useFxRates();
 
   // Lightbox state
@@ -640,7 +642,7 @@ const TradeAtelierProfile = () => {
                         ? "border-accent bg-accent/10 text-accent"
                         : "border-border text-muted-foreground hover:text-foreground"
                     )}
-                    title={showTradePrice ? "Showing trade price (–8%)" : "Showing retail price"}
+                    title={showTradePrice ? `Showing trade price (–${discountLabel}, ${tierLabel} tier)` : "Showing retail price"}
                   >
                     <Tag className="h-3.5 w-3.5" />
                     {showTradePrice ? "Retail" : "Trade"}
@@ -775,7 +777,7 @@ const TradeAtelierProfile = () => {
                                       <span className="text-accent font-semibold">
                                         {`${(pick as any).price_prefix ? (pick as any).price_prefix + ' ' : ''}${formatPriceConverted(Math.round(pick.trade_price_cents * (1 - TRADE_DISCOUNT)), pick.currency || 'EUR', displayCurrency, fxRates)}`}
                                       </span>
-                                      <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+                                      <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–{discountLabel}</span>
                                     </>
                                   : <span className="text-foreground font-semibold">{`${(pick as any).price_prefix ? (pick as any).price_prefix + ' ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`}</span>
                                 : "Price on request"
