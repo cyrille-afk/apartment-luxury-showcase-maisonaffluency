@@ -19,10 +19,15 @@ interface QuoteItemWithProduct {
   quantity: number;
   unit_price_cents: number | null;
   notes: string | null;
+  po_number: string | null;
+  cost_code: string | null;
+  lead_time_weeks_override: number | null;
+  deposit_pct_override: number | null;
   trade_products: {
     product_name: string;
     brand_name: string;
     trade_price_cents: number | null;
+    rrp_price_cents: number | null;
     currency: string;
     image_url: string | null;
     dimensions: string | null;
