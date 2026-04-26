@@ -333,6 +333,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     itemId: string,
     patch: Partial<Pick<QuoteItemWithProduct, "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override">>
   ) => {
+    if (isReadOnly) return;
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
     const { error } = await supabase.from("trade_quote_items").update(patch as any).eq("id", itemId);
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
