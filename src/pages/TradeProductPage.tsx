@@ -349,11 +349,18 @@ const TradeProductPage: React.FC = () => {
       )?.[0] || rawSubcategory
     : null;
 
-  // Fallback back-target: showroom grid filtered to this category/subcategory
-  const fallbackParams = new URLSearchParams({ tab: "grid" });
-  if (product.category) fallbackParams.set("category", product.category);
-  if (normalizedSubcategory) fallbackParams.set("subcategory", normalizedSubcategory);
-  const fallbackPath = `/trade/showroom?${fallbackParams.toString()}`;
+  // Fallback back-target: prefer the originating designer/atelier gallery so
+  // users return to the same brand context they came from. If we don't yet
+  // know the designer slug (shouldn't happen here), fall back to the showroom
+  // grid filtered to this product's category/subcategory.
+  const fallbackPath = designerSlug
+    ? `/trade/gallery/${designerSlug}`
+    : (() => {
+        const fallbackParams = new URLSearchParams({ tab: "grid" });
+        if (product.category) fallbackParams.set("category", product.category);
+        if (normalizedSubcategory) fallbackParams.set("subcategory", normalizedSubcategory);
+        return `/trade/showroom?${fallbackParams.toString()}`;
+      })();
 
   const galleryFromAdmin = (product.gallery_images || []).filter(Boolean) as string[];
   const images = (galleryFromAdmin.length > 0
