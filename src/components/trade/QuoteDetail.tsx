@@ -419,6 +419,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               compact
             />
           )}
+          <button
+            onClick={handleExportExcel}
+            disabled={exportingExcel || items.length === 0}
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            title="Procurement-grade Excel with PO numbers, lead times, deposit schedule and cost codes"
+          >
+            {exportingExcel ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">Export Excel</span>
+            <span className="sm:hidden">Excel</span>
+          </button>
           <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
             <Printer className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Print / PDF</span>
