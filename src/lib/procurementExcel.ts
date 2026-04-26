@@ -184,11 +184,13 @@ export async function buildProcurementWorkbook(input: ExportInput): Promise<Blob
 
   // Status dropdown (column Q, rows 2..lastRow)
   if (lastRow >= 2) {
-    ffe.dataValidations.add(`Q2:Q${lastRow}`, {
-      type: "list",
-      allowBlank: true,
-      formulae: ['"Draft,Submitted,Confirmed,Ordered,In Production,Shipped,Delivered,Installed"'],
-    });
+    for (let r = 2; r <= lastRow; r++) {
+      ffe.getCell(`Q${r}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: ['"Draft,Submitted,Confirmed,Ordered,In Production,Shipped,Delivered,Installed"'],
+      };
+    }
   }
 
   // Totals row
