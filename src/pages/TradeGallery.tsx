@@ -271,6 +271,44 @@ const TradeGallery = () => {
 
   const routeBrandName = routeBrandSlug ? slugBrandMap.get(routeBrandSlug) : undefined;
 
+  // Build reverse lookup: brand display name -> slug, so dropdown changes can navigate.
+  const brandToSlug = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const [slug, brand] of slugBrandMap.entries()) {
+      if (brand && !m.has(brand)) m.set(brand, slug);
+    }
+    return m;
+  }, [slugBrandMap]);
+
+  // Sync route slug -> dropdown selection (so the <select> visibly reflects the URL).
+  useEffect(() => {
+    if (routeBrandName && selectedBrand !== routeBrandName) {
+      setSelectedBrand(routeBrandName);
+    } else if (!routeBrandSlug && selectedBrand !== "all" && !brands.includes(selectedBrand)) {
+      // Brand list loaded later — no-op; handled by user interaction.
+    }
+    // When user navigates from /trade/gallery/:slug back to /trade/gallery, reset selection.
+    if (!routeBrandSlug && routeBrandName === undefined && selectedBrand !== "all") {
+      // Only auto-reset if previous value matched a known brand from a slug route.
+      // Skip to avoid clobbering manual dropdown choices.
+    }
+  }, [routeBrandName, routeBrandSlug]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Dropdown -> URL: keep route in sync with dropdown so paginate/search/share stays consistent.
+  const handleBrandChange = (value: string) => {
+    setSelectedBrand(value);
+    if (value === "all") {
+      if (routeBrandSlug) navigate("/trade/gallery", { replace: false });
+      return;
+    }
+    const targetSlug = brandToSlug.get(value);
+    if (targetSlug && targetSlug !== routeBrandSlug) {
+      navigate(`/trade/gallery/${targetSlug}`, { replace: false });
+    } else if (!targetSlug && routeBrandSlug) {
+      navigate("/trade/gallery", { replace: false });
+    }
+  };
+
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
       const q = search.toLowerCase();
