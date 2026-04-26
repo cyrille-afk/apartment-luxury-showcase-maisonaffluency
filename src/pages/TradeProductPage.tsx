@@ -399,9 +399,16 @@ const TradeProductPage: React.FC = () => {
     : hasSingleAxisSplit
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+
+  // When the product has variants but the user hasn't picked one yet, fall back
+  // to the cheapest variant price so we can show "From €X" instead of "Price on request".
+  const minVariantCents = hasVariants && sizeVariants && sizeVariants.length > 0
+    ? Math.min(...sizeVariants.map((v) => v.price_cents))
+    : null;
   const effectiveRrpCents = hasVariants
-    ? (activeVariant ? activeVariant.price_cents : null)
+    ? (activeVariant ? activeVariant.price_cents : minVariantCents)
     : pricing?.rrp_price_cents ?? null;
+  const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
 
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
@@ -409,7 +416,10 @@ const TradeProductPage: React.FC = () => {
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
     const formatted = formatPriceConverted(cents, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
-    const prefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
+    // Honour the catalog price_prefix (e.g. "From"), and add an implicit "From"
+    // when we're showing the minimum variant before the user selects a size.
+    const explicitPrefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
+    const prefix = explicitPrefix || (isFromPrice ? "From " : "");
     return (
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-display text-2xl text-accent font-semibold">
