@@ -38,8 +38,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
-
-const TRADE_DISCOUNT = 0.08;
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
