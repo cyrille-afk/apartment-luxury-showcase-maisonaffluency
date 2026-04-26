@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import {
   autoPoNumber,
   type ProcurementLine,
 } from "@/lib/procurementExcel";
+import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
 
 interface FFEItem {
   product_name: string;
