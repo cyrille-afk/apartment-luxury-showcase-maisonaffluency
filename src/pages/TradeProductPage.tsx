@@ -39,6 +39,7 @@ import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -191,6 +192,7 @@ const TradeProductPage: React.FC = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
+  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
 
   // ── Smart back navigation ──
   const stateFrom = (location.state as { from?: string } | null)?.from;
@@ -213,7 +215,6 @@ const TradeProductPage: React.FC = () => {
 
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
-  const [showTradePrice, setShowTradePrice] = useState(true);
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
@@ -348,11 +349,18 @@ const TradeProductPage: React.FC = () => {
       )?.[0] || rawSubcategory
     : null;
 
-  // Fallback back-target: showroom grid filtered to this category/subcategory
-  const fallbackParams = new URLSearchParams({ tab: "grid" });
-  if (product.category) fallbackParams.set("category", product.category);
-  if (normalizedSubcategory) fallbackParams.set("subcategory", normalizedSubcategory);
-  const fallbackPath = `/trade/showroom?${fallbackParams.toString()}`;
+  // Fallback back-target: prefer the originating designer/atelier gallery so
+  // users return to the same brand context they came from. If we don't yet
+  // know the designer slug (shouldn't happen here), fall back to the showroom
+  // grid filtered to this product's category/subcategory.
+  const fallbackPath = designerSlug
+    ? `/trade/gallery/${designerSlug}`
+    : (() => {
+        const fallbackParams = new URLSearchParams({ tab: "grid" });
+        if (product.category) fallbackParams.set("category", product.category);
+        if (normalizedSubcategory) fallbackParams.set("subcategory", normalizedSubcategory);
+        return `/trade/showroom?${fallbackParams.toString()}`;
+      })();
 
   const galleryFromAdmin = (product.gallery_images || []).filter(Boolean) as string[];
   const images = (galleryFromAdmin.length > 0
@@ -398,9 +406,16 @@ const TradeProductPage: React.FC = () => {
     : hasSingleAxisSplit
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+
+  // When the product has variants but the user hasn't picked one yet, fall back
+  // to the cheapest variant price so we can show "From €X" instead of "Price on request".
+  const minVariantCents = hasVariants && sizeVariants && sizeVariants.length > 0
+    ? Math.min(...sizeVariants.map((v) => v.price_cents))
+    : null;
   const effectiveRrpCents = hasVariants
-    ? (activeVariant ? activeVariant.price_cents : null)
+    ? (activeVariant ? activeVariant.price_cents : minVariantCents)
     : pricing?.rrp_price_cents ?? null;
+  const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
 
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
@@ -408,7 +423,10 @@ const TradeProductPage: React.FC = () => {
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
     const formatted = formatPriceConverted(cents, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
-    const prefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
+    // Honour the catalog price_prefix (e.g. "From"), and add an implicit "From"
+    // when we're showing the minimum variant before the user selects a size.
+    const explicitPrefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
+    const prefix = explicitPrefix || (isFromPrice ? "From " : "");
     return (
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-display text-2xl text-accent font-semibold">
@@ -608,7 +626,7 @@ const TradeProductPage: React.FC = () => {
               <div className="flex flex-col gap-2 pt-1">
                 {renderPrice()}
                 <button
-                  onClick={() => setShowTradePrice((v) => !v)}
+                  onClick={() => setShowTradePrice(!showTradePrice)}
                   className="self-start font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
                 >
                   Show {showTradePrice ? "retail" : "trade"} price

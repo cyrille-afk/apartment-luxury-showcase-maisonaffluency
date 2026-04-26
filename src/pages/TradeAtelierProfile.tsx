@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -186,7 +187,7 @@ const TradeAtelierProfile = () => {
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [gridCols, setGridCols] = useState<3 | 4>(4);
-  const [showTradePrice, setShowTradePrice] = useState(false);
+  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const fxRates = useFxRates();
 
@@ -635,7 +636,7 @@ const TradeAtelierProfile = () => {
                 <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
                 {(isTradeUser || isAdmin) && (
                   <button
-                    onClick={() => setShowTradePrice((v) => !v)}
+                    onClick={() => setShowTradePrice(!showTradePrice)}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
                       showTradePrice

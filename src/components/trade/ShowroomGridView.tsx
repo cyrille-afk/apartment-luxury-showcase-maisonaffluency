@@ -17,6 +17,7 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER } from "@/lib/productTaxonomy";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -168,7 +169,7 @@ const ShowroomGridView = ({
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
-  const [showTradePrice, setShowTradePrice] = useState(false);
+  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const fxRates = useFxRates();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
@@ -583,7 +584,7 @@ const ShowroomGridView = ({
           </select>
           <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
           <button
-            onClick={() => setShowTradePrice((v) => !v)}
+            onClick={() => setShowTradePrice(!showTradePrice)}
             className={cn(
               "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
               showTradePrice
