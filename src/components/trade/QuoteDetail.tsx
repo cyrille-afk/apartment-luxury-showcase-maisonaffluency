@@ -145,7 +145,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, admin_notes, project_id").eq("id", quoteId).single(),
