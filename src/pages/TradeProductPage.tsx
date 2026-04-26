@@ -729,6 +729,15 @@ const TradeProductPage: React.FC = () => {
               )}
             </div>
 
+            {/* Bespoke / customisation request */}
+            <button
+              onClick={() => setCustomRequestOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-foreground hover:bg-muted w-full"
+            >
+              <Wand2 size={13} />
+              Request Customisation
+            </button>
+
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
 
