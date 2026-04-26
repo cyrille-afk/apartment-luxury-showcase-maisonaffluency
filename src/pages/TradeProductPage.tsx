@@ -248,6 +248,7 @@ const TradeProductPage: React.FC = () => {
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [customRequestOpen, setCustomRequestOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
