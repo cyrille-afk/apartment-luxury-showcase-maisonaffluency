@@ -27,7 +27,7 @@ interface QuoteItemWithProduct {
     product_name: string;
     brand_name: string;
     trade_price_cents: number | null;
-    rrp_price_cents: number | null;
+    rrp_price_cents?: number | null;
     currency: string;
     image_url: string | null;
     dimensions: string | null;
