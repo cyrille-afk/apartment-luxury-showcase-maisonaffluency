@@ -11,6 +11,8 @@ import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+import TradePriceToggle from "@/components/trade/TradePriceToggle";
+
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 const TradeBottomNav = lazy(() => import("@/components/trade/TradeBottomNav"));
@@ -188,8 +190,11 @@ const TradeLayout = () => {
               <LayoutDashboard className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="font-display text-xs text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
             </div>
-            {/* Right: notification bell */}
-            <div className="ml-auto">
+            {/* Right: trade price toggle + notification bell */}
+            <div className="ml-auto flex items-center gap-2 md:gap-4">
+              <div className="hidden sm:block">
+                <TradePriceToggle />
+              </div>
               <NotificationBell />
             </div>
           </header>
