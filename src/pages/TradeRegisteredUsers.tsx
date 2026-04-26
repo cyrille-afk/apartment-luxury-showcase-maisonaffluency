@@ -1,12 +1,14 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ArrowLeft, UserCheck, UserX, Clock, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { TIER_LABEL, TIER_DISCOUNT, type TradeTier } from "@/hooks/useTradeDiscount";
 
 interface RegisteredUser {
   id: string;
@@ -17,18 +19,35 @@ interface RegisteredUser {
   created_at: string;
   roles: string[];
   app_status: string | null;
+  trade_tier: TradeTier;
 }
+
+const TIER_OPTIONS: TradeTier[] = ["standard", "silver", "gold"];
+
+const tierBadgeClass = (tier: TradeTier) => {
+  switch (tier) {
+    case "gold":
+      return "bg-amber-100 text-amber-900 border-amber-300";
+    case "silver":
+      return "bg-slate-100 text-slate-800 border-slate-300";
+    default:
+      return "bg-muted text-foreground border-border";
+  }
+};
 
 export default function TradeRegisteredUsers() {
   const { isAdmin, loading } = useAuth();
+  const { toast } = useToast();
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-registered-users"],
     queryFn: async () => {
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, email, first_name, last_name, company, created_at")
+        .select("id, email, first_name, last_name, company, created_at, trade_tier")
         .order("created_at", { ascending: false });
 
       if (error || !profiles) return [];
@@ -50,8 +69,9 @@ export default function TradeRegisteredUsers() {
         if (!appMap.has(a.user_id)) appMap.set(a.user_id, a.status);
       });
 
-      return profiles.map((p): RegisteredUser => ({
+      return profiles.map((p: any): RegisteredUser => ({
         ...p,
+        trade_tier: (p.trade_tier as TradeTier) ?? "standard",
         roles: rolesMap.get(p.id) || [],
         app_status: appMap.get(p.id) || null,
       }));
@@ -70,13 +90,30 @@ export default function TradeRegisteredUsers() {
         u.email.toLowerCase().includes(q) ||
         u.company.toLowerCase().includes(q) ||
         month.includes(q) ||
-        u.roles.some((r) => r.replace("_", " ").includes(q))
+        u.roles.some((r) => r.replace("_", " ").includes(q)) ||
+        u.trade_tier.includes(q)
       );
     });
   }, [users, search]);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
+
+  const updateTier = async (userId: string, tier: TradeTier) => {
+    setSavingId(userId);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ trade_tier: tier })
+      .eq("id", userId);
+    setSavingId(null);
+    if (error) {
+      toast({ title: "Failed to update tier", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Tier set to ${TIER_LABEL[tier]} (${Math.round(TIER_DISCOUNT[tier] * 100)}%)` });
+    qc.invalidateQueries({ queryKey: ["admin-registered-users"] });
+    qc.invalidateQueries({ queryKey: ["trade-tier"] });
+  };
 
   const roleBadge = (role: string) => {
     const colors: Record<string, string> = {
@@ -125,10 +162,21 @@ export default function TradeRegisteredUsers() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name, email, month…"
+              placeholder="Search name, email, tier, month…"
               className="pl-8 pr-3 py-1.5 text-sm font-body rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 w-56"
             />
           </div>
+        </div>
+
+        {/* Tier legend */}
+        <div className="flex flex-wrap items-center gap-3 text-[11px] font-body text-muted-foreground">
+          <span className="uppercase tracking-wider">Trade tiers:</span>
+          {TIER_OPTIONS.map((t) => (
+            <span key={t} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border ${tierBadgeClass(t)}`}>
+              <span className="font-medium">{TIER_LABEL[t]}</span>
+              <span className="opacity-70">{Math.round(TIER_DISCOUNT[t] * 100)}%</span>
+            </span>
+          ))}
         </div>
 
         {isLoading ? (
@@ -142,6 +190,7 @@ export default function TradeRegisteredUsers() {
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">User</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Company</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Roles</th>
+                    <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Trade Tier</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Application</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Joined</th>
                   </tr>
@@ -164,6 +213,20 @@ export default function TradeRegisteredUsers() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
+                        <select
+                          value={u.trade_tier}
+                          disabled={savingId === u.id}
+                          onChange={(e) => updateTier(u.id, e.target.value as TradeTier)}
+                          className={`text-[11px] font-body px-2 py-1 rounded border outline-none focus:ring-1 focus:ring-primary/30 ${tierBadgeClass(u.trade_tier)} ${savingId === u.id ? "opacity-50" : ""}`}
+                        >
+                          {TIER_OPTIONS.map((t) => (
+                            <option key={t} value={t}>
+                              {TIER_LABEL[t]} — {Math.round(TIER_DISCOUNT[t] * 100)}%
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           {appStatusIcon(u.app_status)}
                           {u.app_status && (
@@ -178,7 +241,7 @@ export default function TradeRegisteredUsers() {
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
                         No users match "{search}"
                       </td>
                     </tr>
