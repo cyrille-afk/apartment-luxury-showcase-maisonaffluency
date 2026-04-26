@@ -167,6 +167,48 @@ export default function TradeFFESchedule() {
     }
   };
 
+  const [packaging, setPackaging] = useState(false);
+  const handleSpecPackage = async () => {
+    if (!items.length) return;
+    setPackaging(true);
+    try {
+      // Deduplicate by product_name+brand for cleaner ZIP
+      const seen = new Set<string>();
+      const products: SpecPackageProduct[] = [];
+      for (const it of items) {
+        const key = `${it.brand_name}|${it.product_name}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        products.push({
+          product_name: it.product_name,
+          brand_name: it.brand_name,
+          category: it.category,
+          sku: it.sku,
+          dimensions: it.dimensions,
+          materials: it.materials,
+          lead_time: it.lead_time,
+          pdf_url: it.spec_sheet_url,
+        });
+      }
+      const projectName = items.find((i) => i.client_name)?.client_name || "Project";
+      const { blob, filename, missingPdfs } = await generateSpecPackageZip(products, {
+        projectName,
+        studioName: "Maison Affluency",
+      });
+      downloadBlob(blob, filename);
+      toast({
+        title: "Spec package ready",
+        description: missingPdfs.length
+          ? `Downloaded with ${products.length} cover sheets. ${missingPdfs.length} attached PDFs were unreachable.`
+          : `Downloaded with ${products.length} structured cover sheets.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Spec package failed", description: err?.message || "Unable to build ZIP.", variant: "destructive" });
+    } finally {
+      setPackaging(false);
+    }
+  };
+
   const totalValue = items.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
 
   return (
