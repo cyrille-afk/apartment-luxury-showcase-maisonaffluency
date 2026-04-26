@@ -39,6 +39,7 @@ import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -191,6 +192,7 @@ const TradeProductPage: React.FC = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
+  const { showTradePrice, setShowTradePrice } = useTradePriceMode();
 
   // ── Smart back navigation ──
   const stateFrom = (location.state as { from?: string } | null)?.from;
@@ -213,7 +215,6 @@ const TradeProductPage: React.FC = () => {
 
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
-  const [showTradePrice, setShowTradePrice] = useState(true);
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
