@@ -328,6 +328,76 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handlePrint = () => window.print();
 
+  /** Optimistic patch: update one quote-line column and persist. */
+  const updateItemField = async (
+    itemId: string,
+    patch: Partial<Pick<QuoteItemWithProduct, "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override">>
+  ) => {
+    setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
+    const { error } = await supabase.from("trade_quote_items").update(patch as any).eq("id", itemId);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
+  const parseLeadWeeks = (text: string | null): number | null => {
+    if (!text) return null;
+    const m = text.match(/(\d+)\s*(?:-\s*(\d+))?/);
+    if (!m) return null;
+    return m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
+  };
+
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const handleExportExcel = async () => {
+    if (!items.length) return;
+    setExportingExcel(true);
+    try {
+      const lines: ProcurementLine[] = items.map((item, idx) => {
+        const product = item.trade_products;
+        const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+        const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
+        const unitTrade = convertCents(rawUnit, fromCur, currency);
+        const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
+        const lead = item.lead_time_weeks_override ?? parseLeadWeeks(product?.lead_time || null);
+        return {
+          po_number: item.po_number || autoPoNumber(quoteNumber, idx + 1),
+          cost_code: item.cost_code || "",
+          room: clientName || "",
+          item_code: product?.sku || "",
+          designer: product?.brand_name || "",
+          product_name: product?.product_name || "—",
+          finish_or_com: [product?.dimensions, product?.materials].filter(Boolean).join(" · "),
+          quantity: item.quantity,
+          unit_rrp_cents: unitRrp,
+          unit_trade_cents: unitTrade,
+          currency,
+          lead_time_weeks: lead,
+          deposit_pct: item.deposit_pct_override ?? 0.6,
+          status: quoteStatus,
+          supplier: product?.brand_name || "",
+          notes: item.notes || "",
+        };
+      });
+
+      await downloadProcurementWorkbook({
+        meta: {
+          project_name: clientName || quoteNumber,
+          client_name: clientName || "—",
+          designer_studio: clientCompany || "—",
+          address: "—",
+          revision: "Rev 1",
+          quote_refs: [quoteNumber],
+        },
+        lines,
+        fileName: `${quoteNumber}-procurement-${new Date().toISOString().slice(0, 10)}.xlsx`,
+      });
+      toast({ title: "Excel export ready", description: "Procurement workbook downloaded." });
+    } catch (err: any) {
+      toast({ title: "Export failed", description: err?.message || "Unable to generate workbook.", variant: "destructive" });
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
+
   return (
     <div className="max-w-4xl">
       {/* Back + Project + Print — hidden in print */}
