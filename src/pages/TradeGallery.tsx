@@ -454,7 +454,7 @@ const TradeGallery = () => {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
+          <select value={selectedBrand} onChange={(e) => handleBrandChange(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
             <option value="all">All Designers & Makers ({brands.length})</option>
             {brands.map((b) => (
               <option key={b} value={b}>{b}</option>
