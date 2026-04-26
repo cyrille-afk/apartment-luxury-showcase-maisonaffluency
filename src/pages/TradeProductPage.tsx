@@ -190,6 +190,7 @@ const TradeProductPage: React.FC = () => {
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
+  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
 
   // ── Smart back navigation ──
   const stateFrom = (location.state as { from?: string } | null)?.from;
