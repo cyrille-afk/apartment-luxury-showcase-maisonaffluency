@@ -254,7 +254,7 @@ const TradeGallery = () => {
             <span className="text-accent font-semibold">
               {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
-            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–{discountLabel}</span>
+            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>{tierLabel} –{discountLabel}</span>
           </>
         ) : (
           <span className="text-foreground font-semibold">
