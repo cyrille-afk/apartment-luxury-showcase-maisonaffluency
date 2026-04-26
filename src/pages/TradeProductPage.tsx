@@ -38,8 +38,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
-
-const TRADE_DISCOUNT = 0.08;
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -191,6 +190,7 @@ const TradeProductPage: React.FC = () => {
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
+  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
 
   // ── Smart back navigation ──
   const stateFrom = (location.state as { from?: string } | null)?.from;
@@ -419,8 +419,8 @@ const TradeProductPage: React.FC = () => {
             <span className="font-body text-sm text-muted-foreground line-through">
               {prefix}{formatPriceConverted(rrp, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
             </span>
-            <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider">
-              Trade –8%
+            <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier`}>
+              Trade –{discountLabel}
             </span>
           </>
         )}

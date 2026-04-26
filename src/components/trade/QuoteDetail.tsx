@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -55,6 +56,7 @@ const currencySymbol = (c: string) => {
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel } = useTradeDiscount();
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
@@ -458,7 +460,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
                   <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
                 </div>
-                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
+                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest" title={`${tierLabel} tier`}>{tradeDiscountLabel} Discount</span>
               </button>
 
               <div className="flex items-center gap-2">
@@ -635,12 +637,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     </div>
                     {tradeDiscount && subtotalCents > 0 && (
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>Trade Discount (8%)</span>
-                        <span>-{formatPriceRaw(Math.round(subtotalCents * 0.08), currency)}</span>
+                        <span>Trade Discount ({tradeDiscountLabel})</span>
+                        <span>-{formatPriceRaw(Math.round(subtotalCents * tradeDiscountPct), currency)}</span>
                       </div>
                     )}
                     {gstEnabled && subtotalCents > 0 && (() => {
-                      const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+                      const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
                       return (
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
                           <span>GST ({gstRate}%)</span>
@@ -649,7 +651,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       );
                     })()}
                     {(() => {
-                      const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+                      const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
                       const total = gstEnabled && afterDiscount > 0
                         ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
                         : afterDiscount;
@@ -839,7 +841,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
 
         {isConfirmed && !isFullyPaid && (() => {
-          const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+          const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
           const withGst = gstEnabled && afterDiscount > 0
             ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
             : afterDiscount;

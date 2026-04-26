@@ -1715,6 +1715,7 @@ export type Database = {
           id: string
           last_name: string
           phone: string
+          trade_tier: Database["public"]["Enums"]["trade_tier"]
         }
         Insert: {
           avatar_url?: string | null
@@ -1725,6 +1726,7 @@ export type Database = {
           id: string
           last_name?: string
           phone?: string
+          trade_tier?: Database["public"]["Enums"]["trade_tier"]
         }
         Update: {
           avatar_url?: string | null
@@ -1735,6 +1737,7 @@ export type Database = {
           id?: string
           last_name?: string
           phone?: string
+          trade_tier?: Database["public"]["Enums"]["trade_tier"]
         }
         Relationships: []
       }
@@ -3107,6 +3110,7 @@ export type Database = {
         }
         Returns: string
       }
+      current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3249,6 +3253,10 @@ export type Database = {
         }[]
       }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
+      tier_discount_pct: {
+        Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
+        Returns: number
+      }
       update_item_approval_by_token: {
         Args: { _approval_status: string; _item_id: string; _token: string }
         Returns: undefined
@@ -3283,6 +3291,7 @@ export type Database = {
         | "returned"
         | "cancelled"
       trade_application_status: "pending" | "approved" | "rejected"
+      trade_tier: "standard" | "silver" | "gold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3442,6 +3451,7 @@ export const Constants = {
         "cancelled",
       ],
       trade_application_status: ["pending", "approved", "rejected"],
+      trade_tier: ["standard", "silver", "gold"],
     },
   },
 } as const

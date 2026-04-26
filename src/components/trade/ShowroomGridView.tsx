@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER } from "@/lib/productTaxonomy";
 import { useAuth } from "@/hooks/useAuth";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -103,7 +104,7 @@ const inferCategory = (name: string): string => {
 
 type PriceMatch = { name: string; cents: number; rrp_cents?: number; currency: string; price_unit?: string };
 
-const TRADE_DISCOUNT = 0.08;
+// TRADE_DISCOUNT now comes from useTradeDiscount() at runtime (tier-aware).
 
 const normalizeProductName = (value: string): string =>
   value.toLowerCase().replace(/['']/g, "").replace(/&/g, " and ").replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9\s]/g, " ").replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ").replace(/\s+/g, " ").trim();
@@ -169,6 +170,7 @@ const ShowroomGridView = ({
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [showTradePrice, setShowTradePrice] = useState(false);
   const fxRates = useFxRates();
+  const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
@@ -216,7 +218,7 @@ const ShowroomGridView = ({
             <span className="text-accent font-semibold">
               {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
-            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>
+            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–{discountLabel}</span>
           </>
         ) : (
           <span className="text-foreground font-semibold">
@@ -588,7 +590,7 @@ const ShowroomGridView = ({
                 ? "border-accent bg-accent/10 text-accent"
                 : "border-border text-muted-foreground hover:text-foreground"
             )}
-            title={showTradePrice ? "Showing trade price (–8%)" : "Showing retail price"}
+            title={showTradePrice ? `Showing trade price (–${discountLabel}, ${tierLabel} tier)` : "Showing retail price"}
           >
             <Tag className="h-3.5 w-3.5" />
             {showTradePrice ? "Retail" : "Trade"}
