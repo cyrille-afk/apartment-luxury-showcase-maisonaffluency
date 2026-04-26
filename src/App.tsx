@@ -37,6 +37,7 @@ const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
 const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
+const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
 const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
 const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
 const TradeAnnotations = lazy(() => import("./pages/TradeAnnotations"));
@@ -239,6 +240,7 @@ const App = () => {
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
                     <Route path="order-timeline" element={<TradeOrderTimeline />} />
                     <Route path="ffe-schedule" element={<TradeFFESchedule />} />
+                    <Route path="ffe-export-test" element={<TradeFFEExportTest />} />
                     <Route path="materials" element={<TradeMaterialLibrary />} />
                     <Route path="tearsheets" element={<TradeTearsheets />} />
                     <Route path="annotations" element={<TradeAnnotations />} />
