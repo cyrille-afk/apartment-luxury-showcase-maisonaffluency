@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen, Tag } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -54,11 +54,13 @@ const TradeGallery = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
+  const [slugBrandMap, setSlugBrandMap] = useState<Map<string, string>>(new Map());
   const [lastFavoritedRealId, setLastFavoritedRealId] = useState<string | null>(null);
   const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { slug: routeBrandSlug } = useParams<{ slug: string }>();
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     const brand = product.brand_name.includes(" - ")
@@ -266,6 +268,8 @@ const TradeGallery = () => {
     );
   };
 
+  const routeBrandName = routeBrandSlug ? slugBrandMap.get(routeBrandSlug) : undefined;
+
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
       const q = search.toLowerCase();
@@ -275,12 +279,13 @@ const TradeGallery = () => {
         p.brand_name.toLowerCase().includes(q) ||
         p.subtitle?.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q);
-      const matchesBrand = selectedBrand === "all" || p.brand_name === selectedBrand || p.reedition_by === selectedBrand;
+      const activeBrand = routeBrandName || (selectedBrand === "all" ? null : selectedBrand);
+      const matchesBrand = !activeBrand || p.brand_name === activeBrand || p.reedition_by === activeBrand;
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
       return matchesSearch && matchesBrand && matchesCategory && matchesSub;
     });
-  }, [allProducts, search, selectedBrand, selectedCategory, selectedSubcategory]);
+  }, [allProducts, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
     pick: {
@@ -311,11 +316,14 @@ const TradeGallery = () => {
         .eq("is_published", true);
       if (!data) return;
       const map = new Map<string, string>();
+      const reverseMap = new Map<string, string>();
       for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
         if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
         if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
+        reverseMap.set(d.slug, d.display_name || d.name);
       }
       setDesignerSlugMap(map);
+      setSlugBrandMap(reverseMap);
     })();
   }, []);
 
