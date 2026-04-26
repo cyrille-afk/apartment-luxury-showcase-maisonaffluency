@@ -76,7 +76,7 @@ export default function TradeFFESchedule() {
       const { data: products } = await supabase
         .from("trade_products")
         .select(
-          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents"
+          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, pdf_url, pdf_urls"
         )
         .in("id", productIds);
 
