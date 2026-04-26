@@ -63,6 +63,8 @@ const TradeDocumentsAdmin = lazy(() => import("./pages/TradeDocumentsAdmin"));
 const TradeMediaLibrary = lazy(() => import("./pages/TradeMediaLibrary"));
 const TradeQuotesAdmin = lazy(() => import("./pages/TradeQuotesAdmin"));
 const TradeAxonometricRequests = lazy(() => import("./pages/TradeAxonometricRequests"));
+const TradeCustomRequests = lazy(() => import("./pages/TradeCustomRequests"));
+const TradeFairCalendar = lazy(() => import("./pages/TradeFairCalendar"));
 const TradeAxonometricGallery = lazy(() => import("./pages/TradeAxonometricGallery"));
 const TradePresentations = lazy(() => import("./pages/TradePresentations"));
 const TradePresentationBuilder = lazy(() => import("./pages/TradePresentationBuilder"));
@@ -261,6 +263,8 @@ const App = () => {
                     <Route path="guides" element={<TradeGuides />} />
                     <Route path="guides/analytics" element={<TradeGuidesAnalytics />} />
                     <Route path="guides/:slug" element={<TradeGuideDetail />} />
+                    <Route path="custom-requests" element={<TradeCustomRequests />} />
+                    <Route path="calendar" element={<TradeFairCalendar />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 

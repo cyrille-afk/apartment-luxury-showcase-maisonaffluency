@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import {
   autoPoNumber,
   type ProcurementLine,
 } from "@/lib/procurementExcel";
+import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
 
 interface FFEItem {
   product_name: string;
@@ -31,6 +32,7 @@ interface FFEItem {
   cost_code: string | null;
   lead_time_weeks_override: number | null;
   deposit_pct_override: number | null;
+  spec_sheet_url: string | null;
 }
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
@@ -73,7 +75,7 @@ export default function TradeFFESchedule() {
       const { data: products } = await supabase
         .from("trade_products")
         .select(
-          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents"
+          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, spec_sheet_url"
         )
         .in("id", productIds);
 
@@ -102,6 +104,7 @@ export default function TradeFFESchedule() {
           cost_code: item.cost_code ?? null,
           lead_time_weeks_override: item.lead_time_weeks_override ?? null,
           deposit_pct_override: item.deposit_pct_override ?? null,
+          spec_sheet_url: p?.spec_sheet_url ?? null,
         } as FFEItem;
       });
     },
@@ -164,6 +167,48 @@ export default function TradeFFESchedule() {
     }
   };
 
+  const [packaging, setPackaging] = useState(false);
+  const handleSpecPackage = async () => {
+    if (!items.length) return;
+    setPackaging(true);
+    try {
+      // Deduplicate by product_name+brand for cleaner ZIP
+      const seen = new Set<string>();
+      const products: SpecPackageProduct[] = [];
+      for (const it of items) {
+        const key = `${it.brand_name}|${it.product_name}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        products.push({
+          product_name: it.product_name,
+          brand_name: it.brand_name,
+          category: it.category,
+          sku: it.sku,
+          dimensions: it.dimensions,
+          materials: it.materials,
+          lead_time: it.lead_time,
+          pdf_url: it.spec_sheet_url,
+        });
+      }
+      const projectName = items.find((i) => i.client_name)?.client_name || "Project";
+      const { blob, filename, missingPdfs } = await generateSpecPackageZip(products, {
+        projectName,
+        studioName: "Maison Affluency",
+      });
+      downloadBlob(blob, filename);
+      toast({
+        title: "Spec package ready",
+        description: missingPdfs.length
+          ? `Downloaded with ${products.length} cover sheets. ${missingPdfs.length} attached PDFs were unreachable.`
+          : `Downloaded with ${products.length} structured cover sheets.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Spec package failed", description: err?.message || "Unable to build ZIP.", variant: "destructive" });
+    } finally {
+      setPackaging(false);
+    }
+  };
+
   const totalValue = items.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
 
   return (
@@ -177,10 +222,16 @@ export default function TradeFFESchedule() {
               Procurement-grade FF&E generated from your confirmed quotes — Excel export with PO numbers, lead times, deposit schedule and cost codes.
             </p>
           </div>
-          <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
-            {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-            Export Excel (.xlsx)
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleSpecPackage} disabled={!items.length || packaging} variant="outline" size="sm">
+              {packaging ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Package className="h-4 w-4 mr-2" />}
+              Spec Package (.zip)
+            </Button>
+            <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
+              {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+              Export Excel (.xlsx)
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (

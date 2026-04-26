@@ -15,7 +15,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Heart, Scale, ArrowLeft, Layers, Ruler, Clock, Globe, ShoppingCart, Check, Loader2, Package,
+  Heart, Scale, ArrowLeft, Layers, Ruler, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
+import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
@@ -247,6 +248,7 @@ const TradeProductPage: React.FC = () => {
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [customRequestOpen, setCustomRequestOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -728,6 +730,15 @@ const TradeProductPage: React.FC = () => {
               )}
             </div>
 
+            {/* Bespoke / customisation request */}
+            <button
+              onClick={() => setCustomRequestOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-foreground hover:bg-muted w-full"
+            >
+              <Wand2 size={13} />
+              Request Customisation
+            </button>
+
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
 
@@ -813,6 +824,16 @@ const TradeProductPage: React.FC = () => {
         onOpenChange={setDrawerOpen}
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
+      />
+
+      <CustomRequestModal
+        open={customRequestOpen}
+        onClose={() => setCustomRequestOpen(false)}
+        product={{
+          id: tradeProductId || null,
+          product_name: product?.title || "",
+          brand_name: designerDisplay || null,
+        }}
       />
     </>
   );
