@@ -708,6 +708,73 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
                         </span>
                       </div>
+
+                      {/* Procurement metadata — editable on draft/priced quotes, read-only otherwise */}
+                      <div className="md:col-span-4 mt-2 md:mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 print:hidden">
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">PO #</span>
+                          <input
+                            type="text"
+                            defaultValue={item.po_number || ""}
+                            placeholder={`${quoteNumber}-auto`}
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v !== (item.po_number || "")) updateItemField(item.id, { po_number: v || null });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Cost Code</span>
+                          <input
+                            type="text"
+                            defaultValue={item.cost_code || ""}
+                            placeholder="e.g. FF-LIV-001"
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v !== (item.cost_code || "")) updateItemField(item.id, { cost_code: v || null });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks)</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={1}
+                            defaultValue={item.lead_time_weeks_override ?? ""}
+                            placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const raw = e.target.value.trim();
+                              const v = raw === "" ? null : parseInt(raw, 10);
+                              if (v !== item.lead_time_weeks_override) updateItemField(item.id, { lead_time_weeks_override: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Deposit %</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={5}
+                            defaultValue={item.deposit_pct_override != null ? Math.round(item.deposit_pct_override * 100) : ""}
+                            placeholder="60"
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const raw = e.target.value.trim();
+                              const v = raw === "" ? null : Math.max(0, Math.min(100, parseInt(raw, 10))) / 100;
+                              if (v !== item.deposit_pct_override) updateItemField(item.id, { deposit_pct_override: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                          />
+                        </label>
+                      </div>
                     </div>
                   );
                 })}
