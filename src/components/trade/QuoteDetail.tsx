@@ -333,6 +333,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     itemId: string,
     patch: Partial<Pick<QuoteItemWithProduct, "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override">>
   ) => {
+    if (isReadOnly) return;
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
     const { error } = await supabase.from("trade_quote_items").update(patch as any).eq("id", itemId);
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
@@ -717,12 +718,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             type="text"
                             defaultValue={item.po_number || ""}
                             placeholder={`${quoteNumber}-auto`}
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const v = e.target.value.trim();
                               if (v !== (item.po_number || "")) updateItemField(item.id, { po_number: v || null });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -731,12 +736,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             type="text"
                             defaultValue={item.cost_code || ""}
                             placeholder="e.g. FF-LIV-001"
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const v = e.target.value.trim();
                               if (v !== (item.cost_code || "")) updateItemField(item.id, { cost_code: v || null });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -747,13 +756,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             step={1}
                             defaultValue={item.lead_time_weeks_override ?? ""}
                             placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const raw = e.target.value.trim();
                               const v = raw === "" ? null : parseInt(raw, 10);
                               if (v !== item.lead_time_weeks_override) updateItemField(item.id, { lead_time_weeks_override: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -765,13 +778,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             step={5}
                             defaultValue={item.deposit_pct_override != null ? Math.round(item.deposit_pct_override * 100) : ""}
                             placeholder="60"
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const raw = e.target.value.trim();
                               const v = raw === "" ? null : Math.max(0, Math.min(100, parseInt(raw, 10))) / 100;
                               if (v !== item.deposit_pct_override) updateItemField(item.id, { deposit_pct_override: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                           />
                         </label>
                       </div>
