@@ -619,7 +619,7 @@ const TradeProductPage: React.FC = () => {
               <div className="flex flex-col gap-2 pt-1">
                 {renderPrice()}
                 <button
-                  onClick={() => setShowTradePrice((v) => !v)}
+                  onClick={() => setShowTradePrice(!showTradePrice)}
                   className="self-start font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
                 >
                   Show {showTradePrice ? "retail" : "trade"} price
