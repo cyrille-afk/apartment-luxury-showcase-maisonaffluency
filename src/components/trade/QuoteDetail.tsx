@@ -735,12 +735,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             type="text"
                             defaultValue={item.cost_code || ""}
                             placeholder="e.g. FF-LIV-001"
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const v = e.target.value.trim();
                               if (v !== (item.cost_code || "")) updateItemField(item.id, { cost_code: v || null });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
