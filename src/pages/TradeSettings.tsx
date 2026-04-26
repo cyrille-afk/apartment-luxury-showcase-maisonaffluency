@@ -3,8 +3,9 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2 } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award } from "lucide-react";
 import { z } from "zod";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
 const profileSchema = z.object({
   first_name: z.string().trim().min(1, "First name is required").max(100, "Max 100 characters"),
@@ -24,6 +25,7 @@ const passwordSchema = z.object({
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
   const { toast } = useToast();
+  const { tier, tierLabel, discountLabel } = useTradeDiscount();
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
@@ -173,9 +175,33 @@ const TradeSettings = () => {
       <Helmet><title>Settings — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-2xl">
       <h1 className="font-display text-2xl text-foreground mb-2">Account Settings</h1>
-      <p className="font-body text-sm text-muted-foreground mb-8">
+      <p className="font-body text-sm text-muted-foreground mb-6">
         Manage your trade account details and preferences.
       </p>
+
+      {/* Trade tier badge */}
+      <div className={`mb-8 flex items-center gap-3 px-4 py-3 rounded-lg border ${
+        tier === "gold" ? "bg-amber-50 border-amber-200" :
+        tier === "silver" ? "bg-slate-50 border-slate-200" :
+        "bg-muted/40 border-border"
+      }`}>
+        <div className={`h-9 w-9 rounded-full flex items-center justify-center ${
+          tier === "gold" ? "bg-amber-200 text-amber-900" :
+          tier === "silver" ? "bg-slate-200 text-slate-800" :
+          "bg-foreground/10 text-foreground"
+        }`}>
+          <Award className="h-4 w-4" />
+        </div>
+        <div className="flex-1">
+          <div className="font-display text-sm text-foreground">
+            {tierLabel} Trade Tier
+          </div>
+          <div className="font-body text-xs text-muted-foreground">
+            You receive a {discountLabel} trade discount on all eligible products.
+            {tier !== "gold" && " Tier upgrades are assigned by the Maison Affluency team."}
+          </div>
+        </div>
+      </div>
 
       {/* Profile Photo */}
       <div className="mb-10">
