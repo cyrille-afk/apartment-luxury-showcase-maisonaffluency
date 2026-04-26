@@ -2577,6 +2577,87 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_custom_requests: {
+        Row: {
+          admin_notes: string | null
+          brand_name: string | null
+          budget_notes: string | null
+          com_col_fabric: string | null
+          com_yardage_meters: number | null
+          created_at: string
+          dimension_changes: string | null
+          finish_notes: string | null
+          id: string
+          notes: string | null
+          product_id: string | null
+          product_name: string
+          project_id: string | null
+          quantity: number
+          request_type: string
+          status: string
+          target_lead_weeks: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          brand_name?: string | null
+          budget_notes?: string | null
+          com_col_fabric?: string | null
+          com_yardage_meters?: number | null
+          created_at?: string
+          dimension_changes?: string | null
+          finish_notes?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name: string
+          project_id?: string | null
+          quantity?: number
+          request_type?: string
+          status?: string
+          target_lead_weeks?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          brand_name?: string | null
+          budget_notes?: string | null
+          com_col_fabric?: string | null
+          com_yardage_meters?: number | null
+          created_at?: string
+          dimension_changes?: string | null
+          finish_notes?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name?: string
+          project_id?: string | null
+          quantity?: number
+          request_type?: string
+          status?: string
+          target_lead_weeks?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_custom_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_custom_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_documents: {
         Row: {
           brand_name: string
@@ -2610,6 +2691,63 @@ export type Database = {
           id?: string
           sort_order?: number
           title?: string
+        }
+        Relationships: []
+      }
+      trade_fair_events: {
+        Row: {
+          brands_exhibiting: string[] | null
+          category: string
+          city: string | null
+          country: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          ends_on: string
+          id: string
+          is_published: boolean
+          name: string
+          slug: string
+          starts_on: string
+          updated_at: string
+          venue: string | null
+          website_url: string | null
+        }
+        Insert: {
+          brands_exhibiting?: string[] | null
+          category?: string
+          city?: string | null
+          country?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          ends_on: string
+          id?: string
+          is_published?: boolean
+          name: string
+          slug: string
+          starts_on: string
+          updated_at?: string
+          venue?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          brands_exhibiting?: string[] | null
+          category?: string
+          city?: string | null
+          country?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          ends_on?: string
+          id?: string
+          is_published?: boolean
+          name?: string
+          slug?: string
+          starts_on?: string
+          updated_at?: string
+          venue?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
