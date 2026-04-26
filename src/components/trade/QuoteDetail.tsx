@@ -777,13 +777,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             step={5}
                             defaultValue={item.deposit_pct_override != null ? Math.round(item.deposit_pct_override * 100) : ""}
                             placeholder="60"
-                            disabled={isReadOnly && !isSuperAdmin}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
                             onBlur={(e) => {
+                              if (isReadOnly) return;
                               const raw = e.target.value.trim();
                               const v = raw === "" ? null : Math.max(0, Math.min(100, parseInt(raw, 10))) / 100;
                               if (v !== item.deposit_pct_override) updateItemField(item.id, { deposit_pct_override: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                           />
                         </label>
                       </div>
