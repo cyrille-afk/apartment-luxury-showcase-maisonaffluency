@@ -3,6 +3,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
+  Wand2,
 } from "lucide-react";
 
 type Tool = { title: string; description: string; url: string; icon: any };
