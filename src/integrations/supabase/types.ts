@@ -2765,9 +2765,13 @@ export type Database = {
       trade_quote_items: {
         Row: {
           axonometric_image_url: string | null
+          cost_code: string | null
           created_at: string
+          deposit_pct_override: number | null
           id: string
+          lead_time_weeks_override: number | null
           notes: string | null
+          po_number: string | null
           product_id: string
           quantity: number
           quote_id: string
@@ -2775,9 +2779,13 @@ export type Database = {
         }
         Insert: {
           axonometric_image_url?: string | null
+          cost_code?: string | null
           created_at?: string
+          deposit_pct_override?: number | null
           id?: string
+          lead_time_weeks_override?: number | null
           notes?: string | null
+          po_number?: string | null
           product_id: string
           quantity?: number
           quote_id: string
@@ -2785,9 +2793,13 @@ export type Database = {
         }
         Update: {
           axonometric_image_url?: string | null
+          cost_code?: string | null
           created_at?: string
+          deposit_pct_override?: number | null
           id?: string
+          lead_time_weeks_override?: number | null
           notes?: string | null
+          po_number?: string | null
           product_id?: string
           quantity?: number
           quote_id?: string

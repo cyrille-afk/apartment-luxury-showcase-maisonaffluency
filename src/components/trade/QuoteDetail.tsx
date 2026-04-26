@@ -3,10 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
+import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -18,10 +19,15 @@ interface QuoteItemWithProduct {
   quantity: number;
   unit_price_cents: number | null;
   notes: string | null;
+  po_number: string | null;
+  cost_code: string | null;
+  lead_time_weeks_override: number | null;
+  deposit_pct_override: number | null;
   trade_products: {
     product_name: string;
     brand_name: string;
     trade_price_cents: number | null;
+    rrp_price_cents?: number | null;
     currency: string;
     image_url: string | null;
     dimensions: string | null;
@@ -139,7 +145,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, admin_notes, project_id").eq("id", quoteId).single(),
@@ -322,6 +328,76 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handlePrint = () => window.print();
 
+  /** Optimistic patch: update one quote-line column and persist. */
+  const updateItemField = async (
+    itemId: string,
+    patch: Partial<Pick<QuoteItemWithProduct, "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override">>
+  ) => {
+    setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
+    const { error } = await supabase.from("trade_quote_items").update(patch as any).eq("id", itemId);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
+  const parseLeadWeeks = (text: string | null): number | null => {
+    if (!text) return null;
+    const m = text.match(/(\d+)\s*(?:-\s*(\d+))?/);
+    if (!m) return null;
+    return m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
+  };
+
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const handleExportExcel = async () => {
+    if (!items.length) return;
+    setExportingExcel(true);
+    try {
+      const lines: ProcurementLine[] = items.map((item, idx) => {
+        const product = item.trade_products;
+        const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+        const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
+        const unitTrade = convertCents(rawUnit, fromCur, currency);
+        const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
+        const lead = item.lead_time_weeks_override ?? parseLeadWeeks(product?.lead_time || null);
+        return {
+          po_number: item.po_number || autoPoNumber(quoteNumber, idx + 1),
+          cost_code: item.cost_code || "",
+          room: clientName || "",
+          item_code: product?.sku || "",
+          designer: product?.brand_name || "",
+          product_name: product?.product_name || "—",
+          finish_or_com: [product?.dimensions, product?.materials].filter(Boolean).join(" · "),
+          quantity: item.quantity,
+          unit_rrp_cents: unitRrp,
+          unit_trade_cents: unitTrade,
+          currency,
+          lead_time_weeks: lead,
+          deposit_pct: item.deposit_pct_override ?? 0.6,
+          status: quoteStatus,
+          supplier: product?.brand_name || "",
+          notes: item.notes || "",
+        };
+      });
+
+      await downloadProcurementWorkbook({
+        meta: {
+          project_name: clientName || quoteNumber,
+          client_name: clientName || "—",
+          designer_studio: clientCompany || "—",
+          address: "—",
+          revision: "Rev 1",
+          quote_refs: [quoteNumber],
+        },
+        lines,
+        fileName: `${quoteNumber}-procurement-${new Date().toISOString().slice(0, 10)}.xlsx`,
+      });
+      toast({ title: "Excel export ready", description: "Procurement workbook downloaded." });
+    } catch (err: any) {
+      toast({ title: "Export failed", description: err?.message || "Unable to generate workbook.", variant: "destructive" });
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
+
   return (
     <div className="max-w-4xl">
       {/* Back + Project + Print — hidden in print */}
@@ -343,6 +419,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               compact
             />
           )}
+          <button
+            onClick={handleExportExcel}
+            disabled={exportingExcel || items.length === 0}
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            title="Procurement-grade Excel with PO numbers, lead times, deposit schedule and cost codes"
+          >
+            {exportingExcel ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">Export Excel</span>
+            <span className="sm:hidden">Excel</span>
+          </button>
           <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
             <Printer className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Print / PDF</span>
@@ -621,6 +707,73 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
                           {lineTotal ? `${currencySymbol(currency)} ${formatPriceRaw(lineTotal, currency)}` : "TBD"}
                         </span>
+                      </div>
+
+                      {/* Procurement metadata — editable on draft/priced quotes, read-only otherwise */}
+                      <div className="md:col-span-4 mt-2 md:mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 print:hidden">
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">PO #</span>
+                          <input
+                            type="text"
+                            defaultValue={item.po_number || ""}
+                            placeholder={`${quoteNumber}-auto`}
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v !== (item.po_number || "")) updateItemField(item.id, { po_number: v || null });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Cost Code</span>
+                          <input
+                            type="text"
+                            defaultValue={item.cost_code || ""}
+                            placeholder="e.g. FF-LIV-001"
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v !== (item.cost_code || "")) updateItemField(item.id, { cost_code: v || null });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks)</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={1}
+                            defaultValue={item.lead_time_weeks_override ?? ""}
+                            placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const raw = e.target.value.trim();
+                              const v = raw === "" ? null : parseInt(raw, 10);
+                              if (v !== item.lead_time_weeks_override) updateItemField(item.id, { lead_time_weeks_override: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Deposit %</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={5}
+                            defaultValue={item.deposit_pct_override != null ? Math.round(item.deposit_pct_override * 100) : ""}
+                            placeholder="60"
+                            disabled={isReadOnly && !isSuperAdmin}
+                            onBlur={(e) => {
+                              const raw = e.target.value.trim();
+                              const v = raw === "" ? null : Math.max(0, Math.min(100, parseInt(raw, 10))) / 100;
+                              if (v !== item.deposit_pct_override) updateItemField(item.id, { deposit_pct_override: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 tabular-nums"
+                          />
+                        </label>
                       </div>
                     </div>
                   );
