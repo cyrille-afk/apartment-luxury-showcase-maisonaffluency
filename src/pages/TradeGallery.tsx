@@ -21,6 +21,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 
 const slugifyForUrl = (s: string) =>
@@ -320,7 +321,7 @@ const TradeGallery = () => {
       for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
         if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
         if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
-        reverseMap.set(d.slug, d.display_name || d.name);
+        reverseMap.set(d.slug, normalizeBrandToParent(d.display_name || d.name));
       }
       setDesignerSlugMap(map);
       setSlugBrandMap(reverseMap);
