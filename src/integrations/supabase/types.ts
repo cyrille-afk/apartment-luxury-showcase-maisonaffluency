@@ -1374,6 +1374,7 @@ export type Database = {
           is_read: boolean
           link: string | null
           message: string
+          metadata: Json
           title: string
           type: string
           user_id: string
@@ -1384,6 +1385,7 @@ export type Database = {
           is_read?: boolean
           link?: string | null
           message?: string
+          metadata?: Json
           title: string
           type?: string
           user_id: string
@@ -1394,6 +1396,7 @@ export type Database = {
           is_read?: boolean
           link?: string | null
           message?: string
+          metadata?: Json
           title?: string
           type?: string
           user_id?: string

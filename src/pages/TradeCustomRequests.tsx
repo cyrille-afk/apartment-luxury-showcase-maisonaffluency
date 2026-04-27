@@ -4,6 +4,7 @@
  * admins see all and can reply directly with concierge notes + status updates.
  */
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Loader2, Wand2, Inbox, Save, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +52,19 @@ export default function TradeCustomRequests() {
   const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Record<string, { admin_notes: string; status: string }>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const focusId = searchParams.get("focus");
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!focusId || loading || requests.length === 0) return;
+    const el = document.getElementById(`cr-${focusId}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setHighlightId(focusId);
+    const t = setTimeout(() => setHighlightId(null), 2400);
+    return () => clearTimeout(t);
+  }, [focusId, loading, requests]);
 
   useEffect(() => {
     if (!user) return;
@@ -159,7 +173,13 @@ export default function TradeCustomRequests() {
               const draft = getDraft(r);
               const dirty = isDirty(r);
               return (
-                <div key={r.id} className="border border-border rounded-lg p-4 md:p-5 bg-background">
+                <div
+                  key={r.id}
+                  id={`cr-${r.id}`}
+                  className={`border rounded-lg p-4 md:p-5 bg-background transition-colors duration-700 ${
+                    highlightId === r.id ? "border-primary ring-2 ring-primary/30" : "border-border"
+                  }`}
+                >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0 flex-1">
                       <h3 className="font-display text-base md:text-lg text-foreground tracking-wide truncate">
