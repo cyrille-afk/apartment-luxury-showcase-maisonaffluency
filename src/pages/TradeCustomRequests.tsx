@@ -52,6 +52,19 @@ export default function TradeCustomRequests() {
   const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Record<string, { admin_notes: string; status: string }>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const focusId = searchParams.get("focus");
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!focusId || loading || requests.length === 0) return;
+    const el = document.getElementById(`cr-${focusId}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setHighlightId(focusId);
+    const t = setTimeout(() => setHighlightId(null), 2400);
+    return () => clearTimeout(t);
+  }, [focusId, loading, requests]);
 
   useEffect(() => {
     if (!user) return;
