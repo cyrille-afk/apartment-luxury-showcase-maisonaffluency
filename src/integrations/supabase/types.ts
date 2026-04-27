@@ -218,6 +218,39 @@ export type Database = {
           },
         ]
       }
+      brand_lead_times: {
+        Row: {
+          brand_name: string
+          created_at: string
+          default_lead_weeks_max: number | null
+          default_lead_weeks_min: number | null
+          default_stock_status: string
+          id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          default_lead_weeks_max?: number | null
+          default_lead_weeks_min?: number | null
+          default_stock_status?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          default_lead_weeks_max?: number | null
+          default_lead_weeks_min?: number | null
+          default_stock_status?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_thumbnails: {
         Row: {
           brand_name: string
@@ -1739,6 +1772,10 @@ export type Database = {
           last_name: string
           phone: string
           trade_tier: Database["public"]["Enums"]["trade_tier"]
+          trade_tier_12mo_spend_cents: number
+          trade_tier_computed_at: string | null
+          trade_tier_locked_by_admin: boolean
+          trade_tier_suggested: Database["public"]["Enums"]["trade_tier"] | null
         }
         Insert: {
           avatar_url?: string | null
@@ -1750,6 +1787,12 @@ export type Database = {
           last_name?: string
           phone?: string
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
+          trade_tier_12mo_spend_cents?: number
+          trade_tier_computed_at?: string | null
+          trade_tier_locked_by_admin?: boolean
+          trade_tier_suggested?:
+            | Database["public"]["Enums"]["trade_tier"]
+            | null
         }
         Update: {
           avatar_url?: string | null
@@ -1761,6 +1804,12 @@ export type Database = {
           last_name?: string
           phone?: string
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
+          trade_tier_12mo_spend_cents?: number
+          trade_tier_computed_at?: string | null
+          trade_tier_locked_by_admin?: boolean
+          trade_tier_suggested?:
+            | Database["public"]["Enums"]["trade_tier"]
+            | null
         }
         Relationships: []
       }
@@ -3067,6 +3116,8 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           lead_time: string | null
+          lead_weeks_max_override: number | null
+          lead_weeks_min_override: number | null
           materials: string | null
           origin: string | null
           price_prefix: string | null
@@ -3075,6 +3126,7 @@ export type Database = {
           rrp_price_cents: number | null
           sku: string | null
           spec_sheet_url: string | null
+          stock_status_override: string | null
           subcategory: string | null
           trade_price_cents: number | null
           updated_at: string
@@ -3091,6 +3143,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           lead_time?: string | null
+          lead_weeks_max_override?: number | null
+          lead_weeks_min_override?: number | null
           materials?: string | null
           origin?: string | null
           price_prefix?: string | null
@@ -3099,6 +3153,7 @@ export type Database = {
           rrp_price_cents?: number | null
           sku?: string | null
           spec_sheet_url?: string | null
+          stock_status_override?: string | null
           subcategory?: string | null
           trade_price_cents?: number | null
           updated_at?: string
@@ -3115,6 +3170,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           lead_time?: string | null
+          lead_weeks_max_override?: number | null
+          lead_weeks_min_override?: number | null
           materials?: string | null
           origin?: string | null
           price_prefix?: string | null
@@ -3123,6 +3180,7 @@ export type Database = {
           rrp_price_cents?: number | null
           sku?: string | null
           spec_sheet_url?: string | null
+          stock_status_override?: string | null
           subcategory?: string | null
           trade_price_cents?: number | null
           updated_at?: string
@@ -3520,6 +3578,15 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      effective_product_availability: {
+        Args: { _product_id: string }
+        Returns: {
+          lead_weeks_max: number
+          lead_weeks_min: number
+          source: string
+          stock_status: string
+        }[]
+      }
       effective_project_role: {
         Args: { _project_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["studio_role"]
@@ -3671,6 +3738,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recompute_trade_tier_suggestions: { Args: never; Returns: number }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
