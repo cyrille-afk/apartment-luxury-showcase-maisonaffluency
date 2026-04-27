@@ -612,6 +612,15 @@ const PublicProductPage: React.FC = () => {
                   join our Trade Program
                 </Link>.
               </p>
+              <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
+                Looking for a bespoke version?{" "}
+                <Link
+                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
+                  className="underline underline-offset-2 hover:text-foreground transition-colors"
+                >
+                  Contact our concierge →
+                </Link>
+              </p>
             </div>
           </div>
 
