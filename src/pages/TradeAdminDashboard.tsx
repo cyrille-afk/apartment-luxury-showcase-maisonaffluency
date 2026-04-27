@@ -63,6 +63,7 @@ const shippingGroup: AdminCard[] = [
   { title: "Shipping Rate Matrix", description: "Manage carrier lanes, rate brackets, and CSV imports", url: "/trade/admin/shipping-rates", icon: Settings2 },
   { title: "Shipping Surcharges", description: "Configure fuel, insurance, customs, and duty rates", url: "/trade/admin/shipping-surcharges", icon: Percent },
   { title: "Brand Lead Times", description: "Default availability + lead times per brand for stock badges", url: "/trade/admin/brand-lead-times", icon: Settings2 },
+  { title: "Trade Tiers", description: "Edit Silver/Gold/Platinum discount % and 12-month spend thresholds", url: "/trade/admin/tiers", icon: Percent },
 ];
 
 const groups = [
