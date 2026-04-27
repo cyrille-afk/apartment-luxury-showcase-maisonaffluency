@@ -64,6 +64,7 @@ export default function ExpandableSpec({
   value,
   onChange,
   disabledIndices,
+  helperText,
 }: ExpandableSpecProps) {
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
