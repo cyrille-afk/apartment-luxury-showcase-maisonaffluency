@@ -27,6 +27,7 @@ export default function TradeAdminTiers() {
   const qc = useQueryClient();
   const [draft, setDraft] = useState<Record<Tier, Partial<TierRow>>>({} as any);
   const [recomputing, setRecomputing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-trade-tier-config"],
