@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, TrendingUp } from "lucide-react";
 import { z } from "zod";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
@@ -32,6 +32,7 @@ const TradeSettings = () => {
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [spendCents, setSpendCents] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -62,12 +63,15 @@ const TradeSettings = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("phone, avatar_url")
+      .select("phone, avatar_url, trade_tier_12mo_spend_cents")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (data?.phone) setForm((f) => ({ ...f, phone: data.phone }));
         if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
+        if ((data as any)?.trade_tier_12mo_spend_cents != null) {
+          setSpendCents((data as any).trade_tier_12mo_spend_cents);
+        }
       });
   }, [user]);
 
