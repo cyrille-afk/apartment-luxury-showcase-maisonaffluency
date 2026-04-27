@@ -180,6 +180,14 @@ export default function TradeAdminTiers() {
               <Sparkles className="h-3 w-3" /> {recomputing ? "Recomputing…" : "Recompute suggestions"}
             </button>
             <button
+              onClick={() => setShowPreview((v) => !v)}
+              disabled={!anyDirty || profilesLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-40"
+              title="Estimate how many users would move tiers with the drafted thresholds."
+            >
+              <Eye className="h-3 w-3" /> {showPreview ? "Hide preview" : "Preview impact"}
+            </button>
+            <button
               onClick={saveAll}
               disabled={!anyDirty || !!orderingError}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
