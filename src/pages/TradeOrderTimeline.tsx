@@ -1,16 +1,18 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format, addWeeks, addDays } from "date-fns";
 import {
   DollarSign, Factory, CreditCard, Truck, ShieldCheck, PackageCheck,
   ChevronRight, Calendar, Clock, GripVertical, Edit2, Check, X,
+  FolderKanban,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 
 interface OrderTimeline {
   id: string;
