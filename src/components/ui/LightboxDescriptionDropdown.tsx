@@ -50,7 +50,14 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
             transition={{ duration: 0.2 }}
             className="w-[min(34rem,90vw)] rounded-lg bg-white/85 backdrop-blur-md border border-white/60 shadow-md px-5 py-2.5"
           >
-            <p className="font-body text-[12px] text-foreground leading-relaxed">
+            <p
+              className="font-body text-[12px] text-foreground leading-relaxed overflow-hidden"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+              }}
+            >
               {description}
             </p>
           </motion.div>
