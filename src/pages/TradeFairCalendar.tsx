@@ -52,13 +52,37 @@ export default function TradeFairCalendar() {
     })();
   }, []);
 
-  const grouped = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
+  const [cityFilter, setCityFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  const { cityOptions, categoryOptions } = useMemo(() => {
+    const cities = new Set<string>();
+    const categories = new Set<string>();
+    events.forEach((e) => {
+      if (e.city) cities.add(e.city);
+      if (e.category) categories.add(e.category);
+    });
     return {
-      upcoming: events.filter((e) => e.ends_on >= today),
-      past: events.filter((e) => e.ends_on < today),
+      cityOptions: Array.from(cities).sort((a, b) => a.localeCompare(b)),
+      categoryOptions: Array.from(categories).sort((a, b) => a.localeCompare(b)),
     };
   }, [events]);
+
+  const grouped = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const filtered = events.filter((e) => {
+      if (cityFilter !== "all" && e.city !== cityFilter) return false;
+      if (categoryFilter !== "all" && e.category !== categoryFilter) return false;
+      return true;
+    });
+    return {
+      upcoming: filtered.filter((e) => e.ends_on >= today),
+      past: filtered.filter((e) => e.ends_on < today),
+      totalFiltered: filtered.length,
+    };
+  }, [events, cityFilter, categoryFilter]);
+
+  const hasActiveFilters = cityFilter !== "all" || categoryFilter !== "all";
 
   return (
     <>
