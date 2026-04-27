@@ -86,7 +86,11 @@ export default function TradeRegisteredUsers() {
 
       return profiles.map((p: any): RegisteredUser => ({
         ...p,
-        trade_tier: (p.trade_tier as TradeTier) ?? "standard",
+        trade_tier: normTier(p.trade_tier) ?? "silver",
+        trade_tier_suggested: normTier(p.trade_tier_suggested),
+        trade_tier_locked_by_admin: !!p.trade_tier_locked_by_admin,
+        trade_tier_12mo_spend_cents: Number(p.trade_tier_12mo_spend_cents ?? 0),
+        trade_tier_computed_at: p.trade_tier_computed_at ?? null,
         roles: rolesMap.get(p.id) || [],
         app_status: appMap.get(p.id) || null,
       }));
