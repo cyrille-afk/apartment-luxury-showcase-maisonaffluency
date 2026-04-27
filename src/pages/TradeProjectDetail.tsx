@@ -31,7 +31,13 @@ export default function TradeProjectDetail() {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const { project, loading, refresh } = useProject(id);
-  const accessDenied = !loading && project != null && project.user_id !== user?.id && !isAdmin;
+  // Access is granted if the user owns the project OR is a member of its studio
+  // OR is a platform admin. RLS already gates the read, so a loaded project = readable;
+  // we still compute this explicitly to render a clear access-denied state on direct links.
+  const { studios } = useStudioMemberships();
+  const isStudioMember = !!project?.studio_id && studios.includes(project.studio_id);
+  const accessDenied =
+    !loading && project != null && !isStudioMember && project.user_id !== user?.id && !isAdmin;
   const canManage = !accessDenied;
 
   const [editing, setEditing] = useState(false);
