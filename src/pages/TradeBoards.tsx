@@ -6,6 +6,7 @@ import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
 import SectionHero from "@/components/trade/SectionHero";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
