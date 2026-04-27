@@ -121,6 +121,19 @@ export default function TradeAdminDashboard() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Fetch open custom requests count (anything not resolved/closed)
+  const { data: openCustomRequests = 0 } = useQuery({
+    queryKey: ["admin-open-custom-requests"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("trade_custom_requests")
+        .select("*", { count: "exact", head: true })
+        .not("status", "in", "(resolved,closed,completed)");
+      return count || 0;
+    },
+    enabled: isAdmin,
+  });
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
@@ -129,6 +142,7 @@ export default function TradeAdminDashboard() {
     if (title === "Quote Management") return submittedCount;
     if (title === "Trade Applications") return pendingApps;
     if (title === "Instagram Audit") return missingIg;
+    if (title === "Custom Requests") return openCustomRequests;
     return 0;
   };
 
