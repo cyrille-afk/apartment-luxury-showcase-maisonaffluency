@@ -613,6 +613,11 @@ const TradeProductPage: React.FC = () => {
                     }
                   }}
                   disabledIndices={disabledSizeIndices}
+                  helperText={
+                    disabledSizeIndices.length > 0 && selectedSingleMaterial
+                      ? `Some sizes aren't available in ${selectedSingleMaterial} — greyed out.`
+                      : undefined
+                  }
                 />
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
