@@ -551,7 +551,14 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your material choice"
                   emphasized
                   value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : undefined}
-                  onChange={(idx) => setSelectedSingleMaterial(singleMaterialOptions[idx] ?? null)}
+                  onChange={(idx) => {
+                    const newMat = singleMaterialOptions[idx] ?? null;
+                    setSelectedSingleMaterial(newMat);
+                    // Reset size if it isn't offered for the new material
+                    if (newMat && selectedSingleSize && !singleAxisParsed.some((p) => p.material === newMat && p.size === selectedSingleSize)) {
+                      setSelectedSingleSize(null);
+                    }
+                  }}
                   disabledIndices={disabledMaterialIndices}
                 />
               )}
