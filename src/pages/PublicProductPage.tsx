@@ -207,7 +207,12 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             placeholder={getTopPlaceholder(product)}
             emphasized
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
-            onChange={(idx) => setSelTop(topOptions[idx] ?? null)}
+            onChange={(idx) => {
+              const v = topOptions[idx] ?? null;
+              setSelTop(v);
+              if (v && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelBase(null);
+              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelDualSize(null);
+            }}
             disabledIndices={disabledTopIdx}
           />
         </>
