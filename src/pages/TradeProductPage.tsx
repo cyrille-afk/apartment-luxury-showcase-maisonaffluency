@@ -594,6 +594,7 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : undefined}
                   onChange={(idx) => setSelectedSingleSize(singleSizeOptions[idx] ?? null)}
+                  disabledIndices={disabledSizeIndices}
                 />
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
