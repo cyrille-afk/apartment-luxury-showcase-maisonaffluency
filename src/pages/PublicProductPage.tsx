@@ -219,6 +219,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
               if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelDualSize(null);
             }}
             disabledIndices={disabledTopIdx}
+            helperText={
+              disabledTopIdx.length > 0 && (selBase || selDualSize)
+                ? `Some ${(getTopPlaceholder(product) || "top").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                : undefined
+            }
           />
         </>
       ) : hasSingleAxisSplit ? (
