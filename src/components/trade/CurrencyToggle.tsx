@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 
-export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD";
+export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD" | "GBP" | "CHF" | "AED" | "HKD" | "AUD";
 
-const SUPPORTED_CURRENCIES: DisplayCurrency[] = ["SGD", "EUR", "USD"];
+const SUPPORTED_CURRENCIES: DisplayCurrency[] = ["SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"];
 
 /** Cache live rates so multiple components don't re-fetch */
 let _rateCache: { rates: Record<string, number>; ts: number } | null = null;
