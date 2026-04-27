@@ -323,6 +323,35 @@ export default function TradeCustomRequests() {
                       </div>
                     )
                   )}
+
+                  <div className="mt-4 pt-3 border-t border-border">
+                    <button
+                      onClick={() => toggleActivity(r.id)}
+                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <History className="h-3 w-3" />
+                      Activity log
+                      {openActivity[r.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </button>
+                    {openActivity[r.id] && (
+                      <div className="mt-3 space-y-2">
+                        {loadingActivity[r.id] ? (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <span className="font-body text-xs">Loading…</span>
+                          </div>
+                        ) : (activity[r.id] || []).length === 0 ? (
+                          <p className="font-body text-xs text-muted-foreground/70">No activity recorded.</p>
+                        ) : (
+                          <ol className="space-y-2 border-l border-border pl-3">
+                            {(activity[r.id] || []).map((a) => (
+                              <ActivityItem key={a.id} entry={a} />
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
