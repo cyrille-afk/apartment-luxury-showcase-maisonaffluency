@@ -248,7 +248,12 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           emphasized
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : undefined}
-          onChange={(idx) => setSelDualSize(dualSizeOptions[idx] ?? null)}
+          onChange={(idx) => {
+            const s = dualSizeOptions[idx] ?? null;
+            setSelDualSize(s);
+            if (s && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelBase(null);
+            if (s && selTop && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelTop(null);
+          }}
           disabledIndices={disabledDualSizeIdx}
         />
       ) : hasSingleAxisSplit ? (
