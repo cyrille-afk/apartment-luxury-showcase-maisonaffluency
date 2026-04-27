@@ -63,7 +63,7 @@ export default function TradeProjectDetail() {
   }, [project]);
 
   useEffect(() => {
-    if (!id || !user) return;
+    if (!id || !user || accessDenied) return;
     (async () => {
       setLoadingLinks(true);
       const sb = supabase as any;
