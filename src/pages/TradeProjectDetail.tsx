@@ -6,7 +6,7 @@ import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
-  Package, Users, LayoutGrid, Truck,
+  Package, Users, LayoutGrid, Truck, Lock,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
