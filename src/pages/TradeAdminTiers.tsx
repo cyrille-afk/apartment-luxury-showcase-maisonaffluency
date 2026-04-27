@@ -48,6 +48,54 @@ export default function TradeAdminTiers() {
     return rows.map((r) => ({ ...r, ...(draft[r.tier] || {}) }));
   }, [rows, draft]);
 
+  // Pull all trade users with their current tier + 12-month spend for impact preview.
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
+    queryKey: ["admin-trade-tier-profiles"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("profiles")
+        .select("id, first_name, last_name, email, company, trade_tier, trade_tier_12mo_spend_cents")
+        .not("trade_tier", "is", null);
+      if (error) throw error;
+      return (data || []) as Array<{
+        id: string; first_name: string | null; last_name: string | null;
+        email: string | null; company: string | null;
+        trade_tier: Tier | null; trade_tier_12mo_spend_cents: number | null;
+      }>;
+    },
+    enabled: isAdmin,
+  });
+
+  const tierFor = (cents: number, cfg: TierRow[]): Tier => {
+    const g = cfg.find((r) => r.tier === "gold")?.min_spend_cents ?? Infinity;
+    const p = cfg.find((r) => r.tier === "platinum")?.min_spend_cents ?? Infinity;
+    if (cents >= p) return "platinum";
+    if (cents >= g) return "gold";
+    return "silver";
+  };
+
+  const impact = useMemo(() => {
+    const moves: Array<{ id: string; name: string; spendCents: number; from: Tier; to: Tier; direction: "up" | "down" | "same" }> = [];
+    const counts = { up: 0, down: 0, same: 0 } as Record<"up" | "down" | "same", number>;
+    const toTotals: Record<Tier, number> = { silver: 0, gold: 0, platinum: 0 };
+    for (const p of profiles) {
+      const spend = p.trade_tier_12mo_spend_cents ?? 0;
+      const from = (p.trade_tier ?? "silver") as Tier;
+      const to = tierFor(spend, merged);
+      toTotals[to]++;
+      const dir: "up" | "down" | "same" =
+        TIER_ORDER.indexOf(to) > TIER_ORDER.indexOf(from) ? "up" :
+        TIER_ORDER.indexOf(to) < TIER_ORDER.indexOf(from) ? "down" : "same";
+      counts[dir]++;
+      if (dir !== "same") {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(" ") || p.company || p.email || "Unknown user";
+        moves.push({ id: p.id, name, spendCents: spend, from, to, direction: dir });
+      }
+    }
+    moves.sort((a, b) => b.spendCents - a.spendCents);
+    return { moves, counts, total: profiles.length, toTotals };
+  }, [profiles, merged]);
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
