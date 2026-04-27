@@ -35,6 +35,23 @@ const ContactInquiry = () => {
     message: ""
   });
 
+  // Prefill the message field from URL params (e.g. /contact?subject=Bespoke%20inquiry&message=...)
+  // Used by product pages to seed a "Bespoke inquiry" referencing the specific item.
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const message = params.get("message");
+    const subject = params.get("subject");
+    if (!message && !subject) return;
+    setFormData((prev) => {
+      if (prev.message.trim()) return prev; // don't clobber if user already typed
+      const composed = subject && message
+        ? `${subject}\n\n${message}`
+        : (message || subject || "");
+      return { ...prev, message: composed };
+    });
+  }, [location.search]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
