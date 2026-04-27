@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[]
 
 export default function TradeProjects() {
   const { user } = useAuth();
+  const { currentStudio, canEdit } = useStudio();
   const { projects, loading, refresh } = useProjects();
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -30,9 +32,14 @@ export default function TradeProjects() {
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
+    if (!canEdit) {
+      toast.error("Your role doesn't allow creating projects in this studio");
+      return;
+    }
     setCreating(true);
     const { error } = await supabase.from("projects" as any).insert({
       user_id: user.id,
+      studio_id: currentStudio?.id ?? null,
       name: name.trim(),
       client_name: clientName.trim(),
       location: location.trim(),
