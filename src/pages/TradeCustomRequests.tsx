@@ -144,6 +144,7 @@ export default function TradeCustomRequests() {
       return next;
     });
     toast({ title: "Reply sent", description: "The trade user will see your concierge note." });
+    if (openActivity[r.id]) loadActivity(r.id);
   };
 
   const headline = useMemo(
