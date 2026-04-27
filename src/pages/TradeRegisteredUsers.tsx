@@ -22,10 +22,12 @@ interface RegisteredUser {
   trade_tier: TradeTier;
 }
 
-const TIER_OPTIONS: TradeTier[] = ["standard", "silver", "gold"];
+const TIER_OPTIONS: TradeTier[] = ["silver", "gold", "platinum"];
 
 const tierBadgeClass = (tier: TradeTier) => {
   switch (tier) {
+    case "platinum":
+      return "bg-zinc-900 text-zinc-50 border-zinc-700";
     case "gold":
       return "bg-amber-100 text-amber-900 border-amber-300";
     case "silver":
