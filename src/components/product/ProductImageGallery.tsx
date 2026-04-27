@@ -104,8 +104,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                   src={img}
                   alt=""
                   className="w-full h-full object-cover"
-                  loading={i < 5 || Math.abs(i - activeIndex) <= 1 ? "eager" : "lazy"}
-                  fetchPriority={i === activeIndex ? "high" : "auto"}
+                  loading={i < 5 || Math.abs(i - activeIndex) <= 2 ? "eager" : "lazy"}
+                  fetchPriority={
+                    i === activeIndex
+                      ? "high"
+                      : Math.abs(i - activeIndex) <= 2
+                        ? "high"
+                        : "auto"
+                  }
                   decoding="async"
                 />
               </button>
