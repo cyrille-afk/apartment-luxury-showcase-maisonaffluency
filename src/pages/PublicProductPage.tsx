@@ -289,6 +289,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             if (s && selMat && !singleAxisParsed.some((p) => p.size === s && p.material === selMat)) setSelMat(null);
           }}
           disabledIndices={disabledSizeIdx}
+          helperText={
+            disabledSizeIdx.length > 0 && selMat
+              ? `Some sizes aren't available in ${selMat} — greyed out.`
+              : undefined
+          }
         />
       ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
