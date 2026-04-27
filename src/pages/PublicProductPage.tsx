@@ -239,6 +239,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
           }}
           disabledIndices={disabledMatIdx}
+          helperText={
+            disabledMatIdx.length > 0 && selSize
+              ? `Some materials aren't offered in ${selSize} — greyed out.`
+              : undefined
+          }
         />
       ) : product.materials ? (
         <ExpandableSpec
