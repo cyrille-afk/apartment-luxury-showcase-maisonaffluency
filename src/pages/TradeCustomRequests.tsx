@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Loader2, Wand2, Inbox, Save, ShieldCheck } from "lucide-react";
+import { Loader2, Wand2, Inbox, Save, ShieldCheck, History, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
