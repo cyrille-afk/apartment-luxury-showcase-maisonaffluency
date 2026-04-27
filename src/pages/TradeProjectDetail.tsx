@@ -271,6 +271,19 @@ export default function TradeProjectDetail() {
         )}
       </div>
 
+      {/* Tabbed workspace hub */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="mb-4 flex flex-wrap h-auto bg-muted/30">
+          <TabsTrigger value="overview" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
+          <TabsTrigger value="quotes" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Quotes <span className="ml-1 text-[10px] text-muted-foreground">({quotes.length})</span></TabsTrigger>
+          <TabsTrigger value="boards" className="gap-1.5"><FolderArchive className="h-3.5 w-3.5" /> Boards <span className="ml-1 text-[10px] text-muted-foreground">({boards.length})</span></TabsTrigger>
+          <TabsTrigger value="tearsheets" className="gap-1.5"><ImageIcon className="h-3.5 w-3.5" /> Tearsheets</TabsTrigger>
+          <TabsTrigger value="shipping" className="gap-1.5"><Truck className="h-3.5 w-3.5" /> Shipping <span className="ml-1 text-[10px] text-muted-foreground">({timelines.length})</span></TabsTrigger>
+          <TabsTrigger value="ffe" className="gap-1.5"><ListChecks className="h-3.5 w-3.5" /> FF&E</TabsTrigger>
+        </TabsList>
+
+        {/* OVERVIEW TAB — keeps the original summary panel */}
+        <TabsContent value="overview" className="mt-0">
       {/* Summary panel */}
       <div className="border border-border rounded-md p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
