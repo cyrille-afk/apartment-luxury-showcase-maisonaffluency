@@ -31,7 +31,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
-import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -364,13 +364,7 @@ const TradeProductPage: React.FC = () => {
   const favoriteId = tradeProductId || product.id;
   const favorited = isFavorited(favoriteId);
 
-  const rawSubcategory = product.subcategory?.trim();
-  // Canonical-cased subcategory label (e.g. db "cabinets" → "Cabinets") for display.
-  const normalizedSubcategory = rawSubcategory
-    ? (Object.values(SUBCATEGORY_MAP)
-        .flat()
-        .find((s) => s.toLowerCase() === rawSubcategory.toLowerCase()) || rawSubcategory)
-    : null;
+  const { rawSubcategory, normalizedSubcategory } = normalizeCategoryContext(product.subcategory);
 
   // Fallback back-target: prefer the originating designer/atelier gallery so
   // users return to the same brand context they came from. If we don't yet
