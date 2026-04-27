@@ -157,11 +157,41 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </div>
           </div>
         </div>
-        {overlay && (
-          <div className="absolute top-3 right-3 z-20 pointer-events-none">
-            <div className="pointer-events-auto">{overlay}</div>
+          {overlay && (
+            <div className="absolute top-3 right-3 z-20 pointer-events-none">
+              <div className="pointer-events-auto">{overlay}</div>
+            </div>
+          )}
+
+          {/* Preload neighboring main images so navigation feels instant */}
+          <div aria-hidden="true" className="hidden">
+            {[1, 2].map((offset) => {
+              const next = images[activeIndex + offset];
+              const prev = images[activeIndex - offset];
+              return (
+                <React.Fragment key={offset}>
+                  {next && (
+                    <img
+                      src={next}
+                      alt=""
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                    />
+                  )}
+                  {prev && (
+                    <img
+                      src={prev}
+                      alt=""
+                      loading="eager"
+                      fetchPriority={offset === 1 ? "high" : "auto"}
+                      decoding="async"
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
-        )}
 
         {/* Prev / Next arrows */}
         {images.length > 1 && (
