@@ -25,7 +25,7 @@ const passwordSchema = z.object({
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
   const { toast } = useToast();
-  const { tier, tierLabel, discountLabel } = useTradeDiscount();
+  const { tier, tierLabel, discountLabel, config: tierConfig } = useTradeDiscount();
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
@@ -211,20 +211,13 @@ const TradeSettings = () => {
 
       {/* Tier upgrade callout */}
       {tier !== "platinum" && (() => {
-        const cfg = (typeof (window as any) !== "undefined" ? null : null);
-        // Use the live tier config from the hook
-        const tierCfg = (require("@/hooks/useTradeDiscount") as typeof import("@/hooks/useTradeDiscount"));
-        // We already have `discountLabel` etc; re-fetch config via hook here would re-render — instead
-        // pull straight from useTradeDiscount return that's already in scope below via closure.
-        const SILVER_THRESHOLD = (window as any).__tierCfg?.silver?.min_spend_cents ?? 0;
-        const GOLD_THRESHOLD = (window as any).__tierCfg?.gold?.min_spend_cents ?? 25_000_000;
-        const PLATINUM_THRESHOLD = (window as any).__tierCfg?.platinum?.min_spend_cents ?? 75_000_000;
-        const nextTier = tier === "silver" ? ((window as any).__tierCfg?.gold?.label ?? "Gold") : ((window as any).__tierCfg?.platinum?.label ?? "Platinum");
-        const nextDiscountPct = tier === "silver"
-          ? ((window as any).__tierCfg?.gold?.discount_pct ?? 0.10)
-          : ((window as any).__tierCfg?.platinum?.discount_pct ?? 0.15);
-        const nextDiscount = `${(nextDiscountPct * 100).toFixed(nextDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
-        const nextThreshold = tier === "silver" ? GOLD_THRESHOLD : PLATINUM_THRESHOLD;
+        const SILVER_THRESHOLD = tierConfig.silver.min_spend_cents;
+        const GOLD_THRESHOLD = tierConfig.gold.min_spend_cents;
+        const PLATINUM_THRESHOLD = tierConfig.platinum.min_spend_cents;
+        const nextCfg = tier === "silver" ? tierConfig.gold : tierConfig.platinum;
+        const nextTier = nextCfg.label;
+        const nextDiscount = `${(nextCfg.discount_pct * 100).toFixed(nextCfg.discount_pct * 100 % 1 === 0 ? 0 : 1)}%`;
+        const nextThreshold = nextCfg.min_spend_cents;
         const prevThreshold = tier === "silver" ? SILVER_THRESHOLD : GOLD_THRESHOLD;
         const remainingCents = Math.max(0, nextThreshold - spendCents);
         const progressPct = Math.min(100, Math.max(0,
