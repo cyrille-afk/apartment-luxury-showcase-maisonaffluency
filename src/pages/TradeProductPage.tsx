@@ -726,18 +726,15 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                 />
               )}
-              {(product.origin || product.lead_time) && (
-                <ExpandableSpec
-                  icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
-                  text={
-                    product.origin && product.lead_time
-                      ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")} in ${product.lead_time.replace(/^\s*ships?\s+in\s+/i, "")}`
-                      : product.origin
-                        ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")}`
-                        : product.lead_time!
-                  }
-                />
-              )}
+              {(() => {
+                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                return handcrafted ? (
+                  <ExpandableSpec
+                    icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
+                    text={handcrafted}
+                  />
+                ) : null;
+              })()}
             </div>
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
