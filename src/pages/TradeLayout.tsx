@@ -15,6 +15,7 @@ import TradePriceToggle from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
+import { TierBadge } from "@/components/trade/TierBadge";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
@@ -197,6 +198,9 @@ const TradeLayout = () => {
             <div className="ml-auto flex items-center gap-2 md:gap-4">
               <StudioSwitcher />
               <GlobalProjectSwitcher />
+              <div className="hidden md:block">
+                <TierBadge showDiscount />
+              </div>
               <div className="hidden sm:block">
                 <TradePriceToggle />
               </div>
