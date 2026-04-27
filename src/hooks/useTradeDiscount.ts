@@ -30,6 +30,17 @@ export const TIER_LABEL: Record<TradeTier, string> = {
   platinum: "Platinum",
 };
 
+/**
+ * Static fallback discount map. Real discount % comes from `trade_tier_config`
+ * via `useTradeDiscount()` / `useTierConfig()`. Kept for legacy admin pages
+ * that render a quick label without a live config lookup.
+ */
+export const TIER_DISCOUNT: Record<TradeTier, number> = {
+  silver: 0.08,
+  gold: 0.10,
+  platinum: 0.15,
+};
+
 const normalize = (raw: TradeTierRaw | null | undefined): TradeTier => {
   if (raw === "gold" || raw === "platinum") return raw;
   return "silver";
