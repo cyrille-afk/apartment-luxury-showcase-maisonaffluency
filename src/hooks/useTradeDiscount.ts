@@ -1,24 +1,31 @@
 /**
  * Returns the active trade discount for the signed-in user, based on their tier.
- *   standard → 8%, silver → 12%, gold → 18%
- * Falls back to 8% (standard) for unauthenticated users or while loading.
+ *   silver → 8%, gold → 12%, platinum → 18%
+ * Legacy "standard" rows are treated as silver (8%).
+ * Falls back to 8% for unauthenticated users or while loading.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export type TradeTier = "standard" | "silver" | "gold";
+export type TradeTier = "silver" | "gold" | "platinum";
+type TradeTierRaw = TradeTier | "standard";
 
 export const TIER_DISCOUNT: Record<TradeTier, number> = {
-  standard: 0.08,
-  silver: 0.12,
-  gold: 0.18,
+  silver: 0.08,
+  gold: 0.12,
+  platinum: 0.18,
 };
 
 export const TIER_LABEL: Record<TradeTier, string> = {
-  standard: "Standard",
   silver: "Silver",
   gold: "Gold",
+  platinum: "Platinum",
+};
+
+const normalize = (raw: TradeTierRaw | null | undefined): TradeTier => {
+  if (raw === "gold" || raw === "platinum") return raw;
+  return "silver"; // standard + silver + null all map to silver/8%
 };
 
 export function useTradeDiscount() {
@@ -35,19 +42,18 @@ export function useTradeDiscount() {
         .eq("id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return (data?.trade_tier as TradeTier) ?? "standard";
+      return normalize(data?.trade_tier as TradeTierRaw | null);
     },
   });
 
-  const tier: TradeTier = data ?? "standard";
+  const tier: TradeTier = data ?? "silver";
   const discountPct = TIER_DISCOUNT[tier];
 
   return {
     tier,
-    discountPct,                      // e.g. 0.12
+    discountPct,
     discountLabel: `${Math.round(discountPct * 100)}%`,
     tierLabel: TIER_LABEL[tier],
-    /** Apply discount to a cents value */
     apply: (cents: number) => Math.round(cents * (1 - discountPct)),
   };
 }

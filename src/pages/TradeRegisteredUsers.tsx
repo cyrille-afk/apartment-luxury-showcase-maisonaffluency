@@ -20,12 +20,27 @@ interface RegisteredUser {
   roles: string[];
   app_status: string | null;
   trade_tier: TradeTier;
+  trade_tier_suggested: TradeTier | null;
+  trade_tier_locked_by_admin: boolean;
+  trade_tier_12mo_spend_cents: number;
+  trade_tier_computed_at: string | null;
 }
 
-const TIER_OPTIONS: TradeTier[] = ["standard", "silver", "gold"];
+const normTier = (raw: unknown): TradeTier | null => {
+  if (raw === "platinum" || raw === "gold" || raw === "silver") return raw;
+  if (raw === "standard" || raw == null) return raw === "standard" ? "silver" : null;
+  return null;
+};
+
+const fmtEur = (cents: number) =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
+
+const TIER_OPTIONS: TradeTier[] = ["silver", "gold", "platinum"];
 
 const tierBadgeClass = (tier: TradeTier) => {
   switch (tier) {
+    case "platinum":
+      return "bg-zinc-900 text-zinc-50 border-zinc-700";
     case "gold":
       return "bg-amber-100 text-amber-900 border-amber-300";
     case "silver":
@@ -47,7 +62,7 @@ export default function TradeRegisteredUsers() {
     queryFn: async () => {
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, email, first_name, last_name, company, created_at, trade_tier")
+        .select("id, email, first_name, last_name, company, created_at, trade_tier, trade_tier_suggested, trade_tier_locked_by_admin, trade_tier_12mo_spend_cents, trade_tier_computed_at")
         .order("created_at", { ascending: false });
 
       if (error || !profiles) return [];
@@ -71,7 +86,11 @@ export default function TradeRegisteredUsers() {
 
       return profiles.map((p: any): RegisteredUser => ({
         ...p,
-        trade_tier: (p.trade_tier as TradeTier) ?? "standard",
+        trade_tier: normTier(p.trade_tier) ?? "silver",
+        trade_tier_suggested: normTier(p.trade_tier_suggested),
+        trade_tier_locked_by_admin: !!p.trade_tier_locked_by_admin,
+        trade_tier_12mo_spend_cents: Number(p.trade_tier_12mo_spend_cents ?? 0),
+        trade_tier_computed_at: p.trade_tier_computed_at ?? null,
         roles: rolesMap.get(p.id) || [],
         app_status: appMap.get(p.id) || null,
       }));
@@ -103,7 +122,7 @@ export default function TradeRegisteredUsers() {
     setSavingId(userId);
     const { error } = await supabase
       .from("profiles")
-      .update({ trade_tier: tier })
+      .update({ trade_tier: tier, trade_tier_locked_by_admin: true })
       .eq("id", userId);
     setSavingId(null);
     if (error) {
@@ -113,6 +132,16 @@ export default function TradeRegisteredUsers() {
     toast({ title: `Tier set to ${TIER_LABEL[tier]} (${Math.round(TIER_DISCOUNT[tier] * 100)}%)` });
     qc.invalidateQueries({ queryKey: ["admin-registered-users"] });
     qc.invalidateQueries({ queryKey: ["trade-tier"] });
+  };
+
+  const recomputeAll = async () => {
+    const { data, error } = await supabase.rpc("recompute_trade_tier_suggestions");
+    if (error) {
+      toast({ title: "Failed to recompute", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Suggestions refreshed`, description: `${data ?? 0} profiles updated` });
+    qc.invalidateQueries({ queryKey: ["admin-registered-users"] });
   };
 
   const roleBadge = (role: string) => {
@@ -156,15 +185,23 @@ export default function TradeRegisteredUsers() {
             </div>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name, email, tier, month…"
-              className="pl-8 pr-3 py-1.5 text-sm font-body rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 w-56"
-            />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={recomputeAll}
+              className="px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+            >
+              Recompute tier suggestions
+            </button>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search name, email, tier, month…"
+                className="pl-8 pr-3 py-1.5 text-sm font-body rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 w-56"
+              />
+            </div>
           </div>
         </div>
 
@@ -191,6 +228,7 @@ export default function TradeRegisteredUsers() {
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Company</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Roles</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Trade Tier</th>
+                    <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Suggested (12mo spend)</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Application</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Joined</th>
                   </tr>
@@ -227,6 +265,27 @@ export default function TradeRegisteredUsers() {
                         </select>
                       </td>
                       <td className="px-4 py-3">
+                        {u.trade_tier_suggested ? (
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[10px] font-medium ${tierBadgeClass(u.trade_tier_suggested)}`}>
+                              {TIER_LABEL[u.trade_tier_suggested]}
+                            </span>
+                            <span className="font-body text-[11px] text-muted-foreground">{fmtEur(u.trade_tier_12mo_spend_cents)}</span>
+                            {u.trade_tier_suggested !== u.trade_tier && (
+                              <button
+                                onClick={() => updateTier(u.id, u.trade_tier_suggested!)}
+                                disabled={savingId === u.id}
+                                className="text-[10px] uppercase tracking-wider text-primary hover:underline disabled:opacity-50"
+                              >
+                                Apply
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           {appStatusIcon(u.app_status)}
                           {u.app_status && (
@@ -241,7 +300,7 @@ export default function TradeRegisteredUsers() {
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      <td colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">
                         No users match "{search}"
                       </td>
                     </tr>
