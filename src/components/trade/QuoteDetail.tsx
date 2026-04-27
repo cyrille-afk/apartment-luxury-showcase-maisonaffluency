@@ -345,6 +345,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handlePrint = () => window.print();
 
+  /** Persist insurance fields. Optimistic — caller already updated local state. */
+  const persistInsurance = async (patch: Partial<{ insurance_enabled: boolean; insurance_tier: InsuranceTier; insurance_rate_bps: number; insurance_notes: string | null }>) => {
+    if (isReadOnly) return;
+    const { error } = await supabase.from("trade_quotes").update(patch as any).eq("id", quoteId);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
+  /** Insurance premium in cents, calculated on (subtotal − trade discount). */
+  const insuredBaseCents = tradeDiscount && subtotalCents > 0
+    ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
+    : subtotalCents;
+  const insurancePremiumCents = insuranceEnabled && insuredBaseCents > 0
+    ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
+    : 0;
+
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
     itemId: string,
