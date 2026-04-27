@@ -11,6 +11,7 @@ import {
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,8 +35,9 @@ export default function TradeProjectDetail() {
   // Access is granted if the user owns the project OR is a member of its studio
   // OR is a platform admin. RLS already gates the read, so a loaded project = readable;
   // we still compute this explicitly to render a clear access-denied state on direct links.
-  const { studios } = useStudioMemberships();
-  const isStudioMember = !!project?.studio_id && studios.includes(project.studio_id);
+  const { studios } = useStudio();
+  const studioIds = studios.map((s) => s.id);
+  const isStudioMember = !!project?.studio_id && studioIds.includes(project.studio_id);
   const accessDenied =
     !loading && project != null && !isStudioMember && project.user_id !== user?.id && !isAdmin;
   const canManage = !accessDenied;
