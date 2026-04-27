@@ -159,17 +159,60 @@ export default function TradeProjects() {
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-border rounded-md">
-          <FolderOpen className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-          <p className="font-body text-sm text-muted-foreground mb-4">
-            No {tab} projects yet.
-          </p>
-          {tab === "active" && (
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
-              Create your first project
-            </Button>
-          )}
-        </div>
+        projects.length === 0 && tab === "active" ? (
+          // Studio-wide empty state: no visible projects in any tab
+          <div className="text-center py-20 px-6 border border-dashed border-border rounded-md max-w-xl mx-auto">
+            {hiddenForMeCount > 0 ? (
+              <EyeOff className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+            ) : (
+              <FolderOpen className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+            )}
+            <h2 className="font-display text-lg text-foreground mb-2">
+              {hiddenForMeCount > 0
+                ? "No projects visible to you"
+                : currentStudio
+                  ? `${currentStudio.name} has no projects yet`
+                  : "No projects yet"}
+            </h2>
+            <p className="font-body text-sm text-muted-foreground mb-5">
+              {hiddenForMeCount > 0 ? (
+                <>
+                  This studio has {hiddenForMeCount} project{hiddenForMeCount === 1 ? "" : "s"} you don't currently have access to.
+                  Ask a studio admin to grant you access, or {canEdit ? "start a new project below" : "request a higher role to create one"}.
+                </>
+              ) : canEdit ? (
+                <>Create your first project to start grouping quotes, mood boards, FF&E schedules, tearsheets, and timelines.</>
+              ) : (
+                <>Your role doesn't allow creating projects. Ask a studio admin or owner to create one — or to upgrade your role to Editor.</>
+              )}
+            </p>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {canEdit && (
+                <Button size="sm" onClick={() => setDialogOpen(true)} className="gap-2">
+                  <Plus className="h-4 w-4" /> Create a project
+                </Button>
+              )}
+              <Button size="sm" variant="outline" asChild>
+                <Link to="/trade/studio-settings">
+                  <Users className="h-4 w-4 mr-2" />
+                  {canEdit ? "Manage studio" : "View studio members"}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-20 border border-dashed border-border rounded-md">
+            <FolderOpen className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+            <p className="font-body text-sm text-muted-foreground mb-4">
+              No {tab} projects yet.
+            </p>
+            {tab === "active" && canEdit && (
+              <Button size="sm" onClick={() => setDialogOpen(true)}>
+                Create your first project
+              </Button>
+            )}
+          </div>
+        )
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((p) => (
