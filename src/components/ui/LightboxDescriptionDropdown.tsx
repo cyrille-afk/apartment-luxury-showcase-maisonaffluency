@@ -13,17 +13,25 @@ interface Props {
 
 const LightboxDescriptionDropdown = ({ description }: Props) => {
   const [expanded, setExpanded] = useState(false);
+  const [showFull, setShowFull] = useState(false);
 
   if (!description || !description.trim()) return null;
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (expanded) {
+      setExpanded(false);
+      setShowFull(false);
+    } else {
+      setExpanded(true);
+    }
+  };
 
   return (
     <div className="pointer-events-auto flex flex-col items-end gap-1.5">
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setExpanded(!expanded);
-        }}
+        onClick={handleToggle}
         aria-label={expanded ? "Hide description" : "Read description"}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5",
@@ -48,18 +56,34 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="w-[min(34rem,90vw)] rounded-lg bg-white/85 backdrop-blur-md border border-white/60 shadow-md px-5 py-2.5"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!showFull) setShowFull(true);
+            }}
+            className={cn(
+              "w-[min(34rem,90vw)] rounded-lg bg-white/85 backdrop-blur-md border border-white/60 shadow-md px-5 py-2.5",
+              !showFull && "cursor-pointer hover:bg-white/95 transition-colors"
+            )}
           >
             <p
               className="font-body text-[12px] text-foreground leading-relaxed overflow-hidden"
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-              }}
+              style={
+                showFull
+                  ? undefined
+                  : {
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                    }
+              }
             >
               {description}
             </p>
+            {!showFull && (
+              <span className="mt-1 inline-block font-display italic text-[10px] text-foreground/60">
+                Read more
+              </span>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
