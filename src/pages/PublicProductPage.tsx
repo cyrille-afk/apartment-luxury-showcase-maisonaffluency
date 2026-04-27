@@ -200,6 +200,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
               if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
             }}
             disabledIndices={disabledBaseIdx}
+            helperText={
+              disabledBaseIdx.length > 0 && (selTop || selDualSize)
+                ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                : undefined
+            }
           />
           <ExpandableSpec
             icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
