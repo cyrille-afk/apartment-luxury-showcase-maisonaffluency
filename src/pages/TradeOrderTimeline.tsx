@@ -128,14 +128,30 @@ function MilestoneLine({ icon: Icon, label, date, highlight }: { icon: React.Ele
 export default function TradeOrderTimeline() {
   const { isAdmin, isTradeUser, loading, user } = useAuth();
   const queryClient = useQueryClient();
+  const { projectFilter, clearProjectFilter } = useProjectFilter();
+  const [projectName, setProjectName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectName(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("projects" as any)
+        .select("name")
+        .eq("id", projectFilter)
+        .maybeSingle();
+      setProjectName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["order-timelines"],
+    queryKey: ["order-timelines", projectFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("order_timeline")
         .select("*")
         .order("created_at", { ascending: false });
+      if (projectFilter) q = q.eq("project_id", projectFilter);
+      const { data, error } = await q;
       if (error) throw error;
 
       // Fetch quote + profile data for each timeline
