@@ -617,10 +617,27 @@ const ShowroomGridView = ({
             <option value="all">All Designers ({designers.length})</option>
             {designers.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
-          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setSelectedSubcategory("all"); // reset subcategory when parent changes
+            }}
+            className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
+          >
             <option value="all">All Categories</option>
             {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
+          {selectedCategory !== "all" && availableSubcategories.length > 0 && (
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+              className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
+            >
+              <option value="all">All {selectedCategory}</option>
+              {availableSubcategories.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          )}
           <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
             <option value="all">All Rooms</option>
             {sections.map((s) => <option key={s} value={s}>{s}</option>)}
