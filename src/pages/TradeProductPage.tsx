@@ -15,7 +15,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Heart, Scale, ArrowLeft, Layers, Ruler, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Hammer,
+  Heart, Scale, ArrowLeft, Layers, Ruler, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
@@ -727,7 +727,7 @@ const TradeProductPage: React.FC = () => {
               )}
               {(product.origin || product.lead_time) && (
                 <ExpandableSpec
-                  icon={<Hammer size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
                   text={
                     product.origin && product.lead_time
                       ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")} in ${product.lead_time.replace(/^\s*ships?\s+in\s+/i, "")}`

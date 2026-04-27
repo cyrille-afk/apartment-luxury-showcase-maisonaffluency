@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Layers, Ruler, Clock, Globe } from "lucide-react";
+import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Layers, Ruler, Clock, Globe, Sparkles } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -541,29 +541,19 @@ const PublicProductPage: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <VariantSelectors product={product} />
 
-                {product.origin && (
+                {(product.origin || product.lead_time) && (
                   <ExpandableSpec
-                    icon={<Globe size={14} className="text-[hsl(var(--gold))]" />}
-                    text={product.origin}
-                  />
-                )}
-                {product.lead_time && (
-                  <ExpandableSpec
-                    icon={<Clock size={14} className="text-[hsl(var(--gold))]" />}
-                    text={product.lead_time}
+                    icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
+                    text={
+                      product.origin && product.lead_time
+                        ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")} in ${product.lead_time.replace(/^\s*ships?\s+in\s+/i, "")}`
+                        : product.origin
+                          ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")}`
+                          : product.lead_time!
+                    }
                   />
                 )}
               </div>
-
-              {/* Lead-time chip — sits on the same eye-line as the primary CTA so users see time-to-have-it before clicking. */}
-              {product.lead_time && (
-                <div className="flex items-center justify-end -mb-1">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                    <Clock size={11} className="text-[hsl(var(--gold))]" />
-                    Ships in {product.lead_time.replace(/^\s*ships?\s+in\s+/i, "")}
-                  </span>
-                </div>
-              )}
 
               {/* Primary CTA — Price on Request */}
               <Link
