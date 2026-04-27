@@ -122,7 +122,7 @@ export default function TradeRegisteredUsers() {
     setSavingId(userId);
     const { error } = await supabase
       .from("profiles")
-      .update({ trade_tier: tier })
+      .update({ trade_tier: tier, trade_tier_locked_by_admin: true })
       .eq("id", userId);
     setSavingId(null);
     if (error) {
@@ -132,6 +132,16 @@ export default function TradeRegisteredUsers() {
     toast({ title: `Tier set to ${TIER_LABEL[tier]} (${Math.round(TIER_DISCOUNT[tier] * 100)}%)` });
     qc.invalidateQueries({ queryKey: ["admin-registered-users"] });
     qc.invalidateQueries({ queryKey: ["trade-tier"] });
+  };
+
+  const recomputeAll = async () => {
+    const { data, error } = await supabase.rpc("recompute_trade_tier_suggestions");
+    if (error) {
+      toast({ title: "Failed to recompute", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Suggestions refreshed`, description: `${data ?? 0} profiles updated` });
+    qc.invalidateQueries({ queryKey: ["admin-registered-users"] });
   };
 
   const roleBadge = (role: string) => {
