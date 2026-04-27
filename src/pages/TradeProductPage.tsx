@@ -754,16 +754,6 @@ const TradeProductPage: React.FC = () => {
               <p className="font-body text-sm text-muted-foreground italic">Price on request</p>
             )}
 
-            {/* Lead-time chip — sits on the same eye-line as the primary CTA so users see time-to-have-it before clicking. */}
-            {product.lead_time && (
-              <div className="flex items-center justify-end -mb-1">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  <Clock size={11} className="text-[hsl(var(--gold))]" />
-                  Ships in {product.lead_time.replace(/^\s*ships?\s+in\s+/i, "")}
-                </span>
-              </div>
-            )}
-
             {/* Primary CTA — Add to Quote */}
             <button
               onClick={handleAddToQuote}
