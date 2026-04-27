@@ -3388,6 +3388,33 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_tier_config: {
+        Row: {
+          discount_pct: number
+          label: string
+          min_spend_cents: number
+          tier: Database["public"]["Enums"]["trade_tier"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          discount_pct: number
+          label: string
+          min_spend_cents?: number
+          tier: Database["public"]["Enums"]["trade_tier"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          discount_pct?: number
+          label?: string
+          min_spend_cents?: number
+          tier?: Database["public"]["Enums"]["trade_tier"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

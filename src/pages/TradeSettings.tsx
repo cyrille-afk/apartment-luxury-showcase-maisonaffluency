@@ -25,7 +25,7 @@ const passwordSchema = z.object({
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
   const { toast } = useToast();
-  const { tier, tierLabel, discountLabel } = useTradeDiscount();
+  const { tier, tierLabel, discountLabel, config: tierConfig } = useTradeDiscount();
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
@@ -211,12 +211,13 @@ const TradeSettings = () => {
 
       {/* Tier upgrade callout */}
       {tier !== "platinum" && (() => {
-        const SILVER_THRESHOLD = 0;       // €0
-        const GOLD_THRESHOLD = 50_000_00;  // €50,000 in cents
-        const PLATINUM_THRESHOLD = 250_000_00; // €250,000 in cents
-        const nextTier = tier === "silver" ? "Gold" : "Platinum";
-        const nextDiscount = tier === "silver" ? "12%" : "18%";
-        const nextThreshold = tier === "silver" ? GOLD_THRESHOLD : PLATINUM_THRESHOLD;
+        const SILVER_THRESHOLD = tierConfig.silver.min_spend_cents;
+        const GOLD_THRESHOLD = tierConfig.gold.min_spend_cents;
+        const PLATINUM_THRESHOLD = tierConfig.platinum.min_spend_cents;
+        const nextCfg = tier === "silver" ? tierConfig.gold : tierConfig.platinum;
+        const nextTier = nextCfg.label;
+        const nextDiscount = `${(nextCfg.discount_pct * 100).toFixed(nextCfg.discount_pct * 100 % 1 === 0 ? 0 : 1)}%`;
+        const nextThreshold = nextCfg.min_spend_cents;
         const prevThreshold = tier === "silver" ? SILVER_THRESHOLD : GOLD_THRESHOLD;
         const remainingCents = Math.max(0, nextThreshold - spendCents);
         const progressPct = Math.min(100, Math.max(0,
