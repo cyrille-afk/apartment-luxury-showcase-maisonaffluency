@@ -193,7 +193,12 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             placeholder={getBasePlaceholder(product)}
             emphasized
             value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : undefined}
-            onChange={(idx) => setSelBase(baseOptions[idx] ?? null)}
+            onChange={(idx) => {
+              const v = baseOptions[idx] ?? null;
+              setSelBase(v);
+              if (v && selTop && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelTop(null);
+              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
+            }}
             disabledIndices={disabledBaseIdx}
           />
           <ExpandableSpec
