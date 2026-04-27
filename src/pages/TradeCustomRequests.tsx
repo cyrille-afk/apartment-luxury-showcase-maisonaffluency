@@ -4,6 +4,7 @@
  * admins see all and can reply directly with concierge notes + status updates.
  */
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Loader2, Wand2, Inbox, Save, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
