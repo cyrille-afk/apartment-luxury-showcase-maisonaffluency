@@ -62,6 +62,7 @@ const shippingGroup: AdminCard[] = [
   { title: "Shipping Estimator", description: "Generate landed-cost quotes for trade users (Phase 1 TMS)", url: "/trade/shipping-estimator", icon: Truck },
   { title: "Shipping Rate Matrix", description: "Manage carrier lanes, rate brackets, and CSV imports", url: "/trade/admin/shipping-rates", icon: Settings2 },
   { title: "Shipping Surcharges", description: "Configure fuel, insurance, customs, and duty rates", url: "/trade/admin/shipping-surcharges", icon: Percent },
+  { title: "Brand Lead Times", description: "Default availability + lead times per brand for stock badges", url: "/trade/admin/brand-lead-times", icon: Settings2 },
 ];
 
 const groups = [
