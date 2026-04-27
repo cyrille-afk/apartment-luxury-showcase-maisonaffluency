@@ -437,10 +437,48 @@ const ShowroomGridView = ({
 
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
   const categories = useMemo(() => CATEGORY_ORDER.filter((cat) => products.some((p) => p.category === cat)), [products]);
+  // Subcategories available for the current category — only those with at least
+  // one product in the loaded set, ordered per the canonical taxonomy.
+  const availableSubcategories = useMemo(() => {
+    if (selectedCategory === "all") return [];
+    const taxonomyOrder = SUBCATEGORY_MAP[selectedCategory] || [];
+    const present = new Set(
+      products
+        .filter((p) => p.category === selectedCategory && p.subcategory)
+        .map((p) => p.subcategory as string),
+    );
+    const ordered = taxonomyOrder.filter((s) => present.has(s));
+    // Append any present-but-non-canonical subcategories at the end so nothing is hidden.
+    const extras = [...present].filter((s) => !taxonomyOrder.includes(s)).sort();
+    return [...ordered, ...extras];
+  }, [products, selectedCategory]);
   const sections = useMemo(() => {
     const sectionSet = new Set(products.map((p) => getSection(p.image_identifier)));
     return [...sectionSet].sort();
   }, [products]);
+
+  // Sync URL → state when the user navigates here from a breadcrumb (or back/forward).
+  useEffect(() => {
+    const cat = searchParams.get("category") || "all";
+    const sub = searchParams.get("subcategory") || "all";
+    setSelectedCategory(cat);
+    setSelectedSubcategory(sub);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get("category"), searchParams.get("subcategory")]);
+
+  // Sync state → URL whenever the user changes the dropdowns, so the URL is
+  // shareable and breadcrumbs always reflect the active filter.
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (selectedCategory === "all") next.delete("category"); else next.set("category", selectedCategory);
+    if (selectedSubcategory === "all") next.delete("subcategory"); else next.set("subcategory", selectedSubcategory);
+    // Preserve tab=grid so refresh stays on this view.
+    if (!next.get("tab")) next.set("tab", "grid");
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, selectedSubcategory]);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -448,10 +486,13 @@ const ShowroomGridView = ({
       const matchesSearch = !q || p.product_name.toLowerCase().includes(q) || p.designer_name?.toLowerCase().includes(q) || p.materials?.toLowerCase().includes(q);
       const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
+      const matchesSubcategory =
+        selectedSubcategory === "all" ||
+        (p.subcategory && p.subcategory.toLowerCase() === selectedSubcategory.toLowerCase());
       const matchesSection = selectedSection === "all" || getSection(p.image_identifier) === selectedSection;
-      return matchesSearch && matchesDesigner && matchesCategory && matchesSection;
+      return matchesSearch && matchesDesigner && matchesCategory && matchesSubcategory && matchesSection;
     });
-  }, [products, search, selectedDesigner, selectedCategory, selectedSection]);
+  }, [products, search, selectedDesigner, selectedCategory, selectedSubcategory, selectedSection]);
 
   const addProductToQuote = useCallback(async (product: ShowroomProduct, quoteId: string) => {
     if (!user) return;
