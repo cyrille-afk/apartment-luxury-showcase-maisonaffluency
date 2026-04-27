@@ -176,6 +176,14 @@ export default function ExpandableSpec({
             Finishes auto-detected — please confirm at quote
           </p>
         )}
+        {helperText && (
+          <p
+            className="font-body text-[10px] tracking-wide text-muted-foreground/80 mt-1 pl-[26px] italic"
+            role="note"
+          >
+            {helperText}
+          </p>
+        )}
       </>
     );
   }
