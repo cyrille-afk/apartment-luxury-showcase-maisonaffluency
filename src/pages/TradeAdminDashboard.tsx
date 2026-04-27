@@ -8,6 +8,7 @@ import {
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
   ClipboardList, Layers, Settings2, CalendarClock, Users, Truck, Percent, FileBox,
+  Inbox,
 } from "lucide-react";
 
 interface AdminCard {
