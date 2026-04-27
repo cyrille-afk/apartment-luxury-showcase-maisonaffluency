@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 
 export type Project = {
   id: string;
   user_id: string;
+  studio_id: string | null;
   name: string;
   client_name: string;
   location: string;
@@ -37,6 +39,7 @@ export function getRecentProjectIds(): string[] {
 
 export function useProjects(opts: { activeOnly?: boolean } = {}) {
   const { user } = useAuth();
+  const { currentStudio } = useStudio();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,13 +49,19 @@ export function useProjects(opts: { activeOnly?: boolean } = {}) {
     let q = supabase
       .from("projects" as any)
       .select("*")
-      .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
+    // Scope to current studio so all members see studio projects.
+    // RLS enforces visibility (incl. per-project overrides for hidden projects).
+    if (currentStudio) {
+      q = q.eq("studio_id", currentStudio.id);
+    } else {
+      q = q.eq("user_id", user.id);
+    }
     if (opts.activeOnly) q = q.eq("status", "active");
     const { data } = await q;
     setProjects((data || []) as unknown as Project[]);
     setLoading(false);
-  }, [user, opts.activeOnly]);
+  }, [user, currentStudio?.id, opts.activeOnly]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
