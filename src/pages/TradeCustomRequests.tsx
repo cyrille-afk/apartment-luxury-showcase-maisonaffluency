@@ -351,6 +351,31 @@ export default function TradeCustomRequests() {
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             <span className="font-body text-xs">Loading…</span>
                           </div>
+                      <button
+                      onClick={() => toggleActivity(r.id)}
+                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <History className="h-3 w-3" />
+                      Activity log
+                      <span className="ml-1 rounded-full border border-border px-1.5 py-[1px] text-[9px] tracking-[0.08em] text-muted-foreground/80">
+                        {isAdmin ? "Admin · all activity" : "You · own requests"}
+                      </span>
+                      {openActivity[r.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </button>
+                    {openActivity[r.id] && (
+                      <div className="mt-3 space-y-2">
+                        {loadingActivity[r.id] ? (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <span className="font-body text-xs">Loading…</span>
+                          </div>
+                        ) : activityError[r.id] ? (
+                          <div className="rounded border border-destructive/30 bg-destructive/5 px-3 py-2">
+                            <p className="font-body text-xs text-destructive">{activityError[r.id]}</p>
+                            <p className="mt-1 font-body text-[10px] text-muted-foreground">
+                              Activity is restricted by access rules: trade users see only their own request history; admins see everything.
+                            </p>
+                          </div>
                         ) : (activity[r.id] || []).length === 0 ? (
                           <p className="font-body text-xs text-muted-foreground/70">No activity recorded.</p>
                         ) : (
