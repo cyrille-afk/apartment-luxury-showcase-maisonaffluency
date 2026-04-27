@@ -419,6 +419,20 @@ const TradeProductPage: React.FC = () => {
       )?.variant ?? null
     : null;
 
+  // Cross-axis availability: when a material is picked, disable sizes that
+  // don't exist for that material (and vice versa). Keeps both dropdowns
+  // honest about what combinations are actually offered.
+  const disabledMaterialIndices = hasSingleAxisSplit && selectedSingleSize
+    ? singleMaterialOptions
+        .map((m, i) => (singleAxisParsed.some((p) => p.material === m && p.size === selectedSingleSize) ? -1 : i))
+        .filter((i) => i >= 0)
+    : [];
+  const disabledSizeIndices = hasSingleAxisSplit && selectedSingleMaterial
+    ? singleSizeOptions
+        .map((s, i) => (singleAxisParsed.some((p) => p.size === s && p.material === selectedSingleMaterial) ? -1 : i))
+        .filter((i) => i >= 0)
+    : [];
+
   const activeVariant = isDualAxis
     ? dualVariant
     : hasSingleAxisSplit
