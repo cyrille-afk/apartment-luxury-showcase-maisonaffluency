@@ -600,7 +600,13 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                   placeholder="Select your size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : undefined}
-                  onChange={(idx) => setSelectedSingleSize(singleSizeOptions[idx] ?? null)}
+                  onChange={(idx) => {
+                    const newSize = singleSizeOptions[idx] ?? null;
+                    setSelectedSingleSize(newSize);
+                    if (newSize && selectedSingleMaterial && !singleAxisParsed.some((p) => p.size === newSize && p.material === selectedSingleMaterial)) {
+                      setSelectedSingleMaterial(null);
+                    }
+                  }}
                   disabledIndices={disabledSizeIndices}
                 />
               )}
