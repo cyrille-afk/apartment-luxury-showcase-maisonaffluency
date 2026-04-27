@@ -35,6 +35,7 @@ const commerceGroup: AdminCard[] = [
   { title: "Sample Requests", description: "Track sample shipments and returns", url: "/trade/admin", icon: Package },
   { title: "Trade Applications", description: "Review and approve new trade registrations", url: "/trade/admin", icon: Shield },
   { title: "Registered Users", description: "View all sign-ups, roles, and application status", url: "/trade/registered-users", icon: Users },
+  { title: "Custom Requests", description: "Concierge inbox — reply to bespoke requests inline", url: "/trade/custom-requests", icon: Inbox },
 ];
 
 const analyticsGroup: AdminCard[] = [
