@@ -46,20 +46,28 @@ export function useProjects(opts: { activeOnly?: boolean } = {}) {
   const refresh = useCallback(async () => {
     if (!user) { setProjects([]); setLoading(false); return; }
     setLoading(true);
+    // Scope to current studio (when one is selected) so the switcher works.
+    // RLS (`can_view_project`) hides any project where the user has a
+    // per-project override with a NULL role (explicitly hidden), and only
+    // returns projects the member can actually access.
     let q = supabase
       .from("projects" as any)
       .select("*")
       .order("updated_at", { ascending: false });
-    // Scope to current studio so all members see studio projects.
-    // RLS enforces visibility (incl. per-project overrides for hidden projects).
     if (currentStudio) {
       q = q.eq("studio_id", currentStudio.id);
     } else {
-      q = q.eq("user_id", user.id);
+      // Solo / pre-studio fallback: only own personal (studio-less) projects.
+      q = q.eq("user_id", user.id).is("studio_id", null);
     }
     if (opts.activeOnly) q = q.eq("status", "active");
-    const { data } = await q;
-    setProjects((data || []) as unknown as Project[]);
+    const { data, error } = await q;
+    if (error) {
+      console.error("useProjects: failed to load", error);
+      setProjects([]);
+    } else {
+      setProjects((data || []) as unknown as Project[]);
+    }
     setLoading(false);
   }, [user, currentStudio?.id, opts.activeOnly]);
 
