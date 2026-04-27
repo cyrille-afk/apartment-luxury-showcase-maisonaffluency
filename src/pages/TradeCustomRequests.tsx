@@ -173,7 +173,13 @@ export default function TradeCustomRequests() {
               const draft = getDraft(r);
               const dirty = isDirty(r);
               return (
-                <div key={r.id} className="border border-border rounded-lg p-4 md:p-5 bg-background">
+                <div
+                  key={r.id}
+                  id={`cr-${r.id}`}
+                  className={`border rounded-lg p-4 md:p-5 bg-background transition-colors duration-700 ${
+                    highlightId === r.id ? "border-primary ring-2 ring-primary/30" : "border-border"
+                  }`}
+                >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0 flex-1">
                       <h3 className="font-display text-base md:text-lg text-foreground tracking-wide truncate">
