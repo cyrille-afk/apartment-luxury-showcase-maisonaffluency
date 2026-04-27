@@ -68,15 +68,26 @@ export default function TradeCustomRequests() {
   const [activity, setActivity] = useState<Record<string, ActivityEntry[]>>({});
   const [openActivity, setOpenActivity] = useState<Record<string, boolean>>({});
   const [loadingActivity, setLoadingActivity] = useState<Record<string, boolean>>({});
+  const [activityError, setActivityError] = useState<Record<string, string | null>>({});
 
   const loadActivity = async (requestId: string) => {
     setLoadingActivity((p) => ({ ...p, [requestId]: true }));
-    const { data } = await supabase
+    setActivityError((p) => ({ ...p, [requestId]: null }));
+    const { data, error } = await supabase
       .from("trade_custom_request_activity")
       .select("id, request_id, actor_id, actor_role, action, changes, created_at")
       .eq("request_id", requestId)
       .order("created_at", { ascending: false });
-    setActivity((p) => ({ ...p, [requestId]: (data as ActivityEntry[]) || [] }));
+    if (error) {
+      // RLS denial or other error — surface a friendly access state
+      const msg = /permission|denied|policy|rls/i.test(error.message)
+        ? "You don't have access to this request's activity."
+        : "Couldn't load activity. Please try again.";
+      setActivityError((p) => ({ ...p, [requestId]: msg }));
+      setActivity((p) => ({ ...p, [requestId]: [] }));
+    } else {
+      setActivity((p) => ({ ...p, [requestId]: (data as ActivityEntry[]) || [] }));
+    }
     setLoadingActivity((p) => ({ ...p, [requestId]: false }));
   };
 
