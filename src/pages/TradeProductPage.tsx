@@ -601,7 +601,18 @@ const TradeProductPage: React.FC = () => {
                     placeholder={getBasePlaceholder(product)}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
-                    onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
+                    onChange={(idx) => {
+                      const v = baseOptions[idx] ?? null;
+                      setSelectedBase(v);
+                      if (v && selectedTop && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedTop(null);
+                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedDualSize(null);
+                    }}
+                    disabledIndices={disabledBaseIdx}
+                    helperText={
+                      disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
+                        ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                        : undefined
+                    }
                   />
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -609,7 +620,18 @@ const TradeProductPage: React.FC = () => {
                     placeholder={getTopPlaceholder(product)}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
-                    onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}
+                    onChange={(idx) => {
+                      const v = topOptions[idx] ?? null;
+                      setSelectedTop(v);
+                      if (v && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedBase(null);
+                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedDualSize(null);
+                    }}
+                    disabledIndices={disabledTopIdx}
+                    helperText={
+                      disabledTopIdx.length > 0 && (selectedBase || selectedDualSize)
+                        ? `Some ${(getTopPlaceholder(product) || "top").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                        : undefined
+                    }
                   />
                 </>
               )}
