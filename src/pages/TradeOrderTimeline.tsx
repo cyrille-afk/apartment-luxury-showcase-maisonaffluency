@@ -256,6 +256,26 @@ export default function TradeOrderTimeline() {
           </p>
         </div>
 
+        {projectFilter && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <FolderKanban className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="font-body text-xs text-muted-foreground truncate">
+                Showing timelines for project:{" "}
+                <Link to={`/trade/projects/${projectFilter}`} className="text-foreground underline underline-offset-2">
+                  {projectName || "loading…"}
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={clearProjectFilter}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted/40 px-2 py-0.5 font-body text-[11px] text-muted-foreground"
+            >
+              Clear <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin h-6 w-6 border-2 border-foreground/20 border-t-foreground rounded-full" />
