@@ -6,7 +6,7 @@ import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
-  Package, Users,
+  Package, Users, LayoutGrid, Truck,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
