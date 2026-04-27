@@ -2580,6 +2580,44 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_custom_request_activity: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string
+          changes: Json
+          created_at: string
+          id: string
+          request_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string
+          changes?: Json
+          created_at?: string
+          id?: string
+          request_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string
+          changes?: Json
+          created_at?: string
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_custom_request_activity_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "trade_custom_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_custom_requests: {
         Row: {
           admin_notes: string | null
