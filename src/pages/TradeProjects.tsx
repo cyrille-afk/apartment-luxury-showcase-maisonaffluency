@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon } from "lucide-react";
+import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -19,7 +19,7 @@ const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[]
 
 export default function TradeProjects() {
   const { user } = useAuth();
-  const { currentStudio, canEdit } = useStudio();
+  const { currentStudio, canEdit, isAdmin } = useStudio();
   const { projects, loading, refresh } = useProjects();
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -27,8 +27,27 @@ export default function TradeProjects() {
   const [clientName, setClientName] = useState("");
   const [location, setLocation] = useState("");
   const [creating, setCreating] = useState(false);
+  const [hiddenForMeCount, setHiddenForMeCount] = useState(0);
+
+  // Count projects in this studio that are explicitly hidden from the current
+  // user via a per-project override (role = NULL). Purely informational.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!user || !currentStudio) { setHiddenForMeCount(0); return; }
+      const { data } = await supabase
+        .from("studio_project_overrides" as any)
+        .select("project_id, role, projects!inner(studio_id)")
+        .eq("user_id", user.id)
+        .eq("projects.studio_id", currentStudio.id)
+        .is("role", null);
+      if (!cancelled) setHiddenForMeCount((data || []).length);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, currentStudio?.id, projects.length]);
 
   const filtered = projects.filter((p) => p.status === tab);
+
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
@@ -60,6 +79,25 @@ export default function TradeProjects() {
           <p className="font-body text-sm text-muted-foreground">
             Group quotes, mood boards, FF&E, tearsheets, and timelines under named projects.
           </p>
+          {currentStudio && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-body text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted">
+                <Users className="h-3 w-3" />
+                Showing projects in <span className="text-foreground">{currentStudio.name}</span>
+              </span>
+              {hiddenForMeCount > 0 && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted"
+                  title={isAdmin
+                    ? "These projects exist in the studio but are hidden from you via per-project overrides."
+                    : "Some projects in this studio are restricted by an admin."}
+                >
+                  <EyeOff className="h-3 w-3" />
+                  {hiddenForMeCount} hidden from you
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
