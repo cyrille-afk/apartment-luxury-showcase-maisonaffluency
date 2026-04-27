@@ -6,7 +6,7 @@ import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
-  Package, Users, LayoutGrid, Truck,
+  Package, Users, LayoutGrid, Truck, Lock,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,8 +29,10 @@ type LinkedTimeline = { id: string; quote_id: string; kanban_status: string; est
 export default function TradeProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { project, loading, refresh } = useProject(id);
+  const accessDenied = !loading && project != null && project.user_id !== user?.id && !isAdmin;
+  const canManage = !accessDenied;
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: "", client_name: "", location: "", notes: "", target_completion_date: "" });
@@ -61,7 +63,7 @@ export default function TradeProjectDetail() {
   }, [project]);
 
   useEffect(() => {
-    if (!id || !user) return;
+    if (!id || !user || accessDenied) return;
     (async () => {
       setLoadingLinks(true);
       const sb = supabase as any;
@@ -163,6 +165,26 @@ export default function TradeProjectDetail() {
       <div className="text-center py-20">
         <p className="font-body text-sm text-muted-foreground mb-4">Project not found.</p>
         <Link to="/trade/projects" className="font-body text-xs underline">Back to projects</Link>
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="max-w-md mx-auto text-center py-20">
+        <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-muted mb-4">
+          <Lock className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <h1 className="font-display text-xl text-foreground mb-2">Access denied</h1>
+        <p className="font-body text-sm text-muted-foreground mb-6">
+          You don't have permission to view this project. Only the project owner or an administrator can open it.
+        </p>
+        <Link
+          to="/trade/projects"
+          className="inline-flex items-center gap-1.5 font-body text-xs text-foreground underline hover:no-underline"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to your projects
+        </Link>
       </div>
     );
   }
