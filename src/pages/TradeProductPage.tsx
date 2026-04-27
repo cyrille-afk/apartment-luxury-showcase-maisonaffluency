@@ -37,6 +37,7 @@ import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
+import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
@@ -507,6 +508,22 @@ const TradeProductPage: React.FC = () => {
       </Helmet>
 
       <div className="max-w-7xl pb-12">
+        {(() => {
+          const crumbs: Crumb[] = [{ label: "Trade", to: "/trade/showroom" }];
+          if (product.category) {
+            const params = new URLSearchParams({ tab: "grid" });
+            params.set("category", product.category);
+            crumbs.push({ label: product.category, to: `/trade/showroom?${params.toString()}` });
+          }
+          if (normalizedSubcategory) {
+            const params = new URLSearchParams({ tab: "grid" });
+            if (product.category) params.set("category", product.category);
+            params.set("subcategory", normalizedSubcategory);
+            crumbs.push({ label: normalizedSubcategory, to: `/trade/showroom?${params.toString()}` });
+          }
+          crumbs.push({ label: product.title });
+          return <Breadcrumbs items={crumbs} className="mb-3" />;
+        })()}
         <button
           onClick={() => {
             if (fromPath) {
