@@ -370,3 +370,63 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+const FIELD_LABELS: Record<string, string> = {
+  status: "Status",
+  admin_notes: "Concierge reply",
+  notes: "Notes",
+  dimension_changes: "Dimensions",
+  finish_notes: "Finish",
+  com_col_fabric: "COM / COL",
+  quantity: "Quantity",
+  target_lead_weeks: "Target lead",
+  budget_notes: "Budget",
+};
+
+function fmtVal(v: any): string {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "string" && v.length > 60) return v.slice(0, 57) + "…";
+  return String(v);
+}
+
+function ActivityItem({ entry }: { entry: ActivityEntry }) {
+  const when = new Date(entry.created_at).toLocaleString();
+  const who =
+    entry.actor_role === "admin"
+      ? "Admin"
+      : entry.actor_role === "trade_user"
+      ? "Trade user"
+      : "System";
+  const isCreate = entry.action === "created";
+  const fieldEntries = Object.entries(entry.changes || {});
+  return (
+    <li className="relative">
+      <span className="absolute -left-[14px] top-1.5 h-2 w-2 rounded-full bg-foreground/40" />
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-body text-[10px] uppercase tracking-[0.12em] text-foreground">
+          {who} {isCreate ? "created request" : "updated request"}
+        </span>
+        <span className="font-body text-[10px] text-muted-foreground/70">{when}</span>
+      </div>
+      {!isCreate && fieldEntries.length > 0 && (
+        <ul className="mt-1 space-y-0.5">
+          {fieldEntries.map(([field, change]: [string, any]) => (
+            <li key={field} className="font-body text-xs text-muted-foreground">
+              <span className="text-foreground/80">{FIELD_LABELS[field] || field}</span>:{" "}
+              <span className="line-through text-muted-foreground/60">{fmtVal(change?.from)}</span>
+              {" → "}
+              <span className="text-foreground">{fmtVal(change?.to)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {isCreate && (
+        <p className="mt-1 font-body text-xs text-muted-foreground">
+          {fmtVal(entry.changes?.product_name)}
+          {entry.changes?.brand_name ? ` · ${fmtVal(entry.changes.brand_name)}` : ""}
+          {" · qty "}{fmtVal(entry.changes?.quantity)}
+        </p>
+      )}
+    </li>
+  );
+}
