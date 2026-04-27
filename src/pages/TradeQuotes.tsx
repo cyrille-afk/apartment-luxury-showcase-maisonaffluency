@@ -130,7 +130,7 @@ const TradeQuotes = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [user, showAll, projectFilter]);
+  }, [user, showAll, projectFilter, currentStudio?.id]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
