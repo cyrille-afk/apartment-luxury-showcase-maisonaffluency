@@ -433,6 +433,22 @@ const TradeProductPage: React.FC = () => {
         .filter((i) => i >= 0)
     : [];
 
+  // Dual-axis: cross-disable base × top × size based on existing variants.
+  const variantsList = sizeVariants || [];
+  const matchesDual = (v: any, b: string | null, t: string | null, s: string | null) =>
+    (b == null || (v.base || "").trim() === b) &&
+    (t == null || (v.top || "").trim() === t) &&
+    (s == null || (v.label || "").trim() === s);
+  const disabledBaseIdx = isDualAxis && (selectedTop || selectedDualSize)
+    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selectedTop, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledTopIdx = isDualAxis && (selectedBase || selectedDualSize)
+    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, t, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledDualSizeIdx = isDualAxis && (selectedBase || selectedTop)
+    ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+
   const activeVariant = isDualAxis
     ? dualVariant
     : hasSingleAxisSplit
@@ -585,7 +601,18 @@ const TradeProductPage: React.FC = () => {
                     placeholder={getBasePlaceholder(product)}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
-                    onChange={(idx) => setSelectedBase(baseOptions[idx] ?? null)}
+                    onChange={(idx) => {
+                      const v = baseOptions[idx] ?? null;
+                      setSelectedBase(v);
+                      if (v && selectedTop && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedTop(null);
+                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedDualSize(null);
+                    }}
+                    disabledIndices={disabledBaseIdx}
+                    helperText={
+                      disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
+                        ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                        : undefined
+                    }
                   />
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -593,7 +620,18 @@ const TradeProductPage: React.FC = () => {
                     placeholder={getTopPlaceholder(product)}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
-                    onChange={(idx) => setSelectedTop(topOptions[idx] ?? null)}
+                    onChange={(idx) => {
+                      const v = topOptions[idx] ?? null;
+                      setSelectedTop(v);
+                      if (v && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedBase(null);
+                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedDualSize(null);
+                    }}
+                    disabledIndices={disabledTopIdx}
+                    helperText={
+                      disabledTopIdx.length > 0 && (selectedBase || selectedDualSize)
+                        ? `Some ${(getTopPlaceholder(product) || "top").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                        : undefined
+                    }
                   />
                 </>
               )}
@@ -654,7 +692,18 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
-                  onChange={(idx) => setSelectedDualSize(dualSizeOptions[idx] ?? null)}
+                  onChange={(idx) => {
+                    const s = dualSizeOptions[idx] ?? null;
+                    setSelectedDualSize(s);
+                    if (s && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedBase(null);
+                    if (s && selectedTop && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedTop(null);
+                  }}
+                  disabledIndices={disabledDualSizeIdx}
+                  helperText={
+                    disabledDualSizeIdx.length > 0 && (selectedBase || selectedTop)
+                      ? `Some sizes aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
                 />
               )}
               {product.dimensions && isDualAxis && !hasDualSize && (
