@@ -79,6 +79,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
 
+  // Insurance bundling
+  type InsuranceTier = "standard" | "premium" | "all_risk";
+  const INSURANCE_TIERS: { value: InsuranceTier; label: string; rateBps: number; description: string }[] = [
+    { value: "standard", label: "Standard Transit", rateBps: 50, description: "Loss & damage in transit. Door-to-door coverage." },
+    { value: "premium", label: "Premium Transit", rateBps: 100, description: "Adds handling, storage in-transit, partial loss." },
+    { value: "all_risk", label: "All-Risk Fine Art", rateBps: 180, description: "Comprehensive incl. installation, storage 30 days, named perils." },
+  ];
+  const [insuranceEnabled, setInsuranceEnabled] = useState(false);
+  const [insuranceTier, setInsuranceTier] = useState<InsuranceTier>("standard");
+  const [insuranceRateBps, setInsuranceRateBps] = useState<number>(50);
+  const [insuranceNotes, setInsuranceNotes] = useState("");
+
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
   const isPriced = quoteStatus === "priced";
