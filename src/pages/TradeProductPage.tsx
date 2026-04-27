@@ -433,6 +433,22 @@ const TradeProductPage: React.FC = () => {
         .filter((i) => i >= 0)
     : [];
 
+  // Dual-axis: cross-disable base × top × size based on existing variants.
+  const variantsList = sizeVariants || [];
+  const matchesDual = (v: any, b: string | null, t: string | null, s: string | null) =>
+    (b == null || (v.base || "").trim() === b) &&
+    (t == null || (v.top || "").trim() === t) &&
+    (s == null || (v.label || "").trim() === s);
+  const disabledBaseIdx = isDualAxis && (selectedTop || selectedDualSize)
+    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selectedTop, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledTopIdx = isDualAxis && (selectedBase || selectedDualSize)
+    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, t, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledDualSizeIdx = isDualAxis && (selectedBase || selectedTop)
+    ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+
   const activeVariant = isDualAxis
     ? dualVariant
     : hasSingleAxisSplit
