@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 import TradePriceToggle from "@/components/trade/TradePriceToggle";
+import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
+import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
@@ -190,8 +192,9 @@ const TradeLayout = () => {
               <LayoutDashboard className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="font-display text-xs text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
             </div>
-            {/* Right: trade price toggle + notification bell */}
+            {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4">
+              <GlobalProjectSwitcher />
               <div className="hidden sm:block">
                 <TradePriceToggle />
               </div>
@@ -199,6 +202,7 @@ const TradeLayout = () => {
             </div>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-6 lg:pb-8">
+            <OrphanAssignBanner />
             <Suspense fallback={
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
