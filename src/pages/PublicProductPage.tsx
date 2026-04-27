@@ -23,6 +23,7 @@ import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
+import { formatHandcrafted } from "@/lib/formatHandcrafted";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -541,18 +542,15 @@ const PublicProductPage: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <VariantSelectors product={product} />
 
-                {(product.origin || product.lead_time) && (
-                  <ExpandableSpec
-                    icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
-                    text={
-                      product.origin && product.lead_time
-                        ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")} in ${product.lead_time.replace(/^\s*ships?\s+in\s+/i, "")}`
-                        : product.origin
-                          ? `Handcrafted in ${product.origin.replace(/^\s*(handmade|handcrafted|made)\s+in\s+/i, "")}`
-                          : product.lead_time!
-                    }
-                  />
-                )}
+                {(() => {
+                  const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                  return handcrafted ? (
+                    <ExpandableSpec
+                      icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
+                      text={handcrafted}
+                    />
+                  ) : null;
+                })()}
               </div>
 
               {/* Primary CTA — Price on Request */}
