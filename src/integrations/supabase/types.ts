@@ -3711,7 +3711,7 @@ export type Database = {
         | "cancelled"
       studio_role: "owner" | "admin" | "editor" | "viewer"
       trade_application_status: "pending" | "approved" | "rejected"
-      trade_tier: "standard" | "silver" | "gold"
+      trade_tier: "standard" | "silver" | "gold" | "platinum"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3872,7 +3872,7 @@ export const Constants = {
       ],
       studio_role: ["owner", "admin", "editor", "viewer"],
       trade_application_status: ["pending", "approved", "rejected"],
-      trade_tier: ["standard", "silver", "gold"],
+      trade_tier: ["standard", "silver", "gold", "platinum"],
     },
   },
 } as const
