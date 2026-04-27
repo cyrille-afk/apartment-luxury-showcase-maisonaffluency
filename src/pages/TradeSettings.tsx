@@ -181,11 +181,13 @@ const TradeSettings = () => {
 
       {/* Trade tier badge */}
       <div className={`mb-8 flex items-center gap-3 px-4 py-3 rounded-lg border ${
+        tier === "platinum" ? "bg-gradient-to-r from-zinc-100 via-white to-zinc-100 border-zinc-300" :
         tier === "gold" ? "bg-amber-50 border-amber-200" :
         tier === "silver" ? "bg-slate-50 border-slate-200" :
         "bg-muted/40 border-border"
       }`}>
         <div className={`h-9 w-9 rounded-full flex items-center justify-center ${
+          tier === "platinum" ? "bg-zinc-200 text-zinc-900" :
           tier === "gold" ? "bg-amber-200 text-amber-900" :
           tier === "silver" ? "bg-slate-200 text-slate-800" :
           "bg-foreground/10 text-foreground"
@@ -198,7 +200,7 @@ const TradeSettings = () => {
           </div>
           <div className="font-body text-xs text-muted-foreground">
             You receive a {discountLabel} trade discount on all eligible products.
-            {tier !== "gold" && " Tier upgrades are assigned by the Maison Affluency team."}
+            {tier !== "platinum" && " Tier upgrades are assigned by the Maison Affluency team based on your rolling 12-month confirmed spend."}
           </div>
         </div>
       </div>
