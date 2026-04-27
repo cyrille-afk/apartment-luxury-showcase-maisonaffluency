@@ -61,7 +61,9 @@ export default function ExpandableSpec({
   autoDetectedHint = false,
   value,
   onChange,
+  disabledIndices,
 }: ExpandableSpecProps) {
+  const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   let didAutoSplit = false;
 
