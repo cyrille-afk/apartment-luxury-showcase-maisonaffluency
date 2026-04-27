@@ -3255,6 +3255,10 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          insurance_enabled: boolean
+          insurance_notes: string | null
+          insurance_rate_bps: number
+          insurance_tier: string
           notes: string | null
           project_id: string | null
           responded_at: string | null
@@ -3271,6 +3275,10 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          insurance_enabled?: boolean
+          insurance_notes?: string | null
+          insurance_rate_bps?: number
+          insurance_tier?: string
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
@@ -3287,6 +3295,10 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          insurance_enabled?: boolean
+          insurance_notes?: string | null
+          insurance_rate_bps?: number
+          insurance_tier?: string
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
