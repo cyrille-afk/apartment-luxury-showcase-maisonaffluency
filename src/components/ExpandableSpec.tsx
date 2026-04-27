@@ -43,6 +43,8 @@ interface ExpandableSpecProps {
    * another axis (e.g. size).
    */
   disabledIndices?: number[];
+  /** Optional muted caption rendered below the dropdown (e.g. constraint hints). */
+  helperText?: string;
 }
 
 /**
