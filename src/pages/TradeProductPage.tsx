@@ -552,6 +552,7 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                   value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : undefined}
                   onChange={(idx) => setSelectedSingleMaterial(singleMaterialOptions[idx] ?? null)}
+                  disabledIndices={disabledMaterialIndices}
                 />
               )}
               {!isDualAxis && !hasSingleAxisSplit && product.materials && (
