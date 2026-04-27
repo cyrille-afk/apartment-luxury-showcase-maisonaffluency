@@ -68,15 +68,26 @@ export default function TradeCustomRequests() {
   const [activity, setActivity] = useState<Record<string, ActivityEntry[]>>({});
   const [openActivity, setOpenActivity] = useState<Record<string, boolean>>({});
   const [loadingActivity, setLoadingActivity] = useState<Record<string, boolean>>({});
+  const [activityError, setActivityError] = useState<Record<string, string | null>>({});
 
   const loadActivity = async (requestId: string) => {
     setLoadingActivity((p) => ({ ...p, [requestId]: true }));
-    const { data } = await supabase
+    setActivityError((p) => ({ ...p, [requestId]: null }));
+    const { data, error } = await supabase
       .from("trade_custom_request_activity")
       .select("id, request_id, actor_id, actor_role, action, changes, created_at")
       .eq("request_id", requestId)
       .order("created_at", { ascending: false });
-    setActivity((p) => ({ ...p, [requestId]: (data as ActivityEntry[]) || [] }));
+    if (error) {
+      // RLS denial or other error — surface a friendly access state
+      const msg = /permission|denied|policy|rls/i.test(error.message)
+        ? "You don't have access to this request's activity."
+        : "Couldn't load activity. Please try again.";
+      setActivityError((p) => ({ ...p, [requestId]: msg }));
+      setActivity((p) => ({ ...p, [requestId]: [] }));
+    } else {
+      setActivity((p) => ({ ...p, [requestId]: (data as ActivityEntry[]) || [] }));
+    }
     setLoadingActivity((p) => ({ ...p, [requestId]: false }));
   };
 
@@ -331,6 +342,9 @@ export default function TradeCustomRequests() {
                     >
                       <History className="h-3 w-3" />
                       Activity log
+                      <span className="ml-1 rounded-full border border-border px-1.5 py-[1px] text-[9px] tracking-[0.08em] text-muted-foreground/80">
+                        {isAdmin ? "Admin · all activity" : "You · own requests"}
+                      </span>
                       {openActivity[r.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                     </button>
                     {openActivity[r.id] && (
@@ -339,6 +353,13 @@ export default function TradeCustomRequests() {
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             <span className="font-body text-xs">Loading…</span>
+                          </div>
+                        ) : activityError[r.id] ? (
+                          <div className="rounded border border-destructive/30 bg-destructive/5 px-3 py-2">
+                            <p className="font-body text-xs text-destructive">{activityError[r.id]}</p>
+                            <p className="mt-1 font-body text-[10px] text-muted-foreground">
+                              Activity is restricted by access rules: trade users see only their own request history; admins see everything.
+                            </p>
                           </div>
                         ) : (activity[r.id] || []).length === 0 ? (
                           <p className="font-body text-xs text-muted-foreground/70">No activity recorded.</p>
