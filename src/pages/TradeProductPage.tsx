@@ -846,67 +846,143 @@ const TradeProductPage: React.FC = () => {
         </div>
 
         {/* From the Same Maker — related picks */}
-        {relatedPicks.length > 0 && (
-          <div className="mt-16 pt-8 border-t border-border">
-            <div className="flex items-baseline justify-between mb-6">
-              <div>
-                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
-                  {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
-                    ? "From the Same Maker"
-                    : "From the Same Designer"}
-                </p>
-                <h2 className="font-display text-xl md:text-2xl leading-tight">
-                  <Link
-                    to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {designerDisplay}
-                  </Link>
-                </h2>
+        {relatedPicks.length > 0 && (() => {
+          const sameMakerLabel = (product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
+            ? "From the Same Maker"
+            : "From the Same Designer";
+
+          // Build brand summary from designer biography (mirror PublicProductPage logic).
+          const bio = (designer as any).biography as string | undefined;
+          let brandSummary = "";
+          if (bio) {
+            const cleaned = bio
+              .split(/\n+/)
+              .map((line) => line.trim())
+              .filter((line) => line && !/^https?:\/\//i.test(line.split("|")[0].trim()))
+              .join(" ")
+              .replace(/\s+/g, " ")
+              .trim();
+            if (cleaned.length <= 480) {
+              brandSummary = cleaned;
+            } else {
+              const sentenceEnd = cleaned.slice(480).search(/[.!?](\s|$)/);
+              brandSummary = sentenceEnd !== -1
+                ? cleaned.slice(0, 480 + sentenceEnd + 1).trim()
+                : cleaned.slice(0, 480).replace(/\s+\S*$/, "") + "…";
+            }
+          }
+
+          const PREVIEW_LEN = 240;
+          const needsToggle = brandSummary.length > PREVIEW_LEN;
+          let preview = brandSummary;
+          if (needsToggle) {
+            const slice = brandSummary.slice(0, PREVIEW_LEN);
+            const lastSpace = slice.lastIndexOf(" ");
+            preview = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim() + "…";
+          }
+          const shownSummary = bioExpanded || !needsToggle ? brandSummary : preview;
+
+          return (
+            <div className="mt-16 pt-8 border-t border-border">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+                {/* Mobile-only heading */}
+                <div className="lg:hidden order-1">
+                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                    {sameMakerLabel}
+                  </p>
+                  <h2 className="font-display text-2xl leading-tight">
+                    <Link
+                      to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {designerDisplay}
+                    </Link>
+                  </h2>
+                </div>
+
+                {/* Product grid */}
+                <div className="lg:col-span-8 order-2 lg:order-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                    {relatedPicks.slice(0, 6).map((rp) => (
+                      <Link
+                        key={rp.id}
+                        to={`/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        state={{ from: location.pathname + location.search }}
+                        className="group block"
+                      >
+                        <div className="relative aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
+                          {rp.image_url ? (
+                            <img
+                              src={rp.image_url}
+                              alt={rp.title}
+                              className={cn(
+                                "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+                                rp.hover_image_url ? "group-hover:opacity-0" : "group-hover:scale-105"
+                              )}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="h-6 w-6 text-muted-foreground/30" />
+                            </div>
+                          )}
+                          {rp.hover_image_url && (
+                            <img
+                              src={rp.hover_image_url}
+                              alt=""
+                              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                              loading="lazy"
+                            />
+                          )}
+                        </div>
+                        <p className="font-body text-xs md:text-sm text-foreground mt-2 text-center truncate">
+                          {rp.title}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Brand summary — left column on desktop, below grid on mobile */}
+                <div className="lg:col-span-4 lg:pr-4 order-3 lg:order-1">
+                  <div className="hidden lg:block">
+                    <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                      {sameMakerLabel}
+                    </p>
+                    <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
+                      <Link
+                        to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                        className="hover:text-primary transition-colors"
+                      >
+                        {designerDisplay}
+                      </Link>
+                    </h2>
+                  </div>
+                  {brandSummary && (
+                    <div>
+                      <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                        {renderParagraph(shownSummary)}
+                      </p>
+                      {needsToggle && (
+                        <button
+                          type="button"
+                          onClick={() => setBioExpanded((v) => !v)}
+                          className="mt-2 inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.15em] text-foreground hover:text-primary transition-colors"
+                        >
+                          {bioExpanded ? "Read less" : "Read more"}
+                          <ChevronDown
+                            size={12}
+                            className={cn("transition-transform duration-200", bioExpanded && "rotate-180")}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {relatedPicks.slice(0, 8).map((rp) => (
-                <Link
-                  key={rp.id}
-                  to={`/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
-                  state={{ from: location.pathname + location.search }}
-                  className="group block"
-                >
-                  <div className="relative aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
-                    {rp.image_url ? (
-                      <img
-                        src={rp.image_url}
-                        alt={rp.title}
-                        className={cn(
-                          "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-                          rp.hover_image_url ? "group-hover:opacity-0" : "group-hover:scale-105"
-                        )}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="h-6 w-6 text-muted-foreground/30" />
-                      </div>
-                    )}
-                    {rp.hover_image_url && (
-                      <img
-                        src={rp.hover_image_url}
-                        alt=""
-                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                        loading="lazy"
-                      />
-                    )}
-                  </div>
-                  <p className="font-body text-xs md:text-sm text-foreground mt-2 text-center truncate">
-                    {rp.title}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <QuoteDrawer
