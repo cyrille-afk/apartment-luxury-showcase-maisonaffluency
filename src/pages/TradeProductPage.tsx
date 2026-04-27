@@ -365,10 +365,11 @@ const TradeProductPage: React.FC = () => {
   const favorited = isFavorited(favoriteId);
 
   const rawSubcategory = product.subcategory?.trim();
+  // Canonical-cased subcategory label (e.g. db "cabinets" → "Cabinets") for display.
   const normalizedSubcategory = rawSubcategory
-    ? Object.entries(SUBCATEGORY_MAP).find(([, values]) =>
-        values.some((value) => value.toLowerCase() === rawSubcategory.toLowerCase())
-      )?.[0] || rawSubcategory
+    ? (Object.values(SUBCATEGORY_MAP)
+        .flat()
+        .find((s) => s.toLowerCase() === rawSubcategory.toLowerCase()) || rawSubcategory)
     : null;
 
   // Fallback back-target: prefer the originating designer/atelier gallery so
