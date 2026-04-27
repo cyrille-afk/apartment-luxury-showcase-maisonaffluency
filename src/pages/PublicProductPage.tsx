@@ -17,7 +17,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
-import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
@@ -418,20 +418,8 @@ const PublicProductPage: React.FC = () => {
   };
 
   const pinned = isPinned(product.title, product.id);
-  const rawSubcategory = product.subcategory?.trim();
-  // Parent category derived from the subcategory's position in the taxonomy
-  // (e.g. "Cabinets" → "Storage"). Used for the legacy fallback grid URL.
-  const normalizedParentCategory = rawSubcategory
-    ? Object.entries(SUBCATEGORY_MAP).find(([, values]) =>
-        values.some((value) => value.toLowerCase() === rawSubcategory.toLowerCase())
-      )?.[0] || null
-    : null;
-  // Canonical-cased subcategory label (e.g. db "cabinets" → "Cabinets") for display.
-  const normalizedSubcategory = rawSubcategory
-    ? (Object.values(SUBCATEGORY_MAP)
-        .flat()
-        .find((s) => s.toLowerCase() === rawSubcategory.toLowerCase()) || rawSubcategory)
-    : null;
+  const { rawSubcategory, normalizedSubcategory, normalizedParentCategory } =
+    normalizeCategoryContext(product.subcategory);
 
   const fallbackGridParams = new URLSearchParams();
   if (product.category) fallbackGridParams.set("category", product.category);
