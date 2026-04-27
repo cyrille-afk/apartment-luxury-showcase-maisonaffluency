@@ -48,7 +48,7 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="w-[min(22rem,75vw)] rounded-lg bg-white/85 backdrop-blur-md border border-white/60 shadow-md px-4 py-3"
+            className="w-[min(34rem,90vw)] rounded-lg bg-white/85 backdrop-blur-md border border-white/60 shadow-md px-5 py-2.5"
           >
             <p className="font-body text-[12px] text-foreground leading-relaxed">
               {description}
