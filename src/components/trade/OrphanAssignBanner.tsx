@@ -128,11 +128,11 @@ export function OrphanAssignBanner() {
     for (const [projectId, g] of Object.entries(groups)) {
       const tasks: Promise<any>[] = [];
       if (g.quotes.length)
-        tasks.push(supabase.from("trade_quotes").update({ project_id: projectId } as any).in("id", g.quotes));
+        tasks.push(Promise.resolve(supabase.from("trade_quotes").update({ project_id: projectId } as any).in("id", g.quotes)));
       if (g.boards.length)
-        tasks.push(supabase.from("client_boards" as any).update({ project_id: projectId } as any).in("id", g.boards));
+        tasks.push(Promise.resolve(supabase.from("client_boards" as any).update({ project_id: projectId } as any).in("id", g.boards)));
       if (g.timelines.length)
-        tasks.push(supabase.from("order_timeline" as any).update({ project_id: projectId } as any).in("id", g.timelines));
+        tasks.push(Promise.resolve(supabase.from("order_timeline" as any).update({ project_id: projectId } as any).in("id", g.timelines)));
       const results = await Promise.all(tasks);
       results.forEach((r) => { if (r.error) errors++; });
     }
