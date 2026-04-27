@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Loader2, Wand2, Inbox, Save, ShieldCheck } from "lucide-react";
+import { Loader2, Wand2, Inbox, Save, ShieldCheck, History, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
@@ -25,6 +25,16 @@ type CustomRequest = {
   admin_notes: string | null;
   created_at: string;
   user_id: string;
+};
+
+type ActivityEntry = {
+  id: string;
+  request_id: string;
+  actor_id: string | null;
+  actor_role: string;
+  action: string;
+  changes: Record<string, any>;
+  created_at: string;
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -55,6 +65,26 @@ export default function TradeCustomRequests() {
   const [searchParams] = useSearchParams();
   const focusId = searchParams.get("focus");
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [activity, setActivity] = useState<Record<string, ActivityEntry[]>>({});
+  const [openActivity, setOpenActivity] = useState<Record<string, boolean>>({});
+  const [loadingActivity, setLoadingActivity] = useState<Record<string, boolean>>({});
+
+  const loadActivity = async (requestId: string) => {
+    setLoadingActivity((p) => ({ ...p, [requestId]: true }));
+    const { data } = await supabase
+      .from("trade_custom_request_activity")
+      .select("id, request_id, actor_id, actor_role, action, changes, created_at")
+      .eq("request_id", requestId)
+      .order("created_at", { ascending: false });
+    setActivity((p) => ({ ...p, [requestId]: (data as ActivityEntry[]) || [] }));
+    setLoadingActivity((p) => ({ ...p, [requestId]: false }));
+  };
+
+  const toggleActivity = (requestId: string) => {
+    const willOpen = !openActivity[requestId];
+    setOpenActivity((p) => ({ ...p, [requestId]: willOpen }));
+    if (willOpen && !activity[requestId]) loadActivity(requestId);
+  };
 
   useEffect(() => {
     if (!focusId || loading || requests.length === 0) return;
@@ -114,6 +144,7 @@ export default function TradeCustomRequests() {
       return next;
     });
     toast({ title: "Reply sent", description: "The trade user will see your concierge note." });
+    if (openActivity[r.id]) loadActivity(r.id);
   };
 
   const headline = useMemo(
@@ -292,6 +323,35 @@ export default function TradeCustomRequests() {
                       </div>
                     )
                   )}
+
+                  <div className="mt-4 pt-3 border-t border-border">
+                    <button
+                      onClick={() => toggleActivity(r.id)}
+                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <History className="h-3 w-3" />
+                      Activity log
+                      {openActivity[r.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </button>
+                    {openActivity[r.id] && (
+                      <div className="mt-3 space-y-2">
+                        {loadingActivity[r.id] ? (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <span className="font-body text-xs">Loading…</span>
+                          </div>
+                        ) : (activity[r.id] || []).length === 0 ? (
+                          <p className="font-body text-xs text-muted-foreground/70">No activity recorded.</p>
+                        ) : (
+                          <ol className="space-y-2 border-l border-border pl-3">
+                            {(activity[r.id] || []).map((a) => (
+                              <ActivityItem key={a.id} entry={a} />
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -308,5 +368,65 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70">{label}</dt>
       <dd className="font-body text-sm text-foreground">{value}</dd>
     </div>
+  );
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  status: "Status",
+  admin_notes: "Concierge reply",
+  notes: "Notes",
+  dimension_changes: "Dimensions",
+  finish_notes: "Finish",
+  com_col_fabric: "COM / COL",
+  quantity: "Quantity",
+  target_lead_weeks: "Target lead",
+  budget_notes: "Budget",
+};
+
+function fmtVal(v: any): string {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "string" && v.length > 60) return v.slice(0, 57) + "…";
+  return String(v);
+}
+
+function ActivityItem({ entry }: { entry: ActivityEntry }) {
+  const when = new Date(entry.created_at).toLocaleString();
+  const who =
+    entry.actor_role === "admin"
+      ? "Admin"
+      : entry.actor_role === "trade_user"
+      ? "Trade user"
+      : "System";
+  const isCreate = entry.action === "created";
+  const fieldEntries = Object.entries(entry.changes || {});
+  return (
+    <li className="relative">
+      <span className="absolute -left-[14px] top-1.5 h-2 w-2 rounded-full bg-foreground/40" />
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-body text-[10px] uppercase tracking-[0.12em] text-foreground">
+          {who} {isCreate ? "created request" : "updated request"}
+        </span>
+        <span className="font-body text-[10px] text-muted-foreground/70">{when}</span>
+      </div>
+      {!isCreate && fieldEntries.length > 0 && (
+        <ul className="mt-1 space-y-0.5">
+          {fieldEntries.map(([field, change]: [string, any]) => (
+            <li key={field} className="font-body text-xs text-muted-foreground">
+              <span className="text-foreground/80">{FIELD_LABELS[field] || field}</span>:{" "}
+              <span className="line-through text-muted-foreground/60">{fmtVal(change?.from)}</span>
+              {" → "}
+              <span className="text-foreground">{fmtVal(change?.to)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {isCreate && (
+        <p className="mt-1 font-body text-xs text-muted-foreground">
+          {fmtVal(entry.changes?.product_name)}
+          {entry.changes?.brand_name ? ` · ${fmtVal(entry.changes.brand_name)}` : ""}
+          {" · qty "}{fmtVal(entry.changes?.quantity)}
+        </p>
+      )}
+    </li>
   );
 }
