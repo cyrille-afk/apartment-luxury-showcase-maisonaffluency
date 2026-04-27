@@ -692,7 +692,18 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
-                  onChange={(idx) => setSelectedDualSize(dualSizeOptions[idx] ?? null)}
+                  onChange={(idx) => {
+                    const s = dualSizeOptions[idx] ?? null;
+                    setSelectedDualSize(s);
+                    if (s && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedBase(null);
+                    if (s && selectedTop && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedTop(null);
+                  }}
+                  disabledIndices={disabledDualSizeIdx}
+                  helperText={
+                    disabledDualSizeIdx.length > 0 && (selectedBase || selectedTop)
+                      ? `Some sizes aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
                 />
               )}
               {product.dimensions && isDualAxis && !hasDualSize && (
