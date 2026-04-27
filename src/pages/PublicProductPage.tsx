@@ -502,7 +502,7 @@ const PublicProductPage: React.FC = () => {
                 }
               />
               {/* Bespoke / made-to-order signal — shown when the product offers material or size variants */}
-              {hasVariants && (
+              {computeVariantAxes(product.size_variants).hasVariants && (
                 <div className="pointer-events-none absolute top-3 left-3 z-10">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold)/0.4)] px-2.5 py-1 font-body text-[9px] uppercase tracking-[0.18em] text-foreground/80 shadow-sm">
                     <span className="h-1 w-1 rounded-full bg-[hsl(var(--gold))]" aria-hidden="true" />
