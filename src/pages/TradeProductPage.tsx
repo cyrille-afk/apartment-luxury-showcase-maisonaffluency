@@ -522,20 +522,8 @@ const TradeProductPage: React.FC = () => {
             crumbs.push({ label: normalizedSubcategory, to: `/trade/showroom?${params.toString()}` });
           }
           crumbs.push({ label: product.title });
-          return <Breadcrumbs items={crumbs} className="mb-3" />;
+          return <Breadcrumbs items={crumbs} className="mb-6" />;
         })()}
-        <button
-          onClick={() => {
-            if (fromPath) {
-              navigate(fromPath);
-              return;
-            }
-            navigate(fallbackPath);
-          }}
-          className="inline-flex items-center gap-1.5 mb-6 font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={14} /> Back
-        </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="relative">
