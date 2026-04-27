@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Save, Award, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Award, Sparkles, TrendingUp, TrendingDown, Minus, Eye } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +27,7 @@ export default function TradeAdminTiers() {
   const qc = useQueryClient();
   const [draft, setDraft] = useState<Record<Tier, Partial<TierRow>>>({} as any);
   const [recomputing, setRecomputing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-trade-tier-config"],
@@ -46,6 +47,54 @@ export default function TradeAdminTiers() {
   const merged = useMemo<TierRow[]>(() => {
     return rows.map((r) => ({ ...r, ...(draft[r.tier] || {}) }));
   }, [rows, draft]);
+
+  // Pull all trade users with their current tier + 12-month spend for impact preview.
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
+    queryKey: ["admin-trade-tier-profiles"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("profiles")
+        .select("id, first_name, last_name, email, company, trade_tier, trade_tier_12mo_spend_cents")
+        .not("trade_tier", "is", null);
+      if (error) throw error;
+      return (data || []) as Array<{
+        id: string; first_name: string | null; last_name: string | null;
+        email: string | null; company: string | null;
+        trade_tier: Tier | null; trade_tier_12mo_spend_cents: number | null;
+      }>;
+    },
+    enabled: isAdmin,
+  });
+
+  const tierFor = (cents: number, cfg: TierRow[]): Tier => {
+    const g = cfg.find((r) => r.tier === "gold")?.min_spend_cents ?? Infinity;
+    const p = cfg.find((r) => r.tier === "platinum")?.min_spend_cents ?? Infinity;
+    if (cents >= p) return "platinum";
+    if (cents >= g) return "gold";
+    return "silver";
+  };
+
+  const impact = useMemo(() => {
+    const moves: Array<{ id: string; name: string; spendCents: number; from: Tier; to: Tier; direction: "up" | "down" | "same" }> = [];
+    const counts = { up: 0, down: 0, same: 0 } as Record<"up" | "down" | "same", number>;
+    const toTotals: Record<Tier, number> = { silver: 0, gold: 0, platinum: 0 };
+    for (const p of profiles) {
+      const spend = p.trade_tier_12mo_spend_cents ?? 0;
+      const from = (p.trade_tier ?? "silver") as Tier;
+      const to = tierFor(spend, merged);
+      toTotals[to]++;
+      const dir: "up" | "down" | "same" =
+        TIER_ORDER.indexOf(to) > TIER_ORDER.indexOf(from) ? "up" :
+        TIER_ORDER.indexOf(to) < TIER_ORDER.indexOf(from) ? "down" : "same";
+      counts[dir]++;
+      if (dir !== "same") {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(" ") || p.company || p.email || "Unknown user";
+        moves.push({ id: p.id, name, spendCents: spend, from, to, direction: dir });
+      }
+    }
+    moves.sort((a, b) => b.spendCents - a.spendCents);
+    return { moves, counts, total: profiles.length, toTotals };
+  }, [profiles, merged]);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
@@ -131,6 +180,14 @@ export default function TradeAdminTiers() {
               <Sparkles className="h-3 w-3" /> {recomputing ? "Recomputing…" : "Recompute suggestions"}
             </button>
             <button
+              onClick={() => setShowPreview((v) => !v)}
+              disabled={!anyDirty || profilesLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-40"
+              title="Estimate how many users would move tiers with the drafted thresholds."
+            >
+              <Eye className="h-3 w-3" /> {showPreview ? "Hide preview" : "Preview impact"}
+            </button>
+            <button
               onClick={saveAll}
               disabled={!anyDirty || !!orderingError}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
@@ -143,6 +200,85 @@ export default function TradeAdminTiers() {
         {orderingError && (
           <div className="border border-destructive/30 bg-destructive/5 text-destructive font-body text-xs rounded-md px-3 py-2">
             {orderingError}
+          </div>
+        )}
+
+        {showPreview && anyDirty && (
+          <div className="border border-border rounded-lg bg-muted/30 p-4 space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h2 className="font-display text-base text-foreground flex items-center gap-2">
+                  <Eye className="h-4 w-4" /> Preview impact
+                </h2>
+                <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+                  Based on each user's current 12-month spend on confirmed quotes. Saving updates the thresholds; tier assignments still need to be confirmed per-user.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-xs font-body">
+                <span className="inline-flex items-center gap-1 text-emerald-700">
+                  <TrendingUp className="h-3.5 w-3.5" /> {impact.counts.up} promoted
+                </span>
+                <span className="inline-flex items-center gap-1 text-amber-700">
+                  <TrendingDown className="h-3.5 w-3.5" /> {impact.counts.down} demoted
+                </span>
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <Minus className="h-3.5 w-3.5" /> {impact.counts.same} unchanged
+                </span>
+                <span className="text-muted-foreground">/ {impact.total} users</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {TIER_ORDER.map((t) => {
+                const row = merged.find((r) => r.tier === t);
+                return (
+                  <div key={t} className="rounded-md border border-border bg-background px-3 py-2">
+                    <div className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{row?.label || t}</div>
+                    <div className="font-display text-lg text-foreground tabular-nums">{impact.toTotals[t]}</div>
+                    <div className="font-body text-[10px] text-muted-foreground">would land here</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {impact.moves.length === 0 ? (
+              <div className="text-xs font-body text-muted-foreground py-2">
+                No users would change tier with these thresholds.
+              </div>
+            ) : (
+              <div className="max-h-72 overflow-auto rounded-md border border-border bg-background">
+                <table className="w-full text-xs font-body">
+                  <thead className="bg-muted/50 text-muted-foreground">
+                    <tr className="text-left">
+                      <th className="px-3 py-2 font-medium">User</th>
+                      <th className="px-3 py-2 font-medium tabular-nums">12-mo spend</th>
+                      <th className="px-3 py-2 font-medium">From</th>
+                      <th className="px-3 py-2 font-medium">To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {impact.moves.slice(0, 100).map((m) => (
+                      <tr key={m.id} className="border-t border-border">
+                        <td className="px-3 py-2 text-foreground">{m.name}</td>
+                        <td className="px-3 py-2 tabular-nums text-foreground">{formatCurrency(m.spendCents)}</td>
+                        <td className="px-3 py-2 capitalize text-muted-foreground">{m.from}</td>
+                        <td className="px-3 py-2 capitalize">
+                          <span className={`inline-flex items-center gap-1 ${m.direction === "up" ? "text-emerald-700" : "text-amber-700"}`}>
+                            {m.direction === "up" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {m.to}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {impact.moves.length > 100 && (
+                  <div className="px-3 py-2 text-[11px] text-muted-foreground border-t border-border">
+                    Showing top 100 of {impact.moves.length} affected users (sorted by spend).
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
