@@ -342,21 +342,6 @@ export default function TradeCustomRequests() {
                     >
                       <History className="h-3 w-3" />
                       Activity log
-                      {openActivity[r.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                    </button>
-                    {openActivity[r.id] && (
-                      <div className="mt-3 space-y-2">
-                        {loadingActivity[r.id] ? (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            <span className="font-body text-xs">Loading…</span>
-                          </div>
-                      <button
-                      onClick={() => toggleActivity(r.id)}
-                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <History className="h-3 w-3" />
-                      Activity log
                       <span className="ml-1 rounded-full border border-border px-1.5 py-[1px] text-[9px] tracking-[0.08em] text-muted-foreground/80">
                         {isAdmin ? "Admin · all activity" : "You · own requests"}
                       </span>
