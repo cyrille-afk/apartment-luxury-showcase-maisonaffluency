@@ -37,6 +37,12 @@ interface ExpandableSpecProps {
   /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
   value?: number;
   onChange?: (index: number) => void;
+  /**
+   * Indices that should appear visually crossed-out and be unselectable.
+   * Used when one axis (e.g. material) constrains the available options on
+   * another axis (e.g. size).
+   */
+  disabledIndices?: number[];
 }
 
 /**
