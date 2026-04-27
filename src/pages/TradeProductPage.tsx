@@ -509,17 +509,17 @@ const TradeProductPage: React.FC = () => {
 
       <div className="max-w-7xl pb-12">
         {(() => {
-          // The Trade Showroom grid does not currently filter by URL category/
-          // subcategory params (only ?tab=grid is honored), so all category-level
-          // crumbs route to the grid view. Labels still communicate taxonomy
-          // position; users can refine filters in the grid itself.
-          const gridUrl = "/trade/showroom?tab=grid";
           const crumbs: Crumb[] = [{ label: "Trade", to: "/trade/showroom" }];
           if (product.category) {
-            crumbs.push({ label: product.category, to: gridUrl });
+            const params = new URLSearchParams({ tab: "grid" });
+            params.set("category", product.category);
+            crumbs.push({ label: product.category, to: `/trade/showroom?${params.toString()}` });
           }
           if (normalizedSubcategory) {
-            crumbs.push({ label: normalizedSubcategory, to: gridUrl });
+            const params = new URLSearchParams({ tab: "grid" });
+            if (product.category) params.set("category", product.category);
+            params.set("subcategory", normalizedSubcategory);
+            crumbs.push({ label: normalizedSubcategory, to: `/trade/showroom?${params.toString()}` });
           }
           crumbs.push({ label: product.title });
           return <Breadcrumbs items={crumbs} className="mb-6" />;
