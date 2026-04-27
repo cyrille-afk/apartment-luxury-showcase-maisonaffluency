@@ -20,7 +20,20 @@ interface RegisteredUser {
   roles: string[];
   app_status: string | null;
   trade_tier: TradeTier;
+  trade_tier_suggested: TradeTier | null;
+  trade_tier_locked_by_admin: boolean;
+  trade_tier_12mo_spend_cents: number;
+  trade_tier_computed_at: string | null;
 }
+
+const normTier = (raw: unknown): TradeTier | null => {
+  if (raw === "platinum" || raw === "gold" || raw === "silver") return raw;
+  if (raw === "standard" || raw == null) return raw === "standard" ? "silver" : null;
+  return null;
+};
+
+const fmtEur = (cents: number) =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
 
 const TIER_OPTIONS: TradeTier[] = ["silver", "gold", "platinum"];
 
