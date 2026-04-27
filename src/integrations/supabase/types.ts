@@ -372,6 +372,7 @@ export type Database = {
           project_id: string | null
           share_token: string
           status: string
+          studio_id: string | null
           studio_logo_url: string | null
           studio_name: string | null
           title: string
@@ -389,6 +390,7 @@ export type Database = {
           project_id?: string | null
           share_token?: string
           status?: string
+          studio_id?: string | null
           studio_logo_url?: string | null
           studio_name?: string | null
           title?: string
@@ -406,6 +408,7 @@ export type Database = {
           project_id?: string | null
           share_token?: string
           status?: string
+          studio_id?: string | null
           studio_logo_url?: string | null
           studio_name?: string | null
           title?: string
@@ -420,6 +423,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_boards_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
             referencedColumns: ["id"]
           },
         ]
@@ -1458,6 +1468,7 @@ export type Database = {
           shipping_end_at: string | null
           shipping_start_at: string | null
           shipping_weeks: number
+          studio_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1482,6 +1493,7 @@ export type Database = {
           shipping_end_at?: string | null
           shipping_start_at?: string | null
           shipping_weeks?: number
+          studio_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1506,6 +1518,7 @@ export type Database = {
           shipping_end_at?: string | null
           shipping_start_at?: string | null
           shipping_weeks?: number
+          studio_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1522,6 +1535,13 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: true
             referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_timeline_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
             referencedColumns: ["id"]
           },
         ]
@@ -1755,6 +1775,7 @@ export type Database = {
           name: string
           notes: string | null
           status: string
+          studio_id: string | null
           target_completion_date: string | null
           updated_at: string
           user_id: string
@@ -1769,6 +1790,7 @@ export type Database = {
           name?: string
           notes?: string | null
           status?: string
+          studio_id?: string | null
           target_completion_date?: string | null
           updated_at?: string
           user_id: string
@@ -1783,11 +1805,20 @@ export type Database = {
           name?: string
           notes?: string | null
           status?: string
+          studio_id?: string | null
           target_completion_date?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provenance_certificates: {
         Row: {
@@ -2505,6 +2536,153 @@ export type Database = {
           },
         ]
       }
+      studio_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["studio_role"]
+          studio_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["studio_role"]
+          studio_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["studio_role"]
+          studio_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_invites_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_members: {
+        Row: {
+          id: string
+          invited_by: string | null
+          joined_at: string
+          role: Database["public"]["Enums"]["studio_role"]
+          studio_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          role?: Database["public"]["Enums"]["studio_role"]
+          studio_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          role?: Database["public"]["Enums"]["studio_role"]
+          studio_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_members_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_project_overrides: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          role: Database["public"]["Enums"]["studio_role"] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          role?: Database["public"]["Enums"]["studio_role"] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          role?: Database["public"]["Enums"]["studio_role"] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_project_overrides_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studios: {
+        Row: {
+          billing_email: string | null
+          created_at: string
+          created_by: string
+          id: string
+          logo_url: string | null
+          name: string
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_email?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_email?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -2636,6 +2814,7 @@ export type Database = {
           quantity: number
           request_type: string
           status: string
+          studio_id: string | null
           target_lead_weeks: number | null
           updated_at: string
           user_id: string
@@ -2657,6 +2836,7 @@ export type Database = {
           quantity?: number
           request_type?: string
           status?: string
+          studio_id?: string | null
           target_lead_weeks?: number | null
           updated_at?: string
           user_id: string
@@ -2678,6 +2858,7 @@ export type Database = {
           quantity?: number
           request_type?: string
           status?: string
+          studio_id?: string | null
           target_lead_weeks?: number | null
           updated_at?: string
           user_id?: string
@@ -2695,6 +2876,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_custom_requests_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
             referencedColumns: ["id"]
           },
         ]
@@ -3013,6 +3201,7 @@ export type Database = {
           project_id: string | null
           responded_at: string | null
           status: string
+          studio_id: string | null
           submitted_at: string | null
           updated_at: string
           user_id: string
@@ -3028,6 +3217,7 @@ export type Database = {
           project_id?: string | null
           responded_at?: string | null
           status?: string
+          studio_id?: string | null
           submitted_at?: string | null
           updated_at?: string
           user_id: string
@@ -3043,6 +3233,7 @@ export type Database = {
           project_id?: string | null
           responded_at?: string | null
           status?: string
+          studio_id?: string | null
           submitted_at?: string | null
           updated_at?: string
           user_id?: string
@@ -3053,6 +3244,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quotes_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
             referencedColumns: ["id"]
           },
         ]
@@ -3301,10 +3499,30 @@ export type Database = {
         }
         Returns: string
       }
+      can_edit_project: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_edit_studio: {
+        Args: { _studio_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_view_project: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_view_studio: {
+        Args: { _studio_id: string; _user_id: string }
+        Returns: boolean
+      }
       current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      effective_project_role: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["studio_role"]
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -3327,6 +3545,7 @@ export type Database = {
           project_id: string | null
           share_token: string
           status: string
+          studio_id: string | null
           studio_logo_url: string | null
           studio_name: string | null
           title: string
@@ -3402,9 +3621,18 @@ export type Database = {
           quote_users: number
         }[]
       }
+      get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_studio_role: {
+        Args: {
+          _min_role: Database["public"]["Enums"]["studio_role"]
+          _studio_id: string
           _user_id: string
         }
         Returns: boolean
@@ -3481,6 +3709,7 @@ export type Database = {
         | "delivered"
         | "returned"
         | "cancelled"
+      studio_role: "owner" | "admin" | "editor" | "viewer"
       trade_application_status: "pending" | "approved" | "rejected"
       trade_tier: "standard" | "silver" | "gold"
     }
@@ -3641,6 +3870,7 @@ export const Constants = {
         "returned",
         "cancelled",
       ],
+      studio_role: ["owner", "admin", "editor", "viewer"],
       trade_application_status: ["pending", "approved", "rejected"],
       trade_tier: ["standard", "silver", "gold"],
     },
