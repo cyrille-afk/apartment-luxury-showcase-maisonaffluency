@@ -682,8 +682,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
-                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_100px_120px_130px] md:gap-4 md:items-start">
-                      <div className="flex gap-3 md:gap-4">
+                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[minmax(0,1fr)_100px_120px_130px] md:gap-4 md:items-start">
+                      <div className="flex gap-3 md:gap-4 min-w-0">
                         <div className="w-14 h-14 md:w-20 md:h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                           {product?.image_url ? (
                             <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
@@ -694,16 +694,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight">
+                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words">
                             {product?.product_name || "Unknown Product"}
                           </h4>
-                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
+                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
                           {product?.dimensions && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                           {product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.materials}</p>}
-                          {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground">{product.lead_time}</p>}
-                          {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1">{item.notes}</p>}
+                          {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.lead_time}</p>}
+                          {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 truncate">{item.notes}</p>}
                           {isDraft && (
                             <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-1.5 md:mt-2 transition-colors">
                               <Trash2 className="h-3 w-3" /> Remove
