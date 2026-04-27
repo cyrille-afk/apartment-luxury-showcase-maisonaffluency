@@ -250,6 +250,7 @@ const TradeProductPage: React.FC = () => {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [customRequestOpen, setCustomRequestOpen] = useState(false);
+  const [bioExpanded, setBioExpanded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
