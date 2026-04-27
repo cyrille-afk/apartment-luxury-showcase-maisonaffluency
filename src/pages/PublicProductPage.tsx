@@ -270,6 +270,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             if (s && selTop && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelTop(null);
           }}
           disabledIndices={disabledDualSizeIdx}
+          helperText={
+            disabledDualSizeIdx.length > 0 && (selBase || selTop)
+              ? `Some sizes aren't available with the current finish selection — greyed out.`
+              : undefined
+          }
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
