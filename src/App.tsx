@@ -5,6 +5,7 @@ import Index from "./pages/Index";
 import TradeAxonometric from "./pages/TradeAxonometric";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
+import { StudioProvider } from "@/hooks/useStudio";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 // Defer react-helmet-async — all critical meta tags are already in index.html
@@ -35,6 +36,7 @@ const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeDownloadsByCountry = lazy(() => import("./pages/TradeDownloadsByCountry"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
+const TradeStudioSettings = lazy(() => import("./pages/TradeStudioSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
 const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
 const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
@@ -165,6 +167,7 @@ const App = () => {
     <Suspense fallback={null}>
       <LazyHelmetProvider>
         <AuthProvider>
+        <StudioProvider>
         <CompareProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
@@ -266,6 +269,7 @@ const App = () => {
                     <Route path="custom-requests" element={<TradeCustomRequests />} />
                     <Route path="calendar" element={<TradeFairCalendar />} />
                     <Route path="settings" element={<TradeSettings />} />
+                    <Route path="settings/studio" element={<TradeStudioSettings />} />
                   </Route>
 
                   <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
@@ -289,6 +293,7 @@ const App = () => {
             </BrowserRouter>
           </QueryClientProvider>
         </CompareProvider>
+        </StudioProvider>
         </AuthProvider>
       </LazyHelmetProvider>
     </Suspense>
