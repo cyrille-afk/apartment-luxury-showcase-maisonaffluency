@@ -1,16 +1,18 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format, addWeeks, addDays } from "date-fns";
 import {
   DollarSign, Factory, CreditCard, Truck, ShieldCheck, PackageCheck,
   ChevronRight, Calendar, Clock, GripVertical, Edit2, Check, X,
+  FolderKanban,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 
 interface OrderTimeline {
   id: string;
@@ -126,14 +128,30 @@ function MilestoneLine({ icon: Icon, label, date, highlight }: { icon: React.Ele
 export default function TradeOrderTimeline() {
   const { isAdmin, isTradeUser, loading, user } = useAuth();
   const queryClient = useQueryClient();
+  const { projectFilter, clearProjectFilter } = useProjectFilter();
+  const [projectName, setProjectName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectName(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("projects" as any)
+        .select("name")
+        .eq("id", projectFilter)
+        .maybeSingle();
+      setProjectName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["order-timelines"],
+    queryKey: ["order-timelines", projectFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("order_timeline")
         .select("*")
         .order("created_at", { ascending: false });
+      if (projectFilter) q = q.eq("project_id", projectFilter);
+      const { data, error } = await q;
       if (error) throw error;
 
       // Fetch quote + profile data for each timeline
@@ -237,6 +255,26 @@ export default function TradeOrderTimeline() {
             Track orders from deposit through delivery.
           </p>
         </div>
+
+        {projectFilter && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <FolderKanban className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="font-body text-xs text-muted-foreground truncate">
+                Showing timelines for project:{" "}
+                <Link to={`/trade/projects/${projectFilter}`} className="text-foreground underline underline-offset-2">
+                  {projectName || "loading…"}
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={clearProjectFilter}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted/40 px-2 py-0.5 font-body text-[11px] text-muted-foreground"
+            >
+              Clear <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">

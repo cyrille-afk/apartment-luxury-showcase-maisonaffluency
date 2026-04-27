@@ -2,10 +2,12 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
 import {
   downloadProcurementWorkbook,
   autoPoNumber,
@@ -49,15 +51,31 @@ export default function TradeFFESchedule() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
+  const { projectFilter, clearProjectFilter } = useProjectFilter();
+  const [projectName, setProjectName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!projectFilter) { setProjectName(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("projects" as any)
+        .select("name")
+        .eq("id", projectFilter)
+        .maybeSingle();
+      setProjectName((data as any)?.name || null);
+    })();
+  }, [projectFilter]);
 
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["ffe-schedule", user?.id],
+    queryKey: ["ffe-schedule", user?.id, projectFilter],
     queryFn: async () => {
-      const { data: quotes } = await supabase
+      let qq = supabase
         .from("trade_quotes")
         .select("id, client_name, status")
         .eq("user_id", user!.id)
         .in("status", ["confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
+      if (projectFilter) qq = qq.eq("project_id", projectFilter);
+      const { data: quotes } = await qq;
 
       if (!quotes?.length) return [];
 
@@ -233,6 +251,26 @@ export default function TradeFFESchedule() {
             </Button>
           </div>
         </div>
+
+        {projectFilter && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <FolderKanban className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="font-body text-xs text-muted-foreground truncate">
+                Showing FF&E for project:{" "}
+                <Link to={`/trade/projects/${projectFilter}`} className="text-foreground underline underline-offset-2">
+                  {projectName || "loading…"}
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={clearProjectFilter}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted/40 px-2 py-0.5 font-body text-[11px] text-muted-foreground"
+            >
+              Clear <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>

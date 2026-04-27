@@ -6,7 +6,7 @@ import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
-  Package, Users,
+  Package, Users, LayoutGrid, Truck,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -270,6 +271,19 @@ export default function TradeProjectDetail() {
         )}
       </div>
 
+      {/* Tabbed workspace hub */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="mb-4 flex flex-wrap h-auto bg-muted/30">
+          <TabsTrigger value="overview" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
+          <TabsTrigger value="quotes" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Quotes <span className="ml-1 text-[10px] text-muted-foreground">({quotes.length})</span></TabsTrigger>
+          <TabsTrigger value="boards" className="gap-1.5"><FolderArchive className="h-3.5 w-3.5" /> Boards <span className="ml-1 text-[10px] text-muted-foreground">({boards.length})</span></TabsTrigger>
+          <TabsTrigger value="tearsheets" className="gap-1.5"><ImageIcon className="h-3.5 w-3.5" /> Tearsheets</TabsTrigger>
+          <TabsTrigger value="shipping" className="gap-1.5"><Truck className="h-3.5 w-3.5" /> Shipping <span className="ml-1 text-[10px] text-muted-foreground">({timelines.length})</span></TabsTrigger>
+          <TabsTrigger value="ffe" className="gap-1.5"><ListChecks className="h-3.5 w-3.5" /> FF&E</TabsTrigger>
+        </TabsList>
+
+        {/* OVERVIEW TAB — keeps the original summary panel */}
+        <TabsContent value="overview" className="mt-0">
       {/* Summary panel */}
       <div className="border border-border rounded-md p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -353,109 +367,129 @@ export default function TradeProjectDetail() {
         </div>
       </div>
 
-      {/* Linked items */}
-      {(() => {
-        const visibleQuotes = selectedDesigner
-          ? quotes.filter((q) => brandQuoteIds[selectedDesigner]?.has(q.id))
-          : quotes;
-        const visibleBoards = selectedDesigner
-          ? boards.filter((b) => brandBoardIds[selectedDesigner]?.has(b.id))
-          : boards;
-        return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Section
-          icon={FileText}
-          title="Quotes"
-          count={visibleQuotes.length}
-          loading={loadingLinks}
-          empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
-          link="/trade/quotes"
-          linkLabel="Manage quotes"
-        >
-          {visibleQuotes.map((q) => (
-            <Row
-              key={q.id}
-              to="/trade/quotes"
-              title={q.client_name || "Untitled quote"}
-              meta={`${q.status} · ${new Date(q.created_at).toLocaleDateString()}`}
-            />
-          ))}
-        </Section>
+      {/* Overview-tab quick links to other tabs (kept compact, the per-tab content lives below) */}
+        </TabsContent>
 
-        <Section
-          icon={FolderArchive}
-          title="Project folders / boards"
-          count={visibleBoards.length}
-          loading={loadingLinks}
-          empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
-          link="/trade/boards"
-          linkLabel="Manage boards"
-        >
-          {visibleBoards.map((b) => (
-            <Row
-              key={b.id}
-              to={`/trade/boards/${b.id}`}
-              title={b.title}
-              meta={`${b.status} · ${new Date(b.created_at).toLocaleDateString()}`}
-            />
-          ))}
-        </Section>
+        {/* QUOTES TAB */}
+        <TabsContent value="quotes" className="mt-0">
+          {(() => {
+            const visibleQuotes = selectedDesigner
+              ? quotes.filter((q) => brandQuoteIds[selectedDesigner]?.has(q.id))
+              : quotes;
+            return (
+              <Section
+                icon={FileText}
+                title="Quotes in this project"
+                count={visibleQuotes.length}
+                loading={loadingLinks}
+                empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
+                link={`/trade/quotes?project=${project.id}`}
+                linkLabel="Open quotes filtered by this project"
+              >
+                {visibleQuotes.map((q) => (
+                  <Row
+                    key={q.id}
+                    to="/trade/quotes"
+                    title={q.client_name || "Untitled quote"}
+                    meta={`${q.status} · ${new Date(q.created_at).toLocaleDateString()}`}
+                  />
+                ))}
+              </Section>
+            );
+          })()}
+        </TabsContent>
 
-        <Section
-          icon={CalendarClock}
-          title="Order timelines"
-          count={timelines.length}
-          loading={loadingLinks}
-          empty="No order timelines linked yet."
-          link="/trade/order-timeline"
-          linkLabel="Open timeline board"
-        >
-          {timelines.map((t) => (
-            <Row
-              key={t.id}
-              to="/trade/order-timeline"
-              title={`Status: ${t.kanban_status.replace(/_/g, " ")}`}
-              meta={t.estimated_delivery_at ? `ETA ${new Date(t.estimated_delivery_at).toLocaleDateString()}` : "ETA TBD"}
-            />
-          ))}
-        </Section>
+        {/* BOARDS TAB */}
+        <TabsContent value="boards" className="mt-0">
+          {(() => {
+            const visibleBoards = selectedDesigner
+              ? boards.filter((b) => brandBoardIds[selectedDesigner]?.has(b.id))
+              : boards;
+            return (
+              <Section
+                icon={FolderArchive}
+                title="Mood boards in this project"
+                count={visibleBoards.length}
+                loading={loadingLinks}
+                empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
+                link={`/trade/boards?project=${project.id}`}
+                linkLabel="Open boards filtered by this project"
+              >
+                {visibleBoards.map((b) => (
+                  <Row
+                    key={b.id}
+                    to={`/trade/boards/${b.id}`}
+                    title={b.title}
+                    meta={`${b.status} · ${new Date(b.created_at).toLocaleDateString()}`}
+                  />
+                ))}
+              </Section>
+            );
+          })()}
+        </TabsContent>
 
-        <Section
-          icon={ListChecks}
-          title="FF&E schedule"
-          count={null}
-          loading={false}
-          empty=""
-          link={`/trade/ffe-schedule?project=${project.id}`}
-          linkLabel="Open FF&E for this project"
-        >
-          <p className="font-body text-xs text-muted-foreground px-3 py-2">
-            FF&E auto-aggregates from quotes linked to this project.
-          </p>
-        </Section>
-
-        <Section
-          icon={ImageIcon}
-          title="Tearsheets & mood boards"
-          count={null}
-          loading={false}
-          empty=""
-          link="/trade/tearsheets"
-          linkLabel="Open tearsheet builder"
-        >
-          <p className="font-body text-xs text-muted-foreground px-3 py-2">
-            Tag tearsheets and mood boards with this project to see them here.
-          </p>
-          <Link
-            to="/trade/mood-boards"
-            className="block px-3 py-2 text-xs font-body text-foreground hover:bg-muted/40"
+        {/* TEARSHEETS TAB */}
+        <TabsContent value="tearsheets" className="mt-0">
+          <Section
+            icon={ImageIcon}
+            title="Tearsheets & mood boards"
+            count={null}
+            loading={false}
+            empty=""
+            link={`/trade/tearsheets?project=${project.id}`}
+            linkLabel="Open tearsheet builder for this project"
           >
-            Open mood board builder →
-          </Link>
-        </Section>
-      </div>
-        );
-      })()}
+            <p className="font-body text-xs text-muted-foreground px-3 py-2">
+              Tearsheets aggregate from products in this project's quotes and boards. Open the builder to compose and export.
+            </p>
+            <Link
+              to={`/trade/mood-boards?project=${project.id}`}
+              className="block px-3 py-2 text-xs font-body text-foreground hover:bg-muted/40"
+            >
+              Open mood board builder →
+            </Link>
+          </Section>
+        </TabsContent>
+
+        {/* SHIPPING TAB */}
+        <TabsContent value="shipping" className="mt-0">
+          <Section
+            icon={CalendarClock}
+            title="Order timelines & shipping"
+            count={timelines.length}
+            loading={loadingLinks}
+            empty="No order timelines linked yet."
+            link={`/trade/order-timeline?project=${project.id}`}
+            linkLabel="Open timeline board for this project"
+          >
+            {timelines.map((t) => (
+              <Row
+                key={t.id}
+                to={`/trade/order-timeline?project=${project.id}`}
+                title={`Status: ${t.kanban_status.replace(/_/g, " ")}`}
+                meta={t.estimated_delivery_at ? `ETA ${new Date(t.estimated_delivery_at).toLocaleDateString()}` : "ETA TBD"}
+              />
+            ))}
+          </Section>
+        </TabsContent>
+
+        {/* FF&E TAB */}
+        <TabsContent value="ffe" className="mt-0">
+          <Section
+            icon={ListChecks}
+            title="FF&E schedule"
+            count={null}
+            loading={false}
+            empty=""
+            link={`/trade/ffe-schedule?project=${project.id}`}
+            linkLabel="Open FF&E for this project"
+          >
+            <p className="font-body text-xs text-muted-foreground px-3 py-2">
+              FF&E auto-aggregates from this project's confirmed quotes. The export includes PO numbers, lead times, deposit schedule and cost codes.
+            </p>
+          </Section>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
