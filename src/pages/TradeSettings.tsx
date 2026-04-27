@@ -211,11 +211,19 @@ const TradeSettings = () => {
 
       {/* Tier upgrade callout */}
       {tier !== "platinum" && (() => {
-        const SILVER_THRESHOLD = 0;       // €0
-        const GOLD_THRESHOLD = 50_000_00;  // €50,000 in cents
-        const PLATINUM_THRESHOLD = 250_000_00; // €250,000 in cents
-        const nextTier = tier === "silver" ? "Gold" : "Platinum";
-        const nextDiscount = tier === "silver" ? "12%" : "18%";
+        const cfg = (typeof (window as any) !== "undefined" ? null : null);
+        // Use the live tier config from the hook
+        const tierCfg = (require("@/hooks/useTradeDiscount") as typeof import("@/hooks/useTradeDiscount"));
+        // We already have `discountLabel` etc; re-fetch config via hook here would re-render — instead
+        // pull straight from useTradeDiscount return that's already in scope below via closure.
+        const SILVER_THRESHOLD = (window as any).__tierCfg?.silver?.min_spend_cents ?? 0;
+        const GOLD_THRESHOLD = (window as any).__tierCfg?.gold?.min_spend_cents ?? 25_000_000;
+        const PLATINUM_THRESHOLD = (window as any).__tierCfg?.platinum?.min_spend_cents ?? 75_000_000;
+        const nextTier = tier === "silver" ? ((window as any).__tierCfg?.gold?.label ?? "Gold") : ((window as any).__tierCfg?.platinum?.label ?? "Platinum");
+        const nextDiscountPct = tier === "silver"
+          ? ((window as any).__tierCfg?.gold?.discount_pct ?? 0.10)
+          : ((window as any).__tierCfg?.platinum?.discount_pct ?? 0.15);
+        const nextDiscount = `${(nextDiscountPct * 100).toFixed(nextDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
         const nextThreshold = tier === "silver" ? GOLD_THRESHOLD : PLATINUM_THRESHOLD;
         const prevThreshold = tier === "silver" ? SILVER_THRESHOLD : GOLD_THRESHOLD;
         const remainingCents = Math.max(0, nextThreshold - spendCents);
