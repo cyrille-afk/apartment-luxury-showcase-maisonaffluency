@@ -79,6 +79,25 @@ export default function TradeProjects() {
           <p className="font-body text-sm text-muted-foreground">
             Group quotes, mood boards, FF&E, tearsheets, and timelines under named projects.
           </p>
+          {currentStudio && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-body text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted">
+                <Users className="h-3 w-3" />
+                Showing projects in <span className="text-foreground">{currentStudio.name}</span>
+              </span>
+              {hiddenForMeCount > 0 && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted"
+                  title={isAdmin
+                    ? "These projects exist in the studio but are hidden from you via per-project overrides."
+                    : "Some projects in this studio are restricted by an admin."}
+                >
+                  <EyeOff className="h-3 w-3" />
+                  {hiddenForMeCount} hidden from you
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
