@@ -52,13 +52,37 @@ export default function TradeFairCalendar() {
     })();
   }, []);
 
-  const grouped = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
+  const [cityFilter, setCityFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  const { cityOptions, categoryOptions } = useMemo(() => {
+    const cities = new Set<string>();
+    const categories = new Set<string>();
+    events.forEach((e) => {
+      if (e.city) cities.add(e.city);
+      if (e.category) categories.add(e.category);
+    });
     return {
-      upcoming: events.filter((e) => e.ends_on >= today),
-      past: events.filter((e) => e.ends_on < today),
+      cityOptions: Array.from(cities).sort((a, b) => a.localeCompare(b)),
+      categoryOptions: Array.from(categories).sort((a, b) => a.localeCompare(b)),
     };
   }, [events]);
+
+  const grouped = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const filtered = events.filter((e) => {
+      if (cityFilter !== "all" && e.city !== cityFilter) return false;
+      if (categoryFilter !== "all" && e.category !== categoryFilter) return false;
+      return true;
+    });
+    return {
+      upcoming: filtered.filter((e) => e.ends_on >= today),
+      past: filtered.filter((e) => e.ends_on < today),
+      totalFiltered: filtered.length,
+    };
+  }, [events, cityFilter, categoryFilter]);
+
+  const hasActiveFilters = cityFilter !== "all" || categoryFilter !== "all";
 
   return (
     <>
@@ -85,6 +109,51 @@ export default function TradeFairCalendar() {
           </div>
         ) : (
           <>
+            {events.length > 0 && (
+              <div className="flex flex-wrap items-end gap-3 pb-2 border-b border-border">
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    City
+                  </label>
+                  <select
+                    value={cityFilter}
+                    onChange={(e) => setCityFilter(e.target.value)}
+                    className="bg-background border border-border rounded-md px-3 py-2 font-body text-xs text-foreground focus:outline-none focus:border-foreground/40 min-w-[160px]"
+                  >
+                    <option value="all">All cities</option>
+                    {cityOptions.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    Category
+                  </label>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="bg-background border border-border rounded-md px-3 py-2 font-body text-xs text-foreground focus:outline-none focus:border-foreground/40 min-w-[160px] capitalize"
+                  >
+                    <option value="all">All categories</option>
+                    {categoryOptions.map((c) => (
+                      <option key={c} value={c} className="capitalize">{c.replace(/_/g, " ")}</option>
+                    ))}
+                  </select>
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    onClick={() => { setCityFilter("all"); setCategoryFilter("all"); }}
+                    className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground px-3 py-2 transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                )}
+                <div className="ml-auto font-body text-xs text-muted-foreground">
+                  {grouped.totalFiltered} of {events.length} event{events.length === 1 ? "" : "s"}
+                </div>
+              </div>
+            )}
             {grouped.upcoming.length > 0 && (
               <Section title="Upcoming" events={grouped.upcoming} />
             )}
@@ -94,6 +163,11 @@ export default function TradeFairCalendar() {
             {events.length === 0 && (
               <div className="text-center py-20 border border-dashed border-border rounded-lg">
                 <p className="font-body text-sm text-muted-foreground">No events published yet.</p>
+              </div>
+            )}
+            {events.length > 0 && grouped.totalFiltered === 0 && (
+              <div className="text-center py-16 border border-dashed border-border rounded-lg">
+                <p className="font-body text-sm text-muted-foreground">No events match your filters.</p>
               </div>
             )}
           </>
