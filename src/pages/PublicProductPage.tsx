@@ -21,6 +21,7 @@ import { SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
+import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
@@ -475,6 +476,22 @@ const PublicProductPage: React.FC = () => {
         <Navigation borderless />
 
         <div className="pt-32 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {(() => {
+            const crumbs: Crumb[] = [{ label: "Home", to: "/" }];
+            if (product.category) {
+              const params = new URLSearchParams();
+              params.set("category", product.category);
+              crumbs.push({ label: product.category, to: `/designers?${params.toString()}` });
+            }
+            if (normalizedSubcategory) {
+              const params = new URLSearchParams();
+              if (product.category) params.set("category", product.category);
+              params.set("subcategory", normalizedSubcategory);
+              crumbs.push({ label: normalizedSubcategory, to: `/designers?${params.toString()}` });
+            }
+            crumbs.push({ label: product.title });
+            return <Breadcrumbs items={crumbs} className="mb-3" />;
+          })()}
           <button
             onClick={() => {
               if (fromPath) {
