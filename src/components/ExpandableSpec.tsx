@@ -43,6 +43,8 @@ interface ExpandableSpecProps {
    * another axis (e.g. size).
    */
   disabledIndices?: number[];
+  /** Optional muted caption rendered below the dropdown (e.g. constraint hints). */
+  helperText?: string;
 }
 
 /**
@@ -62,6 +64,7 @@ export default function ExpandableSpec({
   value,
   onChange,
   disabledIndices,
+  helperText,
 }: ExpandableSpecProps) {
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -171,6 +174,14 @@ export default function ExpandableSpec({
             role="note"
           >
             Finishes auto-detected — please confirm at quote
+          </p>
+        )}
+        {helperText && (
+          <p
+            className="font-body text-[10px] tracking-wide text-muted-foreground/80 mt-1 pl-[26px] italic"
+            role="note"
+          >
+            {helperText}
           </p>
         )}
       </>

@@ -200,6 +200,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
               if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
             }}
             disabledIndices={disabledBaseIdx}
+            helperText={
+              disabledBaseIdx.length > 0 && (selTop || selDualSize)
+                ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                : undefined
+            }
           />
           <ExpandableSpec
             icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -214,6 +219,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
               if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelDualSize(null);
             }}
             disabledIndices={disabledTopIdx}
+            helperText={
+              disabledTopIdx.length > 0 && (selBase || selDualSize)
+                ? `Some ${(getTopPlaceholder(product) || "top").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                : undefined
+            }
           />
         </>
       ) : hasSingleAxisSplit ? (
@@ -229,6 +239,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
           }}
           disabledIndices={disabledMatIdx}
+          helperText={
+            disabledMatIdx.length > 0 && selSize
+              ? `Some materials aren't offered in ${selSize} — greyed out.`
+              : undefined
+          }
         />
       ) : product.materials ? (
         <ExpandableSpec
@@ -255,6 +270,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             if (s && selTop && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelTop(null);
           }}
           disabledIndices={disabledDualSizeIdx}
+          helperText={
+            disabledDualSizeIdx.length > 0 && (selBase || selTop)
+              ? `Some sizes aren't available with the current finish selection — greyed out.`
+              : undefined
+          }
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
@@ -269,6 +289,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             if (s && selMat && !singleAxisParsed.some((p) => p.size === s && p.material === selMat)) setSelMat(null);
           }}
           disabledIndices={disabledSizeIdx}
+          helperText={
+            disabledSizeIdx.length > 0 && selMat
+              ? `Some sizes aren't available in ${selMat} — greyed out.`
+              : undefined
+          }
         />
       ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
