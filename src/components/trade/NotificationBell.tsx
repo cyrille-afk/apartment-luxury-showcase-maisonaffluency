@@ -1,9 +1,23 @@
 import { useState, useEffect } from "react";
-import { Bell, X } from "lucide-react";
+import { Bell, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+
+interface NotificationMetadata {
+  request_id?: string;
+  requester_name?: string;
+  requester_company?: string;
+  product_name?: string;
+  brand_name?: string;
+  project_name?: string;
+  project_location?: string;
+  status?: string;
+  quantity?: number;
+  action_label?: string;
+  action_link?: string;
+}
 
 interface Notification {
   id: string;
@@ -13,6 +27,29 @@ interface Notification {
   link: string | null;
   is_read: boolean;
   created_at: string;
+  metadata?: NotificationMetadata | null;
+}
+
+const STATUS_TONES: Record<string, string> = {
+  new: "bg-primary/15 text-primary",
+  open: "bg-primary/15 text-primary",
+  in_progress: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  awaiting_client: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  quoted: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+  resolved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  completed: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  closed: "bg-muted text-muted-foreground",
+};
+
+function StatusPill({ status }: { status: string }) {
+  const tone = STATUS_TONES[status] ?? "bg-muted text-muted-foreground";
+  return (
+    <span
+      className={`inline-flex items-center px-1.5 py-0.5 rounded font-body text-[9px] uppercase tracking-wider ${tone}`}
+    >
+      {status.replace(/_/g, " ")}
+    </span>
+  );
 }
 
 export function NotificationBell() {
@@ -21,7 +58,6 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Fetch notifications
   useEffect(() => {
     if (!user) return;
 
@@ -37,7 +73,6 @@ export function NotificationBell() {
 
     fetchNotifications();
 
-    // Realtime subscription
     const channel = supabase
       .channel(`notifications-${user.id}`)
       .on(
@@ -81,12 +116,11 @@ export function NotificationBell() {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
   };
 
-  const handleClick = (n: Notification) => {
+  const goTo = (n: Notification, href: string | null | undefined) => {
+    if (!href) return;
     if (!n.is_read) markAsRead(n.id);
-    if (n.link) {
-      navigate(n.link);
-      setOpen(false);
-    }
+    navigate(href);
+    setOpen(false);
   };
 
   return (
@@ -106,13 +140,11 @@ export function NotificationBell() {
 
       {open && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 z-40"
             onClick={() => setOpen(false)}
           />
-          {/* Dropdown */}
-          <div className="absolute right-0 top-full mt-2 w-80 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-96 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <h3 className="font-display text-sm text-foreground">
                 Notifications
@@ -134,40 +166,113 @@ export function NotificationBell() {
                 </button>
               </div>
             </div>
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <p className="px-4 py-8 text-center font-body text-xs text-muted-foreground">
                   No notifications yet
                 </p>
               ) : (
-                notifications.map((n) => (
-                  <button
-                    key={n.id}
-                    onClick={() => handleClick(n)}
-                    className={`w-full text-left px-4 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors ${
-                      !n.is_read ? "bg-primary/5" : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      {!n.is_read && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                notifications.map((n) => {
+                  const meta = (n.metadata ?? {}) as NotificationMetadata;
+                  const hasSummary =
+                    meta.requester_name ||
+                    meta.product_name ||
+                    meta.project_name ||
+                    meta.status;
+                  const actionHref = meta.action_link || n.link;
+                  const actionLabel = meta.action_label || "Open";
+
+                  return (
+                    <div
+                      key={n.id}
+                      className={`px-4 py-3 border-b border-border last:border-0 transition-colors ${
+                        !n.is_read ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <button
+                        onClick={() => goTo(n, actionHref)}
+                        className="w-full text-left"
+                      >
+                        <div className="flex items-start gap-2">
+                          {!n.is_read && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-body text-xs font-medium text-foreground truncate">
+                                {n.title}
+                              </p>
+                              {meta.status && <StatusPill status={meta.status} />}
+                            </div>
+
+                            {hasSummary ? (
+                              <div className="mt-1 space-y-0.5">
+                                {meta.requester_name && (
+                                  <p className="font-body text-[11px] text-foreground/80 truncate">
+                                    <span className="text-muted-foreground">Name: </span>
+                                    {meta.requester_name}
+                                    {meta.requester_company
+                                      ? ` · ${meta.requester_company}`
+                                      : ""}
+                                  </p>
+                                )}
+                                {meta.product_name && (
+                                  <p className="font-body text-[11px] text-foreground/80 truncate">
+                                    <span className="text-muted-foreground">Item: </span>
+                                    {meta.product_name}
+                                    {meta.brand_name ? ` (${meta.brand_name})` : ""}
+                                    {meta.quantity && meta.quantity > 1
+                                      ? ` × ${meta.quantity}`
+                                      : ""}
+                                  </p>
+                                )}
+                                {(meta.project_name || meta.project_location) && (
+                                  <p className="font-body text-[11px] text-foreground/80 truncate">
+                                    <span className="text-muted-foreground">Property: </span>
+                                    {meta.project_name || "—"}
+                                    {meta.project_location
+                                      ? ` · ${meta.project_location}`
+                                      : ""}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="font-body text-[11px] text-muted-foreground line-clamp-2 mt-0.5">
+                                {n.message}
+                              </p>
+                            )}
+
+                            <p className="font-body text-[10px] text-muted-foreground/60 mt-1.5">
+                              {formatDistanceToNow(new Date(n.created_at), {
+                                addSuffix: true,
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+
+                      {actionHref && (
+                        <div className="mt-2 flex items-center gap-2 pl-3.5">
+                          <button
+                            onClick={() => goTo(n, actionHref)}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-border text-[10px] font-body text-foreground hover:bg-muted transition-colors"
+                          >
+                            {actionLabel}
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                          {!n.is_read && (
+                            <button
+                              onClick={() => markAsRead(n.id)}
+                              className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              Mark read
+                            </button>
+                          )}
+                        </div>
                       )}
-                      <div className="min-w-0 flex-1">
-                        <p className="font-body text-xs font-medium text-foreground truncate">
-                          {n.title}
-                        </p>
-                        <p className="font-body text-[11px] text-muted-foreground line-clamp-2 mt-0.5">
-                          {n.message}
-                        </p>
-                        <p className="font-body text-[10px] text-muted-foreground/60 mt-1">
-                          {formatDistanceToNow(new Date(n.created_at), {
-                            addSuffix: true,
-                          })}
-                        </p>
-                      </div>
                     </div>
-                  </button>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
