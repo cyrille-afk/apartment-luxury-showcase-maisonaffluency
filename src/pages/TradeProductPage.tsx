@@ -551,7 +551,14 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your material choice"
                   emphasized
                   value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : undefined}
-                  onChange={(idx) => setSelectedSingleMaterial(singleMaterialOptions[idx] ?? null)}
+                  onChange={(idx) => {
+                    const newMat = singleMaterialOptions[idx] ?? null;
+                    setSelectedSingleMaterial(newMat);
+                    // Reset size if it isn't offered for the new material
+                    if (newMat && selectedSingleSize && !singleAxisParsed.some((p) => p.material === newMat && p.size === selectedSingleSize)) {
+                      setSelectedSingleSize(null);
+                    }
+                  }}
                   disabledIndices={disabledMaterialIndices}
                 />
               )}
@@ -593,7 +600,13 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                   placeholder="Select your size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : undefined}
-                  onChange={(idx) => setSelectedSingleSize(singleSizeOptions[idx] ?? null)}
+                  onChange={(idx) => {
+                    const newSize = singleSizeOptions[idx] ?? null;
+                    setSelectedSingleSize(newSize);
+                    if (newSize && selectedSingleMaterial && !singleAxisParsed.some((p) => p.size === newSize && p.material === selectedSingleMaterial)) {
+                      setSelectedSingleMaterial(null);
+                    }
+                  }}
                   disabledIndices={disabledSizeIndices}
                 />
               )}

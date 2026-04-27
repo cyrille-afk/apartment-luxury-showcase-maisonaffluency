@@ -193,7 +193,12 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             placeholder={getBasePlaceholder(product)}
             emphasized
             value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : undefined}
-            onChange={(idx) => setSelBase(baseOptions[idx] ?? null)}
+            onChange={(idx) => {
+              const v = baseOptions[idx] ?? null;
+              setSelBase(v);
+              if (v && selTop && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelTop(null);
+              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
+            }}
             disabledIndices={disabledBaseIdx}
           />
           <ExpandableSpec
@@ -202,7 +207,12 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             placeholder={getTopPlaceholder(product)}
             emphasized
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
-            onChange={(idx) => setSelTop(topOptions[idx] ?? null)}
+            onChange={(idx) => {
+              const v = topOptions[idx] ?? null;
+              setSelTop(v);
+              if (v && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelBase(null);
+              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelDualSize(null);
+            }}
             disabledIndices={disabledTopIdx}
           />
         </>
@@ -213,7 +223,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           placeholder={getMaterialPlaceholder(product)}
           emphasized
           value={selMat != null ? Math.max(0, singleMaterialOptions.indexOf(selMat)) : undefined}
-          onChange={(idx) => setSelMat(singleMaterialOptions[idx] ?? null)}
+          onChange={(idx) => {
+            const m = singleMaterialOptions[idx] ?? null;
+            setSelMat(m);
+            if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
+          }}
           disabledIndices={disabledMatIdx}
         />
       ) : product.materials ? (
@@ -234,7 +248,12 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           emphasized
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : undefined}
-          onChange={(idx) => setSelDualSize(dualSizeOptions[idx] ?? null)}
+          onChange={(idx) => {
+            const s = dualSizeOptions[idx] ?? null;
+            setSelDualSize(s);
+            if (s && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelBase(null);
+            if (s && selTop && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelTop(null);
+          }}
           disabledIndices={disabledDualSizeIdx}
         />
       ) : hasSingleAxisSplit ? (
@@ -244,7 +263,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           emphasized
           placeholder="Select your size"
           value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : undefined}
-          onChange={(idx) => setSelSize(singleSizeOptions[idx] ?? null)}
+          onChange={(idx) => {
+            const s = singleSizeOptions[idx] ?? null;
+            setSelSize(s);
+            if (s && selMat && !singleAxisParsed.some((p) => p.size === s && p.material === selMat)) setSelMat(null);
+          }}
           disabledIndices={disabledSizeIdx}
         />
       ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
