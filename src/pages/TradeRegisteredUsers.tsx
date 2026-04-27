@@ -265,6 +265,30 @@ export default function TradeRegisteredUsers() {
                         </select>
                       </td>
                       <td className="px-4 py-3">
+                        {u.trade_tier_suggested ? (
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[10px] font-medium ${tierBadgeClass(u.trade_tier_suggested)}`}>
+                              {TIER_LABEL[u.trade_tier_suggested]}
+                            </span>
+                            <span className="font-body text-[11px] text-muted-foreground">{fmtEur(u.trade_tier_12mo_spend_cents)}</span>
+                            {u.trade_tier_suggested !== u.trade_tier && (
+                              <button
+                                onClick={() => updateTier(u.id, u.trade_tier_suggested!)}
+                                disabled={savingId === u.id}
+                                className="text-[10px] uppercase tracking-wider text-primary hover:underline disabled:opacity-50"
+                              >
+                                Apply
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td colSpan={0} className="hidden" />{/* spacer */}
+                      <td className="px-0 py-0 hidden" />
+                      <td-removed/>
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           {appStatusIcon(u.app_status)}
                           {u.app_status && (
