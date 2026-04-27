@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import TradePriceToggle from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
+import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -194,6 +195,7 @@ const TradeLayout = () => {
             </div>
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4">
+              <StudioSwitcher />
               <GlobalProjectSwitcher />
               <div className="hidden sm:block">
                 <TradePriceToggle />
