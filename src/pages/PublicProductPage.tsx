@@ -132,6 +132,142 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 }
 
 /* ------------------------------------------------------------------ */
+/*  Variant selectors (controlled — enables cross-axis disabling)     */
+/* ------------------------------------------------------------------ */
+const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
+  const axes = computeVariantAxes(product.size_variants);
+  const {
+    isDualAxis,
+    baseOptions,
+    topOptions,
+    dualSizeOptions,
+    hasSingleAxisSplit,
+    singleSizeOptions,
+    singleMaterialOptions,
+    singleAxisParsed,
+    hasVariants,
+  } = axes;
+
+  const [selBase, setSelBase] = useState<string | null>(null);
+  const [selTop, setSelTop] = useState<string | null>(null);
+  const [selDualSize, setSelDualSize] = useState<string | null>(null);
+  const [selMat, setSelMat] = useState<string | null>(null);
+  const [selSize, setSelSize] = useState<string | null>(null);
+
+  // Single-axis split: cross-disable based on the other selection.
+  const disabledMatIdx = hasSingleAxisSplit && selSize
+    ? singleMaterialOptions
+        .map((m, i) => (singleAxisParsed.some((p) => p.material === m && p.size === selSize) ? -1 : i))
+        .filter((i) => i >= 0)
+    : [];
+  const disabledSizeIdx = hasSingleAxisSplit && selMat
+    ? singleSizeOptions
+        .map((s, i) => (singleAxisParsed.some((p) => p.size === s && p.material === selMat) ? -1 : i))
+        .filter((i) => i >= 0)
+    : [];
+
+  // Dual-axis: cross-disable base × top × size based on existing variants.
+  const variantsList = product.size_variants || [];
+  const matchesDual = (v: any, b: string | null, t: string | null, s: string | null) =>
+    (b == null || (v.base || "").trim() === b) &&
+    (t == null || (v.top || "").trim() === t) &&
+    (s == null || (v.label || "").trim() === s);
+  const disabledBaseIdx = isDualAxis && (selTop || selDualSize)
+    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledTopIdx = isDualAxis && (selBase || selDualSize)
+    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
+    ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+
+  return (
+    <>
+      {/* Material / finish dropdown(s) */}
+      {isDualAxis ? (
+        <>
+          <ExpandableSpec
+            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+            text={baseOptions.join("\n")}
+            placeholder={getBasePlaceholder(product)}
+            emphasized
+            value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : undefined}
+            onChange={(idx) => setSelBase(baseOptions[idx] ?? null)}
+            disabledIndices={disabledBaseIdx}
+          />
+          <ExpandableSpec
+            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+            text={topOptions.join("\n")}
+            placeholder={getTopPlaceholder(product)}
+            emphasized
+            value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
+            onChange={(idx) => setSelTop(topOptions[idx] ?? null)}
+            disabledIndices={disabledTopIdx}
+          />
+        </>
+      ) : hasSingleAxisSplit ? (
+        <ExpandableSpec
+          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          text={singleMaterialOptions.join("\n")}
+          placeholder={getMaterialPlaceholder(product)}
+          emphasized
+          value={selMat != null ? Math.max(0, singleMaterialOptions.indexOf(selMat)) : undefined}
+          onChange={(idx) => setSelMat(singleMaterialOptions[idx] ?? null)}
+          disabledIndices={disabledMatIdx}
+        />
+      ) : product.materials ? (
+        <ExpandableSpec
+          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          text={product.materials}
+          placeholder={getMaterialPlaceholder(product)}
+          autoSplit
+          autoDetectedHint
+        />
+      ) : null}
+
+      {/* Size dropdown */}
+      {isDualAxis && dualSizeOptions.length > 0 ? (
+        <ExpandableSpec
+          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+          text={dualSizeOptions.join("\n")}
+          emphasized
+          placeholder="Select your size"
+          value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : undefined}
+          onChange={(idx) => setSelDualSize(dualSizeOptions[idx] ?? null)}
+          disabledIndices={disabledDualSizeIdx}
+        />
+      ) : hasSingleAxisSplit ? (
+        <ExpandableSpec
+          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+          text={singleSizeOptions.join("\n")}
+          emphasized
+          placeholder="Select your size"
+          value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : undefined}
+          onChange={(idx) => setSelSize(singleSizeOptions[idx] ?? null)}
+          disabledIndices={disabledSizeIdx}
+        />
+      ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
+        const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
+        return labels.length > 1 ? (
+          <ExpandableSpec
+            icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+            text={labels.join("\n")}
+            emphasized
+            placeholder="Select your size"
+          />
+        ) : product.dimensions ? (
+          <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
+        ) : null;
+      })()}
+      {!hasVariants && product.dimensions && (
+        <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
+      )}
+    </>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
 const PublicProductPage: React.FC = () => {
