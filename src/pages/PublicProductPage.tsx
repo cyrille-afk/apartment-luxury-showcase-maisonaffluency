@@ -419,10 +419,18 @@ const PublicProductPage: React.FC = () => {
 
   const pinned = isPinned(product.title, product.id);
   const rawSubcategory = product.subcategory?.trim();
-  const normalizedSubcategory = rawSubcategory
+  // Parent category derived from the subcategory's position in the taxonomy
+  // (e.g. "Cabinets" → "Storage"). Used for the legacy fallback grid URL.
+  const normalizedParentCategory = rawSubcategory
     ? Object.entries(SUBCATEGORY_MAP).find(([, values]) =>
         values.some((value) => value.toLowerCase() === rawSubcategory.toLowerCase())
-      )?.[0] || rawSubcategory
+      )?.[0] || null
+    : null;
+  // Canonical-cased subcategory label (e.g. db "cabinets" → "Cabinets") for display.
+  const normalizedSubcategory = rawSubcategory
+    ? (Object.values(SUBCATEGORY_MAP)
+        .flat()
+        .find((s) => s.toLowerCase() === rawSubcategory.toLowerCase()) || rawSubcategory)
     : null;
 
   const fallbackGridParams = new URLSearchParams();
