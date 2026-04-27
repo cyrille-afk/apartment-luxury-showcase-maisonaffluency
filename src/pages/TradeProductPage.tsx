@@ -560,6 +560,11 @@ const TradeProductPage: React.FC = () => {
                     }
                   }}
                   disabledIndices={disabledMaterialIndices}
+                  helperText={
+                    disabledMaterialIndices.length > 0 && selectedSingleSize
+                      ? `Some materials aren't offered in ${selectedSingleSize} — greyed out.`
+                      : undefined
+                  }
                 />
               )}
               {!isDualAxis && !hasSingleAxisSplit && product.materials && (
