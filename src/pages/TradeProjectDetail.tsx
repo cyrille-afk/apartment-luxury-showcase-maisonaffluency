@@ -29,8 +29,10 @@ type LinkedTimeline = { id: string; quote_id: string; kanban_status: string; est
 export default function TradeProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { project, loading, refresh } = useProject(id);
+  const accessDenied = !loading && project != null && project.user_id !== user?.id && !isAdmin;
+  const canManage = !accessDenied;
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: "", client_name: "", location: "", notes: "", target_completion_date: "" });
