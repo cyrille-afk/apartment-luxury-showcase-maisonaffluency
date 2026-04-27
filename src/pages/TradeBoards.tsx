@@ -6,6 +6,7 @@ import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
 import SectionHero from "@/components/trade/SectionHero";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
@@ -45,6 +46,7 @@ const statusColors: Record<string, string> = {
 
 const TradeBoards = () => {
   const { user } = useAuth();
+  const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const navigate = useNavigate();
   const {
@@ -69,8 +71,14 @@ const TradeBoards = () => {
     let q = supabase
       .from("client_boards")
       .select("*")
-      .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
+    // Scope to current studio so teammates see each other's boards.
+    // RLS enforces actual visibility based on role + per-project overrides.
+    if (currentStudio) {
+      q = q.eq("studio_id", currentStudio.id);
+    } else {
+      q = q.eq("user_id", user.id);
+    }
     if (projectFilter) q = q.eq("project_id", projectFilter);
     const { data } = await q;
 
@@ -107,7 +115,7 @@ const TradeBoards = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchBoards(); }, [user, projectFilter]);
+  useEffect(() => { fetchBoards(); }, [user, projectFilter, currentStudio?.id]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
@@ -130,10 +138,14 @@ const TradeBoards = () => {
 
   const handleCreate = async () => {
     if (!user || !title.trim()) return;
+    if (currentStudio && !canEdit) {
+      toast({ title: "Read-only role", description: "Your role in this studio doesn't allow creating boards.", variant: "destructive" });
+      return;
+    }
     setCreating(true);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, title: title.trim(), client_name: clientName.trim(), client_email: clientEmail.trim() || null })
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: title.trim(), client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
       .select()
       .single();
     setCreating(false);

@@ -5,6 +5,7 @@ import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard, Users, XCircle, FolderOpen } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
@@ -38,6 +39,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
 
 const TradeQuotes = () => {
   const { user, isSuperAdmin } = useAuth();
+  const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const navigate = useNavigate();
   const {
@@ -63,9 +65,15 @@ const TradeQuotes = () => {
       .select("*")
       .order("created_at", { ascending: false });
     
-    // Super admins can toggle between own quotes and all quotes
+    // Super admins can toggle between studio quotes and all quotes.
+    // Otherwise scope to current studio so all teammates see each other's work.
+    // RLS enforces actual visibility based on role + per-project overrides.
     if (!showAll || !isSuperAdmin) {
-      query = query.eq("user_id", user.id);
+      if (currentStudio) {
+        query = query.eq("studio_id", currentStudio.id);
+      } else {
+        query = query.eq("user_id", user.id);
+      }
     }
 
     if (projectFilter) {
@@ -122,7 +130,7 @@ const TradeQuotes = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [user, showAll, projectFilter]);
+  }, [user, showAll, projectFilter, currentStudio?.id]);
 
   useEffect(() => {
     if (!projectFilter) { setProjectFilterName(null); return; }
@@ -146,10 +154,14 @@ const TradeQuotes = () => {
 
   const handleCreateQuote = async () => {
     if (!user) return;
+    if (currentStudio && !canEdit) {
+      toast({ title: "Read-only role", description: "Your role in this studio doesn't allow creating quotes.", variant: "destructive" });
+      return;
+    }
     setCreating(true);
     const { data, error } = await supabase
       .from("trade_quotes")
-      .insert({ user_id: user.id, status: "draft" })
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, status: "draft" } as any)
       .select()
       .single();
 
