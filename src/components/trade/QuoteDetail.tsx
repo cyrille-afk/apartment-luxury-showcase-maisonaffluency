@@ -858,6 +858,80 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 })}
               </div>
 
+              {/* Insurance bundling */}
+              <div className="border-t border-border mt-2 pt-4">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <div className="font-display text-xs uppercase tracking-[0.15em] text-foreground">Coverage & Insurance</div>
+                    <div className="font-body text-[11px] text-muted-foreground mt-0.5">
+                      Bundle transit & all-risk coverage with this quote. Premium is calculated on net value after trade discount.
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-2 cursor-pointer select-none shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={insuranceEnabled}
+                      disabled={isReadOnly}
+                      onChange={(e) => {
+                        const next = e.target.checked;
+                        setInsuranceEnabled(next);
+                        persistInsurance({ insurance_enabled: next });
+                      }}
+                      className="h-4 w-4 accent-foreground"
+                    />
+                    <span className="font-body text-xs text-foreground">Include</span>
+                  </label>
+                </div>
+
+                {insuranceEnabled && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {INSURANCE_TIERS.map((opt) => {
+                        const active = insuranceTier === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            disabled={isReadOnly}
+                            onClick={() => {
+                              setInsuranceTier(opt.value);
+                              setInsuranceRateBps(opt.rateBps);
+                              persistInsurance({ insurance_tier: opt.value, insurance_rate_bps: opt.rateBps });
+                            }}
+                            className={`text-left rounded-md border px-3 py-2.5 transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
+                              active
+                                ? "border-foreground bg-foreground/5"
+                                : "border-border hover:border-foreground/40"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-display text-[11px] uppercase tracking-wider text-foreground">{opt.label}</span>
+                              <span className="font-body text-[11px] tabular-nums text-foreground/80">{(opt.rateBps / 100).toFixed(2)}%</span>
+                            </div>
+                            <div className="font-body text-[10px] text-muted-foreground mt-1 leading-snug">{opt.description}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {!isReadOnly ? (
+                      <textarea
+                        value={insuranceNotes}
+                        onChange={(e) => setInsuranceNotes(e.target.value)}
+                        onBlur={() => persistInsurance({ insurance_notes: insuranceNotes || null })}
+                        placeholder="Coverage notes — declared value, certificate holder, named insured, installation site…"
+                        rows={2}
+                        className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors"
+                      />
+                    ) : insuranceNotes ? (
+                      <p className="font-body text-[11px] text-muted-foreground italic">Coverage notes: {insuranceNotes}</p>
+                    ) : null}
+                    <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed">
+                      Indicative premiums underwritten by Maison Affluency partner brokers. Final certificate issued upon order confirmation.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
                 <div className="flex justify-end">
@@ -872,20 +946,30 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span>-{formatPriceRaw(Math.round(subtotalCents * tradeDiscountPct), currency)}</span>
                       </div>
                     )}
+                    {insuranceEnabled && insurancePremiumCents > 0 && (
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>
+                          Insurance ({INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label} · {(insuranceRateBps / 100).toFixed(2)}%)
+                        </span>
+                        <span>{formatPriceRaw(insurancePremiumCents, currency)}</span>
+                      </div>
+                    )}
                     {gstEnabled && subtotalCents > 0 && (() => {
                       const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
+                      const taxable = afterDiscount + insurancePremiumCents;
                       return (
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
                           <span>GST ({gstRate}%)</span>
-                          <span>{formatPriceRaw(Math.round(afterDiscount * gstRate / 100), currency)}</span>
+                          <span>{formatPriceRaw(Math.round(taxable * gstRate / 100), currency)}</span>
                         </div>
                       );
                     })()}
                     {(() => {
                       const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
-                      const total = gstEnabled && afterDiscount > 0
-                        ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
-                        : afterDiscount;
+                      const taxable = afterDiscount + insurancePremiumCents;
+                      const total = gstEnabled && taxable > 0
+                        ? taxable + Math.round(taxable * gstRate / 100)
+                        : taxable;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
                       return (
