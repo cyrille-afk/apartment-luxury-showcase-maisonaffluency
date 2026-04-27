@@ -223,7 +223,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           placeholder={getMaterialPlaceholder(product)}
           emphasized
           value={selMat != null ? Math.max(0, singleMaterialOptions.indexOf(selMat)) : undefined}
-          onChange={(idx) => setSelMat(singleMaterialOptions[idx] ?? null)}
+          onChange={(idx) => {
+            const m = singleMaterialOptions[idx] ?? null;
+            setSelMat(m);
+            if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
+          }}
           disabledIndices={disabledMatIdx}
         />
       ) : product.materials ? (
