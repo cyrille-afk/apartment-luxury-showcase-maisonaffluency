@@ -65,6 +65,26 @@ export default function TradeCustomRequests() {
   const [searchParams] = useSearchParams();
   const focusId = searchParams.get("focus");
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [activity, setActivity] = useState<Record<string, ActivityEntry[]>>({});
+  const [openActivity, setOpenActivity] = useState<Record<string, boolean>>({});
+  const [loadingActivity, setLoadingActivity] = useState<Record<string, boolean>>({});
+
+  const loadActivity = async (requestId: string) => {
+    setLoadingActivity((p) => ({ ...p, [requestId]: true }));
+    const { data } = await supabase
+      .from("trade_custom_request_activity")
+      .select("id, request_id, actor_id, actor_role, action, changes, created_at")
+      .eq("request_id", requestId)
+      .order("created_at", { ascending: false });
+    setActivity((p) => ({ ...p, [requestId]: (data as ActivityEntry[]) || [] }));
+    setLoadingActivity((p) => ({ ...p, [requestId]: false }));
+  };
+
+  const toggleActivity = (requestId: string) => {
+    const willOpen = !openActivity[requestId];
+    setOpenActivity((p) => ({ ...p, [requestId]: willOpen }));
+    if (willOpen && !activity[requestId]) loadActivity(requestId);
+  };
 
   useEffect(() => {
     if (!focusId || loading || requests.length === 0) return;
