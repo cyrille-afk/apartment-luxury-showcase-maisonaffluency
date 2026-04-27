@@ -27,6 +27,16 @@ type CustomRequest = {
   user_id: string;
 };
 
+type ActivityEntry = {
+  id: string;
+  request_id: string;
+  actor_id: string | null;
+  actor_role: string;
+  action: string;
+  changes: Record<string, any>;
+  created_at: string;
+};
+
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-blue-500/10 text-blue-600 border-blue-500/30",
   in_review: "bg-amber-500/10 text-amber-600 border-amber-500/30",
