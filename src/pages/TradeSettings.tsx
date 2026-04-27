@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, TrendingUp } from "lucide-react";
 import { z } from "zod";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
@@ -32,6 +32,7 @@ const TradeSettings = () => {
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [spendCents, setSpendCents] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -62,12 +63,15 @@ const TradeSettings = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("phone, avatar_url")
+      .select("phone, avatar_url, trade_tier_12mo_spend_cents")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (data?.phone) setForm((f) => ({ ...f, phone: data.phone }));
         if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
+        if ((data as any)?.trade_tier_12mo_spend_cents != null) {
+          setSpendCents((data as any).trade_tier_12mo_spend_cents);
+        }
       });
   }, [user]);
 
@@ -204,6 +208,66 @@ const TradeSettings = () => {
           </div>
         </div>
       </div>
+
+      {/* Tier upgrade callout */}
+      {tier !== "platinum" && (() => {
+        const SILVER_THRESHOLD = 0;       // €0
+        const GOLD_THRESHOLD = 50_000_00;  // €50,000 in cents
+        const PLATINUM_THRESHOLD = 250_000_00; // €250,000 in cents
+        const nextTier = tier === "silver" ? "Gold" : "Platinum";
+        const nextDiscount = tier === "silver" ? "12%" : "18%";
+        const nextThreshold = tier === "silver" ? GOLD_THRESHOLD : PLATINUM_THRESHOLD;
+        const prevThreshold = tier === "silver" ? SILVER_THRESHOLD : GOLD_THRESHOLD;
+        const remainingCents = Math.max(0, nextThreshold - spendCents);
+        const progressPct = Math.min(100, Math.max(0,
+          ((spendCents - prevThreshold) / (nextThreshold - prevThreshold)) * 100
+        ));
+        const fmt = (cents: number) =>
+          new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
+        const accent = tier === "silver" ? "text-amber-700" : "text-zinc-700";
+        const bar = tier === "silver" ? "bg-amber-500" : "bg-zinc-700";
+
+        return (
+          <div className="mb-8 px-4 py-4 rounded-lg border border-border bg-card">
+            <div className="flex items-start gap-3">
+              <div className={`h-9 w-9 rounded-full flex items-center justify-center bg-foreground/5 ${accent}`}>
+                <TrendingUp className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                  <div className="font-display text-sm text-foreground">
+                    Unlock {nextTier} — {nextDiscount} trade discount
+                  </div>
+                  <div className="font-body text-[11px] text-muted-foreground tabular-nums">
+                    {fmt(spendCents)} <span className="opacity-60">/ {fmt(nextThreshold)}</span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="mt-3 h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${bar} rounded-full transition-all`}
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+
+                <div className="mt-3 font-body text-xs text-muted-foreground leading-relaxed">
+                  {remainingCents > 0 ? (
+                    <>
+                      <span className="text-foreground font-medium">{fmt(remainingCents)}</span> of additional confirmed spend over the next 12 months will qualify you for{" "}
+                      <span className="text-foreground font-medium">{nextTier}</span> status.
+                    </>
+                  ) : (
+                    <>
+                      You've crossed the {nextTier} threshold. Our team reviews tier upgrades weekly — your status will be promoted shortly.
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Studio & team */}
       <a
