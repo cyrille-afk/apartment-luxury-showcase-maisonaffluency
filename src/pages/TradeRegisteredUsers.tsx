@@ -285,9 +285,6 @@ export default function TradeRegisteredUsers() {
                           <span className="text-[10px] text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td colSpan={0} className="hidden" />{/* spacer */}
-                      <td className="px-0 py-0 hidden" />
-                      <td-removed/>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           {appStatusIcon(u.app_status)}
