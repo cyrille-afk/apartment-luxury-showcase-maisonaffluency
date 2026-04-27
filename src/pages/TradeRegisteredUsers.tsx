@@ -62,7 +62,7 @@ export default function TradeRegisteredUsers() {
     queryFn: async () => {
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, email, first_name, last_name, company, created_at, trade_tier")
+        .select("id, email, first_name, last_name, company, created_at, trade_tier, trade_tier_suggested, trade_tier_locked_by_admin, trade_tier_12mo_spend_cents, trade_tier_computed_at")
         .order("created_at", { ascending: false });
 
       if (error || !profiles) return [];
