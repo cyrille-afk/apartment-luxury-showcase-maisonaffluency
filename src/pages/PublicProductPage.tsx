@@ -263,7 +263,11 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           emphasized
           placeholder="Select your size"
           value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : undefined}
-          onChange={(idx) => setSelSize(singleSizeOptions[idx] ?? null)}
+          onChange={(idx) => {
+            const s = singleSizeOptions[idx] ?? null;
+            setSelSize(s);
+            if (s && selMat && !singleAxisParsed.some((p) => p.size === s && p.material === selMat)) setSelMat(null);
+          }}
           disabledIndices={disabledSizeIdx}
         />
       ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
