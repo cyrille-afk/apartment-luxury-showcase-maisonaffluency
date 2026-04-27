@@ -121,9 +121,7 @@ export function formatPriceConverted(
 
 const OPTIONS: { value: DisplayCurrency; label: string }[] = [
   { value: "original", label: "Original" },
-  { value: "SGD", label: "SGD" },
-  { value: "EUR", label: "EUR" },
-  { value: "USD", label: "USD" },
+  ...SUPPORTED_CURRENCIES.map((c) => ({ value: c, label: c })),
 ];
 
 interface CurrencyToggleProps {
