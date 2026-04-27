@@ -37,6 +37,12 @@ interface ExpandableSpecProps {
   /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
   value?: number;
   onChange?: (index: number) => void;
+  /**
+   * Indices that should appear visually crossed-out and be unselectable.
+   * Used when one axis (e.g. material) constrains the available options on
+   * another axis (e.g. size).
+   */
+  disabledIndices?: number[];
 }
 
 /**
@@ -55,7 +61,9 @@ export default function ExpandableSpec({
   autoDetectedHint = false,
   value,
   onChange,
+  disabledIndices,
 }: ExpandableSpecProps) {
+  const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   let didAutoSplit = false;
 
@@ -139,15 +147,22 @@ export default function ExpandableSpec({
             </span>
           </SelectTrigger>
           <SelectContent className="z-[130] bg-background border-border">
-            {lines.map((line, i) => (
-              <SelectItem
-                key={i}
-                value={String(i)}
-                className="font-body text-xs md:text-sm cursor-pointer"
-              >
-                {line}
-              </SelectItem>
-            ))}
+            {lines.map((line, i) => {
+              const isDisabled = disabledSet.has(i);
+              return (
+                <SelectItem
+                  key={i}
+                  value={String(i)}
+                  disabled={isDisabled}
+                  className={cn(
+                    "font-body text-xs md:text-sm cursor-pointer",
+                    isDisabled && "line-through text-muted-foreground/50 cursor-not-allowed"
+                  )}
+                >
+                  {line}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         {showAutoHint && (
