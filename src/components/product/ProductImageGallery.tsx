@@ -100,7 +100,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                     : "border-border hover:border-foreground/30"
                 )}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <img
+                  src={img}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading={i < 5 || Math.abs(i - activeIndex) <= 1 ? "eager" : "lazy"}
+                  fetchPriority={i === activeIndex ? "high" : "auto"}
+                  decoding="async"
+                />
               </button>
             ))}
           </div>
