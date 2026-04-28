@@ -48,6 +48,7 @@ const TradeSettings = () => {
     last_name: "",
     company: "",
     phone: "",
+    country: "",
   });
 
   const [passwords, setPasswords] = useState({
