@@ -155,7 +155,7 @@ export default function TradeDescriptionWriter() {
                 ? items.map((p: any) => ({
                     id: p.id,
                     label: p.title,
-                    group: p.designers?.display_name || p.designers?.name || "Unknown",
+                    group: p.designers?.name || p.designers?.display_name || "Unknown",
                   }))
                 : items.map((p: any) => ({
                     id: p.id,
