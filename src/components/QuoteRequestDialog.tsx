@@ -32,7 +32,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
     firstName: "",
     lastName: "",
     phone: "",
-    country: "Singapore",
+    country: inferSupportedCountry(COUNTRIES, "Singapore"),
     city: "",
     shipping: "not-needed" as ShippingOption,
     message: "",
