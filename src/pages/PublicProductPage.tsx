@@ -126,7 +126,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
             ? (product as any).gallery_images
             : tradeProduct?.gallery_images || null,
         },
-        designer: { id: designer.id, name: designer.display_name || designer.name, slug: designer.slug, biography: designer.biography || "" },
+        designer: { id: designer.id, name: designer.name, slug: designer.slug, biography: designer.biography || "" },
         relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
       };
     },
