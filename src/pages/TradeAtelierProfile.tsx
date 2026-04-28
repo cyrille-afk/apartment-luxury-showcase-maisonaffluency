@@ -522,8 +522,7 @@ const TradeAtelierProfile = () => {
                     <img
                       src={designer.hero_image_url || designer.image_url}
                       alt={name}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={{ objectPosition: 'center 25%' }}
+                      className="absolute inset-0 w-full h-full object-cover [object-position:center_15%] md:[object-position:center_25%]"
                       loading="eager"
                     />
                   )}
