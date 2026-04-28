@@ -579,6 +579,7 @@ const PublicProductPage: React.FC = () => {
                 images={images}
                 alt={product.title}
                 activeIndex={galleryActiveIndex}
+                onIndexChange={setGalleryActiveIndex}
                 overlay={
                   product.description ? (
                     <div className="flex flex-col items-end gap-2">

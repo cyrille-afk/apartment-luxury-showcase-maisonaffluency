@@ -11,9 +11,11 @@ interface ProductImageGalleryProps {
   overlay?: React.ReactNode;
   /** Optional controlled active index. When provided, the gallery jumps to it whenever it changes. */
   activeIndex?: number;
+  /** Notifies the parent whenever the active index changes (thumbnail click, arrow nav, dot, etc.) so parent state stays in sync. */
+  onIndexChange?: (index: number) => void;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex, onIndexChange }) => {
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
   // Sync with external controlled index
@@ -29,8 +31,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const [canScrollDown, setCanScrollDown] = useState(false);
 
   const goTo = useCallback((i: number) => {
-    setActiveIndex(Math.max(0, Math.min(i, images.length - 1)));
-  }, [images.length]);
+    const next = Math.max(0, Math.min(i, images.length - 1));
+    setActiveIndex(next);
+    onIndexChange?.(next);
+  }, [images.length, onIndexChange]);
 
   const updateScrollState = useCallback(() => {
     const el = thumbsRef.current;
