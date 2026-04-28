@@ -4,6 +4,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const HIDDEN_CHILD_DESIGNER_NAMES = new Set(["Gabriel Hendifar"]);
+
 export function useParentBrandDesignerCounts(parentNames: string[]) {
   return useQuery({
     queryKey: ["parent-brand-designer-counts", parentNames],
@@ -13,14 +15,14 @@ export function useParentBrandDesignerCounts(parentNames: string[]) {
       if (parentNames.length === 0) return {} as Record<string, number>;
       const { data, error } = await supabase
         .from("designers")
-        .select("founder")
+        .select("founder, name")
         .in("founder", parentNames)
         .eq("is_published", true);
       if (error) throw error;
       const counts: Record<string, number> = {};
       parentNames.forEach(n => { counts[n] = 0; });
       (data || []).forEach(d => {
-        if (d.founder) {
+        if (d.founder && !HIDDEN_CHILD_DESIGNER_NAMES.has(d.name)) {
           // Don't count the parent itself (founder === name)
           counts[d.founder] = (counts[d.founder] || 0) + 1;
         }
@@ -50,7 +52,7 @@ export function useParentBrandDesignerCountsFiltered(parentNames: string[]) {
       const counts: Record<string, number> = {};
       parentNames.forEach(n => { counts[n] = 0; });
       (data || []).forEach(d => {
-        if (d.founder && d.name !== d.founder) {
+        if (d.founder && d.name !== d.founder && !HIDDEN_CHILD_DESIGNER_NAMES.has(d.name)) {
           counts[d.founder] = (counts[d.founder] || 0) + 1;
         }
       });
