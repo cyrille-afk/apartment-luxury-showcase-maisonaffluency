@@ -624,15 +624,19 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isDualAxis && !hasSingleAxisSplit && product.materials && (
-                <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-                  text={product.materials}
-                  placeholder="Select your material choice"
-                  autoSplit
-                  autoDetectedHint
-                />
-              )}
+              {!isDualAxis && !hasSingleAxisSplit && product.materials && (() => {
+                const parsed = parseMaterialsFallback(product.materials);
+                return (
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={product.materials}
+                    placeholder="Select your material choice"
+                    autoSplit
+                    autoDetectedHint
+                    onChange={(idx) => handleMaterialChange(parsed[idx] ?? null)}
+                  />
+                );
+              })()}
               {/* Dual-axis: Base × Top finish dropdowns */}
               {isDualAxis && (
                 <>
