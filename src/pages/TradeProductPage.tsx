@@ -36,6 +36,7 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
