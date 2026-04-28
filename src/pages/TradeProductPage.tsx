@@ -191,7 +191,12 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
         },
         designer: {
           id: designer.id,
-          name: (designer as any).display_name || designer.name,
+          // Use canonical brand/atelier name (e.g. "Atelier Pendhapa") as the
+          // Maker label across the product page — NOT display_name, which often
+          // resolves to the founders' personal duo (e.g. "Antonin Hautefort &
+          // Ignatio Tenggara"). The duo attribution is still preserved on the
+          // designer profile biography quote, which reads its own display_name.
+          name: designer.name,
           slug: designer.slug,
           biography: (designer as any).biography || "",
         },
