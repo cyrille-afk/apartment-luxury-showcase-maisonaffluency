@@ -522,6 +522,7 @@ const PublicProductPage: React.FC = () => {
               <ProductImageGallery
                 images={images}
                 alt={product.title}
+                activeIndex={galleryActiveIndex}
                 overlay={
                   computeVariantAxes(product.size_variants).hasVariants || product.description ? (
                     <div className="flex flex-col items-end gap-2">
