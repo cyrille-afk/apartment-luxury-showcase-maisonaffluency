@@ -5,7 +5,7 @@ import { X, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement, trackForm } from "@/lib/analytics";
-import { inferSupportedCountry } from "@/lib/inferCountry";
+
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 
 const COUNTRIES = [
@@ -28,13 +28,13 @@ interface QuoteRequestDialogProps {
 const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: QuoteRequestDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inferredCountryRef = useRef<string>(inferSupportedCountry(COUNTRIES, "Singapore"));
+  const inferredCountryRef = useRef<string>("");
   const [form, setForm] = useState({
     email: "",
     firstName: "",
     lastName: "",
     phone: "",
-    country: inferredCountryRef.current,
+    country: "",
     city: "",
     shipping: "not-needed" as ShippingOption,
     message: "",
@@ -124,7 +124,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       onOpenChange(false);
       setForm({
         email: "", firstName: "", lastName: "", phone: "",
-        country: inferSupportedCountry(COUNTRIES, "Singapore"), city: "", shipping: "not-needed",
+        country: "", city: "", shipping: "not-needed",
         message: "", consent: false, newsletter: false,
       });
     } catch {
@@ -227,8 +227,9 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               <select
                 value={form.country}
                 onChange={(e) => update("country", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors appearance-none cursor-pointer text-[16px]"
+                className={`w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm outline-none focus:border-foreground transition-colors appearance-none cursor-pointer text-[16px] ${form.country ? "text-foreground" : "text-muted-foreground"}`}
               >
+                <option value="" disabled>— Select country —</option>
                 {COUNTRIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}

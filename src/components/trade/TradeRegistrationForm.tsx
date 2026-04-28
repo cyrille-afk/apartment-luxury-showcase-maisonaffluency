@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { inferSupportedCountry } from "@/lib/inferCountry";
+
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { trackForm } from "@/lib/analytics";
 
@@ -48,7 +48,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const inferredCountryRef = useRef<string>(inferSupportedCountry(COUNTRIES, "Singapore"));
+  const inferredCountryRef = useRef<string>("");
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
@@ -59,7 +59,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     companyName: "",
     companyWebsite: "",
     jobTitle: "",
-    country: inferredCountryRef.current,
+    country: "",
     city: "",
     isCertified: false,
     certificationDetails: "",
@@ -248,7 +248,8 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
           <div>
             <label className="font-body text-sm text-foreground">Country</label>
             <select value={form.country} onChange={(e) => update("country", e.target.value)}
-              className={`${fieldClass("country")} appearance-none`}>
+              className={`${fieldClass("country")} appearance-none ${!form.country ? "text-muted-foreground" : ""}`}>
+              <option value="" disabled>— Select country —</option>
               {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
