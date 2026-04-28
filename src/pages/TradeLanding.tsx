@@ -773,7 +773,22 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               </p>
             </motion.div>
 
-            <MobileTestimonials testimonials={testimonials} />
+            <MobileTestimonials
+              testimonials={
+                isUKVariant
+                  ? [
+                      {
+                        quote:
+                          "Sourcing French and Italian ateliers from London used to mean weeks of phone calls and conflicting freight quotes. Maison Affluency consolidates everything — pricing, lead times, customs, delivery — into one clear quotation. It has genuinely changed how we specify on our UK projects.",
+                        name: "Studio Principal",
+                        title: "Interior Architecture Practice",
+                        location: "London, United Kingdom",
+                      },
+                      ...testimonials,
+                    ]
+                  : testimonials
+              }
+            />
           </div>
         </div>
 
