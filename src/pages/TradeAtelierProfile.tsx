@@ -107,7 +107,6 @@ const TradeAtelierProfile = () => {
   const { toast } = useToast();
   const { data: designer, isLoading } = useDesigner(slug);
   const { isPinned, togglePin } = useCompare();
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     const resetScroll = () => {
@@ -338,126 +337,6 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const bioBlocks = designer.biography
-            ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
-            : [];
-
-          // Check if biography text already contains inline media URLs
-          const bioHasInlineMedia = bioBlocks.some((b: string) => {
-            const pipes = b.split(/\s*\|\s*/);
-            const url = pipes[0]?.trim() || "";
-            if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
-            return (
-              /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
-              /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
-              /vimeo\.com\//i.test(url) ||
-              /youtube\.com\/watch|youtu\.be\//i.test(url)
-            );
-          });
-          // Skip biography_images interleaving when bio text already has inline media
-          const manualMedia = bioHasInlineMedia ? [] : (designer.biography_images || []).filter(Boolean);
-          const curatedMedia = bioHasInlineMedia ? [] : picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
-          const baseMediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 3);
-          const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-chareau.jpg | Maison de Verre, Paris";
-
-          const mediaEntries =
-            slug === "pierre-chareau" && baseMediaEntries.length > 0
-              ? [...baseMediaEntries.slice(0, baseMediaEntries.length - 1), maisonDeVerreLine]
-              : baseMediaEntries;
-
-          let heroParagraphs: string[] = [];
-          let remainingBio = "";
-
-          if (bioBlocks.length > 0) {
-              if (mediaEntries.length > 0) {
-                const textBlocks = bioBlocks.filter((b) => !isBiographyMediaBlock(b));
-                const maxHero = bioHasInlineMedia ? 1 : isMobile ? 1 : 3;
-              const chunkCount = mediaEntries.length + 1;
-                const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
-              const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
-                  textBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
-              );
-
-              for (let i = 1; i < paragraphChunks.length; i++) {
-                if (paragraphChunks[i].length > 0) continue;
-                for (let j = i - 1; j >= 0; j--) {
-                  if (paragraphChunks[j].length > 1) {
-                    const moved = paragraphChunks[j].pop();
-                    if (moved) paragraphChunks[i].unshift(moved);
-                    break;
-                  }
-                }
-              }
-
-                const rawHero = paragraphChunks[0] || [];
-                if (rawHero.length > maxHero) {
-                  const overflow = rawHero.splice(maxHero);
-                  if (!paragraphChunks[1]) paragraphChunks[1] = [];
-                  paragraphChunks[1].unshift(...overflow);
-                }
-                heroParagraphs = rawHero;
-
-                const heroSet = new Set(heroParagraphs);
-                const remainingOrdered: string[] = [];
-                for (const block of bioBlocks) {
-                  if (heroSet.has(block)) {
-                    heroSet.delete(block);
-                    continue;
-                  }
-                  remainingOrdered.push(block);
-                }
-
-                const result: string[] = [];
-                let mediaIdx = 0;
-                for (const block of remainingOrdered) {
-                  if (!isBiographyMediaBlock(block)) {
-                    const chunkBoundary = mediaIdx < mediaEntries.length
-                      ? (paragraphChunks[mediaIdx + 1] || [])[0]
-                      : null;
-                    if (chunkBoundary && block === chunkBoundary && mediaIdx < mediaEntries.length) {
-                      result.push(mediaEntries[mediaIdx]);
-                      mediaIdx++;
-                    }
-                  }
-                  result.push(block);
-                }
-                while (mediaIdx < mediaEntries.length) {
-                  result.push(mediaEntries[mediaIdx]);
-                  mediaIdx++;
-                }
-                remainingBio = result.filter(Boolean).join("\n\n");
-            } else {
-                const textBlocks = bioBlocks.filter((b) => !isBiographyMediaBlock(b));
-                const heroTextCount = bioHasInlineMedia ? 1 : isMobile ? 1 : 3;
-                heroParagraphs = textBlocks.slice(0, heroTextCount);
-                const heroSet = new Set(heroParagraphs);
-                const allRemaining: string[] = [];
-                for (const block of bioBlocks) {
-                  if (heroSet.has(block)) {
-                    heroSet.delete(block);
-                    continue;
-                  }
-                  allRemaining.push(block);
-                }
-                remainingBio = allRemaining.join("\n\n");
-            }
-          }
-
-            const remainingBlocks = remainingBio
-              ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
-              : [];
-            const startsWithInlineImage =
-              bioHasInlineMedia &&
-              heroParagraphs.length > 0 &&
-              remainingBlocks.length > 0 &&
-              isBiographyMediaBlock(remainingBlocks[0]) &&
-              !isBiographyVideoBlock(remainingBlocks[0]);
-            const introEditorialBio = startsWithInlineImage
-              ? [remainingBlocks[0], ...heroParagraphs].join("\n\n")
-              : "";
-            const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
-            const editorialBio = editorialBlocks.join("\n\n");
-            const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
 
           return isDesignerProfile ? (
             <div className="flex flex-col gap-0">
