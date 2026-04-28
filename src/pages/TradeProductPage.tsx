@@ -9,7 +9,7 @@
  * Back navigation:
  *   1. location.state.from (preferred — set when navigating from grid/gallery)
  *   2. sessionStorage("trade_product_from_path") fallback for refresh resilience
- *   3. /trade/showroom?tab=grid as final fallback
+ *   3. /trade/gallery as final fallback
  */
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
@@ -32,7 +32,6 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
-import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
@@ -374,16 +373,15 @@ const TradeProductPage: React.FC = () => {
   const { rawSubcategory, normalizedSubcategory } = normalizeCategoryContext(product.subcategory);
 
   // Fallback back-target: prefer the originating designer/atelier gallery so
-  // users return to the same brand context they came from. If we don't yet
-  // know the designer slug (shouldn't happen here), fall back to the showroom
-  // grid filtered to this product's category/subcategory.
+  // users return to the same brand context they came from.
   const fallbackPath = designerSlug
     ? `/trade/gallery/${designerSlug}`
     : (() => {
-        const fallbackParams = new URLSearchParams({ tab: "grid" });
+        const fallbackParams = new URLSearchParams();
         if (product.category) fallbackParams.set("category", product.category);
         if (normalizedSubcategory) fallbackParams.set("subcategory", normalizedSubcategory);
-        return `/trade/showroom?${fallbackParams.toString()}`;
+        const query = fallbackParams.toString();
+        return `/trade/gallery${query ? `?${query}` : ""}`;
       })();
 
   const galleryFromAdmin = (product.gallery_images || []).filter(Boolean) as string[];
@@ -515,14 +513,14 @@ const TradeProductPage: React.FC = () => {
             trade portal instead of being sent to the public catalogue. */}
         <Breadcrumbs
           items={buildProductBreadcrumbs({
-            root: { label: "Trade Gallery", to: "/trade/showroom?tab=grid" },
+            root: { label: "Trade Gallery", to: "/trade/gallery" },
             category: product.category,
             subcategory: product.subcategory,
             title: product.title,
             buildCategoryHref: (cat, sub) => {
-              const params = new URLSearchParams({ tab: "grid", category: cat });
+              const params = new URLSearchParams({ category: cat });
               if (sub) params.set("subcategory", sub);
-              return `/trade/showroom?${params.toString()}`;
+              return `/trade/gallery?${params.toString()}`;
             },
           })}
           className="mb-6"
