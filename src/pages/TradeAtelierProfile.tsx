@@ -25,7 +25,6 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -53,36 +52,6 @@ const DESIGNER_DATES: Record<string, string> = {
   "jacques-henri-lartigue": "1894–1986",
   "felix-aublet": "1903–1978",
   "laurent-maugoust-cecile-chenais": "b. 1975",
-};
-
-const isBiographyMediaBlock = (text: string): boolean => {
-  const trimmed = text.trim();
-  if (/^<iframe[\s\S]*(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/plugins\/video)/i.test(trimmed)) return true;
-
-  const url = trimmed.split(/\s*\|\s*/)[0]?.trim() || "";
-  if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
-  return (
-    /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
-    /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
-    /vimeo\.com\//i.test(url) ||
-    /youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url) ||
-    /facebook\.com\/plugins\/video|facebook\.com\/.+\/videos\//i.test(url)
-  );
-};
-
-const isBiographyVideoBlock = (text: string): boolean => {
-  const trimmed = text.trim();
-  if (/^<iframe[\s\S]*(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/plugins\/video)/i.test(trimmed)) return true;
-
-  const url = trimmed.split(/\s*\|\s*/)[0]?.trim() || "";
-  if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
-  return (
-    /\.(mp4|webm|mov)(\?|$)/i.test(url) ||
-    /res\.cloudinary\.com\/.+\/video\/upload/i.test(url) ||
-    /vimeo\.com\//i.test(url) ||
-    /youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url) ||
-    /facebook\.com\/plugins\/video|facebook\.com\/.+\/videos\//i.test(url)
-  );
 };
 
 function displayName(name: string): string {
