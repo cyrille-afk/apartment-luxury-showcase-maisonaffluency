@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement } from "@/lib/analytics";
 import { inferSupportedCountry } from "@/lib/inferCountry";
+import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
