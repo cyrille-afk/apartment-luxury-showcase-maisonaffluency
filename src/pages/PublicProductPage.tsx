@@ -83,9 +83,11 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label";
+
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
+        .select(publicPickFields)
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -97,6 +99,12 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       }) || picks.find((p: any) => slugify(p.title) === productSlug);
 
       if (!product) return null;
+
+      const { data: variantMapRow } = await supabase
+        .from("designer_curator_picks_public" as any)
+        .select("variant_image_map")
+        .eq("id", (product as any).id)
+        .maybeSingle();
 
       const brandCandidates = Array.from(new Set([
         designer.display_name,
@@ -122,6 +130,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       return {
         product: {
           ...(product as unknown as ProductRow),
+          variant_image_map: (variantMapRow as any)?.variant_image_map || null,
           image_url: (product as any).image_url || tradeProduct?.image_url || null,
           gallery_images: (product as any).gallery_images?.length
             ? (product as any).gallery_images
