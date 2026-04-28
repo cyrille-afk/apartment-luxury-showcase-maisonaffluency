@@ -243,7 +243,7 @@ const TradeProductPage: React.FC = () => {
   const { data, isLoading } = useTradeProductBySlug(designerSlug, productSlug);
 
   // ── Pricing display state ──
-  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
