@@ -532,19 +532,11 @@ const TradeProductPage: React.FC = () => {
               images={images}
               alt={product.title}
               overlay={
-                hasVariants || product.description ? (
+                product.description ? (
                   <div className="flex flex-col items-end gap-2">
-                    {hasVariants && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-background border border-[hsl(var(--gold)/0.4)] px-2.5 py-1 font-body text-[9px] uppercase tracking-[0.18em] text-foreground/80 shadow-sm">
-                        <span className="h-1 w-1 rounded-full bg-[hsl(var(--gold))]" aria-hidden="true" />
-                        Bespoke available
-                      </span>
-                    )}
-                    {product.description ? (
-                      <div className="hidden md:block">
-                        <LightboxDescriptionDropdown description={product.description} />
-                      </div>
-                    ) : null}
+                    <div className="hidden md:block">
+                      <LightboxDescriptionDropdown description={product.description} />
+                    </div>
                   </div>
                 ) : null
               }
