@@ -443,6 +443,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   await tick();
   let heroLoaded: LoadedImage | null = null;
   if (input.heroImageUrl) heroLoaded = await loadImage(input.heroImageUrl);
+  if (!heroLoaded && input.heroImageFallbackUrl) {
+    heroLoaded = await loadImage(input.heroImageFallbackUrl);
+  }
   emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
   if (heroLoaded) {
