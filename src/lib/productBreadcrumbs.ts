@@ -29,6 +29,14 @@ export interface ProductBreadcrumbInput {
   subcategory?: string | null;
   /** Product title — rendered as the final, non-linked crumb. */
   title: string;
+  /**
+   * Optional URL builder for the Category and Subcategory crumbs.
+   * Defaults to the public CategoryRoute (`/products-category/...`).
+   * Trade pages override this so users return to the Trade Gallery
+   * grid pre-filtered to the same category/subcategory instead of
+   * being booted out to the public site.
+   */
+  buildCategoryHref?: (category: string, subcategory: string | null) => string;
 }
 
 export function buildProductBreadcrumbs({
@@ -36,6 +44,7 @@ export function buildProductBreadcrumbs({
   category,
   subcategory,
   title,
+  buildCategoryHref = categoryUrl,
 }: ProductBreadcrumbInput): Crumb[] {
   const rawSub = subcategory?.trim() || null;
   const canonicalSub = normalizeSubcategory(rawSub); // canonical-cased label or null
