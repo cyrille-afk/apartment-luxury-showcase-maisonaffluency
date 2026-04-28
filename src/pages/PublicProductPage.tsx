@@ -354,6 +354,7 @@ const PublicProductPage: React.FC = () => {
   const [favIds, setFavIds] = useState(readFavs);
   const [relatedIndex, setRelatedIndex] = useState(0);
   const [bioExpanded, setBioExpanded] = useState(false);
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -485,7 +486,7 @@ const PublicProductPage: React.FC = () => {
   const productFinishMap =
     FINISH_IMAGE_MAP[`${designer.slug}:${productSlug}`] || null;
 
-  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
     if (!label || !productFinishMap) return;
     const idx = productFinishMap[normFinish(label)];
