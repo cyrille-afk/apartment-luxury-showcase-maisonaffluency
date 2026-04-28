@@ -66,6 +66,7 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
+  variant_image_map: Record<string, number> | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -84,7 +85,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -354,7 +355,7 @@ const PublicProductPage: React.FC = () => {
   const [favIds, setFavIds] = useState(readFavs);
   const [relatedIndex, setRelatedIndex] = useState(0);
   const [bioExpanded, setBioExpanded] = useState(false);
-  const [galleryJump, setGalleryJump] = useState<{ index: number; nonce: number } | null>(null);
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -471,14 +472,29 @@ const PublicProductPage: React.FC = () => {
   const safeIndex = Math.min(relatedIndex, maxIndex);
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
+  // Data-driven finish → gallery image index mapping.
+  // Read from the product's `variant_image_map` JSONB column (admin-editable in DB).
+  // Keys are normalized (lowercased, alphanumerics only) variant labels — base, top,
+  // material, or any size_variants value — values are 0-based gallery indices.
+  // Also accepts non-normalized keys (we normalize on read for tolerance).
   const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const productFinishMap = React.useMemo(() => {
+    const raw = (product as any)?.variant_image_map;
+    if (!raw || typeof raw !== "object") return null;
+    const out: Record<string, number> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      const idx = Number(v);
+      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
+    }
+    return Object.keys(out).length ? out : null;
+  }, [product]);
 
+  // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
-    if (!label) return;
-    const isApparatusLantern = designer.slug === "apparatus-studio" && slugify(product.title) === "lantern-table-lamp";
-    const idx = isApparatusLantern && normFinish(label).includes("tarnishedsilver") ? 4 : null;
+    if (!label || !productFinishMap) return;
+    const idx = productFinishMap[normFinish(label)];
     if (typeof idx === "number" && idx >= 0 && idx < images.length) {
-      setGalleryJump((current) => ({ index: idx, nonce: (current?.nonce ?? 0) + 1 }));
+      setGalleryActiveIndex(idx);
     }
   };
 
@@ -507,10 +523,9 @@ const PublicProductPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">
               <ProductImageGallery
-                key={`${product.id}-${galleryJump?.nonce ?? 0}`}
                 images={images}
                 alt={product.title}
-                activeIndex={galleryJump?.index}
+                activeIndex={galleryActiveIndex}
                 overlay={
                   computeVariantAxes(product.size_variants).hasVariants || product.description ? (
                     <div className="flex flex-col items-end gap-2">
