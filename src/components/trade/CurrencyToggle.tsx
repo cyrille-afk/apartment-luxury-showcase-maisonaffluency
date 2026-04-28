@@ -124,16 +124,75 @@ const OPTIONS: { value: DisplayCurrency; label: string }[] = [
   ...SUPPORTED_CURRENCIES.map((c) => ({ value: c, label: c })),
 ];
 
+/** Currencies kept inline on compact toggles (in addition to "Original"
+ *  and the user's current selection). All others move into the dropdown. */
+const COMPACT_INLINE: DisplayCurrency[] = ["original", "EUR", "USD"];
+
 interface CurrencyToggleProps {
   value: DisplayCurrency;
   onChange: (v: DisplayCurrency) => void;
   className?: string;
+  /**
+   * When true, only Original / EUR / USD (plus the active selection if it's
+   * something else) render as inline pills; remaining currencies are tucked
+   * behind a "More ▾" dropdown. Used on dense surfaces like product pages.
+   */
+  compact?: boolean;
 }
 
-export default function CurrencyToggle({ value, onChange, className = "" }: CurrencyToggleProps) {
+export default function CurrencyToggle({ value, onChange, className = "", compact = false }: CurrencyToggleProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the dropdown on outside click / Escape.
+  useEffect(() => {
+    if (!compact || !menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && !target.closest("[data-currency-menu]")) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [compact, menuOpen]);
+
+  if (!compact) {
+    return (
+      <div className={`flex items-center gap-1 border border-border rounded-md p-0.5 ${className}`}>
+        {OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            className={`px-2 py-1 text-xs font-body rounded transition-colors ${
+              value === opt.value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // Compact mode: inline = COMPACT_INLINE ∪ {active}; rest → dropdown.
+  const inlineSet = new Set<DisplayCurrency>([...COMPACT_INLINE, value]);
+  const inlineOpts = OPTIONS.filter((o) => inlineSet.has(o.value));
+  const overflowOpts = OPTIONS.filter((o) => !inlineSet.has(o.value));
+  const activeInOverflow = overflowOpts.some((o) => o.value === value);
+
   return (
-    <div className={`flex items-center gap-1 border border-border rounded-md p-0.5 ${className}`}>
-      {OPTIONS.map((opt) => (
+    <div
+      data-currency-menu
+      className={`relative flex items-center gap-1 border border-border rounded-md p-0.5 ${className}`}
+    >
+      {inlineOpts.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
@@ -146,6 +205,48 @@ export default function CurrencyToggle({ value, onChange, className = "" }: Curr
           {opt.label}
         </button>
       ))}
+      {overflowOpts.length > 0 && (
+        <>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className={`px-2 py-1 text-xs font-body rounded transition-colors inline-flex items-center gap-0.5 ${
+              activeInOverflow
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            More
+            <span aria-hidden="true" className="text-[9px] leading-none">▾</span>
+          </button>
+          {menuOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full mt-1 z-50 min-w-[6rem] rounded-md border border-border bg-background shadow-lg p-1"
+            >
+              {overflowOpts.map((opt) => (
+                <button
+                  key={opt.value}
+                  role="menuitem"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-2 py-1 text-xs font-body rounded transition-colors ${
+                    value === opt.value
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
