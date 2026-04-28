@@ -25,7 +25,7 @@ import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
-import { computeVariantAxes } from "@/lib/parseSizeVariants";
+import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 
 /* ------------------------------------------------------------------ */
@@ -138,7 +138,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 /* ------------------------------------------------------------------ */
 /*  Variant selectors (controlled — enables cross-axis disabling)     */
 /* ------------------------------------------------------------------ */
-const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
+const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: string | null) => void }> = ({ product, onMaterialChange }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -200,6 +200,7 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
             onChange={(idx) => {
               const v = baseOptions[idx] ?? null;
               setSelBase(v);
+              onMaterialChange?.(v);
               if (v && selTop && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelTop(null);
               if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
             }}
@@ -240,6 +241,7 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           onChange={(idx) => {
             const m = singleMaterialOptions[idx] ?? null;
             setSelMat(m);
+            onMaterialChange?.(m);
             if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
           }}
           disabledIndices={disabledMatIdx}
@@ -250,13 +252,19 @@ const VariantSelectors: React.FC<{ product: any }> = ({ product }) => {
           }
         />
       ) : product.materials ? (
-        <ExpandableSpec
-          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-          text={product.materials}
-          placeholder={getMaterialPlaceholder(product)}
-          autoSplit
-          autoDetectedHint
-        />
+        (() => {
+          const parsed = parseMaterialsFallback(product.materials);
+          return (
+            <ExpandableSpec
+              icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+              text={product.materials}
+              placeholder={getMaterialPlaceholder(product)}
+              autoSplit
+              autoDetectedHint
+              onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
+            />
+          );
+        })()
       ) : null}
 
       {/* Size dropdown */}
@@ -462,6 +470,30 @@ const PublicProductPage: React.FC = () => {
   const safeIndex = Math.min(relatedIndex, maxIndex);
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
+  // Per-product finish → gallery image index mapping. When a buyer picks a finish
+  // in the materials/base dropdown, we jump the gallery to the most relevant photo.
+  // Keys are normalized (lowercased, alphanumerics only); values are 0-based image indices.
+  const FINISH_IMAGE_MAP: Record<string, Record<string, number>> = {
+    // Apparatus Studio — Lantern Table Lamp: image #5 (the swatch board) when
+    // the buyer picks "Tarnished Silver [Lacquered]".
+    "apparatus-studio:lantern-table-lamp-table-lamp": {
+      tarnishedsilverlacquered: 4,
+      tarnishedsilver: 4,
+    },
+  };
+  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const productFinishMap =
+    FINISH_IMAGE_MAP[`${designer.slug}:${productSlug}`] || null;
+
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  const handleMaterialChange = (label: string | null) => {
+    if (!label || !productFinishMap) return;
+    const idx = productFinishMap[normFinish(label)];
+    if (typeof idx === "number" && idx >= 0 && idx < images.length) {
+      setGalleryActiveIndex(idx);
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -489,6 +521,7 @@ const PublicProductPage: React.FC = () => {
               <ProductImageGallery
                 images={images}
                 alt={product.title}
+                activeIndex={galleryActiveIndex}
                 overlay={
                   computeVariantAxes(product.size_variants).hasVariants || product.description ? (
                     <div className="flex flex-col items-end gap-2">
@@ -535,7 +568,7 @@ const PublicProductPage: React.FC = () => {
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
               <div className="flex flex-col gap-2">
-                <VariantSelectors product={product} />
+                <VariantSelectors product={product} onMaterialChange={handleMaterialChange} />
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);

@@ -9,10 +9,20 @@ interface ProductImageGalleryProps {
   images: string[];
   alt: string;
   overlay?: React.ReactNode;
+  /** Optional controlled active index. When provided, the gallery jumps to it whenever it changes. */
+  activeIndex?: number;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex }) => {
+  const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
+
+  // Sync with external controlled index
+  useEffect(() => {
+    if (controlledIndex != null && controlledIndex !== activeIndex) {
+      setActiveIndex(Math.max(0, Math.min(controlledIndex, images.length - 1)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controlledIndex]);
   const [zoomOpen, setZoomOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
