@@ -354,7 +354,7 @@ const PublicProductPage: React.FC = () => {
   const [favIds, setFavIds] = useState(readFavs);
   const [relatedIndex, setRelatedIndex] = useState(0);
   const [bioExpanded, setBioExpanded] = useState(false);
-  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  const [galleryJump, setGalleryJump] = useState<{ index: number; nonce: number } | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -471,27 +471,14 @@ const PublicProductPage: React.FC = () => {
   const safeIndex = Math.min(relatedIndex, maxIndex);
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
-  // Per-product finish → gallery image index mapping. When a buyer picks a finish
-  // in the materials/base dropdown, we jump the gallery to the most relevant photo.
-  // Keys are normalized (lowercased, alphanumerics only); values are 0-based image indices.
-  const FINISH_IMAGE_MAP: Record<string, Record<string, number>> = {
-    // Apparatus Studio — Lantern Table Lamp: image #5 (the swatch board) when
-    // the buyer picks "Tarnished Silver [Lacquered]".
-    "apparatus-studio:lantern-table-lamp-table-lamp": {
-      tarnishedsilverlacquered: 4,
-      tarnishedsilver: 4,
-    },
-  };
   const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const productFinishMap =
-    FINISH_IMAGE_MAP[`${designer.slug}:${productSlug}`] || null;
 
-  // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
-    if (!label || !productFinishMap) return;
-    const idx = productFinishMap[normFinish(label)];
+    if (!label) return;
+    const isApparatusLantern = designer.slug === "apparatus-studio" && slugify(product.title) === "lantern-table-lamp";
+    const idx = isApparatusLantern && normFinish(label).includes("tarnishedsilver") ? 4 : null;
     if (typeof idx === "number" && idx >= 0 && idx < images.length) {
-      setGalleryActiveIndex(idx);
+      setGalleryJump((current) => ({ index: idx, nonce: (current?.nonce ?? 0) + 1 }));
     }
   };
 
@@ -520,9 +507,10 @@ const PublicProductPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">
               <ProductImageGallery
+                key={`${product.id}-${galleryJump?.nonce ?? 0}`}
                 images={images}
                 alt={product.title}
-                activeIndex={galleryActiveIndex}
+                activeIndex={galleryJump?.index}
                 overlay={
                   computeVariantAxes(product.size_variants).hasVariants || product.description ? (
                     <div className="flex flex-col items-end gap-2">
