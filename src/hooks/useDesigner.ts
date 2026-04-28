@@ -94,6 +94,7 @@ export function useDesignerByName(name: string | undefined) {
     queryKey: ["designer-by-name", name],
     queryFn: async () => {
       if (!name) return null;
+      if (name.trim().toLowerCase() === "gabriel hendifar") return null;
       const { data, error } = await supabase
         .from("designers")
         .select("*")
@@ -275,13 +276,12 @@ export function useRelatedDesigners(
         .from("designers")
         .select("id, slug, name, specialty, image_url, source")
         .neq("slug", currentSlug)
-        .not("slug", "in", `(${[...HIDDEN_DESIGNER_SLUGS].join(",")})`)
         .limit(20);
       if (error) throw error;
       if (!data) return [];
 
       // Score by source match, then random
-      const scored = data.map((d) => ({
+      const scored = data.filter((d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)).map((d) => ({
         ...d,
         score: d.source === source ? 2 : 0,
       }));
