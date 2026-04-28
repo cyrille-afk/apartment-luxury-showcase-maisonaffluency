@@ -462,10 +462,29 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   /* -------------------- COVER -------------------- */
   emit({ stage: "cover", ratio: 0.08, label: "Composing cover…" });
   await tick();
+
+  // Cloudinary fetch-proxy: wraps any external image URL so we get a CORS-friendly
+  // re-encoded JPEG. Cloudinary-hosted URLs are returned as-is.
+  const cloudinaryProxy = (url: string): string => {
+    if (/res\.cloudinary\.com\//i.test(url)) return url;
+    if (!/^https?:\/\//i.test(url)) return url;
+    return `https://res.cloudinary.com/dif1oamtj/image/fetch/w_1600,c_limit,q_auto:good,f_jpg/${encodeURIComponent(url)}`;
+  };
+
+  const tryLoadHero = async (url: string): Promise<LoadedImage | null> => {
+    // Try direct first (fast path for Cloudinary / CORS-enabled hosts)
+    const direct = await loadImage(url);
+    if (direct) return direct;
+    // Fallback: route through Cloudinary fetch proxy for CORS-blocked hosts
+    const proxied = cloudinaryProxy(url);
+    if (proxied !== url) return loadImage(proxied);
+    return null;
+  };
+
   let heroLoaded: LoadedImage | null = null;
-  if (input.heroImageUrl) heroLoaded = await loadImage(input.heroImageUrl);
+  if (input.heroImageUrl) heroLoaded = await tryLoadHero(input.heroImageUrl);
   if (!heroLoaded && input.heroImageFallbackUrl) {
-    heroLoaded = await loadImage(input.heroImageFallbackUrl);
+    heroLoaded = await tryLoadHero(input.heroImageFallbackUrl);
   }
   emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
