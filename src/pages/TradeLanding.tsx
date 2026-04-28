@@ -872,6 +872,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
         </div>
 
+        {/* ─── Shipping Terms Explainer (DDP vs DAP, destination-aware) ─── */}
+        <ShippingTermsExplainer />
+
         {/* ─── FAQ + Registration Side by Side ─── */}
         <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/30 scroll-mt-16">
           {/* Back to top arrow — inside section, visible on arrival */}
