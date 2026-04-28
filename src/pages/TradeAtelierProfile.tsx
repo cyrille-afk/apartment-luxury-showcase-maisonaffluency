@@ -400,11 +400,13 @@ const TradeAtelierProfile = () => {
           let remainingBio = "";
 
           if (bioBlocks.length > 0) {
-            if (mediaEntries.length > 0) {
+              if (mediaEntries.length > 0) {
+                const textBlocks = bioBlocks.filter((b) => !isBiographyMediaBlock(b));
+                const maxHero = bioHasInlineMedia ? 1 : isMobile ? 1 : 3;
               const chunkCount = mediaEntries.length + 1;
-              const chunkSize = Math.max(1, Math.ceil(bioBlocks.length / chunkCount));
+                const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
               const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
-                bioBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
+                  textBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
               );
 
               for (let i = 1; i < paragraphChunks.length; i++) {
@@ -418,20 +420,75 @@ const TradeAtelierProfile = () => {
                 }
               }
 
-              heroParagraphs = paragraphChunks[0] || [];
+                const rawHero = paragraphChunks[0] || [];
+                if (rawHero.length > maxHero) {
+                  const overflow = rawHero.splice(maxHero);
+                  if (!paragraphChunks[1]) paragraphChunks[1] = [];
+                  paragraphChunks[1].unshift(...overflow);
+                }
+                heroParagraphs = rawHero;
 
-              remainingBio = mediaEntries
-                .map((mediaLine, index) => {
-                  const sectionText = (paragraphChunks[index + 1] || []).join("\n\n");
-                  return [mediaLine, sectionText].filter(Boolean).join("\n\n");
-                })
-                .filter(Boolean)
-                .join("\n\n");
+                const heroSet = new Set(heroParagraphs);
+                const remainingOrdered: string[] = [];
+                for (const block of bioBlocks) {
+                  if (heroSet.has(block)) {
+                    heroSet.delete(block);
+                    continue;
+                  }
+                  remainingOrdered.push(block);
+                }
+
+                const result: string[] = [];
+                let mediaIdx = 0;
+                for (const block of remainingOrdered) {
+                  if (!isBiographyMediaBlock(block)) {
+                    const chunkBoundary = mediaIdx < mediaEntries.length
+                      ? (paragraphChunks[mediaIdx + 1] || [])[0]
+                      : null;
+                    if (chunkBoundary && block === chunkBoundary && mediaIdx < mediaEntries.length) {
+                      result.push(mediaEntries[mediaIdx]);
+                      mediaIdx++;
+                    }
+                  }
+                  result.push(block);
+                }
+                while (mediaIdx < mediaEntries.length) {
+                  result.push(mediaEntries[mediaIdx]);
+                  mediaIdx++;
+                }
+                remainingBio = result.filter(Boolean).join("\n\n");
             } else {
-              heroParagraphs = bioBlocks.slice(0, 2);
-              remainingBio = bioBlocks.slice(2).join("\n\n");
+                const textBlocks = bioBlocks.filter((b) => !isBiographyMediaBlock(b));
+                const heroTextCount = bioHasInlineMedia ? 1 : isMobile ? 1 : 3;
+                heroParagraphs = textBlocks.slice(0, heroTextCount);
+                const heroSet = new Set(heroParagraphs);
+                const allRemaining: string[] = [];
+                for (const block of bioBlocks) {
+                  if (heroSet.has(block)) {
+                    heroSet.delete(block);
+                    continue;
+                  }
+                  allRemaining.push(block);
+                }
+                remainingBio = allRemaining.join("\n\n");
             }
           }
+
+            const remainingBlocks = remainingBio
+              ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
+              : [];
+            const startsWithInlineImage =
+              bioHasInlineMedia &&
+              heroParagraphs.length > 0 &&
+              remainingBlocks.length > 0 &&
+              isBiographyMediaBlock(remainingBlocks[0]) &&
+              !isBiographyVideoBlock(remainingBlocks[0]);
+            const introEditorialBio = startsWithInlineImage
+              ? [remainingBlocks[0], ...heroParagraphs].join("\n\n")
+              : "";
+            const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
+            const editorialBio = editorialBlocks.join("\n\n");
+            const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
 
           return isDesignerProfile ? (
             <div className="flex flex-col gap-0">
