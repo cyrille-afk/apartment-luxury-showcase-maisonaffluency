@@ -24,6 +24,7 @@ import DesignerInstagramSection from "@/components/DesignerInstagramSection";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
+import { toOgImage } from "@/lib/ogImage";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -531,10 +532,54 @@ const PublicDesignerProfile = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{name} — Maison Affluency</title>
-        <meta name="description" content={displayBiography?.slice(0, 155) || designer.specialty} />
-      </Helmet>
+      {(() => {
+        const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}`;
+        const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
+        const desc =
+          (displayBiography?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 155)) ||
+          designer.specialty ||
+          `${name} — collectible design at Maison Affluency.`;
+        const personLd = {
+          "@context": "https://schema.org",
+          "@type": isParentBrand ? "Organization" : "Person",
+          name: displayName(name),
+          description: desc,
+          image: ogImg,
+          url: canonical,
+          ...(isChildDesigner && designer.founder ? { affiliation: { "@type": "Organization", name: designer.founder } } : {}),
+        };
+        const crumbsLd = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
+            { "@type": "ListItem", position: 2, name: "Designers", item: "https://www.maisonaffluency.com/designers" },
+            { "@type": "ListItem", position: 3, name: displayName(name), item: canonical },
+          ],
+        };
+        return (
+          <Helmet>
+            <title>{displayName(name)} — Maison Affluency</title>
+            <meta name="description" content={desc} />
+            <link rel="canonical" href={canonical} />
+            <meta property="og:type" content="profile" />
+            <meta property="og:site_name" content="Maison Affluency" />
+            <meta property="og:title" content={`${displayName(name)} — Maison Affluency`} />
+            <meta property="og:description" content={desc} />
+            <meta property="og:url" content={canonical} />
+            <meta property="og:image" content={ogImg} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={displayName(name)} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={`${displayName(name)} — Maison Affluency`} />
+            <meta name="twitter:description" content={desc} />
+            <meta name="twitter:image" content={ogImg} />
+            <script type="application/ld+json">{JSON.stringify(personLd)}</script>
+            <script type="application/ld+json">{JSON.stringify(crumbsLd)}</script>
+          </Helmet>
+        );
+      })()}
 
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
