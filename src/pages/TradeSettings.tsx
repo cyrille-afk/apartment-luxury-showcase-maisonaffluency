@@ -58,25 +58,26 @@ const TradeSettings = () => {
 
   useEffect(() => {
     if (profile) {
-      setForm({
+      setForm((f) => ({
+        ...f,
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         company: profile.company || "",
-        phone: "",
-      });
+      }));
     }
   }, [profile]);
 
-  // Fetch phone and avatar separately
+  // Fetch phone, country, and avatar separately
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("phone, avatar_url, trade_tier_12mo_spend_cents")
+      .select("phone, avatar_url, country, trade_tier_12mo_spend_cents")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (data?.phone) setForm((f) => ({ ...f, phone: data.phone }));
+        if ((data as any)?.country) setForm((f) => ({ ...f, country: (data as any).country }));
         if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
         if ((data as any)?.trade_tier_12mo_spend_cents != null) {
           setSpendCents((data as any).trade_tier_12mo_spend_cents);
