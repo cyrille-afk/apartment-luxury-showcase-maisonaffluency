@@ -123,6 +123,7 @@ const testimonials = [
 
 const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const andreePutmanCatalogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf";
 
