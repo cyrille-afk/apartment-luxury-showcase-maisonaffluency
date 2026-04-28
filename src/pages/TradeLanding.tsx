@@ -160,7 +160,9 @@ const TradeLanding = () => {
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const regionParam = (searchParams.get("region") || "").toLowerCase();
-  const isUKVariant = regionParam === "uk" || regionParam === "gb";
+  const [isUKVariant, setIsUKVariant] = useState<boolean>(
+    regionParam === "uk" || regionParam === "gb",
+  );
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
   const [heroEmail, setHeroEmail] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
@@ -393,7 +395,37 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <ArrowLeft className="w-4 h-4" />
               Back to Maison Affluency
             </Link>
-            <div className="w-4" /> {/* spacer */}
+            {/* Region selector — switches landing copy without changing the URL */}
+            <div
+              role="group"
+              aria-label="Choose region"
+              className="inline-flex items-center rounded-full border border-border bg-background overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setIsUKVariant(false)}
+                aria-pressed={!isUKVariant}
+                className={`px-3 py-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] transition-colors ${
+                  !isUKVariant
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Worldwide
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsUKVariant(true)}
+                aria-pressed={isUKVariant}
+                className={`px-3 py-1 font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] transition-colors border-l border-border ${
+                  isUKVariant
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                UK
+              </button>
+            </div>
           </div>
         </div>
 
