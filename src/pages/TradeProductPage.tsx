@@ -396,34 +396,14 @@ const TradeProductPage: React.FC = () => {
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
 
-  // Data-driven finish → gallery image index mapping (mirrors PublicProductPage).
-  // Plain computations (not useMemo) since they live AFTER the early returns
-  // above — adding hooks here would violate the rules-of-hooks order.
-  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const productFinishMap: Record<string, number> | null = (() => {
-    const raw = (product as any)?.variant_image_map;
-    if (!raw || typeof raw !== "object") return null;
-    const out: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      const idx = Number(v);
-      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
-    }
-    return Object.keys(out).length ? out : null;
-  })();
+  // Data-driven finish → gallery image index mapping (shared with PublicProductPage).
+  const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
-  // Resolve currently-selected finish/material label across the variant axes.
-  const selectedFinishLabel: string | null =
-    selectedSingleMaterial ||
-    selectedBase ||
-    selectedTop ||
-    null;
-
-  const galleryActiveIndex: number | undefined = (() => {
-    if (!productFinishMap || !selectedFinishLabel) return undefined;
-    const idx = productFinishMap[normFinish(selectedFinishLabel)];
-    if (typeof idx === "number" && idx >= 0 && idx < images.length) return idx;
-    return undefined;
-  })();
+  // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
+  const handleMaterialChange = (label: string | null) => {
+    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+    if (idx !== undefined) setGalleryActiveIndex(idx);
+  };
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
