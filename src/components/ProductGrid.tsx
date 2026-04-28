@@ -14,10 +14,9 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
-import { inferSubcategory } from "@/lib/productTaxonomy";
+import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
-import { normalizeCategory } from "@/lib/productTaxonomy";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
