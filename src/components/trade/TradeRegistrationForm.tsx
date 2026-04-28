@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { inferSupportedCountry } from "@/lib/inferCountry";
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
+import { trackForm } from "@/lib/analytics";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -47,6 +48,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const inferredCountryRef = useRef<string>(inferSupportedCountry(COUNTRIES, "Singapore"));
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
@@ -57,7 +59,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     companyName: "",
     companyWebsite: "",
     jobTitle: "",
-    country: inferSupportedCountry(COUNTRIES, "Singapore"),
+    country: inferredCountryRef.current,
     city: "",
     isCertified: false,
     certificationDetails: "",
@@ -71,6 +73,9 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
   }, [prefillEmail]);
 
   const update = (field: string, value: string | boolean) => {
+    if (field === "country" && typeof value === "string") {
+      trackForm.countryChanged("trade_registration", inferredCountryRef.current, value);
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
