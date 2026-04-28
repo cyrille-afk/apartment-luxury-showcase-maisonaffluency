@@ -419,6 +419,23 @@ const TradeSettings = () => {
               <FieldError field="phone" errors={profileErrors} />
             </div>
           </div>
+
+          <div>
+            <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Building className="h-3 w-3" /> Country
+            </label>
+            <select
+              value={form.country}
+              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              className={`${inputClass} appearance-none ${!form.country ? "text-muted-foreground" : ""}`}
+            >
+              <option value="">— Select country —</option>
+              {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
+              Used to set your default trade currency (GBP, EUR, USD, HKD, AED, …). You can still change it any time from the currency toggle.
+            </p>
+          </div>
         </div>
 
         <button
