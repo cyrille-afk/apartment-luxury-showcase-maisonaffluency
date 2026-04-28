@@ -440,10 +440,34 @@ function singularizeSub(s: string): string {
 
   const filterLabel = subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
 
+  // Build breadcrumbs (Home → Category → Subcategory) when a category filter is active.
+  const crumbs: Crumb[] = (() => {
+    const rawSub = subcategory?.trim() || null;
+    const canonicalSub = normalizeSubcategory(rawSub);
+    const canonicalCat =
+      normalizeCategory(category?.trim() || undefined, rawSub || undefined) ||
+      getParentCategoryFromSubcategory(rawSub) ||
+      null;
+    const items: Crumb[] = [{ label: "Home", to: "/" }];
+    if (canonicalCat) {
+      if (canonicalSub) {
+        items.push({ label: canonicalCat, to: categoryUrl(canonicalCat, null) });
+        items.push({ label: canonicalSub });
+      } else {
+        items.push({ label: canonicalCat });
+      }
+    } else if (textQuery) {
+      items.push({ label: `Search: “${textQuery}”` });
+    }
+    return items;
+  })();
+
   return (
     <>
     <section ref={gridRef} id="product-grid" className="py-12 md:py-16 bg-background scroll-mt-28 md:scroll-mt-32">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
+        {/* Breadcrumbs */}
+        {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
