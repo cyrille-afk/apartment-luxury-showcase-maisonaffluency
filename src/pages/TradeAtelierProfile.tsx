@@ -25,6 +25,7 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -107,6 +108,7 @@ const TradeAtelierProfile = () => {
   const { toast } = useToast();
   const { data: designer, isLoading } = useDesigner(slug);
   const { isPinned, togglePin } = useCompare();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const resetScroll = () => {
