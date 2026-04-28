@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
+import { categoryUrl } from "@/lib/categorySlugs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
