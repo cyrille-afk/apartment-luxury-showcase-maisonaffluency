@@ -13,6 +13,7 @@ const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uplo
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
+import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
 const ANDREE_PUTMAN_CATALOG_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
 
@@ -870,6 +871,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </div>
         </div>
         </div>
+
+        {/* ─── Shipping Terms Explainer (DDP vs DAP, destination-aware) ─── */}
+        <ShippingTermsExplainer />
 
         {/* ─── FAQ + Registration Side by Side ─── */}
         <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/30 scroll-mt-16">
