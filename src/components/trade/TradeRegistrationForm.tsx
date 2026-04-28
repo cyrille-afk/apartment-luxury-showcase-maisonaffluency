@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { inferSupportedCountry } from "@/lib/inferCountry";
+import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
