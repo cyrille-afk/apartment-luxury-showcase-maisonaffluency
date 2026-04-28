@@ -508,11 +508,65 @@ const PublicProductPage: React.FC = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{pageTitle} — Maison Affluency</title>
-        <meta name="description" content={product.description || `${product.title} by ${designerDisplay}. ${product.materials || ""}`} />
-        <link rel="canonical" href={`https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`} />
-      </Helmet>
+      {(() => {
+        const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`;
+        const ogImg = toOgImage(product.image_url || images[0] || null);
+        const desc =
+          (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
+          `${product.title} by ${designerDisplay}. ${product.materials || "Collectible design at Maison Affluency."}`.slice(0, 155);
+        const productLd = {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: pageTitle,
+          description: desc,
+          image: images.length ? images : [ogImg],
+          brand: { "@type": "Brand", name: designerDisplay },
+          category: product.subcategory || product.category || undefined,
+          material: product.materials || undefined,
+          url: canonical,
+          offers: {
+            "@type": "Offer",
+            availability: "https://schema.org/InStock",
+            priceCurrency: "EUR",
+            price: "0",
+            priceSpecification: { "@type": "PriceSpecification", priceCurrency: "EUR", price: "0", valueAddedTaxIncluded: false },
+            url: canonical,
+            seller: { "@type": "Organization", name: "Maison Affluency" },
+          },
+        };
+        const crumbsLd = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
+            { "@type": "ListItem", position: 2, name: "Designers", item: "https://www.maisonaffluency.com/designers" },
+            { "@type": "ListItem", position: 3, name: designerDisplay, item: `https://www.maisonaffluency.com/designers/${designer.slug}` },
+            { "@type": "ListItem", position: 4, name: product.title, item: canonical },
+          ],
+        };
+        return (
+          <Helmet>
+            <title>{pageTitle} — Maison Affluency</title>
+            <meta name="description" content={desc} />
+            <link rel="canonical" href={canonical} />
+            <meta property="og:type" content="product" />
+            <meta property="og:site_name" content="Maison Affluency" />
+            <meta property="og:title" content={`${pageTitle} — Maison Affluency`} />
+            <meta property="og:description" content={desc} />
+            <meta property="og:url" content={canonical} />
+            <meta property="og:image" content={ogImg} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={`${product.title} by ${designerDisplay}`} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={`${pageTitle} — Maison Affluency`} />
+            <meta name="twitter:description" content={desc} />
+            <meta name="twitter:image" content={ogImg} />
+            <script type="application/ld+json">{JSON.stringify(productLd)}</script>
+            <script type="application/ld+json">{JSON.stringify(crumbsLd)}</script>
+          </Helmet>
+        );
+      })()}
 
       <div className="min-h-screen bg-background text-foreground">
         <Navigation borderless />
