@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,7 @@ export default function TradeFavorites() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [currency, setCurrency] = useState<DisplayCurrency>("SGD");
+  const [currency, setCurrency] = useTradeDisplayCurrency();
   const rates = useFxRates();
   const [removing, setRemoving] = useState<string | null>(null);
   const [selectedFor3D, setSelectedFor3D] = useState<Set<string>>(new Set());

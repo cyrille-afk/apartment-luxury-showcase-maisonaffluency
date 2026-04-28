@@ -18,6 +18,7 @@ import { useTradeProducts } from "@/hooks/useTradeProducts";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -185,7 +186,7 @@ const TradeAtelierProfile = () => {
   }, [rawPicks, bioImageUrls]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const profileBadgeLabel = designer?.display_name || designer?.name;
-  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
