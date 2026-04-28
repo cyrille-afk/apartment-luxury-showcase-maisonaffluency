@@ -1,24 +1,24 @@
 /**
- * Two-step A–Z designer/maker picker for the Trade Gallery filter bar.
+ * Single-field A–Z designer/maker picker for the Trade Gallery filter bar.
  *
- * Step 1 — letter dropdown: lists every initial that has at least one designer,
- *          plus the count of designers under that letter, plus an "All".
- * Step 2 — designers dropdown: appears once a letter is chosen and lists only
- *          the designers whose normalized initial matches that letter.
+ * Closed state: shows the current selection (or "All Designers & Makers").
+ * Open state: a vertical list of letters. Clicking a letter expands that
+ * letter inline to reveal the designers under it; clicking a designer
+ * selects it and closes the menu.
  *
- * Replaces the legacy "All Designers & Makers (99)" select which had become
- * unwieldy. Accent-folded for sorting and grouping (Andrée → A, Félix → F)
- * but the original display label is preserved in the option text.
+ * Accent-folded for grouping (Andrée → A, Félix → F) but the original
+ * label with diacritics is preserved in the displayed option.
  */
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   brands: string[];
-  /** Currently selected brand display label, or "all". */
+  /** Currently selected brand label, or "all". */
   value: string;
   onChange: (next: string) => void;
-  /** Tailwind classes to match neighbouring filter selects. */
+  /** Tailwind classes inherited from neighbouring filter selects. */
   selectClassName?: string;
 }
 
@@ -27,7 +27,6 @@ const stripAccents = (s: string) =>
 
 const initialOf = (label: string): string => {
   const cleaned = stripAccents(label.trim()).toUpperCase();
-  // Skip leading articles like "L'", "Le ", "La ", "The "
   const stripped = cleaned
     .replace(/^L['']/, "")
     .replace(/^(LE |LA |LES |THE )/, "");
@@ -41,7 +40,10 @@ const AlphabetDesignerPicker = ({
   onChange,
   selectClassName,
 }: Props) => {
-  // Group brands by initial.
+  const [open, setOpen] = useState(false);
+  const [expandedLetter, setExpandedLetter] = useState<string>("");
+  const rootRef = useRef<HTMLDivElement>(null);
+
   const { letters, byLetter, letterOf } = useMemo(() => {
     const map = new Map<string, string[]>();
     const lookup = new Map<string, string>();
@@ -51,7 +53,6 @@ const AlphabetDesignerPicker = ({
       if (!map.has(L)) map.set(L, []);
       map.get(L)!.push(b);
     }
-    // Sort each letter group alphabetically by accent-folded label.
     for (const [, arr] of map) {
       arr.sort((a, b) =>
         stripAccents(a).localeCompare(stripAccents(b), undefined, {
@@ -67,95 +68,164 @@ const AlphabetDesignerPicker = ({
     return { letters, byLetter: map, letterOf: lookup };
   }, [brands]);
 
-  // Active letter is derived from the current value so it stays in sync
-  // with deep links / external state changes.
-  const activeLetter = value !== "all" ? letterOf.get(value) ?? "" : "";
-
-  // Local UI state for the letter the user is browsing (may differ from
-  // the active brand selection while navigating the menu).
-  const [browseLetter, setBrowseLetter] = useStateWithFallback(activeLetter);
-
-  // Keep the browse letter in sync when an external change selects a brand
-  // from a different letter (e.g. clearing filters).
+  // When opening the menu, jump straight to the letter of the active
+  // selection so the user can see context.
   useEffect(() => {
-    if (activeLetter && activeLetter !== browseLetter) {
-      setBrowseLetter(activeLetter);
+    if (open && value !== "all") {
+      const L = letterOf.get(value);
+      if (L) setExpandedLetter(L);
     }
-    if (value === "all" && browseLetter) {
-      // keep the letter chosen so the second dropdown stays visible
-    }
-  }, [activeLetter, value]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!open) setExpandedLetter("");
+  }, [open, value, letterOf]);
 
-  const designersForLetter = browseLetter ? byLetter.get(browseLetter) ?? [] : [];
-
-  const handleLetterChange = (next: string) => {
-    if (next === "all") {
-      setBrowseLetter("");
-      onChange("all");
-      return;
-    }
-    setBrowseLetter(next);
-    // If the current selection no longer belongs to the new letter, reset
-    // back to "all" so the grid widens and the user can pick a designer.
-    if (value !== "all" && letterOf.get(value) !== next) {
-      onChange("all");
-    }
-  };
+  // Click-outside to close.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!rootRef.current) return;
+      if (!rootRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   const totalCount = brands.length;
+  const buttonLabel =
+    value === "all"
+      ? `All Designers & Makers (${totalCount})`
+      : value;
+
+  const handlePickAll = () => {
+    onChange("all");
+    setOpen(false);
+  };
+
+  const handlePickDesigner = (b: string) => {
+    onChange(b);
+    setOpen(false);
+  };
 
   return (
-    <>
-      <select
-        value={browseLetter || "all"}
-        onChange={(e) => handleLetterChange(e.target.value)}
-        aria-label="Filter designers and makers by initial"
-        className={cn(selectClassName)}
+    <div ref={rootRef} className="relative flex-1 sm:flex-none min-w-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={cn(
+          selectClassName,
+          "inline-flex items-center justify-between gap-2 text-left w-full sm:w-auto sm:min-w-[16rem]"
+        )}
       >
-        <option value="all">All Designers &amp; Makers ({totalCount})</option>
-        {letters.map((L) => (
-          <option key={L} value={L}>
-            {L === "#" ? "0–9" : L} ({byLetter.get(L)!.length})
-          </option>
-        ))}
-      </select>
+        <span className="truncate">{buttonLabel}</span>
+        <ChevronDown
+          size={14}
+          className={cn(
+            "shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180"
+          )}
+        />
+      </button>
 
-      {browseLetter && designersForLetter.length > 0 && (
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          aria-label={`Designers starting with ${browseLetter}`}
-          className={cn(selectClassName)}
+      {open && (
+        <div
+          className={cn(
+            "absolute z-30 mt-1 left-0 w-[min(20rem,90vw)] max-h-[min(70vh,28rem)] overflow-y-auto",
+            "rounded-md border border-border bg-background shadow-lg",
+            "font-body text-sm"
+          )}
+          role="listbox"
         >
-          <option value="all">
-            All in “{browseLetter === "#" ? "0–9" : browseLetter}” (
-            {designersForLetter.length})
-          </option>
-          {designersForLetter.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+          <button
+            type="button"
+            onClick={handlePickAll}
+            className={cn(
+              "w-full flex items-center justify-between px-3 py-2 text-left hover:bg-muted/60 transition-colors border-b border-border",
+              value === "all" && "text-foreground font-medium"
+            )}
+          >
+            <span>All Designers &amp; Makers ({totalCount})</span>
+            {value === "all" && <Check size={14} className="text-[hsl(var(--gold))]" />}
+          </button>
+
+          <ul className="py-1">
+            {letters.map((L) => {
+              const isExpanded = expandedLetter === L;
+              const designers = byLetter.get(L) ?? [];
+              const containsActive =
+                value !== "all" && letterOf.get(value) === L;
+
+              return (
+                <li key={L}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedLetter(isExpanded ? "" : L)
+                    }
+                    className={cn(
+                      "w-full flex items-center justify-between gap-2 px-3 py-1.5 text-left hover:bg-muted/60 transition-colors",
+                      (isExpanded || containsActive) && "bg-muted/40"
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      <ChevronRight
+                        size={12}
+                        className={cn(
+                          "text-muted-foreground transition-transform",
+                          isExpanded && "rotate-90"
+                        )}
+                      />
+                      <span className="font-display tracking-wide">
+                        {L === "#" ? "0–9" : L}
+                      </span>
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {designers.length}
+                    </span>
+                  </button>
+
+                  {isExpanded && (
+                    <ul className="pb-1">
+                      {designers.map((b) => {
+                        const active = b === value;
+                        return (
+                          <li key={b}>
+                            <button
+                              type="button"
+                              onClick={() => handlePickDesigner(b)}
+                              className={cn(
+                                "w-full flex items-center justify-between gap-2 pl-9 pr-3 py-1.5 text-left text-[13px] hover:bg-muted/60 transition-colors",
+                                active && "text-foreground font-medium"
+                              )}
+                            >
+                              <span className="truncate">{b}</span>
+                              {active && (
+                                <Check
+                                  size={13}
+                                  className="text-[hsl(var(--gold))] shrink-0"
+                                />
+                              )}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
-    </>
+    </div>
   );
 };
-
-/* ------------------------------------------------------------------ */
-/* Tiny helper: useState with an initial value that may change later. */
-/* ------------------------------------------------------------------ */
-function useStateWithFallback(initial: string) {
-  const ref = useRef(initial);
-  const [v, setV] = useState(initial);
-  // If the prop-derived initial changed and local state is empty, sync once.
-  useEffect(() => {
-    if (initial && !v) {
-      ref.current = initial;
-      setV(initial);
-    }
-  }, [initial]); // eslint-disable-line react-hooks/exhaustive-deps
-  return [v, setV] as const;
-}
 
 export default AlphabetDesignerPicker;
