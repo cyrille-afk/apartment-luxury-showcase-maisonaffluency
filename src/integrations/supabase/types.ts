@@ -797,6 +797,7 @@ export type Database = {
           title: string
           top_axis_label: string | null
           trade_price_cents: number | null
+          variant_image_map: Json | null
           variant_placeholder: string | null
         }
         Insert: {
@@ -828,6 +829,7 @@ export type Database = {
           title?: string
           top_axis_label?: string | null
           trade_price_cents?: number | null
+          variant_image_map?: Json | null
           variant_placeholder?: string | null
         }
         Update: {
@@ -859,6 +861,7 @@ export type Database = {
           title?: string
           top_axis_label?: string | null
           trade_price_cents?: number | null
+          variant_image_map?: Json | null
           variant_placeholder?: string | null
         }
         Relationships: [
@@ -3499,6 +3502,7 @@ export type Database = {
           tags: string[] | null
           title: string | null
           top_axis_label: string | null
+          variant_image_map: Json | null
           variant_placeholder: string | null
         }
         Insert: {
@@ -3528,6 +3532,7 @@ export type Database = {
           tags?: string[] | null
           title?: string | null
           top_axis_label?: string | null
+          variant_image_map?: Json | null
           variant_placeholder?: string | null
         }
         Update: {
@@ -3557,6 +3562,7 @@ export type Database = {
           tags?: string[] | null
           title?: string | null
           top_axis_label?: string | null
+          variant_image_map?: Json | null
           variant_placeholder?: string | null
         }
         Relationships: [
