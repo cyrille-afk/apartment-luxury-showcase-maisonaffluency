@@ -866,6 +866,11 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                   Frequently Asked Questions
                 </h2>
+                {isUKVariant && (
+                  <p className="font-body text-xs md:text-sm text-muted-foreground text-center mt-2 italic">
+                    UK studios — see VAT, Brexit duties and DDP/DAP shipping below.
+                  </p>
+                )}
                 <div className="border-t border-border mt-4" />
               </motion.div>
 
