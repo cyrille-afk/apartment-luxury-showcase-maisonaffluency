@@ -62,14 +62,14 @@ export function buildProductBreadcrumbs({
   if (canonicalCat) {
     crumbs.push({
       label: canonicalCat,
-      to: categoryUrl(canonicalCat, null),
+      to: buildCategoryHref(canonicalCat, null),
     });
 
     // Subcategory only makes sense when nested under its category.
     if (canonicalSub) {
       crumbs.push({
         label: canonicalSub,
-        to: categoryUrl(canonicalCat, canonicalSub),
+        to: buildCategoryHref(canonicalCat, canonicalSub),
       });
     }
   }
