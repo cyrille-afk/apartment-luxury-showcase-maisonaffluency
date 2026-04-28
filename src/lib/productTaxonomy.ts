@@ -231,6 +231,7 @@ const TITLE_SUBCATEGORY_HINTS: [RegExp, string][] = [
   [/\barmchair\b/i, "Armchairs"],
   [/\bfauteuil\b/i, "Armchairs"],
   [/\bclub\s*chair\b/i, "Armchairs"],
+  [/\blounge\s*chair\b/i, "Armchairs"],
   [/\bdining\s*chair\b/i, "Chairs"],
   [/\bchair\b/i, "Chairs"],
   [/\bdaybed\b/i, "Daybeds & Benches"],
