@@ -227,8 +227,9 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               <select
                 value={form.country}
                 onChange={(e) => update("country", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors appearance-none cursor-pointer text-[16px]"
+                className={`w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm outline-none focus:border-foreground transition-colors appearance-none cursor-pointer text-[16px] ${form.country ? "text-foreground" : "text-muted-foreground"}`}
               >
+                <option value="" disabled>— Select country —</option>
                 {COUNTRIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
