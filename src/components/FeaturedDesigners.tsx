@@ -488,8 +488,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "apparatus-studio",
-    name: "Apparatus Studio - Gabriel Hendifar",
-    founder: "Gabriel Hendifar",
+    name: "Apparatus Studio",
+    founder: "Apparatus Studio",
     specialty: "Contemporary Lighting & Industrial Design",
     image: apparatusStudioImg,
     cardThumbnails: [
