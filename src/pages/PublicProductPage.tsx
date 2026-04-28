@@ -23,6 +23,7 @@ import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
