@@ -124,7 +124,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       onOpenChange(false);
       setForm({
         email: "", firstName: "", lastName: "", phone: "",
-        country: inferSupportedCountry(COUNTRIES, "Singapore"), city: "", shipping: "not-needed",
+        country: "", city: "", shipping: "not-needed",
         message: "", consent: false, newsletter: false,
       });
     } catch {
