@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import Index from "./Index";
+import CategorySeo from "@/components/seo/CategorySeo";
 import { categoryFromSlug, subcategoryFromSlugs } from "@/lib/categorySlugs";
 import {
   setPendingCategoryFilter,
@@ -74,7 +75,17 @@ const CategoryRoute = () => {
   if (!category) return <Navigate to="/" replace />;
   if (subcategorySlug && !sub) return <Navigate to={`/products-category/${categorySlug}`} replace />;
 
-  return <Index />;
+  return (
+    <>
+      <CategorySeo
+        category={category}
+        subcategory={sub?.subcategory ?? null}
+        categorySlug={categorySlug!}
+        subcategorySlug={subcategorySlug ?? null}
+      />
+      <Index />
+    </>
+  );
 };
 
 export default CategoryRoute;

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
@@ -190,6 +190,7 @@ export default function ExpandableSpec({
 
   // Multi, no placeholder → simple inline expandable (borderless list row)
   const remaining = lines.length - 1;
+  const panelId = useId();
   return (
     <div className={cn(rowClasses, "items-start")}>
       <span className="mt-0.5 shrink-0">{icon}</span>
@@ -197,8 +198,9 @@ export default function ExpandableSpec({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="group flex items-start gap-1.5 text-left w-full"
+          className="group flex items-start gap-1.5 text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm motion-reduce:transition-none"
           aria-expanded={open}
+          aria-controls={panelId}
         >
           <p className={textClasses}>{lines[0]}</p>
           <span className="flex items-center gap-1 mt-0.5 shrink-0">
@@ -209,22 +211,25 @@ export default function ExpandableSpec({
             )}
             <ChevronDown
               size={13}
+              aria-hidden="true"
               className={cn(
-                "text-muted-foreground/70 group-hover:text-foreground transition-all",
+                "text-muted-foreground/70 group-hover:text-foreground transition-all motion-reduce:transition-none",
                 open && "rotate-180"
               )}
             />
           </span>
         </button>
-        {open && (
-          <div className="mt-1 flex flex-col gap-0.5">
-            {lines.slice(1).map((line, i) => (
-              <p key={i} className={textClasses}>
-                {line}
-              </p>
-            ))}
-          </div>
-        )}
+        <div id={panelId} role="region" hidden={!open}>
+          {open && (
+            <div className="mt-1 flex flex-col gap-0.5">
+              {lines.slice(1).map((line, i) => (
+                <p key={i} className={textClasses}>
+                  {line}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
