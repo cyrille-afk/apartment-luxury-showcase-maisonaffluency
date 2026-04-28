@@ -23,6 +23,7 @@ import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
@@ -473,23 +474,15 @@ const PublicProductPage: React.FC = () => {
         <Navigation borderless />
 
         <div className="pt-32 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {(() => {
-            const crumbs: Crumb[] = [{ label: "Home", to: "/" }];
-            if (product.category) {
-              crumbs.push({
-                label: product.category,
-                to: categoryUrl(product.category, null),
-              });
-            }
-            if (normalizedSubcategory) {
-              crumbs.push({
-                label: normalizedSubcategory,
-                to: categoryUrl(product.category, normalizedSubcategory),
-              });
-            }
-            crumbs.push({ label: product.title });
-            return <Breadcrumbs items={crumbs} className="mb-6" />;
-          })()}
+          <Breadcrumbs
+            items={buildProductBreadcrumbs({
+              root: { label: "Home", to: "/" },
+              category: product.category,
+              subcategory: product.subcategory,
+              title: product.title,
+            })}
+            className="mb-6"
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">

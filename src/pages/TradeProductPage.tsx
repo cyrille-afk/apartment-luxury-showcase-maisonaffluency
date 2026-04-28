@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { categoryUrl } from "@/lib/categorySlugs";
+import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -504,27 +505,19 @@ const TradeProductPage: React.FC = () => {
       </Helmet>
 
       <div className="max-w-7xl pb-12">
-        {(() => {
-          // Link category/subcategory crumbs to the public CategoryRoute,
-          // which is the canonical, fully-populated catalogue browser. The
-          // trade showroom grid only surfaces gallery-hotspot products, so
-          // pointing breadcrumbs there left users on near-empty pages.
-          const crumbs: Crumb[] = [{ label: "Trade", to: "/trade/showroom" }];
-          if (product.category) {
-            crumbs.push({
-              label: product.category,
-              to: categoryUrl(product.category, null),
-            });
-          }
-          if (normalizedSubcategory && product.category) {
-            crumbs.push({
-              label: normalizedSubcategory,
-              to: categoryUrl(product.category, normalizedSubcategory),
-            });
-          }
-          crumbs.push({ label: product.title });
-          return <Breadcrumbs items={crumbs} className="mb-6" />;
-        })()}
+        {/* Link category/subcategory crumbs to the public CategoryRoute,
+            which is the canonical, fully-populated catalogue browser. The
+            trade showroom grid only surfaces gallery-hotspot products, so
+            pointing breadcrumbs there left users on near-empty pages. */}
+        <Breadcrumbs
+          items={buildProductBreadcrumbs({
+            root: { label: "Trade", to: "/trade/showroom" },
+            category: product.category,
+            subcategory: product.subcategory,
+            title: product.title,
+          })}
+          className="mb-6"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="relative">
