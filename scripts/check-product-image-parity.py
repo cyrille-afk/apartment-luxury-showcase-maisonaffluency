@@ -132,39 +132,32 @@ def classify(pick: dict, trade: dict | None, public_view: dict, trade_view: dict
 
 
 def main() -> int:
-    print("→ Fetching designers, picks, trade products…")
-    designers = rest(
-        "designers",
-        {
-            "select": "id,slug,name,display_name,is_published",
-            "is_published": "eq.true",
-            "limit": "5000",
-        },
-    )
+    print(f"→ Fetching designers, picks, trade products… (source: {'psql' if USE_PSQL else 'REST'})")
+    if USE_PSQL:
+        designers = sql(
+            "SELECT id::text, slug, name, display_name FROM public.designers WHERE is_published = true"
+        )
+        picks = sql(
+            "SELECT id::text, designer_id::text, title, image_url, hover_image_url, gallery_images "
+            "FROM public.designer_curator_picks"
+        )
+        trade_products = sql(
+            "SELECT id::text, brand_name, product_name, image_url, gallery_images "
+            "FROM public.trade_products WHERE is_active = true"
+        )
+    else:
+        designers = rest("designers", {"select": "id,slug,name,display_name", "is_published": "eq.true", "limit": "5000"})
+        picks = rest("designer_curator_picks", {"select": "id,designer_id,title,image_url,hover_image_url,gallery_images", "limit": "10000"})
+        trade_products = rest("trade_products", {"select": "id,brand_name,product_name,image_url,gallery_images", "is_active": "eq.true", "limit": "10000"})
+
     designer_by_id = {d["id"]: d for d in designers}
-
-    picks = rest(
-        "designer_curator_picks",
-        {
-            "select": "id,designer_id,title,image_url,hover_image_url,gallery_images",
-            "limit": "10000",
-        },
-    )
-
-    trade_products = rest(
-        "trade_products",
-        {
-            "select": "id,brand_name,product_name,image_url,gallery_images,is_active",
-            "is_active": "eq.true",
-            "limit": "10000",
-        },
-    )
     trade_index: dict[tuple[str, str], dict] = {}
     for tp in trade_products:
         brand = (tp.get("brand_name") or "").strip().lower()
         name = (tp.get("product_name") or "").strip().lower()
         if brand and name:
             trade_index.setdefault((brand, name), tp)
+
 
     rows: list[dict] = []
     counts: dict[str, int] = {}
