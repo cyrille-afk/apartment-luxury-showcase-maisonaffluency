@@ -392,19 +392,12 @@ const PublicProductPage: React.FC = () => {
     });
   };
 
-  // Data-driven finish → gallery image index mapping.
+  // Data-driven finish → gallery image index mapping (shared with TradeProductPage).
   // MUST be declared before any early returns to keep React hook order stable.
-  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const productFinishMap = React.useMemo(() => {
-    const raw = (data?.product as any)?.variant_image_map;
-    if (!raw || typeof raw !== "object") return null;
-    const out: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      const idx = Number(v);
-      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
-    }
-    return Object.keys(out).length ? out : null;
-  }, [data]);
+  const productFinishMap = React.useMemo(
+    () => buildProductFinishMap((data?.product as any)?.variant_image_map),
+    [data]
+  );
 
   if (isLoading) {
     return (
