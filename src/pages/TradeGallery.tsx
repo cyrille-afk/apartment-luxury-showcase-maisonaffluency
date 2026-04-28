@@ -22,6 +22,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 
 const slugifyForUrl = (s: string) =>
@@ -467,12 +468,12 @@ const TradeGallery = () => {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <select value={selectedBrand} onChange={(e) => handleBrandChange(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
-            <option value="all">All Designers & Makers ({brands.length})</option>
-            {brands.map((b) => (
-              <option key={b} value={b}>{b}</option>
-            ))}
-          </select>
+          <AlphabetDesignerPicker
+            brands={brands}
+            value={selectedBrand}
+            onChange={handleBrandChange}
+            selectClassName={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
+          />
           <select
             value={selectedCategory}
             onChange={(e) => {
