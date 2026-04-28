@@ -490,15 +490,11 @@ const PublicProductPage: React.FC = () => {
   const safeIndex = Math.min(relatedIndex, maxIndex);
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
-  // (productFinishMap and normFinish are declared above the early returns to keep hook order stable.)
-
+  // (productFinishMap is declared above the early returns to keep hook order stable.)
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
-    if (!label || !productFinishMap) return;
-    const idx = productFinishMap[normFinish(label)];
-    if (typeof idx === "number" && idx >= 0 && idx < images.length) {
-      setGalleryActiveIndex(idx);
-    }
+    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+    if (idx !== undefined) setGalleryActiveIndex(idx);
   };
 
   return (
