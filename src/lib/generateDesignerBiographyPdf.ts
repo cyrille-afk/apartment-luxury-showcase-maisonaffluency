@@ -240,12 +240,33 @@ function parseBiography(biography: string): ParsedBlock[] {
     });
 }
 
+/** Extract Vimeo numeric ID from a Vimeo URL */
+function extractVimeoId(url: string): string | null {
+  const m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+  return m ? m[1] : null;
+}
+
+/** Extract YouTube video ID from any common URL form */
+function extractYouTubeId(url: string): string | null {
+  const m =
+    url.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/i) ||
+    url.match(/youtube\.com\/(?:watch\?v=|embed\/|v\/)([A-Za-z0-9_-]{6,})/i);
+  return m ? m[1] : null;
+}
+
 /** Resolve the best display URL for a media entry: video → poster (or fallback), image → itself */
 function resolveDisplayImageUrl(media: MediaItem): string | null {
   if (!media.isVideo) return media.url;
   if (media.poster) return media.poster;
   const fallback = VIDEO_POSTER_FALLBACKS[media.url] || VIDEO_POSTER_FALLBACKS[media.url.split("?")[0]];
-  return fallback || null;
+  if (fallback) return fallback;
+  // Vimeo: vumbnail returns a CORS-friendly JPEG thumbnail
+  const vimeoId = extractVimeoId(media.url);
+  if (vimeoId) return `https://vumbnail.com/${vimeoId}.jpg`;
+  // YouTube: i.ytimg.com hi-quality thumbnail
+  const ytId = extractYouTubeId(media.url);
+  if (ytId) return `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`;
+  return null;
 }
 
 /** Resolve a possibly-relative URL to absolute (for fetch) */
@@ -372,6 +393,8 @@ export interface DesignerBiographyPdfInput {
   biographyImages?: string[] | null;
   /** Hero image rendered on the cover */
   heroImageUrl?: string | null;
+  /** Optional fallback hero URL used if primary fails to load (e.g. non-CORS host) */
+  heroImageFallbackUrl?: string | null;
   /** Public profile URL (printed on cover footer) */
   profileUrl?: string | null;
   /** Authenticated trade user's display name — printed in footer as "Prepared for …" */
@@ -441,6 +464,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   await tick();
   let heroLoaded: LoadedImage | null = null;
   if (input.heroImageUrl) heroLoaded = await loadImage(input.heroImageUrl);
+  if (!heroLoaded && input.heroImageFallbackUrl) {
+    heroLoaded = await loadImage(input.heroImageFallbackUrl);
+  }
   emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
   if (heroLoaded) {
@@ -501,12 +527,14 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(8);
     doc.text(sanitizeUrlForDisplay(input.profileUrl), pageWidth - marginX, pageHeight - marginBottom + 34, { align: "right" });
   }
-  // Personalized recipient line (centered, smaller, italic)
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...muted);
-  doc.text(preparedLine, pageWidth / 2, pageHeight - marginBottom + 48, { align: "center" });
-  doc.setFont("helvetica", "normal");
+  // Personalized recipient line — top-right of cover
+  if (recipient || input.downloadedAt) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.text(preparedLine, pageWidth - marginX, marginTop - 36, { align: "right" });
+    doc.setFont("helvetica", "normal");
+  }
 
   /* -------------------- BODY -------------------- */
   doc.addPage();
