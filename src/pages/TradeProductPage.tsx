@@ -559,6 +559,7 @@ const TradeProductPage: React.FC = () => {
             <ProductImageGallery
               images={images}
               alt={product.title}
+              activeIndex={galleryActiveIndex}
               overlay={
                 product.description ? (
                   <div className="flex flex-col items-end gap-2">
