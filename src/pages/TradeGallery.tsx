@@ -22,6 +22,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 
 const slugifyForUrl = (s: string) =>
