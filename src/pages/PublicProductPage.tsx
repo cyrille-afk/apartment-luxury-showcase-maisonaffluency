@@ -200,6 +200,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             onChange={(idx) => {
               const v = baseOptions[idx] ?? null;
               setSelBase(v);
+              onMaterialChange?.(v);
               if (v && selTop && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelTop(null);
               if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
             }}
