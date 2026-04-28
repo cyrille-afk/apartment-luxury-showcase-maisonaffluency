@@ -99,7 +99,11 @@ def main() -> int:
     print("→ Fetching designers, picks, trade products…")
     designers = rest(
         "designers",
-        {"select": "id,slug,name,is_published", "is_published": "eq.true", "limit": "5000"},
+        {
+            "select": "id,slug,name,display_name,is_published",
+            "is_published": "eq.true",
+            "limit": "5000",
+        },
     )
     designer_by_id = {d["id"]: d for d in designers}
 
@@ -111,16 +115,22 @@ def main() -> int:
         },
     )
 
+    # Match the page logic: trade_products.product_name == pick.title
+    # AND trade_products.brand_name IN [designer.display_name, designer.name].
     trade_products = rest(
         "trade_products",
-        {"select": "id,designer_slug,title,image_url,gallery_images", "limit": "10000"},
+        {
+            "select": "id,brand_name,product_name,image_url,gallery_images,is_active",
+            "is_active": "eq.true",
+            "limit": "10000",
+        },
     )
     trade_index: dict[tuple[str, str], dict] = {}
     for tp in trade_products:
-        slug = (tp.get("designer_slug") or "").lower()
-        title = (tp.get("title") or "").strip().lower()
-        if slug and title:
-            trade_index.setdefault((slug, title), tp)
+        brand = (tp.get("brand_name") or "").strip().lower()
+        name = (tp.get("product_name") or "").strip().lower()
+        if brand and name:
+            trade_index.setdefault((brand, name), tp)
 
     checked = 0
     mismatches: list[str] = []
@@ -129,9 +139,17 @@ def main() -> int:
         designer = designer_by_id.get(pick.get("designer_id"))
         if not designer:
             continue  # unpublished designer → not reachable from either page
-        slug = (designer.get("slug") or "").lower()
         title = (pick.get("title") or "").strip().lower()
-        trade = trade_index.get((slug, title))
+        brand_candidates = {
+            (designer.get("display_name") or "").strip().lower(),
+            (designer.get("name") or "").strip().lower(),
+        }
+        brand_candidates.discard("")
+        trade = None
+        for brand in brand_candidates:
+            trade = trade_index.get((brand, title))
+            if trade:
+                break
 
         public_view = resolve_images(pick, trade)
         trade_view = resolve_images(pick, trade)
