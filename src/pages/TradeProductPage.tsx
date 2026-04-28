@@ -669,6 +669,7 @@ const TradeProductPage: React.FC = () => {
                     onChange={(idx) => {
                       const v = topOptions[idx] ?? null;
                       setSelectedTop(v);
+                      handleMaterialChange(v);
                       if (v && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedBase(null);
                       if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedDualSize(null);
                     }}
