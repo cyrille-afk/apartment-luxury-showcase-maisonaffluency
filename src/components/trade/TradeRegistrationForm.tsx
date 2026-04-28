@@ -113,6 +113,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
         last_name: form.lastName,
         company: form.companyName,
         phone: form.phone,
+        country: form.country,
       }).eq("id", authData.user.id);
 
       await supabase.from("trade_applications").insert({

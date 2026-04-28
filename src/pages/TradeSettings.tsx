@@ -7,11 +7,19 @@ import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, Trendi
 import { z } from "zod";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
+const COUNTRIES = [
+  "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
+  "India", "Indonesia", "Italy", "Japan", "Malaysia", "Netherlands", "New Zealand",
+  "Philippines", "South Korea", "Spain", "Switzerland", "Taiwan", "Thailand",
+  "United Arab Emirates", "United Kingdom", "United States", "Vietnam", "Other",
+];
+
 const profileSchema = z.object({
   first_name: z.string().trim().min(1, "First name is required").max(100, "Max 100 characters"),
   last_name: z.string().trim().min(1, "Last name is required").max(100, "Max 100 characters"),
   company: z.string().trim().max(200, "Max 200 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
+  country: z.string().trim().max(100, "Max 100 characters").optional().or(z.literal("")),
 });
 
 const passwordSchema = z.object({
@@ -40,6 +48,7 @@ const TradeSettings = () => {
     last_name: "",
     company: "",
     phone: "",
+    country: "",
   });
 
   const [passwords, setPasswords] = useState({
@@ -49,25 +58,26 @@ const TradeSettings = () => {
 
   useEffect(() => {
     if (profile) {
-      setForm({
+      setForm((f) => ({
+        ...f,
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         company: profile.company || "",
-        phone: "",
-      });
+      }));
     }
   }, [profile]);
 
-  // Fetch phone and avatar separately
+  // Fetch phone, country, and avatar separately
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("phone, avatar_url, trade_tier_12mo_spend_cents")
+      .select("phone, avatar_url, country, trade_tier_12mo_spend_cents")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (data?.phone) setForm((f) => ({ ...f, phone: data.phone }));
+        if ((data as any)?.country) setForm((f) => ({ ...f, country: (data as any).country }));
         if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
         if ((data as any)?.trade_tier_12mo_spend_cents != null) {
           setSpendCents((data as any).trade_tier_12mo_spend_cents);
@@ -127,6 +137,8 @@ const TradeSettings = () => {
     if (!user) return;
     setSaving(true);
 
+    const countryChanged = !!result.data.country;
+
     const { error } = await supabase
       .from("profiles")
       .update(result.data)
@@ -136,6 +148,14 @@ const TradeSettings = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Profile updated" });
+      // Clear manual currency override so the new country drives the default.
+      if (countryChanged) {
+        try {
+          window.localStorage.removeItem("trade.displayCurrency");
+          window.localStorage.removeItem("trade.displayCurrency.manual");
+          window.dispatchEvent(new CustomEvent("trade-display-currency-change", { detail: "original" }));
+        } catch { /* ignore */ }
+      }
       refreshRoles();
     }
     setSaving(false);
@@ -408,6 +428,23 @@ const TradeSettings = () => {
               />
               <FieldError field="phone" errors={profileErrors} />
             </div>
+          </div>
+
+          <div>
+            <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Building className="h-3 w-3" /> Country
+            </label>
+            <select
+              value={form.country}
+              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              className={`${inputClass} appearance-none ${!form.country ? "text-muted-foreground" : ""}`}
+            >
+              <option value="">— Select country —</option>
+              {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
+              Used to set your default trade currency (GBP, EUR, USD, HKD, AED, …). You can still change it any time from the currency toggle.
+            </p>
           </div>
         </div>
 
