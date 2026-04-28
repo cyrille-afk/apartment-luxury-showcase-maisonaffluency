@@ -372,6 +372,8 @@ export interface DesignerBiographyPdfInput {
   biographyImages?: string[] | null;
   /** Hero image rendered on the cover */
   heroImageUrl?: string | null;
+  /** Optional fallback hero URL used if primary fails to load (e.g. non-CORS host) */
+  heroImageFallbackUrl?: string | null;
   /** Public profile URL (printed on cover footer) */
   profileUrl?: string | null;
   /** Authenticated trade user's display name — printed in footer as "Prepared for …" */
