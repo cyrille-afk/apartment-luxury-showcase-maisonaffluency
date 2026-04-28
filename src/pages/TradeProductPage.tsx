@@ -70,6 +70,7 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
+  variant_image_map: Record<string, number> | null;
 }
 
 interface TradePricing {
@@ -98,7 +99,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -390,6 +391,33 @@ const TradeProductPage: React.FC = () => {
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
 
+  // Data-driven finish → gallery image index mapping (mirrors PublicProductPage).
+  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const productFinishMap = React.useMemo(() => {
+    const raw = (product as any)?.variant_image_map;
+    if (!raw || typeof raw !== "object") return null;
+    const out: Record<string, number> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      const idx = Number(v);
+      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
+    }
+    return Object.keys(out).length ? out : null;
+  }, [product]);
+
+  // Resolve currently-selected finish/material label across the variant axes.
+  const selectedFinishLabel: string | null =
+    selectedSingleMaterial ||
+    selectedBase ||
+    selectedTop ||
+    null;
+
+  const galleryActiveIndex = React.useMemo(() => {
+    if (!productFinishMap || !selectedFinishLabel) return undefined;
+    const idx = productFinishMap[normFinish(selectedFinishLabel)];
+    if (typeof idx === "number" && idx >= 0 && idx < images.length) return idx;
+    return undefined;
+  }, [productFinishMap, selectedFinishLabel, images.length]);
+
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
   // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top).
@@ -531,6 +559,7 @@ const TradeProductPage: React.FC = () => {
             <ProductImageGallery
               images={images}
               alt={product.title}
+              activeIndex={galleryActiveIndex}
               overlay={
                 product.description ? (
                   <div className="flex flex-col items-end gap-2">
