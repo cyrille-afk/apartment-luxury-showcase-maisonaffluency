@@ -123,6 +123,7 @@ const testimonials = [
 
 const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const andreePutmanCatalogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf";
 
@@ -910,8 +911,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 <div className="border-t border-border mt-4" />
               </motion.div>
 
-              <div className="space-y-0 divide-y divide-border">
-                {[
+              {(() => {
+                const FAQ_ITEMS = [
                   { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
                   { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
                   { q: "How does trade pricing work?", a: "Once approved, you'll see exclusive trade pricing when signed in. You can also request bespoke multi-product quotations with all prices listed at a glance, including GST where applicable." },
@@ -923,22 +924,47 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   { q: "Where do shipments originate?", a: "The majority of our roster is based in France and Italy, with selected ateliers across Spain, the Netherlands, Switzerland and the UK. Goods consolidate at our European hubs before international dispatch — typically a short, well-trodden route for UK and EU clients." },
                   { q: "How are post-Brexit duties handled for UK deliveries?", a: "We coordinate customs clearance into Great Britain and Northern Ireland on your behalf. Import VAT and any applicable duty are calculated against HMRC tariff codes for each piece and surfaced on the quote — no surprises on delivery." },
                   { q: "Do you offer DDP or DAP shipping terms?", a: "Both. Delivered Duty Paid (DDP) bundles freight, customs, duty and import VAT into a single landed price — recommended for residential clients. Delivered At Place (DAP) is available where your studio or freight forwarder prefers to clear goods directly." },
-                ].map((faq, i) => (
-                  <div key={i} className="py-4">
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between text-left lg:pointer-events-none"
-                      onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                    >
-                      <h3 className="font-display text-sm md:text-base text-foreground">{faq.q}</h3>
-                      <span className="lg:hidden ml-3 text-muted-foreground shrink-0 transition-transform duration-200" style={{ transform: openIndex === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-200 ${openIndex === i ? 'max-h-40 mt-2' : 'max-h-0 lg:max-h-40 lg:mt-2'}`}>
-                      <p className="font-body text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                ];
+                const COLLAPSED_COUNT = 7;
+                const visibleItems = faqExpanded ? FAQ_ITEMS : FAQ_ITEMS.slice(0, COLLAPSED_COUNT);
+                const hiddenCount = FAQ_ITEMS.length - COLLAPSED_COUNT;
+                return (
+                  <>
+                    <div className="space-y-0 divide-y divide-border">
+                      {visibleItems.map((faq, i) => (
+                        <div key={i} className="py-4">
+                          <button
+                            type="button"
+                            className="w-full flex items-center justify-between text-left lg:pointer-events-none"
+                            onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                          >
+                            <h3 className="font-display text-sm md:text-base text-foreground">{faq.q}</h3>
+                            <span className="lg:hidden ml-3 text-muted-foreground shrink-0 transition-transform duration-200" style={{ transform: openIndex === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+                          </button>
+                          <div className={`overflow-hidden transition-all duration-200 ${openIndex === i ? 'max-h-40 mt-2' : 'max-h-0 lg:max-h-40 lg:mt-2'}`}>
+                            <p className="font-body text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))}
-              </div>
+                    {hiddenCount > 0 && (
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setFaqExpanded((v) => !v)}
+                          aria-expanded={faqExpanded}
+                          className="inline-flex items-center gap-1.5 font-body text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {faqExpanded ? "Show less" : `Show ${hiddenCount} more`}
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 transition-transform duration-200 ${faqExpanded ? "rotate-180" : ""}`}
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
             </div>
 
