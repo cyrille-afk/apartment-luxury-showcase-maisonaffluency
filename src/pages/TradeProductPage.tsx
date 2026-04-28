@@ -41,7 +41,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
-import { computeVariantAxes } from "@/lib/parseSizeVariants";
+import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
