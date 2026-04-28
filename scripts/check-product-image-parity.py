@@ -27,25 +27,21 @@ from __future__ import annotations
 import os
 import sys
 import json
+import subprocess
 from urllib import request, parse, error
 
-SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL") or os.environ.get("SUPABASE_URL")
+SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL") or os.environ.get("SUPABASE_URL") or "https://dcrauiygaezoduwdjmsm.supabase.co"
 SUPABASE_KEY = (
     os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY")
     or os.environ.get("SUPABASE_ANON_KEY")
     or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
+    or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+       "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjcmF1aXlnYWV6b2R1d2RqbXNtIiwicm9sZSI6ImFub24i"
+       "LCJpYXQiOjE3NjQ2Nzg2NjIsImV4cCI6MjA4MDI1NDY2Mn0."
+       "COYGvxExzTLk0cZorF3KCJ2tzpIzvqTGb9Gb3J6wqsE"
 )
 
-# Hard-coded fallback (publishable anon key — safe to commit, same as client.ts)
-if not SUPABASE_URL:
-    SUPABASE_URL = "https://dcrauiygaezoduwdjmsm.supabase.co"
-if not SUPABASE_KEY:
-    SUPABASE_KEY = (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjcmF1aXlnYWV6b2R1d2RqbXNtIiwicm9sZSI6ImFub24i"
-        "LCJpYXQiOjE3NjQ2Nzg2NjIsImV4cCI6MjA4MDI1NDY2Mn0."
-        "COYGvxExzTLk0cZorF3KCJ2tzpIzvqTGb9Gb3J6wqsE"
-    )
+USE_PSQL = bool(os.environ.get("PGHOST"))
 
 
 def rest(path: str, params: dict) -> list:
@@ -65,6 +61,30 @@ def rest(path: str, params: dict) -> list:
     except error.HTTPError as e:
         print(f"HTTP {e.code} on {url}: {e.read().decode()[:200]}", file=sys.stderr)
         raise
+
+
+def sql(query: str) -> list[dict]:
+    """Run SQL via psql (bypasses RLS) and return rows as dicts."""
+    out = subprocess.run(
+        ["psql", "-At", "-F", "\t", "-c", f"COPY ({query}) TO STDOUT WITH (FORMAT csv, HEADER, NULL '\\N')"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    import csv, io
+    reader = csv.DictReader(io.StringIO(out))
+    rows: list[dict] = []
+    for r in reader:
+        norm = {}
+        for k, v in r.items():
+            if v == "\\N" or v is None:
+                norm[k] = None
+            elif v.startswith("{") and v.endswith("}"):
+                inner = v[1:-1]
+                norm[k] = [x.strip('"') for x in inner.split(",")] if inner else []
+            else:
+                norm[k] = v
+        rows.append(norm)
+    return rows
+
 
 
 def resolve_images(pick: dict, trade: dict | None) -> dict:
