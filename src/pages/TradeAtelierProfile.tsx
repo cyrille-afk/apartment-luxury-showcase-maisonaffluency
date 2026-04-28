@@ -337,69 +337,6 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const bioBlocks = designer.biography
-            ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
-            : [];
-
-          // Check if biography text already contains inline media URLs
-          const bioHasInlineMedia = bioBlocks.some((b: string) => {
-            const pipes = b.split(/\s*\|\s*/);
-            const url = pipes[0]?.trim() || "";
-            if (!/^https?:\/\//i.test(url) || /\s/.test(url)) return false;
-            return (
-              /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
-              /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
-              /vimeo\.com\//i.test(url) ||
-              /youtube\.com\/watch|youtu\.be\//i.test(url)
-            );
-          });
-          // Skip biography_images interleaving when bio text already has inline media
-          const manualMedia = bioHasInlineMedia ? [] : (designer.biography_images || []).filter(Boolean);
-          const curatedMedia = bioHasInlineMedia ? [] : picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
-          const baseMediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 3);
-          const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-chareau.jpg | Maison de Verre, Paris";
-
-          const mediaEntries =
-            slug === "pierre-chareau" && baseMediaEntries.length > 0
-              ? [...baseMediaEntries.slice(0, baseMediaEntries.length - 1), maisonDeVerreLine]
-              : baseMediaEntries;
-
-          let heroParagraphs: string[] = [];
-          let remainingBio = "";
-
-          if (bioBlocks.length > 0) {
-            if (mediaEntries.length > 0) {
-              const chunkCount = mediaEntries.length + 1;
-              const chunkSize = Math.max(1, Math.ceil(bioBlocks.length / chunkCount));
-              const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
-                bioBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
-              );
-
-              for (let i = 1; i < paragraphChunks.length; i++) {
-                if (paragraphChunks[i].length > 0) continue;
-                for (let j = i - 1; j >= 0; j--) {
-                  if (paragraphChunks[j].length > 1) {
-                    const moved = paragraphChunks[j].pop();
-                    if (moved) paragraphChunks[i].unshift(moved);
-                    break;
-                  }
-                }
-              }
-
-              heroParagraphs = paragraphChunks[0] || [];
-
-              remainingBio = mediaEntries
-                .map((mediaLine, index) => {
-                  const sectionText = (paragraphChunks[index + 1] || []).join("\n\n");
-                  return [mediaLine, sectionText].filter(Boolean).join("\n\n");
-                })
-                .filter(Boolean)
-                .join("\n\n");
-            } else {
-              heroParagraphs = bioBlocks.slice(0, 2);
-              remainingBio = bioBlocks.slice(2).join("\n\n");
-            }
-          }
 
           return isDesignerProfile ? (
             <div className="flex flex-col gap-0">
@@ -477,12 +414,14 @@ const TradeAtelierProfile = () => {
                       </blockquote>
                     );
                   })()}
-                  {heroParagraphs.length > 0 && (
-                    <div className="font-body text-sm leading-relaxed text-foreground/85">
-                      {heroParagraphs.map((p: string, i: number) => (
-                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
-                      ))}
-                    </div>
+                  {designer.biography && (
+                    <EditorialBiography
+                      biography={designer.biography}
+                      biographyImages={designer.biography_images}
+                      pickImages={[]}
+                      designerName={designer.name}
+                      allowCollapse={false}
+                    />
                   )}
                 </motion.div>
               </div>
@@ -491,22 +430,6 @@ const TradeAtelierProfile = () => {
                 <HeritageSlider slides={heritageSlides} />
               )}
 
-              {/* Remaining biography with exactly two staggered images */}
-              {remainingBio && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...transition, delay: 0.2 }}
-                >
-                  <EditorialBiography
-                    biography={remainingBio}
-                    biographyImages={[]}
-                    pickImages={[]}
-                    designerName={designer.name}
-                    startImageIndex={0}
-                  />
-                </motion.div>
-              )}
             </div>
           ) : (
             /* Atelier: full-width hero */
