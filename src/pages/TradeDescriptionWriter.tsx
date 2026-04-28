@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 
 type Tone = "editorial" | "technical" | "seo";
 type Source = "curator_picks" | "trade_products";
@@ -149,47 +150,27 @@ export default function TradeDescriptionWriter() {
           {/* Product */}
           <div className="space-y-1.5">
             <label className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Product</label>
-            <select
-              value={productId}
-              onChange={(e) => { setProductId(e.target.value); setResult(""); }}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
-            >
-              <option value="">Select a product…</option>
-              {source === "curator_picks"
-                ? (() => {
-                    const groups = new Map<string, typeof items>();
-                    for (const p of items) {
-                      const designer = p.designers?.display_name || p.designers?.name || "Unknown";
-                      if (!groups.has(designer)) groups.set(designer, []);
-                      groups.get(designer)!.push(p);
-                    }
-                    const sorted = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
-                    return sorted.map(([designer, picks]) => (
-                      <optgroup key={designer} label={designer}>
-                        {picks.map((p: any) => (
-                          <option key={p.id} value={p.id}>{p.title}</option>
-                        ))}
-                      </optgroup>
-                    ));
-                  })()
-                : (() => {
-                    const groups = new Map<string, typeof items>();
-                    for (const p of items) {
-                      const brand = p.brand_name || "Unknown";
-                      if (!groups.has(brand)) groups.set(brand, []);
-                      groups.get(brand)!.push(p);
-                    }
-                    const sorted = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
-                    return sorted.map(([brand, products]) => (
-                      <optgroup key={brand} label={brand}>
-                        {products.map((p: any) => (
-                          <option key={p.id} value={p.id}>{p.product_name}</option>
-                        ))}
-                      </optgroup>
-                    ));
-                  })()
-              }
-            </select>
+            {(() => {
+              const pickerItems: PickerItem[] = source === "curator_picks"
+                ? items.map((p: any) => ({
+                    id: p.id,
+                    label: p.title,
+                    group: p.designers?.display_name || p.designers?.name || "Unknown",
+                  }))
+                : items.map((p: any) => ({
+                    id: p.id,
+                    label: p.product_name,
+                    group: p.brand_name || "Unknown",
+                  }));
+              return (
+                <AlphabetProductPicker
+                  items={pickerItems}
+                  value={productId}
+                  onChange={(id) => { setProductId(id); setResult(""); }}
+                  placeholder="Select a product…"
+                />
+              );
+            })()}
           </div>
 
           {/* Tone */}
