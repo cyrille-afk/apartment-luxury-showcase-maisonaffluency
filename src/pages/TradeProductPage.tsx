@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
+import { categoryUrl } from "@/lib/categorySlugs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -504,17 +505,22 @@ const TradeProductPage: React.FC = () => {
 
       <div className="max-w-7xl pb-12">
         {(() => {
+          // Link category/subcategory crumbs to the public CategoryRoute,
+          // which is the canonical, fully-populated catalogue browser. The
+          // trade showroom grid only surfaces gallery-hotspot products, so
+          // pointing breadcrumbs there left users on near-empty pages.
           const crumbs: Crumb[] = [{ label: "Trade", to: "/trade/showroom" }];
           if (product.category) {
-            const params = new URLSearchParams({ tab: "grid" });
-            params.set("category", product.category);
-            crumbs.push({ label: product.category, to: `/trade/showroom?${params.toString()}` });
+            crumbs.push({
+              label: product.category,
+              to: categoryUrl(product.category, null),
+            });
           }
-          if (normalizedSubcategory) {
-            const params = new URLSearchParams({ tab: "grid" });
-            if (product.category) params.set("category", product.category);
-            params.set("subcategory", normalizedSubcategory);
-            crumbs.push({ label: normalizedSubcategory, to: `/trade/showroom?${params.toString()}` });
+          if (normalizedSubcategory && product.category) {
+            crumbs.push({
+              label: normalizedSubcategory,
+              to: categoryUrl(product.category, normalizedSubcategory),
+            });
           }
           crumbs.push({ label: product.title });
           return <Breadcrumbs items={crumbs} className="mb-6" />;
