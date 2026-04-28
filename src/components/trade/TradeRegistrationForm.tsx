@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { inferSupportedCountry } from "@/lib/inferCountry";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -55,7 +56,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     companyName: "",
     companyWebsite: "",
     jobTitle: "",
-    country: "Singapore",
+    country: inferSupportedCountry(COUNTRIES, "Singapore"),
     city: "",
     isCertified: false,
     certificationDetails: "",

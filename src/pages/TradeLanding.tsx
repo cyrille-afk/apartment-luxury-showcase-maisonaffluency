@@ -16,30 +16,9 @@ import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
 const ANDREE_PUTMAN_CATALOG_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
 
-const inferCountryFromBrowser = () => {
-  if (typeof navigator === "undefined") return "";
+// Browser country inference moved to src/lib/inferCountry.ts and is now consumed
+// directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
 
-  const locales = [...(navigator.languages || []), navigator.language].filter(Boolean);
-  const displayNames = typeof Intl !== "undefined" && "DisplayNames" in Intl
-    ? new Intl.DisplayNames(["en"], { type: "region" })
-    : null;
-
-  for (const locale of locales) {
-    try {
-      const region = new Intl.Locale(locale).region;
-      if (region) {
-        return displayNames?.of(region) || region;
-      }
-    } catch {
-      const fallbackRegion = locale.match(/[-_]([a-z]{2})$/i)?.[1]?.toUpperCase();
-      if (fallbackRegion) {
-        return displayNames?.of(fallbackRegion) || fallbackRegion;
-      }
-    }
-  }
-
-  return "";
-};
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);

@@ -5,6 +5,7 @@ import { X, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement } from "@/lib/analytics";
+import { inferSupportedCountry } from "@/lib/inferCountry";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -31,7 +32,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
     firstName: "",
     lastName: "",
     phone: "",
-    country: "Singapore",
+    country: inferSupportedCountry(COUNTRIES, "Singapore"),
     city: "",
     shipping: "not-needed" as ShippingOption,
     message: "",
@@ -117,7 +118,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       onOpenChange(false);
       setForm({
         email: "", firstName: "", lastName: "", phone: "",
-        country: "Singapore", city: "", shipping: "not-needed",
+        country: inferSupportedCountry(COUNTRIES, "Singapore"), city: "", shipping: "not-needed",
         message: "", consent: false, newsletter: false,
       });
     } catch {
