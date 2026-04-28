@@ -28,12 +28,13 @@ interface QuoteRequestDialogProps {
 const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: QuoteRequestDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inferredCountryRef = useRef<string>(inferSupportedCountry(COUNTRIES, "Singapore"));
   const [form, setForm] = useState({
     email: "",
     firstName: "",
     lastName: "",
     phone: "",
-    country: inferSupportedCountry(COUNTRIES, "Singapore"),
+    country: inferredCountryRef.current,
     city: "",
     shipping: "not-needed" as ShippingOption,
     message: "",
@@ -41,8 +42,12 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
     newsletter: false,
   });
 
-  const update = (field: string, value: string | boolean) =>
+  const update = (field: string, value: string | boolean) => {
+    if (field === "country" && typeof value === "string") {
+      trackForm.countryChanged("quote_request", inferredCountryRef.current, value);
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
