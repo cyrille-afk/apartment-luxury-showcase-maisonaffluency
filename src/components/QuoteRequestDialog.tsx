@@ -5,7 +5,7 @@ import { X, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement, trackForm } from "@/lib/analytics";
-import { inferSupportedCountry } from "@/lib/inferCountry";
+
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 
 const COUNTRIES = [
