@@ -295,6 +295,18 @@ const TradeGallery = () => {
     }
   }, [routeBrandName, routeBrandSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category") || "all");
+    setSelectedSubcategory(searchParams.get("subcategory") || "all");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (selectedCategory === "all") next.delete("category"); else next.set("category", selectedCategory);
+    if (selectedSubcategory === "all") next.delete("subcategory"); else next.set("subcategory", selectedSubcategory);
+    if (next.toString() !== searchParams.toString()) setSearchParams(next, { replace: true });
+  }, [selectedCategory, selectedSubcategory, searchParams, setSearchParams]);
+
   // Dropdown -> URL: keep route in sync with dropdown so paginate/search/share stays consistent.
   const handleBrandChange = (value: string) => {
     setSelectedBrand(value);
