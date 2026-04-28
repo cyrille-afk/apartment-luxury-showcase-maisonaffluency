@@ -199,7 +199,7 @@ const ContactInquiry = () => {
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+65 XXXX XXXX"
+                placeholder={phonePlaceholder}
                 className={`border-border bg-background font-body rounded-lg ${errors.phone ? "border-destructive" : ""}`}
                 value={formData.phone}
                 onChange={handleInputChange}
