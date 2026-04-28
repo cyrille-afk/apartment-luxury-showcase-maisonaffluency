@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "audit:og": "python3 scripts/audit-og-bridges.py --warnings"
+    "audit:og": "python3 scripts/audit-og-bridges.py --warnings",
+    "check:product-images": "python3 scripts/check-product-image-parity.py"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
