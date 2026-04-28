@@ -52,6 +52,7 @@ function displayName(name: string): string {
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
   const [sp] = useSearchParams();
   const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
+  const panelId = "designer-profile-extra";
   if (!shouldCollapse) return <>{children}</>;
   return (
     <div className="relative">
@@ -59,6 +60,9 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
         {expanded ? (
           <motion.div
             key="expanded"
+            id={panelId}
+            role="region"
+            aria-label="Full designer profile"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -70,12 +74,15 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
       {!expanded && (
         <div className="mt-6 flex justify-center">
           <button
+            type="button"
             onClick={() => setExpanded(true)}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
+            aria-expanded={expanded}
+            aria-controls={panelId}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
           >
-            <ChevronDown className="w-3.5 h-3.5" />
+            <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
             View full profile
-            <ChevronDown className="w-3.5 h-3.5" />
+            <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       )}
