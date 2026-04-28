@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
+import { inferCountryFromBrowser } from "@/lib/inferCountry";
+import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { z } from "zod";
 
 const inquirySchema = z.object({
@@ -34,6 +36,9 @@ const ContactInquiry = () => {
     phone: "",
     message: ""
   });
+  // Phone placeholder reflects the visitor's likely region (e.g. "+44 …" for UK)
+  // so the form doesn't read as Singapore-only. Falls back to a multi-region hint.
+  const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferCountryFromBrowser()));
 
   // Prefill the message field from URL params (e.g. /contact?subject=Bespoke%20inquiry&message=...)
   // Used by product pages to seed a "Bespoke inquiry" referencing the specific item.
@@ -194,7 +199,7 @@ const ContactInquiry = () => {
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+65 XXXX XXXX"
+                placeholder={phonePlaceholder}
                 className={`border-border bg-background font-body rounded-lg ${errors.phone ? "border-destructive" : ""}`}
                 value={formData.phone}
                 onChange={handleInputChange}

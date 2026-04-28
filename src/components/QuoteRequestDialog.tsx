@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement } from "@/lib/analytics";
 import { inferSupportedCountry } from "@/lib/inferCountry";
+import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -208,7 +209,8 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
                 required
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+                placeholder={getPhonePlaceholder(form.country)}
+                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] placeholder:text-muted-foreground/50"
               />
             </div>
           </div>
