@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen, Tag } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -38,11 +38,12 @@ const TradeGallery = () => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const { allProducts, brands, categories } = useTradeProducts();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
@@ -293,6 +294,18 @@ const TradeGallery = () => {
       // Skip to avoid clobbering manual dropdown choices.
     }
   }, [routeBrandName, routeBrandSlug]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category") || "all");
+    setSelectedSubcategory(searchParams.get("subcategory") || "all");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (selectedCategory === "all") next.delete("category"); else next.set("category", selectedCategory);
+    if (selectedSubcategory === "all") next.delete("subcategory"); else next.set("subcategory", selectedSubcategory);
+    if (next.toString() !== searchParams.toString()) setSearchParams(next, { replace: true });
+  }, [selectedCategory, selectedSubcategory, searchParams, setSearchParams]);
 
   // Dropdown -> URL: keep route in sync with dropdown so paginate/search/share stays consistent.
   const handleBrandChange = (value: string) => {
