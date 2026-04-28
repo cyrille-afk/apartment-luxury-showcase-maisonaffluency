@@ -563,7 +563,7 @@ const TradeProductPage: React.FC = () => {
                 </h1>
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
-                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
                 <ShareMenu
                   url={buildPieceOgUrl(designerDisplay, product.title)}
                   message={`${product.title} by ${designerDisplay} — Maison Affluency`}
