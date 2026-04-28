@@ -508,18 +508,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     curatorPicks: [
-      { 
-        image: apparatusPick1, 
-        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772085919/small-room-personality_wvxz6y.png",
-        title: "Lantern",
-        subtitle: "Table Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "Brass armature • Pressed glass shade",
-        dimensions: "70 H × Ø 23 cm",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_LANTERN_TABLE_LAMP.pdf",
-        pdfFilename: "Apparatus_Studio-Lantern_Table_Lamp.pdf"
-      },
+      // Lantern Table Lamp is now sourced from designer_curator_picks (DB) — see id be988b38…
+      // Removing the static duplicate prevents two "Lantern" cards from appearing in the trade gallery.
       { 
         image: apparatusPick5, 
         title: "Segment",
