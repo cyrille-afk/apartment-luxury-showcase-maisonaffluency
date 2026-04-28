@@ -469,6 +469,32 @@ const PublicProductPage: React.FC = () => {
   const safeIndex = Math.min(relatedIndex, maxIndex);
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
+  // Per-product finish → gallery image index mapping. When a buyer picks a finish
+  // in the materials dropdown, we jump the gallery to the most relevant photo.
+  // Keys are normalized (lowercased, alphanumerics only); values are 0-based image indices.
+  const FINISH_IMAGE_MAP: Record<string, Record<string, number>> = {
+    // Apparatus Studio — Lantern Table Lamp: image #5 is the swatch board
+    "apparatus-studio:lantern-table-lamp": {
+      tarnishedsilver: 4,
+      tarnishedsilverlacquered: 4,
+      agedbrass: 4,
+      oilrubbedbronze: 4,
+      blackenedbrass: 4,
+    },
+  };
+  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const productFinishMap =
+    FINISH_IMAGE_MAP[`${designer.slug}:${productSlug}`] || null;
+
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  const handleMaterialChange = (label: string | null) => {
+    if (!label || !productFinishMap) return;
+    const idx = productFinishMap[normFinish(label)];
+    if (typeof idx === "number" && idx >= 0 && idx < images.length) {
+      setGalleryActiveIndex(idx);
+    }
+  };
+
   return (
     <>
       <Helmet>
