@@ -248,7 +248,8 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
           <div>
             <label className="font-body text-sm text-foreground">Country</label>
             <select value={form.country} onChange={(e) => update("country", e.target.value)}
-              className={`${fieldClass("country")} appearance-none`}>
+              className={`${fieldClass("country")} appearance-none ${!form.country ? "text-muted-foreground" : ""}`}>
+              <option value="" disabled>— Select country —</option>
               {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
