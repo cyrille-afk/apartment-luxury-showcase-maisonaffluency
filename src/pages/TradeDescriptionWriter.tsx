@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 
 type Tone = "editorial" | "technical" | "seo";
 type Source = "curator_picks" | "trade_products";
