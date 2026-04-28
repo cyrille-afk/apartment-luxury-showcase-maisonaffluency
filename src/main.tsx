@@ -38,6 +38,9 @@ async function clearStaleFrontendCachesOnce() {
 
 void clearStaleFrontendCachesOnce();
 
+// Start watching /version.json so the app auto-reloads when a new build ships.
+startBuildVersionWatcher();
+
 // CSS is now loaded (import above is synchronous in the bundled output).
 // Reveal content by adding css-ready — this disables the FOUC guard in index.html.
 document.documentElement.classList.add("css-ready");
