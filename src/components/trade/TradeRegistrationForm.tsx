@@ -48,7 +48,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const inferredCountryRef = useRef<string>(inferSupportedCountry(COUNTRIES, "Singapore"));
+  const inferredCountryRef = useRef<string>("");
   const [form, setForm] = useState({
     email: prefillEmail,
     password: "",
@@ -59,7 +59,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     companyName: "",
     companyWebsite: "",
     jobTitle: "",
-    country: inferredCountryRef.current,
+    country: "",
     city: "",
     isCertified: false,
     certificationDetails: "",
