@@ -381,6 +381,20 @@ const PublicProductPage: React.FC = () => {
     });
   };
 
+  // Data-driven finish → gallery image index mapping.
+  // MUST be declared before any early returns to keep React hook order stable.
+  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const productFinishMap = React.useMemo(() => {
+    const raw = (data?.product as any)?.variant_image_map;
+    if (!raw || typeof raw !== "object") return null;
+    const out: Record<string, number> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      const idx = Number(v);
+      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
+    }
+    return Object.keys(out).length ? out : null;
+  }, [data]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -472,22 +486,7 @@ const PublicProductPage: React.FC = () => {
   const safeIndex = Math.min(relatedIndex, maxIndex);
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
-  // Data-driven finish → gallery image index mapping.
-  // Read from the product's `variant_image_map` JSONB column (admin-editable in DB).
-  // Keys are normalized (lowercased, alphanumerics only) variant labels — base, top,
-  // material, or any size_variants value — values are 0-based gallery indices.
-  // Also accepts non-normalized keys (we normalize on read for tolerance).
-  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const productFinishMap = React.useMemo(() => {
-    const raw = (product as any)?.variant_image_map;
-    if (!raw || typeof raw !== "object") return null;
-    const out: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      const idx = Number(v);
-      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
-    }
-    return Object.keys(out).length ? out : null;
-  }, [product]);
+  // (productFinishMap and normFinish are declared above the early returns to keep hook order stable.)
 
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
