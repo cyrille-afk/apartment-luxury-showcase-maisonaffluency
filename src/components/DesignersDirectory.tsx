@@ -1225,7 +1225,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
     filteredItems.forEach((d) => {
-      const letter = d.name[0]?.toUpperCase() || "#";
+      const { displayName } = parseDesignerDisplayName(d);
+      const firstChar = (displayName || d.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "")[0];
+      const letter = firstChar?.toUpperCase() || "#";
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(d);
     });
