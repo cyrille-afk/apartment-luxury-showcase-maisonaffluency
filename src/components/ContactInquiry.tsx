@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
+import { inferCountryFromBrowser } from "@/lib/inferCountry";
+import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { z } from "zod";
 
 const inquirySchema = z.object({
