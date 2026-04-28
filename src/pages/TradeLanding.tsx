@@ -159,6 +159,8 @@ const TradeLanding = () => {
   }, [andreePutmanCatalogUrl]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
+  const regionParam = (searchParams.get("region") || "").toLowerCase();
+  const isUKVariant = regionParam === "uk" || regionParam === "gb";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
   const [heroEmail, setHeroEmail] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
@@ -473,6 +475,15 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </button>
         </div>
 
+        {/* ─── Provenance Trust Strip ─── */}
+        <div className="w-full bg-background border-b border-border">
+          <p className="max-w-5xl mx-auto px-6 py-2.5 text-center font-body text-[11px] md:text-xs text-muted-foreground uppercase tracking-[0.18em]">
+            {isUKVariant
+              ? "Shipping to the UK from European ateliers — France, Italy & beyond"
+              : "Shipping worldwide from European ateliers — France, Italy & beyond"}
+          </p>
+        </div>
+
         {/* ─── Stats Bar ─── */}
         <div className="w-full border-y border-border">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
@@ -762,7 +773,22 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               </p>
             </motion.div>
 
-            <MobileTestimonials testimonials={testimonials} />
+            <MobileTestimonials
+              testimonials={
+                isUKVariant
+                  ? [
+                      {
+                        quote:
+                          "Sourcing French and Italian ateliers from London used to mean weeks of phone calls and conflicting freight quotes. Maison Affluency consolidates everything — pricing, lead times, customs, delivery — into one clear quotation. It has genuinely changed how we specify on our UK projects.",
+                        name: "Studio Principal",
+                        title: "Interior Architecture Practice",
+                        location: "London, United Kingdom",
+                      },
+                      ...testimonials,
+                    ]
+                  : testimonials
+              }
+            />
           </div>
         </div>
 
@@ -840,6 +866,11 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                   Frequently Asked Questions
                 </h2>
+                {isUKVariant && (
+                  <p className="font-body text-xs md:text-sm text-muted-foreground text-center mt-2 italic">
+                    UK studios — see VAT, Brexit duties and DDP/DAP shipping below.
+                  </p>
+                )}
                 <div className="border-t border-border mt-4" />
               </motion.div>
 
@@ -852,6 +883,10 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   { q: "Do you ship internationally?", a: "Yes. We arrange consolidated, fully insured shipping to most countries. Our logistics team will recommend the most appropriate freight partners for your project location." },
                   { q: "Can I request custom or bespoke pieces?", a: "Absolutely. We work directly with specialist workshops and renowned designers worldwide to fulfil custom requirements — from material modifications to entirely bespoke commissions." },
                   { q: "How long does the application review take?", a: "Applications are typically reviewed within 1–2 business days. You'll receive an email notification once your account has been approved." },
+                  { q: "Are prices shown ex-VAT or inclusive?", a: "All trade prices are quoted ex-VAT. Where the destination requires it (e.g. EU intra-community deliveries, UK VAT-registered businesses), VAT is itemised separately on the final quotation. Singapore GST is applied where applicable." },
+                  { q: "Where do shipments originate?", a: "The majority of our roster is based in France and Italy, with selected ateliers across Spain, the Netherlands, Switzerland and the UK. Goods consolidate at our European hubs before international dispatch — typically a short, well-trodden route for UK and EU clients." },
+                  { q: "How are post-Brexit duties handled for UK deliveries?", a: "We coordinate customs clearance into Great Britain and Northern Ireland on your behalf. Import VAT and any applicable duty are calculated against HMRC tariff codes for each piece and surfaced on the quote — no surprises on delivery." },
+                  { q: "Do you offer DDP or DAP shipping terms?", a: "Both. Delivered Duty Paid (DDP) bundles freight, customs, duty and import VAT into a single landed price — recommended for residential clients. Delivered At Place (DAP) is available where your studio or freight forwarder prefers to clear goods directly." },
                 ].map((faq, i) => (
                   <div key={i} className="py-4">
                     <button
