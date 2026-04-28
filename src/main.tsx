@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 
 const CACHE_RESET_SESSION_KEY = "__ma_frontend_cache_reset_v1";
 
