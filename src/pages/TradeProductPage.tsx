@@ -505,16 +505,20 @@ const TradeProductPage: React.FC = () => {
       </Helmet>
 
       <div className="max-w-7xl pb-12">
-        {/* Link category/subcategory crumbs to the public CategoryRoute,
-            which is the canonical, fully-populated catalogue browser. The
-            trade showroom grid only surfaces gallery-hotspot products, so
-            pointing breadcrumbs there left users on near-empty pages. */}
+        {/* Breadcrumbs route back to the Trade Gallery grid pre-filtered
+            to the same category/subcategory, so users stay inside the
+            trade portal instead of being sent to the public catalogue. */}
         <Breadcrumbs
           items={buildProductBreadcrumbs({
-            root: { label: "Trade", to: "/trade/showroom" },
+            root: { label: "Trade Gallery", to: "/trade/showroom?tab=grid" },
             category: product.category,
             subcategory: product.subcategory,
             title: product.title,
+            buildCategoryHref: (cat, sub) => {
+              const params = new URLSearchParams({ tab: "grid", category: cat });
+              if (sub) params.set("subcategory", sub);
+              return `/trade/showroom?${params.toString()}`;
+            },
           })}
           className="mb-6"
         />
