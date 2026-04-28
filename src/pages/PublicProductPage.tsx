@@ -569,7 +569,7 @@ const PublicProductPage: React.FC = () => {
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
               <div className="flex flex-col gap-2">
-                <VariantSelectors product={product} />
+                <VariantSelectors product={product} onMaterialChange={handleMaterialChange} />
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
