@@ -186,7 +186,7 @@ const TradeAtelierProfile = () => {
   }, [rawPicks, bioImageUrls]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const profileBadgeLabel = designer?.display_name || designer?.name;
-  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
