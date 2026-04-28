@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
+import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 
 const CACHE_RESET_SESSION_KEY = "__ma_frontend_cache_reset_v1";
 
@@ -45,4 +46,9 @@ startBuildVersionWatcher();
 // Reveal content by adding css-ready — this disables the FOUC guard in index.html.
 document.documentElement.classList.add("css-ready");
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <>
+    <App />
+    <HmrStatusBanner />
+  </>
+);
