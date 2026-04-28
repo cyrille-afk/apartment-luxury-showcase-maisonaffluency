@@ -102,6 +102,12 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
     summary:
       "Suspended sculpture. From restrained single pendants to ceremonial chandeliers, each piece is conceived as the centrepiece of the volume it inhabits.",
   },
+  "Ceiling Lights": {
+    title: "Ceiling Lights",
+    image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774330412/AffluencySG_107_2_s4nfeb.jpg",
+    summary:
+      "Suspended sculpture. From restrained single pendants to ceremonial chandeliers, each piece is conceived as the centrepiece of the volume it inhabits.",
+  },
 
   // ── Storage ────────────────────────────────────────────────
   Storage: {
