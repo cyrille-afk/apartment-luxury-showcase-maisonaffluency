@@ -28,13 +28,13 @@ interface QuoteRequestDialogProps {
 const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: QuoteRequestDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inferredCountryRef = useRef<string>(inferSupportedCountry(COUNTRIES, "Singapore"));
+  const inferredCountryRef = useRef<string>("");
   const [form, setForm] = useState({
     email: "",
     firstName: "",
     lastName: "",
     phone: "",
-    country: inferredCountryRef.current,
+    country: "",
     city: "",
     shipping: "not-needed" as ShippingOption,
     message: "",
