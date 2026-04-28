@@ -250,6 +250,11 @@ const TradeProductPage: React.FC = () => {
   // we expose two independent dropdowns and resolve the active variant by both.
   const [selectedSingleSize, setSelectedSingleSize] = useState<string | null>(null);
   const [selectedSingleMaterial, setSelectedSingleMaterial] = useState<string | null>(null);
+  // Mirrors PublicProductPage: gallery jumps to a finish's mapped image when a
+  // material/finish dropdown is changed. Stored as state (not derived) so the
+  // jump is committed exactly when the user makes a selection — identical
+  // behaviour to the public side.
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
