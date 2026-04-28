@@ -116,3 +116,25 @@ export const trackEngagement = {
       event_label: sectionName,
     }),
 };
+
+/** Form interaction events */
+export const trackForm = {
+  /**
+   * Fires when a user overrides the inferred default country in a form.
+   * Helps surface mismatches between browser-inferred locale and the user's
+   * actual market (e.g. UK visitors correcting a Singapore default).
+   */
+  countryChanged: (form: string, fromCountry: string, toCountry: string) => {
+    if (!fromCountry || !toCountry || fromCountry === toCountry) return;
+    trackEvent("form_country_changed", {
+      event_category: "Form",
+      event_label: form,
+      from_country: fromCountry,
+      to_country: toCountry,
+    });
+    // Surface in console for ops visibility while GA propagates.
+    if (typeof console !== "undefined") {
+      console.info(`[analytics] ${form}: country changed ${fromCountry} → ${toCountry}`);
+    }
+  },
+};
