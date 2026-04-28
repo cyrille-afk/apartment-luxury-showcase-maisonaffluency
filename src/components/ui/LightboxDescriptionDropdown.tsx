@@ -13,18 +13,12 @@ interface Props {
 
 const LightboxDescriptionDropdown = ({ description }: Props) => {
   const [expanded, setExpanded] = useState(false);
-  const [showFull, setShowFull] = useState(false);
 
   if (!description || !description.trim()) return null;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (expanded) {
-      setExpanded(false);
-      setShowFull(false);
-    } else {
-      setExpanded(true);
-    }
+    setExpanded((v) => !v);
   };
 
   return (
