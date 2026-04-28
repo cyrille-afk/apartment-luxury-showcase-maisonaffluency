@@ -475,6 +475,15 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </button>
         </div>
 
+        {/* ─── Provenance Trust Strip ─── */}
+        <div className="w-full bg-background border-b border-border">
+          <p className="max-w-5xl mx-auto px-6 py-2.5 text-center font-body text-[11px] md:text-xs text-muted-foreground uppercase tracking-[0.18em]">
+            {isUKVariant
+              ? "Shipping to the UK from European ateliers — France, Italy & beyond"
+              : "Shipping worldwide from European ateliers — France, Italy & beyond"}
+          </p>
+        </div>
+
         {/* ─── Stats Bar ─── */}
         <div className="w-full border-y border-border">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
