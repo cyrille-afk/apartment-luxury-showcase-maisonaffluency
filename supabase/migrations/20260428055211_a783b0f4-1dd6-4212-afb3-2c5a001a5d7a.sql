@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET variant_image_map = '{"tarnishedsilver": 2, "tarnishedsilverlacquered": 2}'::jsonb WHERE id = 'fd3b99c7-918e-4ecb-bf1c-546653e4fa20';
