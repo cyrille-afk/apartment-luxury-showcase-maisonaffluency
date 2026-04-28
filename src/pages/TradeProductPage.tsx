@@ -610,6 +610,7 @@ const TradeProductPage: React.FC = () => {
                   onChange={(idx) => {
                     const newMat = singleMaterialOptions[idx] ?? null;
                     setSelectedSingleMaterial(newMat);
+                    handleMaterialChange(newMat);
                     // Reset size if it isn't offered for the new material
                     if (newMat && selectedSingleSize && !singleAxisParsed.some((p) => p.material === newMat && p.size === selectedSingleSize)) {
                       setSelectedSingleSize(null);
