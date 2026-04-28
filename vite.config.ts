@@ -8,11 +8,21 @@ import { componentTagger } from "lovable-tagger";
  * The inline <style> block in index.html already covers critical styles,
  * so the full CSS bundle can load async without visible FOUC.
  */
-function optimizeHtmlPlugin(): Plugin {
+function optimizeHtmlPlugin(buildId: string): Plugin {
   return {
     name: "optimize-html",
     enforce: "post",
     transformIndexHtml(html) {
+      // 0. Inject cache-busting meta tags + build id so the browser always
+      //    revalidates index.html and the app can detect new deployments.
+      const metaInject =
+        '<meta charset="UTF-8" />\n' +
+        '    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />\n' +
+        '    <meta http-equiv="Pragma" content="no-cache" />\n' +
+        '    <meta http-equiv="Expires" content="0" />\n' +
+        `    <meta name="app-build-id" content="${buildId}" />`;
+      html = html.replace('<meta charset="UTF-8" />', metaInject);
+
       // 1. Convert render-blocking CSS to async preload
       html = html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
@@ -38,6 +48,24 @@ function optimizeHtmlPlugin(): Plugin {
       }
 
       return html;
+    },
+  };
+}
+
+/**
+ * Emits /version.json at the build root so the running app can poll it
+ * and auto-reload when a fresh build is deployed.
+ */
+function emitVersionPlugin(buildId: string): Plugin {
+  return {
+    name: "emit-version",
+    apply: "build",
+    generateBundle() {
+      this.emitFile({
+        type: "asset",
+        fileName: "version.json",
+        source: JSON.stringify({ buildId, builtAt: new Date().toISOString() }),
+      });
     },
   };
 }
