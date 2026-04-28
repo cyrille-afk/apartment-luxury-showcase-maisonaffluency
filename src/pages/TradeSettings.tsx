@@ -7,11 +7,19 @@ import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, Trendi
 import { z } from "zod";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
+const COUNTRIES = [
+  "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
+  "India", "Indonesia", "Italy", "Japan", "Malaysia", "Netherlands", "New Zealand",
+  "Philippines", "South Korea", "Spain", "Switzerland", "Taiwan", "Thailand",
+  "United Arab Emirates", "United Kingdom", "United States", "Vietnam", "Other",
+];
+
 const profileSchema = z.object({
   first_name: z.string().trim().min(1, "First name is required").max(100, "Max 100 characters"),
   last_name: z.string().trim().min(1, "Last name is required").max(100, "Max 100 characters"),
   company: z.string().trim().max(200, "Max 200 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
+  country: z.string().trim().max(100, "Max 100 characters").optional().or(z.literal("")),
 });
 
 const passwordSchema = z.object({
