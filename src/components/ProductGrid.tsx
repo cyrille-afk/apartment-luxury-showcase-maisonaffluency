@@ -15,8 +15,10 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory } from "@/lib/productTaxonomy";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
+import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
+import { categoryUrl } from "@/lib/categorySlugs";
+import { normalizeCategory } from "@/lib/productTaxonomy";
+import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
