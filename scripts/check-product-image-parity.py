@@ -95,6 +95,22 @@ def resolve_images(pick: dict, trade: dict | None) -> dict:
     }
 
 
+def classify(pick: dict, trade: dict | None, public_view: dict, trade_view: dict) -> str:
+    """Categorize a product for the parity report."""
+    if public_view != trade_view:
+        return "mismatch"
+    if not trade:
+        return "pick_only"
+    pick_has_image = bool(pick.get("image_url"))
+    pick_has_gallery = bool(pick.get("gallery_images"))
+    trade_has_gallery = bool(trade.get("gallery_images"))
+    if not pick_has_image and trade.get("image_url"):
+        return "trade_only_fallback"
+    if pick_has_gallery and trade_has_gallery and list(pick["gallery_images"]) != list(trade["gallery_images"]):
+        return "divergent_gallery"
+    return "match"
+
+
 def main() -> int:
     print("→ Fetching designers, picks, trade products…")
     designers = rest(
@@ -115,8 +131,6 @@ def main() -> int:
         },
     )
 
-    # Match the page logic: trade_products.product_name == pick.title
-    # AND trade_products.brand_name IN [designer.display_name, designer.name].
     trade_products = rest(
         "trade_products",
         {
@@ -132,13 +146,13 @@ def main() -> int:
         if brand and name:
             trade_index.setdefault((brand, name), tp)
 
-    checked = 0
-    mismatches: list[str] = []
+    rows: list[dict] = []
+    counts: dict[str, int] = {}
 
     for pick in picks:
         designer = designer_by_id.get(pick.get("designer_id"))
         if not designer:
-            continue  # unpublished designer → not reachable from either page
+            continue
         title = (pick.get("title") or "").strip().lower()
         brand_candidates = {
             (designer.get("display_name") or "").strip().lower(),
@@ -153,26 +167,59 @@ def main() -> int:
 
         public_view = resolve_images(pick, trade)
         trade_view = resolve_images(pick, trade)
-        checked += 1
+        status = classify(pick, trade, public_view, trade_view)
+        counts[status] = counts.get(status, 0) + 1
 
-        if public_view != trade_view:
-            mismatches.append(
-                f"  ✗ {designer['slug']}/{pick['title']}\n"
-                f"      public={json.dumps(public_view)}\n"
-                f"      trade ={json.dumps(trade_view)}"
-            )
+        rows.append({
+            "designer_slug": designer.get("slug"),
+            "designer_name": designer.get("display_name") or designer.get("name"),
+            "product_title": pick.get("title"),
+            "pick_id": pick.get("id"),
+            "trade_product_id": (trade or {}).get("id"),
+            "status": status,
+            "public_image_url": public_view["image_url"],
+            "trade_image_url": trade_view["image_url"],
+            "public_hover_image_url": public_view["hover_image_url"],
+            "trade_hover_image_url": trade_view["hover_image_url"],
+            "public_rendered_gallery": public_view["rendered_gallery"],
+            "trade_rendered_gallery": trade_view["rendered_gallery"],
+            "pick_gallery_count": len(pick.get("gallery_images") or []),
+            "trade_gallery_count": len((trade or {}).get("gallery_images") or []),
+        })
 
-    print(f"→ Checked {checked} products across {len(designers)} published designers.")
+    print(f"→ Checked {len(rows)} products across {len(designers)} published designers.")
+    for status, n in sorted(counts.items(), key=lambda x: -x[1]):
+        print(f"   {status:>22} : {n}")
 
-    if mismatches:
-        print(f"\n✗ FAIL: {len(mismatches)} product(s) resolve different images on Public vs Trade:\n")
-        print("\n".join(mismatches[:25]))
-        if len(mismatches) > 25:
-            print(f"  …and {len(mismatches) - 25} more.")
-        return 1
+    # Write artifacts
+    out_dir = "/mnt/documents"
+    os.makedirs(out_dir, exist_ok=True)
+    json_path = os.path.join(out_dir, "product-image-parity-report.json")
+    csv_path = os.path.join(out_dir, "product-image-parity-report.csv")
 
-    print("✓ PASS: Public and Trade product pages resolve identical image URL inputs.")
-    return 0
+    # Report only divergent rows in the artifact (mismatch / divergent_gallery / trade_only_fallback)
+    divergent = [r for r in rows if r["status"] != "match"]
+    with open(json_path, "w") as f:
+        json.dump({"summary": counts, "total": len(rows), "divergent": divergent}, f, indent=2)
+
+    import csv
+    with open(csv_path, "w", newline="") as f:
+        if divergent:
+            fieldnames = list(divergent[0].keys())
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for r in divergent:
+                row = {k: (json.dumps(v) if isinstance(v, list) else v) for k, v in r.items()}
+                writer.writerow(row)
+        else:
+            f.write("status\nno_divergences\n")
+
+    print(f"\n✓ Wrote {len(divergent)} divergent row(s) to:")
+    print(f"   {json_path}")
+    print(f"   {csv_path}")
+
+    # Exit non-zero only on hard mismatches (page logic divergence).
+    return 1 if counts.get("mismatch", 0) else 0
 
 
 if __name__ == "__main__":
