@@ -137,6 +137,8 @@ const TradeSettings = () => {
     if (!user) return;
     setSaving(true);
 
+    const countryChanged = !!result.data.country;
+
     const { error } = await supabase
       .from("profiles")
       .update(result.data)
@@ -146,6 +148,14 @@ const TradeSettings = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Profile updated" });
+      // Clear manual currency override so the new country drives the default.
+      if (countryChanged) {
+        try {
+          window.localStorage.removeItem("trade.displayCurrency");
+          window.localStorage.removeItem("trade.displayCurrency.manual");
+          window.dispatchEvent(new CustomEvent("trade-display-currency-change", { detail: "original" }));
+        } catch { /* ignore */ }
+      }
       refreshRoles();
     }
     setSaving(false);
