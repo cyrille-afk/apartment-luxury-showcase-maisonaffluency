@@ -57,9 +57,29 @@ const COUNTRY_TO_CURRENCY: Record<string, DisplayCurrency> = {
   SG: "SGD",
 };
 
-const currencyForCountry = (code?: string | null): DisplayCurrency | null => {
-  if (!code) return null;
-  return COUNTRY_TO_CURRENCY[code.toUpperCase()] ?? null;
+/** Country full names (as stored on profiles.country / trade_applications) → ISO. */
+const COUNTRY_NAME_TO_ISO: Record<string, string> = {
+  "united kingdom": "GB", "uk": "GB", "england": "GB", "scotland": "GB", "wales": "GB",
+  "united states": "US", "usa": "US", "u.s.": "US", "u.s.a.": "US",
+  "hong kong": "HK",
+  "united arab emirates": "AE", "uae": "AE",
+  "saudi arabia": "SA", "qatar": "QA", "kuwait": "KW", "bahrain": "BH", "oman": "OM",
+  "france": "FR", "germany": "DE", "italy": "IT", "spain": "ES", "netherlands": "NL",
+  "belgium": "BE", "ireland": "IE", "portugal": "PT", "austria": "AT", "greece": "GR",
+  "finland": "FI", "luxembourg": "LU", "monaco": "MC",
+  "switzerland": "CH", "australia": "AU", "singapore": "SG",
+};
+
+const currencyForCountry = (input?: string | null): DisplayCurrency | null => {
+  if (!input) return null;
+  const trimmed = input.trim();
+  // ISO 2-letter code (case-insensitive)
+  if (/^[A-Za-z]{2}$/.test(trimmed)) {
+    return COUNTRY_TO_CURRENCY[trimmed.toUpperCase()] ?? null;
+  }
+  // Full name lookup
+  const iso = COUNTRY_NAME_TO_ISO[trimmed.toLowerCase()];
+  return iso ? (COUNTRY_TO_CURRENCY[iso] ?? null) : null;
 };
 
 /** Best-effort country from the browser's locale (e.g. "en-GB" → "GB"). */
