@@ -56,7 +56,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     companyName: "",
     companyWebsite: "",
     jobTitle: "",
-    country: "Singapore",
+    country: inferSupportedCountry(COUNTRIES, "Singapore"),
     city: "",
     isCertified: false,
     certificationDetails: "",
