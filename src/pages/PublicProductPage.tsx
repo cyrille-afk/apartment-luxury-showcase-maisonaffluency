@@ -354,6 +354,7 @@ const PublicProductPage: React.FC = () => {
   const [favIds, setFavIds] = useState(readFavs);
   const [relatedIndex, setRelatedIndex] = useState(0);
   const [bioExpanded, setBioExpanded] = useState(false);
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
