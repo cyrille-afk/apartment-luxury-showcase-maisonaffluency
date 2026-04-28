@@ -240,6 +240,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           onChange={(idx) => {
             const m = singleMaterialOptions[idx] ?? null;
             setSelMat(m);
+            onMaterialChange?.(m);
             if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
           }}
           disabledIndices={disabledMatIdx}
@@ -250,13 +251,19 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           }
         />
       ) : product.materials ? (
-        <ExpandableSpec
-          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-          text={product.materials}
-          placeholder={getMaterialPlaceholder(product)}
-          autoSplit
-          autoDetectedHint
-        />
+        (() => {
+          const parsed = parseMaterialsFallback(product.materials);
+          return (
+            <ExpandableSpec
+              icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+              text={product.materials}
+              placeholder={getMaterialPlaceholder(product)}
+              autoSplit
+              autoDetectedHint
+              onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
+            />
+          );
+        })()
       ) : null}
 
       {/* Size dropdown */}
