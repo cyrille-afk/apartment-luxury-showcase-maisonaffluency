@@ -80,7 +80,7 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
   },
   "Table Lights": {
     title: "Table Lights",
-    image: cld("v1773652807/details-console_hk6uxt.jpg"),
+    image: cld("v1772085919/small-room-personality_wvxz6y.png"),
     summary:
       "Intimate, sculptural, and quietly indispensable. Table lamps in alabaster, blown glass, ceramic and patinated bronze — small editions from designers who treat the bedside, the console, the desk as stage.",
   },
