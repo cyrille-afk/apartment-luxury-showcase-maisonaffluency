@@ -159,6 +159,8 @@ const TradeLanding = () => {
   }, [andreePutmanCatalogUrl]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
+  const regionParam = (searchParams.get("region") || "").toLowerCase();
+  const isUKVariant = regionParam === "uk" || regionParam === "gb";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
   const [heroEmail, setHeroEmail] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
