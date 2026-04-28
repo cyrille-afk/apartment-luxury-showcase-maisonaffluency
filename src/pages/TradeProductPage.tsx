@@ -42,6 +42,7 @@ import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
+import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -251,9 +252,8 @@ const TradeProductPage: React.FC = () => {
   const [selectedSingleSize, setSelectedSingleSize] = useState<string | null>(null);
   const [selectedSingleMaterial, setSelectedSingleMaterial] = useState<string | null>(null);
   // Mirrors PublicProductPage: gallery jumps to a finish's mapped image when a
-  // material/finish dropdown is changed. Stored as state (not derived) so the
-  // jump is committed exactly when the user makes a selection — identical
-  // behaviour to the public side.
+  // material/finish dropdown is changed (state-backed so behaviour matches the
+  // public side exactly).
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
   const fxRates = useFxRates();
 
@@ -396,26 +396,13 @@ const TradeProductPage: React.FC = () => {
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
 
-  // Data-driven finish → gallery image index mapping (mirrors PublicProductPage).
-  const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const productFinishMap: Record<string, number> | null = (() => {
-    const raw = (product as any)?.variant_image_map;
-    if (!raw || typeof raw !== "object") return null;
-    const out: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      const idx = Number(v);
-      if (Number.isFinite(idx)) out[normFinish(k)] = idx;
-    }
-    return Object.keys(out).length ? out : null;
-  })();
+  // Data-driven finish → gallery image index mapping (shared with PublicProductPage).
+  const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
   const handleMaterialChange = (label: string | null) => {
-    if (!label || !productFinishMap) return;
-    const idx = productFinishMap[normFinish(label)];
-    if (typeof idx === "number" && idx >= 0 && idx < images.length) {
-      setGalleryActiveIndex(idx);
-    }
+    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+    if (idx !== undefined) setGalleryActiveIndex(idx);
   };
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
