@@ -23,6 +23,7 @@ import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
 
 const slugifyForUrl = (s: string) =>
