@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 
 const CACHE_RESET_SESSION_KEY = "__ma_frontend_cache_reset_v1";
 
@@ -36,6 +37,9 @@ async function clearStaleFrontendCachesOnce() {
 }
 
 void clearStaleFrontendCachesOnce();
+
+// Start watching /version.json so the app auto-reloads when a new build ships.
+startBuildVersionWatcher();
 
 // CSS is now loaded (import above is synchronous in the bundled output).
 // Reveal content by adding css-ready — this disables the FOUC guard in index.html.

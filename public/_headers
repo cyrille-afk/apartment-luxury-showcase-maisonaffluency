@@ -21,22 +21,32 @@
 /manifest.json
   Cache-Control: public, max-age=86400
 
-# HTML — always revalidate
+# Build version manifest — must always be fresh so the auto-update watcher works
+/version.json
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+# HTML — never cache the shell so deployments take effect immediately
 /index.html
-  Cache-Control: no-cache
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
   X-Robots-Tag: all
 /
-  Cache-Control: no-cache
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
   X-Robots-Tag: all
 
 # OG bridge files — allow crawlers
 /*.html
-  Cache-Control: no-cache
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
   X-Robots-Tag: all
 
 # All pages — force revalidation, security & performance headers
 /*
-  Cache-Control: no-cache
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
