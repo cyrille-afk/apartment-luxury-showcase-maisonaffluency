@@ -1199,9 +1199,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     });
   }, [items, searchQuery]);
 
-  const topLevelItems = useMemo(() => {
-    return searchFiltered.filter((d) => !(d.founder && d.founder !== d.name && parentNames.has(d.founder)));
-  }, [searchFiltered, parentNames]);
+  // Include child designers in the A-Z list so they're findable by their own
+  // initial. They still appear nested under their parent atelier's expandable
+  // card; the child card here shows the atelier as its parentLabel for context.
+  const topLevelItems = useMemo(() => searchFiltered, [searchFiltered]);
 
   // Apply category/subcategory filter
   const filteredItems = useMemo(() => {
