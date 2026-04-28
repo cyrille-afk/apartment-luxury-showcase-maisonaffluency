@@ -71,16 +71,19 @@ function emitVersionPlugin(buildId: string): Plugin {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === "development" && componentTagger(),
-    optimizeHtmlPlugin(),
-  ].filter(Boolean),
+export default defineConfig(({ mode }) => {
+  const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return {
+    server: {
+      host: "::",
+      port: 8080,
+    },
+    plugins: [
+      react(),
+      mode === "development" && componentTagger(),
+      optimizeHtmlPlugin(buildId),
+      emitVersionPlugin(buildId),
+    ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
