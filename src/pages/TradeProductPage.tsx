@@ -392,8 +392,10 @@ const TradeProductPage: React.FC = () => {
   ) as string[];
 
   // Data-driven finish → gallery image index mapping (mirrors PublicProductPage).
+  // Plain computations (not useMemo) since they live AFTER the early returns
+  // above — adding hooks here would violate the rules-of-hooks order.
   const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const productFinishMap = React.useMemo(() => {
+  const productFinishMap: Record<string, number> | null = (() => {
     const raw = (product as any)?.variant_image_map;
     if (!raw || typeof raw !== "object") return null;
     const out: Record<string, number> = {};
@@ -402,7 +404,7 @@ const TradeProductPage: React.FC = () => {
       if (Number.isFinite(idx)) out[normFinish(k)] = idx;
     }
     return Object.keys(out).length ? out : null;
-  }, [product]);
+  })();
 
   // Resolve currently-selected finish/material label across the variant axes.
   const selectedFinishLabel: string | null =
@@ -411,12 +413,12 @@ const TradeProductPage: React.FC = () => {
     selectedTop ||
     null;
 
-  const galleryActiveIndex = React.useMemo(() => {
+  const galleryActiveIndex: number | undefined = (() => {
     if (!productFinishMap || !selectedFinishLabel) return undefined;
     const idx = productFinishMap[normFinish(selectedFinishLabel)];
     if (typeof idx === "number" && idx >= 0 && idx < images.length) return idx;
     return undefined;
-  }, [productFinishMap, selectedFinishLabel, images.length]);
+  })();
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
