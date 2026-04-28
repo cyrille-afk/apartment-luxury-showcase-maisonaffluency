@@ -566,13 +566,22 @@ const TradeAtelierProfile = () => {
                       </blockquote>
                     );
                   })()}
-                  {heroParagraphs.length > 0 && (
+                  {introEditorialBio ? (
+                    <EditorialBiography
+                      biography={introEditorialBio}
+                      biographyImages={[]}
+                      pickImages={[]}
+                      designerName={designer.name}
+                      allowCollapse={false}
+                      startImageIndex={0}
+                    />
+                  ) : heroParagraphs.length > 0 ? (
                     <div className="font-body text-sm leading-relaxed text-foreground/85">
                       {heroParagraphs.map((p: string, i: number) => (
                         <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                       ))}
                     </div>
-                  )}
+                  ) : null}
                 </motion.div>
               </div>
 
@@ -581,18 +590,19 @@ const TradeAtelierProfile = () => {
               )}
 
               {/* Remaining biography with exactly two staggered images */}
-              {remainingBio && (
+              {editorialBio && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ ...transition, delay: 0.2 }}
                 >
                   <EditorialBiography
-                    biography={remainingBio}
+                    biography={editorialBio}
                     biographyImages={[]}
                     pickImages={[]}
                     designerName={designer.name}
-                    startImageIndex={0}
+                    allowCollapse={false}
+                    startImageIndex={editorialStartImageIndex}
                   />
                 </motion.div>
               )}
