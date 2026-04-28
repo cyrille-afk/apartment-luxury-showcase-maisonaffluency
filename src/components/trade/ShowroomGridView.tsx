@@ -273,22 +273,38 @@ const ShowroomGridView = ({
           .select("id, product_name, description, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
           .eq("is_active", true);
 
-        // Fetch descriptions from curator picks
+        // Fetch descriptions + categorization from curator picks (live DB)
         const { data: curatorDescriptions } = await supabase
           .from("designer_curator_picks")
-          .select("title, description")
-          .not("description", "is", null);
+          .select("title, subtitle, description, category, subcategory, tags");
 
         const descriptionLookup = new Map<string, string>();
         const normalizedDescriptionLookup = new Map<string, string>();
         const descriptionEntries: { normalizedKey: string; tokens: Set<string>; desc: string }[] = [];
         if (curatorDescriptions) {
-          for (const cd of curatorDescriptions) {
+          for (const cd of curatorDescriptions as any[]) {
+            const titleKey = cd.title?.trim().toLowerCase();
+            if (!titleKey) continue;
+
+            // Merge live curator-pick category/subcategory into metadataLookup so
+            // products that exist only in designer_curator_picks (not the static
+            // tradeProducts catalog) still filter correctly in the trade grid.
+            const rawCat = cd.category?.trim() || cd.tags?.[0] || undefined;
+            const rawSub = cd.subcategory?.trim() || cd.tags?.[1] || undefined;
+            const inferText = [cd.title, cd.subtitle].filter(Boolean).join(" ");
+            const resolvedSub = inferSubcategory(rawCat, rawSub, inferText);
+            const resolvedCat = normalizeCategory(rawCat, resolvedSub) || rawCat;
+            const liveMeta = metadataLookup.get(titleKey) || {};
+            metadataLookup.set(titleKey, {
+              ...liveMeta,
+              category: liveMeta.category || resolvedCat,
+              subcategory: liveMeta.subcategory || resolvedSub,
+            });
+
             if (cd.description?.trim()) {
               const desc = cd.description.trim();
-              const key = cd.title.trim().toLowerCase();
+              descriptionLookup.set(titleKey, desc);
               const normalizedKey = normalizeProductName(cd.title);
-              descriptionLookup.set(key, desc);
               if (normalizedKey) normalizedDescriptionLookup.set(normalizedKey, desc);
               descriptionEntries.push({
                 normalizedKey,
