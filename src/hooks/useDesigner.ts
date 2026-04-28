@@ -2,6 +2,23 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 
+const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
+
+const normalizePickKey = (pick: Pick<DesignerCuratorPick, "title" | "subtitle" | "image_url">) =>
+  [pick.title, pick.subtitle || "", pick.image_url || ""]
+    .map((value) => value.trim().toLowerCase())
+    .join("|");
+
+const dedupePicks = <T extends DesignerCuratorPick>(picks: T[]) => {
+  const seen = new Set<string>();
+  return picks.filter((pick) => {
+    const key = normalizePickKey(pick);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export interface Designer {
   id: string;
   slug: string;
@@ -54,6 +71,7 @@ export function useDesigner(slug: string | undefined) {
     queryKey: ["designer", slug],
     queryFn: async () => {
       if (!slug) return null;
+      if (HIDDEN_DESIGNER_SLUGS.has(slug)) return null;
       const { data, error } = await supabase
         .from("designers")
         .select("*")
@@ -76,6 +94,7 @@ export function useDesignerByName(name: string | undefined) {
     queryKey: ["designer-by-name", name],
     queryFn: async () => {
       if (!name) return null;
+      if (name.trim().toLowerCase() === "gabriel hendifar") return null;
       const { data, error } = await supabase
         .from("designers")
         .select("*")
@@ -105,13 +124,13 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
           .eq("designer_id", designerId)
           .order("sort_order", { ascending: true });
         if (error) throw error;
-        return (data || []).map((d) => ({
+        return dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
-        })) as unknown as DesignerCuratorPick[];
+        })) as unknown as DesignerCuratorPick[]);
       }
       const { data, error } = await supabase
         .from("designer_curator_picks")
@@ -119,12 +138,12 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
         .eq("designer_id", designerId)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data || []).map((d) => ({
+      return dedupePicks((data || []).map((d) => ({
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
-      })) as unknown as DesignerCuratorPick[];
+      })) as unknown as DesignerCuratorPick[]);
     },
     enabled: !!designerId,
   });
@@ -155,7 +174,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         .neq("id", designer.id);
       if (subDesignersError) throw subDesignersError;
 
-      const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id);
+      const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id && !HIDDEN_DESIGNER_SLUGS.has(d.slug));
 
       // Deduplicate: current parent + children
       const seen = new Set<string>();
@@ -174,7 +193,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
           .in("designer_id", designerIds)
           .order("sort_order", { ascending: true });
         if (error) throw error;
-        return (data || []).map((d) => ({
+        return dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
           trade_price_cents: null,
@@ -182,7 +201,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
           designer_name: nameMap[d.designer_id]?.name || designer.name,
           designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
-        })) as unknown as AttributedCuratorPick[];
+        })) as unknown as AttributedCuratorPick[]);
       }
 
       const { data, error } = await supabase
@@ -193,14 +212,14 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
 
       if (error) throw error;
 
-      return (data || []).map((d) => ({
+      return dedupePicks((data || []).map((d) => ({
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
         designer_name: nameMap[d.designer_id]?.name || designer.name,
         designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
-      })) as unknown as AttributedCuratorPick[];
+      })) as unknown as AttributedCuratorPick[]);
     },
     enabled: !!designer,
   });
@@ -216,7 +235,7 @@ export function useAllDesigners() {
         .select("*")
         .order("name", { ascending: true });
       if (error) throw error;
-      return (data || []).map((d) => ({
+      return (data || []).filter((d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)).map((d) => ({
         ...d,
         links: (d.links as Designer["links"]) || [],
       })) as Designer[];
@@ -235,7 +254,7 @@ export function useNewInDesigners() {
         .not("new_in_order", "is", null)
         .order("new_in_order", { ascending: true });
       if (error) throw error;
-      return (data || []).map((d) => ({
+      return (data || []).filter((d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)).map((d) => ({
         ...d,
         links: (d.links as Designer["links"]) || [],
       })) as Designer[];
@@ -262,7 +281,7 @@ export function useRelatedDesigners(
       if (!data) return [];
 
       // Score by source match, then random
-      const scored = data.map((d) => ({
+      const scored = data.filter((d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)).map((d) => ({
         ...d,
         score: d.source === source ? 2 : 0,
       }));

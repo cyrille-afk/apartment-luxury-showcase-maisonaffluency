@@ -6,6 +6,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const HIDDEN_CHILD_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
+
 export interface SubDesigner {
   name: string;
   slug: string;
@@ -28,7 +30,7 @@ export function useParentBrandDesigners(parentName: string | null) {
         .eq("is_published", true)
         .order("name");
       if (error) throw error;
-      return (data || []).map((d) => {
+      return (data || []).filter((d) => !HIDDEN_CHILD_DESIGNER_SLUGS.has(d.slug)).map((d) => {
         const linksArr = Array.isArray(d.links) ? d.links : [];
         const igLink = linksArr.find((l: any) => l.type?.toLowerCase() === "instagram");
         return {

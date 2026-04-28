@@ -1930,7 +1930,7 @@ interface ParentBrandConfig {
   staticDesigners?: { name: string; slug: string; image: string }[];
   /** Label for the founder pill on sub-designer cards */
   pillLabel: string;
-  /** Featured designer name used in share text (e.g. "incl. Gabriel Hendifar") */
+  /** Featured designer name used in share text */
   highlightDesigner?: string;
 }
 
@@ -2055,7 +2055,7 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://instagram.com/apparatusstudio",
     profileSlug: "apparatus-studio",
     pillLabel: "Apparatus",
-    highlightDesigner: "Gabriel Hendifar",
+    highlightDesigner: null,
   },
   {
     brandName: "Achille Salvagni Atelier",
