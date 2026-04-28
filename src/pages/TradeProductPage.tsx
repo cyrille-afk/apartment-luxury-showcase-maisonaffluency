@@ -36,6 +36,7 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
@@ -242,7 +243,7 @@ const TradeProductPage: React.FC = () => {
   const { data, isLoading } = useTradeProductBySlug(designerSlug, productSlug);
 
   // ── Pricing display state ──
-  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);

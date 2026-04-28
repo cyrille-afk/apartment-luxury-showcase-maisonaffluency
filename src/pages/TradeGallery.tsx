@@ -23,6 +23,7 @@ import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
+import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 
 
 const slugifyForUrl = (s: string) =>
@@ -46,7 +47,7 @@ const TradeGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const fxRates = useFxRates();
