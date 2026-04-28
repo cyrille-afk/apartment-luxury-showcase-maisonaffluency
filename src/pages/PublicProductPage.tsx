@@ -471,16 +471,14 @@ const PublicProductPage: React.FC = () => {
   const visibleRelated = relatedPicks.slice(safeIndex, safeIndex + visibleCount);
 
   // Per-product finish → gallery image index mapping. When a buyer picks a finish
-  // in the materials dropdown, we jump the gallery to the most relevant photo.
+  // in the materials/base dropdown, we jump the gallery to the most relevant photo.
   // Keys are normalized (lowercased, alphanumerics only); values are 0-based image indices.
   const FINISH_IMAGE_MAP: Record<string, Record<string, number>> = {
-    // Apparatus Studio — Lantern Table Lamp: image #5 is the swatch board
-    "apparatus-studio:lantern-table-lamp": {
-      tarnishedsilver: 4,
+    // Apparatus Studio — Lantern Table Lamp: image #5 (the swatch board) when
+    // the buyer picks "Tarnished Silver [Lacquered]".
+    "apparatus-studio:lantern-table-lamp-table-lamp": {
       tarnishedsilverlacquered: 4,
-      agedbrass: 4,
-      oilrubbedbronze: 4,
-      blackenedbrass: 4,
+      tarnishedsilver: 4,
     },
   };
   const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
