@@ -211,7 +211,8 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
           <div>
             <label className="font-body text-sm text-foreground">Phone<span className="text-destructive">*</span></label>
             <input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)}
-              className={fieldClass("phone")} />
+              placeholder={getPhonePlaceholder(form.country)}
+              className={`${fieldClass("phone")} placeholder:text-muted-foreground/50`} />
             <FieldError field="phone" />
           </div>
         </div>
