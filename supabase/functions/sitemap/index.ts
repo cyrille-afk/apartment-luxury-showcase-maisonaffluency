@@ -11,6 +11,7 @@ const STATIC_URLS = [
   { loc: "/collectibles", changefreq: "monthly", priority: "0.8" },
   { loc: "/contact", changefreq: "monthly", priority: "0.7" },
   { loc: "/journal", changefreq: "weekly", priority: "0.9" },
+  { loc: "/studios", changefreq: "weekly", priority: "0.8" },
   { loc: "/trade-program", changefreq: "monthly", priority: "0.8" },
   { loc: "/trade/register", changefreq: "monthly", priority: "0.6" },
   { loc: "/trade/login", changefreq: "monthly", priority: "0.5" },
@@ -54,6 +55,13 @@ serve(async () => {
     .eq("is_active", true)
     .order("updated_at", { ascending: false });
 
+  // Fetch published studios
+  const { data: studios } = await supabase
+    .from("featured_studios")
+    .select("slug, updated_at")
+    .eq("is_published", true)
+    .order("slug");
+
   const staticEntries = STATIC_URLS.map((u) => urlEntry(u.loc, today, u.changefreq, u.priority));
 
   const designerEntries = (designers || []).map((d: { slug: string; updated_at: string }) =>
@@ -68,9 +76,13 @@ serve(async () => {
     urlEntry(`/product/${p.id}`, p.updated_at.split("T")[0], "weekly", "0.6")
   );
 
+  const studioEntries = (studios || []).map((s: { slug: string; updated_at: string }) =>
+    urlEntry(`/studios/${s.slug}`, s.updated_at.split("T")[0], "monthly", "0.7")
+  );
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...designerEntries, ...articleEntries, ...productEntries].join("\n")}
+${[...staticEntries, ...designerEntries, ...articleEntries, ...productEntries, ...studioEntries].join("\n")}
 </urlset>`;
 
   return new Response(xml, {
