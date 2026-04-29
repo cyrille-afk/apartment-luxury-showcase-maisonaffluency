@@ -64,7 +64,7 @@ export default function Studios() {
       if (!error && data) setStudios(data as Studio[]);
       setLoading(false);
     })();
-  }, []);
+  }, [user]);
 
   const filtered = useMemo(() => {
     return studios.filter((s) => {
@@ -73,6 +73,17 @@ export default function Studios() {
       return true;
     });
   }, [studios, discipline, projectType]);
+
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <Skeleton className="h-8 w-40" />
+      </main>
+    );
+  }
+  if (!user) {
+    return <Navigate to={`/trade/login?redirect=${encodeURIComponent("/studios")}`} replace />;
+  }
 
   return (
     <main className="min-h-screen bg-background">
