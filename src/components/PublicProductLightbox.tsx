@@ -413,6 +413,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         text={topOptions.join("\n")}
                         placeholder={getTopPlaceholder(product)}
                         emphasized
+                        value={selectedTopIdx ?? undefined}
+                        onChange={(idx) => setSelectedTopIdx(idx < 0 ? null : idx)}
                       />
                     </>
                   );
