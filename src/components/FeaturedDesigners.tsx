@@ -1408,18 +1408,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1930_Soleil_Coffee_Table_Oak_Info_Sheet.pdf",
         pdfFilename: "JMF-Soleil_Coffee_Table_Info_Sheet.pdf",
       },
-      {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433739/JMF_1934_Round_X_Stool__01_Portrait_HD_mcngzi.jpg",
-        title: "X Stool (Round)",
-        subtitle: "1934",
-        category: "Furniture",
-        tags: ["Re-edition", "Furniture", "Stool"],
-        materials: "Sandblasted Varnished Oak • Foal Hide",
-        dimensions: "Ø 55 × H 43 cm",
-        description: "Experience the understated grandeur of the X Stool (Round), a profound 1934 collaboration between the visionary Jean-Michel Frank and Adolphe Chanaux, meticulously re-edited by Ecart Paris. This piece encapsulates Frank's revolutionary philosophy of simplicity as the ultimate sophistication, offering a compelling form of luxury furniture that seamlessly integrates into any sophisticated interior. Crafted from sandblasted varnished oak, its tactile grain provides a subtle counterpoint to the plush foal hide upholstery, a testament to Frank's innovative use of refined materials during the Art Deco era. More than a mere stool, its versatile design allows it to function as an elegant seat, a practical side table, or a captivating sculptural accent—a testament to Frank's genius for practical elegance. This collectible design is an authentic re-edition, ensuring the enduring legacy and impeccable craftsmanship that defined Jean-Michel Frank's celebrated body of work.",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1930_X_Stool_Round_Info_Sheet.pdf",
-        pdfFilename: "JMF-X_Stool_Round_Info_Sheet.pdf",
-      },
     ],
     links: [
       { type: "Curators' Picks" },
