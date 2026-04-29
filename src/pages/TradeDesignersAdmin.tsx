@@ -474,7 +474,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                             return new Set(normTokens(file));
                           });
                           const normFinishLocal = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                          const nextMap: Record<string, number> = { ...(pick.variant_image_map || {}) };
+                          // Start fresh — drop stale keys (e.g. from when keys were derived from Base only)
+                          const nextMap: Record<string, number> = {};
                           let assigned = 0;
                           for (const v of variants) {
                             const labelSrc = v.top || v.base || v.label || "";
