@@ -451,14 +451,35 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             </div>
 
 
-            {/* Primary CTA — matches "Add to Quote" visual style */}
+            {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
             <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
-              <a
-                href="/trade-program"
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                Price on Request
-              </a>
+              {productPageHref ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    navigate(productPageHref, {
+                      state: { from: location.pathname + location.search },
+                    });
+                  }}
+                  className="group flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+                >
+                  View full product page
+                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+                </button>
+              ) : (
+                <a
+                  href="/trade-program"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+                >
+                  Price on Request
+                </a>
+              )}
+              {productPageHref && (
+                <p className="text-center font-body text-[10px] tracking-wide text-muted-foreground/80">
+                  See all photos, finishes & specifications
+                </p>
+              )}
             </div>
 
             {/* Desktop secondary actions */}
