@@ -532,17 +532,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
                     const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                    const keySource: "Top" | "Base" | "Label" | null =
-                      variant.top?.trim() ? "Top"
-                      : variant.base?.trim() ? "Base"
-                      : variant.label?.trim() ? "Label"
+                    const baseTrim = variant.base?.trim() || "";
+                    const topTrim = variant.top?.trim() || "";
+                    const labelTrim = variant.label?.trim() || "";
+                    // Composite key when both axes are filled (decouples rows that
+                    // share the same Top, e.g. Apparatus Lantern Table Lamp).
+                    const isComposite = Boolean(baseTrim && topTrim);
+                    const keySource: "Base × Top" | "Top" | "Base" | "Label" | null =
+                      isComposite ? "Base × Top"
+                      : topTrim ? "Top"
+                      : baseTrim ? "Base"
+                      : labelTrim ? "Label"
                       : null;
-                    const keySourceValue =
-                      keySource === "Top" ? variant.top
-                      : keySource === "Base" ? variant.base
-                      : keySource === "Label" ? variant.label
-                      : "";
-                    const mapKey = normFinish(keySourceValue || "");
+                    const mapKey = isComposite
+                      ? `${normFinish(baseTrim)}|${normFinish(topTrim)}`
+                      : normFinish(topTrim || baseTrim || labelTrim);
+                    const keyDisplay = isComposite
+                      ? `${normFinish(baseTrim)} | ${normFinish(topTrim)}`
+                      : mapKey;
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
                       : undefined;
