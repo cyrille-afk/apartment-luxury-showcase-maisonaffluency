@@ -575,6 +575,17 @@ const PublicProductPage: React.FC = () => {
     label: string | null,
     opts?: { base?: string | null; top?: string | null; size?: string | null }
   ) => {
+    // Detect a "clear selection" call: no label and no axis values.
+    const isClear =
+      !label &&
+      (!opts || (!opts.base && !opts.top && !opts.size));
+    if (isClear) {
+      // Snap the gallery back to the primary product image (index 0) so the
+      // hero visibly resets when the user clears their finish/material choice.
+      setGalleryActiveIndex(0);
+      setGalleryJumpNonce((n) => n + 1);
+      return;
+    }
     // Prefer the composite Base|Top|Size key when present, then fall back to
     // Base|Top, then single-axis. Same canonical resolver as TradeProductPage
     // so hero, hover, and any related image always come from one source key.
