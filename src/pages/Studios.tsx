@@ -72,6 +72,38 @@ export default function Studios() {
     });
   }, [studios, discipline, projectType]);
 
+  // Log filter usage (debounced) — one event per matching studio so each
+  // owner sees how often visitors discover them via a given filter.
+  const filterTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!discipline && !projectType) return;
+    if (filterTimer.current) window.clearTimeout(filterTimer.current);
+    filterTimer.current = window.setTimeout(() => {
+      const matches = filtered.slice(0, 24); // safety cap
+      for (const s of matches) {
+        if (discipline) {
+          logStudioEvent({
+            studioId: s.id,
+            eventType: "filter_applied",
+            filterKey: "discipline",
+            filterValue: discipline,
+          });
+        }
+        if (projectType) {
+          logStudioEvent({
+            studioId: s.id,
+            eventType: "filter_applied",
+            filterKey: "project_type",
+            filterValue: projectType,
+          });
+        }
+      }
+    }, 700);
+    return () => {
+      if (filterTimer.current) window.clearTimeout(filterTimer.current);
+    };
+  }, [discipline, projectType, filtered]);
+
   return (
     <main className="min-h-screen bg-background">
       <Helmet>
@@ -211,6 +243,9 @@ function StudioCard({ studio }: { studio: Studio }) {
   return (
     <Link
       to={`/studios/${studio.slug}`}
+      onClick={() =>
+        logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
+      }
       className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
