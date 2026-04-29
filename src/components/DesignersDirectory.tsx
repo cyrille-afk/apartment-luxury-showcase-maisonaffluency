@@ -280,7 +280,7 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
   if (item.founder && item.founder !== item.name) {
     return { displayName: item.display_name || item.name, parentLabel: item.founder };
   }
-  if (item.display_name && item.display_name !== item.name) {
+  if (!item.founder && item.display_name && item.display_name !== item.name) {
     return { displayName: item.display_name, parentLabel: item.name };
   }
   const dashIdx = item.name.indexOf(" - ");
