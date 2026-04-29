@@ -120,15 +120,17 @@ export default function ExpandableSpec({
   if (placeholder) {
     const handleChange = (v: string) => {
       if (v === "__clear__") {
+        // Always reset internal state so uncontrolled triggers visually clear
+        // back to the placeholder, even when a parent onChange is wired up.
+        setInternalIdx(null);
         if (onChange) onChange(-1);
-        else setInternalIdx(null);
         return;
       }
       const idx = parseInt(v, 10);
+      setInternalIdx(idx);
       if (onChange) onChange(idx);
-      else setInternalIdx(idx);
     };
-    const currentVal = selectedIdx != null ? String(selectedIdx) : undefined;
+    const currentVal = selectedIdx != null && selectedIdx >= 0 ? String(selectedIdx) : undefined;
     const hasSelection = selectedIdx != null && selectedIdx >= 0;
 
     return (
