@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   generateDesignerBiographyPdf,
@@ -11,6 +11,7 @@ import { trackDownload } from "@/lib/trackDownload";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { useAuth } from "@/hooks/useAuth";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import BiographyPdfPreviewDialog from "@/components/BiographyPdfPreviewDialog";
 
 interface BiographyPdfButtonProps extends Omit<DesignerBiographyPdfInput, "onProgress"> {
   className?: string;
@@ -31,6 +32,11 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
   const { profile, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<PdfProgress | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const fileName = `${slugify(input.designerName)}-biography.pdf`;
 
   const recipientName = (() => {
     const first = profile?.first_name?.trim() ?? "";
@@ -40,10 +46,34 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
     return profile?.email ?? user?.email ?? null;
   })();
 
-  const runDownload = async () => {
+  // Revoke object URLs when the preview closes / a new one supersedes it
+  // to avoid leaking blob memory across multiple previews.
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const closePreview = () => {
+    setPreviewOpen(false);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewBlob(null);
+  };
+
+  const handleDownloadFromPreview = () => {
+    if (!previewBlob) return;
+    downloadBlob(previewBlob, fileName);
+    trackDownload(undefined, `Biography PDF — ${input.designerName}`);
+  };
+
+  const runPreview = async () => {
     if (loading) return;
     setLoading(true);
     setProgress({ stage: "parsing", ratio: 0, label: "Preparing…" });
+    // Open the dialog immediately so the user sees a loading state while
+    // the PDF is being assembled (can take several seconds for long bios).
+    setPreviewOpen(true);
     try {
       const blob = await generateDesignerBiographyPdf({
         ...input,
@@ -51,28 +81,29 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
         downloadedAt: new Date(),
         onProgress: (p) => setProgress(p),
       });
-      downloadBlob(blob, `${slugify(input.designerName)}-biography.pdf`);
-      trackDownload(undefined, `Biography PDF — ${input.designerName}`);
+      const url = URL.createObjectURL(blob);
+      setPreviewBlob(blob);
+      setPreviewUrl(url);
     } catch (err) {
       console.error("[BiographyPdfButton] failed:", err);
       toast({
-        title: "Download failed",
+        title: "Preview failed",
         description: "We couldn't generate the PDF. Please try again.",
         variant: "destructive",
       });
+      setPreviewOpen(false);
     } finally {
-      // Brief delay so user sees "Ready" before reset
       setTimeout(() => {
         setLoading(false);
         setProgress(null);
-      }, 600);
+      }, 400);
     }
   };
 
   const handleClick = () => {
     requireAuth(() => {
-      void runDownload();
-    }, `download ${input.designerName}'s biography`);
+      void runPreview();
+    }, `preview ${input.designerName}'s biography`);
   };
 
   const pct = progress ? Math.round(Math.min(1, Math.max(0, progress.ratio)) * 100) : 0;
@@ -85,16 +116,16 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
           onClick={handleClick}
           disabled={loading}
           className="group inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 disabled:opacity-70 disabled:cursor-wait"
-          aria-label={`Download ${input.designerName} biography as PDF`}
+          aria-label={`Preview ${input.designerName} biography PDF before downloading`}
           aria-busy={loading}
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Download className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
+            <Eye className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
           )}
           <span className="underline-offset-4 group-hover:underline">
-            {loading ? (progress?.label ?? "Preparing…") : "Download biography"}
+            {loading ? (progress?.label ?? "Preparing…") : "Preview biography"}
           </span>
           {loading && (
             <span className="text-xs tabular-nums text-muted-foreground ml-1">
@@ -119,6 +150,15 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
           </div>
         )}
       </div>
+
+      <BiographyPdfPreviewDialog
+        open={previewOpen}
+        blobUrl={previewUrl}
+        fileName={fileName}
+        designerName={input.designerName}
+        onClose={closePreview}
+        onDownload={handleDownloadFromPreview}
+      />
 
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
