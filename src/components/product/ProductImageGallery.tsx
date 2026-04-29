@@ -247,7 +247,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           count={images.length}
           activeIndex={activeIndex}
           onSelect={goTo}
-          variant="dark"
+          variant="light"
           ariaPrefix="View image"
           className="absolute bottom-3 left-1/2 -translate-x-1/2"
         />
