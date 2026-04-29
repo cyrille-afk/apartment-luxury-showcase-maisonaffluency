@@ -1109,6 +1109,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         const pairedIndices: number[] = [];
         let lookahead = blockIdx + 1;
         while (lookahead < blocks.length && blocks[lookahead].type === "text") {
+          if (consumedTextIdx.has(lookahead)) { lookahead++; continue; }
           const t = blocks[lookahead].text?.trim();
           if (!t) { lookahead++; continue; }
           pairedTexts.push(t);
