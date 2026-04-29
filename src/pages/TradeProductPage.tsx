@@ -517,11 +517,16 @@ const TradeProductPage: React.FC = () => {
     (b == null || (v.base || "").trim() === b) &&
     (t == null || (v.top || "").trim() === t) &&
     (s == null || (v.label || "").trim() === s);
-  const disabledBaseIdx = isDualAxis && (selectedTop || selectedDualSize)
-    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selectedTop, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
+  // Only disable an axis option when NO variant exists for it given the size
+  // selection. We intentionally do NOT cross-disable base ↔ top: picking the
+  // other base should be allowed and will auto-swap the top to a compatible
+  // pairing (handled in onChange below). Otherwise users have to "Clear
+  // selection" every time they want to switch colorway.
+  const disabledBaseIdx = isDualAxis && selectedDualSize
+    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, null, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
-  const disabledTopIdx = isDualAxis && (selectedBase || selectedDualSize)
-    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, t, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
+  const disabledTopIdx = isDualAxis && selectedDualSize
+    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, null, t, selectedDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
   const disabledDualSizeIdx = isDualAxis && (selectedBase || selectedTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
