@@ -20,6 +20,7 @@ import {
   normalizeCategory,
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
   hasExplicitCategory: boolean;
