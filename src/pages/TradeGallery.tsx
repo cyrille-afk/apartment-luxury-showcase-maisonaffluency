@@ -39,7 +39,7 @@ const TradeGallery = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const { allProducts, brands, categories } = useTradeProducts();
+  const { allProducts, brands, categories, duplicateGroups } = useTradeProducts();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState("");
