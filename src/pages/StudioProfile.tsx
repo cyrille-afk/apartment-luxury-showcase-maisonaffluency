@@ -46,6 +46,7 @@ const LABELS: Record<string, string> = {
 
 export default function StudioProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const { user, isAdmin } = useAuth();
   const [studio, setStudio] = useState<Studio | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -63,10 +64,20 @@ export default function StudioProfile() {
         setNotFound(true);
       } else {
         setStudio(data as Studio);
+        logStudioEvent({ studioId: data.id, eventType: "profile_view" });
       }
       setLoading(false);
     })();
   }, [slug]);
+
+  const canViewInsights =
+    !!studio && (isAdmin || (!!user && studio.owner_user_id === user.id));
+
+  const trackCta = (kind: StudioCtaKind) => {
+    if (studio?.id) {
+      logStudioEvent({ studioId: studio.id, eventType: "cta_click", ctaKind: kind });
+    }
+  };
 
   if (loading) {
     return (
