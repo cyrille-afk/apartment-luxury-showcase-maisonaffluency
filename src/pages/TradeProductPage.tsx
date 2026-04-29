@@ -557,6 +557,7 @@ const TradeProductPage: React.FC = () => {
               images={images}
               alt={product.title}
               activeIndex={galleryActiveIndex}
+              activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
               overlay={
                 product.description ? (
