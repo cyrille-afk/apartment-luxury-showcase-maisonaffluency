@@ -754,7 +754,7 @@ const TradeProductPage: React.FC = () => {
                           nextBase = compatBases[0];
                         }
                       }
-                      handleMaterialChange(v, { base: nextBase, top: v });
+                      handleMaterialChange(v, { base: nextBase, top: v, size: nextSize });
                     }}
                     disabledIndices={disabledTopIdx}
                     helperText={
