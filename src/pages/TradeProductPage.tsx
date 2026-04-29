@@ -445,6 +445,19 @@ const TradeProductPage: React.FC = () => {
     }
   };
 
+  const handleResetDefaultPair = () => {
+    if (!defaultPair) return;
+    setSelectedBase(defaultPair.base);
+    setSelectedTop(defaultPair.top);
+    setSelectedDualSize(null);
+    handleMaterialChange(defaultPair.base);
+  };
+  const isAtDefaultPair =
+    !!defaultPair &&
+    selectedBase === defaultPair.base &&
+    selectedTop === defaultPair.top &&
+    !selectedDualSize;
+
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
   // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top).
