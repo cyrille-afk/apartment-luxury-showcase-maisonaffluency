@@ -816,14 +816,121 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
   drawSectionLabel("About");
 
+  const renderIntroSpread = async (): Promise<boolean> => {
+    const intro = blocks[0];
+    const figure = blocks[1];
+    if (intro?.type !== "text" || !intro.text?.trim() || figure?.type !== "media" || !figure.media) return false;
+
+    const displayUrl = resolveDisplayImageUrl(figure.media);
+    if (!displayUrl) return false;
+    const img = await loadImage(displayUrl);
+    if (!img) return false;
+
+    const startY = cursorY + 4;
+    const gutter = 26;
+    const textW = contentWidth * 0.56;
+    const mediaW = contentWidth - textW - gutter;
+    const mediaX = marginX + textW + gutter;
+    const bodyLineH = 15.8;
+    const text = intro.text.trim();
+    const dropChar = text.charAt(0);
+    const restText = text.slice(1).replace(/^\s+/, "");
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...ink);
+    const dropCapWidth = 30;
+    const indentedLines = doc.splitTextToSize(restText, textW - dropCapWidth).slice(0, 3);
+    const consumed = indentedLines.join(" ").length;
+    const remaining = restText.slice(consumed).replace(/^\s+/, "");
+    const fullLines = remaining ? doc.splitTextToSize(remaining, textW) : [];
+    const textH = Math.max(3 * bodyLineH, indentedLines.length * bodyLineH + fullLines.length * bodyLineH) + 8;
+
+    const ratio = img.width / img.height;
+    let drawW = mediaW;
+    let drawH = drawW / ratio;
+    const maxIntroImgH = pageHeight * 0.34;
+    if (drawH > maxIntroImgH) {
+      drawH = maxIntroImgH;
+      drawW = drawH * ratio;
+    }
+
+    let capLines: string[] = [];
+    const capLineH = 11.5;
+    if (figure.media.caption) {
+      doc.setFont("times", "italic");
+      doc.setFontSize(8.5);
+      capLines = doc.splitTextToSize(figure.media.caption, mediaW);
+    }
+    const captionH = capLines.length ? 8 + capLines.length * capLineH : 0;
+    const linkH = figure.media.isVideo ? 14 : 0;
+    const blockH = Math.max(textH, drawH + captionH + linkH) + 22;
+    ensureSpace(blockH);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(48);
+    doc.setTextColor(...ink);
+    doc.text(dropChar, marginX, startY + 36);
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...ink);
+    let y = startY + 12;
+    for (const line of indentedLines) {
+      doc.text(line, marginX + dropCapWidth, y);
+      y += bodyLineH;
+    }
+    for (const line of fullLines) {
+      doc.text(line, marginX, y);
+      y += bodyLineH;
+    }
+
+    const imgX = mediaX + (mediaW - drawW) / 2;
+    doc.addImage(img.dataUrl, img.format, imgX, startY, drawW, drawH, undefined, "FAST");
+    if (figure.media.isVideo) {
+      const cx = imgX + drawW / 2;
+      const cy = startY + drawH / 2;
+      doc.setFillColor(20, 20, 20);
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(1);
+      doc.circle(cx, cy, 14, "FD");
+      doc.setFillColor(255, 255, 255);
+      doc.triangle(cx - 4, cy - 6, cx - 4, cy + 6, cx + 7, cy, "F");
+    }
+
+    let mediaY = startY + drawH + 8;
+    if (capLines.length) {
+      doc.setFont("times", "italic");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...inkSoft);
+      for (const line of capLines) {
+        doc.text(line, mediaX, mediaY);
+        mediaY += capLineH;
+      }
+    }
+    if (figure.media.isVideo) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(80, 80, 160);
+      doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(figure.media.url)}`, mediaX, mediaY + 6, { url: figure.media.url });
+      mediaY += linkH;
+    }
+
+    firstParagraphRendered = true;
+    cursorY = startY + blockH;
+    return true;
+  };
+
+  const introSpreadRendered = await renderIntroSpread();
+
   // Render blocks
-  let mediaIdx = 0;
+  let mediaIdx = introSpreadRendered ? 1 : 0;
   // Reserve 0.20..0.90 of the bar for media work, 0.90..1.0 for finalize
   const mediaStart = 0.20;
   const mediaEnd = 0.90;
   // Track which text blocks have already been consumed by side-by-side figures
   const consumedTextIdx = new Set<number>();
-  for (let blockIdx = 0; blockIdx < blocks.length; blockIdx++) {
+  for (let blockIdx = introSpreadRendered ? 2 : 0; blockIdx < blocks.length; blockIdx++) {
     const block = blocks[blockIdx];
     if (consumedTextIdx.has(blockIdx)) continue;
     if (block.type === "media") {
