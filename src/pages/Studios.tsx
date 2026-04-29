@@ -130,7 +130,7 @@ export default function Studios() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild>
-              <Link to="/trade-program">For trade · Apply for access</Link>
+              <Link to="/contact">Request an introduction</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/studios/submit">Submit your studio</Link>
