@@ -270,7 +270,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                   </div>
                 )}
                 <img
-                  src={product.image_url}
+                  key={currentImageUrl /* re-mount on finish swap so loader resets */}
+                  src={currentImageUrl}
                   alt={product.title}
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
@@ -278,12 +279,12 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     "w-full h-full object-contain transition-opacity duration-300",
                     imageFailed ? "opacity-0"
                       : !imageLoaded ? "opacity-0"
-                        : showHoverImage && canShowHoverImage && hoverImageLoaded ? "opacity-0"
+                        : showHoverImage && canShowHoverImage && hoverImageLoaded && !imageSwappedByFinish ? "opacity-0"
                           : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
-                {canShowHoverImage && product.hover_image_url && (
+                {canShowHoverImage && product.hover_image_url && !imageSwappedByFinish && (
                   <img
                     src={product.hover_image_url}
                     alt={`${product.title} in context`}
