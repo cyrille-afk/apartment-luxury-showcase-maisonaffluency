@@ -104,16 +104,93 @@ export default function Studios() {
     };
   }, [discipline, projectType, filtered]);
 
+  // Dynamic SEO based on active filters + result set
+  const disciplineLabel = discipline ? labelOf(DISCIPLINES, discipline) : null;
+  const projectTypeLabel = projectType ? labelOf(PROJECT_TYPES, projectType) : null;
+
+  const seoTitle = (() => {
+    if (disciplineLabel && projectTypeLabel)
+      return `${disciplineLabel} Studios for ${projectTypeLabel} Projects | Maison Affluency`;
+    if (disciplineLabel)
+      return `${disciplineLabel} Studios — Featured Directory | Maison Affluency`;
+    if (projectTypeLabel)
+      return `Studios Specialising in ${projectTypeLabel} | Maison Affluency`;
+    return "Featured Studios | Architects & Interior Designers — Maison Affluency";
+  })();
+
+  const seoDescription = (() => {
+    const count = filtered.length;
+    const base =
+      "A curated directory of architecture and interior design studios partnering with Maison Affluency on residential, hospitality and bespoke commissions.";
+    if (loading) return base;
+    if (disciplineLabel && projectTypeLabel)
+      return `Discover ${count} ${disciplineLabel.toLowerCase()} studio${count === 1 ? "" : "s"} working on ${projectTypeLabel.toLowerCase()} projects with Maison Affluency. Filter by discipline and project type.`;
+    if (disciplineLabel)
+      return `Browse ${count} ${disciplineLabel.toLowerCase()} stud${count === 1 ? "io" : "ios"} featured by Maison Affluency. Curated practices for residential, hospitality and bespoke commissions.`;
+    if (projectTypeLabel)
+      return `Find studios specialising in ${projectTypeLabel.toLowerCase()} projects — ${count} curated practice${count === 1 ? "" : "s"} on Maison Affluency.`;
+    return base;
+  })();
+
+  const canonical = "https://www.maisonaffluency.com/studios";
+  const ogImage =
+    studios.find((s) => s.is_featured && s.hero_image_url)?.hero_image_url ||
+    studios.find((s) => s.hero_image_url)?.hero_image_url ||
+    "https://www.maisonaffluency.com/og-default.jpg";
+
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Featured Studios — Maison Affluency",
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    numberOfItems: filtered.length,
+    itemListElement: filtered.slice(0, 30).map((s, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://www.maisonaffluency.com/studios/${s.slug}`,
+      name: s.name,
+    })),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com/" },
+      { "@type": "ListItem", position: 2, name: "Studios", item: canonical },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <Helmet>
-        <title>Featured Studios | Architects & Interior Designers — Maison Affluency</title>
-        <meta
-          name="description"
-          content="Browse a curated directory of architecture and interior design studios partnering with Maison Affluency. Filter by discipline and project type."
-        />
-        <link rel="canonical" href="https://www.maisonaffluency.com/studios" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonical} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Maison Affluency" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        {!loading && filtered.length > 0 && (
+          <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
+        )}
       </Helmet>
+
 
       {/* Hero */}
       <section className="border-b border-border bg-card">
