@@ -270,8 +270,15 @@ function extractYouTubeId(url: string): string | null {
 function resolveDisplayImageUrl(media: MediaItem): string | null {
   if (!media.isVideo) return media.url;
   if (media.poster) return media.poster;
-  const fallback = VIDEO_POSTER_FALLBACKS[media.url] || VIDEO_POSTER_FALLBACKS[media.url.split("?")[0]];
+  // Exact / stripped-query lookup in the curated map
+  const fallback =
+    VIDEO_POSTER_FALLBACKS[media.url] ||
+    VIDEO_POSTER_FALLBACKS[media.url.split("?")[0]];
   if (fallback) return fallback;
+  // Cloudinary native videos → auto poster frame at 2s (matches EditorialBiography)
+  if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(media.url)) {
+    return media.url.replace("/video/upload/", "/video/upload/so_2,f_jpg,q_auto/");
+  }
   // Vimeo: vumbnail returns a CORS-friendly JPEG thumbnail
   const vimeoId = extractVimeoId(media.url);
   if (vimeoId) return `https://vumbnail.com/${vimeoId}.jpg`;
