@@ -455,6 +455,56 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                       >
                         Build matrix
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[10px]"
+                        title="Match each variant against gallery image filenames and auto-assign Image #"
+                        onClick={() => {
+                          const variants = pick.size_variants || [];
+                          const gallery = pick.gallery_images || [];
+                          if (variants.length === 0 || gallery.length === 0) {
+                            toast({ title: "Nothing to match", description: "Add gallery images and at least one variant row first.", variant: "destructive" });
+                            return;
+                          }
+                          const normTokens = (s: string) =>
+                            s.toLowerCase().replace(/[^a-z0-9]+/g, " ").split(/\s+/).filter((t) => t.length >= 3);
+                          const galleryTokens = gallery.map((url) => {
+                            const file = (url.split("/").pop() || "").replace(/\.[a-z0-9]+$/i, "");
+                            return new Set(normTokens(file));
+                          });
+                          const normFinishLocal = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+                          const nextMap: Record<string, number> = { ...(pick.variant_image_map || {}) };
+                          let assigned = 0;
+                          for (const v of variants) {
+                            const labelSrc = v.top || v.base || v.label || "";
+                            const key = normFinishLocal(v.base || v.label || "");
+                            if (!key || !labelSrc) continue;
+                            const tokens = normTokens(labelSrc);
+                            if (tokens.length === 0) continue;
+                            let bestIdx = -1;
+                            let bestScore = 0;
+                            galleryTokens.forEach((gset, i) => {
+                              const score = tokens.reduce((acc, t) => acc + (gset.has(t) ? 1 : 0), 0);
+                              if (score > bestScore) { bestScore = score; bestIdx = i; }
+                            });
+                            if (bestIdx >= 0 && bestScore > 0) {
+                              nextMap[key] = bestIdx;
+                              assigned++;
+                            }
+                          }
+                          updateField(pick.id, "variant_image_map", Object.keys(nextMap).length ? nextMap : null);
+                          toast({
+                            title: assigned > 0 ? "Images auto-filled" : "No matches found",
+                            description: assigned > 0
+                              ? `${assigned} variant(s) mapped by filename token match. Review and adjust if needed.`
+                              : "Couldn't match variant labels to gallery filenames. Rename images (e.g. include 'lacquer' or 'sand-blasted-ash') or set Image # manually.",
+                            variant: assigned > 0 ? "default" : "destructive",
+                          });
+                        }}
+                      >
+                        Auto-fill Image #
+                      </Button>
                     </div>
                   </div>
                   <p className="text-[10px] text-muted-foreground italic leading-snug">
