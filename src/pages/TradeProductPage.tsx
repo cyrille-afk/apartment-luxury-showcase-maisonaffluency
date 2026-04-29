@@ -1008,7 +1008,8 @@ const TradeProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
-                      to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                      to={`/trade/designers/${designer.slug}`}
+                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                       className="hover:text-primary transition-colors"
                     >
                       {designerDisplay}
