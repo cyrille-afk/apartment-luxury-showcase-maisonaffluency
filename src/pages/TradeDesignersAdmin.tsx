@@ -159,6 +159,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     variant_placeholder: string | null;
     base_axis_label: string | null;
     top_axis_label: string | null;
+    variant_image_map: Record<string, number> | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
