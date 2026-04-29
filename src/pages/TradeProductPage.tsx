@@ -437,8 +437,10 @@ const TradeProductPage: React.FC = () => {
   const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
-  const handleMaterialChange = (label: string | null) => {
-    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+  const handleMaterialChange = (label: string | null, opts?: { base?: string | null; top?: string | null }) => {
+    const idx = opts && (opts.base || opts.top)
+      ? resolveVariantImageIndex(productFinishMap, { base: opts.base, top: opts.top, label, imageCount: images.length })
+      : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
       setGalleryJumpNonce((n) => n + 1);
