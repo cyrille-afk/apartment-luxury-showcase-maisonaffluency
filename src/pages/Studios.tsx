@@ -43,12 +43,14 @@ const labelOf = (list: { value: string; label: string }[], v: string) =>
   list.find((x) => x.value === v)?.label ?? v;
 
 export default function Studios() {
+  const { user, loading: authLoading } = useAuth();
   const [studios, setStudios] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
   const [discipline, setDiscipline] = useState<string | null>(null);
   const [projectType, setProjectType] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     (async () => {
       const { data, error } = await supabase
         .from("featured_studios")
