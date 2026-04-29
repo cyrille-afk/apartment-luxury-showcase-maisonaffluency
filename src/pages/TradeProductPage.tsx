@@ -353,6 +353,16 @@ const TradeProductPage: React.FC = () => {
     if (compatTops.length === 1) {
       setSelectedBase(firstBase);
       setSelectedTop(compatTops[0]);
+      // Sync gallery to the base finish's mapped image (mirrors handleMaterialChange).
+      const rawMap = (data?.product as any)?.variant_image_map;
+      const finishMap = buildProductFinishMap(rawMap);
+      const imgCount = ((data?.product as any)?.gallery_images?.length) ||
+        ([(data?.product as any)?.image_url, (data?.product as any)?.hover_image_url].filter(Boolean).length);
+      const idx = resolveFinishImageIndex(finishMap, firstBase, imgCount);
+      if (idx !== undefined) {
+        setGalleryActiveIndex(idx);
+        setGalleryJumpNonce((n) => n + 1);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.product?.id]);
