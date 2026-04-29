@@ -478,7 +478,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           let assigned = 0;
                           for (const v of variants) {
                             const labelSrc = v.top || v.base || v.label || "";
-                            const key = normFinishLocal(v.base || v.label || "");
+                            const key = normFinishLocal(v.top || v.base || v.label || "");
                             if (!key || !labelSrc) continue;
                             const tokens = normTokens(labelSrc);
                             if (tokens.length === 0) continue;
