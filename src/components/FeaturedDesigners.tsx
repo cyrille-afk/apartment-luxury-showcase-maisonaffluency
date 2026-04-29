@@ -549,18 +549,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_TASSEL_57.pdf",
         pdfFilename: "Apparatus_Studio-Tassel_57.pdf"
       },
-      { 
-        image: apparatusPick7, 
-        title: "Portal",
-        subtitle: "Dining Table",
-        category: "Furniture",
-        tags: ["Furniture", "Table", "Dining Table"],
-        materials: "Nero Kinatra Marble",
-        dimensions: "Ø 137 × H 74 cm",
-        description: "Available in various Marbles, Travertine and Bleached Ash Wood",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_PORTAL_DINING_TABLE.pdf",
-        pdfFilename: "Apparatus_Studio-Portal_Dining_Table.pdf"
-      },
+      // Portal Dining Table sourced from designer_curator_picks (DB) — duplicate removed.
       { 
         image: apparatusPick8, 
         hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773129337/APPARATUS_LDN_MYFR-0623_4_0.jpg_e658el.webp",
