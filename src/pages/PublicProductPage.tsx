@@ -213,8 +213,14 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
               const v = baseOptions[idx] ?? null;
               setSelBase(v);
               onMaterialChange?.(v);
-              if (v && selTop && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelTop(null);
-              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, v, selTop, selDualSize))) setSelDualSize(null);
+              let nextTop = selTop;
+              let nextSize = selDualSize;
+              if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelTop(null); nextTop = null; }
+              if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelDualSize(null); nextSize = null; }
+              if (v && !nextTop) {
+                const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                if (compatTops.length === 1) setSelTop(compatTops[0]);
+              }
             }}
             disabledIndices={disabledBaseIdx}
             helperText={
@@ -232,8 +238,17 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             onChange={(idx) => {
               const v = topOptions[idx] ?? null;
               setSelTop(v);
-              if (v && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelBase(null);
-              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelDualSize(null);
+              let nextBase = selBase;
+              let nextSize = selDualSize;
+              if (v && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelBase(null); nextBase = null; }
+              if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelDualSize(null); nextSize = null; }
+              if (v && !nextBase) {
+                const compatBases = baseOptions.filter((b) => variantsList.some((x: any) => matchesDual(x, b, v, nextSize)));
+                if (compatBases.length === 1) {
+                  setSelBase(compatBases[0]);
+                  onMaterialChange?.(compatBases[0]);
+                }
+              }
             }}
             disabledIndices={disabledTopIdx}
             helperText={

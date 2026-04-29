@@ -649,8 +649,15 @@ const TradeProductPage: React.FC = () => {
                       const v = baseOptions[idx] ?? null;
                       setSelectedBase(v);
                       handleMaterialChange(v);
-                      if (v && selectedTop && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedTop(null);
-                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedDualSize(null);
+                      let nextTop = selectedTop;
+                      let nextSize = selectedDualSize;
+                      if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
+                      if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                      // Auto-select the only viable top when base narrows it down to one
+                      if (v && !nextTop) {
+                        const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                        if (compatTops.length === 1) setSelectedTop(compatTops[0]);
+                      }
                     }}
                     disabledIndices={disabledBaseIdx}
                     helperText={
@@ -669,8 +676,17 @@ const TradeProductPage: React.FC = () => {
                       const v = topOptions[idx] ?? null;
                       setSelectedTop(v);
                       handleMaterialChange(v);
-                      if (v && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedBase(null);
-                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, selectedBase, v, selectedDualSize))) setSelectedDualSize(null);
+                      let nextBase = selectedBase;
+                      let nextSize = selectedDualSize;
+                      if (v && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelectedBase(null); nextBase = null; }
+                      if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                      if (v && !nextBase) {
+                        const compatBases = baseOptions.filter((b) => variantsList.some((x: any) => matchesDual(x, b, v, nextSize)));
+                        if (compatBases.length === 1) {
+                          setSelectedBase(compatBases[0]);
+                          handleMaterialChange(compatBases[0]);
+                        }
+                      }
                     }}
                     disabledIndices={disabledTopIdx}
                     helperText={
