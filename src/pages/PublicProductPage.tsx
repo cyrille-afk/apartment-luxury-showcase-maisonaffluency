@@ -238,8 +238,17 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             onChange={(idx) => {
               const v = topOptions[idx] ?? null;
               setSelTop(v);
-              if (v && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelBase(null);
-              if (v && selDualSize && !variantsList.some((x: any) => matchesDual(x, selBase, v, selDualSize))) setSelDualSize(null);
+              let nextBase = selBase;
+              let nextSize = selDualSize;
+              if (v && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelBase(null); nextBase = null; }
+              if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelDualSize(null); nextSize = null; }
+              if (v && !nextBase) {
+                const compatBases = baseOptions.filter((b) => variantsList.some((x: any) => matchesDual(x, b, v, nextSize)));
+                if (compatBases.length === 1) {
+                  setSelBase(compatBases[0]);
+                  onMaterialChange?.(compatBases[0]);
+                }
+              }
             }}
             disabledIndices={disabledTopIdx}
             helperText={
