@@ -150,14 +150,22 @@ const TradeDesigners = () => {
     return map;
   }, [allProducts]);
 
+  // Child designers hidden from the grid — parent atelier card represents them.
+  const HIDDEN_CHILD_DESIGNERS = useMemo(
+    () => new Set(["laura demichelis"]),
+    []
+  );
+
   const enriched = useMemo(() => {
-    return designers.map((d) => {
-      const tags = extractTags(d.specialty);
-      const productCount = productCountMap.get(d.name.toLowerCase()) || 0;
-      const isAtelierCard = !!(d.founder && d.founder === d.name);
-      return { ...d, tags, productCount, isAtelierCard };
-    });
-  }, [designers, productCountMap]);
+    return designers
+      .filter((d) => !HIDDEN_CHILD_DESIGNERS.has(normalizeText(d.name)))
+      .map((d) => {
+        const tags = extractTags(d.specialty);
+        const productCount = productCountMap.get(d.name.toLowerCase()) || 0;
+        const isAtelierCard = !!(d.founder && d.founder === d.name);
+        return { ...d, tags, productCount, isAtelierCard };
+      });
+  }, [designers, productCountMap, HIDDEN_CHILD_DESIGNERS]);
 
   // Split carousel entries into ateliers vs designers
   const atelierCarouselEntries = useMemo(() => {
