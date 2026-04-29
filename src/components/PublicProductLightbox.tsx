@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
+import { X, Layers, Ruler, FileDown, Heart, Scale, ArrowRight } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -15,6 +15,11 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { useDesignerByName } from "@/hooks/useDesigner";
+import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
+
+/** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
+const slugifyProduct = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 export interface PublicLightboxItem {
   id: string;
@@ -34,6 +39,10 @@ export interface PublicLightboxItem {
   variant_placeholder?: string | null;
   base_axis_label?: string | null;
   top_axis_label?: string | null;
+  /** Full product gallery; used together with variant_image_map to swap the lightbox image when a finish is picked. */
+  gallery_images?: string[] | null;
+  /** Maps normalized finish labels → gallery_images index. */
+  variant_image_map?: Record<string, number> | null;
 }
 
 interface Props {
@@ -119,11 +128,17 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     : undefined;
   const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
 
+  // Reset per-product state when the product changes (incl. selected finish).
+  const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
+  const [selectedMaterialIdx, setSelectedMaterialIdx] = useState<number | null>(null);
+
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
+    setSelectedBaseIdx(null);
+    setSelectedMaterialIdx(null);
   }, [product?.id]);
 
   // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
@@ -157,6 +172,31 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
   const favorited = isFavorited(product.id);
+
+  /* ── Finish-driven image swap ───────────────────────────────────────── */
+  const finishMap = buildProductFinishMap(product.variant_image_map);
+  const galleryImages = (product.gallery_images || []).filter(Boolean);
+  const sv = product.size_variants || [];
+  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  const baseOptions = isDualAxis
+    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
+    : [];
+  const materialOptions = !isDualAxis && product.materials ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean) : [];
+  const selectedFinishLabel =
+    isDualAxis && selectedBaseIdx != null && selectedBaseIdx >= 0 ? baseOptions[selectedBaseIdx] :
+    !isDualAxis && selectedMaterialIdx != null && selectedMaterialIdx >= 0 ? materialOptions[selectedMaterialIdx] :
+    null;
+  const finishImageIdx =
+    finishMap && galleryImages.length > 0
+      ? resolveFinishImageIndex(finishMap, selectedFinishLabel, galleryImages.length)
+      : undefined;
+  const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
+  const imageSwappedByFinish = currentImageUrl !== product.image_url;
+
+  /* ── Linked product page URL (only when designer slug resolves) ───── */
+  const productPageHref = linkedDesigner?.slug
+    ? `/designers/${linkedDesigner.slug}/${slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""))}`
+    : null;
 
   const compareItem: CompareItem = {
     pick: {
@@ -230,7 +270,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                   </div>
                 )}
                 <img
-                  src={product.image_url}
+                  key={currentImageUrl /* re-mount on finish swap so loader resets */}
+                  src={currentImageUrl}
                   alt={product.title}
                   onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                   onError={() => { setImageFailed(true); setImageLoaded(true); }}
@@ -238,12 +279,12 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     "w-full h-full object-contain transition-opacity duration-300",
                     imageFailed ? "opacity-0"
                       : !imageLoaded ? "opacity-0"
-                        : showHoverImage && canShowHoverImage && hoverImageLoaded ? "opacity-0"
+                        : showHoverImage && canShowHoverImage && hoverImageLoaded && !imageSwappedByFinish ? "opacity-0"
                           : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
-                {canShowHoverImage && product.hover_image_url && (
+                {canShowHoverImage && product.hover_image_url && !imageSwappedByFinish && (
                   <img
                     src={product.hover_image_url}
                     alt={`${product.title} in context`}
@@ -334,10 +375,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
             <div className="flex flex-col">
               {(() => {
-                const sv = product.size_variants || [];
-                const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
                 if (isDualAxis) {
-                  const baseOptions = Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)));
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
                   return (
                     <>
@@ -346,6 +384,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         text={baseOptions.join("\n")}
                         placeholder={getBasePlaceholder(product)}
                         emphasized
+                        value={selectedBaseIdx ?? undefined}
+                        onChange={(idx) => setSelectedBaseIdx(idx < 0 ? null : idx)}
                       />
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -362,6 +402,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     text={product.materials}
                     placeholder="Select your material choice"
                     autoSplit
+                    value={selectedMaterialIdx ?? undefined}
+                    onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                   />
                 ) : null;
               })()}
@@ -409,14 +451,35 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             </div>
 
 
-            {/* Primary CTA — matches "Add to Quote" visual style */}
+            {/* Primary CTA — visit the full product page (more images, full spec, gallery) */}
             <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
-              <a
-                href="/trade-program"
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                Price on Request
-              </a>
+              {productPageHref ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    navigate(productPageHref, {
+                      state: { from: location.pathname + location.search },
+                    });
+                  }}
+                  className="group flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+                >
+                  View full product page
+                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+                </button>
+              ) : (
+                <a
+                  href="/trade-program"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+                >
+                  Price on Request
+                </a>
+              )}
+              {productPageHref && (
+                <p className="text-center font-body text-[10px] tracking-wide text-muted-foreground/80">
+                  See all photos, finishes & specifications
+                </p>
+              )}
             </div>
 
             {/* Desktop secondary actions */}
