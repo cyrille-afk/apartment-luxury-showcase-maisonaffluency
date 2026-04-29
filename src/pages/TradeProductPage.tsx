@@ -248,6 +248,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
+  const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
   // Single-axis split: when each variant label encodes both size + material,
   // we expose two independent dropdowns and resolve the active variant by both.
   const [selectedSingleSize, setSelectedSingleSize] = useState<string | null>(null);
@@ -353,6 +354,7 @@ const TradeProductPage: React.FC = () => {
     if (compatTops.length === 1) {
       setSelectedBase(firstBase);
       setSelectedTop(compatTops[0]);
+      setDefaultPair({ base: firstBase, top: compatTops[0] });
       // Sync gallery to the base finish's mapped image (mirrors handleMaterialChange).
       const rawMap = (data?.product as any)?.variant_image_map;
       const finishMap = buildProductFinishMap(rawMap);
@@ -442,6 +444,19 @@ const TradeProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
     }
   };
+
+  const handleResetDefaultPair = () => {
+    if (!defaultPair) return;
+    setSelectedBase(defaultPair.base);
+    setSelectedTop(defaultPair.top);
+    setSelectedDualSize(null);
+    handleMaterialChange(defaultPair.base);
+  };
+  const isAtDefaultPair =
+    !!defaultPair &&
+    selectedBase === defaultPair.base &&
+    selectedTop === defaultPair.top &&
+    !selectedDualSize;
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
@@ -726,6 +741,15 @@ const TradeProductPage: React.FC = () => {
                         : undefined
                     }
                   />
+                  {defaultPair && !isAtDefaultPair && (
+                    <button
+                      type="button"
+                      onClick={handleResetDefaultPair}
+                      className="self-start mt-1 ml-[26px] font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+                    >
+                      Reset to default pairing
+                    </button>
+                  )}
                 </>
               )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes */}

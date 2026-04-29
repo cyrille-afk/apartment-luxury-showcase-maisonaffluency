@@ -169,6 +169,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
   const [selDualSize, setSelDualSize] = useState<string | null>(null);
   const [selMat, setSelMat] = useState<string | null>(null);
   const [selSize, setSelSize] = useState<string | null>(null);
+  const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
 
   // Default the dual-axis pickers to the first base + its compatible top
   // so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -185,10 +186,24 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     if (compatTops.length === 1) {
       setSelBase(firstBase);
       setSelTop(compatTops[0]);
+      setDefaultPair({ base: firstBase, top: compatTops[0] });
       onMaterialChange?.(firstBase);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
+
+  const handleResetDefault = () => {
+    if (!defaultPair) return;
+    setSelBase(defaultPair.base);
+    setSelTop(defaultPair.top);
+    setSelDualSize(null);
+    onMaterialChange?.(defaultPair.base);
+  };
+  const isAtDefault =
+    !!defaultPair &&
+    selBase === defaultPair.base &&
+    selTop === defaultPair.top &&
+    !selDualSize;
 
   // Single-axis split: cross-disable based on the other selection.
   const disabledMatIdx = hasSingleAxisSplit && selSize
@@ -277,6 +292,15 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
                 : undefined
             }
           />
+          {defaultPair && !isAtDefault && (
+            <button
+              type="button"
+              onClick={handleResetDefault}
+              className="self-start mt-1 ml-[26px] font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+            >
+              Reset to default pairing
+            </button>
+          )}
         </>
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
