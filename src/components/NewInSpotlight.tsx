@@ -68,7 +68,13 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
         category: p.category,
         subcategory: (p as any).subcategory ?? null,
         pdf_url: p.pdf_url,
+        designer_slug: designer.slug,
         size_variants: (p as any).size_variants ?? null,
+        variant_placeholder: (p as any).variant_placeholder ?? null,
+        base_axis_label: (p as any).base_axis_label ?? null,
+        top_axis_label: (p as any).top_axis_label ?? null,
+        gallery_images: (p as any).gallery_images ?? null,
+        variant_image_map: (p as any).variant_image_map ?? null,
       })),
     [picks, designer.name]
   );

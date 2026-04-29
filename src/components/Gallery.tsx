@@ -386,19 +386,20 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const [{ data: picks }, { data: designers }] = await Promise.all([
         supabase
           .from("designer_curator_picks_public")
-          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants")
+          .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants,variant_placeholder,base_axis_label,top_axis_label,gallery_images,variant_image_map")
           .not("image_url", "is", null),
         supabase
           .from("designers")
-          .select("id, name")
+          .select("id, name, slug")
       ]);
 
       if (!picks) return;
 
-      const designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]));
+      const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
 
       const mapped: PublicLightboxItem[] = (picks as any[]).map((p) => {
-        const brandName = designerMap.get(p.designer_id) || "Unknown";
+        const designerInfo = designerMap.get(p.designer_id);
+        const brandName = designerInfo?.name || "Unknown";
 
         return {
           id: p.id,
@@ -414,7 +415,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           subcategory: p.subcategory || null,
           pdf_url: p.pdf_url || null,
           pdf_urls: (p.pdf_urls as any) || null,
+          designer_slug: designerInfo?.slug || null,
           size_variants: (p.size_variants as any) || null,
+          variant_placeholder: p.variant_placeholder || null,
+          base_axis_label: p.base_axis_label || null,
+          top_axis_label: p.top_axis_label || null,
+          gallery_images: (p.gallery_images as any) || null,
+          variant_image_map: (p.variant_image_map as any) || null,
         };
       });
 
@@ -441,6 +448,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         subcategory: p.subcategory || null,
         pdf_url: p.pdf_url || null,
         pdf_urls: p.pdf_urls || null,
+        size_variants: (p as any).size_variants || null,
+        variant_placeholder: (p as any).variant_placeholder || null,
+        base_axis_label: (p as any).base_axis_label || null,
+        top_axis_label: (p as any).top_axis_label || null,
+        gallery_images: (p as any).gallery_images || null,
+        variant_image_map: (p as any).variant_image_map || null,
       }));
 
     const byKey = new Map<string, PublicLightboxItem>();

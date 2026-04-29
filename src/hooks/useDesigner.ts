@@ -62,7 +62,12 @@ export interface DesignerCuratorPick {
   sort_order: number;
   trade_price_cents: number | null;
   currency: string;
-  size_variants?: { label: string; price_cents: number }[] | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  variant_placeholder?: string | null;
+  base_axis_label?: string | null;
+  top_axis_label?: string | null;
+  gallery_images?: string[] | null;
+  variant_image_map?: Record<string, number> | null;
 }
 
 /** Fetch a single designer by slug */
