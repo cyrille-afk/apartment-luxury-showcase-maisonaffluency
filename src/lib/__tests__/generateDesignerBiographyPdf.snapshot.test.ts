@@ -67,15 +67,15 @@ beforeAll(() => {
 
   // jsPDF's Blob in jsdom doesn't expose .arrayBuffer(); polyfill it.
   if (typeof Blob.prototype.arrayBuffer !== "function") {
-    // @ts-expect-error polyfill
-    Blob.prototype.arrayBuffer = function () {
-      return new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as ArrayBuffer);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsArrayBuffer(this);
-      });
-    };
+    (Blob.prototype as unknown as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer =
+      function () {
+        return new Promise<ArrayBuffer>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as ArrayBuffer);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsArrayBuffer(this);
+        });
+      };
   }
 });
 
