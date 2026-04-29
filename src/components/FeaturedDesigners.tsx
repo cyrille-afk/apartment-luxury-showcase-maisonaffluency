@@ -1409,18 +1409,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "JMF-Soleil_Coffee_Table_Info_Sheet.pdf",
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433160/Screen_Shot_2026-03-02_at_2.20.10_PM_cfq0rl.png",
-        title: "Elephant Armchair",
-        subtitle: "1939",
-        category: "Furniture",
-        tags: ["Re-edition", "Furniture", "Armchair"],
-        materials: "Smooth Solid Oak Frame • Fabric",
-        dimensions: "L 87 × D 100 × H 73 cm",
-        description: "The Elephant Armchair, a magnificent testament to Jean-Michel Frank's enduring vision, epitomises minimalist luxury and the very essence of collectible design from the Art Deco period. Conceived in 1939, this iconic piece, now impeccably re-edited by Ecart Paris under the discerning eye of Andrée Putman, embodies Frank's philosophy that simplicity is the ultimate sophistication. Its commanding presence, defined by a robust smooth solid oak frame, speaks to the designer's unparalleled mastery of material and form. The armchair's generous proportions invite a profound sense of comfort, while its understated elegance allows the purity of its lines to shine. This is not merely luxury furniture—it is a re-edition that meticulously preserves the integrity of Frank's original brilliance, offering an unparalleled opportunity to own a piece of design history. Available in various Oak and Walnut finishes on request.",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1939_Elephant_Armchair_Info_Sheet.pdf",
-        pdfFilename: "JMF-Elephant_Armchair_Info_Sheet.pdf",
-      },
-      {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433739/JMF_1934_Round_X_Stool__01_Portrait_HD_mcngzi.jpg",
         title: "X Stool (Round)",
         subtitle: "1934",
