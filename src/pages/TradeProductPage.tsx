@@ -466,7 +466,7 @@ const TradeProductPage: React.FC = () => {
     setSelectedBase(defaultPair.base);
     setSelectedTop(defaultPair.top);
     setSelectedDualSize(null);
-    handleMaterialChange(defaultPair.base, { base: defaultPair.base, top: defaultPair.top });
+    handleMaterialChange(defaultPair.base, { base: defaultPair.base, top: defaultPair.top, size: null });
   };
   const isAtDefaultPair =
     !!defaultPair &&
