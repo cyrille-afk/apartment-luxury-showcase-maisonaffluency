@@ -356,12 +356,12 @@ const TradeProductPage: React.FC = () => {
       setSelectedBase(firstBase);
       setSelectedTop(compatTops[0]);
       setDefaultPair({ base: firstBase, top: compatTops[0] });
-      // Sync gallery to the base finish's mapped image (mirrors handleMaterialChange).
+      // Sync gallery to the complete Base × Top mapped image (mirrors handleMaterialChange).
       const rawMap = (data?.product as any)?.variant_image_map;
       const finishMap = buildProductFinishMap(rawMap);
       const imgCount = ((data?.product as any)?.gallery_images?.length) ||
         ([(data?.product as any)?.image_url, (data?.product as any)?.hover_image_url].filter(Boolean).length);
-      const idx = resolveFinishImageIndex(finishMap, firstBase, imgCount);
+      const idx = resolveVariantImageIndex(finishMap, { base: firstBase, top: compatTops[0], imageCount: imgCount });
       if (idx !== undefined) {
         setGalleryActiveIndex(idx);
         setGalleryJumpNonce((n) => n + 1);
@@ -453,7 +453,7 @@ const TradeProductPage: React.FC = () => {
     setSelectedBase(defaultPair.base);
     setSelectedTop(defaultPair.top);
     setSelectedDualSize(null);
-    handleMaterialChange(defaultPair.base);
+    handleMaterialChange(defaultPair.base, { base: defaultPair.base, top: defaultPair.top });
   };
   const isAtDefaultPair =
     !!defaultPair &&
