@@ -478,8 +478,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           const nextMap: Record<string, number> = {};
                           let assigned = 0;
                           for (const v of variants) {
-                            const labelSrc = v.top || v.base || v.label || "";
-                            const key = normFinishLocal(v.top || v.base || v.label || "");
+                            const baseTrim = (v.base || "").trim();
+                            const topTrim = (v.top || "").trim();
+                            const labelTrim = (v.label || "").trim();
+                            const isComposite = Boolean(baseTrim && topTrim);
+                            const key = isComposite
+                              ? `${normFinishLocal(baseTrim)}|${normFinishLocal(topTrim)}`
+                              : normFinishLocal(topTrim || baseTrim || labelTrim);
+                            // Match against the most descriptive label available so each
+                            // composite row can still find its own gallery image.
+                            const labelSrc = isComposite
+                              ? `${baseTrim} ${topTrim}`
+                              : (topTrim || baseTrim || labelTrim);
                             if (!key || !labelSrc) continue;
                             const tokens = normTokens(labelSrc);
                             if (tokens.length === 0) continue;
