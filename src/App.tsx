@@ -59,6 +59,7 @@ const TradeCurrencyConverter = lazy(() => import("./pages/TradeCurrencyConverter
 const TradeCPD = lazy(() => import("./pages/TradeCPD"));
 const TradeComparator = lazy(() => import("./pages/TradeComparator"));
 const TradeTools = lazy(() => import("./pages/TradeTools"));
+const TradeFloorPlanFFE = lazy(() => import("./pages/TradeFloorPlanFFE"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
@@ -267,6 +268,7 @@ const App = () => {
                     <Route path="cpd" element={<TradeCPD />} />
                     <Route path="comparator" element={<TradeComparator />} />
                     <Route path="tools" element={<TradeTools />} />
+                    <Route path="floor-plan-ffe" element={<TradeFloorPlanFFE />} />
                     <Route path="guides" element={<TradeGuides />} />
                     <Route path="guides/analytics" element={<TradeGuidesAnalytics />} />
                     <Route path="guides/:slug" element={<TradeGuideDetail />} />
