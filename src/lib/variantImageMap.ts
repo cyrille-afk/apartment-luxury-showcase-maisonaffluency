@@ -12,10 +12,12 @@ export const normFinish = (s: string): string =>
 
 const normMapKey = (key: string): string => {
   if (!key.includes("|")) return normFinish(key);
-  const [base, top] = key.split("|");
-  const b = normFinish(base || "");
-  const t = normFinish(top || "");
-  return b && t ? `${b}|${t}` : normFinish(key);
+  const parts = key.split("|").map((p) => normFinish(p || ""));
+  // Drop empty trailing segments so "base|top|" still matches "base|top"
+  while (parts.length && !parts[parts.length - 1]) parts.pop();
+  if (parts.length === 0) return normFinish(key);
+  if (parts.length === 1) return parts[0];
+  return parts.join("|");
 };
 
 /**
