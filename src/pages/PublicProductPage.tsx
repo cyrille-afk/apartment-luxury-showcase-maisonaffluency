@@ -533,7 +533,11 @@ const PublicProductPage: React.FC = () => {
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
 
-  const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
+  const subtitleEchoesTitle =
+    !!product.subtitle &&
+    (product.title.toLowerCase().includes(product.subtitle.toLowerCase()) ||
+      product.subtitle.toLowerCase().includes(product.title.toLowerCase()));
+  const pageTitle = `${product.title}${product.subtitle && !subtitleEchoesTitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
 
   // Build brand summary from biography: strip media URLs (lines starting with http) and pipe-delimited captions.
   const brandSummary = (() => {
