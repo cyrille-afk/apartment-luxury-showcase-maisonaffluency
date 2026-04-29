@@ -649,8 +649,15 @@ const TradeProductPage: React.FC = () => {
                       const v = baseOptions[idx] ?? null;
                       setSelectedBase(v);
                       handleMaterialChange(v);
-                      if (v && selectedTop && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedTop(null);
-                      if (v && selectedDualSize && !variantsList.some((x: any) => matchesDual(x, v, selectedTop, selectedDualSize))) setSelectedDualSize(null);
+                      let nextTop = selectedTop;
+                      let nextSize = selectedDualSize;
+                      if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
+                      if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                      // Auto-select the only viable top when base narrows it down to one
+                      if (v && !nextTop) {
+                        const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                        if (compatTops.length === 1) setSelectedTop(compatTops[0]);
+                      }
                     }}
                     disabledIndices={disabledBaseIdx}
                     helperText={
