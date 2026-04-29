@@ -292,6 +292,15 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
                 : undefined
             }
           />
+          {defaultPair && !isAtDefault && (
+            <button
+              type="button"
+              onClick={handleResetDefault}
+              className="self-start mt-1 ml-[26px] font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+            >
+              Reset to default pairing
+            </button>
+          )}
         </>
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
