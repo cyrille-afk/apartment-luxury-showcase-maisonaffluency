@@ -59,7 +59,7 @@ describe("BiographyPdfButton — auth gate", () => {
 
   it("does NOT generate a PDF when the user is anonymous, and opens the auth gate instead", async () => {
     render(<BiographyPdfButton {...baseProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /download .* biography as pdf/i }));
+    fireEvent.click(screen.getByRole("button", { name: /preview .* biography pdf before downloading/i }));
 
     // Gate appears
     const gate = await screen.findByTestId("auth-gate-open");
@@ -75,7 +75,7 @@ describe("BiographyPdfButton — auth gate", () => {
     authState.user = { id: "user-1" };
     render(<BiographyPdfButton {...baseProps} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /download .* biography as pdf/i }));
+    fireEvent.click(screen.getByRole("button", { name: /preview .* biography pdf before downloading/i }));
 
     await waitFor(() => expect(generateSpy).toHaveBeenCalledTimes(1));
     expect(screen.queryByTestId("auth-gate-open")).not.toBeInTheDocument();

@@ -95,7 +95,7 @@ describe("Biography PDF footer URL", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /download .* biography as pdf/i }));
+    fireEvent.click(screen.getByRole("button", { name: /preview .* biography pdf before downloading/i }));
 
     await waitFor(() => expect(generateSpy).toHaveBeenCalledTimes(1));
 
