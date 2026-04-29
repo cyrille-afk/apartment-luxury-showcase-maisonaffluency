@@ -10,6 +10,14 @@
 export const normFinish = (s: string): string =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "");
 
+const normMapKey = (key: string): string => {
+  if (!key.includes("|")) return normFinish(key);
+  const [base, top] = key.split("|");
+  const b = normFinish(base || "");
+  const t = normFinish(top || "");
+  return b && t ? `${b}|${t}` : normFinish(key);
+};
+
 /**
  * Build a normalized lookup table from a product's raw `variant_image_map`
  * JSONB column. Returns null when the map is empty or unusable so callers
@@ -22,7 +30,7 @@ export function buildProductFinishMap(
   const out: Record<string, number> = {};
   for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
     const idx = Number(v);
-    if (Number.isFinite(idx)) out[normFinish(k)] = idx;
+    if (Number.isFinite(idx)) out[normMapKey(k)] = idx;
   }
   return Object.keys(out).length ? out : null;
 }
@@ -80,6 +88,7 @@ export function resolveVariantImageIndex(
     const composite = `${normFinish(base)}|${normFinish(top)}`;
     const idx = finishMap[composite];
     if (typeof idx === "number" && idx >= 0 && idx < imageCount) return idx;
+    return undefined;
   }
   // 2) Single-axis fallbacks, in priority order
   for (const candidate of [top, base, label]) {
