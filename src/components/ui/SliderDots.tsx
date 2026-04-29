@@ -47,7 +47,7 @@ const SliderDots: React.FC<SliderDotsProps> = ({
           onClick={() => onSelect(i)}
           aria-label={`${ariaPrefix} ${i + 1}`}
           className={cn(
-            "rounded-full border transition-all duration-300",
+            "rounded-full border transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.45)]",
             dim,
             i === activeIndex ? activeColor : inactiveColor
           )}
