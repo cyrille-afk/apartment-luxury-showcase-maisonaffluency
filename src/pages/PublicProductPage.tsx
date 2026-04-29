@@ -150,7 +150,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 /* ------------------------------------------------------------------ */
 /*  Variant selectors (controlled — enables cross-axis disabling)     */
 /* ------------------------------------------------------------------ */
-const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: string | null) => void }> = ({ product, onMaterialChange }) => {
+const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null }) => void }> = ({ product, onMaterialChange }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
