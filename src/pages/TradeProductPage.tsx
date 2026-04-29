@@ -741,6 +741,15 @@ const TradeProductPage: React.FC = () => {
                         : undefined
                     }
                   />
+                  {defaultPair && !isAtDefaultPair && (
+                    <button
+                      type="button"
+                      onClick={handleResetDefaultPair}
+                      className="self-start mt-1 ml-[26px] font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+                    >
+                      Reset to default pairing
+                    </button>
+                  )}
                 </>
               )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
