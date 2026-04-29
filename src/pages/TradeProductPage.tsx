@@ -834,8 +834,14 @@ const TradeProductPage: React.FC = () => {
                   onChange={(idx) => {
                     const s = dualSizeOptions[idx] ?? null;
                     setSelectedDualSize(s);
-                    if (s && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedBase(null);
-                    if (s && selectedTop && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedTop(null);
+                    let nextBase = selectedBase;
+                    let nextTop = selectedTop;
+                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedBase(null); nextBase = null; }
+                    if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedTop(null); nextTop = null; }
+                    // Re-sync the gallery to the canonical key for the
+                    // (base, top, size) triple — same resolver as the
+                    // Base/Top dropdowns, so all three axes stay aligned.
+                    handleMaterialChange(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
                   }}
                   disabledIndices={disabledDualSizeIdx}
                   helperText={
