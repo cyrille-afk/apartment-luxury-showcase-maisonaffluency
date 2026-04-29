@@ -261,7 +261,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
                 const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
                 if (compatTops.length === 1) { setSelTop(compatTops[0]); nextTop = compatTops[0]; }
               }
-              onMaterialChange?.(v, { base: v, top: nextTop });
+              onMaterialChange?.(v, { base: v, top: nextTop, size: nextSize });
             }}
             disabledIndices={disabledBaseIdx}
             helperText={
