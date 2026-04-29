@@ -474,11 +474,12 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                             return new Set(normTokens(file));
                           });
                           const normFinishLocal = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                          const nextMap: Record<string, number> = { ...(pick.variant_image_map || {}) };
+                          // Start fresh — drop stale keys (e.g. from when keys were derived from Base only)
+                          const nextMap: Record<string, number> = {};
                           let assigned = 0;
                           for (const v of variants) {
                             const labelSrc = v.top || v.base || v.label || "";
-                            const key = normFinishLocal(v.base || v.label || "");
+                            const key = normFinishLocal(v.top || v.base || v.label || "");
                             if (!key || !labelSrc) continue;
                             const tokens = normTokens(labelSrc);
                             if (tokens.length === 0) continue;
@@ -531,7 +532,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
                     const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                    const mapKey = normFinish(variant.base || variant.label || "");
+                    const mapKey = normFinish(variant.top || variant.base || variant.label || "");
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
                       : undefined;
