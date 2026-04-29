@@ -321,7 +321,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = b.charAt(0).toUpperCase();
+                    const letter = initialOf(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -341,7 +341,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = b.charAt(0).toUpperCase();
+                    const letter = initialOf(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -387,7 +387,7 @@ const TradeDesigners = () => {
                 onSelect={(b) => {
                   setSelectedBrand(b);
                   if (b === "all") return;
-                  const letter = b.charAt(0).toUpperCase();
+                  const letter = initialOf(b);
                   requestAnimationFrame(() => {
                     const el = document.getElementById(`designer-letter-${letter}`);
                     el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -403,8 +403,8 @@ const TradeDesigners = () => {
           {allLetters.map((letter) => {
             const hasResults = grouped.some(([l]) => l === letter);
             const hasAnyResults = enriched.some((d) => {
-              const ch = d.name.charAt(0).toUpperCase();
-              const fch = d.founder ? d.founder.charAt(0).toUpperCase() : null;
+              const ch = initialOf(d.name);
+              const fch = d.founder ? initialOf(d.founder) : null;
               return ch === letter || fch === letter;
             });
             return (
