@@ -1046,10 +1046,48 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       const ratio = img.width / img.height;
 
+      // ── Backfill: if this figure won't fit in the remaining space and
+      // would force a near-empty bottom on the current page, hoist a
+      // following text block (skipping over media that haven't been
+      // rendered yet) up to fill the space first. Prevents the giant
+      // whitespace gap seen when a side-by-side spread ends mid-page and
+      // the next media is too tall to fit beneath it.
+      const free = availableSpace();
+      const minFigureFootprint = Math.min(pageHeight * 0.20, contentWidth * 0.32) + 40;
+      if (free > 80 && free < minFigureFootprint) {
+        for (let look = blockIdx + 1; look < blocks.length; look++) {
+          const cand = blocks[look];
+          if (consumedTextIdx.has(look)) continue;
+          if (cand.type !== "text") continue;
+          const t = cand.text?.trim();
+          if (!t) continue;
+          // Render this paragraph now to fill the page; mark it consumed.
+          doc.setFont("times", "normal");
+          doc.setFontSize(11);
+          doc.setTextColor(...ink);
+          const bodyLineH = 16.5;
+          const wrapped = doc.splitTextToSize(t, contentWidth);
+          for (const line of wrapped) {
+            ensureSpace(bodyLineH);
+            doc.text(line, marginX, cursorY + 4);
+            cursorY += bodyLineH;
+          }
+          cursorY += 14;
+          consumedTextIdx.add(look);
+          break;
+        }
+      }
+
       // Look ahead: if the NEXT block is text and the drop cap has already
       // been used, render side-by-side (image left, text right) to pull
       // content up and avoid orphaned takeaways on later pages.
-      const nextBlock = blocks[blockIdx + 1];
+      let nextBlock = blocks[blockIdx + 1];
+      // Skip over any text blocks that have been consumed by a hoist above
+      let nextTextLookIdx = blockIdx + 1;
+      while (nextTextLookIdx < blocks.length && consumedTextIdx.has(nextTextLookIdx)) {
+        nextTextLookIdx++;
+      }
+      nextBlock = blocks[nextTextLookIdx];
       const canSideBySide =
         firstParagraphRendered &&
         nextBlock &&
