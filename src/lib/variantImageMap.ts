@@ -126,10 +126,4 @@ export function resolveVariantImageIndex(
   }
   return undefined;
 }
-  // 2) Single-axis fallbacks, in priority order
-  for (const candidate of [top, base, label]) {
-    const idx = resolveFinishImageIndex(finishMap, candidate, imageCount);
-    if (typeof idx === "number") return idx;
-  }
-  return undefined;
-}
+
