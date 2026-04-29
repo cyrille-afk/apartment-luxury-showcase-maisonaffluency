@@ -118,14 +118,21 @@ export default function StudioProfile() {
         {studio.hero_image_url && <meta property="og:image" content={studio.hero_image_url} />}
       </Helmet>
 
-      {/* Back */}
-      <div className="mx-auto max-w-6xl px-6 pt-8">
+      {/* Back + insights (owner/admin only) */}
+      <div className="mx-auto max-w-6xl px-6 pt-8 flex items-center justify-between gap-4">
         <Link
           to="/studios"
           className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3 w-3" /> Back to directory
         </Link>
+        {canViewInsights && (
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/studios/${studio.slug}/insights`}>
+              <BarChart3 className="h-3.5 w-3.5 mr-2" /> Insights
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Hero */}
@@ -212,7 +219,12 @@ export default function StudioProfile() {
           <div className="space-y-2 pt-2">
             {studio.website_url && (
               <Button asChild variant="outline" className="w-full justify-between">
-                <a href={studio.website_url} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={studio.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackCta("website")}
+                >
                   <span className="flex items-center gap-2">
                     <Globe className="h-4 w-4" /> Website
                   </span>
@@ -222,7 +234,12 @@ export default function StudioProfile() {
             )}
             {igUrl && (
               <Button asChild variant="outline" className="w-full justify-between">
-                <a href={igUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={igUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackCta("instagram")}
+                >
                   <span className="flex items-center gap-2">
                     <Instagram className="h-4 w-4" /> @{igHandle}
                   </span>
@@ -232,7 +249,10 @@ export default function StudioProfile() {
             )}
             {studio.contact_email && (
               <Button asChild className="w-full justify-between">
-                <a href={`mailto:${studio.contact_email}`}>
+                <a
+                  href={`mailto:${studio.contact_email}`}
+                  onClick={() => trackCta("email")}
+                >
                   <span className="flex items-center gap-2">
                     <Mail className="h-4 w-4" /> Contact studio
                   </span>
