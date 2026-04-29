@@ -336,6 +336,27 @@ const TradeProductPage: React.FC = () => {
     }
   }, [user, data, activeQuoteId, toast]);
 
+  // Default the dual-axis pickers to the first base + its uniquely-compatible
+  // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
+  // "Aged Brass + Bisque Leather" → "Paglierino Travertine"). Picking the
+  // other base then auto-swaps the top via the existing handlers.
+  useEffect(() => {
+    const sv = data?.pricing?.size_variants;
+    if (!sv || !sv.length || selectedBase || selectedTop) return;
+    const baseOpts = Array.from(new Set(sv.map((v: any) => (v.base || "").trim()).filter(Boolean)));
+    const topOpts = Array.from(new Set(sv.map((v: any) => (v.top || "").trim()).filter(Boolean)));
+    if (!baseOpts.length || !topOpts.length) return;
+    const firstBase = baseOpts[0];
+    const compatTops = topOpts.filter((t) =>
+      sv.some((v: any) => (v.base || "").trim() === firstBase && (v.top || "").trim() === t)
+    );
+    if (compatTops.length === 1) {
+      setSelectedBase(firstBase);
+      setSelectedTop(compatTops[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.product?.id]);
+
   if (isLoading) {
     return <div className="pt-8"><PageLoadingSkeleton /></div>;
   }
