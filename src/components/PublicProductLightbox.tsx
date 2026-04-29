@@ -183,15 +183,34 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const baseOptions = isDualAxis
     ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
     : [];
+  const topOptionsForResolve = isDualAxis
+    ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
+    : [];
   const materialOptions = !isDualAxis && product.materials ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean) : [];
-  const selectedFinishLabel =
-    isDualAxis && selectedBaseIdx != null && selectedBaseIdx >= 0 ? baseOptions[selectedBaseIdx] :
-    !isDualAxis && selectedMaterialIdx != null && selectedMaterialIdx >= 0 ? materialOptions[selectedMaterialIdx] :
-    null;
-  const finishImageIdx =
-    finishMap && galleryImages.length > 0
-      ? resolveFinishImageIndex(finishMap, selectedFinishLabel, galleryImages.length)
-      : undefined;
+  // Try every selected axis label against the finish map — this lets dual-axis
+  // products resolve images whether the differentiating finish lives on the
+  // base or the top dropdown (e.g. Segment Console Table varies on Top).
+  const candidateFinishLabels: string[] = [];
+  if (isDualAxis) {
+    if (selectedTopIdx != null && selectedTopIdx >= 0) {
+      const v = topOptionsForResolve[selectedTopIdx];
+      if (v) candidateFinishLabels.push(v);
+    }
+    if (selectedBaseIdx != null && selectedBaseIdx >= 0) {
+      const v = baseOptions[selectedBaseIdx];
+      if (v) candidateFinishLabels.push(v);
+    }
+  } else if (selectedMaterialIdx != null && selectedMaterialIdx >= 0) {
+    const v = materialOptions[selectedMaterialIdx];
+    if (v) candidateFinishLabels.push(v);
+  }
+  let finishImageIdx: number | undefined;
+  if (finishMap && galleryImages.length > 0) {
+    for (const label of candidateFinishLabels) {
+      const idx = resolveFinishImageIndex(finishMap, label, galleryImages.length);
+      if (idx != null) { finishImageIdx = idx; break; }
+    }
+  }
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
   const imageSwappedByFinish = currentImageUrl !== product.image_url;
 
