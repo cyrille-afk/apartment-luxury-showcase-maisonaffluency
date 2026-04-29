@@ -555,8 +555,12 @@ const PublicProductPage: React.FC = () => {
 
   // (productFinishMap is declared above the early returns to keep hook order stable.)
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
-  const handleMaterialChange = (label: string | null) => {
-    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+  const handleMaterialChange = (label: string | null, opts?: { base?: string | null; top?: string | null }) => {
+    // Prefer the composite Base|Top key when both axes are filled (decouples
+    // rows that share the same Top, e.g. Apparatus Lantern Table Lamp).
+    const idx = opts && (opts.base || opts.top)
+      ? resolveVariantImageIndex(productFinishMap, { base: opts.base, top: opts.top, label, imageCount: images.length })
+      : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
       setGalleryJumpNonce((n) => n + 1);
