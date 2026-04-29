@@ -16,6 +16,7 @@ import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { rememberProductBackRef } from "@/lib/designerBackRef";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
