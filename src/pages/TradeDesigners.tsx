@@ -152,7 +152,7 @@ const TradeDesigners = () => {
 
   // Child designers hidden from the grid — parent atelier card represents them.
   const HIDDEN_CHILD_DESIGNERS = useMemo(
-    () => new Set(["laura demichelis"]),
+    () => new Set(["laura demichelis", "leo aerts"]),
     []
   );
 
