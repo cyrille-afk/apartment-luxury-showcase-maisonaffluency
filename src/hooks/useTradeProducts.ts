@@ -177,5 +177,52 @@ export function useTradeProducts() {
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
   const categories = useMemo(() => getAllCategories(allProducts), [allProducts]);
 
-  return { allProducts, brands, categories, getSubcategories };
+  // Dev-only: detect likely duplicate cards (exact key matches collapse via Map,
+  // but near-duplicates like "Pars" vs "Pars Cocktail Table" can survive merge).
+  const duplicateGroups = useMemo<DuplicateGroup[]>(() => {
+    if (!import.meta.env.DEV) return [];
+    const byBrand = new Map<string, TradeProduct[]>();
+    for (const p of allProducts) {
+      const b = p.brand_name.trim().toLowerCase();
+      if (!byBrand.has(b)) byBrand.set(b, []);
+      byBrand.get(b)!.push(p);
+    }
+    const groups: DuplicateGroup[] = [];
+    for (const [, items] of byBrand) {
+      const seen = new Set<number>();
+      for (let i = 0; i < items.length; i++) {
+        if (seen.has(i)) continue;
+        const group = [items[i]];
+        const aTokens = items[i].product_name.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+        for (let j = i + 1; j < items.length; j++) {
+          if (seen.has(j)) continue;
+          const bName = items[j].product_name.toLowerCase();
+          const bTokens = bName.split(/\s+/).filter(t => t.length > 2);
+          const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+          const longerName = aTokens.length <= bTokens.length ? bName : items[i].product_name.toLowerCase();
+          if (shorter.length === 0) continue;
+          const allPresent = shorter.every(t => longerName.includes(t));
+          if (allPresent) {
+            group.push(items[j]);
+            seen.add(j);
+          }
+        }
+        if (group.length > 1) {
+          seen.add(i);
+          groups.push({
+            brand: items[i].brand_name,
+            items: group.map(g => ({ id: g.id, product_name: g.product_name, image_url: g.image_url })),
+          });
+        }
+      }
+    }
+    return groups;
+  }, [allProducts]);
+
+  return { allProducts, brands, categories, getSubcategories, duplicateGroups };
+}
+
+export interface DuplicateGroup {
+  brand: string;
+  items: { id: string; product_name: string; image_url: string | null }[];
 }
