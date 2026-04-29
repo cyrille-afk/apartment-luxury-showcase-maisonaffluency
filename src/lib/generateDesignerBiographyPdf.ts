@@ -27,9 +27,21 @@ interface ParsedBlock {
   media?: MediaItem;
 }
 
+/**
+ * Hand-picked poster overrides — kept in sync with EditorialBiography so the
+ * downloaded PDF mirrors what the user sees on the platform.
+ */
 const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
   "https://videos.fashionnetwork.com/en/PMV20055_EN.mp4":
     "/images/thierry-lemaire-video-poster.jpg",
+  "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1774220339833-galr9d.mp4":
+    "/images/lamont-video-poster-v2.jpg?v=20260323-2",
+  "https://vimeo.com/803009029":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun.jpg",
+  "https://youtu.be/OaRgw7VoeY0":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1774856563/Screen_Shot_2026-03-30_at_3.41.52_PM_sezoxs.png",
+  "https://www.youtube.com/watch?v=hQ0_HOzRKwI":
+    "/images/lbv-dior-poster.jpg",
 };
 
 function isVideoUrl(url: string): boolean {
@@ -258,8 +270,15 @@ function extractYouTubeId(url: string): string | null {
 function resolveDisplayImageUrl(media: MediaItem): string | null {
   if (!media.isVideo) return media.url;
   if (media.poster) return media.poster;
-  const fallback = VIDEO_POSTER_FALLBACKS[media.url] || VIDEO_POSTER_FALLBACKS[media.url.split("?")[0]];
+  // Exact / stripped-query lookup in the curated map
+  const fallback =
+    VIDEO_POSTER_FALLBACKS[media.url] ||
+    VIDEO_POSTER_FALLBACKS[media.url.split("?")[0]];
   if (fallback) return fallback;
+  // Cloudinary native videos → auto poster frame at 2s (matches EditorialBiography)
+  if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(media.url)) {
+    return media.url.replace("/video/upload/", "/video/upload/so_2,f_jpg,q_auto/");
+  }
   // Vimeo: vumbnail returns a CORS-friendly JPEG thumbnail
   const vimeoId = extractVimeoId(media.url);
   if (vimeoId) return `https://vumbnail.com/${vimeoId}.jpg`;
@@ -561,6 +580,8 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   doc.rect(0, 0, pageWidth, pageHeight, "F");
   let cursorY = marginTop;
 
+  const availableSpace = () => pageHeight - marginBottom - cursorY;
+
   const ensureSpace = (needed: number) => {
     if (cursorY + needed > pageHeight - marginBottom) {
       doc.addPage();
@@ -569,6 +590,27 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       cursorY = marginTop;
     }
   };
+
+  /**
+   * Decide whether to use the remaining space on the current page rather than
+   * forcing a page break. Returns the height budget for the figure if we should
+   * stay on this page, or null if a page break is preferable.
+   */
+  const tryFitFigureOnCurrentPage = (
+    desiredH: number,
+    minImgH: number,
+    chromeH: number /* caption + link + paddings */,
+  ): number | null => {
+    const free = availableSpace();
+    // Total desired = image + chrome
+    if (free >= desiredH + chromeH) return desiredH; // plenty of room
+    // Can we shrink and still meet minimum?
+    const shrunk = free - chromeH - 8;
+    if (shrunk >= minImgH) return shrunk;
+    // Even shrunk it won't fit nicely — break the page.
+    return null;
+  };
+
 
   const drawSectionLabel = (label: string) => {
     ensureSpace(40);
@@ -950,12 +992,20 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
         // Target image height: match the right-column text height for a balanced
         // spread, clamped so it never becomes a stamp or a giant.
-        const minImgH = Math.min(pageHeight * 0.28, contentWidth * 0.45);
+        const minImgH = Math.min(pageHeight * 0.24, contentWidth * 0.40);
         const maxImgH = pageHeight * 0.48;
-        const targetImgH = Math.max(
+        let targetImgH = Math.max(
           minImgH,
           Math.min(maxImgH, rightTextH - captionH - linkH),
         );
+
+        // Try to keep this figure on the current page by shrinking if needed,
+        // rather than leaving the bottom of the page empty.
+        const chrome = captionH + linkH + 18;
+        const fitted = tryFitFigureOnCurrentPage(targetImgH, minImgH, chrome);
+        if (fitted !== null) {
+          targetImgH = fitted;
+        }
 
         let drawH = targetImgH;
         let drawW = drawH * ratio;
@@ -1060,13 +1110,13 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       // Default: full-width figure (existing behaviour)
       const maxImgH = pageHeight * 0.36;
+      const minImgHFull = Math.min(pageHeight * 0.20, contentWidth * 0.32);
       let drawW = contentWidth;
       let drawH = drawW / ratio;
       if (drawH > maxImgH) {
         drawH = maxImgH;
         drawW = drawH * ratio;
       }
-      const imgX = marginX + (contentWidth - drawW) / 2;
 
       let capLines: string[] = [];
       const capLineH = 12;
@@ -1079,6 +1129,20 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
+
+      // Try to keep this figure on the current page by shrinking if needed.
+      const chrome = 6 + 10 + captionH + linkH + 16;
+      const fitted = tryFitFigureOnCurrentPage(drawH, minImgHFull, chrome);
+      if (fitted !== null && fitted < drawH) {
+        drawH = fitted;
+        drawW = drawH * ratio;
+        if (drawW > contentWidth) {
+          drawW = contentWidth;
+          drawH = drawW / ratio;
+        }
+      }
+
+      const imgX = marginX + (contentWidth - drawW) / 2;
       const figureH = 6 + drawH + 10 + captionH + linkH + 16;
 
       ensureSpace(figureH);
