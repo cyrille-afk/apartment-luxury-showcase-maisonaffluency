@@ -375,10 +375,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
             <div className="flex flex-col">
               {(() => {
-                const sv = product.size_variants || [];
-                const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
                 if (isDualAxis) {
-                  const baseOptions = Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)));
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
                   return (
                     <>
@@ -387,6 +384,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         text={baseOptions.join("\n")}
                         placeholder={getBasePlaceholder(product)}
                         emphasized
+                        value={selectedBaseIdx ?? undefined}
+                        onChange={(idx) => setSelectedBaseIdx(idx < 0 ? null : idx)}
                       />
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -403,6 +402,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     text={product.materials}
                     placeholder="Select your material choice"
                     autoSplit
+                    value={selectedMaterialIdx ?? undefined}
+                    onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                   />
                 ) : null;
               })()}
