@@ -28,6 +28,7 @@ import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
+import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 
 /* ------------------------------------------------------------------ */
