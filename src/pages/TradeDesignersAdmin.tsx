@@ -532,13 +532,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
                     const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                    const mapKey = normFinish(variant.top || variant.base || variant.label || "");
+                    const keySource: "Top" | "Base" | "Label" | null =
+                      variant.top?.trim() ? "Top"
+                      : variant.base?.trim() ? "Base"
+                      : variant.label?.trim() ? "Label"
+                      : null;
+                    const keySourceValue =
+                      keySource === "Top" ? variant.top
+                      : keySource === "Base" ? variant.base
+                      : keySource === "Label" ? variant.label
+                      : "";
+                    const mapKey = normFinish(keySourceValue || "");
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
                       : undefined;
                     const currentImageNum = typeof currentImageIdx === "number" ? currentImageIdx + 1 : "";
                     return (
-                    <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
+                    <div key={idx} className="space-y-1">
+                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
                       <Input
                         value={variant.label || ""}
                         onChange={(e) => {
