@@ -41,3 +41,50 @@ export function resolveFinishImageIndex(
   if (typeof idx === "number" && idx >= 0 && idx < imageCount) return idx;
   return undefined;
 }
+
+/**
+ * Build the canonical composite key for a dual-axis variant row. When both
+ * axes are filled, this guarantees each row gets its own image slot — even
+ * when several rows share the same Top (or Base) value, like Apparatus
+ * Lantern Table Lamp where every row is "Slip-cast Porcelain" but the
+ * Structure differs.
+ */
+export function variantImageKey(
+  base?: string | null,
+  top?: string | null,
+  label?: string | null
+): string {
+  const b = (base || "").trim();
+  const t = (top || "").trim();
+  if (b && t) return `${normFinish(b)}|${normFinish(t)}`;
+  return normFinish(t || b || label || "");
+}
+
+/**
+ * Try a list of candidate labels (already in priority order) plus an
+ * optional composite `base|top` key. Returns the first valid mapping.
+ */
+export function resolveVariantImageIndex(
+  finishMap: Record<string, number> | null,
+  opts: {
+    base?: string | null;
+    top?: string | null;
+    label?: string | null;
+    imageCount: number;
+  }
+): number | undefined {
+  if (!finishMap) return undefined;
+  const { base, top, label, imageCount } = opts;
+  // 1) Composite key (most specific) when both axes are present
+  if (base && top) {
+    const composite = `${normFinish(base)}|${normFinish(top)}`;
+    const idx = finishMap[composite];
+    if (typeof idx === "number" && idx >= 0 && idx < imageCount) return idx;
+  }
+  // 2) Single-axis fallbacks, in priority order
+  for (const candidate of [top, base, label]) {
+    const idx = resolveFinishImageIndex(finishMap, candidate, imageCount);
+    if (typeof idx === "number") return idx;
+  }
+  return undefined;
+}
