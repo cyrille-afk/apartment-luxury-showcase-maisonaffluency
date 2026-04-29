@@ -156,6 +156,14 @@ export default function ExpandableSpec({
             </span>
           </SelectTrigger>
           <SelectContent className="z-[130] bg-background border-border">
+            {hasSelection && (
+              <SelectItem
+                value="__clear__"
+                className="font-body text-xs md:text-sm cursor-pointer text-muted-foreground italic border-b border-border/60"
+              >
+                Clear selection
+              </SelectItem>
+            )}
             {lines.map((line, i) => {
               const isDisabled = disabledSet.has(i);
               return (
