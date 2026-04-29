@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, X, Loader2, AlertCircle } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 interface Props {
   open: boolean;
@@ -107,7 +107,11 @@ export default function BiographyPdfPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 gap-0 flex flex-col overflow-hidden">
+      <DialogContent aria-describedby="biography-pdf-preview-description" className="max-w-5xl w-[95vw] h-[90vh] p-0 gap-0 flex flex-col overflow-hidden">
+        <DialogTitle className="sr-only">Biography preview — {designerName}</DialogTitle>
+        <DialogDescription id="biography-pdf-preview-description" className="sr-only">
+          Rendered page-by-page PDF preview for checking biography poster images and spacing before download.
+        </DialogDescription>
         {/* Header */}
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-background/95">
           <div className="min-w-0">
