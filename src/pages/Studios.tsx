@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -42,12 +43,14 @@ const labelOf = (list: { value: string; label: string }[], v: string) =>
   list.find((x) => x.value === v)?.label ?? v;
 
 export default function Studios() {
+  const { user, loading: authLoading } = useAuth();
   const [studios, setStudios] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
   const [discipline, setDiscipline] = useState<string | null>(null);
   const [projectType, setProjectType] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     (async () => {
       const { data, error } = await supabase
         .from("featured_studios")
@@ -61,7 +64,7 @@ export default function Studios() {
       if (!error && data) setStudios(data as Studio[]);
       setLoading(false);
     })();
-  }, []);
+  }, [user]);
 
   const filtered = useMemo(() => {
     return studios.filter((s) => {
@@ -70,6 +73,17 @@ export default function Studios() {
       return true;
     });
   }, [studios, discipline, projectType]);
+
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <Skeleton className="h-8 w-40" />
+      </main>
+    );
+  }
+  if (!user) {
+    return <Navigate to={`/trade/login?redirect=${encodeURIComponent("/studios")}`} replace />;
+  }
 
   return (
     <main className="min-h-screen bg-background">

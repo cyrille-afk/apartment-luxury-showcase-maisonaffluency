@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, ExternalLink, Globe, Instagram, Mail, MapPin } from "lucide-react";
@@ -43,12 +44,13 @@ const LABELS: Record<string, string> = {
 
 export default function StudioProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const { user, loading: authLoading } = useAuth();
   const [studio, setStudio] = useState<Studio | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || !user) return;
     (async () => {
       const { data, error } = await supabase
         .from("featured_studios")
@@ -63,7 +65,18 @@ export default function StudioProfile() {
       }
       setLoading(false);
     })();
-  }, [slug]);
+  }, [slug, user]);
+
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <Skeleton className="h-8 w-40" />
+      </main>
+    );
+  }
+  if (!user) {
+    return <Navigate to={`/trade/login?redirect=${encodeURIComponent(`/studios/${slug ?? ""}`)}`} replace />;
+  }
 
   if (loading) {
     return (
