@@ -180,7 +180,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     if (!variants.length || !baseOptions.length) return;
     const firstBase = baseOptions[0];
     const compatTops = topOptions.filter((t) =>
-      variants.some((v: any) => matchesDual(v, firstBase, t, null))
+      variants.some((v: any) => (v.base || "").trim() === firstBase && (v.top || "").trim() === t)
     );
     if (compatTops.length === 1) {
       setSelBase(firstBase);
