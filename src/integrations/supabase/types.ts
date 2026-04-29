@@ -3067,6 +3067,80 @@ export type Database = {
           },
         ]
       }
+      trade_floor_plan_layouts: {
+        Row: {
+          created_at: string
+          id: string
+          layout: Json
+          name: string
+          plan_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          layout?: Json
+          name?: string
+          plan_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          layout?: Json
+          name?: string
+          plan_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_floor_plan_layouts_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "trade_floor_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_floor_plans: {
+        Row: {
+          brief: Json
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          plan_image_url: string
+          suggestions: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brief?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          plan_image_url: string
+          suggestions?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brief?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          plan_image_url?: string
+          suggestions?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trade_product_cad_assets: {
         Row: {
           created_at: string

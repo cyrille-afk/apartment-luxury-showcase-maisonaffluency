@@ -3,7 +3,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2,
+  Wand2, Map,
 } from "lucide-react";
 
 type Tool = { title: string; description: string; url: string; icon: any };
@@ -27,6 +27,7 @@ const categories: ToolCategory[] = [
       { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
       { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
+      { title: "Floor Plan → FF&E", description: "Upload a plan, get an AI-suggested layout from the catalog", url: "/trade/floor-plan-ffe", icon: Map },
       { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
     ],
   },
