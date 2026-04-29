@@ -510,17 +510,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     curatorPicks: [
       // Lantern Table Lamp is now sourced from designer_curator_picks (DB) — see id be988b38…
       // Removing the static duplicate prevents two "Lantern" cards from appearing in the trade gallery.
-      { 
-        image: apparatusPick5, 
-        title: "Segment",
-        subtitle: "Console Table",
-        category: "Furniture",
-        tags: ["Furniture", "Console"],
-        materials: "Hand-Cast Resin Legs • Lacquer or Sand-Blasted Ash Table Surface",
-        dimensions: "W 147 × D 45 × H 84 cm",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_SEGMENT_CONSOLE_TABLE.pdf",
-        pdfFilename: "Apparatus_Studio-Segment_Console_Table.pdf"
-      },
+      // Segment Console Table, Pars Cocktail Table and Portal Dining Table
+      // are now sourced from designer_curator_picks (DB). Removing the static
+      // duplicates prevents two cards from appearing in the trade gallery.
       { 
         image: apparatusPick2, 
         hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773316984/Screen_Shot_2026-03-12_at_7.58.51_PM_kuasmc.png",
@@ -532,18 +524,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Pendant Small: H 30 × W 13 cm · Brass mesh line: Height to order — Pendant Large: H 41 × W 17 cm · Brass mesh line: Height to order",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_LARIAT_PENDANT.pdf",
         pdfFilename: "Apparatus_Studio-Lariat_Pendant.pdf"
-      },
-      { 
-        image: apparatusPick6, 
-        title: "Pars",
-        subtitle: "Cocktail Table",
-        category: "Furniture",
-        tags: ["Furniture", "Table"],
-        materials: "Brass Armature • Stone • Hand-Cut Leather",
-        dimensions: "Ø 31 × H 61 cm",
-        description: "Also available in Noir Saint-Laurent Marble Top, Ebene Leather and Oil-Rubbed Bronze",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_PARS_COCKTAIL_TABLE.pdf",
-        pdfFilename: "Apparatus_Studio-Pars_Cocktail_Table.pdf"
       },
       { 
         image: apparatusPick3, 
