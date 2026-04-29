@@ -580,6 +580,8 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   doc.rect(0, 0, pageWidth, pageHeight, "F");
   let cursorY = marginTop;
 
+  const availableSpace = () => pageHeight - marginBottom - cursorY;
+
   const ensureSpace = (needed: number) => {
     if (cursorY + needed > pageHeight - marginBottom) {
       doc.addPage();
@@ -588,6 +590,27 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       cursorY = marginTop;
     }
   };
+
+  /**
+   * Decide whether to use the remaining space on the current page rather than
+   * forcing a page break. Returns the height budget for the figure if we should
+   * stay on this page, or null if a page break is preferable.
+   */
+  const tryFitFigureOnCurrentPage = (
+    desiredH: number,
+    minImgH: number,
+    chromeH: number /* caption + link + paddings */,
+  ): number | null => {
+    const free = availableSpace();
+    // Total desired = image + chrome
+    if (free >= desiredH + chromeH) return desiredH; // plenty of room
+    // Can we shrink and still meet minimum?
+    const shrunk = free - chromeH - 8;
+    if (shrunk >= minImgH) return shrunk;
+    // Even shrunk it won't fit nicely — break the page.
+    return null;
+  };
+
 
   const drawSectionLabel = (label: string) => {
     ensureSpace(40);
