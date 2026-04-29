@@ -159,6 +159,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     variant_placeholder: string | null;
     base_axis_label: string | null;
     top_axis_label: string | null;
+    variant_image_map: Record<string, number> | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -459,22 +460,34 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <p className="text-[10px] text-muted-foreground italic leading-snug">
                     For a single dropdown (size only), fill <em>Label</em> + <em>Price</em>. For two dropdowns (e.g. Base × Top finish), fill <em>Base</em> and <em>Top</em>; the product sheet will render two selectors and price by combination.
                   </p>
+                  <p className="text-[10px] text-muted-foreground italic">
+                    <strong>Image #</strong>: optional. Enter the gallery image number (1, 2, 3…) that should appear when this finish/size is selected. Leave blank to keep the current image.
+                  </p>
                   {(pick.size_variants || []).length === 0 && (
                     <p className="text-[10px] text-muted-foreground italic">
                       No variants. The Default RRP above will be used.
                     </p>
                   )}
                   {(pick.size_variants || []).length > 0 && (
-                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
                       <span>Label / Size</span>
                       <span>{pick.base_axis_label || "Base"}</span>
                       <span>{pick.top_axis_label || "Top"}</span>
                       <span>Price ({pick.currency || "EUR"})</span>
+                      <span>Image #</span>
                       <span></span>
                     </div>
                   )}
-                  {(pick.size_variants || []).map((variant, idx) => (
-                    <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_7rem_1.75rem] gap-1.5 items-center">
+                  {(pick.size_variants || []).map((variant, idx) => {
+                    const galleryCount = (pick.gallery_images || []).length;
+                    const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+                    const mapKey = normFinish(variant.base || variant.label || "");
+                    const currentImageIdx = mapKey && pick.variant_image_map
+                      ? pick.variant_image_map[mapKey]
+                      : undefined;
+                    const currentImageNum = typeof currentImageIdx === "number" ? currentImageIdx + 1 : "";
+                    return (
+                    <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
                       <Input
                         value={variant.label || ""}
                         onChange={(e) => {
@@ -518,6 +531,28 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         placeholder="0.00"
                         className="text-xs h-8"
                       />
+                      <Input
+                        type="number"
+                        min={1}
+                        max={galleryCount || undefined}
+                        value={currentImageNum}
+                        onChange={(e) => {
+                          if (!mapKey) return;
+                          const next = { ...(pick.variant_image_map || {}) };
+                          const raw = e.target.value.trim();
+                          if (raw === "") {
+                            delete next[mapKey];
+                          } else {
+                            const n = parseInt(raw, 10);
+                            if (Number.isFinite(n) && n >= 1) next[mapKey] = n - 1;
+                          }
+                          updateField(pick.id, "variant_image_map", Object.keys(next).length ? next : null);
+                        }}
+                        placeholder="—"
+                        title={mapKey ? `Mapped key: ${mapKey}` : "Fill Base or Label first"}
+                        disabled={!mapKey}
+                        className="text-xs h-8"
+                      />
                       <Button
                         variant="ghost"
                         size="icon"
@@ -530,7 +565,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <VariantPreviewPanel
                   sizeVariants={pick.size_variants}
