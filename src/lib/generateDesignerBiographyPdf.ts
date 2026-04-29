@@ -1110,13 +1110,13 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
       // Default: full-width figure (existing behaviour)
       const maxImgH = pageHeight * 0.36;
+      const minImgHFull = Math.min(pageHeight * 0.20, contentWidth * 0.32);
       let drawW = contentWidth;
       let drawH = drawW / ratio;
       if (drawH > maxImgH) {
         drawH = maxImgH;
         drawW = drawH * ratio;
       }
-      const imgX = marginX + (contentWidth - drawW) / 2;
 
       let capLines: string[] = [];
       const capLineH = 12;
@@ -1129,6 +1129,20 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       }
       const captionH = capLines.length ? capPadTop + capLines.length * capLineH + capPadBottom : 0;
       const linkH = block.media.isVideo ? 18 : 0;
+
+      // Try to keep this figure on the current page by shrinking if needed.
+      const chrome = 6 + 10 + captionH + linkH + 16;
+      const fitted = tryFitFigureOnCurrentPage(drawH, minImgHFull, chrome);
+      if (fitted !== null && fitted < drawH) {
+        drawH = fitted;
+        drawW = drawH * ratio;
+        if (drawW > contentWidth) {
+          drawW = contentWidth;
+          drawH = drawW / ratio;
+        }
+      }
+
+      const imgX = marginX + (contentWidth - drawW) / 2;
       const figureH = 6 + drawH + 10 + captionH + linkH + 16;
 
       ensureSpace(figureH);
