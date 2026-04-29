@@ -406,7 +406,10 @@ const TradeProductPage: React.FC = () => {
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
   const handleMaterialChange = (label: string | null) => {
     const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
-    if (idx !== undefined) setGalleryActiveIndex(idx);
+    if (idx !== undefined) {
+      setGalleryActiveIndex(idx);
+      setGalleryJumpNonce((n) => n + 1);
+    }
   };
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
