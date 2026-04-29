@@ -644,7 +644,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           </span>
                           <span className="text-muted-foreground">→</span>
                           <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground/80">
-                            {mapKey || "(empty)"}
+                            {keyDisplay || "(empty)"}
                           </code>
                           {typeof currentImageIdx === "number" ? (
                             <span className="text-muted-foreground">
