@@ -123,10 +123,13 @@ async function renderAndParse(): Promise<ParsedPage[]> {
 
   // Use the legacy build that doesn't need a worker (better for jsdom)
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  // Disable worker — synchronous main-thread parsing
-  (pdfjs as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc = "";
+  // Point worker at a resolvable path; pdfjs will fall back to the fake-worker
+  // path when fetching the URL fails in jsdom — that's fine, it then runs
+  // synchronously on the main thread.
+  (pdfjs as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc =
+    new URL("../../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs", import.meta.url).href;
 
-  const loadingTask = pdfjs.getDocument({ data: buf });
+  const loadingTask = pdfjs.getDocument({ data: buf, useWorkerFetch: false, isEvalSupported: false });
   const doc = await loadingTask.promise;
 
   const out: ParsedPage[] = [];
