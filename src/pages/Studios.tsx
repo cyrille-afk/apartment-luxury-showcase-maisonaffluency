@@ -133,7 +133,7 @@ export default function Studios() {
               <Link to="/trade-program">For trade · Apply for access</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/contact">Submit your studio</Link>
+              <Link to="/studios/submit">Submit your studio</Link>
             </Button>
           </div>
         </div>

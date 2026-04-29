@@ -2839,6 +2839,81 @@ export type Database = {
           },
         ]
       }
+      studio_submissions: {
+        Row: {
+          about: string | null
+          contact_name: string
+          country: string | null
+          created_at: string
+          disciplines: string[]
+          email: string
+          id: string
+          instagram: string | null
+          location: string | null
+          notable_projects: string | null
+          phone: string | null
+          portfolio_url: string | null
+          project_types: string[]
+          referrer: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          studio_name: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          about?: string | null
+          contact_name: string
+          country?: string | null
+          created_at?: string
+          disciplines?: string[]
+          email: string
+          id?: string
+          instagram?: string | null
+          location?: string | null
+          notable_projects?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          project_types?: string[]
+          referrer?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          studio_name: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          about?: string | null
+          contact_name?: string
+          country?: string | null
+          created_at?: string
+          disciplines?: string[]
+          email?: string
+          id?: string
+          instagram?: string | null
+          location?: string | null
+          notable_projects?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          project_types?: string[]
+          referrer?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          studio_name?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       studios: {
         Row: {
           billing_email: string | null
