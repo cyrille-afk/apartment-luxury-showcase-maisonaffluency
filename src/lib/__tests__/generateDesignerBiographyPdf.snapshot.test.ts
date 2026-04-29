@@ -81,14 +81,19 @@ beforeAll(() => {
 
 // Realistic Apparatus-style biography that triggers the page-3 issue:
 // drop-cap intro paragraph → media → paragraph → media → paragraph.
-const APPARATUS_BIO = [
+// Realistic Apparatus-style biography that triggers the page-3 issue:
+// drop-cap intro paragraph → media → paragraph → media → paragraph.
+// We repeat the cluster twice to guarantee ≥3 body pages of content so the
+// whitespace assertion has interior pages to inspect.
+const APPARATUS_CLUSTER = [
   "Apparatus is a New York-based design studio established in 2012 by Gabriel Hendifar and Jeremy Anderson. The studio explores the relationship between materials and craft through a tightly edited collection of lighting, furniture, and objects. Their work has been celebrated for its sculptural confidence and an obsessive attention to handwork.",
   "![Apparatus New York Gallery, 124 West 30th Street, Floor 4, New York, NY 10001](https://res.cloudinary.com/example/image/upload/apparatus-ny.jpg)",
   "At Apparatus, hand-patinated brass forms the structural backbone of nearly every piece. It is combined with sensual, time-honoured materials — marble, suede, horsehair, lacquer, porcelain, alabaster, hand-frosted mouth-blown glass, and hand-cast resin — all fabricated with a devotion to small-studio craftsmanship. Each piece embodies a deft balance between mechanisation and the handmade. The studio's custom component catalogue now numbers more than 700 parts.",
   "![Apparatus London Gallery, Mount Street, Mayfair - Photo Credit Matthew Placek](https://res.cloudinary.com/example/image/upload/apparatus-london.jpg)",
   "In May 2023, Apparatus opened its first European gallery on Mount Street in Mayfair, London — a 3,200-square-foot Grade II-listed building dating to the 1890s, conceived as a living expression of the brand's immersive design ethos. Today Apparatus employs approximately 110 team members across design, sales, operations, and manufacturing, with showrooms in New York, Los Angeles, Milan, and London.",
   "The studio has created environments for the Four Seasons, Soho House, Paris's Hôtel Lutetia, and architect Annabelle Selldorf. Interior designers Jamie Drake, Kelly Behun, Christine Gachot, and Nate Berkus are among its most prominent advocates. Gabriel Hendifar serves as Artistic Director and CEO; Jeremy Anderson, co-founder, initially handled operations, production, and finishing — personally wiring fixtures, applying patinas, and hand-finishing leather details in the early years.",
-].join("\n\n");
+];
+const APPARATUS_BIO = [...APPARATUS_CLUSTER, ...APPARATUS_CLUSTER].join("\n\n");
 
 interface ParsedTextItem {
   str: string;
