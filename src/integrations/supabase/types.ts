@@ -1153,6 +1153,84 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_studios: {
+        Row: {
+          bio: string | null
+          contact_email: string | null
+          country: string | null
+          created_at: string
+          disciplines: string[]
+          founded_year: number | null
+          gallery_images: string[] | null
+          hero_image_url: string | null
+          id: string
+          instagram_handle: string | null
+          is_featured: boolean
+          is_published: boolean
+          location: string | null
+          logo_url: string | null
+          name: string
+          notable_projects: string | null
+          project_types: string[]
+          slug: string
+          sort_order: number
+          tagline: string | null
+          team_size: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          contact_email?: string | null
+          country?: string | null
+          created_at?: string
+          disciplines?: string[]
+          founded_year?: number | null
+          gallery_images?: string[] | null
+          hero_image_url?: string | null
+          id?: string
+          instagram_handle?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          notable_projects?: string | null
+          project_types?: string[]
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          team_size?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          contact_email?: string | null
+          country?: string | null
+          created_at?: string
+          disciplines?: string[]
+          founded_year?: number | null
+          gallery_images?: string[] | null
+          hero_image_url?: string | null
+          id?: string
+          instagram_handle?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          notable_projects?: string | null
+          project_types?: string[]
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          team_size?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       gallery_hotspots: {
         Row: {
           created_at: string

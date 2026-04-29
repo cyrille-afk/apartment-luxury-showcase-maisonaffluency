@@ -20,6 +20,8 @@ const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
+const Studios = lazy(() => import("./pages/Studios"));
+const StudioProfile = lazy(() => import("./pages/StudioProfile"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
@@ -199,7 +201,9 @@ const App = () => {
                   <Route path="/collectibles" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicCollectibles /></Suspense>} />
                   <Route path="/gallery" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicGallery /></Suspense>} />
                   <Route path="/contact" element={<Suspense fallback={<PageLoadingSkeleton />}><ContactPage /></Suspense>} />
-                  <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
+                   <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
+                   <Route path="/studios" element={<Suspense fallback={<PageLoadingSkeleton />}><Studios /></Suspense>} />
+                   <Route path="/studios/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><StudioProfile /></Suspense>} />
                   
                   
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
