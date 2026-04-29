@@ -156,16 +156,30 @@ const TradeDesigners = () => {
     []
   );
 
+  // Count published children per founder. A parent only acts as an "atelier card"
+  // (black square label) when at least one published child is attached to it.
+  const publishedChildCountByFounder = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const d of designers) {
+      if (!d.is_published) continue;
+      if (!d.founder || d.founder === d.name) continue;
+      const key = normalizeText(d.founder);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return counts;
+  }, [designers]);
+
   const enriched = useMemo(() => {
     return designers
       .filter((d) => !HIDDEN_CHILD_DESIGNERS.has(normalizeText(d.name)))
       .map((d) => {
         const tags = extractTags(d.specialty);
         const productCount = productCountMap.get(d.name.toLowerCase()) || 0;
-        const isAtelierCard = !!(d.founder && d.founder === d.name);
+        const hasChildren = (publishedChildCountByFounder.get(normalizeText(d.name)) || 0) > 0;
+        const isAtelierCard = !!(d.founder && d.founder === d.name && hasChildren);
         return { ...d, tags, productCount, isAtelierCard };
       });
-  }, [designers, productCountMap, HIDDEN_CHILD_DESIGNERS]);
+  }, [designers, productCountMap, HIDDEN_CHILD_DESIGNERS, publishedChildCountByFounder]);
 
   // Split carousel entries into ateliers vs designers
   const atelierCarouselEntries = useMemo(() => {
