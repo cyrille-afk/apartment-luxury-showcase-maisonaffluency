@@ -423,7 +423,10 @@ const TradeProductPage: React.FC = () => {
     singleMaterialOptions,
     hasSingleAxisSplit,
   } = axes;
-  const hasDualSize = dualSizeOptions.length > 0;
+  // Only ask the user to choose a size when there is a real choice. If every
+  // dual-axis variant shares one size label, material selection alone should
+  // resolve the priced row (e.g. Soleil: Oak vs Straw Marquetry at Ø85).
+  const hasDualSize = dualSizeOptions.length > 1;
   const dualVariant = isDualAxis
     ? sizeVariants!.find((v) =>
         (v.base || "").trim() === (selectedBase || "") &&
