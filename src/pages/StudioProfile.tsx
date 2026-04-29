@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ExternalLink, Globe, Instagram, Mail, MapPin } from "lucide-react";
+import { ArrowLeft, BarChart3, ExternalLink, Globe, Instagram, Mail, MapPin } from "lucide-react";
+import { logStudioEvent, type StudioCtaKind } from "@/lib/leadTracking";
 
 type Studio = {
   id: string;
@@ -26,6 +28,7 @@ type Studio = {
   project_types: string[];
   notable_projects: string | null;
   is_featured: boolean;
+  owner_user_id: string | null;
 };
 
 const LABELS: Record<string, string> = {
