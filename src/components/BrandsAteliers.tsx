@@ -3338,20 +3338,54 @@ const BrandsAteliers = () => {
 
         {/* Alphabetical strips */}
         <div>
-          {alphaGroups.map(([letter, brands]) => (
-            <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
-              <AlphaStrip
-                letter={letter}
-                brands={brands}
-                isInView={isInView}
-                scrollToGallery={scrollToGallery}
-                onOpenPicks={openPicks}
-                initialExpandBrand={expandBrand}
-                onExpandConsumed={handleExpandConsumed}
-              />
-              {/* Ecart sub-designers are now inline in the strip */}
-            </div>
-          ))}
+          {allLetters.map((letter) => {
+            const brands = alphaGroups.find(([l]) => l === letter)?.[1];
+            const subs = subDesignerIndexByLetter[letter] || [];
+            return (
+              <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
+                {brands && brands.length > 0 ? (
+                  <AlphaStrip
+                    letter={letter}
+                    brands={brands}
+                    isInView={isInView}
+                    scrollToGallery={scrollToGallery}
+                    onOpenPicks={openPicks}
+                    initialExpandBrand={expandBrand}
+                    onExpandConsumed={handleExpandConsumed}
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 mb-3 px-1 mt-6">
+                    <span className="font-serif text-2xl text-foreground md:text-primary/60">{letter}</span>
+                    <div className="flex-1 h-px bg-border/30" />
+                  </div>
+                )}
+
+                {subs.length > 0 && (
+                  <div className="px-1 mb-8 -mt-2">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-body mb-2">
+                      Re-edited designers
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {subs.map((sub) => (
+                        <button
+                          key={`${sub.parentBrand}-${sub.name}`}
+                          type="button"
+                          onClick={() => handleSubDesignerClick(sub.dbParentName)}
+                          className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/60 bg-background/60 hover:bg-background hover:border-foreground/30 transition-all text-xs font-body"
+                          aria-label={`${sub.name} — re-edited by ${sub.parentBrand}`}
+                        >
+                          <span className="text-foreground">{sub.name}</span>
+                          <span className="text-muted-foreground/70 text-[10px] uppercase tracking-wider">
+                            ↳ {sub.parentBrand}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
         </div>
 
