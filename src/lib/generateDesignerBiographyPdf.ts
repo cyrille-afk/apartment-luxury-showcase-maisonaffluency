@@ -992,12 +992,20 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
 
         // Target image height: match the right-column text height for a balanced
         // spread, clamped so it never becomes a stamp or a giant.
-        const minImgH = Math.min(pageHeight * 0.28, contentWidth * 0.45);
+        const minImgH = Math.min(pageHeight * 0.24, contentWidth * 0.40);
         const maxImgH = pageHeight * 0.48;
-        const targetImgH = Math.max(
+        let targetImgH = Math.max(
           minImgH,
           Math.min(maxImgH, rightTextH - captionH - linkH),
         );
+
+        // Try to keep this figure on the current page by shrinking if needed,
+        // rather than leaving the bottom of the page empty.
+        const chrome = captionH + linkH + 18;
+        const fitted = tryFitFigureOnCurrentPage(targetImgH, minImgH, chrome);
+        if (fitted !== null) {
+          targetImgH = fitted;
+        }
 
         let drawH = targetImgH;
         let drawW = drawH * ratio;
