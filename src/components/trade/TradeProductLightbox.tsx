@@ -27,6 +27,11 @@ export interface TradeProductLightboxItem {
   subcategory?: string;
   pdf_url?: string | null;
   price?: string | null;
+  /** Optional: priced variants (label/base/top + price_cents). When present, the
+   *  lightbox shows each variant's price in the price block so users see how
+   *  selecting a different finish/size changes the price. */
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  currency?: string | null;
 }
 
 interface TradeProductLightboxProps {
