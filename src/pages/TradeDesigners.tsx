@@ -221,14 +221,16 @@ const TradeDesigners = () => {
       const sortName = d.isAtelierCard
         ? `${d.name}\0\0`
         : d.founder && d.founder !== d.name
-          ? `${d.founder}\0\x01${d.name}`
+          ? d.founder === selectedBrand
+            ? `${d.founder}\0\x01${d.name}`
+            : d.name
           : d.name;
       entries.push({ designer: d, sortName });
     }
 
     entries.sort((a, b) => {
-      const aFounder = a.designer.isAtelierCard ? a.designer.name : (a.designer.founder || "");
-      const bFounder = b.designer.isAtelierCard ? b.designer.name : (b.designer.founder || "");
+      const aFounder = a.designer.isAtelierCard ? a.designer.name : (a.designer.founder === selectedBrand ? a.designer.founder : "");
+      const bFounder = b.designer.isAtelierCard ? b.designer.name : (b.designer.founder === selectedBrand ? b.designer.founder : "");
       if (aFounder && bFounder && aFounder === bFounder) {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
@@ -242,8 +244,8 @@ const TradeDesigners = () => {
     const letterMap = new Map<string, typeof entries>();
     for (const entry of entries) {
       const d = entry.designer;
-      const groupName = d.isAtelierCard ? d.name : (d.founder && d.founder !== d.name ? d.founder : d.name);
-      const letter = groupName.charAt(0).toUpperCase();
+      const groupName = d.isAtelierCard ? d.name : (d.founder === selectedBrand ? d.founder : d.name);
+      const letter = initialOf(groupName);
       if (!letterMap.has(letter)) letterMap.set(letter, []);
       letterMap.get(letter)!.push(entry);
     }
@@ -258,13 +260,13 @@ const TradeDesigners = () => {
     }
 
     return [...letterMap.entries()].sort(([a], [b]) => a.localeCompare(b));
-  }, [filtered]);
+  }, [filtered, selectedBrand]);
 
   const allLetters = useMemo(() => {
     const letters = new Set<string>();
     for (const b of enriched) {
-      letters.add(b.name.charAt(0).toUpperCase());
-      if (b.founder) letters.add(b.founder.charAt(0).toUpperCase());
+      letters.add(initialOf(b.name));
+      if (b.founder) letters.add(initialOf(b.founder));
     }
     return [...letters].sort();
   }, [enriched]);
