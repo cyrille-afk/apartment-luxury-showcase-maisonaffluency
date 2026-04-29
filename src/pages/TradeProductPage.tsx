@@ -446,6 +446,17 @@ const TradeProductPage: React.FC = () => {
     label: string | null,
     opts?: { base?: string | null; top?: string | null; size?: string | null }
   ) => {
+    // Detect a "clear selection" call: no label and no axis values.
+    const isClear =
+      !label &&
+      (!opts || (!opts.base && !opts.top && !opts.size));
+    if (isClear) {
+      // Reset hero back to the primary product image so the gallery visibly
+      // matches the cleared selection state.
+      setGalleryActiveIndex(0);
+      setGalleryJumpNonce((n) => n + 1);
+      return;
+    }
     const idx = opts && (opts.base || opts.top || opts.size)
       ? resolveVariantImageIndex(productFinishMap, {
           base: opts.base,
