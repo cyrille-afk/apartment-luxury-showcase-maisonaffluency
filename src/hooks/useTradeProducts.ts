@@ -176,15 +176,24 @@ export function useTradeProducts() {
     return Array.from(merged.values());
   }, [staticProducts, liveProducts]);
 
+  // Apply dev-only hidden-IDs filter (used by the duplicate banner so devs
+  // can suppress unwanted near-duplicate cards from the live grid).
+  const allProducts = useMemo(
+    () => (hiddenIds.size === 0 ? mergedProducts : mergedProducts.filter((p) => !hiddenIds.has(p.id))),
+    [mergedProducts, hiddenIds]
+  );
+
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
   const categories = useMemo(() => getAllCategories(allProducts), [allProducts]);
 
   // Dev-only: detect likely duplicate cards (exact key matches collapse via Map,
   // but near-duplicates like "Pars" vs "Pars Cocktail Table" can survive merge).
+  // Computed against the *unfiltered* merged set so hidden items remain visible
+  // in the banner and can be unhidden.
   const duplicateGroups = useMemo<DuplicateGroup[]>(() => {
     if (!import.meta.env.DEV) return [];
     const byBrand = new Map<string, TradeProduct[]>();
-    for (const p of allProducts) {
+    for (const p of mergedProducts) {
       const b = p.brand_name.trim().toLowerCase();
       if (!byBrand.has(b)) byBrand.set(b, []);
       byBrand.get(b)!.push(p);
@@ -219,7 +228,7 @@ export function useTradeProducts() {
       }
     }
     return groups;
-  }, [allProducts]);
+  }, [mergedProducts]);
 
   return { allProducts, brands, categories, getSubcategories, duplicateGroups };
 }
