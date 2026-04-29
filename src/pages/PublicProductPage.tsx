@@ -497,7 +497,10 @@ const PublicProductPage: React.FC = () => {
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
     const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
-    if (idx !== undefined) setGalleryActiveIndex(idx);
+    if (idx !== undefined) {
+      setGalleryActiveIndex(idx);
+      setGalleryJumpNonce((n) => n + 1);
+    }
   };
 
   return (
