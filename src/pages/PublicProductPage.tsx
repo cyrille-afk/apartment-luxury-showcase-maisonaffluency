@@ -916,7 +916,8 @@ const PublicProductPage: React.FC = () => {
                     </p>
                     <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                       <Link
-                        to={`/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                        to={`/designers/${designer.slug}`}
+                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                         className="hover:text-primary transition-colors"
                       >
                         {designerDisplay}
