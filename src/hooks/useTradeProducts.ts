@@ -151,12 +151,19 @@ export function useTradeProducts() {
         const candidates = descriptionsByBrand.get(brand);
         if (!candidates) continue;
         const pName = product.product_name.trim().toLowerCase();
-        // Match if the candidate name tokens are a subset of the product name tokens (min 2 tokens)
+        // Match if the candidate name tokens are a subset of the product name tokens (min 2 tokens),
+        // or if a short/static display name is the leading token of the fuller live product name.
+        // e.g. "Casque" (static gallery card) → "Casque Bar Cabinet" (live curator pick)
         for (const c of candidates) {
           const cTokens = c.name.split(/\s+/).filter(t => t.length > 2);
-          if (cTokens.length < 2) continue;
+          const pTokens = pName.split(/\s+/).filter(t => t.length > 2);
+          const isShortDisplayNameMatch =
+            pTokens.length === 1 &&
+            pTokens[0].length >= 5 &&
+            cTokens[0] === pTokens[0];
+          if (cTokens.length < 2 && !isShortDisplayNameMatch) continue;
           const allPresent = cTokens.every(t => pName.includes(t));
-          if (allPresent) {
+          if (allPresent || isShortDisplayNameMatch) {
             product.description = c.description;
             break;
           }
