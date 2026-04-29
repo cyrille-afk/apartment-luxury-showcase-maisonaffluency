@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ExternalLink, Globe, Instagram, Mail, MapPin } from "lucide-react";
+import { ArrowLeft, BarChart3, ExternalLink, Globe, Instagram, Mail, MapPin } from "lucide-react";
+import { logStudioEvent, type StudioCtaKind } from "@/lib/leadTracking";
 
 type Studio = {
   id: string;
@@ -26,6 +28,7 @@ type Studio = {
   project_types: string[];
   notable_projects: string | null;
   is_featured: boolean;
+  owner_user_id: string | null;
 };
 
 const LABELS: Record<string, string> = {
@@ -43,6 +46,7 @@ const LABELS: Record<string, string> = {
 
 export default function StudioProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const { user, isAdmin } = useAuth();
   const [studio, setStudio] = useState<Studio | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -60,10 +64,20 @@ export default function StudioProfile() {
         setNotFound(true);
       } else {
         setStudio(data as Studio);
+        logStudioEvent({ studioId: data.id, eventType: "profile_view" });
       }
       setLoading(false);
     })();
   }, [slug]);
+
+  const canViewInsights =
+    !!studio && (isAdmin || (!!user && studio.owner_user_id === user.id));
+
+  const trackCta = (kind: StudioCtaKind) => {
+    if (studio?.id) {
+      logStudioEvent({ studioId: studio.id, eventType: "cta_click", ctaKind: kind });
+    }
+  };
 
   if (loading) {
     return (
@@ -104,14 +118,21 @@ export default function StudioProfile() {
         {studio.hero_image_url && <meta property="og:image" content={studio.hero_image_url} />}
       </Helmet>
 
-      {/* Back */}
-      <div className="mx-auto max-w-6xl px-6 pt-8">
+      {/* Back + insights (owner/admin only) */}
+      <div className="mx-auto max-w-6xl px-6 pt-8 flex items-center justify-between gap-4">
         <Link
           to="/studios"
           className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3 w-3" /> Back to directory
         </Link>
+        {canViewInsights && (
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/studios/${studio.slug}/insights`}>
+              <BarChart3 className="h-3.5 w-3.5 mr-2" /> Insights
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Hero */}
@@ -198,7 +219,12 @@ export default function StudioProfile() {
           <div className="space-y-2 pt-2">
             {studio.website_url && (
               <Button asChild variant="outline" className="w-full justify-between">
-                <a href={studio.website_url} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={studio.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackCta("website")}
+                >
                   <span className="flex items-center gap-2">
                     <Globe className="h-4 w-4" /> Website
                   </span>
@@ -208,7 +234,12 @@ export default function StudioProfile() {
             )}
             {igUrl && (
               <Button asChild variant="outline" className="w-full justify-between">
-                <a href={igUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={igUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackCta("instagram")}
+                >
                   <span className="flex items-center gap-2">
                     <Instagram className="h-4 w-4" /> @{igHandle}
                   </span>
@@ -218,7 +249,10 @@ export default function StudioProfile() {
             )}
             {studio.contact_email && (
               <Button asChild className="w-full justify-between">
-                <a href={`mailto:${studio.contact_email}`}>
+                <a
+                  href={`mailto:${studio.contact_email}`}
+                  onClick={() => trackCta("email")}
+                >
                   <span className="flex items-center gap-2">
                     <Mail className="h-4 w-4" /> Contact studio
                   </span>

@@ -1171,6 +1171,7 @@ export type Database = {
           logo_url: string | null
           name: string
           notable_projects: string | null
+          owner_user_id: string | null
           project_types: string[]
           slug: string
           sort_order: number
@@ -1196,6 +1197,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           notable_projects?: string | null
+          owner_user_id?: string | null
           project_types?: string[]
           slug: string
           sort_order?: number
@@ -1221,6 +1223,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           notable_projects?: string | null
+          owner_user_id?: string | null
           project_types?: string[]
           slug?: string
           sort_order?: number
@@ -2716,6 +2719,59 @@ export type Database = {
           },
         ]
       }
+      studio_lead_events: {
+        Row: {
+          country: string | null
+          created_at: string
+          cta_kind: string | null
+          event_type: string
+          filter_key: string | null
+          filter_value: string | null
+          id: string
+          referrer: string | null
+          studio_id: string | null
+          user_agent: string | null
+          user_id: string | null
+          visitor_hash: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          cta_kind?: string | null
+          event_type: string
+          filter_key?: string | null
+          filter_value?: string | null
+          id?: string
+          referrer?: string | null
+          studio_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visitor_hash?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          cta_kind?: string | null
+          event_type?: string
+          filter_key?: string | null
+          filter_value?: string | null
+          id?: string
+          referrer?: string | null
+          studio_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visitor_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_lead_events_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "featured_studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       studio_members: {
         Row: {
           id: string
@@ -3902,6 +3958,10 @@ export type Database = {
           _studio_id: string
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_studio_owner: {
+        Args: { _studio_id: string; _user_id: string }
         Returns: boolean
       }
       log_public_download_event: {
