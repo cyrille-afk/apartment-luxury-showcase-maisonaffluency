@@ -95,8 +95,8 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
           <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">Collectible</span>
         )}
         {isAtelier && !brand.source?.includes("collectible") && (
-          <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-            <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
+          <div className="absolute top-2.5 left-2.5 w-11 h-11 md:w-14 md:h-14 bg-foreground flex items-center justify-center p-1 overflow-hidden rounded-sm">
+            <span className="font-display text-[6px] md:text-[7.5px] text-background text-center leading-[1.15] uppercase tracking-[0.1em]">{brand.name}</span>
           </div>
         )}
         {brand.founder && !isAtelier && !brand.source?.includes("collectible") && (
