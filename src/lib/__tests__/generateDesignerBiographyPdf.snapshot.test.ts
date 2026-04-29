@@ -48,14 +48,35 @@ class StubImage {
 beforeAll(() => {
   // @ts-expect-error overriding for jsdom
   globalThis.Image = StubImage;
-  // canvas.toDataURL needs to return a non-empty JPEG string so the generator
-  // accepts the bitmap. We monkey-patch the prototype.
+
+  // jsdom has no canvas backend — return a minimal 2D context stub so the
+  // generator can call drawImage / fillRect without crashing.
   const protoCanvas = HTMLCanvasElement.prototype as unknown as {
+    getContext: (type: string) => unknown;
     toDataURL: (type?: string) => string;
   };
+  const ctxStub = {
+    fillStyle: "#ffffff",
+    fillRect: () => {},
+    drawImage: () => {},
+  };
+  protoCanvas.getContext = () => ctxStub;
   protoCanvas.toDataURL = () =>
     // 4-byte JPEG-shaped data URL — jsPDF only checks for the "data:image/jpeg" prefix
     "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AKpgD//Z";
+
+  // jsPDF's Blob in jsdom doesn't expose .arrayBuffer(); polyfill it.
+  if (typeof Blob.prototype.arrayBuffer !== "function") {
+    // @ts-expect-error polyfill
+    Blob.prototype.arrayBuffer = function () {
+      return new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(this);
+      });
+    };
+  }
 });
 
 // Realistic Apparatus-style biography that triggers the page-3 issue:
