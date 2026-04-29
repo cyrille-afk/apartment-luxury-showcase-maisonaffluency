@@ -624,7 +624,8 @@ const TradeProductPage: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Link
-                  to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                  to={`/trade/designers/${designer.slug}`}
+                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                   className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
