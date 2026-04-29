@@ -23,6 +23,7 @@ import TradeProductLightbox, { type TradeProductLightboxItem } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { consumeProductBackRef } from "@/lib/designerBackRef";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
