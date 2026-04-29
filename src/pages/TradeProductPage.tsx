@@ -256,6 +256,9 @@ const TradeProductPage: React.FC = () => {
   // material/finish dropdown is changed (state-backed so behaviour matches the
   // public side exactly).
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  // Bumped on every parent-initiated jump so the gallery re-syncs even when the
+  // numeric index is identical to the previous one (e.g. re-selecting the same finish).
+  const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
@@ -403,7 +406,10 @@ const TradeProductPage: React.FC = () => {
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
   const handleMaterialChange = (label: string | null) => {
     const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
-    if (idx !== undefined) setGalleryActiveIndex(idx);
+    if (idx !== undefined) {
+      setGalleryActiveIndex(idx);
+      setGalleryJumpNonce((n) => n + 1);
+    }
   };
 
   const pageTitle = `${product.title}${product.subtitle ? ` ${product.subtitle}` : ""} by ${designerDisplay}`;
@@ -551,6 +557,7 @@ const TradeProductPage: React.FC = () => {
               images={images}
               alt={product.title}
               activeIndex={galleryActiveIndex}
+              activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
               overlay={
                 product.description ? (

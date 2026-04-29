@@ -367,6 +367,9 @@ const PublicProductPage: React.FC = () => {
   const [relatedIndex, setRelatedIndex] = useState(0);
   const [bioExpanded, setBioExpanded] = useState(false);
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  // Bumped on every parent-initiated jump so the gallery re-syncs even when the
+  // numeric index is identical to the previous one (e.g. re-selecting the same finish).
+  const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -494,7 +497,10 @@ const PublicProductPage: React.FC = () => {
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (label: string | null) => {
     const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
-    if (idx !== undefined) setGalleryActiveIndex(idx);
+    if (idx !== undefined) {
+      setGalleryActiveIndex(idx);
+      setGalleryJumpNonce((n) => n + 1);
+    }
   };
 
   return (
@@ -579,6 +585,7 @@ const PublicProductPage: React.FC = () => {
                 images={images}
                 alt={product.title}
                 activeIndex={galleryActiveIndex}
+                activeIndexNonce={galleryJumpNonce}
                 onIndexChange={setGalleryActiveIndex}
                 overlay={
                   product.description ? (

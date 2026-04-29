@@ -11,20 +11,29 @@ interface ProductImageGalleryProps {
   overlay?: React.ReactNode;
   /** Optional controlled active index. When provided, the gallery jumps to it whenever it changes. */
   activeIndex?: number;
+  /**
+   * Optional bump counter. Incrementing this forces the gallery to re-sync to
+   * `activeIndex` even when the numeric value is identical to the previous one
+   * (e.g. user re-selects the same finish after manually scrolling away).
+   */
+  activeIndexNonce?: number;
   /** Notifies the parent whenever the active index changes (thumbnail click, arrow nav, dot, etc.) so parent state stays in sync. */
   onIndexChange?: (index: number) => void;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex, onIndexChange }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
-  // Sync with external controlled index
+  // Sync with external controlled index. Re-runs whenever the index *or* the
+  // nonce changes, so parent-initiated re-selections always force a jump even
+  // if the numeric index hasn't moved.
   useEffect(() => {
-    if (controlledIndex != null && controlledIndex !== activeIndex) {
+    if (controlledIndex != null) {
       setActiveIndex(Math.max(0, Math.min(controlledIndex, images.length - 1)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controlledIndex]);
+  }, [controlledIndex, activeIndexNonce]);
+
   const [zoomOpen, setZoomOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
