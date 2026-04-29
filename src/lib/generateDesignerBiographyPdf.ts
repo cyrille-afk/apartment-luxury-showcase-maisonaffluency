@@ -565,12 +565,14 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(8);
     doc.text(sanitizeUrlForDisplay(input.profileUrl), pageWidth - marginX, pageHeight - marginBottom + 34, { align: "right" });
   }
-  // Personalized recipient line — top-right of cover
+  // Personalized recipient line — placed on the cream block above the footer
+  // hairline so it sits on a light surface and reads clearly (was overlaid on
+  // the dark hero image previously and was barely visible).
   if (recipient || input.downloadedAt) {
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(7.5);
-    doc.setTextColor(...muted);
-    doc.text(preparedLine, pageWidth - marginX, marginTop - 36, { align: "right" });
+    doc.setFontSize(9);
+    doc.setTextColor(...inkSoft);
+    doc.text(preparedLine, marginX, pageHeight - marginBottom);
     doc.setFont("helvetica", "normal");
   }
 
