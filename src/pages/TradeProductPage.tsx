@@ -47,6 +47,7 @@ import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageInde
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { rememberProductBackRef } from "@/lib/designerBackRef";
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
