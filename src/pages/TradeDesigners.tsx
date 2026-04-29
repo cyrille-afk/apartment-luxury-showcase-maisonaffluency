@@ -29,6 +29,18 @@ function extractTags(specialty: string): string[] {
   return tags.length > 0 ? tags : ["Design"];
 }
 
+const normalizeText = (value: string | null | undefined) =>
+  (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const initialOf = (value: string | null | undefined) => {
+  const first = normalizeText(value).charAt(0).toUpperCase();
+  return /[A-Z]/.test(first) ? first : "#";
+};
+
 
 type EnrichedDesigner = {
   id: string; slug: string; name: string; founder: string | null; specialty: string;
@@ -131,9 +143,9 @@ const TradeDesigners = () => {
     const map = new Map<string, string>();
     for (const p of allProducts) {
       if (!p.materials) continue;
-      const key = p.brand_name.toLowerCase();
+      const key = normalizeText(p.brand_name);
       const prev = map.get(key) || "";
-      map.set(key, prev + " " + p.materials.toLowerCase());
+      map.set(key, `${prev} ${normalizeText(p.materials)}`);
     }
     return map;
   }, [allProducts]);
@@ -177,20 +189,22 @@ const TradeDesigners = () => {
     let result = enriched.slice();
 
     if (selectedBrand !== "all") {
-      // Brand carousel selections should show only the selected card itself.
-      // Child designers stay accessible via their own dedicated profiles, not as
-      // duplicate cards under the atelier selection.
-      result = result.filter((d) => d.name === selectedBrand);
+      const selected = normalizeText(selectedBrand);
+      result = result.filter(
+        (d) => normalizeText(d.name) === selected || normalizeText(d.founder) === selected
+      );
     }
 
     if (search) {
-      const q = search.toLowerCase();
+      const q = normalizeText(search);
       result = result.filter(
         (b) =>
-          b.name.toLowerCase().includes(q) ||
-          b.specialty.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q)) ||
-          (brandMaterialsMap.get(b.name.toLowerCase()) || "").includes(q)
+          normalizeText(b.name).includes(q) ||
+          normalizeText(b.founder).includes(q) ||
+          normalizeText(b.specialty).includes(q) ||
+          b.tags.some((t) => normalizeText(t).includes(q)) ||
+          (brandMaterialsMap.get(normalizeText(b.name)) || "").includes(q) ||
+          (brandMaterialsMap.get(normalizeText(b.founder)) || "").includes(q)
       );
     }
     if (activeFilters.length > 0) {
@@ -207,14 +221,16 @@ const TradeDesigners = () => {
       const sortName = d.isAtelierCard
         ? `${d.name}\0\0`
         : d.founder && d.founder !== d.name
-          ? `${d.founder}\0\x01${d.name}`
+          ? d.founder === selectedBrand
+            ? `${d.founder}\0\x01${d.name}`
+            : d.name
           : d.name;
       entries.push({ designer: d, sortName });
     }
 
     entries.sort((a, b) => {
-      const aFounder = a.designer.isAtelierCard ? a.designer.name : (a.designer.founder || "");
-      const bFounder = b.designer.isAtelierCard ? b.designer.name : (b.designer.founder || "");
+      const aFounder = a.designer.isAtelierCard ? a.designer.name : (a.designer.founder === selectedBrand ? a.designer.founder : "");
+      const bFounder = b.designer.isAtelierCard ? b.designer.name : (b.designer.founder === selectedBrand ? b.designer.founder : "");
       if (aFounder && bFounder && aFounder === bFounder) {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
@@ -228,8 +244,8 @@ const TradeDesigners = () => {
     const letterMap = new Map<string, typeof entries>();
     for (const entry of entries) {
       const d = entry.designer;
-      const groupName = d.isAtelierCard ? d.name : (d.founder && d.founder !== d.name ? d.founder : d.name);
-      const letter = groupName.charAt(0).toUpperCase();
+      const groupName = d.isAtelierCard ? d.name : (d.founder === selectedBrand ? d.founder : d.name);
+      const letter = initialOf(groupName);
       if (!letterMap.has(letter)) letterMap.set(letter, []);
       letterMap.get(letter)!.push(entry);
     }
@@ -244,13 +260,13 @@ const TradeDesigners = () => {
     }
 
     return [...letterMap.entries()].sort(([a], [b]) => a.localeCompare(b));
-  }, [filtered]);
+  }, [filtered, selectedBrand]);
 
   const allLetters = useMemo(() => {
     const letters = new Set<string>();
     for (const b of enriched) {
-      letters.add(b.name.charAt(0).toUpperCase());
-      if (b.founder) letters.add(b.founder.charAt(0).toUpperCase());
+      letters.add(initialOf(b.name));
+      if (b.founder) letters.add(initialOf(b.founder));
     }
     return [...letters].sort();
   }, [enriched]);
@@ -305,7 +321,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = b.charAt(0).toUpperCase();
+                    const letter = initialOf(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -325,7 +341,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = b.charAt(0).toUpperCase();
+                    const letter = initialOf(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -371,7 +387,7 @@ const TradeDesigners = () => {
                 onSelect={(b) => {
                   setSelectedBrand(b);
                   if (b === "all") return;
-                  const letter = b.charAt(0).toUpperCase();
+                  const letter = initialOf(b);
                   requestAnimationFrame(() => {
                     const el = document.getElementById(`designer-letter-${letter}`);
                     el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -387,8 +403,8 @@ const TradeDesigners = () => {
           {allLetters.map((letter) => {
             const hasResults = grouped.some(([l]) => l === letter);
             const hasAnyResults = enriched.some((d) => {
-              const ch = d.name.charAt(0).toUpperCase();
-              const fch = d.founder ? d.founder.charAt(0).toUpperCase() : null;
+              const ch = initialOf(d.name);
+              const fch = d.founder ? initialOf(d.founder) : null;
               return ch === letter || fch === letter;
             });
             return (
