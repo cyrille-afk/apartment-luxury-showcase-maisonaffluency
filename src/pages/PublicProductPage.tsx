@@ -188,7 +188,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
       setSelBase(firstBase);
       setSelTop(compatTops[0]);
       setDefaultPair({ base: firstBase, top: compatTops[0] });
-      onMaterialChange?.(firstBase, { base: firstBase, top: compatTops[0] });
+      onMaterialChange?.(firstBase, { base: firstBase, top: compatTops[0], size: null });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
