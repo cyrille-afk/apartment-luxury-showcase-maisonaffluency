@@ -103,10 +103,9 @@ async function renderAndParse(): Promise<ParsedPage[]> {
   // Use the legacy build that doesn't need a worker (better for jsdom)
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
   // Disable worker — synchronous main-thread parsing
-  // @ts-expect-error pdfjs types
-  pdfjs.GlobalWorkerOptions.workerSrc = "";
+  (pdfjs as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc = "";
 
-  const loadingTask = pdfjs.getDocument({ data: buf, disableWorker: true });
+  const loadingTask = pdfjs.getDocument({ data: buf });
   const doc = await loadingTask.promise;
 
   const out: ParsedPage[] = [];
