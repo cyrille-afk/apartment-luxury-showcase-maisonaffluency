@@ -627,6 +627,33 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
+                    {/* Image key preview — shows which field drives the variant_image_map lookup */}
+                    <div className="pl-1 text-[10px] flex flex-wrap items-center gap-1.5 text-muted-foreground/80">
+                      <span className="uppercase tracking-wider">Image key:</span>
+                      {keySource ? (
+                        <>
+                          <span className="rounded bg-muted px-1.5 py-0.5 font-medium text-foreground/80">
+                            {keySource}
+                          </span>
+                          <span className="text-muted-foreground">→</span>
+                          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground/80">
+                            {mapKey || "(empty)"}
+                          </code>
+                          {typeof currentImageIdx === "number" ? (
+                            <span className="text-muted-foreground">
+                              (image #{currentImageIdx + 1})
+                            </span>
+                          ) : (
+                            <span className="italic text-muted-foreground/60">unmapped</span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="italic text-muted-foreground/60">
+                          Fill Top, Base, or Label to enable mapping
+                        </span>
+                      )}
+                    </div>
+                    </div>
                     );
                   })}
                 </div>
