@@ -96,6 +96,8 @@ function pickToLightboxItem(
     subcategory: pick.subcategory || undefined,
     pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
     price,
+    size_variants: (pick as any).size_variants ?? null,
+    currency,
   };
 }
 
