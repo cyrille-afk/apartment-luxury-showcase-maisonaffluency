@@ -725,7 +725,7 @@ const TradeProductPage: React.FC = () => {
                         const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
                         if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
                       }
-                      handleMaterialChange(v, { base: v, top: nextTop });
+                      handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
                     }}
                     disabledIndices={disabledBaseIdx}
                     helperText={
