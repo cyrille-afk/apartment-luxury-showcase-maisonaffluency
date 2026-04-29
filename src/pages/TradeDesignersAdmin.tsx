@@ -478,8 +478,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           const nextMap: Record<string, number> = {};
                           let assigned = 0;
                           for (const v of variants) {
-                            const labelSrc = v.top || v.base || v.label || "";
-                            const key = normFinishLocal(v.top || v.base || v.label || "");
+                            const baseTrim = (v.base || "").trim();
+                            const topTrim = (v.top || "").trim();
+                            const labelTrim = (v.label || "").trim();
+                            const isComposite = Boolean(baseTrim && topTrim);
+                            const key = isComposite
+                              ? `${normFinishLocal(baseTrim)}|${normFinishLocal(topTrim)}`
+                              : normFinishLocal(topTrim || baseTrim || labelTrim);
+                            // Match against the most descriptive label available so each
+                            // composite row can still find its own gallery image.
+                            const labelSrc = isComposite
+                              ? `${baseTrim} ${topTrim}`
+                              : (topTrim || baseTrim || labelTrim);
                             if (!key || !labelSrc) continue;
                             const tokens = normTokens(labelSrc);
                             if (tokens.length === 0) continue;
@@ -532,17 +542,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
                     const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                    const keySource: "Top" | "Base" | "Label" | null =
-                      variant.top?.trim() ? "Top"
-                      : variant.base?.trim() ? "Base"
-                      : variant.label?.trim() ? "Label"
+                    const baseTrim = variant.base?.trim() || "";
+                    const topTrim = variant.top?.trim() || "";
+                    const labelTrim = variant.label?.trim() || "";
+                    // Composite key when both axes are filled (decouples rows that
+                    // share the same Top, e.g. Apparatus Lantern Table Lamp).
+                    const isComposite = Boolean(baseTrim && topTrim);
+                    const keySource: "Base × Top" | "Top" | "Base" | "Label" | null =
+                      isComposite ? "Base × Top"
+                      : topTrim ? "Top"
+                      : baseTrim ? "Base"
+                      : labelTrim ? "Label"
                       : null;
-                    const keySourceValue =
-                      keySource === "Top" ? variant.top
-                      : keySource === "Base" ? variant.base
-                      : keySource === "Label" ? variant.label
-                      : "";
-                    const mapKey = normFinish(keySourceValue || "");
+                    const mapKey = isComposite
+                      ? `${normFinish(baseTrim)}|${normFinish(topTrim)}`
+                      : normFinish(topTrim || baseTrim || labelTrim);
+                    const keyDisplay = isComposite
+                      ? `${normFinish(baseTrim)} | ${normFinish(topTrim)}`
+                      : mapKey;
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
                       : undefined;
@@ -637,7 +654,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           </span>
                           <span className="text-muted-foreground">→</span>
                           <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground/80">
-                            {mapKey || "(empty)"}
+                            {keyDisplay || "(empty)"}
                           </code>
                           {typeof currentImageIdx === "number" ? (
                             <span className="text-muted-foreground">

@@ -15,7 +15,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { useDesignerByName } from "@/hooks/useDesigner";
-import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -187,28 +187,26 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
     : [];
   const materialOptions = !isDualAxis && product.materials ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean) : [];
-  // Try every selected axis label against the finish map — this lets dual-axis
-  // products resolve images whether the differentiating finish lives on the
-  // base or the top dropdown (e.g. Segment Console Table varies on Top).
-  const candidateFinishLabels: string[] = [];
-  if (isDualAxis) {
-    if (selectedTopIdx != null && selectedTopIdx >= 0) {
-      const v = topOptionsForResolve[selectedTopIdx];
-      if (v) candidateFinishLabels.push(v);
-    }
-    if (selectedBaseIdx != null && selectedBaseIdx >= 0) {
-      const v = baseOptions[selectedBaseIdx];
-      if (v) candidateFinishLabels.push(v);
-    }
-  } else if (selectedMaterialIdx != null && selectedMaterialIdx >= 0) {
-    const v = materialOptions[selectedMaterialIdx];
-    if (v) candidateFinishLabels.push(v);
-  }
+  // Resolve which gallery image matches the current selection. For dual-axis
+  // products we first try the composite Base|Top key (so rows that share the
+  // same Top — e.g. Apparatus Lantern Table Lamp where every row is "Slip-cast
+  // Porcelain" but Structure differs — still get distinct images), then fall
+  // back to single-axis labels.
   let finishImageIdx: number | undefined;
   if (finishMap && galleryImages.length > 0) {
-    for (const label of candidateFinishLabels) {
-      const idx = resolveFinishImageIndex(finishMap, label, galleryImages.length);
-      if (idx != null) { finishImageIdx = idx; break; }
+    if (isDualAxis) {
+      const topLabel =
+        selectedTopIdx != null && selectedTopIdx >= 0 ? topOptionsForResolve[selectedTopIdx] : null;
+      const baseLabel =
+        selectedBaseIdx != null && selectedBaseIdx >= 0 ? baseOptions[selectedBaseIdx] : null;
+      finishImageIdx = resolveVariantImageIndex(finishMap, {
+        base: baseLabel,
+        top: topLabel,
+        imageCount: galleryImages.length,
+      });
+    } else if (selectedMaterialIdx != null && selectedMaterialIdx >= 0) {
+      const v = materialOptions[selectedMaterialIdx];
+      if (v) finishImageIdx = resolveFinishImageIndex(finishMap, v, galleryImages.length);
     }
   }
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;

@@ -43,7 +43,7 @@ import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -437,8 +437,10 @@ const TradeProductPage: React.FC = () => {
   const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
-  const handleMaterialChange = (label: string | null) => {
-    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+  const handleMaterialChange = (label: string | null, opts?: { base?: string | null; top?: string | null }) => {
+    const idx = opts && (opts.base || opts.top)
+      ? resolveVariantImageIndex(productFinishMap, { base: opts.base, top: opts.top, label, imageCount: images.length })
+      : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
       setGalleryJumpNonce((n) => n + 1);
@@ -694,7 +696,6 @@ const TradeProductPage: React.FC = () => {
                     onChange={(idx) => {
                       const v = baseOptions[idx] ?? null;
                       setSelectedBase(v);
-                      handleMaterialChange(v);
                       let nextTop = selectedTop;
                       let nextSize = selectedDualSize;
                       if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
@@ -702,8 +703,9 @@ const TradeProductPage: React.FC = () => {
                       // Auto-select the only viable top when base narrows it down to one
                       if (v && !nextTop) {
                         const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
-                        if (compatTops.length === 1) setSelectedTop(compatTops[0]);
+                        if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
                       }
+                      handleMaterialChange(v, { base: v, top: nextTop });
                     }}
                     disabledIndices={disabledBaseIdx}
                     helperText={
@@ -721,7 +723,6 @@ const TradeProductPage: React.FC = () => {
                     onChange={(idx) => {
                       const v = topOptions[idx] ?? null;
                       setSelectedTop(v);
-                      handleMaterialChange(v);
                       let nextBase = selectedBase;
                       let nextSize = selectedDualSize;
                       if (v && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelectedBase(null); nextBase = null; }
@@ -730,9 +731,10 @@ const TradeProductPage: React.FC = () => {
                         const compatBases = baseOptions.filter((b) => variantsList.some((x: any) => matchesDual(x, b, v, nextSize)));
                         if (compatBases.length === 1) {
                           setSelectedBase(compatBases[0]);
-                          handleMaterialChange(compatBases[0]);
+                          nextBase = compatBases[0];
                         }
                       }
+                      handleMaterialChange(v, { base: nextBase, top: v });
                     }}
                     disabledIndices={disabledTopIdx}
                     helperText={

@@ -26,7 +26,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { toOgImage } from "@/lib/ogImage";
 
@@ -150,7 +150,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 /* ------------------------------------------------------------------ */
 /*  Variant selectors (controlled — enables cross-axis disabling)     */
 /* ------------------------------------------------------------------ */
-const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: string | null) => void }> = ({ product, onMaterialChange }) => {
+const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null }) => void }> = ({ product, onMaterialChange }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -187,7 +187,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
       setSelBase(firstBase);
       setSelTop(compatTops[0]);
       setDefaultPair({ base: firstBase, top: compatTops[0] });
-      onMaterialChange?.(firstBase);
+      onMaterialChange?.(firstBase, { base: firstBase, top: compatTops[0] });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
@@ -197,7 +197,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     setSelBase(defaultPair.base);
     setSelTop(defaultPair.top);
     setSelDualSize(null);
-    onMaterialChange?.(defaultPair.base);
+    onMaterialChange?.(defaultPair.base, { base: defaultPair.base, top: defaultPair.top });
   };
   const isAtDefault =
     !!defaultPair &&
@@ -247,15 +247,15 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             onChange={(idx) => {
               const v = baseOptions[idx] ?? null;
               setSelBase(v);
-              onMaterialChange?.(v);
               let nextTop = selTop;
               let nextSize = selDualSize;
               if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelTop(null); nextTop = null; }
               if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelDualSize(null); nextSize = null; }
               if (v && !nextTop) {
                 const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
-                if (compatTops.length === 1) setSelTop(compatTops[0]);
+                if (compatTops.length === 1) { setSelTop(compatTops[0]); nextTop = compatTops[0]; }
               }
+              onMaterialChange?.(v, { base: v, top: nextTop });
             }}
             disabledIndices={disabledBaseIdx}
             helperText={
@@ -281,9 +281,10 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
                 const compatBases = baseOptions.filter((b) => variantsList.some((x: any) => matchesDual(x, b, v, nextSize)));
                 if (compatBases.length === 1) {
                   setSelBase(compatBases[0]);
-                  onMaterialChange?.(compatBases[0]);
+                  nextBase = compatBases[0];
                 }
               }
+              onMaterialChange?.(v, { base: nextBase, top: v });
             }}
             disabledIndices={disabledTopIdx}
             helperText={
@@ -554,8 +555,12 @@ const PublicProductPage: React.FC = () => {
 
   // (productFinishMap is declared above the early returns to keep hook order stable.)
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
-  const handleMaterialChange = (label: string | null) => {
-    const idx = resolveFinishImageIndex(productFinishMap, label, images.length);
+  const handleMaterialChange = (label: string | null, opts?: { base?: string | null; top?: string | null }) => {
+    // Prefer the composite Base|Top key when both axes are filled (decouples
+    // rows that share the same Top, e.g. Apparatus Lantern Table Lamp).
+    const idx = opts && (opts.base || opts.top)
+      ? resolveVariantImageIndex(productFinishMap, { base: opts.base, top: opts.top, label, imageCount: images.length })
+      : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
       setGalleryJumpNonce((n) => n + 1);
