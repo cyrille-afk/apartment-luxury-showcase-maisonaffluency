@@ -119,11 +119,17 @@ export default function ExpandableSpec({
   // Multi + placeholder → real Select (borderless list row)
   if (placeholder) {
     const handleChange = (v: string) => {
+      if (v === "__clear__") {
+        if (onChange) onChange(-1);
+        else setInternalIdx(null);
+        return;
+      }
       const idx = parseInt(v, 10);
       if (onChange) onChange(idx);
       else setInternalIdx(idx);
     };
     const currentVal = selectedIdx != null ? String(selectedIdx) : undefined;
+    const hasSelection = selectedIdx != null && selectedIdx >= 0;
 
     return (
       <>
@@ -150,6 +156,14 @@ export default function ExpandableSpec({
             </span>
           </SelectTrigger>
           <SelectContent className="z-[130] bg-background border-border">
+            {hasSelection && (
+              <SelectItem
+                value="__clear__"
+                className="font-body text-xs md:text-sm cursor-pointer text-muted-foreground italic border-b border-border/60"
+              >
+                Clear selection
+              </SelectItem>
+            )}
             {lines.map((line, i) => {
               const isDisabled = disabledSet.has(i);
               return (
