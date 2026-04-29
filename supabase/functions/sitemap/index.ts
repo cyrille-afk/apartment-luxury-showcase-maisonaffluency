@@ -55,6 +55,13 @@ serve(async () => {
     .eq("is_active", true)
     .order("updated_at", { ascending: false });
 
+  // Fetch published studios
+  const { data: studios } = await supabase
+    .from("featured_studios")
+    .select("slug, updated_at")
+    .eq("is_published", true)
+    .order("slug");
+
   const staticEntries = STATIC_URLS.map((u) => urlEntry(u.loc, today, u.changefreq, u.priority));
 
   const designerEntries = (designers || []).map((d: { slug: string; updated_at: string }) =>
