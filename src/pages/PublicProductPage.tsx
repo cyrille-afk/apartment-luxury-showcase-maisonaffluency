@@ -356,8 +356,14 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           onChange={(idx) => {
             const s = dualSizeOptions[idx] ?? null;
             setSelDualSize(s);
-            if (s && selBase && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelBase(null);
-            if (s && selTop && !variantsList.some((x: any) => matchesDual(x, selBase, selTop, s))) setSelTop(null);
+            let nextBase = selBase;
+            let nextTop = selTop;
+            if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelBase(null); nextBase = null; }
+            if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelTop(null); nextTop = null; }
+            // Re-sync the gallery using the canonical (base, top, size)
+            // composite — keeps the hero image aligned with the current
+            // selection no matter which axis was just changed.
+            onMaterialChange?.(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
           }}
           disabledIndices={disabledDualSizeIdx}
           helperText={
