@@ -53,26 +53,35 @@ export function resolveFinishImageIndex(
 }
 
 /**
- * Build the canonical composite key for a dual-axis variant row. When both
- * axes are filled, this guarantees each row gets its own image slot — even
- * when several rows share the same Top (or Base) value, like Apparatus
- * Lantern Table Lamp where every row is "Slip-cast Porcelain" but the
- * Structure differs.
+ * Build the canonical composite key for a variant row. Supports up to three
+ * axes: Base × Top × Size. When fewer axes are present, the key collapses
+ * gracefully so single-axis lookups still work.
  */
 export function variantImageKey(
   base?: string | null,
   top?: string | null,
-  label?: string | null
+  label?: string | null,
+  size?: string | null
 ): string {
-  const b = (base || "").trim();
-  const t = (top || "").trim();
-  if (b && t) return `${normFinish(b)}|${normFinish(t)}`;
-  return normFinish(t || b || label || "");
+  const b = normFinish((base || "").trim());
+  const t = normFinish((top || "").trim());
+  const s = normFinish((size || "").trim());
+  if (b && t && s) return `${b}|${t}|${s}`;
+  if (b && t) return `${b}|${t}`;
+  return normFinish(top || base || label || size || "");
 }
 
 /**
- * Try a list of candidate labels (already in priority order) plus an
- * optional composite `base|top` key. Returns the first valid mapping.
+ * Resolve the gallery image index for the *current* variant selection.
+ *
+ * Tries keys from most-specific to least-specific so a single
+ * `variant_image_map` works for products with one, two, or three axes:
+ *   1. `base|top|size`  (full triple)
+ *   2. `base|top`       (dual-axis composite)
+ *   3. `top`, `base`, `label` (single-axis fallbacks)
+ *
+ * Returns undefined when nothing matches so callers can leave the gallery
+ * on its current image instead of jumping to a wrong one.
  */
 export function resolveVariantImageIndex(
   finishMap: Record<string, number> | null,
@@ -80,18 +89,43 @@ export function resolveVariantImageIndex(
     base?: string | null;
     top?: string | null;
     label?: string | null;
+    size?: string | null;
     imageCount: number;
   }
 ): number | undefined {
   if (!finishMap) return undefined;
-  const { base, top, label, imageCount } = opts;
-  // 1) Composite key (most specific) when both axes are present
+  const { base, top, label, size, imageCount } = opts;
+
+  const tryKey = (k: string | undefined): number | undefined => {
+    if (!k) return undefined;
+    const idx = finishMap[k];
+    return typeof idx === "number" && idx >= 0 && idx < imageCount ? idx : undefined;
+  };
+
+  // 1) Full triple — most specific
+  if (base && top && size) {
+    const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(size)}`;
+    const hit = tryKey(triple);
+    if (hit !== undefined) return hit;
+  }
+  // 2) Dual-axis composite (Base × Top)
   if (base && top) {
     const composite = `${normFinish(base)}|${normFinish(top)}`;
-    const idx = finishMap[composite];
-    if (typeof idx === "number" && idx >= 0 && idx < imageCount) return idx;
+    const hit = tryKey(composite);
+    if (hit !== undefined) return hit;
+    // For dual-axis products, do NOT silently fall back to a single-axis
+    // image (e.g. picking "Aged Brass | Slip-Cast Porcelain" must not
+    // resolve to whatever image "Slip-Cast Porcelain" alone maps to,
+    // because the same Top is shared by every Base).
     return undefined;
   }
+  // 3) Single-axis fallbacks, in priority order
+  for (const candidate of [top, base, label, size]) {
+    const idx = resolveFinishImageIndex(finishMap, candidate, imageCount);
+    if (typeof idx === "number") return idx;
+  }
+  return undefined;
+}
   // 2) Single-axis fallbacks, in priority order
   for (const candidate of [top, base, label]) {
     const idx = resolveFinishImageIndex(finishMap, candidate, imageCount);
