@@ -170,6 +170,26 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
   const [selMat, setSelMat] = useState<string | null>(null);
   const [selSize, setSelSize] = useState<string | null>(null);
 
+  // Default the dual-axis pickers to the first base + its compatible top
+  // so users see a complete pairing on load (e.g. Pars Cocktail Table:
+  // "Aged Brass + Bisque Leather" → "Paglierino Travertine"). They can
+  // still switch to the other colorway and the top auto-updates.
+  useEffect(() => {
+    if (!isDualAxis || selBase || selTop) return;
+    const variants = product.size_variants || [];
+    if (!variants.length || !baseOptions.length) return;
+    const firstBase = baseOptions[0];
+    const compatTops = topOptions.filter((t) =>
+      variants.some((v: any) => (v.base || "").trim() === firstBase && (v.top || "").trim() === t)
+    );
+    if (compatTops.length === 1) {
+      setSelBase(firstBase);
+      setSelTop(compatTops[0]);
+      onMaterialChange?.(firstBase);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDualAxis, product.id]);
+
   // Single-axis split: cross-disable based on the other selection.
   const disabledMatIdx = hasSingleAxisSplit && selSize
     ? singleMaterialOptions
