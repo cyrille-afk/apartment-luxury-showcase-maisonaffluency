@@ -290,7 +290,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
                   nextBase = compatBases[0];
                 }
               }
-              onMaterialChange?.(v, { base: nextBase, top: v });
+              onMaterialChange?.(v, { base: nextBase, top: v, size: nextSize });
             }}
             disabledIndices={disabledTopIdx}
             helperText={
