@@ -173,6 +173,31 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     : product.brand_name;
   const favorited = isFavorited(product.id);
 
+  /* ── Finish-driven image swap ───────────────────────────────────────── */
+  const finishMap = buildProductFinishMap(product.variant_image_map);
+  const galleryImages = (product.gallery_images || []).filter(Boolean);
+  const sv = product.size_variants || [];
+  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  const baseOptions = isDualAxis
+    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
+    : [];
+  const materialOptions = !isDualAxis && product.materials ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean) : [];
+  const selectedFinishLabel =
+    isDualAxis && selectedBaseIdx != null && selectedBaseIdx >= 0 ? baseOptions[selectedBaseIdx] :
+    !isDualAxis && selectedMaterialIdx != null && selectedMaterialIdx >= 0 ? materialOptions[selectedMaterialIdx] :
+    null;
+  const finishImageIdx =
+    finishMap && galleryImages.length > 0
+      ? resolveFinishImageIndex(finishMap, selectedFinishLabel, galleryImages.length)
+      : undefined;
+  const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
+  const imageSwappedByFinish = currentImageUrl !== product.image_url;
+
+  /* ── Linked product page URL (only when designer slug resolves) ───── */
+  const productPageHref = linkedDesigner?.slug
+    ? `/designers/${linkedDesigner.slug}/${slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""))}`
+    : null;
+
   const compareItem: CompareItem = {
     pick: {
       title: product.title,
