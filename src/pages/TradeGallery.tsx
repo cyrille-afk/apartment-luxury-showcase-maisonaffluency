@@ -457,6 +457,8 @@ const TradeGallery = () => {
         </div>
       </SectionHero>
 
+      <DuplicateProductsBanner groups={duplicateGroups} />
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-6">
         <div className="relative flex-1 min-w-0 sm:min-w-[200px] sm:max-w-sm">
