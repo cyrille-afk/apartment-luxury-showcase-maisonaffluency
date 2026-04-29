@@ -16,6 +16,7 @@ import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { rememberProductBackRef } from "@/lib/designerBackRef";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -377,10 +378,9 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                 type="button"
                 onClick={() => {
                   if (!linkedDesigner?.slug) return;
+                  rememberProductBackRef(linkedDesigner.slug, location.pathname + location.search);
                   onClose();
-                  navigate(
-                    `/designers/${linkedDesigner.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`
-                  );
+                  navigate(`/designers/${linkedDesigner.slug}`);
                 }}
                 disabled={!linkedDesigner?.slug}
                 className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"

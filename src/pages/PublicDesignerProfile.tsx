@@ -23,6 +23,7 @@ import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import DesignerInstagramSection from "@/components/DesignerInstagramSection";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
 
@@ -97,7 +98,10 @@ const PublicDesignerProfile = () => {
   const scrollToSection = searchParams.get("section");
   const fromJournal = searchParams.get("from_journal"); // e.g. slug of referring article
   const fromNewIn = searchParams.get("from") === "new-in";
-  const fromProduct = searchParams.get("from_product");
+  const fromProduct = useMemo(
+    () => searchParams.get("from_product") || consumeProductBackRef(slug),
+    [searchParams, slug]
+  );
   const { data: designer, isLoading } = useDesigner(slug);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);

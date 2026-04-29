@@ -47,6 +47,7 @@ import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageInde
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { rememberProductBackRef } from "@/lib/designerBackRef";
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -623,7 +624,8 @@ const TradeProductPage: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Link
-                  to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                  to={`/trade/designers/${designer.slug}`}
+                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                   className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
@@ -1006,7 +1008,8 @@ const TradeProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
-                      to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                      to={`/trade/designers/${designer.slug}`}
+                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                       className="hover:text-primary transition-colors"
                     >
                       {designerDisplay}
@@ -1065,7 +1068,8 @@ const TradeProductPage: React.FC = () => {
                     </p>
                     <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                       <Link
-                        to={`/trade/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                        to={`/trade/designers/${designer.slug}`}
+                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                         className="hover:text-primary transition-colors"
                       >
                         {designerDisplay}

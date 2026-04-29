@@ -28,6 +28,7 @@ import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
+import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 
 /* ------------------------------------------------------------------ */
@@ -667,7 +668,8 @@ const PublicProductPage: React.FC = () => {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <Link
-                    to={`/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                    to={`/designers/${designer.slug}`}
+                    onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                     className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                   >
                     {designerDisplay}
@@ -791,7 +793,8 @@ const PublicProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
-                      to={`/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                      to={`/designers/${designer.slug}`}
+                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                       className="hover:text-primary transition-colors"
                     >
                       {designerDisplay}
@@ -913,7 +916,8 @@ const PublicProductPage: React.FC = () => {
                     </p>
                     <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                       <Link
-                        to={`/designers/${designer.slug}?from_product=${encodeURIComponent(location.pathname + location.search)}`}
+                        to={`/designers/${designer.slug}`}
+                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                         className="hover:text-primary transition-colors"
                       >
                         {designerDisplay}

@@ -23,6 +23,7 @@ import TradeProductLightbox, { type TradeProductLightboxItem } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { consumeProductBackRef } from "@/lib/designerBackRef";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -106,7 +107,10 @@ const TradeAtelierProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const fromProduct = searchParams.get("from_product");
+  const fromProduct = useMemo(
+    () => searchParams.get("from_product") || consumeProductBackRef(slug),
+    [searchParams, slug]
+  );
   const { toast } = useToast();
   const { data: designer, isLoading } = useDesigner(slug);
   const { isPinned, togglePin } = useCompare();
