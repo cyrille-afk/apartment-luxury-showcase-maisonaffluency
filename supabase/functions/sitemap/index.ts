@@ -76,9 +76,13 @@ serve(async () => {
     urlEntry(`/product/${p.id}`, p.updated_at.split("T")[0], "weekly", "0.6")
   );
 
+  const studioEntries = (studios || []).map((s: { slug: string; updated_at: string }) =>
+    urlEntry(`/studios/${s.slug}`, s.updated_at.split("T")[0], "monthly", "0.7")
+  );
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...designerEntries, ...articleEntries, ...productEntries].join("\n")}
+${[...staticEntries, ...designerEntries, ...articleEntries, ...productEntries, ...studioEntries].join("\n")}
 </urlset>`;
 
   return new Response(xml, {
