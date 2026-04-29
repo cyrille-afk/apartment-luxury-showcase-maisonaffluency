@@ -354,6 +354,7 @@ const TradeProductPage: React.FC = () => {
     if (compatTops.length === 1) {
       setSelectedBase(firstBase);
       setSelectedTop(compatTops[0]);
+      setDefaultPair({ base: firstBase, top: compatTops[0] });
       // Sync gallery to the base finish's mapped image (mirrors handleMaterialChange).
       const rawMap = (data?.product as any)?.variant_image_map;
       const finishMap = buildProductFinishMap(rawMap);
