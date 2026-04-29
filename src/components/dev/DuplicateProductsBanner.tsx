@@ -1,11 +1,15 @@
 import { useState } from "react";
 import type { DuplicateGroup } from "@/hooks/useTradeProducts";
+import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 
 /**
  * Dev-only banner that surfaces likely duplicate product cards in the Trade
  * grid (e.g. "Pars" + "Pars Cocktail Table" appearing as two cards because
- * the static + live merge keys didn't match exactly). Renders nothing in
- * production builds or when no duplicates are detected.
+ * the static + live merge keys didn't match exactly). Each item in a group
+ * renders as a thumbnail; click to hide that specific card from the grid
+ * (state is persisted in localStorage and respected by `useTradeProducts`).
+ *
+ * Renders nothing in production builds or when no duplicates are detected.
  */
 export default function DuplicateProductsBanner({
   groups,
@@ -14,12 +18,17 @@ export default function DuplicateProductsBanner({
 }) {
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const { ids: hiddenIds, hide, unhide, clear } = useHiddenTradeProductIds();
 
   if (!import.meta.env.DEV) return null;
   if (dismissed) return null;
   if (!groups || groups.length === 0) return null;
 
   const totalDupes = groups.reduce((sum, g) => sum + g.items.length, 0);
+  const hiddenCount = groups.reduce(
+    (sum, g) => sum + g.items.filter((it) => hiddenIds.has(it.id)).length,
+    0
+  );
 
   return (
     <div
@@ -36,10 +45,19 @@ export default function DuplicateProductsBanner({
             style={{ boxShadow: "0 0 0 4px rgba(245,158,11,0.18)" }}
           />
           Dev warning · {groups.length} duplicate group
-          {groups.length === 1 ? "" : "s"} ({totalDupes} cards) detected in
-          Trade grid
+          {groups.length === 1 ? "" : "s"} ({totalDupes} cards) detected
+          {hiddenCount > 0 ? ` · ${hiddenCount} hidden` : ""}
         </div>
         <div className="flex items-center gap-2">
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              onClick={clear}
+              className="text-xs underline opacity-80 hover:opacity-100"
+            >
+              Restore all
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
@@ -59,24 +77,79 @@ export default function DuplicateProductsBanner({
       </div>
 
       {expanded && (
-        <ul className="mt-2 space-y-2 text-xs">
-          {groups.map((g, i) => (
-            <li
-              key={`${g.brand}-${i}`}
-              className="rounded border border-amber-400/40 bg-white/60 p-2 dark:bg-black/20"
-            >
-              <div className="font-medium">{g.brand}</div>
-              <ul className="mt-1 space-y-0.5">
-                {g.items.map((it) => (
-                  <li key={it.id} className="flex items-center gap-2 font-mono">
-                    <span className="opacity-50">[{it.id.slice(0, 8)}]</span>
-                    <span>{it.product_name}</span>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="mt-2 text-[11px] opacity-75">
+            Click an image to hide that card from the grid. Click again to
+            restore.
+          </p>
+          <ul className="mt-2 space-y-3 text-xs">
+            {groups.map((g, i) => (
+              <li
+                key={`${g.brand}-${i}`}
+                className="rounded border border-amber-400/40 bg-white/60 p-2 dark:bg-black/20"
+              >
+                <div className="mb-2 font-medium">{g.brand}</div>
+                <div className="flex flex-wrap gap-3">
+                  {g.items.map((it) => {
+                    const isHidden = hiddenIds.has(it.id);
+                    return (
+                      <button
+                        key={it.id}
+                        type="button"
+                        onClick={() => (isHidden ? unhide(it.id) : hide(it.id))}
+                        title={
+                          isHidden
+                            ? `Restore "${it.product_name}"`
+                            : `Hide "${it.product_name}" from grid`
+                        }
+                        className="group relative flex w-28 flex-col items-stretch gap-1 text-left"
+                      >
+                        <div
+                          className={
+                            "relative aspect-square w-full overflow-hidden rounded border " +
+                            (isHidden
+                              ? "border-amber-600/60 opacity-40"
+                              : "border-amber-400/50 hover:border-amber-700")
+                          }
+                        >
+                          {it.image_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={it.image_url}
+                              alt={it.product_name}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-[10px] opacity-60">
+                              no image
+                            </div>
+                          )}
+                          <div
+                            className={
+                              "pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-wider transition " +
+                              (isHidden
+                                ? "bg-black/40 text-white"
+                                : "bg-black/0 text-transparent group-hover:bg-black/45 group-hover:text-white")
+                            }
+                          >
+                            {isHidden ? "Hidden — click to restore" : "Click to hide"}
+                          </div>
+                        </div>
+                        <div className="line-clamp-2 leading-tight">
+                          {it.product_name}
+                        </div>
+                        <div className="font-mono text-[10px] opacity-50">
+                          {it.id.slice(0, 8)}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );
