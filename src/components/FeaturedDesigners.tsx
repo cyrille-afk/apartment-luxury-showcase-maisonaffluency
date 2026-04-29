@@ -3223,6 +3223,37 @@ const FeaturedDesigners = () => {
                             })}
                           </div>
                         )}
+
+                        {/* Expandable Brand Philosophy */}
+                        {((curatorPicksDesigner as any)?.philosophy)?.trim?.() && (
+                          <div className="mt-6 max-w-2xl mx-auto px-4">
+                            <button
+                              type="button"
+                              onClick={() => setPhilosophyOpen(o => !o)}
+                              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-sm text-white transition-all"
+                              aria-expanded={philosophyOpen}
+                              aria-controls="brand-philosophy-panel"
+                            >
+                              <span className="text-[10px] uppercase tracking-[0.18em] font-display">Brand Philosophy</span>
+                              <ChevronDown
+                                className={`w-3.5 h-3.5 transition-transform duration-300 ${philosophyOpen ? 'rotate-180' : ''}`}
+                              />
+                            </button>
+                            <div
+                              id="brand-philosophy-panel"
+                              className={`grid transition-all duration-500 ease-out ${philosophyOpen ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0'}`}
+                            >
+                              <div className="overflow-hidden">
+                                <blockquote className="text-white/85 font-display italic text-sm md:text-base leading-relaxed text-center px-2">
+                                  &ldquo;{(curatorPicksDesigner as any).philosophy}&rdquo;
+                                </blockquote>
+                                <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-white/50 text-center">
+                                  — {curatorPicksDesigner.displayName || curatorPicksDesigner.name}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
