@@ -35,6 +35,7 @@ export interface PublicLightboxItem {
   subcategory?: string | null;
   pdf_url?: string | null;
   pdf_urls?: PdfEntry[] | null;
+  designer_slug?: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_placeholder?: string | null;
   base_axis_label?: string | null;
@@ -213,8 +214,9 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const imageSwappedByFinish = currentImageUrl !== product.image_url;
 
   /* ── Linked product page URL (only when designer slug resolves) ───── */
-  const productPageHref = linkedDesigner?.slug
-    ? `/designers/${linkedDesigner.slug}/${slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""))}`
+  const productPageDesignerSlug = product.designer_slug || linkedDesigner?.slug;
+  const productPageHref = productPageDesignerSlug
+    ? `/designers/${productPageDesignerSlug}/${slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""))}`
     : null;
 
   const compareItem: CompareItem = {
