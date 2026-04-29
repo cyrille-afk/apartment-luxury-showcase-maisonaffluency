@@ -34,6 +34,10 @@ export interface PublicLightboxItem {
   variant_placeholder?: string | null;
   base_axis_label?: string | null;
   top_axis_label?: string | null;
+  /** Full product gallery; used together with variant_image_map to swap the lightbox image when a finish is picked. */
+  gallery_images?: string[] | null;
+  /** Maps normalized finish labels → gallery_images index. */
+  variant_image_map?: Record<string, number> | null;
 }
 
 interface Props {
