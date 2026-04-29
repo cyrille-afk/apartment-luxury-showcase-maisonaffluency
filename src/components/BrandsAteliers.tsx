@@ -3022,6 +3022,40 @@ const BrandsAteliers = () => {
 
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
+  // Build a per-letter index of sub-designers re-edited by parent ateliers (e.g. Ecart, Man of Parts).
+  // Lets users locate Jean-Michel Frank under "J", Paul László under "P", etc.,
+  // even though they live nested inside their parent atelier's expandable card.
+  const subDesignerIndexByLetter = useMemo(() => {
+    const groups: Record<string, Array<{ name: string; parentBrand: string; dbParentName: string }>> = {};
+    const q = searchQuery.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    PARENT_BRAND_CONFIGS.forEach((cfg) => {
+      const subs = cfg.staticDesigners || [];
+      subs.forEach((sub) => {
+        const norm = sub.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (q && !norm.toLowerCase().includes(q) && !cfg.brandName.toLowerCase().includes(q) && !cfg.dbParentName.toLowerCase().includes(q)) return;
+        const letter = norm[0]?.toUpperCase() || "#";
+        if (!groups[letter]) groups[letter] = [];
+        groups[letter].push({ name: sub.name, parentBrand: cfg.brandName, dbParentName: cfg.dbParentName });
+      });
+    });
+    return groups;
+  }, [searchQuery]);
+
+  // Letters present in either main brands or sub-designers
+  const allLetters = useMemo(() => {
+    const set = new Set<string>(alphaGroups.map(([l]) => l));
+    Object.keys(subDesignerIndexByLetter).forEach((l) => set.add(l));
+    return Array.from(set).sort();
+  }, [alphaGroups, subDesignerIndexByLetter]);
+
+  const handleSubDesignerClick = useCallback((dbParentName: string) => {
+    setExpandBrand(dbParentName);
+    const params = new URLSearchParams(window.location.search);
+    params.set("expand", dbParentName);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params}${window.location.hash}`);
+  }, []);
+
+
   const scrollToGallery = (galleryIndex: number, brandName: string) => {
     window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
       detail: { index: galleryIndex, sourceId: `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}` }
@@ -3304,20 +3338,54 @@ const BrandsAteliers = () => {
 
         {/* Alphabetical strips */}
         <div>
-          {alphaGroups.map(([letter, brands]) => (
-            <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
-              <AlphaStrip
-                letter={letter}
-                brands={brands}
-                isInView={isInView}
-                scrollToGallery={scrollToGallery}
-                onOpenPicks={openPicks}
-                initialExpandBrand={expandBrand}
-                onExpandConsumed={handleExpandConsumed}
-              />
-              {/* Ecart sub-designers are now inline in the strip */}
-            </div>
-          ))}
+          {allLetters.map((letter) => {
+            const brands = alphaGroups.find(([l]) => l === letter)?.[1];
+            const subs = subDesignerIndexByLetter[letter] || [];
+            return (
+              <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
+                {brands && brands.length > 0 ? (
+                  <AlphaStrip
+                    letter={letter}
+                    brands={brands}
+                    isInView={isInView}
+                    scrollToGallery={scrollToGallery}
+                    onOpenPicks={openPicks}
+                    initialExpandBrand={expandBrand}
+                    onExpandConsumed={handleExpandConsumed}
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 mb-3 px-1 mt-6">
+                    <span className="font-serif text-2xl text-foreground md:text-primary/60">{letter}</span>
+                    <div className="flex-1 h-px bg-border/30" />
+                  </div>
+                )}
+
+                {subs.length > 0 && (
+                  <div className="px-1 mb-8 -mt-2">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-body mb-2">
+                      Re-edited designers
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {subs.map((sub) => (
+                        <button
+                          key={`${sub.parentBrand}-${sub.name}`}
+                          type="button"
+                          onClick={() => handleSubDesignerClick(sub.dbParentName)}
+                          className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/60 bg-background/60 hover:bg-background hover:border-foreground/30 transition-all text-xs font-body"
+                          aria-label={`${sub.name} — re-edited by ${sub.parentBrand}`}
+                        >
+                          <span className="text-foreground">{sub.name}</span>
+                          <span className="text-muted-foreground/70 text-[10px] uppercase tracking-wider">
+                            ↳ {sub.parentBrand}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
         </div>
 
