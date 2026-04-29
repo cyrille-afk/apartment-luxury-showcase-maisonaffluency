@@ -128,11 +128,17 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     : undefined;
   const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
 
+  // Reset per-product state when the product changes (incl. selected finish).
+  const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
+  const [selectedMaterialIdx, setSelectedMaterialIdx] = useState<number | null>(null);
+
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
+    setSelectedBaseIdx(null);
+    setSelectedMaterialIdx(null);
   }, [product?.id]);
 
   // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
