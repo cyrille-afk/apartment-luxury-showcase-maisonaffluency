@@ -438,9 +438,22 @@ const TradeProductPage: React.FC = () => {
   const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
-  const handleMaterialChange = (label: string | null, opts?: { base?: string | null; top?: string | null }) => {
-    const idx = opts && (opts.base || opts.top)
-      ? resolveVariantImageIndex(productFinishMap, { base: opts.base, top: opts.top, label, imageCount: images.length })
+  // `opts` carries the *post-update* axis state (base, top, size) so the
+  // resolver can always look up the canonical composite key for the
+  // current selection — guaranteeing the hero image stays in sync no
+  // matter which axis the user touches.
+  const handleMaterialChange = (
+    label: string | null,
+    opts?: { base?: string | null; top?: string | null; size?: string | null }
+  ) => {
+    const idx = opts && (opts.base || opts.top || opts.size)
+      ? resolveVariantImageIndex(productFinishMap, {
+          base: opts.base,
+          top: opts.top,
+          size: opts.size,
+          label,
+          imageCount: images.length,
+        })
       : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
@@ -453,7 +466,7 @@ const TradeProductPage: React.FC = () => {
     setSelectedBase(defaultPair.base);
     setSelectedTop(defaultPair.top);
     setSelectedDualSize(null);
-    handleMaterialChange(defaultPair.base, { base: defaultPair.base, top: defaultPair.top });
+    handleMaterialChange(defaultPair.base, { base: defaultPair.base, top: defaultPair.top, size: null });
   };
   const isAtDefaultPair =
     !!defaultPair &&
@@ -712,7 +725,7 @@ const TradeProductPage: React.FC = () => {
                         const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
                         if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
                       }
-                      handleMaterialChange(v, { base: v, top: nextTop });
+                      handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
                     }}
                     disabledIndices={disabledBaseIdx}
                     helperText={
@@ -741,7 +754,7 @@ const TradeProductPage: React.FC = () => {
                           nextBase = compatBases[0];
                         }
                       }
-                      handleMaterialChange(v, { base: nextBase, top: v });
+                      handleMaterialChange(v, { base: nextBase, top: v, size: nextSize });
                     }}
                     disabledIndices={disabledTopIdx}
                     helperText={
@@ -821,8 +834,14 @@ const TradeProductPage: React.FC = () => {
                   onChange={(idx) => {
                     const s = dualSizeOptions[idx] ?? null;
                     setSelectedDualSize(s);
-                    if (s && selectedBase && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedBase(null);
-                    if (s && selectedTop && !variantsList.some((x: any) => matchesDual(x, selectedBase, selectedTop, s))) setSelectedTop(null);
+                    let nextBase = selectedBase;
+                    let nextTop = selectedTop;
+                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedBase(null); nextBase = null; }
+                    if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedTop(null); nextTop = null; }
+                    // Re-sync the gallery to the canonical key for the
+                    // (base, top, size) triple — same resolver as the
+                    // Base/Top dropdowns, so all three axes stay aligned.
+                    handleMaterialChange(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
                   }}
                   disabledIndices={disabledDualSizeIdx}
                   helperText={
