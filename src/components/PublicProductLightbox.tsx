@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
+import { X, Layers, Ruler, FileDown, Heart, Scale, ArrowRight } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -15,6 +15,11 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { useDesignerByName } from "@/hooks/useDesigner";
+import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
+
+/** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
+const slugifyProduct = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 export interface PublicLightboxItem {
   id: string;
