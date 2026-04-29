@@ -723,7 +723,6 @@ const TradeProductPage: React.FC = () => {
                     onChange={(idx) => {
                       const v = topOptions[idx] ?? null;
                       setSelectedTop(v);
-                      handleMaterialChange(v);
                       let nextBase = selectedBase;
                       let nextSize = selectedDualSize;
                       if (v && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, v, nextSize))) { setSelectedBase(null); nextBase = null; }
@@ -732,9 +731,10 @@ const TradeProductPage: React.FC = () => {
                         const compatBases = baseOptions.filter((b) => variantsList.some((x: any) => matchesDual(x, b, v, nextSize)));
                         if (compatBases.length === 1) {
                           setSelectedBase(compatBases[0]);
-                          handleMaterialChange(compatBases[0]);
+                          nextBase = compatBases[0];
                         }
                       }
+                      handleMaterialChange(v, { base: nextBase, top: v });
                     }}
                     disabledIndices={disabledTopIdx}
                     helperText={
