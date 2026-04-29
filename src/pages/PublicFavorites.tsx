@@ -89,9 +89,26 @@ const PublicFavorites = () => {
       const enriched: FavPick[] = data.map((p) => {
         const d = designerMap.get(p.designer_id);
         return {
-          ...p,
+          id: p.id,
+          title: p.title,
+          subtitle: p.subtitle,
+          image_url: p.image_url,
+          hover_image_url: p.hover_image_url,
+          materials: p.materials,
+          dimensions: p.dimensions,
+          description: p.description,
+          category: p.category,
+          subcategory: p.subcategory,
+          pdf_url: p.pdf_url,
+          designer_id: p.designer_id,
           designer_name: d?.name || "",
           designer_slug: d?.slug || "",
+          size_variants: (p as any).size_variants ?? null,
+          variant_placeholder: (p as any).variant_placeholder ?? null,
+          base_axis_label: (p as any).base_axis_label ?? null,
+          top_axis_label: (p as any).top_axis_label ?? null,
+          gallery_images: (p as any).gallery_images ?? null,
+          variant_image_map: (p as any).variant_image_map ?? null,
         };
       });
 
