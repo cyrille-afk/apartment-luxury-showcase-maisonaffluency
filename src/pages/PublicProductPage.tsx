@@ -187,7 +187,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
       setSelBase(firstBase);
       setSelTop(compatTops[0]);
       setDefaultPair({ base: firstBase, top: compatTops[0] });
-      onMaterialChange?.(firstBase);
+      onMaterialChange?.(firstBase, { base: firstBase, top: compatTops[0] });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
@@ -197,7 +197,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     setSelBase(defaultPair.base);
     setSelTop(defaultPair.top);
     setSelDualSize(null);
-    onMaterialChange?.(defaultPair.base);
+    onMaterialChange?.(defaultPair.base, { base: defaultPair.base, top: defaultPair.top });
   };
   const isAtDefault =
     !!defaultPair &&
