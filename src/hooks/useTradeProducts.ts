@@ -107,6 +107,7 @@ const keyOf = (p: TradeProduct) =>
  */
 export function useTradeProducts() {
   const staticProducts = useMemo(() => getAllTradeProducts(), []);
+  const { ids: hiddenIds } = useHiddenTradeProductIds();
 
   const { data: liveProducts = [] } = useQuery({
     queryKey: ["trade-live-products"],
@@ -114,7 +115,7 @@ export function useTradeProducts() {
     staleTime: 60_000,
   });
 
-  const allProducts = useMemo(() => {
+  const mergedProducts = useMemo(() => {
     const merged = new Map<string, TradeProduct>();
     for (const p of staticProducts) merged.set(keyOf(p), p);
     for (const p of liveProducts) {
