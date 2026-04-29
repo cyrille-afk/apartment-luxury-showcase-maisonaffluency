@@ -976,6 +976,8 @@ const PublicDesignerProfile = () => {
           variant_placeholder: (p as any).variant_placeholder ?? null,
           base_axis_label: (p as any).base_axis_label ?? null,
           top_axis_label: (p as any).top_axis_label ?? null,
+          gallery_images: (p as any).gallery_images ?? null,
+          variant_image_map: (p as any).variant_image_map ?? null,
         }))}
         onClose={() => setLightboxItem(null)}
         onSelectRelated={(item) => setLightboxItem(item)}
