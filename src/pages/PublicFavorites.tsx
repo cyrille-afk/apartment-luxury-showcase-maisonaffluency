@@ -42,6 +42,12 @@ interface FavPick {
   designer_id: string;
   designer_name?: string;
   designer_slug?: string;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  variant_placeholder?: string | null;
+  base_axis_label?: string | null;
+  top_axis_label?: string | null;
+  gallery_images?: string[] | null;
+  variant_image_map?: Record<string, number> | null;
 }
 
 const PublicFavorites = () => {
@@ -62,7 +68,7 @@ const PublicFavorites = () => {
       setLoading(true);
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label")
+        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
         .in("id", favIds);
 
       if (!data || data.length === 0) {
@@ -126,10 +132,13 @@ const PublicFavorites = () => {
         category: p.category,
         subcategory: p.subcategory,
         pdf_url: p.pdf_url,
+        designer_slug: p.designer_slug || null,
         size_variants: (p as any).size_variants ?? null,
         variant_placeholder: (p as any).variant_placeholder ?? null,
         base_axis_label: (p as any).base_axis_label ?? null,
         top_axis_label: (p as any).top_axis_label ?? null,
+        gallery_images: (p as any).gallery_images ?? null,
+        variant_image_map: (p as any).variant_image_map ?? null,
       })),
     [picks]
   );
