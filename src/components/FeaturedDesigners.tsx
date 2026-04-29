@@ -1397,18 +1397,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
     curatorPicks: [
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433149/Screen_Shot_2026-03-02_at_2.21.39_PM_p8h0pg.png",
-        title: "Upholstered Back 3-Seater Sofa",
-        subtitle: "1932",
-        category: "Furniture",
-        tags: ["Re-edition", "Furniture", "Sofa"],
-        materials: "Varnished Solid Oak • Leather",
-        dimensions: "L 230 × P 89 × H 81 cm",
-        description: "The Upholstered Back 3-Seater Sofa stands as a definitive testament to the minimalist luxury pioneered by Jean-Michel Frank, the Art Deco visionary who redefined spatial elegance through the beauty of restraint. Exemplifying Frank's philosophy that a room is best furnished by emptying it, this sofa balances rigorous geometry with an uncompromising commitment to materiality. Crafted with a precision-engineered frame of varnished solid oak, the piece showcases the natural grain of the wood, providing a warm, structural counterpoint to its expansive presence. The sofa is meticulously upholstered in a premium leather that emphasizes the clean, architectural lines characteristic of Frank's third path—a sophisticated bridge between the extravagance of early Art Deco and the austerity of the modernist movement. Measuring L 230 × P 89 × H 81 cm, this 3-seater variant offers a generous footprint without sacrificing the lightness of form that Jean-Michel Frank famously shared with contemporaries like Gabrielle Chanel. This collectible design is an authentic re-edition by Ecart Paris, founded by Andrée Putman, preserving the enduring legacy and impeccable craftsmanship of the original. For more intimate arrangements, this design is also available in a 2-seater configuration.",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1924_Upholstered_Back_Sofa_Info_Sheet.pdf",
-        pdfFilename: "JMF-Upholstered_Back_Sofa_Info_Sheet.pdf",
-      },
-      {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772434426/Screen_Shot_2026-03-02_at_2.50.16_PM_clwjui.png",
         title: "Croisillon Lamp",
         subtitle: "1924",
