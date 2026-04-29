@@ -1976,6 +1976,7 @@ const FeaturedDesigners = () => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [picksHovered, setPicksHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [philosophyOpen, setPhilosophyOpen] = useState(false);
   const imageZoomedRef = useRef(false);
   const picksSwipeRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
