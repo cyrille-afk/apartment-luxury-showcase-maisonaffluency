@@ -532,13 +532,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
                     const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-                    const mapKey = normFinish(variant.top || variant.base || variant.label || "");
+                    const keySource: "Top" | "Base" | "Label" | null =
+                      variant.top?.trim() ? "Top"
+                      : variant.base?.trim() ? "Base"
+                      : variant.label?.trim() ? "Label"
+                      : null;
+                    const keySourceValue =
+                      keySource === "Top" ? variant.top
+                      : keySource === "Base" ? variant.base
+                      : keySource === "Label" ? variant.label
+                      : "";
+                    const mapKey = normFinish(keySourceValue || "");
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
                       : undefined;
                     const currentImageNum = typeof currentImageIdx === "number" ? currentImageIdx + 1 : "";
                     return (
-                    <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
+                    <div key={idx} className="space-y-1">
+                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
                       <Input
                         value={variant.label || ""}
                         onChange={(e) => {
@@ -615,6 +626,33 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
+                    </div>
+                    {/* Image key preview — shows which field drives the variant_image_map lookup */}
+                    <div className="pl-1 text-[10px] flex flex-wrap items-center gap-1.5 text-muted-foreground/80">
+                      <span className="uppercase tracking-wider">Image key:</span>
+                      {keySource ? (
+                        <>
+                          <span className="rounded bg-muted px-1.5 py-0.5 font-medium text-foreground/80">
+                            {keySource}
+                          </span>
+                          <span className="text-muted-foreground">→</span>
+                          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground/80">
+                            {mapKey || "(empty)"}
+                          </code>
+                          {typeof currentImageIdx === "number" ? (
+                            <span className="text-muted-foreground">
+                              (image #{currentImageIdx + 1})
+                            </span>
+                          ) : (
+                            <span className="italic text-muted-foreground/60">unmapped</span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="italic text-muted-foreground/60">
+                          Fill Top, Base, or Label to enable mapping
+                        </span>
+                      )}
+                    </div>
                     </div>
                     );
                   })}
