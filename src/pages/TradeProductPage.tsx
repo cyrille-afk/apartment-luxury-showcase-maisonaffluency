@@ -438,9 +438,22 @@ const TradeProductPage: React.FC = () => {
   const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
   // Identical handler signature/behaviour to PublicProductPage.handleMaterialChange.
-  const handleMaterialChange = (label: string | null, opts?: { base?: string | null; top?: string | null }) => {
-    const idx = opts && (opts.base || opts.top)
-      ? resolveVariantImageIndex(productFinishMap, { base: opts.base, top: opts.top, label, imageCount: images.length })
+  // `opts` carries the *post-update* axis state (base, top, size) so the
+  // resolver can always look up the canonical composite key for the
+  // current selection — guaranteeing the hero image stays in sync no
+  // matter which axis the user touches.
+  const handleMaterialChange = (
+    label: string | null,
+    opts?: { base?: string | null; top?: string | null; size?: string | null }
+  ) => {
+    const idx = opts && (opts.base || opts.top || opts.size)
+      ? resolveVariantImageIndex(productFinishMap, {
+          base: opts.base,
+          top: opts.top,
+          size: opts.size,
+          label,
+          imageCount: images.length,
+        })
       : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
