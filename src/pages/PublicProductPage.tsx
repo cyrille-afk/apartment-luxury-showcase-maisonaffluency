@@ -198,7 +198,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     setSelBase(defaultPair.base);
     setSelTop(defaultPair.top);
     setSelDualSize(null);
-    onMaterialChange?.(defaultPair.base, { base: defaultPair.base, top: defaultPair.top });
+    onMaterialChange?.(defaultPair.base, { base: defaultPair.base, top: defaultPair.top, size: null });
   };
   const isAtDefault =
     !!defaultPair &&
