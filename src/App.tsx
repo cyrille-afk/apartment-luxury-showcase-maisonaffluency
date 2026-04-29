@@ -21,6 +21,7 @@ const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const Studios = lazy(() => import("./pages/Studios"));
+const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
 const StudioProfile = lazy(() => import("./pages/StudioProfile"));
 const StudioInsights = lazy(() => import("./pages/StudioInsights"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
@@ -204,6 +205,7 @@ const App = () => {
                   <Route path="/contact" element={<Suspense fallback={<PageLoadingSkeleton />}><ContactPage /></Suspense>} />
                    <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
                   <Route path="/studios" element={<Suspense fallback={<PageLoadingSkeleton />}><Studios /></Suspense>} />
+                  <Route path="/studios/submit" element={<Suspense fallback={<PageLoadingSkeleton />}><StudioSubmit /></Suspense>} />
                   <Route path="/studios/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><StudioProfile /></Suspense>} />
                   <Route path="/studios/:slug/insights" element={<Suspense fallback={<PageLoadingSkeleton />}><StudioInsights /></Suspense>} />
                   
