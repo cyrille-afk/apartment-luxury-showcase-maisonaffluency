@@ -840,10 +840,11 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.setFontSize(11);
     doc.setTextColor(...ink);
     const dropCapWidth = 30;
-    const indentedLines = doc.splitTextToSize(restText, textW - dropCapWidth).slice(0, 3);
-    const consumed = indentedLines.join(" ").length;
-    const remaining = restText.slice(consumed).replace(/^\s+/, "");
-    const fullLines = remaining ? doc.splitTextToSize(remaining, textW) : [];
+    const allIndentedLines = doc.splitTextToSize(restText, textW - dropCapWidth);
+    const indentedLines = allIndentedLines.slice(0, 3);
+    const fullLines = allIndentedLines.length > 3
+      ? doc.splitTextToSize(allIndentedLines.slice(3).join(" "), textW)
+      : [];
     const textH = Math.max(3 * bodyLineH, indentedLines.length * bodyLineH + fullLines.length * bodyLineH) + 8;
 
     const ratio = img.width / img.height;
