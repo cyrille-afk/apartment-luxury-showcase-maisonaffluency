@@ -256,6 +256,9 @@ const TradeProductPage: React.FC = () => {
   // material/finish dropdown is changed (state-backed so behaviour matches the
   // public side exactly).
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  // Bumped on every parent-initiated jump so the gallery re-syncs even when the
+  // numeric index is identical to the previous one (e.g. re-selecting the same finish).
+  const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
   const fxRates = useFxRates();
 
   // ── Quote drawer ──
