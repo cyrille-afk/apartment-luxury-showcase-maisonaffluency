@@ -15,7 +15,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { useDesignerByName } from "@/hooks/useDesigner";
-import { buildProductFinishMap, resolveFinishImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
