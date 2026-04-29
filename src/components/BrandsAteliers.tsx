@@ -3022,6 +3022,40 @@ const BrandsAteliers = () => {
 
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
+  // Build a per-letter index of sub-designers re-edited by parent ateliers (e.g. Ecart, Man of Parts).
+  // Lets users locate Jean-Michel Frank under "J", Paul László under "P", etc.,
+  // even though they live nested inside their parent atelier's expandable card.
+  const subDesignerIndexByLetter = useMemo(() => {
+    const groups: Record<string, Array<{ name: string; parentBrand: string; dbParentName: string }>> = {};
+    const q = searchQuery.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    PARENT_BRAND_CONFIGS.forEach((cfg) => {
+      const subs = cfg.staticDesigners || [];
+      subs.forEach((sub) => {
+        const norm = sub.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (q && !norm.toLowerCase().includes(q) && !cfg.brandName.toLowerCase().includes(q) && !cfg.dbParentName.toLowerCase().includes(q)) return;
+        const letter = norm[0]?.toUpperCase() || "#";
+        if (!groups[letter]) groups[letter] = [];
+        groups[letter].push({ name: sub.name, parentBrand: cfg.brandName, dbParentName: cfg.dbParentName });
+      });
+    });
+    return groups;
+  }, [searchQuery]);
+
+  // Letters present in either main brands or sub-designers
+  const allLetters = useMemo(() => {
+    const set = new Set<string>(alphaGroups.map(([l]) => l));
+    Object.keys(subDesignerIndexByLetter).forEach((l) => set.add(l));
+    return Array.from(set).sort();
+  }, [alphaGroups, subDesignerIndexByLetter]);
+
+  const handleSubDesignerClick = useCallback((dbParentName: string) => {
+    setExpandBrand(dbParentName);
+    const params = new URLSearchParams(window.location.search);
+    params.set("expand", dbParentName);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params}${window.location.hash}`);
+  }, []);
+
+
   const scrollToGallery = (galleryIndex: number, brandName: string) => {
     window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
       detail: { index: galleryIndex, sourceId: `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}` }
