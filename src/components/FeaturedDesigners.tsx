@@ -1977,6 +1977,7 @@ const FeaturedDesigners = () => {
   const [picksHovered, setPicksHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [philosophyOpen, setPhilosophyOpen] = useState(false);
+  useEffect(() => { setPhilosophyOpen(false); }, [curatorPicksDesigner?.id]);
   const imageZoomedRef = useRef(false);
   const picksSwipeRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
