@@ -24,6 +24,7 @@ import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 
 
 const slugifyForUrl = (s: string) =>
