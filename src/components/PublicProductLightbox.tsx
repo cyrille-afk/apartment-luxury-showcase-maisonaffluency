@@ -130,6 +130,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
   // Reset per-product state when the product changes (incl. selected finish).
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
+  const [selectedTopIdx, setSelectedTopIdx] = useState<number | null>(null);
   const [selectedMaterialIdx, setSelectedMaterialIdx] = useState<number | null>(null);
 
   useEffect(() => {
@@ -138,6 +139,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     setHoverImageLoaded(false);
     setShowHoverImage(false);
     setSelectedBaseIdx(null);
+    setSelectedTopIdx(null);
     setSelectedMaterialIdx(null);
   }, [product?.id]);
 
