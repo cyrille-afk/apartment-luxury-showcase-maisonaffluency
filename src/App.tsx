@@ -20,6 +20,8 @@ const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
+const Studios = lazy(() => import("./pages/Studios"));
+const StudioProfile = lazy(() => import("./pages/StudioProfile"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
