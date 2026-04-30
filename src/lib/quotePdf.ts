@@ -467,7 +467,10 @@ function drawTable(
   args.lines.forEach((line, idx) => {
     const meta = [line.dimensions, line.materials, line.leadTime, line.notes].filter(Boolean) as string[];
     const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
-    const metaHeight = meta.length * 10;
+    // Pre-wrap meta strings so multi-line materials/notes are not truncated.
+    const metaWrapped = meta.map((m) => doc.splitTextToSize(m, colDesc - 12) as string[]);
+    const metaLineCount = metaWrapped.reduce((sum, w) => sum + w.length, 0);
+    const metaHeight = metaLineCount * 10;
     const titleHeight = titleWrap.length * 12;
     const rowH = Math.max(56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
@@ -512,15 +515,16 @@ function drawTable(
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(titleWrap, xDesc + 6, y + 20);
 
-    // meta lines
+    // meta lines (full wrap, no truncation)
     let metaY = y + 20 + titleHeight + 2;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    meta.forEach((m) => {
-      const wrapped = doc.splitTextToSize(m, colDesc - 12);
-      doc.text(wrapped[0], xDesc + 6, metaY);
-      metaY += 10;
+    metaWrapped.forEach((wrapped) => {
+      wrapped.forEach((ln) => {
+        doc.text(ln, xDesc + 6, metaY);
+        metaY += 10;
+      });
     });
 
     // qty / unit / amount
