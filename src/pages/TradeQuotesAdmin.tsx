@@ -34,6 +34,7 @@ interface AdminQuoteItem {
   quantity: number;
   unit_price_cents: number | null;
   notes: string | null;
+  lead_time_weeks_override: number | null;
   trade_products: {
     product_name: string;
     brand_name: string;
