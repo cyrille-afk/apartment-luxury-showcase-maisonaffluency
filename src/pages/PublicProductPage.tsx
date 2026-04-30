@@ -251,6 +251,13 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             emphasized
             value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : undefined}
             onChange={(idx) => {
+              if (idx < 0) {
+                setSelBase(null);
+                setSelTop(null);
+                setSelDualSize(null);
+                onMaterialChange?.(null);
+                return;
+              }
               const v = baseOptions[idx] ?? null;
               setSelBase(v);
               let nextTop = selTop;
@@ -277,6 +284,13 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             emphasized
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
             onChange={(idx) => {
+              if (idx < 0) {
+                setSelBase(null);
+                setSelTop(null);
+                setSelDualSize(null);
+                onMaterialChange?.(null);
+                return;
+              }
               const v = topOptions[idx] ?? null;
               setSelTop(v);
               let nextBase = selBase;
@@ -582,6 +596,17 @@ const PublicProductPage: React.FC = () => {
     if (isClear) {
       // Snap the gallery back to the primary product image (index 0) so the
       // hero visibly resets when the user clears their finish/material choice.
+      setGalleryActiveIndex(0);
+      setGalleryJumpNonce((n) => n + 1);
+      return;
+    }
+    const isDualAxisSelection = (product.size_variants || []).some(
+      (v: any) => (v.base && String(v.base).trim()) || (v.top && String(v.top).trim())
+    );
+    if (isDualAxisSelection && opts && (!opts.base || !opts.top)) {
+      // Do not resolve partial Base/Top state through a single-axis fallback;
+      // wait for a complete pairing, otherwise clearing one axis can show the
+      // wrong mapped finish image.
       setGalleryActiveIndex(0);
       setGalleryJumpNonce((n) => n + 1);
       return;
