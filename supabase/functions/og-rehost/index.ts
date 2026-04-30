@@ -149,24 +149,23 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch source (with a real UA – many CDNs block default fetch UA)
-    const srcResp = await fetch(sourceUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; MaisonAffluencyOG/1.0; +https://www.maisonaffluency.com)",
-        Accept: "image/*,*/*;q=0.8",
-      },
-      redirect: "follow",
-    });
-    if (!srcResp.ok) {
+    let out: Uint8Array;
+    try {
+      out = await fetchOptimized(sourceUrl);
+    } catch (e: any) {
       return new Response(
-        JSON.stringify({ error: `source fetch failed: ${srcResp.status}` }),
+        JSON.stringify({ error: e?.message ?? "source fetch failed" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const raw = new Uint8Array(await srcResp.arrayBuffer());
-
-    const out = await fitAndCompress(raw);
+    if (out.byteLength > MAX_BYTES * 1.5) {
+      // Cloudinary occasionally returns a slightly larger file when the
+      // source is very flat. Log it but accept – still way under the
+      // 5 MB hard limit social platforms enforce.
+      console.warn(
+        `og-rehost: ${sourceUrl} → ${out.byteLength} B (over 300 KB target)`,
+      );
+    }
 
     const { error: upErr } = await supabase.storage
       .from(BUCKET)
