@@ -155,9 +155,7 @@ def iter_bridges(only: str | None) -> Iterable[Path]:
 # ---------- one-off mode ----------
 
 def one_off(url: str, slug: str) -> str:
-    raw = fetch(url)
-    out = fit_1200x630_under_300kb(raw)
-    return storage_put(slug, out)
+    return rehost_via_edge(url, slug)["url"]
 
 
 # ---------- main ----------
