@@ -8,6 +8,7 @@ import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
+import { downloadQuotePdf, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
@@ -384,7 +385,52 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return sum + converted * item.quantity;
   }, 0);
 
-  const handlePrint = () => window.print();
+  const handleDownloadPdf = () => {
+    const lines: QuotePdfLine[] = items.map((item) => {
+      const product = item.trade_products;
+      const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+      const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
+      const unit = convertCents(rawUnit, fromCur, currency);
+      return {
+        productName: product?.product_name || "—",
+        brandName: product?.brand_name || "",
+        dimensions: product?.dimensions ?? null,
+        materials: product?.materials ?? null,
+        leadTime: product?.lead_time ?? null,
+        notes: item.notes ?? null,
+        quantity: item.quantity,
+        unitPriceCents: unit,
+        lineTotalCents: unit != null ? unit * item.quantity : null,
+      };
+    });
+    const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
+    const insLabel = INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label ?? null;
+    try {
+      downloadQuotePdf({
+        quoteNumber,
+        status: quoteStatus,
+        statusLabel: statusEntry.label,
+        createdAt: createdDate,
+        expiryAt: expiryDate,
+        clientName: clientName || null,
+        projectName: projectName || null,
+        currency,
+        lines,
+        subtotalCents,
+        tradeDiscountPct,
+        tradeDiscountApplied: tradeDiscount,
+        gstEnabled,
+        gstRate,
+        insurancePremiumCents: insurancePremiumCents || 0,
+        insuranceLabel: insuranceEnabled ? insLabel : null,
+        insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
+        notes: notes || null,
+      });
+      toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
+    } catch (err: any) {
+      toast({ title: "PDF failed", description: err?.message || "Could not generate PDF.", variant: "destructive" });
+    }
+  };
 
   /** Persist insurance fields. Optimistic — caller already updated local state. */
   const persistInsurance = async (patch: Partial<{ insurance_enabled: boolean; insurance_tier: InsuranceTier; insurance_rate_bps: number; insurance_notes: string | null }>) => {
@@ -515,10 +561,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="hidden sm:inline">Export Excel</span>
             <span className="sm:hidden">Excel</span>
           </button>
-          <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={items.length === 0}
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            title="Download a branded PDF — clean, no browser headers/footers"
+          >
             <Printer className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Print / PDF</span>
-            <span className="sm:hidden">Print</span>
+            <span className="hidden sm:inline">Download PDF</span>
+            <span className="sm:hidden">PDF</span>
           </button>
         </div>
       </div>
