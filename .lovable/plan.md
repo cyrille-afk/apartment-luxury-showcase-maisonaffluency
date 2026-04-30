@@ -1,61 +1,64 @@
-## What's actually wrong on QU-22A02A
 
-After inspecting `src/pages/TradeQuotesAdmin.tsx` (the admin detail view) and the underlying data for QU-22A02A (currency=EUR, 2 items: Reda Amalou Lady Bug Side Table, Pierre Bonnefille Stone D Coffee Table), here's a direct answer to each issue and the fix for each.
+## Root causes
 
-### 1) Lead time is not displayed next to the item — because we never render it
+**1) Pierre Bonnefille lead time missing in admin (but visible in trade editor)**
+- `trade_products.lead_time` is `NULL` for both Pierre Bonnefille and Reda Amalou items.
+- Admin set per-line overrides on the quote: `lead_time_weeks_override = 16` (Reda Amalou) and `14` (Pierre Bonnefille). These ARE in `trade_quote_items` and visible in the network response.
+- The trade-side `QuoteDetail.tsx` uses `item.lead_time_weeks_override ?? parseLeadWeeks(product?.lead_time)` (line 411) — so it works there.
+- The admin `TradeQuotesAdmin.tsx` only calls `formatLeadTime(leadTimes[item.id])` from the `effective_product_availability` RPC, which returns NULL for both because there's no brand_lead_times row and no product-level override. The per-line override is **never read**.
 
-The admin detail row only renders: image, product name, brand, dimensions, and (sometimes) "Catalog: …". There is **no JSX** at all that reads lead time. Meanwhile a perfectly good DB function `effective_product_availability(_product_id)` already returns `(lead_weeks_min, lead_weeks_max, stock_status, source)` cascading product override → brand default → fallback. For these two specific items, both the product overrides and `brand_lead_times` are empty, so we'd get the default `made_to_order` with no weeks — which is itself a content gap to flag, but we should still show *something* (e.g. "Made to order — lead time TBC").
+**2) FX rates not loading**
+- Network log shows: `GET https://api.frankfurter.app/latest?from=EUR&to=GBP → Failed to fetch` (CORS / blocked in the Lovable preview environment).
+- Result: `fxEurGbp` stays `null` indefinitely → panel sits at "Loading FX rates…" forever and `gbp.ready` is always `false`.
 
-**Fix:** in the detail loader, batch-call `effective_product_availability` for each `product_id` and render under the dimensions line as `Lead time: 12–14 weeks` (or `Made to order — TBC` when null). Same line on mobile.
+**3) GBP DDP click "freezes" everything**
+- It is not a real freeze — it's the same FX failure: when the user flips the totals toggle to "GBP DDP", every line shows `…` and never resolves because `fxEurGbp` is null. There is no fallback path and no error message, so the UI looks stuck.
+- Same applies to the "Download UK DDP estimate (PDF)" button — it's still clickable but would generate a PDF with zeroed values.
 
-### 2) "Catalog: …" — what it actually means and why it's confusing here
+## Fixes
 
-It's the **fallback unit price** the admin tool resolved for that line, in the source product's own currency, used to pre-fill the editable Unit Price input. It comes from two sources, in order:
+### A. Admin lead-time display (`src/pages/TradeQuotesAdmin.tsx`)
 
-1. `trade_products.trade_price_cents` for the exact product, OR
-2. A fuzzy match against any other priced `trade_products` row (token overlap + brand boost).
+In the line-item render around line 547, prefer the per-line override:
 
-For QU-22A02A both items have `trade_price_cents = NULL`, so the admin saw whatever the fuzzy matcher pulled (which may not even be the same product). The label "Catalog" is misleading because (a) it's not necessarily the catalog price of *this* product, and (b) for already-priced lines (where `unit_price_cents` is set, like on QU-22A02A: €2,300 and €35,000) it's redundant noise.
+```text
+leadLabel =
+  item.lead_time_weeks_override
+    ? `Lead time: ${item.lead_time_weeks_override} weeks`
+    : formatLeadTime(leadTimes[item.id])
+```
 
-**Fix:**
-- Rename "Catalog" → "Suggested (catalog)" only when the line has **no** `unit_price_cents` yet (i.e. we actually used it to pre-fill).
-- Hide it entirely once the admin has set/saved a `unit_price_cents`.
-- When the price came from a fuzzy match (not the same product), append "≈ from {matched product name}" so the admin knows it's a guess.
+This mirrors the trade view's behaviour and immediately surfaces the 14-week / 16-week values the admin already saved.
 
-### 3) Discounted price is not visible — because the admin view ignores tier discounts entirely
+### B. Resilient FX fetcher (`src/hooks/useGbpLandedCost.ts` + `src/components/trade/UkLandedCostPanel.tsx`)
 
-The admin pricing view only shows: Unit Price input, Subtotal, GST (SGD only), Total. It never reads `useTradeDiscount` / `current_trade_discount_pct()` and never shows the discounted unit, line or grand totals. The trade user receiving the quote sees the discount on their side, but the admin pricing the quote can't sanity-check what the client will actually pay.
+- Add a small helper `fetchFx(from, to)` that:
+  1. Tries `https://api.frankfurter.app/latest?from=...&to=...` with a 4 s `AbortController` timeout.
+  2. On failure, falls back to `https://api.exchangerate.host/latest?base=...&symbols=...` (CORS-enabled, free, no key).
+  3. On second failure, falls back to a **hardcoded sensible default** keyed by currency pair (e.g. `EUR→GBP ≈ 0.85`, `SGD→EUR ≈ 0.69`, `USD→EUR ≈ 0.92`) and exposes a flag `fxIsFallback = true`.
+- Hook now always resolves `ready=true` after the attempts; `fxEurGbp` and `fxQuoteEur` are guaranteed non-null.
+- When `fxIsFallback` is true, the panel and the totals GBP block render an amber notice: *"Live FX unavailable — using fallback rate. Treat the GBP figure as approximate."* and the disclaimer copy is updated. The PDF inherits the same flag and prints the warning.
 
-(Side note specific to QU-22A02A: the requesting account is `gregoire@maisonaffluency.com` whose `profiles.trade_tier = 'standard'` — which `useTradeDiscount` normalizes to **silver / 8%**. So even if discount lookup worked, this particular user resolves to 8%. We can still display it.)
+### C. GBP DDP toggle no longer "freezes" (`src/pages/TradeQuotesAdmin.tsx`, `src/components/trade/QuoteDetail.tsx`)
 
-**Fix:**
-- Look up the **quote owner's** tier (not the admin's): `select trade_tier from profiles where id = quote.user_id`, then `tier_discount_pct(tier)` from `trade_tier_config` (fall back to 8%).
-- Per row: under the Unit Price input show `After {pct}% trade: € X,XXX.XX`.
-- In the totals block: add a `Trade discount ({pct}%)` line subtracting from subtotal, then compute GST/Total off the discounted subtotal.
+- Because `gbp.ready` is now guaranteed (B), the toggle never stays stuck.
+- Add a defensive guard: if after 8 s any rate is still missing, show the amber notice and a **"Switch back to {QUOTE_CCY}"** inline button so the user can recover with one click.
+- When `fxIsFallback` is true, set the GBP toggle to a slightly muted style and append "≈" before the GBP total so the approximation is visible at a glance.
 
-### 4) GST is applied to a EUR quote — bug in the totals block
+### D. Files touched
 
-Lines 522–527 and 532 apply GST whenever `currency === "SGD"`. QU-22A02A is EUR so GST should never appear — and indeed the **condition is correct**. The reason GST is *visually* showing on QU-22A02A is something else: the unit-price input pre-fill uses `formatPrice` / inputs in EUR but the *individual product rows still carry `currency = 'SGD'` in `trade_products`*, and we render the input prefix from `quote.currency` (EUR) — that part is fine. So GST should not actually be in the DOM for this quote.
+```text
+src/pages/TradeQuotesAdmin.tsx           # lead time fix + fallback notice on totals
+src/components/trade/QuoteDetail.tsx     # fallback notice on totals (uses same hook)
+src/hooks/useGbpLandedCost.ts            # multi-source FX fetcher + fxIsFallback flag
+src/components/trade/UkLandedCostPanel.tsx # surface FX fallback + amber notice
+src/lib/ukDdpPdf.ts                      # print "(approx.)" + warning when fallback used
+```
 
-I'd like to verify this by looking at the live page once we're in build mode, but the most likely culprit is one of:
-- `quote.currency` is being read as undefined → `currency` defaults to `"SGD"` (line 353: `quote?.currency || "SGD"`) — happens during the initial render before `quote` resolves. The GST row then briefly mounts and may be screenshotting that state.
-- Or the user is looking at the **trade-side** view (not admin), which has its own GST logic.
+No DB changes needed.
 
-**Fix:**
-- Guard the GST row strictly: only render once `quote` has loaded AND `quote.currency === 'SGD'` (replace the `currency` local with `quote?.currency` directly in those two lines so the SGD fallback can't sneak in).
-- Audit the parallel trade-side quote view (`src/pages/TradeQuotes.tsx` — same currency check should exist) and apply the same strict guard.
+## Verification (after build)
 
----
-
-## Files to change
-
-- `src/pages/TradeQuotesAdmin.tsx`
-  - Add `effective_product_availability` batch fetch + render lead time on each row (desktop + mobile).
-  - Rename/hide the "Catalog" line per the rules above; mark fuzzy-matched suggestions clearly.
-  - Fetch the **quote owner's** tier + `trade_tier_config`, render per-line discounted price and a "Trade discount" totals row; recompute GST/Total off the discounted subtotal.
-  - Strict GST guard: render only when `quote?.currency === 'SGD'`.
-- `src/pages/TradeQuotes.tsx` (trade-user view) — apply the same strict GST guard so it can never appear on a EUR quote.
-
-## Out of scope (flagging only)
-
-- Both QU-22A02A products (`Lady Bug Side Table`, `Stone D Limonite D'Eau Coffee Table`) have `trade_price_cents = NULL` and no entry in `brand_lead_times` for Reda Amalou or Pierre Bonnefille. That's why "Catalog" was misleading and lead time would render as "TBC". Worth a separate pass to enrich those products + add brand lead-time defaults.
+- Open `QU-22A02A` in admin → both lines should show "Lead time: 14 weeks" / "Lead time: 16 weeks".
+- Toggle totals to **GBP DDP** → values render within 4–8 s either with live rate or with the amber "fallback rate" notice; never stuck on `…`.
+- Click **Download UK DDP estimate (PDF)** → PDF opens with values, including the fallback notice if applicable.
