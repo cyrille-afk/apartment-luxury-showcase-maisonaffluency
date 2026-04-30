@@ -427,6 +427,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
         insuranceEnabled,
         notes: notes || null,
+        gbpLanded: gbp.ready
+          ? {
+              ready: gbp.ready,
+              fxEurGbp: gbp.fxEurGbp,
+              fxIsFallback: gbp.fxIsFallback,
+              goodsGbpCents: gbp.goodsGbpCents,
+              shippingGbpCents: gbp.shippingGbpCents,
+              dutyGbpCents: gbp.dutyGbpCents,
+              vatGbpCents: gbp.vatGbpCents,
+              totalGbpCents: gbp.totalGbpCents,
+            }
+          : null,
       });
       toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
     } catch (err: any) {
