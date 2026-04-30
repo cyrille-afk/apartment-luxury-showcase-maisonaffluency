@@ -258,6 +258,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     load();
   }, [quoteId, user]);
 
+  // Fetch project name when projectId changes
+  useEffect(() => {
+    if (!projectId) { setProjectName(null); return; }
+    supabase.from("trade_projects").select("name").eq("id", projectId).maybeSingle().then(({ data }) => {
+      setProjectName((data as any)?.name ?? null);
+    });
+  }, [projectId]);
+
   // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
   useEffect(() => {
     if (!gstUserTouched) setGstEnabled(currency === "SGD");
