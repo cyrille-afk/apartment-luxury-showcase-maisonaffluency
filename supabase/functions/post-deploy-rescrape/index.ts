@@ -169,6 +169,7 @@ Deno.serve(async (req) => {
     return new Response("method not allowed", { status: 405, headers: corsHeaders });
 
   const body = await req.json().catch(() => ({}));
+  const mode = typeof body.mode === "string" ? body.mode : "rescrape";
   const force = !!body.force;
   const triggerSource = typeof body.triggerSource === "string" ? body.triggerSource : "unknown";
   const maxRescrapes = Math.max(1, Math.min(1000, body.maxRescrapes ?? DEFAULT_MAX));
@@ -185,6 +186,103 @@ Deno.serve(async (req) => {
       console.error("failed to log og_rescrape_runs", e);
     }
   };
+
+  // ─────────────────────────────────────────────────────────────
+  // INSPECT MODE: { mode: "inspect", url: "<bridge url or path>" }
+  // Returns the bridge's current og:image, image byte size, and
+  // the snapshot's last-known og:image for that bridge.
+  // ─────────────────────────────────────────────────────────────
+  if (mode === "inspect") {
+    try {
+      const raw = String(body.url ?? "").trim();
+      if (!raw) return jsonResp({ error: "url required" }, 400);
+
+      // Normalize → path relative to SITE_BASE
+      let path = raw;
+      try {
+        if (/^https?:\/\//i.test(raw)) {
+          const u = new URL(raw);
+          path = u.pathname.replace(/^\/+/, "");
+        }
+      } catch { /* keep as-is */ }
+      path = path.replace(/^\/+/, "");
+
+      const [, ogImage] = await extractOgImage(path);
+
+      // Probe the og:image for size
+      let imageBytes: number | null = null;
+      let imageContentType: string | null = null;
+      let imageStatus: number | null = null;
+      if (ogImage) {
+        try {
+          const head = await fetch(ogImage, { method: "HEAD" });
+          imageStatus = head.status;
+          imageContentType = head.headers.get("content-type");
+          const len = head.headers.get("content-length");
+          imageBytes = len ? parseInt(len, 10) : null;
+          if (imageBytes === null) {
+            const get = await fetch(ogImage);
+            const buf = await get.arrayBuffer();
+            imageBytes = buf.byteLength;
+          }
+        } catch (e) {
+          console.error("og image probe failed", e);
+        }
+      }
+
+      const snapshot = await fetchSnapshot();
+      const previousOgImage = snapshot.entries?.[path] ?? null;
+
+      return jsonResp({
+        ok: true,
+        path,
+        bridgeUrl: `${SITE_BASE}/${path}`,
+        ogImage,
+        previousOgImage,
+        changedSinceSnapshot: previousOgImage !== ogImage,
+        imageBytes,
+        imageContentType,
+        imageStatus,
+        compliant:
+          imageBytes !== null && imageBytes <= 300 * 1024 &&
+          (imageContentType?.includes("image/") ?? false),
+      });
+    } catch (e: any) {
+      return jsonResp({ error: e?.message ?? String(e) }, 500);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // RESCRAPE-ONE MODE: { mode: "rescrape-one", url: "..." }
+  // Forces a single bridge to be rescraped via Meta.
+  // ─────────────────────────────────────────────────────────────
+  if (mode === "rescrape-one") {
+    try {
+      const raw = String(body.url ?? "").trim();
+      if (!raw) return jsonResp({ error: "url required" }, 400);
+      let path = raw;
+      try {
+        if (/^https?:\/\//i.test(raw)) {
+          const u = new URL(raw);
+          path = u.pathname.replace(/^\/+/, "");
+        }
+      } catch { /* keep */ }
+      path = path.replace(/^\/+/, "");
+      const fullUrl = `${SITE_BASE}/${path}`;
+      const result = await callRescrape([fullUrl]);
+      await logRun({
+        trigger_source: triggerSource || "admin-inspect",
+        rescraped_count: 1,
+        forced: true,
+        rescrape_result: { single: path, result },
+      });
+      return jsonResp({ ok: true, url: fullUrl, result });
+    } catch (e: any) {
+      return jsonResp({ error: e?.message ?? String(e) }, 500);
+    }
+  }
+
+
 
   try {
     const [paths, buildId, prev] = await Promise.all([
