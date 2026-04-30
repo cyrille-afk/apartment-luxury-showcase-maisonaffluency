@@ -1,0 +1,1 @@
+UPDATE public.trade_products SET currency = 'EUR' WHERE id = 'e465aa2a-c8e3-4f2e-b800-1716d699c13c';
