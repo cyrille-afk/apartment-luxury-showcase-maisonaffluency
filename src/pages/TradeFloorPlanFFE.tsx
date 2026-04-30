@@ -45,6 +45,7 @@ export default function TradeFloorPlanFFE() {
   const [progressStep, setProgressStep] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<{ room: number; item: number } | null>(null);
 
