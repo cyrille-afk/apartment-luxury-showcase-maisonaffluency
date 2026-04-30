@@ -406,7 +406,14 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         placeholder={getBasePlaceholder(product)}
                         emphasized
                         value={selectedBaseIdx ?? undefined}
-                        onChange={(idx) => setSelectedBaseIdx(idx < 0 ? null : idx)}
+                        onChange={(idx) => {
+                          if (idx < 0) {
+                            setSelectedBaseIdx(null);
+                            setSelectedTopIdx(null);
+                            return;
+                          }
+                          setSelectedBaseIdx(idx);
+                        }}
                       />
                       <ExpandableSpec
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -414,7 +421,14 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         placeholder={getTopPlaceholder(product)}
                         emphasized
                         value={selectedTopIdx ?? undefined}
-                        onChange={(idx) => setSelectedTopIdx(idx < 0 ? null : idx)}
+                        onChange={(idx) => {
+                          if (idx < 0) {
+                            setSelectedBaseIdx(null);
+                            setSelectedTopIdx(null);
+                            return;
+                          }
+                          setSelectedTopIdx(idx);
+                        }}
                       />
                     </>
                   );
