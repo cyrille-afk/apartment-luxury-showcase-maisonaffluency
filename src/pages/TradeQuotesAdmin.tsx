@@ -234,6 +234,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   /** Trade discount % to apply on the client side (e.g. 0.08 for silver). */
   const [ownerDiscountPct, setOwnerDiscountPct] = useState<number>(0);
   const [ownerTierLabel, setOwnerTierLabel] = useState<string>("");
+  /** Display the totals block in the quote currency or in GBP DDP landed cost. */
+  const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
 
   useEffect(() => {
     const load = async () => {
