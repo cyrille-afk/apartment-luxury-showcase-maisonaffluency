@@ -208,8 +208,14 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     if (isDualAxis) {
       const topLabel =
         selectedTopIdx != null && selectedTopIdx >= 0 ? topOptionsForResolve[selectedTopIdx] : null;
+      // When the Base axis only offers one option, treat it as implicitly
+      // selected so picking just the Top still resolves the composite key.
       const baseLabel =
-        selectedBaseIdx != null && selectedBaseIdx >= 0 ? baseOptions[selectedBaseIdx] : null;
+        selectedBaseIdx != null && selectedBaseIdx >= 0
+          ? baseOptions[selectedBaseIdx]
+          : baseOptions.length === 1
+            ? baseOptions[0]
+            : null;
       finishImageIdx = resolveVariantImageIndex(finishMap, {
         base: baseLabel,
         top: topLabel,
