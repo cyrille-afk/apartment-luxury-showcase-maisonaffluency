@@ -9,10 +9,10 @@
  * Quote currency (usually EUR) is left untouched — this is purely a side-panel
  * helper for UK clients quoted in EUR.
  */
-import { useEffect, useMemo, useState } from "react";
-import { estimateShipping, ShippingBreakdown } from "@/lib/shippingEstimator";
-import { Truck, Loader2, ChevronDown, ChevronUp, FileDown } from "lucide-react";
+import { useState } from "react";
+import { Truck, Loader2, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
 import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
+import { useGbpLandedCost, FX_BUFFER, fmtGbp } from "@/hooks/useGbpLandedCost";
 
 interface Props {
   /** Net goods subtotal AFTER trade discount, in the quote's currency */
