@@ -110,6 +110,7 @@ export default function TradeFloorPlanFFE() {
       if (insErr) throw insErr;
       setPlanId(row.id);
       setSuggestions(null);
+      setConfirmed(false);
       toast({ title: "Floor plan uploaded" });
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
