@@ -502,7 +502,17 @@ function drawTable(
     const editionClean = editionRaw.replace(/^edition\s*[:\-—]?\s*/i, "").trim();
     const editionLabel = editionClean ? `Edition: ${editionClean}` : null;
     const variantLabel = line.variantLabel ? `Finish: ${line.variantLabel}` : null;
-    const meta = [line.dimensions, line.materials, variantLabel, editionLabel, line.leadTime, line.notes].filter(Boolean) as string[];
+    // When the user picked a finish, it supersedes the generic catalogue
+    // dimensions/materials lines (which are otherwise repetitive noise).
+    const showCatalogueMeta = !line.variantLabel;
+    const meta = [
+      variantLabel,
+      showCatalogueMeta ? line.dimensions : null,
+      showCatalogueMeta ? line.materials : null,
+      editionLabel,
+      line.leadTime,
+      line.notes,
+    ].filter(Boolean) as string[];
     const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
     // Pre-wrap meta strings so multi-line materials/notes are not truncated.
     const metaWrapped = meta.map((m) => doc.splitTextToSize(m, colDesc - 12) as string[]);
