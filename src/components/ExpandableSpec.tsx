@@ -118,10 +118,11 @@ export default function ExpandableSpec({
 
   // Multi + placeholder → real Select (borderless list row)
   if (placeholder) {
+    const NONE = "__none__";
     const handleChange = (v: string) => {
-      if (v === "__clear__") {
-        // Always reset internal state so uncontrolled triggers visually clear
-        // back to the placeholder, even when a parent onChange is wired up.
+      if (v === "__clear__" || v === NONE) {
+        // Always reset internal state so the trigger visually clears back to
+        // the placeholder, even when a parent onChange is wired up.
         setInternalIdx(null);
         if (onChange) onChange(-1);
         return;
@@ -130,20 +131,17 @@ export default function ExpandableSpec({
       setInternalIdx(idx);
       if (onChange) onChange(idx);
     };
-    const currentVal = selectedIdx != null && selectedIdx >= 0 ? String(selectedIdx) : undefined;
     const hasSelection = selectedIdx != null && selectedIdx >= 0;
-    // Radix <Select> becomes uncontrolled when `value` flips to `undefined`
-    // and visually retains the previously chosen label (e.g. "Lacquer" /
-    // "Sand-Blasted") even though parent state is null. That makes the
-    // dropdown look out of sync with the gallery after "Clear selection",
-    // most noticeably on mobile where the gallery sits right above the
-    // dropdowns. Remounting on clear forces the trigger back to the
-    // placeholder so dropdowns + gallery stay aligned.
-    const selectKey = hasSelection ? "set" : "cleared";
+    // Keep <Select> controlled at all times. If we ever pass `undefined`,
+    // Radix flips to uncontrolled mode and the trigger keeps showing the
+    // previously chosen label — making the dropdown look out of sync with
+    // the gallery after "Clear selection". A sentinel "__none__" value keeps
+    // it controlled and lets <SelectValue> fall back to the placeholder.
+    const currentVal = hasSelection ? String(selectedIdx) : NONE;
 
     return (
       <>
-        <Select key={selectKey} value={currentVal} onValueChange={handleChange}>
+        <Select value={currentVal} onValueChange={handleChange}>
           <SelectTrigger
             className={cn(
               rowClasses,
