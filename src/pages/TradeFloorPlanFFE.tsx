@@ -88,15 +88,47 @@ export default function TradeFloorPlanFFE() {
     })();
   }, [user]);
 
-  const handleFile = async (file: File) => {
+  const rasterisePdfToPng = async (file: File): Promise<File> => {
+    const pdfjsLib: any = await import("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const page = await pdf.getPage(1);
+    const baseViewport = page.getViewport({ scale: 1 });
+    const targetWidth = 1800;
+    const scale = Math.min(3, targetWidth / baseViewport.width);
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const blob: Blob = await new Promise((res) => canvas.toBlob((b) => res(b!), "image/png", 0.92)!);
+    return new File([blob], file.name.replace(/\.pdf$/i, "") + ".png", { type: "image/png" });
+  };
+
+  const handleFile = async (rawFile: File) => {
     if (!user) return;
-    if (file.size > 20 * 1024 * 1024) {
+    if (rawFile.size > 20 * 1024 * 1024) {
       toast({ title: "File too large", description: "Max 20 MB.", variant: "destructive" });
+      return;
+    }
+    const isPdf = rawFile.type === "application/pdf" || /\.pdf$/i.test(rawFile.name);
+    const isImage = rawFile.type.startsWith("image/");
+    if (!isPdf && !isImage) {
+      toast({ title: "Unsupported file", description: "Upload a PDF or image (PNG, JPG).", variant: "destructive" });
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
+      let file = rawFile;
+      if (isPdf) {
+        toast({ title: "Converting PDF…", description: "Rasterising the first page for AI analysis." });
+        file = await rasterisePdfToPng(rawFile);
+      }
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from("floor-plans").upload(path, file, { contentType: file.type });
       if (error) throw error;
