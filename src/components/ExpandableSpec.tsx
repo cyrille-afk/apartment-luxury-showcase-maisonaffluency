@@ -34,8 +34,8 @@ interface ExpandableSpecProps {
    * from the materials field. Has no effect if the dropdown isn't auto-split.
    */
   autoDetectedHint?: boolean;
-  /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
-  value?: number;
+  /** Controlled selected index (for parent-managed selection, e.g. trade pricing). Use null for an explicit cleared state. */
+  value?: number | null;
   onChange?: (index: number) => void;
   /**
    * Indices that should appear visually crossed-out and be unselectable.
@@ -92,7 +92,7 @@ export default function ExpandableSpec({
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
-  const selectedIdx = value ?? internalIdx;
+  const selectedIdx = value !== undefined ? value : internalIdx;
   const showAutoHint = autoDetectedHint && didAutoSplit;
 
   if (lines.length === 0) return null;
