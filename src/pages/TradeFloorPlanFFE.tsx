@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Upload, Sparkles, Trash2, Save, FileText, Paintbrush, FileSpreadsheet, Scissors, RotateCw, Plus, Minus, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload, Sparkles, Trash2, Save, FileText, Paintbrush, FileSpreadsheet, Scissors, RotateCw, Plus, Minus, Image as ImageIcon, Check, X, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
