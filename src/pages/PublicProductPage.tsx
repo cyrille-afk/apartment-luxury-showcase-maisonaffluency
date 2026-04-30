@@ -610,10 +610,11 @@ const PublicProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
-    const isDualAxisSelection = (product.size_variants || []).some(
-      (v: any) => (v.base && String(v.base).trim()) || (v.top && String(v.top).trim())
-    );
-    if (isDualAxisSelection && opts && (!opts.base || !opts.top)) {
+    const variantsForAxes = product.size_variants || [];
+    const requiresBaseAndTopSelection =
+      variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
+      variantsForAxes.some((v: any) => v.top && String(v.top).trim());
+    if (requiresBaseAndTopSelection && opts && (!opts.base || !opts.top)) {
       // Do not resolve partial Base/Top state through a single-axis fallback;
       // wait for a complete pairing, otherwise clearing one axis can show the
       // wrong mapped finish image.

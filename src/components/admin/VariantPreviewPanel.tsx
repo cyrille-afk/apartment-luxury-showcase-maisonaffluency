@@ -47,18 +47,28 @@ export default function VariantPreviewPanel({
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedBase, setSelectedBase] = useState<string>("");
   const [selectedTop, setSelectedTop] = useState<string>("");
+  const baseNeedsSelection = baseOptions.length > 1;
+  const topNeedsSelection = topOptions.length > 1;
+  const sizeNeedsSelection = sizeOptions.length > 1;
+  const effectiveBase = isDualAxis ? (baseNeedsSelection ? selectedBase : baseOptions[0] || "") : "";
+  const effectiveTop = isDualAxis ? (topNeedsSelection ? selectedTop : topOptions[0] || "") : "";
+  const effectiveSize = sizeNeedsSelection ? selectedSize : sizeOptions[0] || "";
 
   const matched = useMemo(() => {
     if (isDualAxis) {
+      if ((baseOptions.length > 0 && !effectiveBase) || (topOptions.length > 0 && !effectiveTop) || (sizeNeedsSelection && !effectiveSize)) {
+        return undefined;
+      }
       return sv.find(
         (v) =>
-          (!selectedSize || (v.label || "").trim() === selectedSize) &&
-          (!selectedBase || (v.base || "").trim() === selectedBase) &&
-          (!selectedTop || (v.top || "").trim() === selectedTop)
+          (!effectiveSize || (v.label || "").trim() === effectiveSize) &&
+          (!effectiveBase || (v.base || "").trim() === effectiveBase) &&
+          (!effectiveTop || (v.top || "").trim() === effectiveTop)
       );
     }
-    return sv.find((v) => (v.label || "").trim() === selectedSize);
-  }, [sv, isDualAxis, selectedSize, selectedBase, selectedTop]);
+    if (sizeNeedsSelection && !selectedSize) return undefined;
+    return sv.find((v) => (v.label || "").trim() === effectiveSize);
+  }, [sv, isDualAxis, sizeNeedsSelection, selectedSize, effectiveSize, effectiveBase, effectiveTop, baseOptions.length, topOptions.length]);
 
   const sizePlaceholder = "Select your size";
   const materialPlaceholder = variantPlaceholder || "Select your material choice";
@@ -89,7 +99,14 @@ export default function VariantPreviewPanel({
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
                   value={selectedBase}
-                  onChange={(e) => setSelectedBase(e.target.value)}
+                  onChange={(e) => {
+                    const nextBase = e.target.value;
+                    setSelectedBase(nextBase);
+                    if (!nextBase) {
+                      setSelectedTop("");
+                      setSelectedSize("");
+                    }
+                  }}
                 >
                   <option value="">
                     {variantPlaceholder ||
@@ -107,7 +124,14 @@ export default function VariantPreviewPanel({
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
                   value={selectedTop}
-                  onChange={(e) => setSelectedTop(e.target.value)}
+                  onChange={(e) => {
+                    const nextTop = e.target.value;
+                    setSelectedTop(nextTop);
+                    if (!nextTop) {
+                      setSelectedBase("");
+                      setSelectedSize("");
+                    }
+                  }}
                 >
                   <option value="">
                     {variantPlaceholder ||
@@ -137,7 +161,14 @@ export default function VariantPreviewPanel({
               <select
                 className="rounded border bg-background px-2 py-1.5 text-xs"
                 value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
+                onChange={(e) => {
+                  const nextSize = e.target.value;
+                  setSelectedSize(nextSize);
+                  if (!nextSize && isDualAxis) {
+                    setSelectedBase("");
+                    setSelectedTop("");
+                  }
+                }}
               >
                 <option value="">{sizePlaceholder}</option>
                 {sizeOptions.map((o) => (
