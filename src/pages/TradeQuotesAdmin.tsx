@@ -316,14 +316,25 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         return best;
       };
 
-      // Build a resolved price map: item.id → { cents, currency }
-      const resolvedPrices: Record<string, { cents: number; currency: string }> = {};
+      // Build a resolved price map: item.id → CatalogPriceInfo
+      const resolvedPrices: Record<string, CatalogPriceInfo> = {};
       fetchedItems.forEach((item) => {
         if (item.trade_products?.trade_price_cents != null) {
-          resolvedPrices[item.id] = { cents: item.trade_products.trade_price_cents, currency: item.trade_products.currency || "SGD" };
+          resolvedPrices[item.id] = {
+            cents: item.trade_products.trade_price_cents,
+            currency: item.trade_products.currency || "SGD",
+            match: "exact",
+          };
         } else {
           const match = findFuzzyPrice(item.trade_products?.product_name || "", item.trade_products?.brand_name);
-          if (match) resolvedPrices[item.id] = { cents: match.trade_price_cents, currency: match.currency };
+          if (match) {
+            resolvedPrices[item.id] = {
+              cents: match.trade_price_cents,
+              currency: match.currency,
+              match: "fuzzy",
+              matched_name: match.product_name,
+            };
+          }
         }
       });
 
