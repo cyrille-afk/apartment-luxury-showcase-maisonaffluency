@@ -149,6 +149,7 @@ export default function TradeFloorPlanFFE() {
       setConfirmed(false);
       setActiveRoom(0);
       setSelectedItem(null);
+      setSelectedIdxs([]);
       toast({
         title: "Layout ready for review",
         description: `${next.rooms?.length || 0} rooms · adjust on the plan, then Confirm & Save.`,
