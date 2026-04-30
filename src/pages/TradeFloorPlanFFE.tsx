@@ -48,6 +48,7 @@ export default function TradeFloorPlanFFE() {
   const [confirmed, setConfirmed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<{ room: number; item: number } | null>(null);
+  const [selectedIdxs, setSelectedIdxs] = useState<number[]>([]);
 
   const PROGRESS_STEPS = [
     "Reading floor plan…",
