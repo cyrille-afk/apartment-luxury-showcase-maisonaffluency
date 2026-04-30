@@ -141,14 +141,17 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
 
   // ---- Notes
   if (args.notes && args.notes.trim()) {
-    y = ensureSpace(doc, y, 80, pageH);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    const wrapped = doc.splitTextToSize(args.notes.trim(), contentW);
+    const notesBlockH = 18 /* title */ + 18 /* gap */ + wrapped.length * 12 + 8 /* trailing pad */;
+    y = ensureSpace(doc, y, notesBlockH + 18, pageH);
     y += 18;
     sectionTitle(doc, "Project notes", M, y);
     y += 18;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    const wrapped = doc.splitTextToSize(args.notes.trim(), contentW);
     doc.text(wrapped, M, y);
     y += wrapped.length * 12;
   }
