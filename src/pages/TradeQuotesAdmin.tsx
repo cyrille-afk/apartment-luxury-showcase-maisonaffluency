@@ -680,6 +680,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                         <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
                           Indicative. EUR→GBP @ {gbp.fxEurGbp?.toFixed(4)} (+2% FX buffer). DDP — duty &amp; VAT included. Adjust CBM/weight in the panel below.
                         </p>
+                        {gbp.fxIsFallback && (
+                          <p className="font-body text-[10px] text-amber-700 leading-relaxed">
+                            ⚠ Live FX unavailable — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).
+                          </p>
+                        )}
                       </div>
                     );
                   }
