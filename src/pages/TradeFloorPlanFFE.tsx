@@ -869,34 +869,6 @@ function SidePanel({
         </div>
       )}
 
-      {/* Grid overlay (only while dragging) */}
-      {drag && snapEnabled && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-60"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, hsl(var(--primary) / 0.18) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary) / 0.18) 1px, transparent 1px)",
-            backgroundSize: `${100 / grid}% ${100 / grid}%`,
-          }}
-        />
-      )}
-
-      {/* Alignment guides */}
-      {guides.v != null && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute top-0 bottom-0 w-px bg-primary/80"
-          style={{ left: `${guides.v * 100}%` }}
-        />
-      )}
-      {guides.h != null && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-0 right-0 h-px bg-primary/80"
-          style={{ top: `${guides.h * 100}%` }}
-        />
-      )}
 
       {!multi && it && (
         <div className="space-y-2 pt-3 border-t border-border">
