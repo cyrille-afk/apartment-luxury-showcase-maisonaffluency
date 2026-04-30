@@ -584,13 +584,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Quote Number</span>
                 <span className="text-foreground">{quoteNumber}</span>
               </div>
-              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
-                quoteStatus === "submitted" ? "bg-primary/10 text-primary" :
-                quoteStatus === "reviewed" ? "bg-emerald-500/10 text-emerald-600" :
-                "bg-muted text-muted-foreground"
-              }`}>
-                {quoteStatus}
-              </span>
+              {(() => {
+                const map: Record<string, { label: string; cls: string }> = {
+                  draft:        { label: "Draft",          cls: "bg-muted text-muted-foreground" },
+                  submitted:    { label: "Submitted",      cls: "bg-primary/10 text-primary" },
+                  reviewed:     { label: "Reviewed",       cls: "bg-emerald-500/10 text-emerald-600" },
+                  priced:       { label: "Priced",         cls: "bg-amber-500/10 text-amber-600" },
+                  confirmed:    { label: "Confirmed",      cls: "bg-blue-500/10 text-blue-600" },
+                  deposit_paid: { label: "Deposit Paid",   cls: "bg-emerald-500/10 text-emerald-600" },
+                  paid:         { label: "Fully Paid",     cls: "bg-emerald-600 text-white" },
+                  cancelled:    { label: "Cancelled",      cls: "bg-destructive/10 text-destructive" },
+                };
+                const s = map[quoteStatus] ?? { label: quoteStatus, cls: "bg-muted text-muted-foreground" };
+                return (
+                  <span className={`inline-block mt-1 px-2.5 py-1 rounded-full text-[10px] font-body uppercase tracking-wider ${s.cls}`}>
+                    {s.label}
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Right: Logo + Company details */}
