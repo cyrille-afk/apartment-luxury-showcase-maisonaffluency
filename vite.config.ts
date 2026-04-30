@@ -84,22 +84,20 @@ function emitOgManifestPlugin(): Plugin {
     name: "emit-og-manifest",
     apply: "build",
     buildStart() {
-      const fs = require("fs");
-      const pathMod = require("path");
-      const publicDir = pathMod.resolve(__dirname, "public");
+      const publicDir = path.resolve(__dirname, "public");
       const ogTag = /<meta\s+property="og:image"\s+content=/i;
       const excludeNames = new Set(["index.html", "404.html"]);
 
       const out: string[] = [];
       const walk = (dir: string) => {
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-          const abs = pathMod.join(dir, entry.name);
+          const abs = path.join(dir, entry.name);
           if (entry.isDirectory()) {
             walk(abs);
           } else if (entry.isFile() && entry.name.endsWith(".html") && !excludeNames.has(entry.name)) {
             const html = fs.readFileSync(abs, "utf-8");
             if (ogTag.test(html)) {
-              out.push(pathMod.relative(publicDir, abs).split(pathMod.sep).join("/"));
+              out.push(path.relative(publicDir, abs).split(path.sep).join("/"));
             }
           }
         }
@@ -107,7 +105,7 @@ function emitOgManifestPlugin(): Plugin {
       walk(publicDir);
       out.sort();
       fs.writeFileSync(
-        pathMod.join(publicDir, "og-manifest.json"),
+        path.join(publicDir, "og-manifest.json"),
         JSON.stringify(out, null, 2) + "\n",
       );
     },
