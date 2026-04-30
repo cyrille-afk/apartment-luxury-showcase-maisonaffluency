@@ -11,7 +11,8 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { estimateShipping, ShippingBreakdown } from "@/lib/shippingEstimator";
-import { Truck, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Truck, Loader2, ChevronDown, ChevronUp, FileDown } from "lucide-react";
+import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
 
 interface Props {
   /** Net goods subtotal AFTER trade discount, in the quote's currency */
@@ -24,6 +25,10 @@ interface Props {
   defaultExpanded?: boolean;
   /** Headline label, e.g. "UK landed cost (DDP)" */
   title?: string;
+  /** Quote reference for the downloadable PDF (e.g. "QU-22A02A") */
+  quoteRef?: string;
+  /** Optional client / studio name for the PDF header */
+  clientName?: string | null;
 }
 
 const FX_BUFFER = 0.02; // +2% safety margin on EUR→GBP
@@ -38,6 +43,8 @@ export const UkLandedCostPanel = ({
   category = "furniture",
   defaultExpanded = false,
   title = "UK landed cost (DDP, GBP)",
+  quoteRef,
+  clientName,
 }: Props) => {
   const [cbm, setCbm] = useState(2);
   const [kg, setKg] = useState(200);
@@ -256,6 +263,51 @@ export const UkLandedCostPanel = ({
                   Quote remains in {quoteCurrency} as the working currency. This panel is a courtesy
                   landed-cost view for the UK end-client.
                 </p>
+              </div>
+
+              {/* Download PDF */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    downloadUkDdpPdf({
+                      quoteRef: quoteRef || "QUOTE",
+                      clientName: clientName ?? null,
+                      quoteCurrency,
+                      cbm,
+                      kg,
+                      mode,
+                      carrier: breakdown?.selected_carrier ?? null,
+                      transitDays: {
+                        min: breakdown?.transit_days_min ?? null,
+                        max: breakdown?.transit_days_max ?? null,
+                      },
+                      gbp: {
+                        ready: true,
+                        loading: false,
+                        fxEurGbp,
+                        fxQuoteEur,
+                        goodsGbpCents: goodsGbp,
+                        freightGbpCents: freightGbp,
+                        fuelGbpCents: fuelGbp,
+                        insuranceGbpCents: insuranceGbp,
+                        customsGbpCents: customsGbp,
+                        handlingGbpCents: handlingGbp,
+                        lastMileGbpCents: lastMileGbp,
+                        shippingGbpCents: shippingGbp,
+                        dutyGbpCents: dutyGbp,
+                        vatGbpCents: vatGbp,
+                        totalGbpCents: totalGbp,
+                        breakdown,
+                        goodsEurCents,
+                      },
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"
+                >
+                  <FileDown className="w-3.5 h-3.5" />
+                  Download UK DDP estimate (PDF)
+                </button>
               </div>
             </div>
           )}
