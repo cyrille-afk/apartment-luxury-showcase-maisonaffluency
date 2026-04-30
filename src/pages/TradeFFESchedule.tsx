@@ -47,6 +47,10 @@ function parseLeadWeeks(text: string | null): number | null {
   return m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
 }
 
+function leadOverride(value: number | null): number | null {
+  return value && value > 0 ? value : null;
+}
+
 export default function TradeFFESchedule() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -139,7 +143,7 @@ export default function TradeFFESchedule() {
         seqByQuote[item.quote_id] = (seqByQuote[item.quote_id] || 0) + 1;
         const seq = seqByQuote[item.quote_id];
         const lead =
-          item.lead_time_weeks_override ?? parseLeadWeeks(item.lead_time);
+          leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
         return {
           po_number: item.po_number || autoPoNumber(item.quote_ref, seq),
           cost_code: item.cost_code || "",
@@ -292,7 +296,7 @@ export default function TradeFFESchedule() {
                 </thead>
                 <tbody>
                   {items.map((item, i) => {
-                    const lead = item.lead_time_weeks_override ?? parseLeadWeeks(item.lead_time);
+                    const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground tabular-nums">{item.po_number || <span className="italic text-muted-foreground/60">auto</span>}</td>
