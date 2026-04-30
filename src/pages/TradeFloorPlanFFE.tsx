@@ -79,6 +79,7 @@ export default function TradeFloorPlanFFE() {
         if (b.notes) setNotes(b.notes);
         if (data.suggestions && (data.suggestions as any).rooms) {
           setSuggestions(data.suggestions as Suggestions);
+          setConfirmed(true);
         }
       }
     })();
