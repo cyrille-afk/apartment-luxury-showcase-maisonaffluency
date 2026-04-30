@@ -31,14 +31,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
-import io
 import os
 import re
 import sys
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import urlparse
 
 import requests
 
