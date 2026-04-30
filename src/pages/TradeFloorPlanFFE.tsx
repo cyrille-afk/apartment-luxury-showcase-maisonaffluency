@@ -145,14 +145,13 @@ export default function TradeFloorPlanFFE() {
       const next = data as Suggestions;
       setProgressStep(PROGRESS_STEPS.length - 1);
       setSuggestions(next);
+      setConfirmed(false);
       setActiveRoom(0);
-      if (planId) {
-        await supabase
-          .from("trade_floor_plans")
-          .update({ brief, suggestions: next as any })
-          .eq("id", planId);
-      }
-      toast({ title: "Layout suggested", description: `${next.rooms?.length || 0} rooms.` });
+      setSelectedItem(null);
+      toast({
+        title: "Layout ready for review",
+        description: `${next.rooms?.length || 0} rooms · adjust on the plan, then Confirm & Save.`,
+      });
     } catch (e: any) {
       toast({ title: "Could not generate layout", description: e.message, variant: "destructive" });
     } finally {
