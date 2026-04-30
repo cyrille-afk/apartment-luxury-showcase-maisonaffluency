@@ -360,9 +360,30 @@ export default function TradeFloorPlanFFE() {
         {suggestions && suggestions.rooms.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="font-display text-lg text-foreground">Proposed layout</h2>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="font-display text-lg text-foreground">Proposed layout</h2>
+                {confirmed ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-body bg-primary/10 text-primary border border-primary/20">
+                    <Check className="w-3 h-3" /> Confirmed
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-body bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                    <AlertCircle className="w-3 h-3" /> Pending review
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={saveLayout}><Save className="w-4 h-4" />Save</Button>
+                <Button
+                  variant={confirmed ? "outline" : "default"}
+                  size="sm"
+                  onClick={saveLayout}
+                  disabled={confirmed}
+                >
+                  <Check className="w-4 h-4" />{confirmed ? "Saved" : "Confirm & Save"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={discardSuggestions}>
+                  <X className="w-4 h-4" />Discard
+                </Button>
                 <Button variant="outline" size="sm" onClick={sendToMoodBoard}><Paintbrush className="w-4 h-4" />Mood Board</Button>
                 <Button variant="outline" size="sm" onClick={() => stageHandoff("trade:pendingFFE", "/trade/ffe-schedule", "FF&E Schedule")}>
                   <FileSpreadsheet className="w-4 h-4" />FF&amp;E Schedule
@@ -375,6 +396,13 @@ export default function TradeFloorPlanFFE() {
                 </Button>
               </div>
             </div>
+
+            {!confirmed && (
+              <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 font-body text-xs text-amber-800 dark:text-amber-300">
+                Drag pieces on the floor plan, adjust size & rotation, or remove items. Then{" "}
+                <strong>Confirm &amp; Save</strong> to lock this layout in.
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-2">
               {suggestions.rooms.map((r, i) => (
@@ -410,12 +438,34 @@ export default function TradeFloorPlanFFE() {
               </div>
             )}
 
-            {/* Mobile list */}
-            {isMobile && (
-              <MobileList
-                room={suggestions.rooms[activeRoom]}
-                onRemove={(idx) => removeItem(activeRoom, idx)}
-              />
+            {/* Mobile: overlay preview + list */}
+            {isMobile && planUrl && (
+              <div className="space-y-3">
+                <CanvasPreview
+                  planUrl={planUrl}
+                  room={suggestions.rooms[activeRoom]}
+                  selectedIdx={selectedItem?.room === activeRoom ? selectedItem?.item ?? null : null}
+                  onSelect={(idx) => setSelectedItem({ room: activeRoom, item: idx })}
+                  onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
+                />
+                <MobileList
+                  room={suggestions.rooms[activeRoom]}
+                  onRemove={(idx) => removeItem(activeRoom, idx)}
+                />
+                <div className="sticky bottom-3 flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={saveLayout}
+                    disabled={confirmed}
+                    variant={confirmed ? "outline" : "default"}
+                  >
+                    <Check className="w-4 h-4" />{confirmed ? "Saved" : "Confirm & Save"}
+                  </Button>
+                  <Button variant="outline" onClick={discardSuggestions}>
+                    <X className="w-4 h-4" />Discard
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         )}
