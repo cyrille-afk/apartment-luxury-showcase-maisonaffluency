@@ -35,11 +35,39 @@ async function fetchRemoteBuildId(): Promise<string | null> {
   }
 }
 
+async function triggerPostDeployRescrape(newBuildId: string) {
+  // Fire-and-forget. We use sessionStorage so multiple tabs / multiple
+  // version checks during the same session don't pile up duplicate calls.
+  // The edge function itself is also idempotent (it short-circuits when the
+  // snapshot already matches the buildId), so a duplicate call is cheap.
+  try {
+    const key = "og-rescrape-fired-for";
+    if (sessionStorage.getItem(key) === newBuildId) return;
+    sessionStorage.setItem(key, newBuildId);
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/post-deploy-rescrape`;
+    // keepalive lets the request survive the imminent page reload below.
+    void fetch(url, {
+      method: "POST",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ buildId: newBuildId }),
+    }).catch(() => {});
+  } catch {
+    /* noop */
+  }
+}
+
 async function checkForUpdate() {
   if (!currentBuildId) return;
   const remote = await fetchRemoteBuildId();
   if (!remote) return;
   if (remote !== currentBuildId) {
+    // Kick off the OG rescrape for this new deploy *before* we reload.
+    triggerPostDeployRescrape(remote);
     // Avoid reloading while the user is mid-input (forms, contenteditable).
     const active = document.activeElement as HTMLElement | null;
     const isEditing =
