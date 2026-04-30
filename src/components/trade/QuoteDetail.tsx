@@ -39,6 +39,8 @@ interface QuoteItemWithProduct {
     lead_time: string | null;
     sku: string | null;
   } | null;
+  /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
+  edition?: string | null;
 }
 
 interface QuoteDetailProps {
@@ -262,6 +264,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }
       }
 
+      // Enrich items with `edition` from designer_curator_picks (matched by title, normalized).
+      try {
+        const titles = Array.from(
+          new Set(
+            loadedItems
+              .map((i) => i.trade_products?.product_name?.trim())
+              .filter(Boolean) as string[]
+          )
+        );
+        if (titles.length > 0) {
+          const { data: picks } = await supabase
+            .from("designer_curator_picks")
+            .select("title, edition")
+            .in("title", titles);
+          if (picks && picks.length > 0) {
+            const norm = (s: string) =>
+              s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+            const editionByTitle = new Map<string, string>();
+            for (const p of picks as Array<{ title: string; edition: string | null }>) {
+              if (p.edition && p.title) editionByTitle.set(norm(p.title), p.edition);
+            }
+            loadedItems = loadedItems.map((it) => {
+              const t = it.trade_products?.product_name;
+              if (!t) return it;
+              const ed = editionByTitle.get(norm(t));
+              return ed ? { ...it, edition: ed } : it;
+            });
+          }
+        }
+      } catch {
+        /* non-fatal — edition is purely additive metadata */
+      }
+
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
@@ -396,6 +431,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         brandName: product?.brand_name || "",
         dimensions: product?.dimensions ?? null,
         materials: product?.materials ?? null,
+        edition: item.edition ?? null,
         leadTime: product?.lead_time ?? null,
         notes: item.notes ?? null,
         quantity: item.quantity,
@@ -826,6 +862,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           </p>
                           {product?.dimensions && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                           {product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.materials}</p>}
+                          {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 truncate">Edition: {item.edition}</p>}
                           {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.lead_time}</p>}
                           {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 truncate">{item.notes}</p>}
                           {isDraft && (
