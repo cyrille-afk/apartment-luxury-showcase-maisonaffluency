@@ -141,7 +141,7 @@ export function buildUkDdpPdf({
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text("DDP delivered London — all in", M + 14, y + 27);
+  doc.text("DDP delivered London - all in", M + 14, y + 27);
   doc.setFontSize(16);
   doc.text(fmtGbp(gbp.totalGbpCents), pageW - M - 14, y + 28, { align: "right" });
   y += 60;
