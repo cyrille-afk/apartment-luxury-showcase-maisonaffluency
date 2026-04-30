@@ -457,6 +457,17 @@ const TradeProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
+    const isDualAxisSelection = (pricing?.size_variants || []).some(
+      (v: any) => (v.base && String(v.base).trim()) || (v.top && String(v.top).trim())
+    );
+    if (isDualAxisSelection && opts && (!opts.base || !opts.top)) {
+      // Partial Base/Top selections must not fall back to a standalone finish
+      // key (e.g. clearing Top while Base remains). A clear/partial state
+      // should show the primary product image until a complete pairing is set.
+      setGalleryActiveIndex(0);
+      setGalleryJumpNonce((n) => n + 1);
+      return;
+    }
     const idx = opts && (opts.base || opts.top || opts.size)
       ? resolveVariantImageIndex(productFinishMap, {
           base: opts.base,
@@ -725,6 +736,13 @@ const TradeProductPage: React.FC = () => {
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => {
+                      if (idx < 0) {
+                        setSelectedBase(null);
+                        setSelectedTop(null);
+                        setSelectedDualSize(null);
+                        handleMaterialChange(null);
+                        return;
+                      }
                       const v = baseOptions[idx] ?? null;
                       setSelectedBase(v);
                       let nextTop = selectedTop;
@@ -752,6 +770,13 @@ const TradeProductPage: React.FC = () => {
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
                     onChange={(idx) => {
+                      if (idx < 0) {
+                        setSelectedBase(null);
+                        setSelectedTop(null);
+                        setSelectedDualSize(null);
+                        handleMaterialChange(null);
+                        return;
+                      }
                       const v = topOptions[idx] ?? null;
                       setSelectedTop(v);
                       let nextBase = selectedBase;
