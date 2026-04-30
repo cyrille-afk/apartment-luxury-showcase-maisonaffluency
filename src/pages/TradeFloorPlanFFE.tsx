@@ -42,9 +42,20 @@ export default function TradeFloorPlanFFE() {
   const [notes, setNotes] = useState("");
 
   const [suggesting, setSuggesting] = useState(false);
+  const [progressStep, setProgressStep] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
   const [activeRoom, setActiveRoom] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<{ room: number; item: number } | null>(null);
+
+  const PROGRESS_STEPS = [
+    "Reading floor plan…",
+    "Detecting rooms & circulation…",
+    "Matching catalog pieces to brief…",
+    "Placing furniture & fixtures…",
+    "Refining proportions…",
+    "Finalising layout…",
+  ];
 
   // Auto-load most recent plan
   useEffect(() => {
@@ -111,6 +122,13 @@ export default function TradeFloorPlanFFE() {
       return;
     }
     setSuggesting(true);
+    setProgressStep(0);
+    setElapsed(0);
+    const startedAt = Date.now();
+    const tick = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 500);
+    const stepTimer = setInterval(() => {
+      setProgressStep((s) => Math.min(s + 1, PROGRESS_STEPS.length - 2));
+    }, 4500);
     try {
       const brief = {
         rooms: roomsText.split(",").map((s) => s.trim()).filter(Boolean),
@@ -122,6 +140,7 @@ export default function TradeFloorPlanFFE() {
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const next = data as Suggestions;
+      setProgressStep(PROGRESS_STEPS.length - 1);
       setSuggestions(next);
       setActiveRoom(0);
       if (planId) {
@@ -134,6 +153,8 @@ export default function TradeFloorPlanFFE() {
     } catch (e: any) {
       toast({ title: "Could not generate layout", description: e.message, variant: "destructive" });
     } finally {
+      clearInterval(tick);
+      clearInterval(stepTimer);
       setSuggesting(false);
     }
   };
@@ -280,6 +301,42 @@ export default function TradeFloorPlanFFE() {
               {suggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               {suggesting ? "Composing layout…" : "Suggest FF&E layout"}
             </Button>
+            {suggesting && (
+              <div className="rounded-md border border-border bg-muted/30 p-4 space-y-3" aria-live="polite">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all duration-700 ease-out"
+                    style={{ width: `${Math.round(((progressStep + 1) / PROGRESS_STEPS.length) * 100)}%` }}
+                  />
+                </div>
+                <div className="flex items-start gap-2">
+                  <Loader2 className="w-3.5 h-3.5 mt-0.5 animate-spin text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body text-sm text-foreground">{PROGRESS_STEPS[progressStep]}</p>
+                    <p className="font-body text-xs text-muted-foreground mt-0.5">
+                      Step {progressStep + 1} of {PROGRESS_STEPS.length} · {elapsed}s elapsed · usually 20–45s
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-1">
+                  {PROGRESS_STEPS.map((label, i) => (
+                    <li
+                      key={label}
+                      className={`flex items-center gap-2 text-xs font-body ${
+                        i < progressStep ? "text-foreground/70" : i === progressStep ? "text-foreground" : "text-muted-foreground/60"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full ${
+                          i < progressStep ? "bg-primary" : i === progressStep ? "bg-primary animate-pulse" : "bg-muted-foreground/30"
+                        }`}
+                      />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
