@@ -601,6 +601,7 @@ export default function TradeFloorPlanFFE() {
 /* ---------- Canvas (desktop + mobile) ---------- */
 function CanvasPreview({
   planUrl, room, selectedIdxs, onSelect, onClearSelection, onMove, onMoveGroup,
+  snapEnabled, gridDivisions,
 }: {
   planUrl: string;
   room: Room;
@@ -609,6 +610,8 @@ function CanvasPreview({
   onClearSelection: () => void;
   onMove: (i: number, x: number, y: number) => void;
   onMoveGroup: (dx: number, dy: number) => void;
+  snapEnabled: boolean;
+  gridDivisions: number;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<
