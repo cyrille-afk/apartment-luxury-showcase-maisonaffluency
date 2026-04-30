@@ -888,16 +888,10 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
             <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
           </div>
         )}
-        {/* Description overlay on hover */}
-        {pick.description && (
-          <div className="absolute left-3 right-3 top-12 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="bg-background/90 backdrop-blur-sm rounded-lg shadow-lg px-3.5 py-2.5 border border-border/30">
-              <p className="font-body text-xs text-foreground leading-relaxed line-clamp-3">
-                {pick.description}
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Description overlay on hover — hidden on touch devices so the
+            grid stays clean on mobile (mirrors PublicDesignerProfile).
+            Mobile users see the description inside the product sheet only. */}
+        <ProductCardDescriptionOverlay description={pick.description} />
         {/* Hover action icons */}
         <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <span
