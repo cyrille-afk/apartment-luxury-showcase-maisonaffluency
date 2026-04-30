@@ -265,8 +265,8 @@ export const UkLandedCostPanel = ({
   );
 };
 
-const Row = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between font-body text-xs text-muted-foreground">
+const Row = ({ label, value, bold, indent }: { label: string; value: string; bold?: boolean; indent?: boolean }) => (
+  <div className={`flex justify-between font-body text-xs ${bold ? "text-foreground font-medium" : "text-muted-foreground"} ${indent ? "pl-2" : ""}`}>
     <span className="pr-2">{label}</span>
     <span className="tabular-nums">{value}</span>
   </div>
