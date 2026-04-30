@@ -567,6 +567,8 @@ export default function TradeFloorPlanFFE() {
                   onClearSelection={clearSelection}
                   onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
                   onMoveGroup={(dx, dy) => moveMany(activeRoom, selectedIdxs, dx, dy)}
+                  snapEnabled={snapEnabled}
+                  gridDivisions={gridDivisions}
                 />
                 <MobileList
                   room={suggestions.rooms[activeRoom]}
