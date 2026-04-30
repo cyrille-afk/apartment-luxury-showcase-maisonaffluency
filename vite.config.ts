@@ -70,6 +70,49 @@ function emitVersionPlugin(buildId: string): Plugin {
   };
 }
 
+/**
+ * Regenerates public/og-manifest.json at build time so the post-deploy
+ * Meta rescraper always knows about every OG bridge file (otherwise newly
+ * added bridges would be invisible to it until someone bumps a baked list).
+ *
+ * The manifest is the list of every .html file under public/ that contains
+ * a <meta property="og:image"> tag.
+ */
+function emitOgManifestPlugin(): Plugin {
+  return {
+    name: "emit-og-manifest",
+    apply: "build",
+    buildStart() {
+      const fs = require("fs");
+      const pathMod = require("path");
+      const publicDir = pathMod.resolve(__dirname, "public");
+      const ogTag = /<meta\s+property="og:image"\s+content=/i;
+      const excludeNames = new Set(["index.html", "404.html"]);
+
+      const out: string[] = [];
+      const walk = (dir: string) => {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          const abs = pathMod.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            walk(abs);
+          } else if (entry.isFile() && entry.name.endsWith(".html") && !excludeNames.has(entry.name)) {
+            const html = fs.readFileSync(abs, "utf-8");
+            if (ogTag.test(html)) {
+              out.push(pathMod.relative(publicDir, abs).split(pathMod.sep).join("/"));
+            }
+          }
+        }
+      };
+      walk(publicDir);
+      out.sort();
+      fs.writeFileSync(
+        pathMod.join(publicDir, "og-manifest.json"),
+        JSON.stringify(out, null, 2) + "\n",
+      );
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
