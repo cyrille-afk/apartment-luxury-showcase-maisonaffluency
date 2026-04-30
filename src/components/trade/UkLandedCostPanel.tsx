@@ -111,11 +111,13 @@ export const UkLandedCostPanel = ({
   };
 
   const goodsGbp = eurToGbp(goodsEurCents);
-  const shippingEurCents = breakdown?.available
-    ? (breakdown.freight_cents + breakdown.fuel_cents + breakdown.insurance_cents +
-       breakdown.customs_cents + breakdown.handling_cents + breakdown.last_mile_cents)
-    : 0;
-  const shippingGbp = eurToGbp(shippingEurCents);
+  const freightGbp = eurToGbp(breakdown?.freight_cents ?? 0);
+  const fuelGbp = eurToGbp(breakdown?.fuel_cents ?? 0);
+  const insuranceGbp = eurToGbp(breakdown?.insurance_cents ?? 0);
+  const customsGbp = eurToGbp(breakdown?.customs_cents ?? 0);
+  const handlingGbp = eurToGbp(breakdown?.handling_cents ?? 0);
+  const lastMileGbp = eurToGbp(breakdown?.last_mile_cents ?? 0);
+  const shippingGbp = freightGbp + fuelGbp + insuranceGbp + customsGbp + handlingGbp + lastMileGbp;
   const dutyGbp = eurToGbp(breakdown?.duty_cents ?? 0);
   const vatGbp = eurToGbp(breakdown?.vat_cents ?? 0);
   const totalGbp = goodsGbp + shippingGbp + dutyGbp + vatGbp;
