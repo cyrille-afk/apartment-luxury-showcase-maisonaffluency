@@ -155,7 +155,11 @@ export function parseRichInline(input: string): RichRun[] {
   const cleaned = decoded
     .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
     .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/?p[^>]*>/gi, "");
+    .replace(/<\/?p[^>]*>/gi, "")
+    // Single line breaks within an inline run must collapse to a space —
+    // jsPDF would otherwise treat raw \n as a hard line break and stack
+    // it on top of our manually advanced y cursor (overlapping text).
+    .replace(/\n+/g, " ");
 
   const runs: RichRun[] = [];
   let italic = 0;
