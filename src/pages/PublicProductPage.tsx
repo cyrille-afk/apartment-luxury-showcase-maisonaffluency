@@ -200,6 +200,18 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     setSelDualSize(null);
     onMaterialChange?.(defaultPair.base, { base: defaultPair.base, top: defaultPair.top, size: null });
   };
+
+  // Single atomic reset for dual-axis selectors. Wipes Base/Top/Size in one
+  // React batch and notifies the parent with an explicit cleared payload so
+  // the gallery resolver always sees a fully-cleared state — no chance of
+  // dropdowns showing one finish (e.g. "Sand Blaster") while the gallery
+  // shows another image.
+  const clearAllDualSelections = () => {
+    setSelBase(null);
+    setSelTop(null);
+    setSelDualSize(null);
+    onMaterialChange?.(null, { base: null, top: null, size: null });
+  };
   const isAtDefault =
     !!defaultPair &&
     selBase === defaultPair.base &&
