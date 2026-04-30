@@ -530,6 +530,12 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const priceStr = itemPrices[item.id] || "";
                   const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
                   const lineTotal = cents * item.quantity;
+                  const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
+                  const lead = leadTimes[item.id];
+                  const leadLabel = formatLeadTime(lead);
+                  const catalog = catalogPrices[item.id];
+                  // Only show the suggestion when we used it to pre-fill (i.e. no admin price has been saved yet).
+                  const showCatalogHint = catalog && !item.unit_price_cents;
 
                   return (
                     <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_80px_120px_100px] md:gap-4 md:items-center">
@@ -545,9 +551,15 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                           <h4 className="font-display text-xs text-foreground leading-tight">{product?.product_name || "Unknown"}</h4>
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}</p>
                           {product?.dimensions && <p className="font-body text-[10px] text-muted-foreground">{product.dimensions}</p>}
-                          {catalogPrices[item.id] && (
+                          {leadLabel && (
+                            <p className="font-body text-[10px] text-muted-foreground">{leadLabel}</p>
+                          )}
+                          {showCatalogHint && (
                             <p className="font-body text-[10px] text-muted-foreground/60">
-                              Catalog: {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)}
+                              Suggested {catalog.match === "fuzzy" ? "(≈)" : "(catalog)"}: {formatPrice(catalog.cents, catalog.currency)}
+                              {catalog.match === "fuzzy" && catalog.matched_name && (
+                                <span className="italic"> · from "{catalog.matched_name}"</span>
+                              )}
                             </p>
                           )}
                         </div>
@@ -567,9 +579,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
-                        {catalogPrices[item.id] && catalogPrices[item.id].currency !== currency && (
-                          <p className="font-body text-[9px] text-muted-foreground/50 text-right mt-0.5 italic">
-                            {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)} catalog
+                        {ownerDiscountPct > 0 && cents > 0 && (
+                          <p className="font-body text-[9px] text-emerald-600/80 text-right mt-0.5">
+                            After {(ownerDiscountPct * 100).toFixed(0)}% trade: {formatPrice(discountedUnit, currency)}
                           </p>
                         )}
                       </div>
