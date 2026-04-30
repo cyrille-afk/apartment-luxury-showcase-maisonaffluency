@@ -58,6 +58,17 @@ export interface QuotePdfArgs {
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
   notes?: string | null;
+  /** Optional UK Landed Cost (GBP DDP London) breakdown — rendered after the main totals block when provided. */
+  gbpLanded?: {
+    ready: boolean;
+    fxEurGbp: number | null;
+    fxIsFallback: boolean;
+    goodsGbpCents: number;
+    shippingGbpCents: number;
+    dutyGbpCents: number;
+    vatGbpCents: number;
+    totalGbpCents: number;
+  } | null;
 }
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
