@@ -11,7 +11,7 @@ describe("ExpandableSpec controlled clearing", () => {
     const { rerender } = render(
       <ExpandableSpec
         icon={<Layers />}
-        text="Lacquer\nSand-Blasted Ash Table Surface"
+        text={"Lacquer\nSand-Blasted Ash Table Surface"}
         placeholder="Select your top finish"
         value={0}
         onChange={onChange}
@@ -27,7 +27,7 @@ describe("ExpandableSpec controlled clearing", () => {
     rerender(
       <ExpandableSpec
         icon={<Layers />}
-        text="Lacquer\nSand-Blasted Ash Table Surface"
+        text={"Lacquer\nSand-Blasted Ash Table Surface"}
         placeholder="Select your top finish"
         value={null}
         onChange={onChange}
