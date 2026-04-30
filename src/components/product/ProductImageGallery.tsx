@@ -187,6 +187,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <div className="pointer-events-auto">{overlay}</div>
             </div>
           )}
+          {firstImageBadge && activeIndex === 0 && (
+            <div className="absolute top-3 left-3 z-20 pointer-events-none">
+              <div className="pointer-events-auto">{firstImageBadge}</div>
+            </div>
+          )}
 
           {/* Preload neighboring main images so navigation feels instant */}
           <div aria-hidden="true" className="hidden">
