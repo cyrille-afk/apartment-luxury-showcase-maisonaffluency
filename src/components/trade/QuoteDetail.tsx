@@ -1270,11 +1270,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </button>
                 </div>
               </div>
-              {subtotalCents > 0 && (
-                <p className="font-body text-[10px] text-muted-foreground text-right">
-                  Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (deposit {currencySymbol(currency)}{formatPriceRaw(depositCents, currency)} +{gstEnabled ? ` ${gstRate}% GST incl. +` : ""} 3.4% processing fee). Or pay via bank transfer using the details above.
-                </p>
-              )}
+              {subtotalCents > 0 && (() => {
+                const sym = currencySymbol(currency);
+                const fmt = (c: number) => `${sym}${formatPriceRaw(c, currency)}`;
+                const discountCents = tradeDiscount ? Math.round(subtotalCents * tradeDiscountPct) : 0;
+                const gstCents = gstEnabled ? Math.round(afterDiscount * gstRate / 100) : 0;
+                const processingFee = chargeTotal - depositCents;
+                const Row = ({ label, value, strong = false, muted = false }: { label: React.ReactNode; value: React.ReactNode; strong?: boolean; muted?: boolean }) => (
+                  <div className={`flex items-baseline justify-between gap-4 ${strong ? "font-medium text-foreground" : muted ? "text-muted-foreground" : "text-foreground/80"}`}>
+                    <span>{label}</span>
+                    <span className="tabular-nums">{value}</span>
+                  </div>
+                );
+                return (
+                  <div className="rounded-md border border-border bg-muted/30 px-4 py-3">
+                    <p className="font-display text-[10px] uppercase tracking-[0.15em] text-foreground/70 mb-2">60% Deposit Breakdown</p>
+                    <div className="font-body text-[11px] space-y-1">
+                      <Row label="Item subtotal" value={`${fmt(subtotalCents)} ${currency}`} />
+                      {tradeDiscount && discountCents > 0 && (
+                        <Row label={`Trade discount (${Math.round(tradeDiscountPct * 100)}%)`} value={`− ${fmt(discountCents)} ${currency}`} muted />
+                      )}
+                      <Row label="Net subtotal" value={`${fmt(afterDiscount)} ${currency}`} />
+                      {gstEnabled && (
+                        <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
+                      )}
+                      <div className="border-t border-border my-1.5" />
+                      <Row label="Order total (incl. GST)" value={`${fmt(withGst)} ${currency}`} strong />
+                      <Row label="60% deposit due now" value={`${fmt(depositCents)} ${currency}`} strong />
+                      <div className="border-t border-border my-1.5" />
+                      <Row label="Stripe processing fee (3.4% + fixed)" value={`+ ${fmt(processingFee)} ${currency}`} muted />
+                      <Row label="Total charge to your card" value={`${fmt(chargeTotal)} ${currency}`} strong />
+                    </div>
+                    <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                      Card-denominated foreign transaction fees (~1–2%) may apply separately. To avoid the processing fee, pay {fmt(depositCents)} {currency} via bank transfer using the details above.
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           );
         })()}
