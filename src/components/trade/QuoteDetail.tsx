@@ -109,6 +109,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const isFullyPaid = quoteStatus === "paid";
   const isReadOnly = !isDraft && !isSuperAdmin;
 
+  const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+    draft:        { label: "Draft",        cls: "bg-muted text-muted-foreground" },
+    submitted:    { label: "Submitted",    cls: "bg-primary/10 text-primary" },
+    reviewed:     { label: "Reviewed",     cls: "bg-emerald-500/10 text-emerald-600" },
+    priced:       { label: "Priced",       cls: "bg-amber-500/10 text-amber-600" },
+    confirmed:    { label: "Confirmed",    cls: "bg-blue-500/10 text-blue-600" },
+    deposit_paid: { label: "Deposit Paid", cls: "bg-emerald-500/10 text-emerald-600" },
+    paid:         { label: "Fully Paid",   cls: "bg-emerald-600 text-white" },
+    cancelled:    { label: "Cancelled",    cls: "bg-destructive/10 text-destructive" },
+  };
+  const StatusBadge = ({ className = "" }: { className?: string }) => {
+    const s = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "bg-muted text-muted-foreground" };
+    return (
+      <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-body uppercase tracking-wider ${s.cls} ${className}`}>
+        {s.label}
+      </span>
+    );
+  };
+
   const createdDate = new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
   expiryDate.setDate(expiryDate.getDate() + 7);
