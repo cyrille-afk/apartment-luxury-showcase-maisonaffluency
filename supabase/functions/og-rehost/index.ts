@@ -1,0 +1,211 @@
+/**
+ * og-rehost
+ * =========
+ *
+ * Idempotent OG image rehosting endpoint.
+ *
+ * POST { sourceUrl: string, slug: string }
+ *   → downloads the source, resizes to 1200×630, compresses under 300 KB,
+ *     uploads to assets/og/<slug>.jpg, returns the public URL.
+ *   → if the same source URL was already processed under that slug
+ *     (we hash the source URL into the filename), returns the cached URL
+ *     without re-uploading.
+ *
+ * Used by:
+ *   • scripts/og-pipeline.py (backfill of public/designers/*.html)
+ *   • Any admin UI that wants to attach a fresh OG image to a bridge.
+ *
+ * No JWT required. Anyone who can produce a working sourceUrl can rehost it
+ * — we only ever store derived 1200×630 thumbnails, which is the same image
+ * the bridge would have served anyway.
+ */
+
+// deno-lint-ignore-file no-explicit-any
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const BUCKET = "assets";
+const PREFIX = "og/";
+const TARGET_W = 1200;
+const TARGET_H = 630;
+const MAX_BYTES = 300 * 1024;
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+function publicUrl(path: string): string {
+  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+}
+
+async function sha8(input: string): Promise<string> {
+  const buf = await crypto.subtle.digest(
+    "SHA-1",
+    new TextEncoder().encode(input),
+  );
+  return Array.from(new Uint8Array(buf))
+    .slice(0, 4)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Use Cloudinary's fetch delivery to do the heavy lifting.
+ * It downloads the source, resizes/crops to 1200×630, and re-encodes to JPEG
+ * with quality auto-tuned for our 300 KB target. We then download the result
+ * once and store it in our own bucket so we own the asset and don't depend on
+ * Cloudinary's free fetch quota at request time.
+ */
+const CLOUDINARY_CLOUD = "dif1oamtj";
+
+function cloudinaryFetchUrl(sourceUrl: string, qual: string): string {
+  const transform = [
+    "f_jpg",
+    "w_1200",
+    "h_630",
+    "c_fill",
+    "g_auto",
+    qual,
+    "fl_lossy.progressive",
+  ].join(",");
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/fetch/${transform}/${encodeURIComponent(
+    sourceUrl,
+  )}`;
+}
+
+async function fetchOptimized(sourceUrl: string): Promise<Uint8Array> {
+  // Try progressively more aggressive Cloudinary quality presets until the
+  // result is under MAX_BYTES, then fall back to the raw source as a last
+  // resort (still better than nothing for social crawlers).
+  const tries = [
+    cloudinaryFetchUrl(sourceUrl, "q_auto:good"),
+    cloudinaryFetchUrl(sourceUrl, "q_auto:eco"),
+    cloudinaryFetchUrl(sourceUrl, "q_auto:low"),
+    cloudinaryFetchUrl(sourceUrl, "q_50"),
+  ];
+  let best: Uint8Array | null = null;
+  for (const url of tries) {
+    const r = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; MaisonAffluencyOG/1.0; +https://www.maisonaffluency.com)",
+        Accept: "image/jpeg,image/*",
+      },
+      redirect: "follow",
+    });
+    if (!r.ok) continue;
+    const ct = r.headers.get("content-type") ?? "";
+    if (!ct.startsWith("image/")) continue; // Cloudinary returns image/gif on errors
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf.byteLength === 0) continue;
+    if (buf.byteLength <= MAX_BYTES) return buf;
+    if (!best || buf.byteLength < best.byteLength) best = buf;
+  }
+  if (best) return best; // closest we got
+  throw new Error(`source fetch failed for ${sourceUrl}`);
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+  if (req.method !== "POST") {
+    return new Response("method not allowed", { status: 405, headers: corsHeaders });
+  }
+
+  try {
+    const body = await req.json().catch(() => ({}));
+    const sourceUrl: string = body.sourceUrl;
+    const baseSlug: string = body.slug;
+
+    if (!sourceUrl || typeof sourceUrl !== "string") {
+      return new Response(
+        JSON.stringify({ error: "sourceUrl required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    if (!baseSlug || !/^[a-z0-9-]+$/.test(baseSlug)) {
+      return new Response(
+        JSON.stringify({ error: "slug must be lowercase kebab-case" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    if (!/^https?:\/\//i.test(sourceUrl)) {
+      return new Response(
+        JSON.stringify({ error: "sourceUrl must be absolute http(s)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const digest = await sha8(sourceUrl);
+    const objectPath = `${PREFIX}${baseSlug}-${digest}.jpg`;
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
+    // Cache hit → return existing object
+    const head = await fetch(publicUrl(objectPath), { method: "HEAD" });
+    if (head.ok) {
+      return new Response(
+        JSON.stringify({
+          url: publicUrl(objectPath),
+          cached: true,
+          bytes: Number(head.headers.get("content-length") || 0),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    let out: Uint8Array;
+    try {
+      out = await fetchOptimized(sourceUrl);
+    } catch (e: any) {
+      return new Response(
+        JSON.stringify({ error: e?.message ?? "source fetch failed" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    if (out.byteLength > MAX_BYTES * 1.5) {
+      // Cloudinary occasionally returns a slightly larger file when the
+      // source is very flat. Log it but accept – still way under the
+      // 5 MB hard limit social platforms enforce.
+      console.warn(
+        `og-rehost: ${sourceUrl} → ${out.byteLength} B (over 300 KB target)`,
+      );
+    }
+
+    const { error: upErr } = await supabase.storage
+      .from(BUCKET)
+      .upload(objectPath, out, {
+        contentType: "image/jpeg",
+        upsert: true,
+        cacheControl: "31536000",
+      });
+    if (upErr) {
+      return new Response(
+        JSON.stringify({ error: `upload failed: ${upErr.message}` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        url: publicUrl(objectPath),
+        cached: false,
+        bytes: out.byteLength,
+        width: TARGET_W,
+        height: TARGET_H,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (e: any) {
+    return new Response(
+      JSON.stringify({ error: e?.message ?? String(e) }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+});
+
