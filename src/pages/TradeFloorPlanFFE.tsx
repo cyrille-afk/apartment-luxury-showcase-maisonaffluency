@@ -1005,36 +1005,49 @@ function MobileList({
   return (
     <div className="space-y-3">
       <p className="font-body text-xs italic text-muted-foreground">{room.summary}</p>
-      {room.items.map((it, i) => {
-        const isSel = selectedIdxs.includes(i);
-        return (
-          <div
-            key={i}
-            className={`flex items-start gap-3 p-3 rounded-lg border bg-background ${
-              isSel ? "border-primary ring-1 ring-primary/30" : "border-border"
-            }`}
-          >
-            <button
-              onClick={() => onToggle(i)}
-              aria-label={isSel ? "Deselect" : "Select"}
-              className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-sm border shrink-0 ${
-                isSel ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/40"
+      {(() => {
+        const groups = new Map<string, { idxs: number[]; product: typeof room.items[number]["product"]; reason: string }>();
+        room.items.forEach((it, i) => {
+          const key = `${it.product.title}__${it.product.designer}`;
+          const g = groups.get(key);
+          if (g) g.idxs.push(i);
+          else groups.set(key, { idxs: [i], product: it.product, reason: it.reason });
+        });
+        return Array.from(groups.values()).map((g, gi) => {
+          const allSel = g.idxs.every((i) => selectedIdxs.includes(i));
+          const someSel = !allSel && g.idxs.some((i) => selectedIdxs.includes(i));
+          return (
+            <div
+              key={gi}
+              className={`flex items-start gap-3 p-3 rounded-lg border bg-background ${
+                allSel ? "border-primary ring-1 ring-primary/30" : someSel ? "border-primary/50" : "border-border"
               }`}
             >
-              {isSel && <Check className="w-3 h-3" />}
-            </button>
-            <img src={it.product.image_url} alt="" className="w-16 h-16 rounded object-cover shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="font-body text-sm font-medium text-foreground truncate">{it.product.title}</p>
-              <p className="font-body text-[11px] text-muted-foreground truncate">{it.product.designer}</p>
-              <p className="font-body text-[11px] text-muted-foreground mt-1">{it.reason}</p>
+              <button
+                onClick={() => g.idxs.forEach((i) => onToggle(i))}
+                aria-label={allSel ? "Deselect group" : "Select group"}
+                className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-sm border shrink-0 ${
+                  allSel ? "bg-primary border-primary text-primary-foreground" : someSel ? "bg-primary/40 border-primary/60 text-primary-foreground" : "border-muted-foreground/40"
+                }`}
+              >
+                {(allSel || someSel) && <Check className="w-3 h-3" />}
+              </button>
+              <img src={g.product.image_url} alt="" className="w-16 h-16 rounded object-cover shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="font-body text-sm font-medium text-foreground truncate">
+                  {g.product.title}
+                  {g.idxs.length > 1 && <span className="ml-1 text-muted-foreground">×{g.idxs.length}</span>}
+                </p>
+                <p className="font-body text-[11px] text-muted-foreground truncate">{g.product.designer}</p>
+                <p className="font-body text-[11px] text-muted-foreground mt-1">{g.reason}</p>
+              </div>
+              <button onClick={() => g.idxs.slice().reverse().forEach((i) => onRemove(i))} className="text-muted-foreground hover:text-destructive" aria-label="Remove group">
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
-            <button onClick={() => onRemove(i)} className="text-muted-foreground hover:text-destructive">
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        );
-      })}
+          );
+        });
+      })()}
     </div>
   );
 }
