@@ -155,7 +155,11 @@ export function parseRichInline(input: string): RichRun[] {
   const cleaned = decoded
     .replace(/<a\s+href="[^"]*"[^>]*>([\s\S]*?)<\/a>/gi, "$1")
     .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/?p[^>]*>/gi, "");
+    .replace(/<\/?p[^>]*>/gi, "")
+    // Single line breaks within an inline run must collapse to a space —
+    // jsPDF would otherwise treat raw \n as a hard line break and stack
+    // it on top of our manually advanced y cursor (overlapping text).
+    .replace(/\n+/g, " ");
 
   const runs: RichRun[] = [];
   let italic = 0;
@@ -913,9 +917,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     }
     if (figure.media.isVideo) {
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.5);
+      doc.setFontSize(8);
       doc.setTextColor(80, 80, 160);
-      doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(figure.media.url)}`, mediaX, mediaY + 6, { url: figure.media.url });
+      doc.textWithLink("\u25B6  Watch video", mediaX, mediaY + 6, { url: figure.media.url });
       mediaY += linkH;
     }
 
@@ -1033,7 +1037,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(80, 80, 160);
-        doc.textWithLink(sanitizeUrlForDisplay(block.media.url), marginX, cursorY, { url: block.media.url });
+        doc.textWithLink("\u25B6  Watch video", marginX, cursorY, { url: block.media.url });
         cursorY += 14;
         doc.setDrawColor(...rule);
         doc.line(marginX, cursorY, pageWidth - marginX, cursorY);
@@ -1200,7 +1204,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
           doc.setFont("helvetica", "normal");
           doc.setFontSize(8);
           doc.setTextColor(80, 80, 160);
-          doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media!.url)}`, imgX, leftY + 8, { url: block.media!.url });
+          doc.textWithLink("\u25B6  Watch video", imgX, leftY + 8, { url: block.media!.url });
           leftY += 14;
         }
 
@@ -1334,7 +1338,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 160);
         ensureSpace(14);
-        doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media.url)}`, marginX, cursorY + 10, { url: block.media.url });
+        doc.textWithLink("\u25B6  Watch video", marginX, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
       cursorY += 18;

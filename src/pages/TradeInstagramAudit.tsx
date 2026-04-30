@@ -97,7 +97,7 @@ const TradeInstagramAudit = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, founder, source, links")
+        .select("id, slug, name, display_name, founder, source, links, instagram_handle, instagram_handle_2")
         .eq("is_published", true)
         .order("name");
       if (error) throw error;
@@ -106,9 +106,17 @@ const TradeInstagramAudit = () => {
   });
 
   const rows: DesignerIG[] = useMemo(() => {
-    return designers.map((d) => {
+    return designers.map((d: any) => {
       const linksArr = Array.isArray(d.links) ? d.links : [];
-      const igFromDb = (linksArr.find((l: any) => l.type?.toLowerCase() === "instagram") as any)?.url || null;
+      const igFromLinks = (linksArr.find((l: any) => l.type?.toLowerCase() === "instagram") as any)?.url || null;
+      // The dedicated `instagram_handle` column is the modern source of truth
+      // (used by the designer admin form). Fall back to the legacy `links`
+      // JSON for older records.
+      const handle: string | null = d.instagram_handle?.trim() || null;
+      const igFromHandle = handle
+        ? (handle.startsWith("http") ? handle : `https://instagram.com/${handle.replace(/^@/, "")}`)
+        : null;
+      const igFromDb = igFromHandle || igFromLinks;
       const igFromFallback = INSTAGRAM_LINKS[d.slug] || null;
       const isParent = d.founder === d.name || (!d.founder && !d.display_name);
 
