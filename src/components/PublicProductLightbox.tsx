@@ -414,7 +414,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         text={baseOptions.join("\n")}
                         placeholder={getBasePlaceholder(product)}
                         emphasized
-                        value={selectedBaseIdx ?? undefined}
+                        value={selectedBaseIdx ?? null}
                         onChange={(idx) => {
                           if (idx < 0) {
                             clearAllDualSelections();
@@ -428,7 +428,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         text={topOptions.join("\n")}
                         placeholder={getTopPlaceholder(product)}
                         emphasized
-                        value={selectedTopIdx ?? undefined}
+                        value={selectedTopIdx ?? null}
                         onChange={(idx) => {
                           if (idx < 0) {
                             clearAllDualSelections();
@@ -446,7 +446,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     text={product.materials}
                     placeholder="Select your material choice"
                     autoSplit
-                    value={selectedMaterialIdx ?? undefined}
+                    value={selectedMaterialIdx ?? null}
                     onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                   />
                 ) : null;
