@@ -9,10 +9,10 @@
  * Quote currency (usually EUR) is left untouched — this is purely a side-panel
  * helper for UK clients quoted in EUR.
  */
-import { useEffect, useMemo, useState } from "react";
-import { estimateShipping, ShippingBreakdown } from "@/lib/shippingEstimator";
-import { Truck, Loader2, ChevronDown, ChevronUp, FileDown } from "lucide-react";
+import { useState } from "react";
+import { Truck, Loader2, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
 import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
+import { useGbpLandedCost, FX_BUFFER, fmtGbp } from "@/hooks/useGbpLandedCost";
 
 interface Props {
   /** Net goods subtotal AFTER trade discount, in the quote's currency */
@@ -31,12 +31,6 @@ interface Props {
   clientName?: string | null;
 }
 
-const FX_BUFFER = 0.02; // +2% safety margin on EUR→GBP
-
-const fmtGbp = (cents: number) =>
-  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 })
-    .format((cents || 0) / 100);
-
 export const UkLandedCostPanel = ({
   goodsAfterDiscountCents,
   quoteCurrency,
@@ -50,86 +44,35 @@ export const UkLandedCostPanel = ({
   const [kg, setKg] = useState(200);
   const [mode, setMode] = useState<"road" | "courier">("road");
   const [expanded, setExpanded] = useState(defaultExpanded);
-  const [fxEurGbp, setFxEurGbp] = useState<number | null>(null);
-  const [fxQuoteEur, setFxQuoteEur] = useState<number | null>(null);
-  const [breakdown, setBreakdown] = useState<ShippingBreakdown | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch EUR→GBP and (if needed) quoteCurrency→EUR
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const eurRes = await fetch("https://api.frankfurter.app/latest?from=EUR&to=GBP");
-        const eurData = await eurRes.json();
-        if (!cancelled && eurData?.rates?.GBP) setFxEurGbp(eurData.rates.GBP);
-      } catch { /* swallow */ }
+  const gbp = useGbpLandedCost({
+    goodsAfterDiscountCents,
+    quoteCurrency,
+    cbm,
+    kg,
+    mode,
+    category,
+  });
 
-      if (quoteCurrency === "EUR") {
-        if (!cancelled) setFxQuoteEur(1);
-      } else {
-        try {
-          const r = await fetch(`https://api.frankfurter.app/latest?from=${quoteCurrency}&to=EUR`);
-          const d = await r.json();
-          if (!cancelled && d?.rates?.EUR) setFxQuoteEur(d.rates.EUR);
-        } catch { /* swallow */ }
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [quoteCurrency]);
-
-  // Goods value in EUR (estimator's currency)
-  const goodsEurCents = useMemo(() => {
-    if (!fxQuoteEur || goodsAfterDiscountCents <= 0) return 0;
-    return Math.round(goodsAfterDiscountCents * fxQuoteEur);
-  }, [goodsAfterDiscountCents, fxQuoteEur]);
-
-  // Run estimator whenever inputs change
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (goodsEurCents <= 0) { setBreakdown(null); return; }
-      setLoading(true);
-      try {
-        const b = await estimateShipping({
-          origin_country: "FR",
-          dest_country: "GB",
-          total_volume_cbm: cbm,
-          total_weight_kg: kg,
-          declared_value_cents: goodsEurCents,
-          currency: "EUR",
-          preferred_mode: mode,
-          category,
-        });
-        if (!cancelled) setBreakdown(b);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [cbm, kg, mode, category, goodsEurCents]);
-
-  // EUR → GBP with buffer
-  const eurToGbp = (eurCents: number): number => {
-    if (!fxEurGbp) return 0;
-    return Math.round(eurCents * fxEurGbp * (1 + FX_BUFFER));
-  };
-
-  const goodsGbp = eurToGbp(goodsEurCents);
-  const freightGbp = eurToGbp(breakdown?.freight_cents ?? 0);
-  const fuelGbp = eurToGbp(breakdown?.fuel_cents ?? 0);
-  const insuranceGbp = eurToGbp(breakdown?.insurance_cents ?? 0);
-  const customsGbp = eurToGbp(breakdown?.customs_cents ?? 0);
-  const handlingGbp = eurToGbp(breakdown?.handling_cents ?? 0);
-  const lastMileGbp = eurToGbp(breakdown?.last_mile_cents ?? 0);
-  const shippingGbp = freightGbp + fuelGbp + insuranceGbp + customsGbp + handlingGbp + lastMileGbp;
-  const dutyGbp = eurToGbp(breakdown?.duty_cents ?? 0);
-  const vatGbp = eurToGbp(breakdown?.vat_cents ?? 0);
-  const totalGbp = goodsGbp + shippingGbp + dutyGbp + vatGbp;
-
-  const ratesReady = fxEurGbp != null && fxQuoteEur != null;
+  const {
+    ready: ratesReady,
+    loading,
+    fxEurGbp,
+    fxIsFallback,
+    goodsGbpCents: goodsGbp,
+    freightGbpCents: freightGbp,
+    fuelGbpCents: fuelGbp,
+    insuranceGbpCents: insuranceGbp,
+    customsGbpCents: customsGbp,
+    handlingGbpCents: handlingGbp,
+    lastMileGbpCents: lastMileGbp,
+    shippingGbpCents: shippingGbp,
+    dutyGbpCents: dutyGbp,
+    vatGbpCents: vatGbp,
+    totalGbpCents: totalGbp,
+    breakdown,
+    goodsEurCents,
+  } = gbp;
 
   return (
     <div className="border border-border rounded-md bg-background/40 print:bg-white">
@@ -245,6 +188,16 @@ export const UkLandedCostPanel = ({
                 <span className="font-medium tabular-nums">{fmtGbp(totalGbp)}</span>
               </div>
 
+              {fxIsFallback && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-50/60 px-2.5 py-2 mt-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="font-body text-[10px] leading-snug text-amber-900">
+                    <span className="font-medium">Live FX unavailable</span> — using fallback indicative rate.
+                    Treat the GBP figure as approximate; final invoice issued at the rate of the day.
+                  </p>
+                </div>
+              )}
+
               {/* Disclaimer */}
               <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
                 <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
@@ -282,25 +235,7 @@ export const UkLandedCostPanel = ({
                         min: breakdown?.transit_days_min ?? null,
                         max: breakdown?.transit_days_max ?? null,
                       },
-                      gbp: {
-                        ready: true,
-                        loading: false,
-                        fxEurGbp,
-                        fxQuoteEur,
-                        goodsGbpCents: goodsGbp,
-                        freightGbpCents: freightGbp,
-                        fuelGbpCents: fuelGbp,
-                        insuranceGbpCents: insuranceGbp,
-                        customsGbpCents: customsGbp,
-                        handlingGbpCents: handlingGbp,
-                        lastMileGbpCents: lastMileGbp,
-                        shippingGbpCents: shippingGbp,
-                        dutyGbpCents: dutyGbp,
-                        vatGbpCents: vatGbp,
-                        totalGbpCents: totalGbp,
-                        breakdown,
-                        goodsEurCents,
-                      },
+                      gbp,
                     });
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"

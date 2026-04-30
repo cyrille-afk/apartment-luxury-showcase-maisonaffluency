@@ -34,6 +34,7 @@ interface AdminQuoteItem {
   quantity: number;
   unit_price_cents: number | null;
   notes: string | null;
+  lead_time_weeks_override: number | null;
   trade_products: {
     product_name: string;
     brand_name: string;
@@ -545,7 +546,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const lineTotal = cents * item.quantity;
                   const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
                   const lead = leadTimes[item.id];
-                  const leadLabel = formatLeadTime(lead);
+                  // Per-line admin override wins over the catalog/brand default from the RPC.
+                  const leadLabel = item.lead_time_weeks_override
+                    ? `Lead time: ${item.lead_time_weeks_override} weeks`
+                    : formatLeadTime(lead);
                   const catalog = catalogPrices[item.id];
                   // Only show the suggestion when we used it to pre-fill (i.e. no admin price has been saved yet).
                   const showCatalogHint = catalog && !item.unit_price_cents;
@@ -676,6 +680,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                         <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
                           Indicative. EUR→GBP @ {gbp.fxEurGbp?.toFixed(4)} (+2% FX buffer). DDP — duty &amp; VAT included. Adjust CBM/weight in the panel below.
                         </p>
+                        {gbp.fxIsFallback && (
+                          <p className="font-body text-[10px] text-amber-700 leading-relaxed">
+                            ⚠ Live FX unavailable — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).
+                          </p>
+                        )}
                       </div>
                     );
                   }
