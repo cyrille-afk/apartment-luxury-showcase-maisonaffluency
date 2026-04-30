@@ -484,7 +484,8 @@ function drawTable(
   // body rows
   doc.setTextColor(FG[0], FG[1], FG[2]);
   args.lines.forEach((line, idx) => {
-    const meta = [line.dimensions, line.materials, line.leadTime, line.notes].filter(Boolean) as string[];
+    const editionLabel = line.edition ? `Edition: ${line.edition}` : null;
+    const meta = [line.dimensions, line.materials, editionLabel, line.leadTime, line.notes].filter(Boolean) as string[];
     const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
     // Pre-wrap meta strings so multi-line materials/notes are not truncated.
     const metaWrapped = meta.map((m) => doc.splitTextToSize(m, colDesc - 12) as string[]);
