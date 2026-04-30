@@ -99,7 +99,14 @@ export default function VariantPreviewPanel({
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
                   value={selectedBase}
-                  onChange={(e) => setSelectedBase(e.target.value)}
+                  onChange={(e) => {
+                    const nextBase = e.target.value;
+                    setSelectedBase(nextBase);
+                    if (!nextBase) {
+                      setSelectedTop("");
+                      setSelectedSize("");
+                    }
+                  }}
                 >
                   <option value="">
                     {variantPlaceholder ||
@@ -117,7 +124,14 @@ export default function VariantPreviewPanel({
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
                   value={selectedTop}
-                  onChange={(e) => setSelectedTop(e.target.value)}
+                  onChange={(e) => {
+                    const nextTop = e.target.value;
+                    setSelectedTop(nextTop);
+                    if (!nextTop) {
+                      setSelectedBase("");
+                      setSelectedSize("");
+                    }
+                  }}
                 >
                   <option value="">
                     {variantPlaceholder ||
@@ -147,7 +161,14 @@ export default function VariantPreviewPanel({
               <select
                 className="rounded border bg-background px-2 py-1.5 text-xs"
                 value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
+                onChange={(e) => {
+                  const nextSize = e.target.value;
+                  setSelectedSize(nextSize);
+                  if (!nextSize && isDualAxis) {
+                    setSelectedBase("");
+                    setSelectedTop("");
+                  }
+                }}
               >
                 <option value="">{sizePlaceholder}</option>
                 {sizeOptions.map((o) => (
