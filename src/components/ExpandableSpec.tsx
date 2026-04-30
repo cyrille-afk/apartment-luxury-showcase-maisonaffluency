@@ -132,10 +132,18 @@ export default function ExpandableSpec({
     };
     const currentVal = selectedIdx != null && selectedIdx >= 0 ? String(selectedIdx) : undefined;
     const hasSelection = selectedIdx != null && selectedIdx >= 0;
+    // Radix <Select> becomes uncontrolled when `value` flips to `undefined`
+    // and visually retains the previously chosen label (e.g. "Lacquer" /
+    // "Sand-Blasted") even though parent state is null. That makes the
+    // dropdown look out of sync with the gallery after "Clear selection",
+    // most noticeably on mobile where the gallery sits right above the
+    // dropdowns. Remounting on clear forces the trigger back to the
+    // placeholder so dropdowns + gallery stay aligned.
+    const selectKey = hasSelection ? "set" : "cleared";
 
     return (
       <>
-        <Select value={currentVal} onValueChange={handleChange}>
+        <Select key={selectKey} value={currentVal} onValueChange={handleChange}>
           <SelectTrigger
             className={cn(
               rowClasses,
