@@ -86,6 +86,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState<string | null>(null);
 
   // Insurance bundling
   type InsuranceTier = "standard" | "premium" | "all_risk";
@@ -256,6 +257,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     };
     load();
   }, [quoteId, user]);
+
+  // Fetch project name when projectId changes
+  useEffect(() => {
+    if (!projectId) { setProjectName(null); return; }
+    (supabase.from as any)("trade_projects").select("name").eq("id", projectId).maybeSingle().then(({ data }: any) => {
+      setProjectName(data?.name ?? null);
+    });
+  }, [projectId]);
 
   // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
   useEffect(() => {
@@ -526,25 +535,37 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-4 md:p-6 lg:p-8">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-10">
-            {/* Left: Title + Client Name */}
+            {/* Left: Title + Project + Client Name */}
             <div>
               <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
                 Quote
               </h1>
+              {projectName && (
+                <div className="mb-2">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Project</span>
+                  <p className="font-display text-sm text-foreground uppercase tracking-wider">{projectName}</p>
+                </div>
+              )}
               {isDraft ? (
-                <input
-                  type="text"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
-                  placeholder="Client / Project Name"
-                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none text-[16px] sm:text-sm"
-                />
+                <>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Client</span>
+                  <input
+                    type="text"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
+                    placeholder="Client / Project Name"
+                    className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none text-[16px] sm:text-sm"
+                  />
+                </>
               ) : (
                 clientName && (
-                  <p className="font-display text-sm text-foreground uppercase tracking-wider">
-                    {clientName}
-                  </p>
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Client</span>
+                    <p className="font-display text-sm text-foreground uppercase tracking-wider">
+                      {clientName}
+                    </p>
+                  </div>
                 )
               )}
             </div>
