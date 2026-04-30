@@ -648,6 +648,22 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   );
                 })()}
               </div>
+
+              {/* UK landed cost (DDP, GBP) — useful when client is in the UK but quoted in EUR/USD/SGD */}
+              {subtotalCents > 0 && (() => {
+                const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
+                const goodsAfter = subtotalCents - discountCents;
+                return (
+                  <div className="mt-4">
+                    <UkLandedCostPanel
+                      goodsAfterDiscountCents={goodsAfter}
+                      quoteCurrency={currency}
+                      defaultExpanded={true}
+                      title="UK landed cost (DDP, GBP) — admin preview"
+                    />
+                  </div>
+                );
+              })()}
             </>
           )}
         </div>
