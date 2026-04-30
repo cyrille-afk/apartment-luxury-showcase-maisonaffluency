@@ -60,8 +60,8 @@ export function buildUkDdpPdf({
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("UK Landed-Cost Estimate · Delivered Duty Paid", M, 60);
-  doc.text("Paris → London", M, 74);
+  doc.text("UK Landed-Cost Estimate - Delivered Duty Paid", M, 60);
+  doc.text("Paris to London", M, 74);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
