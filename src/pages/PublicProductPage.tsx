@@ -374,6 +374,10 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : undefined}
           onChange={(idx) => {
+            if (idx < 0) {
+              clearAllDualSelections();
+              return;
+            }
             const s = dualSizeOptions[idx] ?? null;
             setSelDualSize(s);
             let nextBase = selBase;
