@@ -31,12 +31,6 @@ interface Props {
   clientName?: string | null;
 }
 
-const FX_BUFFER = 0.02; // +2% safety margin on EUR→GBP
-
-const fmtGbp = (cents: number) =>
-  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 })
-    .format((cents || 0) / 100);
-
 export const UkLandedCostPanel = ({
   goodsAfterDiscountCents,
   quoteCurrency,
@@ -50,86 +44,35 @@ export const UkLandedCostPanel = ({
   const [kg, setKg] = useState(200);
   const [mode, setMode] = useState<"road" | "courier">("road");
   const [expanded, setExpanded] = useState(defaultExpanded);
-  const [fxEurGbp, setFxEurGbp] = useState<number | null>(null);
-  const [fxQuoteEur, setFxQuoteEur] = useState<number | null>(null);
-  const [breakdown, setBreakdown] = useState<ShippingBreakdown | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch EUR→GBP and (if needed) quoteCurrency→EUR
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const eurRes = await fetch("https://api.frankfurter.app/latest?from=EUR&to=GBP");
-        const eurData = await eurRes.json();
-        if (!cancelled && eurData?.rates?.GBP) setFxEurGbp(eurData.rates.GBP);
-      } catch { /* swallow */ }
+  const gbp = useGbpLandedCost({
+    goodsAfterDiscountCents,
+    quoteCurrency,
+    cbm,
+    kg,
+    mode,
+    category,
+  });
 
-      if (quoteCurrency === "EUR") {
-        if (!cancelled) setFxQuoteEur(1);
-      } else {
-        try {
-          const r = await fetch(`https://api.frankfurter.app/latest?from=${quoteCurrency}&to=EUR`);
-          const d = await r.json();
-          if (!cancelled && d?.rates?.EUR) setFxQuoteEur(d.rates.EUR);
-        } catch { /* swallow */ }
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [quoteCurrency]);
-
-  // Goods value in EUR (estimator's currency)
-  const goodsEurCents = useMemo(() => {
-    if (!fxQuoteEur || goodsAfterDiscountCents <= 0) return 0;
-    return Math.round(goodsAfterDiscountCents * fxQuoteEur);
-  }, [goodsAfterDiscountCents, fxQuoteEur]);
-
-  // Run estimator whenever inputs change
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (goodsEurCents <= 0) { setBreakdown(null); return; }
-      setLoading(true);
-      try {
-        const b = await estimateShipping({
-          origin_country: "FR",
-          dest_country: "GB",
-          total_volume_cbm: cbm,
-          total_weight_kg: kg,
-          declared_value_cents: goodsEurCents,
-          currency: "EUR",
-          preferred_mode: mode,
-          category,
-        });
-        if (!cancelled) setBreakdown(b);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [cbm, kg, mode, category, goodsEurCents]);
-
-  // EUR → GBP with buffer
-  const eurToGbp = (eurCents: number): number => {
-    if (!fxEurGbp) return 0;
-    return Math.round(eurCents * fxEurGbp * (1 + FX_BUFFER));
-  };
-
-  const goodsGbp = eurToGbp(goodsEurCents);
-  const freightGbp = eurToGbp(breakdown?.freight_cents ?? 0);
-  const fuelGbp = eurToGbp(breakdown?.fuel_cents ?? 0);
-  const insuranceGbp = eurToGbp(breakdown?.insurance_cents ?? 0);
-  const customsGbp = eurToGbp(breakdown?.customs_cents ?? 0);
-  const handlingGbp = eurToGbp(breakdown?.handling_cents ?? 0);
-  const lastMileGbp = eurToGbp(breakdown?.last_mile_cents ?? 0);
-  const shippingGbp = freightGbp + fuelGbp + insuranceGbp + customsGbp + handlingGbp + lastMileGbp;
-  const dutyGbp = eurToGbp(breakdown?.duty_cents ?? 0);
-  const vatGbp = eurToGbp(breakdown?.vat_cents ?? 0);
-  const totalGbp = goodsGbp + shippingGbp + dutyGbp + vatGbp;
-
-  const ratesReady = fxEurGbp != null && fxQuoteEur != null;
+  const {
+    ready: ratesReady,
+    loading,
+    fxEurGbp,
+    fxIsFallback,
+    goodsGbpCents: goodsGbp,
+    freightGbpCents: freightGbp,
+    fuelGbpCents: fuelGbp,
+    insuranceGbpCents: insuranceGbp,
+    customsGbpCents: customsGbp,
+    handlingGbpCents: handlingGbp,
+    lastMileGbpCents: lastMileGbp,
+    shippingGbpCents: shippingGbp,
+    dutyGbpCents: dutyGbp,
+    vatGbpCents: vatGbp,
+    totalGbpCents: totalGbp,
+    breakdown,
+    goodsEurCents,
+  } = gbp;
 
   return (
     <div className="border border-border rounded-md bg-background/40 print:bg-white">
