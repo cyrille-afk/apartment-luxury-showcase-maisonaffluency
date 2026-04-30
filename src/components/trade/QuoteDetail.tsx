@@ -953,7 +953,50 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
+                {subtotalCents > 0 && (
+                  <div className="flex justify-end">
+                    <div className="w-72">
+                      <QuoteDisplayCurrencyToggle
+                        value={displayCcy}
+                        onChange={setDisplayCcy}
+                        quoteCurrency={currency}
+                        disabled={displayCcy === "quote" ? false : !gbp.ready}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className="flex justify-end">
+                  {displayCcy === "gbp" && subtotalCents > 0 ? (
+                    <div className="w-72 space-y-1">
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>Goods (after discount)</span>
+                        <span>{gbp.ready ? fmtGbp(gbp.goodsGbpCents) : "…"}</span>
+                      </div>
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>Shipping FR → GB</span>
+                        <span>{gbp.ready ? fmtGbp(gbp.shippingGbpCents) : "…"}</span>
+                      </div>
+                      {gbp.dutyGbpCents > 0 && (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>Import duty</span>
+                          <span>{fmtGbp(gbp.dutyGbpCents)}</span>
+                        </div>
+                      )}
+                      {gbp.vatGbpCents > 0 && (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>UK VAT</span>
+                          <span>{fmtGbp(gbp.vatGbpCents)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                        <span className="uppercase tracking-wider">Total GBP · DDP London</span>
+                        <span className="font-medium">{gbp.ready ? fmtGbp(gbp.totalGbpCents) : "…"}</span>
+                      </div>
+                      <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
+                        Indicative. EUR→GBP @ {gbp.fxEurGbp?.toFixed(4)} (+2% FX buffer). DDP — UK customs, duty &amp; VAT included. Payments &amp; deposits remain in {currency}.
+                      </p>
+                    </div>
+                  ) : (
                   <div className="w-72 space-y-1">
                     <div className="flex justify-between font-body text-xs text-muted-foreground">
                       <span>Subtotal</span>
