@@ -73,6 +73,8 @@ const formatLeadTime = (info?: LeadTimeInfo) => {
   return "Made to order — lead time TBC";
 };
 
+const leadOverride = (value: number | null) => (value && value > 0 ? value : null);
+
 const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: Clock, className: "bg-muted text-muted-foreground" },
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
@@ -547,8 +549,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
                   const lead = leadTimes[item.id];
                   // Per-line admin override wins over the catalog/brand default from the RPC.
-                  const leadLabel = item.lead_time_weeks_override
-                    ? `Lead time: ${item.lead_time_weeks_override} weeks`
+                  const overrideLead = leadOverride(item.lead_time_weeks_override);
+                  const leadLabel = overrideLead
+                    ? `Lead time: ${overrideLead} weeks`
                     : formatLeadTime(lead);
                   const catalog = catalogPrices[item.id];
                   // Only show the suggestion when we used it to pre-fill (i.e. no admin price has been saved yet).

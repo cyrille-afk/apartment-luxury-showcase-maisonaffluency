@@ -397,6 +397,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
   };
 
+  const getLeadWeeksOverride = (value: number | null): number | null =>
+    value && value > 0 ? value : null;
+
   const [exportingExcel, setExportingExcel] = useState(false);
   const handleExportExcel = async () => {
     if (!items.length) return;
@@ -408,7 +411,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
         const unitTrade = convertCents(rawUnit, fromCur, currency);
         const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
-        const lead = item.lead_time_weeks_override ?? parseLeadWeeks(product?.lead_time || null);
+        const lead = getLeadWeeksOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(product?.lead_time || null);
         return {
           po_number: item.po_number || autoPoNumber(quoteNumber, idx + 1),
           cost_code: item.cost_code || "",
@@ -832,9 +835,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks)</span>
                           <input
                             type="number"
-                            min={0}
+                            min={1}
                             step={1}
-                            defaultValue={item.lead_time_weeks_override ?? ""}
+                            defaultValue={getLeadWeeksOverride(item.lead_time_weeks_override) ?? ""}
                             placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
                             disabled={isReadOnly}
                             readOnly={isReadOnly}
@@ -843,8 +846,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             onBlur={(e) => {
                               if (isReadOnly) return;
                               const raw = e.target.value.trim();
-                              const v = raw === "" ? null : parseInt(raw, 10);
-                              if (v !== item.lead_time_weeks_override) updateItemField(item.id, { lead_time_weeks_override: v });
+                              const parsed = raw === "" ? null : parseInt(raw, 10);
+                              const v = parsed && parsed > 0 ? parsed : null;
+                              if (v !== getLeadWeeksOverride(item.lead_time_weeks_override)) updateItemField(item.id, { lead_time_weeks_override: v });
                             }}
                             className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                           />
