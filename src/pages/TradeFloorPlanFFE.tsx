@@ -301,6 +301,42 @@ export default function TradeFloorPlanFFE() {
               {suggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               {suggesting ? "Composing layout…" : "Suggest FF&E layout"}
             </Button>
+            {suggesting && (
+              <div className="rounded-md border border-border bg-muted/30 p-4 space-y-3" aria-live="polite">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all duration-700 ease-out"
+                    style={{ width: `${Math.round(((progressStep + 1) / PROGRESS_STEPS.length) * 100)}%` }}
+                  />
+                </div>
+                <div className="flex items-start gap-2">
+                  <Loader2 className="w-3.5 h-3.5 mt-0.5 animate-spin text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body text-sm text-foreground">{PROGRESS_STEPS[progressStep]}</p>
+                    <p className="font-body text-xs text-muted-foreground mt-0.5">
+                      Step {progressStep + 1} of {PROGRESS_STEPS.length} · {elapsed}s elapsed · usually 20–45s
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-1">
+                  {PROGRESS_STEPS.map((label, i) => (
+                    <li
+                      key={label}
+                      className={`flex items-center gap-2 text-xs font-body ${
+                        i < progressStep ? "text-foreground/70" : i === progressStep ? "text-foreground" : "text-muted-foreground/60"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full ${
+                          i < progressStep ? "bg-primary" : i === progressStep ? "bg-primary animate-pulse" : "bg-muted-foreground/30"
+                        }`}
+                      />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
