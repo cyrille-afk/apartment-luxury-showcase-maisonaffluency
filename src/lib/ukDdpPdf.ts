@@ -60,8 +60,8 @@ export function buildUkDdpPdf({
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("UK Landed-Cost Estimate · Delivered Duty Paid", M, 60);
-  doc.text("Paris → London", M, 74);
+  doc.text("UK Landed-Cost Estimate - Delivered Duty Paid", M, 60);
+  doc.text("Paris to London", M, 74);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
@@ -87,19 +87,19 @@ export function buildUkDdpPdf({
   y += 22;
   twoCol(doc, M, y, "Origin", "Paris, France (FR)");
   twoCol(doc, M + (pageW - 2 * M) / 2, y, "Destination", "London, United Kingdom (GB)");
-  y += 16;
-  twoCol(doc, M, y, "Mode", mode === "road" ? "Road · white-glove" : "Courier · express");
+  y += 30;
+  twoCol(doc, M, y, "Mode", mode === "road" ? "Road - white-glove" : "Courier - express");
   twoCol(
     doc,
     M + (pageW - 2 * M) / 2,
     y,
     "Carrier",
-    carrier ? `${carrier}${transitDays?.min ? ` · ${transitDays.min}–${transitDays.max} days` : ""}` : "—"
+    carrier ? `${carrier}${transitDays?.min ? ` (${transitDays.min}-${transitDays.max} days)` : ""}` : "—"
   );
-  y += 16;
+  y += 30;
   twoCol(doc, M, y, "Volume", `${cbm.toFixed(2)} CBM`);
   twoCol(doc, M + (pageW - 2 * M) / 2, y, "Weight", `${kg} kg`);
-  y += 28;
+  y += 32;
 
   // Section: Goods
   sectionTitle(doc, "Goods value", M, y);
@@ -110,7 +110,7 @@ export function buildUkDdpPdf({
   // Section: Freight breakdown
   sectionTitle(doc, "Freight & logistics", M, y);
   y += 22;
-  costRow(doc, M, y, pageW - M, "Base freight (Paris → London)", fmtGbp(gbp.freightGbpCents));
+  costRow(doc, M, y, pageW - M, "Base freight (Paris to London)", fmtGbp(gbp.freightGbpCents));
   y += 16;
   if (gbp.fuelGbpCents > 0) { costRow(doc, M, y, pageW - M, "Fuel surcharge", fmtGbp(gbp.fuelGbpCents)); y += 16; }
   if (gbp.insuranceGbpCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtGbp(gbp.insuranceGbpCents)); y += 16; }
@@ -130,7 +130,7 @@ export function buildUkDdpPdf({
     ? (gbp.breakdown.vat_cents /
         Math.max(1, gbp.goodsEurCents + gbp.breakdown.freight_cents + gbp.breakdown.duty_cents)) * 100
     : 0;
-  costRow(doc, M, y, pageW - M, `Import duty (${dutyPct.toFixed(1)}% — furniture/lighting)`, fmtGbp(gbp.dutyGbpCents));
+  costRow(doc, M, y, pageW - M, `Import duty (${dutyPct.toFixed(1)}% - furniture/lighting)`, fmtGbp(gbp.dutyGbpCents));
   y += 16;
   costRow(doc, M, y, pageW - M, `UK VAT (${vatPct.toFixed(0)}% on goods + freight + duty)`, fmtGbp(gbp.vatGbpCents));
   y += 28;
@@ -141,7 +141,7 @@ export function buildUkDdpPdf({
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text("DDP delivered London — all in", M + 14, y + 27);
+  doc.text("DDP delivered London - all in", M + 14, y + 27);
   doc.setFontSize(16);
   doc.text(fmtGbp(gbp.totalGbpCents), pageW - M - 14, y + 28, { align: "right" });
   y += 60;
@@ -155,11 +155,11 @@ export function buildUkDdpPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   const notes = [
-    `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) — actual crating may vary on confirmation.`,
-    `Prices include UK customs clearance, import duty and VAT under Delivered Duty Paid (DDP) — no further charges on delivery to London.`,
-    `FX: ${quoteCurrency} → GBP via EUR pivot @ ${gbp.fxEurGbp?.toFixed(4)} (EUR→GBP) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final GBP invoice issued on order confirmation.`,
+    `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
+    `Prices include UK customs clearance, import duty and VAT under Delivered Duty Paid (DDP) - no further charges on delivery to London.`,
+    `FX: ${quoteCurrency} to GBP via EUR pivot @ ${gbp.fxEurGbp?.toFixed(4)} (EUR to GBP) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final GBP invoice issued on order confirmation.`,
     ...(gbp.fxIsFallback
-      ? [`⚠ Live FX feed unavailable at the time of generation — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).`]
+      ? [`Note: Live FX feed unavailable at the time of generation - figures use a fallback indicative rate. Treat the GBP total as approximate (~).`]
       : []),
     `Working currency on the quote remains ${quoteCurrency}. This document is a courtesy landed-cost view for the UK end-client.`,
   ];
@@ -175,9 +175,9 @@ export function buildUkDdpPdf({
   doc.setTextColor(JADE_SOFT[0], JADE_SOFT[1], JADE_SOFT[2]);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text("Maison Affluency · Paris", M, pageH - 38);
-  doc.text("hello@maisonaffluency.com · maisonaffluency.com", M, pageH - 26);
-  doc.text(`Estimate ref. ${quoteRef} · DDP-GB`, pageW - M, pageH - 26, { align: "right" });
+  doc.text("Maison Affluency - Paris", M, pageH - 38);
+  doc.text("hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 26);
+  doc.text(`Estimate ref. ${quoteRef} - DDP-GB`, pageW - M, pageH - 26, { align: "right" });
 
   return doc;
 }
