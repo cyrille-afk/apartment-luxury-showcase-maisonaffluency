@@ -545,7 +545,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const lineTotal = cents * item.quantity;
                   const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
                   const lead = leadTimes[item.id];
-                  const leadLabel = formatLeadTime(lead);
+                  // Per-line admin override wins over the catalog/brand default from the RPC.
+                  const leadLabel = item.lead_time_weeks_override
+                    ? `Lead time: ${item.lead_time_weeks_override} weeks`
+                    : formatLeadTime(lead);
                   const catalog = catalogPrices[item.id];
                   // Only show the suggestion when we used it to pre-fill (i.e. no admin price has been saved yet).
                   const showCatalogHint = catalog && !item.unit_price_cents;
