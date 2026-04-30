@@ -226,7 +226,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [itemPrices, setItemPrices] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [catalogPrices, setCatalogPrices] = useState<Record<string, { cents: number; currency: string }>>({});
+  const [catalogPrices, setCatalogPrices] = useState<Record<string, CatalogPriceInfo>>({});
+  const [leadTimes, setLeadTimes] = useState<Record<string, LeadTimeInfo>>({});
+  /** Trade discount % to apply on the client side (e.g. 0.08 for silver). */
+  const [ownerDiscountPct, setOwnerDiscountPct] = useState<number>(0);
+  const [ownerTierLabel, setOwnerTierLabel] = useState<string>("");
 
   useEffect(() => {
     const load = async () => {
