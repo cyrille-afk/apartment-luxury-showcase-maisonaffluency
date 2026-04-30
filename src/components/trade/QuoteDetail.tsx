@@ -1353,6 +1353,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
               <CheckCircle className="h-4 w-4" />
               <span>Fully paid</span>
+              <StatusBadge />
             </div>
           </div>
         )}
