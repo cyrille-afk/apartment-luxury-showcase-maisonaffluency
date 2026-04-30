@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Eye, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   generateDesignerBiographyPdf,
@@ -116,16 +116,16 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
           onClick={handleClick}
           disabled={loading}
           className="group inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 disabled:opacity-70 disabled:cursor-wait"
-          aria-label={`Preview ${input.designerName} biography PDF before downloading`}
+          aria-label={`Download ${input.designerName} biography PDF`}
           aria-busy={loading}
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Eye className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
+            <Download className="h-4 w-4 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
           )}
           <span className="underline-offset-4 group-hover:underline">
-            {loading ? (progress?.label ?? "Preparing…") : "Preview biography"}
+            {loading ? (progress?.label ?? "Preparing…") : "Download biography"}
           </span>
           {loading && (
             <span className="text-xs tabular-nums text-muted-foreground ml-1">
