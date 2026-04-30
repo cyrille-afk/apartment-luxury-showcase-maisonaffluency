@@ -919,7 +919,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(80, 80, 160);
-      doc.textWithLink("\u25B6  Watch video", mediaX, mediaY + 6, { url: figure.media.url });
+      doc.textWithLink(">  Watch video", mediaX, mediaY + 6, { url: figure.media.url });
       mediaY += linkH;
     }
 
@@ -1037,7 +1037,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(80, 80, 160);
-        doc.textWithLink("\u25B6  Watch video", marginX, cursorY, { url: block.media.url });
+        doc.textWithLink(">  Watch video", marginX, cursorY, { url: block.media.url });
         cursorY += 14;
         doc.setDrawColor(...rule);
         doc.line(marginX, cursorY, pageWidth - marginX, cursorY);
@@ -1204,7 +1204,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
           doc.setFont("helvetica", "normal");
           doc.setFontSize(8);
           doc.setTextColor(80, 80, 160);
-          doc.textWithLink("\u25B6  Watch video", imgX, leftY + 8, { url: block.media!.url });
+          doc.textWithLink(">  Watch video", imgX, leftY + 8, { url: block.media!.url });
           leftY += 14;
         }
 
@@ -1338,7 +1338,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 160);
         ensureSpace(14);
-        doc.textWithLink("\u25B6  Watch video", marginX, cursorY + 10, { url: block.media.url });
+        doc.textWithLink(">  Watch video", marginX, cursorY + 10, { url: block.media.url });
         cursorY += 14;
       }
       cursorY += 18;
