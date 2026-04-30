@@ -73,7 +73,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
-  const [gstEnabled, setGstEnabled] = useState(true);
+  // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
+  // The user can still toggle it on manually if needed.
+  const [gstEnabled, setGstEnabled] = useState(false);
+  const [gstUserTouched, setGstUserTouched] = useState(false);
   const [gstRate, setGstRate] = useState(9);
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
@@ -248,6 +251,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     };
     load();
   }, [quoteId, user]);
+
+  // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
+  useEffect(() => {
+    if (!gstUserTouched) setGstEnabled(currency === "SGD");
+  }, [currency, gstUserTouched]);
 
   const handleCurrencyChange = async (c: Currency) => {
     setCurrency(c);
@@ -613,7 +621,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setGstEnabled(!gstEnabled)}
+                  onClick={() => { setGstUserTouched(true); setGstEnabled(!gstEnabled); }}
                   className="flex items-center gap-2"
                 >
                   <div className={`relative w-8 h-[18px] rounded-full transition-colors ${gstEnabled ? "bg-foreground" : "bg-border"}`}>

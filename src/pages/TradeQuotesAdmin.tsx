@@ -42,6 +42,33 @@ interface AdminQuoteItem {
   } | null;
 }
 
+interface LeadTimeInfo {
+  lead_weeks_min: number | null;
+  lead_weeks_max: number | null;
+  stock_status: string | null;
+  source: string | null;
+}
+
+interface CatalogPriceInfo {
+  cents: number;
+  currency: string;
+  /** "exact" when matched on product_id, "fuzzy" when matched on a different priced product. */
+  match: "exact" | "fuzzy";
+  matched_name?: string;
+}
+
+const formatLeadTime = (info?: LeadTimeInfo) => {
+  if (!info) return null;
+  const { lead_weeks_min, lead_weeks_max, stock_status } = info;
+  if (lead_weeks_min && lead_weeks_max) {
+    const range = lead_weeks_min === lead_weeks_max ? `${lead_weeks_min}` : `${lead_weeks_min}–${lead_weeks_max}`;
+    return `Lead time: ${range} weeks`;
+  }
+  if (lead_weeks_min) return `Lead time: ~${lead_weeks_min} weeks`;
+  if (stock_status === "in_stock") return "In stock";
+  return "Made to order — lead time TBC";
+};
+
 const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: Clock, className: "bg-muted text-muted-foreground" },
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
@@ -199,7 +226,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [itemPrices, setItemPrices] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [catalogPrices, setCatalogPrices] = useState<Record<string, { cents: number; currency: string }>>({});
+  const [catalogPrices, setCatalogPrices] = useState<Record<string, CatalogPriceInfo>>({});
+  const [leadTimes, setLeadTimes] = useState<Record<string, LeadTimeInfo>>({});
+  /** Trade discount % to apply on the client side (e.g. 0.08 for silver). */
+  const [ownerDiscountPct, setOwnerDiscountPct] = useState<number>(0);
+  const [ownerTierLabel, setOwnerTierLabel] = useState<string>("");
 
   useEffect(() => {
     const load = async () => {
@@ -285,14 +316,25 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         return best;
       };
 
-      // Build a resolved price map: item.id → { cents, currency }
-      const resolvedPrices: Record<string, { cents: number; currency: string }> = {};
+      // Build a resolved price map: item.id → CatalogPriceInfo
+      const resolvedPrices: Record<string, CatalogPriceInfo> = {};
       fetchedItems.forEach((item) => {
         if (item.trade_products?.trade_price_cents != null) {
-          resolvedPrices[item.id] = { cents: item.trade_products.trade_price_cents, currency: item.trade_products.currency || "SGD" };
+          resolvedPrices[item.id] = {
+            cents: item.trade_products.trade_price_cents,
+            currency: item.trade_products.currency || "SGD",
+            match: "exact",
+          };
         } else {
           const match = findFuzzyPrice(item.trade_products?.product_name || "", item.trade_products?.brand_name);
-          if (match) resolvedPrices[item.id] = { cents: match.trade_price_cents, currency: match.currency };
+          if (match) {
+            resolvedPrices[item.id] = {
+              cents: match.trade_price_cents,
+              currency: match.currency,
+              match: "fuzzy",
+              matched_name: match.product_name,
+            };
+          }
         }
       });
 
@@ -345,6 +387,50 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       });
       setItemPrices(prices);
       setCatalogPrices(resolvedPrices);
+
+      // Fetch lead time for each line item via the effective_product_availability function.
+      const leadTimeMap: Record<string, LeadTimeInfo> = {};
+      await Promise.all(
+        fetchedItems.map(async (item) => {
+          if (!item.product_id) return;
+          try {
+            const { data: lt } = await (supabase as any).rpc("effective_product_availability", { _product_id: item.product_id });
+            if (lt && lt.length > 0) leadTimeMap[item.id] = lt[0] as LeadTimeInfo;
+          } catch {
+            /* ignore */
+          }
+        })
+      );
+      setLeadTimes(leadTimeMap);
+
+      // Resolve the quote owner's trade discount tier (silver/gold/platinum → discount %).
+      if (q?.user_id) {
+        try {
+          const { data: ownerProfile } = await supabase
+            .from("profiles")
+            .select("trade_tier")
+            .eq("id", q.user_id)
+            .maybeSingle();
+          const rawTier = (ownerProfile?.trade_tier as string | null) || "silver";
+          const tier = (["silver", "gold", "platinum"] as const).includes(rawTier as any) ? (rawTier as "silver" | "gold" | "platinum") : "silver";
+          const { data: cfg } = await (supabase as any)
+            .from("trade_tier_config")
+            .select("tier, discount_pct, label")
+            .eq("tier", tier)
+            .maybeSingle();
+          const fallback: Record<string, { pct: number; label: string }> = {
+            silver: { pct: 0.08, label: "Silver" },
+            gold: { pct: 0.10, label: "Gold" },
+            platinum: { pct: 0.15, label: "Platinum" },
+          };
+          setOwnerDiscountPct(cfg?.discount_pct != null ? Number(cfg.discount_pct) : fallback[tier].pct);
+          setOwnerTierLabel(cfg?.label || fallback[tier].label);
+        } catch {
+          setOwnerDiscountPct(0.08);
+          setOwnerTierLabel("Silver");
+        }
+      }
+
       setLoading(false);
     };
     load();
@@ -444,6 +530,12 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const priceStr = itemPrices[item.id] || "";
                   const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
                   const lineTotal = cents * item.quantity;
+                  const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
+                  const lead = leadTimes[item.id];
+                  const leadLabel = formatLeadTime(lead);
+                  const catalog = catalogPrices[item.id];
+                  // Only show the suggestion when we used it to pre-fill (i.e. no admin price has been saved yet).
+                  const showCatalogHint = catalog && !item.unit_price_cents;
 
                   return (
                     <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_80px_120px_100px] md:gap-4 md:items-center">
@@ -459,9 +551,15 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                           <h4 className="font-display text-xs text-foreground leading-tight">{product?.product_name || "Unknown"}</h4>
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}</p>
                           {product?.dimensions && <p className="font-body text-[10px] text-muted-foreground">{product.dimensions}</p>}
-                          {catalogPrices[item.id] && (
+                          {leadLabel && (
+                            <p className="font-body text-[10px] text-muted-foreground">{leadLabel}</p>
+                          )}
+                          {showCatalogHint && (
                             <p className="font-body text-[10px] text-muted-foreground/60">
-                              Catalog: {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)}
+                              Suggested {catalog.match === "fuzzy" ? "(≈)" : "(catalog)"}: {formatPrice(catalog.cents, catalog.currency)}
+                              {catalog.match === "fuzzy" && catalog.matched_name && (
+                                <span className="italic"> · from "{catalog.matched_name}"</span>
+                              )}
                             </p>
                           )}
                         </div>
@@ -481,9 +579,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
-                        {catalogPrices[item.id] && catalogPrices[item.id].currency !== currency && (
-                          <p className="font-body text-[9px] text-muted-foreground/50 text-right mt-0.5 italic">
-                            {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)} catalog
+                        {ownerDiscountPct > 0 && cents > 0 && (
+                          <p className="font-body text-[9px] text-emerald-600/80 text-right mt-0.5">
+                            After {(ownerDiscountPct * 100).toFixed(0)}% trade: {formatPrice(discountedUnit, currency)}
                           </p>
                         )}
                       </div>
@@ -514,26 +612,40 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
               {/* Subtotal */}
               <div className="border-t border-border mt-2 pt-4 flex justify-end">
-                <div className="w-64 space-y-1">
-                  <div className="flex justify-between font-body text-xs text-muted-foreground">
-                    <span>Subtotal</span>
-                    <span>{subtotalCents > 0 ? formatPrice(subtotalCents, currency) : "—"}</span>
-                  </div>
-                  {currency === "SGD" && subtotalCents > 0 && (
-                    <div className="flex justify-between font-body text-xs text-muted-foreground">
-                      <span>GST (9%)</span>
-                      <span>{formatPrice(Math.round(subtotalCents * 0.09), currency)}</span>
+                {(() => {
+                  const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
+                  const afterDiscountCents = subtotalCents - discountCents;
+                  // Strict GST guard: only when the quote is SGD AND fully loaded (never on the SGD fallback while quote is still null).
+                  const showGst = quote?.currency === "SGD" && afterDiscountCents > 0;
+                  const gstCents = showGst ? Math.round(afterDiscountCents * 0.09) : 0;
+                  const totalCents = afterDiscountCents + gstCents;
+                  return (
+                    <div className="w-72 space-y-1">
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>Subtotal</span>
+                        <span>{subtotalCents > 0 ? formatPrice(subtotalCents, currency) : "—"}</span>
+                      </div>
+                      {ownerDiscountPct > 0 && subtotalCents > 0 && (
+                        <div className="flex justify-between font-body text-xs text-emerald-600/80">
+                          <span>Trade discount ({(ownerDiscountPct * 100).toFixed(0)}% · {ownerTierLabel})</span>
+                          <span>− {formatPrice(discountCents, currency)}</span>
+                        </div>
+                      )}
+                      {showGst && (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>GST (9%)</span>
+                          <span>{formatPrice(gstCents, currency)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                        <span className="uppercase tracking-wider">Total {currency}</span>
+                        <span className="font-medium">
+                          {subtotalCents > 0 ? formatPrice(totalCents, currency) : "—"}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
-                    <span className="uppercase tracking-wider">Total {currency}</span>
-                    <span className="font-medium">
-                      {subtotalCents > 0
-                        ? formatPrice(currency === "SGD" ? subtotalCents + Math.round(subtotalCents * 0.09) : subtotalCents, currency)
-                        : "—"}
-                    </span>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
             </>
           )}
