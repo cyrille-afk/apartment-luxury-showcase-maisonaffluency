@@ -490,6 +490,17 @@ const TradeProductPage: React.FC = () => {
     setSelectedDualSize(null);
     handleMaterialChange(defaultPair.base, { base: defaultPair.base, top: defaultPair.top, size: null });
   };
+
+  // Single atomic reset for dual-axis selectors. Wipes Base/Top/Size in one
+  // React batch and notifies the gallery resolver with an explicit cleared
+  // payload so dropdowns and gallery never get out of sync (e.g. a stale
+  // "Sand Blaster" finish appearing while the hero shows the default image).
+  const clearAllDualSelections = () => {
+    setSelectedBase(null);
+    setSelectedTop(null);
+    setSelectedDualSize(null);
+    handleMaterialChange(null, { base: null, top: null, size: null });
+  };
   const isAtDefaultPair =
     !!defaultPair &&
     selectedBase === defaultPair.base &&
@@ -737,10 +748,7 @@ const TradeProductPage: React.FC = () => {
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => {
                       if (idx < 0) {
-                        setSelectedBase(null);
-                        setSelectedTop(null);
-                        setSelectedDualSize(null);
-                        handleMaterialChange(null);
+                        clearAllDualSelections();
                         return;
                       }
                       const v = baseOptions[idx] ?? null;
@@ -771,10 +779,7 @@ const TradeProductPage: React.FC = () => {
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
                     onChange={(idx) => {
                       if (idx < 0) {
-                        setSelectedBase(null);
-                        setSelectedTop(null);
-                        setSelectedDualSize(null);
-                        handleMaterialChange(null);
+                        clearAllDualSelections();
                         return;
                       }
                       const v = topOptions[idx] ?? null;
@@ -868,6 +873,10 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
                   onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
                     const s = dualSizeOptions[idx] ?? null;
                     setSelectedDualSize(s);
                     let nextBase = selectedBase;
