@@ -572,19 +572,43 @@ export default function TradeFloorPlanFFE() {
 
 /* ---------- Canvas (desktop) ---------- */
 function CanvasPreview({
-  planUrl, room, selectedIdx, onSelect, onMove,
+/* ---------- Canvas (desktop + mobile) ---------- */
+function CanvasPreview({
+  planUrl, room, selectedIdxs, onSelect, onClearSelection, onMove, onMoveGroup,
 }: {
-  planUrl: string; room: Room; selectedIdx: number | null;
-  onSelect: (i: number) => void; onMove: (i: number, x: number, y: number) => void;
+  planUrl: string;
+  room: Room;
+  selectedIdxs: number[];
+  onSelect: (i: number, additive: boolean) => void;
+  onClearSelection: () => void;
+  onMove: (i: number, x: number, y: number) => void;
+  onMoveGroup: (dx: number, dy: number) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [drag, setDrag] = useState<{ idx: number; offsetX: number; offsetY: number } | null>(null);
+  const [drag, setDrag] = useState<
+    | { kind: "single"; idx: number; offsetX: number; offsetY: number }
+    | { kind: "group"; lastX: number; lastY: number }
+    | null
+  >(null);
+  const longPressTimer = useRef<number | null>(null);
 
-  const beginDrag = (clientX: number, clientY: number, idx: number) => {
-    onSelect(idx);
+  const beginDrag = (clientX: number, clientY: number, idx: number, additive: boolean) => {
+    const isInGroup = selectedIdxs.includes(idx) && selectedIdxs.length > 1;
     const rect = wrapRef.current?.getBoundingClientRect();
     if (!rect) return;
+    if (isInGroup && !additive) {
+      // Move all selected as a group
+      setDrag({
+        kind: "group",
+        lastX: (clientX - rect.left) / rect.width,
+        lastY: (clientY - rect.top) / rect.height,
+      });
+      return;
+    }
+    onSelect(idx, additive);
+    if (additive) return; // additive click toggles selection, no drag
     setDrag({
+      kind: "single",
       idx,
       offsetX: (clientX - rect.left) / rect.width - room.items[idx].x,
       offsetY: (clientY - rect.top) / rect.height - room.items[idx].y,
@@ -593,14 +617,28 @@ function CanvasPreview({
 
   const handleMouseDown = (e: React.MouseEvent, idx: number) => {
     e.stopPropagation();
-    beginDrag(e.clientX, e.clientY, idx);
+    const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+    beginDrag(e.clientX, e.clientY, idx, additive);
   };
 
   const handleTouchStart = (e: React.TouchEvent, idx: number) => {
     e.stopPropagation();
     const t = e.touches[0];
     if (!t) return;
-    beginDrag(t.clientX, t.clientY, idx);
+    // long-press => additive selection (no drag)
+    longPressTimer.current = window.setTimeout(() => {
+      onSelect(idx, true);
+      setDrag(null);
+      longPressTimer.current = null;
+    }, 450);
+    beginDrag(t.clientX, t.clientY, idx, false);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
   };
 
   useEffect(() => {
@@ -608,18 +646,30 @@ function CanvasPreview({
     const updateFromPoint = (clientX: number, clientY: number) => {
       const rect = wrapRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = Math.min(0.98, Math.max(0.02, (clientX - rect.left) / rect.width - drag.offsetX));
-      const y = Math.min(0.98, Math.max(0.02, (clientY - rect.top) / rect.height - drag.offsetY));
-      onMove(drag.idx, x, y);
+      if (drag.kind === "single") {
+        const x = Math.min(0.98, Math.max(0.02, (clientX - rect.left) / rect.width - drag.offsetX));
+        const y = Math.min(0.98, Math.max(0.02, (clientY - rect.top) / rect.height - drag.offsetY));
+        onMove(drag.idx, x, y);
+      } else {
+        const nx = (clientX - rect.left) / rect.width;
+        const ny = (clientY - rect.top) / rect.height;
+        const dx = nx - drag.lastX;
+        const dy = ny - drag.lastY;
+        if (Math.abs(dx) > 0.0005 || Math.abs(dy) > 0.0005) {
+          onMoveGroup(dx, dy);
+          setDrag({ kind: "group", lastX: nx, lastY: ny });
+        }
+      }
     };
     const onMove2 = (e: MouseEvent) => updateFromPoint(e.clientX, e.clientY);
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
       if (!t) return;
+      cancelLongPress();
       e.preventDefault();
       updateFromPoint(t.clientX, t.clientY);
     };
-    const onUp = () => setDrag(null);
+    const onUp = () => { cancelLongPress(); setDrag(null); };
     window.addEventListener("mousemove", onMove2);
     window.addEventListener("mouseup", onUp);
     window.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -632,81 +682,107 @@ function CanvasPreview({
       window.removeEventListener("touchend", onUp);
       window.removeEventListener("touchcancel", onUp);
     };
-  }, [drag, onMove]);
+  }, [drag, onMove, onMoveGroup]);
 
   return (
     <div
       ref={wrapRef}
       className="relative w-full aspect-[4/3] rounded-lg border border-border bg-muted overflow-hidden select-none touch-none"
-      onClick={() => onSelect(-1)}
+      onClick={onClearSelection}
     >
       {/\.pdf($|\?)/i.test(planUrl) ? (
         <iframe src={planUrl} className="w-full h-full pointer-events-none" title="Plan" />
       ) : (
         <img src={planUrl} alt="" className="w-full h-full object-contain pointer-events-none" />
       )}
-      {room.items.map((it, idx) => (
-        <div
-          key={idx}
-          onMouseDown={(e) => handleMouseDown(e, idx)}
-          onTouchStart={(e) => handleTouchStart(e, idx)}
-          className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move group ${
-            selectedIdx === idx ? "ring-2 ring-foreground" : "ring-1 ring-foreground/30 hover:ring-foreground/60"
-          } rounded-md overflow-hidden bg-background shadow-lg`}
-          style={{
-            left: `${it.x * 100}%`,
-            top: `${it.y * 100}%`,
-            width: `${Math.max(it.w, 0.06) * 100}%`,
-            transform: `translate(-50%, -50%) rotate(${it.rotation}deg)`,
-          }}
-          title={`${it.product.title} — ${it.product.designer}`}
-        >
-          {it.product.image_url ? (
-            <img src={it.product.image_url} alt={it.product.title} className="w-full aspect-square object-cover" />
-          ) : (
-            <div className="w-full aspect-square flex items-center justify-center bg-muted text-muted-foreground">
-              <ImageIcon className="w-4 h-4" />
-            </div>
-          )}
-        </div>
-      ))}
+      {room.items.map((it, idx) => {
+        const isSelected = selectedIdxs.includes(idx);
+        return (
+          <div
+            key={idx}
+            onMouseDown={(e) => handleMouseDown(e, idx)}
+            onTouchStart={(e) => handleTouchStart(e, idx)}
+            onTouchEnd={cancelLongPress}
+            className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move group ${
+              isSelected ? "ring-2 ring-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.25)]" : "ring-1 ring-foreground/30 hover:ring-foreground/60"
+            } rounded-md overflow-hidden bg-background shadow-lg`}
+            style={{
+              left: `${it.x * 100}%`,
+              top: `${it.y * 100}%`,
+              width: `${Math.max(it.w, 0.06) * 100}%`,
+              transform: `translate(-50%, -50%) rotate(${it.rotation}deg)`,
+            }}
+            title={`${it.product.title} — ${it.product.designer}`}
+          >
+            {it.product.image_url ? (
+              <img src={it.product.image_url} alt={it.product.title} className="w-full aspect-square object-cover" />
+            ) : (
+              <div className="w-full aspect-square flex items-center justify-center bg-muted text-muted-foreground">
+                <ImageIcon className="w-4 h-4" />
+              </div>
+            )}
+            {isSelected && selectedIdxs.length > 1 && (
+              <span className="absolute top-0.5 left-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-medium">
+                {selectedIdxs.indexOf(idx) + 1}
+              </span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 /* ---------- Side panel (desktop) ---------- */
 function SidePanel({
-  room, selectedIdx, onSelect, onUpdate, onRemove,
+  room, selectedIdx, selectedIdxs, onSelect, onUpdate, onRemove, onRemoveSelected,
 }: {
-  room: Room; selectedIdx: number | null;
-  onSelect: (i: number) => void;
+  room: Room;
+  selectedIdx: number | null;
+  selectedIdxs: number[];
+  onSelect: (i: number, additive: boolean) => void;
   onUpdate: (i: number, patch: Partial<Placement>) => void;
   onRemove: (i: number) => void;
+  onRemoveSelected: () => void;
 }) {
   const it = selectedIdx != null && selectedIdx >= 0 ? room.items[selectedIdx] : null;
+  const multi = selectedIdxs.length > 1;
 
   return (
     <div className="space-y-3 p-4 rounded-lg border border-border bg-background max-h-[600px] overflow-y-auto">
       <p className="font-body text-xs italic text-muted-foreground">{room.summary}</p>
       <div className="space-y-1.5">
-        {room.items.map((x, i) => (
-          <button
-            key={i}
-            onClick={() => onSelect(i)}
-            className={`w-full flex items-center gap-2 p-1.5 rounded text-left border ${
-              selectedIdx === i ? "border-foreground bg-muted" : "border-transparent hover:bg-muted/50"
-            }`}
-          >
-            <img src={x.product.image_url} alt="" className="w-10 h-10 object-cover rounded" />
-            <div className="min-w-0 flex-1">
-              <span className="block font-body text-xs font-medium text-foreground truncate">{x.product.title}</span>
-              <span className="block font-body text-[10px] text-muted-foreground truncate">{x.product.designer}</span>
-            </div>
-          </button>
-        ))}
+        {room.items.map((x, i) => {
+          const isSel = selectedIdxs.includes(i);
+          return (
+            <button
+              key={i}
+              onClick={(e) => onSelect(i, e.shiftKey || e.metaKey || e.ctrlKey)}
+              className={`w-full flex items-center gap-2 p-1.5 rounded text-left border ${
+                isSel ? "border-primary bg-muted" : "border-transparent hover:bg-muted/50"
+              }`}
+            >
+              <span className={`inline-block w-3 h-3 rounded-sm border ${isSel ? "bg-primary border-primary" : "border-muted-foreground/40"}`} />
+              <img src={x.product.image_url} alt="" className="w-10 h-10 object-cover rounded" />
+              <div className="min-w-0 flex-1">
+                <span className="block font-body text-xs font-medium text-foreground truncate">{x.product.title}</span>
+                <span className="block font-body text-[10px] text-muted-foreground truncate">{x.product.designer}</span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {it && (
+      {multi && (
+        <div className="space-y-2 pt-3 border-t border-border">
+          <p className="font-body text-[11px] text-muted-foreground">{selectedIdxs.length} pieces selected — drag any one to move them together.</p>
+          <Button variant="outline" size="sm" onClick={onRemoveSelected} className="w-full">
+            <Trash2 className="w-3.5 h-3.5" /> Remove {selectedIdxs.length} pieces
+          </Button>
+        </div>
+      )}
+
+      {!multi && it && (
         <div className="space-y-2 pt-3 border-t border-border">
           <p className="font-body text-[11px] text-muted-foreground">{it.reason}</p>
           <div className="flex items-center gap-2">
@@ -735,23 +811,47 @@ function SidePanel({
 }
 
 /* ---------- Mobile list ---------- */
-function MobileList({ room, onRemove }: { room: Room; onRemove: (i: number) => void }) {
+function MobileList({
+  room, selectedIdxs, onToggle, onRemove,
+}: {
+  room: Room;
+  selectedIdxs: number[];
+  onToggle: (i: number) => void;
+  onRemove: (i: number) => void;
+}) {
   return (
     <div className="space-y-3">
       <p className="font-body text-xs italic text-muted-foreground">{room.summary}</p>
-      {room.items.map((it, i) => (
-        <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background">
-          <img src={it.product.image_url} alt="" className="w-16 h-16 rounded object-cover shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="font-body text-sm font-medium text-foreground truncate">{it.product.title}</p>
-            <p className="font-body text-[11px] text-muted-foreground truncate">{it.product.designer}</p>
-            <p className="font-body text-[11px] text-muted-foreground mt-1">{it.reason}</p>
+      {room.items.map((it, i) => {
+        const isSel = selectedIdxs.includes(i);
+        return (
+          <div
+            key={i}
+            className={`flex items-start gap-3 p-3 rounded-lg border bg-background ${
+              isSel ? "border-primary ring-1 ring-primary/30" : "border-border"
+            }`}
+          >
+            <button
+              onClick={() => onToggle(i)}
+              aria-label={isSel ? "Deselect" : "Select"}
+              className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-sm border shrink-0 ${
+                isSel ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/40"
+              }`}
+            >
+              {isSel && <Check className="w-3 h-3" />}
+            </button>
+            <img src={it.product.image_url} alt="" className="w-16 h-16 rounded object-cover shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="font-body text-sm font-medium text-foreground truncate">{it.product.title}</p>
+              <p className="font-body text-[11px] text-muted-foreground truncate">{it.product.designer}</p>
+              <p className="font-body text-[11px] text-muted-foreground mt-1">{it.reason}</p>
+            </div>
+            <button onClick={() => onRemove(i)} className="text-muted-foreground hover:text-destructive">
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={() => onRemove(i)} className="text-muted-foreground hover:text-destructive">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
