@@ -60,9 +60,9 @@ serve(async (req) => {
 
     if (qErr || !quote) throw new Error("Quote not found");
 
-    // Validate status: deposit requires "confirmed", balance requires "deposit_paid"
-    if (paymentType === "deposit" && quote.status !== "confirmed") {
-      throw new Error("Quote must be confirmed before deposit payment");
+    // Validate status: deposit requires "priced" or "confirmed", balance requires "deposit_paid"
+    if (paymentType === "deposit" && !["priced", "confirmed"].includes(quote.status)) {
+      throw new Error("Quote must be priced or confirmed before deposit payment");
     }
     if (paymentType === "balance" && quote.status !== "deposit_paid") {
       throw new Error("Deposit must be paid before balance payment");
