@@ -20,12 +20,8 @@
  * the bridge would have served anyway.
  */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 // deno-lint-ignore-file no-explicit-any
-import {
-  decode as decodeJpeg,
-  encode as encodeJpeg,
-} from "https://deno.land/x/jpegts@1.1/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
