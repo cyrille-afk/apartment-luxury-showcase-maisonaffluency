@@ -1302,6 +1302,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
                     <CheckCircle className="h-4 w-4" />
                     <span>{isPayingBalance ? "Deposit paid — balance due" : "Order confirmed"}</span>
+                    <StatusBadge />
                   </div>
                   {isPayingBalance && (
                     <p className="font-body text-[10px] text-muted-foreground">
