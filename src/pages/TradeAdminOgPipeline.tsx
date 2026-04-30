@@ -235,6 +235,9 @@ export default function TradeAdminOgPipeline() {
         </div>
       )}
 
+      {/* Per-URL Inspector */}
+      <UrlInspector />
+
       {/* History */}
       <div className="border border-border rounded-lg bg-card overflow-hidden">
         <div className="p-6 border-b border-border flex items-center justify-between">
