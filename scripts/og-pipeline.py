@@ -41,17 +41,18 @@ from typing import Iterable
 from urllib.parse import urlparse
 
 import requests
-from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 BRIDGES_DIR = ROOT / "public" / "designers"
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://dcrauiygaezoduwdjmsm.supabase.co")
-SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")  # required for --apply
-BUCKET = "assets"
-PREFIX = "og/"
-TARGET_W, TARGET_H = 1200, 630
-MAX_BYTES = 300 * 1024  # 300 KB
+SUPABASE_URL = os.environ.get(
+    "SUPABASE_URL", "https://dcrauiygaezoduwdjmsm.supabase.co"
+)
+ANON_KEY = os.environ.get(
+    "SUPABASE_ANON_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjcmF1aXlnYWV6b2R1d2RqbXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2Nzg2NjIsImV4cCI6MjA4MDI1NDY2Mn0.COYGvxExzTLk0cZorF3KCJ2tzpIzvqTGb9Gb3J6wqsE",
+)
+REHOST_ENDPOINT = f"{SUPABASE_URL}/functions/v1/og-rehost"
 
 CLOUDINARY_OK = re.compile(
     r"https://res\.cloudinary\.com/.*/upload/[^/]*w_1200[^/]*h_630[^/]*c_fill",
