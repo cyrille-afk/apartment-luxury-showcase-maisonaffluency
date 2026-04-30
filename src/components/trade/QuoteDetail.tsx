@@ -458,6 +458,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         subtotalCents,
         tradeDiscountPct,
         tradeDiscountApplied: tradeDiscount,
+        tierLabel,
+        tierBreakdown: tierConfig
+          ? (["silver", "gold", "platinum"] as const).map((t) => ({
+              label: tierConfig[t].label,
+              pct: tierConfig[t].discount_pct,
+              minSpendCents: tierConfig[t].min_spend_cents,
+              active: t === currentTier,
+            }))
+          : undefined,
         gstEnabled,
         gstRate,
         insurancePremiumCents: insurancePremiumCents || 0,
