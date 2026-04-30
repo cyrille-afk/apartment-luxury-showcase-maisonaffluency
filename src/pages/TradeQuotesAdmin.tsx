@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2 } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
 import SectionHero from "@/components/trade/SectionHero";
+import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 
 interface AdminQuote {
   id: string;
