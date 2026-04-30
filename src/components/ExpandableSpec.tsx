@@ -159,7 +159,7 @@ export default function ExpandableSpec({
           >
             <span className="shrink-0">{icon}</span>
             <span className="flex-1 truncate">
-              {hasSelection ? lines[selectedIdx] : placeholder}
+              {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
             </span>
           </SelectTrigger>
           <SelectContent className="z-[130] bg-background border-border">
