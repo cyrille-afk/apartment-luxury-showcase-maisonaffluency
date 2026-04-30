@@ -145,6 +145,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     setSelectedMaterialIdx(null);
   }, [product?.id]);
 
+  // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
+  // Wipes both indices in one React batch so the gallery (which derives the
+  // current image from base/top together) snaps cleanly back to the primary
+  // image instead of partially honouring a stale finish.
+  const clearAllDualSelections = () => {
+    setSelectedBaseIdx(null);
+    setSelectedTopIdx(null);
+  };
+
   // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
   // so we don't clobber it on close.
   useEffect(() => {
