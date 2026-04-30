@@ -861,6 +861,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           </p>
                           {product?.dimensions && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
                           {product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.materials}</p>}
+                          {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 truncate">Edition: {item.edition}</p>}
                           {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.lead_time}</p>}
                           {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 truncate">{item.notes}</p>}
                           {isDraft && (
