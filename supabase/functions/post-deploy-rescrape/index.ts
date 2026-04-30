@@ -228,10 +228,6 @@ Deno.serve(async (req) => {
     const rescrapeResult = await callRescrape(urls);
 
     // Persist new snapshot (always, so subsequent runs can diff)
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
     const newSnapshot: Snapshot = {
       buildId: buildId ?? undefined,
       entries: current,
@@ -247,6 +243,19 @@ Deno.serve(async (req) => {
       console.error("snapshot upload failed", upErr);
     }
 
+    await logRun({
+      trigger_source: triggerSource,
+      build_id: buildId,
+      manifest_size: paths.length,
+      current_snapshot_size: Object.keys(current).length,
+      previous_snapshot_size: Object.keys(prev.entries ?? {}).length,
+      rescraped_count: toRescrape.length,
+      forced: force,
+      truncated,
+      skipped: false,
+      rescrape_result: rescrapeResult,
+    });
+
     return jsonResp({
       ok: true,
       buildId,
@@ -259,6 +268,12 @@ Deno.serve(async (req) => {
     });
   } catch (e: any) {
     console.error("post-deploy-rescrape error", e);
+    await logRun({
+      trigger_source: triggerSource,
+      forced: force,
+      rescraped_count: 0,
+      error: e?.message ?? String(e),
+    });
     return jsonResp({ error: e?.message ?? String(e) }, 500);
   }
 });
