@@ -721,6 +721,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                       quoteCurrency={currency}
                       defaultExpanded={true}
                       title="UK landed cost (DDP, GBP) — admin preview"
+                      quoteRef={`QU-${quoteId.slice(0, 6).toUpperCase()}`}
+                      clientName={quote?.client_name ?? null}
                     />
                   </div>
                 );
