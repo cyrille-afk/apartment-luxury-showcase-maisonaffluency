@@ -9,6 +9,8 @@ import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
+import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
+import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -78,6 +80,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // The user can still toggle it on manually if needed.
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstUserTouched, setGstUserTouched] = useState(false);
+  /** Display the totals block in the quote currency or in GBP DDP landed cost. */
+  const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
   const [gstRate, setGstRate] = useState(9);
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
@@ -368,6 +372,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const insurancePremiumCents = insuranceEnabled && insuredBaseCents > 0
     ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
     : 0;
+
+  /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
+  const gbp = useGbpLandedCost({
+    goodsAfterDiscountCents: insuredBaseCents,
+    quoteCurrency: currency,
+  });
 
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
@@ -943,7 +953,50 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
+                {subtotalCents > 0 && (
+                  <div className="flex justify-end">
+                    <div className="w-72">
+                      <QuoteDisplayCurrencyToggle
+                        value={displayCcy}
+                        onChange={setDisplayCcy}
+                        quoteCurrency={currency}
+                        disabled={displayCcy === "quote" ? false : !gbp.ready}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className="flex justify-end">
+                  {displayCcy === "gbp" && subtotalCents > 0 ? (
+                    <div className="w-72 space-y-1">
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>Goods (after discount)</span>
+                        <span>{gbp.ready ? fmtGbp(gbp.goodsGbpCents) : "…"}</span>
+                      </div>
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>Shipping FR → GB</span>
+                        <span>{gbp.ready ? fmtGbp(gbp.shippingGbpCents) : "…"}</span>
+                      </div>
+                      {gbp.dutyGbpCents > 0 && (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>Import duty</span>
+                          <span>{fmtGbp(gbp.dutyGbpCents)}</span>
+                        </div>
+                      )}
+                      {gbp.vatGbpCents > 0 && (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>UK VAT</span>
+                          <span>{fmtGbp(gbp.vatGbpCents)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                        <span className="uppercase tracking-wider">Total GBP · DDP London</span>
+                        <span className="font-medium">{gbp.ready ? fmtGbp(gbp.totalGbpCents) : "…"}</span>
+                      </div>
+                      <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
+                        Indicative. EUR→GBP @ {gbp.fxEurGbp?.toFixed(4)} (+2% FX buffer). DDP — UK customs, duty &amp; VAT included. Payments &amp; deposits remain in {currency}.
+                      </p>
+                    </div>
+                  ) : (
                   <div className="w-72 space-y-1">
                     <div className="flex justify-between font-body text-xs text-muted-foreground">
                       <span>Subtotal</span>
@@ -1016,6 +1069,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       );
                     })()}
                   </div>
+                  )}
                 </div>
 
                 {/* UK landed cost (DDP, GBP) — for UK clients on EUR/USD/SGD quotes */}
