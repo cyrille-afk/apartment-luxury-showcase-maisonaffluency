@@ -126,6 +126,7 @@ export default defineConfig(({ mode }) => {
       mode === "development" && componentTagger(),
       optimizeHtmlPlugin(buildId),
       emitVersionPlugin(buildId),
+      emitOgManifestPlugin(),
     ].filter(Boolean),
   resolve: {
     alias: {
