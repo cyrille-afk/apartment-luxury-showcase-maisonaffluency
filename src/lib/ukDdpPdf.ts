@@ -87,19 +87,19 @@ export function buildUkDdpPdf({
   y += 22;
   twoCol(doc, M, y, "Origin", "Paris, France (FR)");
   twoCol(doc, M + (pageW - 2 * M) / 2, y, "Destination", "London, United Kingdom (GB)");
-  y += 16;
-  twoCol(doc, M, y, "Mode", mode === "road" ? "Road · white-glove" : "Courier · express");
+  y += 30;
+  twoCol(doc, M, y, "Mode", mode === "road" ? "Road - white-glove" : "Courier - express");
   twoCol(
     doc,
     M + (pageW - 2 * M) / 2,
     y,
     "Carrier",
-    carrier ? `${carrier}${transitDays?.min ? ` · ${transitDays.min}–${transitDays.max} days` : ""}` : "—"
+    carrier ? `${carrier}${transitDays?.min ? ` (${transitDays.min}-${transitDays.max} days)` : ""}` : "—"
   );
-  y += 16;
+  y += 30;
   twoCol(doc, M, y, "Volume", `${cbm.toFixed(2)} CBM`);
   twoCol(doc, M + (pageW - 2 * M) / 2, y, "Weight", `${kg} kg`);
-  y += 28;
+  y += 32;
 
   // Section: Goods
   sectionTitle(doc, "Goods value", M, y);
