@@ -373,6 +373,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
     : 0;
 
+  /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
+  const gbp = useGbpLandedCost({
+    goodsAfterDiscountCents: insuredBaseCents,
+    quoteCurrency: currency,
+  });
+
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
     itemId: string,
