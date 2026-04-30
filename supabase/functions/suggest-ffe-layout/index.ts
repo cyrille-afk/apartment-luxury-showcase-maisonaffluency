@@ -220,7 +220,7 @@ Look at the floor plan image and propose an FF&E layout per room.`;
             role: "user",
             content: [
               { type: "text", text: userText },
-              { type: "image_url", image_url: { url: plan_image_url } },
+              { type: "image_url", image_url: { url: imageUrlForAI } },
             ],
           },
         ],
