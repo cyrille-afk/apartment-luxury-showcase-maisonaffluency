@@ -624,7 +624,17 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
               </div>
 
               {/* Subtotal */}
-              <div className="border-t border-border mt-2 pt-4 flex justify-end">
+              <div className="border-t border-border mt-2 pt-4 flex flex-col items-end">
+                {subtotalCents > 0 && (
+                  <div className="w-72">
+                    <QuoteDisplayCurrencyToggle
+                      value={displayCcy}
+                      onChange={setDisplayCcy}
+                      quoteCurrency={currency}
+                      disabled={displayCcy === "quote" ? false : !gbp.ready}
+                    />
+                  </div>
+                )}
                 {(() => {
                   const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
                   const afterDiscountCents = subtotalCents - discountCents;
@@ -632,6 +642,45 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const showGst = quote?.currency === "SGD" && afterDiscountCents > 0;
                   const gstCents = showGst ? Math.round(afterDiscountCents * 0.09) : 0;
                   const totalCents = afterDiscountCents + gstCents;
+
+                  // GBP DDP view
+                  if (displayCcy === "gbp") {
+                    return (
+                      <div className="w-72 space-y-1">
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>Goods (after discount)</span>
+                          <span>{gbp.ready ? fmtGbp(gbp.goodsGbpCents) : "…"}</span>
+                        </div>
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>Shipping FR → GB</span>
+                          <span>{gbp.ready ? fmtGbp(gbp.shippingGbpCents) : "…"}</span>
+                        </div>
+                        {gbp.dutyGbpCents > 0 && (
+                          <div className="flex justify-between font-body text-xs text-muted-foreground">
+                            <span>Import duty</span>
+                            <span>{fmtGbp(gbp.dutyGbpCents)}</span>
+                          </div>
+                        )}
+                        {gbp.vatGbpCents > 0 && (
+                          <div className="flex justify-between font-body text-xs text-muted-foreground">
+                            <span>UK VAT</span>
+                            <span>{fmtGbp(gbp.vatGbpCents)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                          <span className="uppercase tracking-wider">Total GBP · DDP London</span>
+                          <span className="font-medium">
+                            {gbp.ready ? fmtGbp(gbp.totalGbpCents) : "…"}
+                          </span>
+                        </div>
+                        <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
+                          Indicative. EUR→GBP @ {gbp.fxEurGbp?.toFixed(4)} (+2% FX buffer). DDP — duty &amp; VAT included. Adjust CBM/weight in the panel below.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  // Quote currency view (default)
                   return (
                     <div className="w-72 space-y-1">
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
