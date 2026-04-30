@@ -861,6 +861,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
+                          {item.variant_label && <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words"><span className="text-muted-foreground">Finish:</span> {item.variant_label}</p>}
                           {product?.dimensions && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">{product.dimensions}</p>}
                           {product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.materials}</p>}
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
