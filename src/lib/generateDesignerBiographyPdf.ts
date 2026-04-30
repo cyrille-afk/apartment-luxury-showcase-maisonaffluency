@@ -1037,7 +1037,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(80, 80, 160);
-        doc.textWithLink(sanitizeUrlForDisplay(block.media.url), marginX, cursorY, { url: block.media.url });
+        doc.textWithLink("\u25B6  Watch video", marginX, cursorY, { url: block.media.url });
         cursorY += 14;
         doc.setDrawColor(...rule);
         doc.line(marginX, cursorY, pageWidth - marginX, cursorY);
