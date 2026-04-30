@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2 } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
 import SectionHero from "@/components/trade/SectionHero";
+import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 
 interface AdminQuote {
   id: string;
@@ -647,6 +648,22 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   );
                 })()}
               </div>
+
+              {/* UK landed cost (DDP, GBP) — useful when client is in the UK but quoted in EUR/USD/SGD */}
+              {subtotalCents > 0 && (() => {
+                const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
+                const goodsAfter = subtotalCents - discountCents;
+                return (
+                  <div className="mt-4">
+                    <UkLandedCostPanel
+                      goodsAfterDiscountCents={goodsAfter}
+                      quoteCurrency={currency}
+                      defaultExpanded={true}
+                      title="UK landed cost (DDP, GBP) — admin preview"
+                    />
+                  </div>
+                );
+              })()}
             </>
           )}
         </div>
