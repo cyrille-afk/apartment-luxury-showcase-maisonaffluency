@@ -385,7 +385,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return sum + converted * item.quantity;
   }, 0);
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
       const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
@@ -401,12 +401,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         quantity: item.quantity,
         unitPriceCents: unit,
         lineTotalCents: unit != null ? unit * item.quantity : null,
+        imageUrl: product?.image_url ?? null,
       };
     });
     const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
     const insLabel = INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label ?? null;
     try {
-      downloadQuotePdf({
+      await downloadQuotePdf({
         quoteNumber,
         status: quoteStatus,
         statusLabel: statusEntry.label,
@@ -424,6 +425,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         insurancePremiumCents: insurancePremiumCents || 0,
         insuranceLabel: insuranceEnabled ? insLabel : null,
         insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
+        insuranceEnabled,
         notes: notes || null,
       });
       toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
