@@ -552,7 +552,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   if (discountCents > 0) {
     rows.push({
       label: `Trade discount (${Math.round(args.tradeDiscountPct * 100)}%)`,
-      value: `− ${fmtMoney(discountCents, args.currency)}`,
+      value: `- ${fmtMoney(discountCents, args.currency)}`,
       muted: true,
     });
   }
