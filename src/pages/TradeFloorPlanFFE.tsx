@@ -570,8 +570,6 @@ export default function TradeFloorPlanFFE() {
   );
 }
 
-/* ---------- Canvas (desktop) ---------- */
-function CanvasPreview({
 /* ---------- Canvas (desktop + mobile) ---------- */
 function CanvasPreview({
   planUrl, room, selectedIdxs, onSelect, onClearSelection, onMove, onMoveGroup,
