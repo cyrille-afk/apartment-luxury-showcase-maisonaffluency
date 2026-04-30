@@ -1083,6 +1083,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       }
                       quoteCurrency={currency}
                       defaultExpanded={false}
+                      quoteRef={quoteNumber}
+                      clientName={clientName || null}
                     />
                   </div>
                 )}
