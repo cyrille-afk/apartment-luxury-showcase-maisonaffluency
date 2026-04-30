@@ -105,6 +105,54 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    // Fetch the floor plan, validate by magic bytes, and inline as base64 so
+    // Gemini never has to fetch the signed URL itself. PDFs are rejected with
+    // a clear, actionable message (the upload path now converts PDFs → PNG,
+    // but older saved plans may still be PDFs).
+    let imageUrlForAI = plan_image_url;
+    try {
+      const planResp = await fetch(plan_image_url);
+      if (!planResp.ok) {
+        return new Response(JSON.stringify({ error: `Could not load floor plan (status ${planResp.status}). Please re-upload it.` }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const buf = new Uint8Array(await planResp.arrayBuffer());
+      const isPdf = buf.length >= 4 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46;
+      const isPng = buf.length >= 4 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47;
+      const isJpg = buf.length >= 3 && buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF;
+      const isGif = buf.length >= 3 && buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46;
+      const isWebp = buf.length >= 12 && buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46
+        && buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50;
+      if (isPdf) {
+        return new Response(JSON.stringify({
+          error: "This floor plan is a PDF. Click 'Replace plan' and upload it again — the new uploader auto-converts PDFs to images.",
+          code: "PDF_PLAN",
+        }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!(isPng || isJpg || isGif || isWebp)) {
+        return new Response(JSON.stringify({
+          error: "Floor plan must be a PNG, JPG, GIF or WebP image. Please re-upload.",
+        }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const mime = isPng ? "image/png" : isJpg ? "image/jpeg" : isGif ? "image/gif" : "image/webp";
+      let bin = "";
+      const CHUNK = 0x8000;
+      for (let i = 0; i < buf.length; i += CHUNK) {
+        bin += String.fromCharCode.apply(null, Array.from(buf.subarray(i, i + CHUNK)) as any);
+      }
+      imageUrlForAI = `data:${mime};base64,${btoa(bin)}`;
+    } catch (e) {
+      console.error("Floor plan fetch/validate failed", e);
+      return new Response(JSON.stringify({ error: "Could not read the uploaded floor plan. Please re-upload it as a PNG or JPG image." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const catalog = await loadCatalog();
     const system = buildSystemPrompt(catalog);
 
