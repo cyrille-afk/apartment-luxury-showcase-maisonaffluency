@@ -261,7 +261,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             text={baseOptions.join("\n")}
             placeholder={getBasePlaceholder(product)}
             emphasized
-            value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : undefined}
+            value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
             onChange={(idx) => {
               if (idx < 0) {
                 clearAllDualSelections();
@@ -291,7 +291,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             text={topOptions.join("\n")}
             placeholder={getTopPlaceholder(product)}
             emphasized
-            value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
+            value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : null}
             onChange={(idx) => {
               if (idx < 0) {
                 clearAllDualSelections();
@@ -335,7 +335,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           text={singleMaterialOptions.join("\n")}
           placeholder={getMaterialPlaceholder(product)}
           emphasized
-          value={selMat != null ? Math.max(0, singleMaterialOptions.indexOf(selMat)) : undefined}
+          value={selMat != null ? Math.max(0, singleMaterialOptions.indexOf(selMat)) : null}
           onChange={(idx) => {
             const m = singleMaterialOptions[idx] ?? null;
             setSelMat(m);
@@ -372,7 +372,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           text={dualSizeOptions.join("\n")}
           emphasized
           placeholder="Select your size"
-          value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : undefined}
+          value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {
             if (idx < 0) {
               clearAllDualSelections();
@@ -402,7 +402,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
           text={singleSizeOptions.join("\n")}
           emphasized
           placeholder="Select your size"
-          value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : undefined}
+          value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}
           onChange={(idx) => {
             const s = singleSizeOptions[idx] ?? null;
             setSelSize(s);
