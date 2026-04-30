@@ -166,6 +166,7 @@ export default function TradeFloorPlanFFE() {
     const next = { ...suggestions, rooms: suggestions.rooms.map((r) => ({ ...r, items: [...r.items] })) };
     next.rooms[roomIdx].items[itemIdx] = { ...next.rooms[roomIdx].items[itemIdx], ...patch };
     setSuggestions(next);
+    setConfirmed(false);
   };
 
   const removeItem = (roomIdx: number, itemIdx: number) => {
@@ -175,18 +176,31 @@ export default function TradeFloorPlanFFE() {
     }))};
     setSuggestions(next);
     setSelectedItem(null);
+    setConfirmed(false);
+  };
+
+  const discardSuggestions = () => {
+    setSuggestions(null);
+    setConfirmed(false);
+    setSelectedItem(null);
+    toast({ title: "Suggestion discarded" });
   };
 
   const saveLayout = async () => {
     if (!planId || !suggestions || !user) return;
+    const brief = {
+      rooms: roomsText.split(",").map((s) => s.trim()).filter(Boolean),
+      style, budget, notes,
+    };
     const { error } = await supabase
       .from("trade_floor_plans")
-      .update({ suggestions: suggestions as any, name: planName })
+      .update({ suggestions: suggestions as any, brief, name: planName })
       .eq("id", planId);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Layout saved" });
+      setConfirmed(true);
+      toast({ title: "Layout confirmed & saved" });
     }
   };
 
