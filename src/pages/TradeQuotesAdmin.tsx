@@ -387,6 +387,50 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       });
       setItemPrices(prices);
       setCatalogPrices(resolvedPrices);
+
+      // Fetch lead time for each line item via the effective_product_availability function.
+      const leadTimeMap: Record<string, LeadTimeInfo> = {};
+      await Promise.all(
+        fetchedItems.map(async (item) => {
+          if (!item.product_id) return;
+          try {
+            const { data: lt } = await (supabase as any).rpc("effective_product_availability", { _product_id: item.product_id });
+            if (lt && lt.length > 0) leadTimeMap[item.id] = lt[0] as LeadTimeInfo;
+          } catch {
+            /* ignore */
+          }
+        })
+      );
+      setLeadTimes(leadTimeMap);
+
+      // Resolve the quote owner's trade discount tier (silver/gold/platinum → discount %).
+      if (q?.user_id) {
+        try {
+          const { data: ownerProfile } = await supabase
+            .from("profiles")
+            .select("trade_tier")
+            .eq("id", q.user_id)
+            .maybeSingle();
+          const rawTier = (ownerProfile?.trade_tier as string | null) || "silver";
+          const tier = (["silver", "gold", "platinum"] as const).includes(rawTier as any) ? (rawTier as "silver" | "gold" | "platinum") : "silver";
+          const { data: cfg } = await (supabase as any)
+            .from("trade_tier_config")
+            .select("tier, discount_pct, label")
+            .eq("tier", tier)
+            .maybeSingle();
+          const fallback: Record<string, { pct: number; label: string }> = {
+            silver: { pct: 0.08, label: "Silver" },
+            gold: { pct: 0.10, label: "Gold" },
+            platinum: { pct: 0.15, label: "Platinum" },
+          };
+          setOwnerDiscountPct(cfg?.discount_pct != null ? Number(cfg.discount_pct) : fallback[tier].pct);
+          setOwnerTierLabel(cfg?.label || fallback[tier].label);
+        } catch {
+          setOwnerDiscountPct(0.08);
+          setOwnerTierLabel("Silver");
+        }
+      }
+
       setLoading(false);
     };
     load();
