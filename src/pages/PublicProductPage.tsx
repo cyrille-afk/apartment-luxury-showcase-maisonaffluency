@@ -600,6 +600,17 @@ const PublicProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
+    const isDualAxisSelection = (product.size_variants || []).some(
+      (v: any) => (v.base && String(v.base).trim()) || (v.top && String(v.top).trim())
+    );
+    if (isDualAxisSelection && opts && (!opts.base || !opts.top)) {
+      // Do not resolve partial Base/Top state through a single-axis fallback;
+      // wait for a complete pairing, otherwise clearing one axis can show the
+      // wrong mapped finish image.
+      setGalleryActiveIndex(0);
+      setGalleryJumpNonce((n) => n + 1);
+      return;
+    }
     // Prefer the composite Base|Top|Size key when present, then fall back to
     // Base|Top, then single-axis. Same canonical resolver as TradeProductPage
     // so hero, hover, and any related image always come from one source key.
