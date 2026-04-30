@@ -69,7 +69,7 @@ const currencySymbol = (c: string) => {
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
-  const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel } = useTradeDiscount();
+  const { discountPct: tradeDiscountPct, discountLabel: tradeDiscountLabel, tierLabel, tier: currentTier, config: tierConfig } = useTradeDiscount();
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
