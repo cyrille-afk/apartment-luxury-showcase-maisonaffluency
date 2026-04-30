@@ -1017,6 +1017,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     })()}
                   </div>
                 </div>
+
+                {/* UK landed cost (DDP, GBP) — for UK clients on EUR/USD/SGD quotes */}
+                {subtotalCents > 0 && (
+                  <div className="mt-4">
+                    <UkLandedCostPanel
+                      goodsAfterDiscountCents={
+                        tradeDiscount
+                          ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
+                          : subtotalCents
+                      }
+                      quoteCurrency={currency}
+                      defaultExpanded={false}
+                    />
+                  </div>
+                )}
               </div>
             </>
           )}
