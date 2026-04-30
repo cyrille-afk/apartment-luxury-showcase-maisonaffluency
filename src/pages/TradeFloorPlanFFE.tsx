@@ -42,9 +42,20 @@ export default function TradeFloorPlanFFE() {
   const [notes, setNotes] = useState("");
 
   const [suggesting, setSuggesting] = useState(false);
+  const [progressStep, setProgressStep] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
   const [activeRoom, setActiveRoom] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<{ room: number; item: number } | null>(null);
+
+  const PROGRESS_STEPS = [
+    "Reading floor plan…",
+    "Detecting rooms & circulation…",
+    "Matching catalog pieces to brief…",
+    "Placing furniture & fixtures…",
+    "Refining proportions…",
+    "Finalising layout…",
+  ];
 
   // Auto-load most recent plan
   useEffect(() => {
