@@ -1219,16 +1219,49 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {isPriced && (
-          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-end print:hidden">
-            <button
-              onClick={handleConfirmOrder}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors"
-            >
-              <CheckCircle className="h-3.5 w-3.5" /> Confirm Order
-            </button>
-          </div>
-        )}
+        {isPriced && (() => {
+          const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
+          const withGst = gstEnabled && afterDiscount > 0 ? afterDiscount + Math.round(afterDiscount * gstRate / 100) : afterDiscount;
+          const depositCents = Math.round(withGst * 0.6);
+          const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
+          const fixedFee = fixedFees[currency] ?? 50;
+          const chargeTotal = Math.ceil((depositCents + fixedFee) / (1 - 0.034));
+          return (
+            <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-1">Confirm &amp; Pay</p>
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    Pay your 60% deposit by card to confirm this order, or click Confirm Order to pay later by bank transfer.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                  {subtotalCents > 0 && (
+                    <button
+                      onClick={() => handleStripePayment("deposit")}
+                      disabled={payingStripe}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
+                    >
+                      {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
+                      {payingStripe ? "Redirecting…" : "Pay 60% Deposit"}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleConfirmOrder}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-foreground text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/5 transition-colors"
+                  >
+                    <CheckCircle className="h-3.5 w-3.5" /> Confirm Order
+                  </button>
+                </div>
+              </div>
+              {subtotalCents > 0 && (
+                <p className="font-body text-[10px] text-muted-foreground text-right">
+                  Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (deposit {currencySymbol(currency)}{formatPriceRaw(depositCents, currency)} +{gstEnabled ? ` ${gstRate}% GST incl. +` : ""} 3.4% processing fee). Or pay via bank transfer using the details above.
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         {isConfirmed && !isFullyPaid && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
