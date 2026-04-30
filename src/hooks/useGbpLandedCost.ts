@@ -184,6 +184,7 @@ export const useGbpLandedCost = ({
     loading,
     fxEurGbp,
     fxQuoteEur,
+    fxIsFallback,
     goodsGbpCents,
     freightGbpCents,
     fuelGbpCents,
