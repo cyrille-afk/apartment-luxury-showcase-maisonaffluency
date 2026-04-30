@@ -770,7 +770,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
                   <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
                 </div>
-                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest" title={`${tierLabel} tier`}>{tradeDiscountLabel} Discount</span>
+                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">
+                  Trade discount
+                </span>
+                <span className="font-body text-[10px] text-foreground uppercase tracking-widest">
+                  · {tierLabel} {tradeDiscountLabel}
+                </span>
               </button>
 
               <div className="flex items-center gap-2">
@@ -806,6 +811,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 )}
               </div>
             </div>
+
+            {tradeDiscount && tierConfig && (
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10px] text-muted-foreground">
+                <span className="uppercase tracking-widest">Tiers:</span>
+                {(["silver","gold","platinum"] as const).map((t) => {
+                  const c = tierConfig[t];
+                  const pct = `${(c.discount_pct * 100).toFixed(c.discount_pct * 100 % 1 === 0 ? 0 : 1)}%`;
+                  const min = c.min_spend_cents > 0
+                    ? `from ${(c.min_spend_cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${currency}`
+                    : "entry";
+                  const active = t === currentTier;
+                  return (
+                    <span key={t} className={active ? "text-foreground" : ""}>
+                      <span className={active ? "font-medium" : ""}>{c.label}</span>{" "}
+                      <span className="opacity-70">{pct} · {min}</span>
+                      {active && <span className="ml-1 uppercase tracking-widest">(you)</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
