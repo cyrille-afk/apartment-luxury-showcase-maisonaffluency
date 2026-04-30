@@ -1243,7 +1243,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                  <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-1">Confirm &amp; Pay</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground">Confirm &amp; Pay</p>
+                    <StatusBadge />
+                  </div>
                   <p className="font-body text-[11px] text-muted-foreground">
                     Pay your 60% deposit by card to confirm this order, or click Confirm Order to pay later by bank transfer.
                   </p>
