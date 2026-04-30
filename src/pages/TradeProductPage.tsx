@@ -311,7 +311,21 @@ const TradeProductPage: React.FC = () => {
       }
 
       const { product, designer } = data;
-      const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+
+      // Build the chosen variant label (finish/size) from the current selection
+      // so the quote line records exactly what the user picked.
+      let variantLabel: string | null = null;
+      if (selectedBase || selectedTop) {
+        variantLabel = [selectedBase, selectedTop, selectedDualSize].filter(Boolean).join(" · ");
+      } else if (selectedSingleMaterial || selectedSingleSize) {
+        variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
+      } else if (selectedVariantIdx != null) {
+        const sv = data?.pricing?.size_variants;
+        const v = sv && sv[selectedVariantIdx];
+        if (v?.label) variantLabel = String(v.label).trim();
+      }
+
+      const { data: itemId, error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,
         _quote_id: quoteId,
         _product_name: product.title,
@@ -325,6 +339,13 @@ const TradeProductPage: React.FC = () => {
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
+        // Persist the chosen variant on the freshly created/merged quote item.
+        if (itemId && variantLabel) {
+          await supabase
+            .from("trade_quote_items")
+            .update({ variant_label: variantLabel } as any)
+            .eq("id", itemId as unknown as string);
+        }
         setAdded(true);
         setDrawerRefreshKey((k) => k + 1);
         setDrawerOpen(true);
@@ -337,7 +358,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
