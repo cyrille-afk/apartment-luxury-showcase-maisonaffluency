@@ -72,6 +72,16 @@ export default function TradeFloorPlanFFE() {
         .limit(1)
         .maybeSingle();
       if (data) {
+        // Skip auto-restoring legacy PDF plans — they crash the AI step.
+        // Force the user to re-upload so the PDF→PNG path runs.
+        const looksLikePdf = typeof data.plan_image_url === "string" && /\.pdf(\?|$)/i.test(data.plan_image_url);
+        if (looksLikePdf) {
+          toast({
+            title: "Please re-upload your floor plan",
+            description: "Your previous plan was a PDF. Upload it again — we now convert PDFs to images automatically.",
+          });
+          return;
+        }
         setPlanId(data.id);
         setPlanUrl(data.plan_image_url);
         setPlanName(data.name);
