@@ -620,6 +620,47 @@ function CanvasPreview({
     | null
   >(null);
   const longPressTimer = useRef<number | null>(null);
+  const [guides, setGuides] = useState<{ v: number | null; h: number | null }>({ v: null, h: null });
+
+  const SNAP_TOL = 0.012;
+  const grid = Math.max(2, gridDivisions);
+  const gridStep = 1 / grid;
+  const snapToGrid = (v: number) => Math.round(v / gridStep) * gridStep;
+
+  const buildSnapTargets = () => {
+    const xs: number[] = [0.5, 0.25, 0.75];
+    const ys: number[] = [0.5, 0.25, 0.75];
+    room.items.forEach((it, i) => {
+      if (selectedIdxs.includes(i)) return;
+      const half = Math.max(it.w, 0.06) / 2;
+      xs.push(it.x, it.x - half, it.x + half);
+      ys.push(it.y, it.y - half, it.y + half);
+    });
+    return { xs, ys };
+  };
+
+  const snapWithGuides = (x: number, y: number, halfW: number, halfH: number) => {
+    if (!snapEnabled) return { x, y, vGuide: null as number | null, hGuide: null as number | null };
+    const { xs, ys } = buildSnapTargets();
+    let bestX = { val: x, guide: null as number | null, dist: Infinity };
+    let bestY = { val: y, guide: null as number | null, dist: Infinity };
+    const candX = [{ o: 0, l: x }, { o: -halfW, l: x - halfW }, { o: halfW, l: x + halfW }];
+    const candY = [{ o: 0, l: y }, { o: -halfH, l: y - halfH }, { o: halfH, l: y + halfH }];
+    for (const tx of xs) for (const c of candX) {
+      const d = Math.abs(c.l - tx);
+      if (d < SNAP_TOL && d < bestX.dist) bestX = { val: tx - c.o, guide: tx, dist: d };
+    }
+    for (const ty of ys) for (const c of candY) {
+      const d = Math.abs(c.l - ty);
+      if (d < SNAP_TOL && d < bestY.dist) bestY = { val: ty - c.o, guide: ty, dist: d };
+    }
+    return {
+      x: bestX.guide != null ? bestX.val : snapToGrid(x),
+      y: bestY.guide != null ? bestY.val : snapToGrid(y),
+      vGuide: bestX.guide,
+      hGuide: bestY.guide,
+    };
+  };
 
   const beginDrag = (clientX: number, clientY: number, idx: number, additive: boolean) => {
     const isInGroup = selectedIdxs.includes(idx) && selectedIdxs.length > 1;
