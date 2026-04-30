@@ -651,6 +651,72 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   return y + totalH + 12;
 }
 
+// -------- UK Landed Cost block (GBP DDP London) -------------------------
+function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
+  const g = args.gbpLanded!;
+  const fmtG = (cents: number) =>
+    new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format((cents || 0) / 100);
+
+  const blockW = 280;
+  const x = M + contentW - blockW;
+  let cy = y;
+
+  const rows: { label: string; value: string }[] = [];
+  rows.push({ label: "Goods (after discount)", value: fmtG(g.goodsGbpCents) });
+  rows.push({ label: "Shipping FR → GB", value: fmtG(g.shippingGbpCents) });
+  if (g.dutyGbpCents > 0) rows.push({ label: "Import duty", value: fmtG(g.dutyGbpCents) });
+  if (g.vatGbpCents > 0) rows.push({ label: "UK VAT", value: fmtG(g.vatGbpCents) });
+
+  const rowH = 16;
+  const fxNote = `Indicative. EUR→GBP @ ${g.fxEurGbp?.toFixed(4) ?? "—"} (+2% FX buffer). DDP — UK customs, duty & VAT included. Payments & deposits remain in ${args.currency}.`;
+  const fxLines = doc.splitTextToSize(fxNote, blockW - 28);
+  const fallbackLines = g.fxIsFallback
+    ? doc.splitTextToSize("Live FX unavailable — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).", blockW - 28)
+    : [];
+  const totalH = 28 + rows.length * rowH + 28 + fxLines.length * 10 + fallbackLines.length * 10 + 14;
+
+  doc.setFillColor(250, 249, 246);
+  doc.rect(x, cy, blockW, totalH, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("UK LANDED COST · GBP DDP LONDON", x + 14, cy + 14);
+  cy += 28;
+
+  rows.forEach((r) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text(r.label, x + 14, cy);
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    doc.text(r.value, x + blockW - 14, cy, { align: "right" });
+    cy += rowH;
+  });
+
+  doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
+  doc.setLineWidth(0.6);
+  doc.line(x + 14, cy - 2, x + blockW - 14, cy - 2);
+  cy += 12;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("Total GBP · DDP London", x + 14, cy);
+  doc.text(fmtG(g.totalGbpCents), x + blockW - 14, cy, { align: "right" });
+  cy += 14;
+
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  fxLines.forEach((ln: string) => { doc.text(ln, x + 14, cy); cy += 9; });
+  if (fallbackLines.length) {
+    doc.setTextColor(178, 100, 30);
+    fallbackLines.forEach((ln: string) => { doc.text(ln, x + 14, cy); cy += 9; });
+  }
+
+  return y + totalH + 12;
+}
+
 // -------- Insurance block -----------------------------------------------
 function drawInsuranceBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
   sectionTitle(doc, "Coverage & insurance", M, y);
