@@ -24,6 +24,10 @@ interface Props {
   defaultExpanded?: boolean;
   /** Headline label, e.g. "UK landed cost (DDP)" */
   title?: string;
+  /** Quote reference for the downloadable PDF (e.g. "QU-22A02A") */
+  quoteRef?: string;
+  /** Optional client / studio name for the PDF header */
+  clientName?: string | null;
 }
 
 const FX_BUFFER = 0.02; // +2% safety margin on EUR→GBP
@@ -38,6 +42,8 @@ export const UkLandedCostPanel = ({
   category = "furniture",
   defaultExpanded = false,
   title = "UK landed cost (DDP, GBP)",
+  quoteRef,
+  clientName,
 }: Props) => {
   const [cbm, setCbm] = useState(2);
   const [kg, setKg] = useState(200);
