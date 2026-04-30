@@ -244,6 +244,7 @@ export default function TradeFloorPlanFFE() {
     setSuggestions(null);
     setConfirmed(false);
     setSelectedItem(null);
+    setSelectedIdxs([]);
     toast({ title: "Suggestion discarded" });
   };
 
