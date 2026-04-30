@@ -184,7 +184,3 @@ Deno.serve(async (req) => {
   }
 });
 
-// Silence "unused import" – we keep the explicit import for clarity even
-// though we end up calling the dynamic import variant inside fitAndCompress.
-void decodeJpeg;
-void encodeJpeg;
