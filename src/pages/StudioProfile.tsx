@@ -114,6 +114,8 @@ export default function StudioProfile() {
         <title>{studio.name} | Featured Studio — Maison Affluency</title>
         <meta name="description" content={studio.tagline || studio.bio?.slice(0, 155) || `${studio.name} — featured studio on Maison Affluency.`} />
         <link rel="canonical" href={`https://www.maisonaffluency.com/studios/${studio.slug}`} />
+        <link rel="alternate" hrefLang="en" href={`https://www.maisonaffluency.com/studios/${studio.slug}`} />
+        <link rel="alternate" hrefLang="x-default" href={`https://www.maisonaffluency.com/studios/${studio.slug}`} />
         <meta property="og:title" content={`${studio.name} | Maison Affluency`} />
         {studio.hero_image_url && <meta property="og:image" content={studio.hero_image_url} />}
       </Helmet>
