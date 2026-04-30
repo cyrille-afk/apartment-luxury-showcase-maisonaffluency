@@ -1069,7 +1069,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       );
                     })()}
                   </div>
+                  )}
                 </div>
+              </div>
 
                 {/* UK landed cost (DDP, GBP) — for UK clients on EUR/USD/SGD quotes */}
                 {subtotalCents > 0 && (
