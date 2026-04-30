@@ -55,33 +55,49 @@ async function sha8(input: string): Promise<string> {
 }
 
 /**
- * Resize to fit 1200×630 (cover crop) and recompress until under 300 KB.
- * Uses ImageScript which is available in Deno without native deps.
+ * Use Cloudinary's fetch delivery to do the heavy lifting.
+ * It downloads the source, resizes/crops to 1200×630, and re-encodes to JPEG
+ * with quality auto-tuned for our 300 KB target. We then download the result
+ * once and store it in our own bucket so we own the asset and don't depend on
+ * Cloudinary's free fetch quota at request time.
  */
-async function fitAndCompress(raw: Uint8Array): Promise<Uint8Array> {
-  // Lazy import keeps cold start cheap when the cache hits.
-  const { Image } = await import(
-    "https://deno.land/x/imagescript@1.2.17/mod.ts"
-  );
-  const img = await Image.decode(raw);
+const CLOUDINARY_CLOUD = "dif1oamtj";
 
-  // Cover-fit: scale so the smaller side meets the target, then center crop.
-  const scale = Math.max(TARGET_W / img.width, TARGET_H / img.height);
-  const scaledW = Math.round(img.width * scale);
-  const scaledH = Math.round(img.height * scale);
-  img.resize(scaledW, scaledH);
+function cloudinaryFetchUrl(sourceUrl: string, maxBytes: number): string {
+  const transform = [
+    "f_jpg",
+    "w_1200",
+    "h_630",
+    "c_fill",
+    "g_auto",
+    "q_auto:good",
+    `fl_lossy.progressive`,
+    `b_size:${maxBytes}`, // Cloudinary respects max byte size for `q_auto`
+  ].join(",");
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/fetch/${transform}/${encodeURIComponent(
+    sourceUrl,
+  )}`;
+}
 
-  const cropX = Math.max(0, Math.floor((scaledW - TARGET_W) / 2));
-  // Bias slightly toward the upper third – portraits read better.
-  const cropY = Math.max(0, Math.floor((scaledH - TARGET_H) * 0.4));
-  img.crop(cropX, cropY, TARGET_W, TARGET_H);
-
-  for (const q of [88, 82, 76, 70, 64, 58, 52, 46, 40, 35]) {
-    const out = await img.encodeJPEG(q);
-    if (out.byteLength <= MAX_BYTES) return out;
+async function fetchOptimized(sourceUrl: string): Promise<Uint8Array> {
+  // Try Cloudinary first; fall back to raw source if Cloudinary refuses
+  // (e.g. blocked domain). The raw source is still better than nothing –
+  // social crawlers will at least see *some* image.
+  for (const url of [cloudinaryFetchUrl(sourceUrl, MAX_BYTES), sourceUrl]) {
+    const r = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; MaisonAffluencyOG/1.0; +https://www.maisonaffluency.com)",
+        Accept: "image/*,*/*;q=0.8",
+      },
+      redirect: "follow",
+    });
+    if (r.ok) {
+      const buf = new Uint8Array(await r.arrayBuffer());
+      if (buf.byteLength > 0) return buf;
+    }
   }
-  // Final fallback – aggressive
-  return await img.encodeJPEG(30);
+  throw new Error(`source fetch failed for ${sourceUrl}`);
 }
 
 Deno.serve(async (req) => {
