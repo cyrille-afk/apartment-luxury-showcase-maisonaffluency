@@ -503,12 +503,15 @@ function drawTable(
     const editionLabel = editionClean ? `Edition: ${editionClean}` : null;
     const variantLabel = line.variantLabel ? `Finish: ${line.variantLabel}` : null;
     // When the user picked a finish, it supersedes the generic catalogue
-    // dimensions/materials lines (which are otherwise repetitive noise).
-    const showCatalogueMeta = !line.variantLabel;
+    // materials line (which is otherwise repetitive noise). Dimensions remain
+    // visible unless they are already embedded in the variant label.
+    const dimsAlreadyInVariant = !!(line.variantLabel && line.dimensions &&
+      line.variantLabel.toLowerCase().includes(String(line.dimensions).toLowerCase().slice(0, 8)));
+    const showMaterials = !line.variantLabel;
     const meta = [
       variantLabel,
-      showCatalogueMeta ? line.dimensions : null,
-      showCatalogueMeta ? line.materials : null,
+      dimsAlreadyInVariant ? null : line.dimensions,
+      showMaterials ? line.materials : null,
       editionLabel,
       line.leadTime,
       line.notes,
