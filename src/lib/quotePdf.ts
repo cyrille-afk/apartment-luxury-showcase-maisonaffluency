@@ -30,6 +30,7 @@ export interface QuotePdfLine {
   brandName: string;
   dimensions?: string | null;
   materials?: string | null;
+  edition?: string | null;
   leadTime?: string | null;
   notes?: string | null;
   quantity: number;
