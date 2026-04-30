@@ -108,16 +108,78 @@ export default function StudioProfile() {
   const igHandle = studio.instagram_handle?.replace(/^@/, "");
   const igUrl = igHandle ? `https://instagram.com/${igHandle}` : null;
 
+  const canonicalUrl = `https://www.maisonaffluency.com/studios/${studio.slug}`;
+  const description =
+    studio.tagline || studio.bio?.slice(0, 155) || `${studio.name} — featured studio on Maison Affluency.`;
+  const igHandleForLd = studio.instagram_handle?.replace(/^@/, "");
+  const sameAs = [
+    studio.website_url || null,
+    igHandleForLd ? `https://instagram.com/${igHandleForLd}` : null,
+  ].filter(Boolean) as string[];
+
+  const organizationLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: studio.name,
+    url: canonicalUrl,
+    description,
+    ...(studio.logo_url ? { logo: studio.logo_url } : {}),
+    ...(studio.hero_image_url ? { image: studio.hero_image_url } : {}),
+    ...(studio.founded_year ? { foundingDate: String(studio.founded_year) } : {}),
+    ...(studio.contact_email
+      ? {
+          contactPoint: {
+            "@type": "ContactPoint",
+            email: studio.contact_email,
+            contactType: "customer support",
+          },
+        }
+      : {}),
+    ...(studio.location || studio.country
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            ...(studio.location ? { addressLocality: studio.location } : {}),
+            ...(studio.country ? { addressCountry: studio.country } : {}),
+          },
+        }
+      : {}),
+    ...(studio.disciplines?.length
+      ? { knowsAbout: studio.disciplines.map((d) => LABELS[d] ?? d) }
+      : {}),
+    ...(sameAs.length ? { sameAs } : {}),
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
+      { "@type": "ListItem", position: 2, name: "Studios", item: "https://www.maisonaffluency.com/studios" },
+      { "@type": "ListItem", position: 3, name: studio.name, item: canonicalUrl },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <Helmet>
         <title>{studio.name} | Featured Studio — Maison Affluency</title>
-        <meta name="description" content={studio.tagline || studio.bio?.slice(0, 155) || `${studio.name} — featured studio on Maison Affluency.`} />
-        <link rel="canonical" href={`https://www.maisonaffluency.com/studios/${studio.slug}`} />
-        <link rel="alternate" hrefLang="en" href={`https://www.maisonaffluency.com/studios/${studio.slug}`} />
-        <link rel="alternate" hrefLang="x-default" href={`https://www.maisonaffluency.com/studios/${studio.slug}`} />
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
+        <link rel="alternate" hrefLang="en" href={canonicalUrl} />
+        <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:site_name" content="Maison Affluency" />
         <meta property="og:title" content={`${studio.name} | Maison Affluency`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
         {studio.hero_image_url && <meta property="og:image" content={studio.hero_image_url} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${studio.name} | Maison Affluency`} />
+        <meta name="twitter:description" content={description} />
+        {studio.hero_image_url && <meta name="twitter:image" content={studio.hero_image_url} />}
+        <script type="application/ld+json">{JSON.stringify(organizationLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
       </Helmet>
 
       {/* Back + insights (owner/admin only) */}
