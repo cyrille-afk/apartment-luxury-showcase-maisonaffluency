@@ -315,14 +315,22 @@ const TradeProductPage: React.FC = () => {
       // Build the chosen variant label (finish/size) from the current selection
       // so the quote line records exactly what the user picked.
       let variantLabel: string | null = null;
+      const sv: any[] | undefined = data?.pricing?.size_variants;
+      const buildDualLabel = (v: any): string =>
+        [v?.base, v?.top, v?.size, v?.label].filter(Boolean).map((s: string) => String(s).trim()).join(" · ");
       if (selectedBase || selectedTop) {
         variantLabel = [selectedBase, selectedTop, selectedDualSize].filter(Boolean).join(" · ");
       } else if (selectedSingleMaterial || selectedSingleSize) {
         variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
       } else if (selectedVariantIdx != null) {
-        const sv = data?.pricing?.size_variants;
         const v = sv && sv[selectedVariantIdx];
         if (v?.label) variantLabel = String(v.label).trim();
+      } else if (sv && sv.length === 1) {
+        // Single-variant product (e.g. Reda Amalou Lady Bug — one Base × Top
+        // combination). The user never opens the dropdown, but the finish
+        // should still be recorded on the quote line for clarity.
+        const v = sv[0];
+        variantLabel = buildDualLabel(v) || (v?.label ? String(v.label).trim() : null);
       }
 
       const { data: itemId, error } = await supabase.rpc("add_gallery_product_to_quote", {
