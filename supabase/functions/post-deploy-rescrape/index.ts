@@ -170,7 +170,21 @@ Deno.serve(async (req) => {
 
   const body = await req.json().catch(() => ({}));
   const force = !!body.force;
+  const triggerSource = typeof body.triggerSource === "string" ? body.triggerSource : "unknown";
   const maxRescrapes = Math.max(1, Math.min(1000, body.maxRescrapes ?? DEFAULT_MAX));
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
+  const logRun = async (row: Record<string, unknown>) => {
+    try {
+      await supabase.from("og_rescrape_runs").insert(row);
+    } catch (e) {
+      console.error("failed to log og_rescrape_runs", e);
+    }
+  };
 
   try {
     const [paths, buildId, prev] = await Promise.all([
@@ -181,6 +195,16 @@ Deno.serve(async (req) => {
 
     // Same build as last run AND not forced → nothing to do.
     if (!force && buildId && prev.buildId === buildId) {
+      await logRun({
+        trigger_source: triggerSource,
+        build_id: buildId,
+        manifest_size: paths.length,
+        previous_snapshot_size: Object.keys(prev.entries ?? {}).length,
+        rescraped_count: 0,
+        forced: force,
+        skipped: true,
+        skipped_reason: "same buildId as last snapshot",
+      });
       return jsonResp({
         skipped: true,
         reason: "same buildId as last snapshot",
@@ -204,10 +228,6 @@ Deno.serve(async (req) => {
     const rescrapeResult = await callRescrape(urls);
 
     // Persist new snapshot (always, so subsequent runs can diff)
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
     const newSnapshot: Snapshot = {
       buildId: buildId ?? undefined,
       entries: current,
@@ -223,6 +243,19 @@ Deno.serve(async (req) => {
       console.error("snapshot upload failed", upErr);
     }
 
+    await logRun({
+      trigger_source: triggerSource,
+      build_id: buildId,
+      manifest_size: paths.length,
+      current_snapshot_size: Object.keys(current).length,
+      previous_snapshot_size: Object.keys(prev.entries ?? {}).length,
+      rescraped_count: toRescrape.length,
+      forced: force,
+      truncated,
+      skipped: false,
+      rescrape_result: rescrapeResult,
+    });
+
     return jsonResp({
       ok: true,
       buildId,
@@ -235,6 +268,12 @@ Deno.serve(async (req) => {
     });
   } catch (e: any) {
     console.error("post-deploy-rescrape error", e);
+    await logRun({
+      trigger_source: triggerSource,
+      forced: force,
+      rescraped_count: 0,
+      error: e?.message ?? String(e),
+    });
     return jsonResp({ error: e?.message ?? String(e) }, 500);
   }
 });
