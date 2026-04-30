@@ -7,7 +7,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 
 interface ExpandableSpecProps {
@@ -151,7 +150,7 @@ export default function ExpandableSpec({
               "focus:ring-0 focus:ring-offset-0 focus:outline-none",
               "hover:text-foreground transition-colors",
               "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
-              selectedIdx == null
+              !hasSelection
                 ? "text-muted-foreground"
                 : emphasized
                 ? "text-foreground font-medium"
@@ -160,7 +159,7 @@ export default function ExpandableSpec({
           >
             <span className="shrink-0">{icon}</span>
             <span className="flex-1 truncate">
-              <SelectValue placeholder={placeholder} />
+              {hasSelection ? lines[selectedIdx] : placeholder}
             </span>
           </SelectTrigger>
           <SelectContent className="z-[130] bg-background border-border">
