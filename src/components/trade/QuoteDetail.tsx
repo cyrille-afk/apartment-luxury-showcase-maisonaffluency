@@ -621,7 +621,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setGstEnabled(!gstEnabled)}
+                  onClick={() => { setGstUserTouched(true); setGstEnabled(!gstEnabled); }}
                   className="flex items-center gap-2"
                 >
                   <div className={`relative w-8 h-[18px] rounded-full transition-colors ${gstEnabled ? "bg-foreground" : "bg-border"}`}>
