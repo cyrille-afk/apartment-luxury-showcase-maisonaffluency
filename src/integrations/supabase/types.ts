@@ -3541,6 +3541,7 @@ export type Database = {
           quantity: number
           quote_id: string
           unit_price_cents: number | null
+          variant_label: string | null
         }
         Insert: {
           axonometric_image_url?: string | null
@@ -3555,6 +3556,7 @@ export type Database = {
           quantity?: number
           quote_id: string
           unit_price_cents?: number | null
+          variant_label?: string | null
         }
         Update: {
           axonometric_image_url?: string | null
@@ -3569,6 +3571,7 @@ export type Database = {
           quantity?: number
           quote_id?: string
           unit_price_cents?: number | null
+          variant_label?: string | null
         }
         Relationships: [
           {
