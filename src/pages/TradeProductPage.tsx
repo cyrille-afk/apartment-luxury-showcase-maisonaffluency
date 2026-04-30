@@ -748,10 +748,7 @@ const TradeProductPage: React.FC = () => {
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
                     onChange={(idx) => {
                       if (idx < 0) {
-                        setSelectedBase(null);
-                        setSelectedTop(null);
-                        setSelectedDualSize(null);
-                        handleMaterialChange(null);
+                        clearAllDualSelections();
                         return;
                       }
                       const v = baseOptions[idx] ?? null;
