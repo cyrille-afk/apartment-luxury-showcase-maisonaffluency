@@ -417,8 +417,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         value={selectedBaseIdx ?? undefined}
                         onChange={(idx) => {
                           if (idx < 0) {
-                            setSelectedBaseIdx(null);
-                            setSelectedTopIdx(null);
+                            clearAllDualSelections();
                             return;
                           }
                           setSelectedBaseIdx(idx);
