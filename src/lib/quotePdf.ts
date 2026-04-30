@@ -416,10 +416,20 @@ function drawCompanyAndMeta(
   // Right: meta in 4 mini-columns (Date / Expiry / Client / Project)
   const metaX = M + colW;
   const metaColW = colW / 2;
+  // Split CLIENT into person + company on common separators so they render on
+  // two distinct lines (e.g. "Margot Watson — De Beers London").
+  const splitClient = (raw: string | null | undefined): string[] => {
+    const v = String(raw ?? "").trim();
+    if (!v) return ["—"];
+    // Try em-dash, en-dash, hyphen with spaces, slash, pipe, or comma
+    const m = v.split(/\s+[—–\-/|]\s+|\s*,\s*/);
+    return m.filter(Boolean).slice(0, 2);
+  };
+  const clientLines = splitClient(args.clientName);
   const metaRows = [
     [["DATE", fmtDate(args.createdAt)], ["EXPIRY", fmtDate(args.expiryAt)]],
-    [["CLIENT", args.clientName || "—"], ["PROJECT", args.projectName || "—"]],
-  ];
+    [["CLIENT", clientLines], ["PROJECT", [args.projectName || "—"]]],
+  ] as Array<Array<[string, string[] | string]>>;
   metaRows.forEach((row, rIdx) => {
     row.forEach(([label, value], cIdx) => {
       const x = metaX + cIdx * metaColW;
@@ -431,10 +441,13 @@ function drawCompanyAndMeta(
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
       doc.setTextColor(FG[0], FG[1], FG[2]);
-      const wrapped = doc.splitTextToSize(String(value), metaColW - 8);
-      // Render up to 2 lines so values like "Margot Watson — De Beers London" fit.
-      const lines = wrapped.slice(0, 2);
-      lines.forEach((ln: string, i: number) => {
+      const values = Array.isArray(value) ? value : [value];
+      const lines: string[] = [];
+      values.forEach((v) => {
+        const wrapped = doc.splitTextToSize(String(v), metaColW - 8);
+        wrapped.forEach((w: string) => lines.push(w));
+      });
+      lines.slice(0, 2).forEach((ln: string, i: number) => {
         doc.text(ln, x, ry + 12 + i * 10);
       });
     });
