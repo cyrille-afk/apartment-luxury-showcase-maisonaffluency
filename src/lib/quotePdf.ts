@@ -163,11 +163,145 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   y += 18;
   y = drawTermsAndConditions(doc, M, y, contentW);
 
+  // ---- Branded signature / seal (status-aware)
+  y = ensureSpace(doc, y, 160, pageH);
+  y += 24;
+  drawSignatureSeal(doc, args, M, y, contentW);
+
   // ---- Footer on every page
   drawFooterAllPages(doc, args, pageW, pageH, M);
 
   return doc;
 }
+
+// -------- Branded signature / seal --------------------------------------
+/**
+ * Status-aware seal placed on the last page. Renders three blocks:
+ *   • Round wax-style seal stamped with the status (Priced / Confirmed / Submitted / Draft)
+ *   • Authorised signatory line with name + title + dated stamp
+ *   • Client acceptance line for counter-signature on confirmed/submitted quotes
+ */
+function drawSignatureSeal(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  M: number,
+  y: number,
+  contentW: number,
+) {
+  const status = (args.status || "").toLowerCase();
+  // Map status → seal copy + accent
+  const seal: { label: string; sub: string; accent: readonly [number, number, number] } = (() => {
+    if (status === "confirmed" || status === "paid" || status === "deposit_paid")
+      return { label: "CONFIRMED", sub: "Order accepted - production scheduled", accent: [12, 49, 47] as const };
+    if (status === "priced")
+      return { label: "PRICED", sub: "Issued for client review & acceptance", accent: [12, 49, 47] as const };
+    if (status === "submitted" || status === "sent")
+      return { label: "SUBMITTED", sub: "Awaiting client confirmation", accent: [120, 92, 36] as const };
+    return { label: "DRAFT", sub: "Working draft - not for circulation", accent: [115, 115, 115] as const };
+  })();
+
+  const blockH = 130;
+  const colW = (contentW - 24) / 2;
+
+  // ----- LEFT: round seal
+  const cx = M + 60;
+  const cy = y + blockH / 2;
+  const r = 48;
+  // outer ring
+  doc.setDrawColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+  doc.setLineWidth(1.4);
+  doc.circle(cx, cy, r);
+  doc.setLineWidth(0.5);
+  doc.circle(cx, cy, r - 4);
+  // inner soft fill
+  doc.setFillColor(250, 249, 246);
+  doc.circle(cx, cy, r - 6, "F");
+
+  // top arc text - "MAISON AFFLUENCY" (rendered as straight tagline above status)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.5);
+  doc.setTextColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+  doc.text("MAISON AFFLUENCY", cx, cy - 22, { align: "center" });
+
+  // status label (bold, big)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+  doc.text(seal.label, cx, cy - 2, { align: "center" });
+
+  // hairline under status
+  doc.setDrawColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+  doc.setLineWidth(0.4);
+  doc.line(cx - 24, cy + 4, cx + 24, cy + 4);
+
+  // quote number + date inside seal
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text(args.quoteNumber, cx, cy + 14, { align: "center" });
+  doc.text(fmtDate(args.createdAt).toUpperCase(), cx, cy + 22, { align: "center" });
+
+  // caption under seal
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  const subWrap = doc.splitTextToSize(seal.sub, 130);
+  doc.text(subWrap, cx, y + blockH + 12, { align: "center" });
+
+  // ----- RIGHT: signatory + client acceptance lines
+  const rx = M + colW + 24 + 20;
+  const rWidth = contentW - (colW + 24 + 20);
+
+  // Authorised signatory
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+  doc.text("AUTHORISED BY", rx, y + 6);
+  doc.setDrawColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+  doc.setLineWidth(0.5);
+  doc.line(rx, y + 9, rx + 28, y + 9);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text("Maison Affluency", rx, y + 26);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("Trade desk - hello@maisonaffluency.com", rx, y + 38);
+  // signature line
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.4);
+  doc.line(rx, y + 56, rx + Math.min(rWidth, 220), y + 56);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text(`Signed ${fmtDate(args.createdAt)}`, rx, y + 66);
+
+  // Client acceptance (only for priced / submitted / confirmed; skip draft)
+  if (status !== "draft") {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+    doc.text("CLIENT ACCEPTANCE", rx, y + 86);
+    doc.setDrawColor(seal.accent[0], seal.accent[1], seal.accent[2]);
+    doc.setLineWidth(0.5);
+    doc.line(rx, y + 89, rx + 36, y + 89);
+
+    // signature + date lines side by side
+    const sigW = Math.min(rWidth - 90, 160);
+    doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+    doc.setLineWidth(0.4);
+    doc.line(rx, y + 116, rx + sigW, y + 116);
+    doc.line(rx + sigW + 20, y + 116, rx + sigW + 20 + 80, y + 116);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text("Signature & name", rx, y + 126);
+    doc.text("Date", rx + sigW + 20, y + 126);
+  }
+}
+
 
 // -------- Header band ---------------------------------------------------
 function drawHeader(
