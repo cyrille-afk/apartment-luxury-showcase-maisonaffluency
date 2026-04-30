@@ -74,6 +74,7 @@ interface ProductRow {
   base_axis_label: string | null;
   top_axis_label: string | null;
   variant_image_map: Record<string, number> | null;
+  edition: string | null;
 }
 
 interface TradePricing {
@@ -102,7 +103,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -660,6 +661,13 @@ const TradeProductPage: React.FC = () => {
               activeIndex={galleryActiveIndex}
               activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
+              firstImageBadge={
+                product.edition ? (
+                  <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
+                    {product.edition}
+                  </span>
+                ) : null
+              }
               overlay={
                 product.description ? (
                   <div className="flex flex-col items-end gap-2">

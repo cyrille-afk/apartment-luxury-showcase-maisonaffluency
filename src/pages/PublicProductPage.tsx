@@ -86,7 +86,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, edition";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -724,6 +724,13 @@ const PublicProductPage: React.FC = () => {
                 activeIndex={galleryActiveIndex}
                 activeIndexNonce={galleryJumpNonce}
                 onIndexChange={setGalleryActiveIndex}
+                firstImageBadge={
+                  (product as any).edition ? (
+                    <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
+                      {(product as any).edition}
+                    </span>
+                  ) : null
+                }
                 overlay={
                   product.description ? (
                     <div className="flex flex-col items-end gap-2">

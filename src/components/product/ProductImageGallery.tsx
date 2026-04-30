@@ -9,6 +9,8 @@ interface ProductImageGalleryProps {
   images: string[];
   alt: string;
   overlay?: React.ReactNode;
+  /** Badge rendered top-left of the main image, only when the first photo is active. */
+  firstImageBadge?: React.ReactNode;
   /** Optional controlled active index. When provided, the gallery jumps to it whenever it changes. */
   activeIndex?: number;
   /**
@@ -21,7 +23,7 @@ interface ProductImageGalleryProps {
   onIndexChange?: (index: number) => void;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
   // Sync with external controlled index. Re-runs whenever the index *or* the
@@ -183,6 +185,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
+            </div>
+          )}
+          {firstImageBadge && activeIndex === 0 && (
+            <div className="absolute top-3 left-3 z-20 pointer-events-none">
+              <div className="pointer-events-auto">{firstImageBadge}</div>
             </div>
           )}
 
