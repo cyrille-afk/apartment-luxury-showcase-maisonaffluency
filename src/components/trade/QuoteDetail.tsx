@@ -420,9 +420,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const parseLeadWeeks = (text: string | null): number | null => {
     if (!text) return null;
-    const m = text.match(/(\d+)\s*(?:-\s*(\d+))?/);
+    // Match "14-16", "14 - 16", "18 to 20", "18 – 20" (en-dash), "18—20" (em-dash)
+    const m = text.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)|\d+/i);
     if (!m) return null;
-    return m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
+    if (m[2]) return parseInt(m[2], 10); // upper bound of a range
+    const single = text.match(/\d+/);
+    return single ? parseInt(single[0], 10) : null;
   };
 
   const getLeadWeeksOverride = (value: number | null): number | null =>
