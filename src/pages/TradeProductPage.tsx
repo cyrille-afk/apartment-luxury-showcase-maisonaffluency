@@ -74,6 +74,7 @@ interface ProductRow {
   base_axis_label: string | null;
   top_axis_label: string | null;
   variant_image_map: Record<string, number> | null;
+  edition: string | null;
 }
 
 interface TradePricing {
