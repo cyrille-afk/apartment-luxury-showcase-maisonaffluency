@@ -995,6 +995,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
                         Indicative. EUR→GBP @ {gbp.fxEurGbp?.toFixed(4)} (+2% FX buffer). DDP — UK customs, duty &amp; VAT included. Payments &amp; deposits remain in {currency}.
                       </p>
+                      {gbp.fxIsFallback && (
+                        <p className="font-body text-[10px] text-amber-700 leading-relaxed">
+                          ⚠ Live FX unavailable — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).
+                        </p>
+                      )}
                     </div>
                   ) : (
                   <div className="w-72 space-y-1">
