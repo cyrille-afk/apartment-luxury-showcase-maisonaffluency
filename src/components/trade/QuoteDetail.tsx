@@ -264,6 +264,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }
       }
 
+      // Enrich items with `edition` from designer_curator_picks (matched by title, normalized).
+      try {
+        const titles = Array.from(
+          new Set(
+            loadedItems
+              .map((i) => i.trade_products?.product_name?.trim())
+              .filter(Boolean) as string[]
+          )
+        );
+        if (titles.length > 0) {
+          const { data: picks } = await supabase
+            .from("designer_curator_picks")
+            .select("title, edition")
+            .in("title", titles);
+          if (picks && picks.length > 0) {
+            const norm = (s: string) =>
+              s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+            const editionByTitle = new Map<string, string>();
+            for (const p of picks as Array<{ title: string; edition: string | null }>) {
+              if (p.edition && p.title) editionByTitle.set(norm(p.title), p.edition);
+            }
+            loadedItems = loadedItems.map((it) => {
+              const t = it.trade_products?.product_name;
+              if (!t) return it;
+              const ed = editionByTitle.get(norm(t));
+              return ed ? { ...it, edition: ed } : it;
+            });
+          }
+        }
+      } catch {
+        /* non-fatal — edition is purely additive metadata */
+      }
+
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
