@@ -506,6 +506,28 @@ export default function TradeFloorPlanFFE() {
               >
                 <Trash2 className="w-3.5 h-3.5" />Remove {selectedIdxs.length > 1 ? `(${selectedIdxs.length})` : ""}
               </Button>
+              <span className="ml-auto inline-flex items-center gap-2 rounded-md border border-border px-2 py-1">
+                <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={snapEnabled}
+                    onChange={(e) => setSnapEnabled(e.target.checked)}
+                    className="accent-primary h-3.5 w-3.5"
+                  />
+                  Snap
+                </label>
+                <select
+                  value={gridDivisions}
+                  onChange={(e) => setGridDivisions(Number(e.target.value))}
+                  disabled={!snapEnabled}
+                  className="bg-background text-foreground border border-input rounded px-1.5 py-0.5 text-[11px] disabled:opacity-50"
+                  aria-label="Grid size"
+                >
+                  <option value={10}>Coarse (10%)</option>
+                  <option value={20}>Medium (5%)</option>
+                  <option value={40}>Fine (2.5%)</option>
+                </select>
+              </span>
             </div>
 
             {/* Desktop canvas */}
