@@ -163,6 +163,8 @@ def main() -> None:
     ap.add_argument("--only", help="single bridge filename, e.g. foo-og-v2.html")
     ap.add_argument("--url", help="one-off mode: rehost a single URL")
     ap.add_argument("--slug", help="slug to use with --url (required)")
+    ap.add_argument("--workers", type=int, default=8,
+                    help="parallel rehost requests (default 8)")
     args = ap.parse_args()
 
     if args.url:
@@ -171,17 +173,36 @@ def main() -> None:
         print(one_off(args.url, args.slug))
         return
 
+    bridges = list(iter_bridges(args.only))
     counts = {"ok": 0, "would-rehost": 0, "rehosted": 0, "error": 0, "no-og-image": 0}
-    for bridge in iter_bridges(args.only):
-        res = process_bridge(bridge, apply=args.apply)
-        counts[res["status"]] = counts.get(res["status"], 0) + 1
-        if res["status"] in ("would-rehost", "rehosted", "error"):
-            print(
-                f"[{res['status']:>13}] {res['file']}"
-                + (f"  ← {res.get('src','')[:80]}" if res.get("src") else "")
-                + (f"  → {res['hosted']} ({res['bytes']} B)" if res.get("hosted") else "")
-                + (f"  !! {res['error']}" if res.get("error") else "")
-            )
+
+    def worker(b: Path) -> dict:
+        return process_bridge(b, apply=args.apply)
+
+    if args.apply and len(bridges) > 1:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            futures = {pool.submit(worker, b): b for b in bridges}
+            for fut in as_completed(futures):
+                res = fut.result()
+                counts[res["status"]] = counts.get(res["status"], 0) + 1
+                if res["status"] in ("rehosted", "error"):
+                    print(
+                        f"[{res['status']:>13}] {res['file']}"
+                        + (f"  → {res['hosted']} ({res.get('bytes')} B)" if res.get("hosted") else "")
+                        + (f"  !! {res['error']}" if res.get("error") else "")
+                    )
+    else:
+        for bridge in bridges:
+            res = worker(bridge)
+            counts[res["status"]] = counts.get(res["status"], 0) + 1
+            if res["status"] in ("would-rehost", "rehosted", "error"):
+                print(
+                    f"[{res['status']:>13}] {res['file']}"
+                    + (f"  ← {res.get('src','')[:80]}" if res.get("src") else "")
+                    + (f"  → {res['hosted']} ({res.get('bytes')} B)" if res.get("hosted") else "")
+                    + (f"  !! {res['error']}" if res.get("error") else "")
+                )
 
     print("\nSummary:")
     for k, v in counts.items():
