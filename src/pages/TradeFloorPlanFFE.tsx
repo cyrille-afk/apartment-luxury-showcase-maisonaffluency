@@ -712,22 +712,39 @@ function CanvasPreview({
   };
 
   useEffect(() => {
-    if (!drag) return;
+    if (!drag) {
+      setGuides({ v: null, h: null });
+      return;
+    }
     const updateFromPoint = (clientX: number, clientY: number) => {
       const rect = wrapRef.current?.getBoundingClientRect();
       if (!rect) return;
       if (drag.kind === "single") {
-        const x = Math.min(0.98, Math.max(0.02, (clientX - rect.left) / rect.width - drag.offsetX));
-        const y = Math.min(0.98, Math.max(0.02, (clientY - rect.top) / rect.height - drag.offsetY));
+        const rawX = (clientX - rect.left) / rect.width - drag.offsetX;
+        const rawY = (clientY - rect.top) / rect.height - drag.offsetY;
+        const it = room.items[drag.idx];
+        const half = Math.max(it?.w ?? 0.06, 0.06) / 2;
+        const snapped = snapWithGuides(rawX, rawY, half, half);
+        const x = Math.min(0.98, Math.max(0.02, snapped.x));
+        const y = Math.min(0.98, Math.max(0.02, snapped.y));
+        setGuides({ v: snapped.vGuide, h: snapped.hGuide });
         onMove(drag.idx, x, y);
       } else {
         const nx = (clientX - rect.left) / rect.width;
         const ny = (clientY - rect.top) / rect.height;
-        const dx = nx - drag.lastX;
-        const dy = ny - drag.lastY;
+        let dx = nx - drag.lastX;
+        let dy = ny - drag.lastY;
+        if (snapEnabled) {
+          dx = Math.round(dx / gridStep) * gridStep;
+          dy = Math.round(dy / gridStep) * gridStep;
+        }
         if (Math.abs(dx) > 0.0005 || Math.abs(dy) > 0.0005) {
           onMoveGroup(dx, dy);
-          setDrag({ kind: "group", lastX: nx, lastY: ny });
+          setDrag({
+            kind: "group",
+            lastX: snapEnabled ? drag.lastX + dx : nx,
+            lastY: snapEnabled ? drag.lastY + dy : ny,
+          });
         }
       }
     };
@@ -739,7 +756,7 @@ function CanvasPreview({
       e.preventDefault();
       updateFromPoint(t.clientX, t.clientY);
     };
-    const onUp = () => { cancelLongPress(); setDrag(null); };
+    const onUp = () => { cancelLongPress(); setDrag(null); setGuides({ v: null, h: null }); };
     window.addEventListener("mousemove", onMove2);
     window.addEventListener("mouseup", onUp);
     window.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -752,7 +769,7 @@ function CanvasPreview({
       window.removeEventListener("touchend", onUp);
       window.removeEventListener("touchcancel", onUp);
     };
-  }, [drag, onMove, onMoveGroup]);
+  }, [drag, onMove, onMoveGroup, snapEnabled, gridStep, room.items, selectedIdxs]);
 
   return (
     <div
