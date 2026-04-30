@@ -42,6 +42,33 @@ interface AdminQuoteItem {
   } | null;
 }
 
+interface LeadTimeInfo {
+  lead_weeks_min: number | null;
+  lead_weeks_max: number | null;
+  stock_status: string | null;
+  source: string | null;
+}
+
+interface CatalogPriceInfo {
+  cents: number;
+  currency: string;
+  /** "exact" when matched on product_id, "fuzzy" when matched on a different priced product. */
+  match: "exact" | "fuzzy";
+  matched_name?: string;
+}
+
+const formatLeadTime = (info?: LeadTimeInfo) => {
+  if (!info) return null;
+  const { lead_weeks_min, lead_weeks_max, stock_status } = info;
+  if (lead_weeks_min && lead_weeks_max) {
+    const range = lead_weeks_min === lead_weeks_max ? `${lead_weeks_min}` : `${lead_weeks_min}–${lead_weeks_max}`;
+    return `Lead time: ${range} weeks`;
+  }
+  if (lead_weeks_min) return `Lead time: ~${lead_weeks_min} weeks`;
+  if (stock_status === "in_stock") return "In stock";
+  return "Made to order — lead time TBC";
+};
+
 const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: Clock, className: "bg-muted text-muted-foreground" },
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
