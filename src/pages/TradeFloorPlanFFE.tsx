@@ -49,6 +49,8 @@ export default function TradeFloorPlanFFE() {
   const [activeRoom, setActiveRoom] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<{ room: number; item: number } | null>(null);
   const [selectedIdxs, setSelectedIdxs] = useState<number[]>([]);
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  const [gridDivisions, setGridDivisions] = useState(20); // 20 → 5% grid; 40 → 2.5%
 
   const PROGRESS_STEPS = [
     "Reading floor plan…",
@@ -504,6 +506,28 @@ export default function TradeFloorPlanFFE() {
               >
                 <Trash2 className="w-3.5 h-3.5" />Remove {selectedIdxs.length > 1 ? `(${selectedIdxs.length})` : ""}
               </Button>
+              <span className="ml-auto inline-flex items-center gap-2 rounded-md border border-border px-2 py-1">
+                <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={snapEnabled}
+                    onChange={(e) => setSnapEnabled(e.target.checked)}
+                    className="accent-primary h-3.5 w-3.5"
+                  />
+                  Snap
+                </label>
+                <select
+                  value={gridDivisions}
+                  onChange={(e) => setGridDivisions(Number(e.target.value))}
+                  disabled={!snapEnabled}
+                  className="bg-background text-foreground border border-input rounded px-1.5 py-0.5 text-[11px] disabled:opacity-50"
+                  aria-label="Grid size"
+                >
+                  <option value={10}>Coarse (10%)</option>
+                  <option value={20}>Medium (5%)</option>
+                  <option value={40}>Fine (2.5%)</option>
+                </select>
+              </span>
             </div>
 
             {/* Desktop canvas */}
@@ -517,6 +541,8 @@ export default function TradeFloorPlanFFE() {
                   onClearSelection={clearSelection}
                   onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
                   onMoveGroup={(dx, dy) => moveMany(activeRoom, selectedIdxs, dx, dy)}
+                  snapEnabled={snapEnabled}
+                  gridDivisions={gridDivisions}
                 />
                 <SidePanel
                   room={suggestions.rooms[activeRoom]}
@@ -541,6 +567,8 @@ export default function TradeFloorPlanFFE() {
                   onClearSelection={clearSelection}
                   onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
                   onMoveGroup={(dx, dy) => moveMany(activeRoom, selectedIdxs, dx, dy)}
+                  snapEnabled={snapEnabled}
+                  gridDivisions={gridDivisions}
                 />
                 <MobileList
                   room={suggestions.rooms[activeRoom]}
@@ -573,6 +601,7 @@ export default function TradeFloorPlanFFE() {
 /* ---------- Canvas (desktop + mobile) ---------- */
 function CanvasPreview({
   planUrl, room, selectedIdxs, onSelect, onClearSelection, onMove, onMoveGroup,
+  snapEnabled, gridDivisions,
 }: {
   planUrl: string;
   room: Room;
@@ -581,6 +610,8 @@ function CanvasPreview({
   onClearSelection: () => void;
   onMove: (i: number, x: number, y: number) => void;
   onMoveGroup: (dx: number, dy: number) => void;
+  snapEnabled: boolean;
+  gridDivisions: number;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<
@@ -589,6 +620,47 @@ function CanvasPreview({
     | null
   >(null);
   const longPressTimer = useRef<number | null>(null);
+  const [guides, setGuides] = useState<{ v: number | null; h: number | null }>({ v: null, h: null });
+
+  const SNAP_TOL = 0.012;
+  const grid = Math.max(2, gridDivisions);
+  const gridStep = 1 / grid;
+  const snapToGrid = (v: number) => Math.round(v / gridStep) * gridStep;
+
+  const buildSnapTargets = () => {
+    const xs: number[] = [0.5, 0.25, 0.75];
+    const ys: number[] = [0.5, 0.25, 0.75];
+    room.items.forEach((it, i) => {
+      if (selectedIdxs.includes(i)) return;
+      const half = Math.max(it.w, 0.06) / 2;
+      xs.push(it.x, it.x - half, it.x + half);
+      ys.push(it.y, it.y - half, it.y + half);
+    });
+    return { xs, ys };
+  };
+
+  const snapWithGuides = (x: number, y: number, halfW: number, halfH: number) => {
+    if (!snapEnabled) return { x, y, vGuide: null as number | null, hGuide: null as number | null };
+    const { xs, ys } = buildSnapTargets();
+    let bestX = { val: x, guide: null as number | null, dist: Infinity };
+    let bestY = { val: y, guide: null as number | null, dist: Infinity };
+    const candX = [{ o: 0, l: x }, { o: -halfW, l: x - halfW }, { o: halfW, l: x + halfW }];
+    const candY = [{ o: 0, l: y }, { o: -halfH, l: y - halfH }, { o: halfH, l: y + halfH }];
+    for (const tx of xs) for (const c of candX) {
+      const d = Math.abs(c.l - tx);
+      if (d < SNAP_TOL && d < bestX.dist) bestX = { val: tx - c.o, guide: tx, dist: d };
+    }
+    for (const ty of ys) for (const c of candY) {
+      const d = Math.abs(c.l - ty);
+      if (d < SNAP_TOL && d < bestY.dist) bestY = { val: ty - c.o, guide: ty, dist: d };
+    }
+    return {
+      x: bestX.guide != null ? bestX.val : snapToGrid(x),
+      y: bestY.guide != null ? bestY.val : snapToGrid(y),
+      vGuide: bestX.guide,
+      hGuide: bestY.guide,
+    };
+  };
 
   const beginDrag = (clientX: number, clientY: number, idx: number, additive: boolean) => {
     const isInGroup = selectedIdxs.includes(idx) && selectedIdxs.length > 1;
@@ -640,22 +712,39 @@ function CanvasPreview({
   };
 
   useEffect(() => {
-    if (!drag) return;
+    if (!drag) {
+      setGuides({ v: null, h: null });
+      return;
+    }
     const updateFromPoint = (clientX: number, clientY: number) => {
       const rect = wrapRef.current?.getBoundingClientRect();
       if (!rect) return;
       if (drag.kind === "single") {
-        const x = Math.min(0.98, Math.max(0.02, (clientX - rect.left) / rect.width - drag.offsetX));
-        const y = Math.min(0.98, Math.max(0.02, (clientY - rect.top) / rect.height - drag.offsetY));
+        const rawX = (clientX - rect.left) / rect.width - drag.offsetX;
+        const rawY = (clientY - rect.top) / rect.height - drag.offsetY;
+        const it = room.items[drag.idx];
+        const half = Math.max(it?.w ?? 0.06, 0.06) / 2;
+        const snapped = snapWithGuides(rawX, rawY, half, half);
+        const x = Math.min(0.98, Math.max(0.02, snapped.x));
+        const y = Math.min(0.98, Math.max(0.02, snapped.y));
+        setGuides({ v: snapped.vGuide, h: snapped.hGuide });
         onMove(drag.idx, x, y);
       } else {
         const nx = (clientX - rect.left) / rect.width;
         const ny = (clientY - rect.top) / rect.height;
-        const dx = nx - drag.lastX;
-        const dy = ny - drag.lastY;
+        let dx = nx - drag.lastX;
+        let dy = ny - drag.lastY;
+        if (snapEnabled) {
+          dx = Math.round(dx / gridStep) * gridStep;
+          dy = Math.round(dy / gridStep) * gridStep;
+        }
         if (Math.abs(dx) > 0.0005 || Math.abs(dy) > 0.0005) {
           onMoveGroup(dx, dy);
-          setDrag({ kind: "group", lastX: nx, lastY: ny });
+          setDrag({
+            kind: "group",
+            lastX: snapEnabled ? drag.lastX + dx : nx,
+            lastY: snapEnabled ? drag.lastY + dy : ny,
+          });
         }
       }
     };
@@ -667,7 +756,7 @@ function CanvasPreview({
       e.preventDefault();
       updateFromPoint(t.clientX, t.clientY);
     };
-    const onUp = () => { cancelLongPress(); setDrag(null); };
+    const onUp = () => { cancelLongPress(); setDrag(null); setGuides({ v: null, h: null }); };
     window.addEventListener("mousemove", onMove2);
     window.addEventListener("mouseup", onUp);
     window.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -680,7 +769,7 @@ function CanvasPreview({
       window.removeEventListener("touchend", onUp);
       window.removeEventListener("touchcancel", onUp);
     };
-  }, [drag, onMove, onMoveGroup]);
+  }, [drag, onMove, onMoveGroup, snapEnabled, gridStep, room.items, selectedIdxs]);
 
   return (
     <div
@@ -693,6 +782,36 @@ function CanvasPreview({
       ) : (
         <img src={planUrl} alt="" className="w-full h-full object-contain pointer-events-none" />
       )}
+
+      {/* Grid overlay (only while dragging) */}
+      {drag && snapEnabled && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, hsl(var(--primary) / 0.18) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary) / 0.18) 1px, transparent 1px)",
+            backgroundSize: `${100 / grid}% ${100 / grid}%`,
+          }}
+        />
+      )}
+
+      {/* Alignment guides */}
+      {guides.v != null && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-0 bottom-0 w-px bg-primary/80"
+          style={{ left: `${guides.v * 100}%` }}
+        />
+      )}
+      {guides.h != null && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-0 right-0 h-px bg-primary/80"
+          style={{ top: `${guides.h * 100}%` }}
+        />
+      )}
+
       {room.items.map((it, idx) => {
         const isSelected = selectedIdxs.includes(idx);
         return (
@@ -779,6 +898,7 @@ function SidePanel({
           </Button>
         </div>
       )}
+
 
       {!multi && it && (
         <div className="space-y-2 pt-3 border-t border-border">
