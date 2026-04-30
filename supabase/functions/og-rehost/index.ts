@@ -63,16 +63,15 @@ async function sha8(input: string): Promise<string> {
  */
 const CLOUDINARY_CLOUD = "dif1oamtj";
 
-function cloudinaryFetchUrl(sourceUrl: string, maxBytes: number): string {
+function cloudinaryFetchUrl(sourceUrl: string, qual: string): string {
   const transform = [
     "f_jpg",
     "w_1200",
     "h_630",
     "c_fill",
     "g_auto",
-    "q_auto:good",
-    `fl_lossy.progressive`,
-    `b_size:${maxBytes}`, // Cloudinary respects max byte size for `q_auto`
+    qual,
+    "fl_lossy.progressive",
   ].join(",");
   return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/fetch/${transform}/${encodeURIComponent(
     sourceUrl,
@@ -80,23 +79,34 @@ function cloudinaryFetchUrl(sourceUrl: string, maxBytes: number): string {
 }
 
 async function fetchOptimized(sourceUrl: string): Promise<Uint8Array> {
-  // Try Cloudinary first; fall back to raw source if Cloudinary refuses
-  // (e.g. blocked domain). The raw source is still better than nothing –
-  // social crawlers will at least see *some* image.
-  for (const url of [cloudinaryFetchUrl(sourceUrl, MAX_BYTES), sourceUrl]) {
+  // Try progressively more aggressive Cloudinary quality presets until the
+  // result is under MAX_BYTES, then fall back to the raw source as a last
+  // resort (still better than nothing for social crawlers).
+  const tries = [
+    cloudinaryFetchUrl(sourceUrl, "q_auto:good"),
+    cloudinaryFetchUrl(sourceUrl, "q_auto:eco"),
+    cloudinaryFetchUrl(sourceUrl, "q_auto:low"),
+    cloudinaryFetchUrl(sourceUrl, "q_50"),
+  ];
+  let best: Uint8Array | null = null;
+  for (const url of tries) {
     const r = await fetch(url, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (compatible; MaisonAffluencyOG/1.0; +https://www.maisonaffluency.com)",
-        Accept: "image/*,*/*;q=0.8",
+        Accept: "image/jpeg,image/*",
       },
       redirect: "follow",
     });
-    if (r.ok) {
-      const buf = new Uint8Array(await r.arrayBuffer());
-      if (buf.byteLength > 0) return buf;
-    }
+    if (!r.ok) continue;
+    const ct = r.headers.get("content-type") ?? "";
+    if (!ct.startsWith("image/")) continue; // Cloudinary returns image/gif on errors
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf.byteLength === 0) continue;
+    if (buf.byteLength <= MAX_BYTES) return buf;
+    if (!best || buf.byteLength < best.byteLength) best = buf;
   }
+  if (best) return best; // closest we got
   throw new Error(`source fetch failed for ${sourceUrl}`);
 }
 
