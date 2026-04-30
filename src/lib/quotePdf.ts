@@ -663,15 +663,15 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
 
   const rows: { label: string; value: string }[] = [];
   rows.push({ label: "Goods (after discount)", value: fmtG(g.goodsGbpCents) });
-  rows.push({ label: "Shipping FR → GB", value: fmtG(g.shippingGbpCents) });
+  rows.push({ label: "Shipping FR to GB", value: fmtG(g.shippingGbpCents) });
   if (g.dutyGbpCents > 0) rows.push({ label: "Import duty", value: fmtG(g.dutyGbpCents) });
   if (g.vatGbpCents > 0) rows.push({ label: "UK VAT", value: fmtG(g.vatGbpCents) });
 
   const rowH = 16;
-  const fxNote = `Indicative. EUR→GBP @ ${g.fxEurGbp?.toFixed(4) ?? "—"} (+2% FX buffer). DDP — UK customs, duty & VAT included. Payments & deposits remain in ${args.currency}.`;
+  const fxNote = `Indicative. EUR-GBP @ ${g.fxEurGbp?.toFixed(4) ?? "-"} (+2% FX buffer). DDP - UK customs, duty & VAT included. Payments & deposits remain in ${args.currency}.`;
   const fxLines = doc.splitTextToSize(fxNote, blockW - 28);
   const fallbackLines = g.fxIsFallback
-    ? doc.splitTextToSize("Live FX unavailable — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).", blockW - 28)
+    ? doc.splitTextToSize("Live FX unavailable - figures use a fallback indicative rate. Treat the GBP total as approximate.", blockW - 28)
     : [];
   const totalH = 28 + rows.length * rowH + 28 + fxLines.length * 10 + fallbackLines.length * 10 + 14;
 
