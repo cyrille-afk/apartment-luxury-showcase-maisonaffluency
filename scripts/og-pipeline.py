@@ -73,52 +73,22 @@ UA = (
 )
 
 
-# ---------- core image transform ----------
+# ---------- rehost (delegates heavy lifting to og-rehost edge function) ----------
 
-def fit_1200x630_under_300kb(raw: bytes) -> bytes:
-    """Return JPEG bytes sized 1200×630, <=300 KB. Crops to fill, never letterboxes."""
-    img = Image.open(io.BytesIO(raw))
-    img = ImageOps.exif_transpose(img)
-    if img.mode not in ("RGB", "L"):
-        img = img.convert("RGB")
-    # Smart center-crop fit (cover behaviour)
-    img = ImageOps.fit(img, (TARGET_W, TARGET_H), method=Image.LANCZOS, centering=(0.5, 0.4))
-
-    for q in (88, 82, 76, 70, 64, 58, 52, 46, 40):
-        buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=q, optimize=True, progressive=True)
-        data = buf.getvalue()
-        if len(data) <= MAX_BYTES:
-            return data
-    # Last resort: chroma subsample harder + low quality
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=35, optimize=True, progressive=True, subsampling=2)
-    return buf.getvalue()
-
-
-# ---------- supabase storage ----------
-
-def storage_put(slug: str, data: bytes) -> str:
-    if not SERVICE_KEY:
-        raise RuntimeError(
-            "SUPABASE_SERVICE_ROLE_KEY not set. Export it before using --apply."
-        )
-    path = f"{PREFIX}{slug}.jpg"
-    url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET}/{path}"
+def rehost_via_edge(source_url: str, slug: str) -> dict:
     r = requests.post(
-        url,
-        data=data,
+        REHOST_ENDPOINT,
+        json={"sourceUrl": source_url, "slug": slug},
         headers={
-            "Authorization": f"Bearer {SERVICE_KEY}",
-            "Content-Type": "image/jpeg",
-            "x-upsert": "true",
-            "cache-control": "public, max-age=31536000, immutable",
+            "Authorization": f"Bearer {ANON_KEY}",
+            "apikey": ANON_KEY,
+            "Content-Type": "application/json",
         },
-        timeout=60,
+        timeout=120,
     )
     if r.status_code >= 300:
-        raise RuntimeError(f"upload failed {r.status_code}: {r.text[:200]}")
-    return f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{path}"
+        raise RuntimeError(f"og-rehost {r.status_code}: {r.text[:300]}")
+    return r.json()
 
 
 # ---------- bridge rewriting ----------
@@ -133,18 +103,10 @@ def needs_rehost(url: str) -> bool:
     return True
 
 
-def slug_for(bridge_path: Path, source_url: str) -> str:
+def slug_for(bridge_path: Path) -> str:
     base = bridge_path.stem  # e.g. apparatus-studio-og-v2
-    # collapse any trailing -og or -og-vN; we want a stable per-designer key
-    base = re.sub(r"-og(?:-v\d+)?$", "", base)
-    digest = hashlib.sha1(source_url.encode("utf-8")).hexdigest()[:8]
-    return f"{base}-{digest}"
-
-
-def fetch(url: str) -> bytes:
-    r = requests.get(url, headers={"User-Agent": UA}, timeout=45, allow_redirects=True)
-    r.raise_for_status()
-    return r.content
+    # collapse any trailing -og or -og-vN; one slug per designer
+    return re.sub(r"-og(?:-v\d+)?$", "", base)
 
 
 def process_bridge(path: Path, apply: bool) -> dict:
