@@ -484,6 +484,14 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     return sum + cents * item.quantity;
   }, 0);
 
+  // GBP DDP landed-cost amounts for the totals toggle
+  const goodsAfterDiscountCents =
+    subtotalCents - (ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0);
+  const gbp = useGbpLandedCost({
+    goodsAfterDiscountCents,
+    quoteCurrency: currency,
+  });
+
   const canSendPricing = quote?.status === "submitted" || quote?.status === "priced";
 
   return (
