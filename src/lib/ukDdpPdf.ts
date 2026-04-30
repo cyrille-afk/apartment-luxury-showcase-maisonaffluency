@@ -175,9 +175,9 @@ export function buildUkDdpPdf({
   doc.setTextColor(JADE_SOFT[0], JADE_SOFT[1], JADE_SOFT[2]);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text("Maison Affluency · Paris", M, pageH - 38);
-  doc.text("hello@maisonaffluency.com · maisonaffluency.com", M, pageH - 26);
-  doc.text(`Estimate ref. ${quoteRef} · DDP-GB`, pageW - M, pageH - 26, { align: "right" });
+  doc.text("Maison Affluency - Paris", M, pageH - 38);
+  doc.text("hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 26);
+  doc.text(`Estimate ref. ${quoteRef} - DDP-GB`, pageW - M, pageH - 26, { align: "right" });
 
   return doc;
 }
