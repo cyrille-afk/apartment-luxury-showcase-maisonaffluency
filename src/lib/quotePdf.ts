@@ -31,6 +31,7 @@ export interface QuotePdfLine {
   dimensions?: string | null;
   materials?: string | null;
   edition?: string | null;
+  variantLabel?: string | null;
   leadTime?: string | null;
   notes?: string | null;
   quantity: number;
