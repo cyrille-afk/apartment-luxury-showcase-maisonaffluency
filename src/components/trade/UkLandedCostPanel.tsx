@@ -188,6 +188,16 @@ export const UkLandedCostPanel = ({
                 <span className="font-medium tabular-nums">{fmtGbp(totalGbp)}</span>
               </div>
 
+              {fxIsFallback && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-50/60 px-2.5 py-2 mt-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="font-body text-[10px] leading-snug text-amber-900">
+                    <span className="font-medium">Live FX unavailable</span> — using fallback indicative rate.
+                    Treat the GBP figure as approximate; final invoice issued at the rate of the day.
+                  </p>
+                </div>
+              )}
+
               {/* Disclaimer */}
               <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
                 <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
