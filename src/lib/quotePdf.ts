@@ -141,14 +141,17 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
 
   // ---- Notes
   if (args.notes && args.notes.trim()) {
-    y = ensureSpace(doc, y, 80, pageH);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    const wrapped = doc.splitTextToSize(args.notes.trim(), contentW);
+    const notesBlockH = 18 /* title */ + 18 /* gap */ + wrapped.length * 12 + 8 /* trailing pad */;
+    y = ensureSpace(doc, y, notesBlockH + 18, pageH);
     y += 18;
     sectionTitle(doc, "Project notes", M, y);
     y += 18;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    const wrapped = doc.splitTextToSize(args.notes.trim(), contentW);
     doc.text(wrapped, M, y);
     y += wrapped.length * 12;
   }
@@ -401,20 +404,24 @@ function drawCompanyAndMeta(
   metaRows.forEach((row, rIdx) => {
     row.forEach(([label, value], cIdx) => {
       const x = metaX + cIdx * metaColW;
-      const ry = y + rIdx * 26;
+      const ry = y + rIdx * 32;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       doc.text(label, x, ry);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(FG[0], FG[1], FG[2]);
       const wrapped = doc.splitTextToSize(String(value), metaColW - 8);
-      doc.text(wrapped[0], x, ry + 12);
+      // Render up to 2 lines so values like "Margot Watson — De Beers London" fit.
+      const lines = wrapped.slice(0, 2);
+      lines.forEach((ln: string, i: number) => {
+        doc.text(ln, x, ry + 12 + i * 10);
+      });
     });
   });
 
-  return y + 60;
+  return y + 70;
 }
 
 // -------- Items table ---------------------------------------------------
@@ -552,7 +559,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   if (discountCents > 0) {
     rows.push({
       label: `Trade discount (${Math.round(args.tradeDiscountPct * 100)}%)`,
-      value: `− ${fmtMoney(discountCents, args.currency)}`,
+      value: `- ${fmtMoney(discountCents, args.currency)}`,
       muted: true,
     });
   }
@@ -593,7 +600,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
     doc.setTextColor(r.muted ? MUTED[0] : FG[0], r.muted ? MUTED[1] : FG[1], r.muted ? MUTED[2] : FG[2]);
     doc.text(r.label, x + 14, cy);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    doc.text(`${r.value} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+    doc.text(r.value, x + blockW - 14, cy, { align: "right" });
     cy += rowH;
   });
 
@@ -606,7 +613,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFontSize(11);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
   doc.text("Order total", x + 14, cy);
-  doc.text(`${fmtMoney(grand, args.currency)} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(grand, args.currency), x + blockW - 14, cy, { align: "right" });
   cy += 18;
 
   // deposit / balance
@@ -614,10 +621,10 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFontSize(9);
   doc.setTextColor(FG[0], FG[1], FG[2]);
   doc.text("60% deposit due now", x + 14, cy);
-  doc.text(`${fmtMoney(deposit, args.currency)} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(deposit, args.currency), x + blockW - 14, cy, { align: "right" });
   cy += 14;
   doc.text("40% balance before shipment", x + 14, cy);
-  doc.text(`${fmtMoney(balance, args.currency)} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
 
   return y + totalH + 12;
 }
