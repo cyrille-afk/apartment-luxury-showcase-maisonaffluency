@@ -194,7 +194,12 @@ Look at the floor plan image and propose an FF&E layout per room.`;
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      return new Response(JSON.stringify({ error: "AI service error" }), {
+      let detail = "AI service error";
+      try {
+        const j = JSON.parse(t);
+        detail = j?.error?.message || detail;
+      } catch { /* ignore */ }
+      return new Response(JSON.stringify({ error: detail }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
