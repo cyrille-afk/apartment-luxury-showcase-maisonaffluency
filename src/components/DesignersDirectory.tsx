@@ -18,6 +18,7 @@ import { trackCTA } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
+import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { GALLERY } from "@/constants/galleryIndex";
