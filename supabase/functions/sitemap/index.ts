@@ -26,6 +26,18 @@ function urlEntry(loc: string, lastmod: string, changefreq: string, priority: st
   </url>`;
 }
 
+function urlEntryWithHreflang(loc: string, lastmod: string, changefreq: string, priority: string): string {
+  const full = `${SITE}${loc}`;
+  return `  <url>
+    <loc>${full}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="${full}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${full}"/>
+  </url>`;
+}
+
 serve(async () => {
   const today = new Date().toISOString().split("T")[0];
 
