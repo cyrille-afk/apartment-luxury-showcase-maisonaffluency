@@ -484,40 +484,64 @@ function CanvasPreview({
   const wrapRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ idx: number; offsetX: number; offsetY: number } | null>(null);
 
-  const handleMouseDown = (e: React.MouseEvent, idx: number) => {
-    e.stopPropagation();
+  const beginDrag = (clientX: number, clientY: number, idx: number) => {
     onSelect(idx);
     const rect = wrapRef.current?.getBoundingClientRect();
     if (!rect) return;
     setDrag({
       idx,
-      offsetX: (e.clientX - rect.left) / rect.width - room.items[idx].x,
-      offsetY: (e.clientY - rect.top) / rect.height - room.items[idx].y,
+      offsetX: (clientX - rect.left) / rect.width - room.items[idx].x,
+      offsetY: (clientY - rect.top) / rect.height - room.items[idx].y,
     });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    beginDrag(e.clientX, e.clientY, idx);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent, idx: number) => {
+    e.stopPropagation();
+    const t = e.touches[0];
+    if (!t) return;
+    beginDrag(t.clientX, t.clientY, idx);
   };
 
   useEffect(() => {
     if (!drag) return;
-    const onMove2 = (e: MouseEvent) => {
+    const updateFromPoint = (clientX: number, clientY: number) => {
       const rect = wrapRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = Math.min(0.98, Math.max(0.02, (e.clientX - rect.left) / rect.width - drag.offsetX));
-      const y = Math.min(0.98, Math.max(0.02, (e.clientY - rect.top) / rect.height - drag.offsetY));
+      const x = Math.min(0.98, Math.max(0.02, (clientX - rect.left) / rect.width - drag.offsetX));
+      const y = Math.min(0.98, Math.max(0.02, (clientY - rect.top) / rect.height - drag.offsetY));
       onMove(drag.idx, x, y);
+    };
+    const onMove2 = (e: MouseEvent) => updateFromPoint(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      e.preventDefault();
+      updateFromPoint(t.clientX, t.clientY);
     };
     const onUp = () => setDrag(null);
     window.addEventListener("mousemove", onMove2);
     window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("touchcancel", onUp);
     return () => {
       window.removeEventListener("mousemove", onMove2);
       window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("touchcancel", onUp);
     };
   }, [drag, onMove]);
 
   return (
     <div
       ref={wrapRef}
-      className="relative w-full aspect-[4/3] rounded-lg border border-border bg-muted overflow-hidden select-none"
+      className="relative w-full aspect-[4/3] rounded-lg border border-border bg-muted overflow-hidden select-none touch-none"
       onClick={() => onSelect(-1)}
     >
       {/\.pdf($|\?)/i.test(planUrl) ? (
@@ -529,6 +553,7 @@ function CanvasPreview({
         <div
           key={idx}
           onMouseDown={(e) => handleMouseDown(e, idx)}
+          onTouchStart={(e) => handleTouchStart(e, idx)}
           className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move group ${
             selectedIdx === idx ? "ring-2 ring-foreground" : "ring-1 ring-foreground/30 hover:ring-foreground/60"
           } rounded-md overflow-hidden bg-background shadow-lg`}
