@@ -158,6 +158,9 @@ export function buildUkDdpPdf({
     `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) — actual crating may vary on confirmation.`,
     `Prices include UK customs clearance, import duty and VAT under Delivered Duty Paid (DDP) — no further charges on delivery to London.`,
     `FX: ${quoteCurrency} → GBP via EUR pivot @ ${gbp.fxEurGbp?.toFixed(4)} (EUR→GBP) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final GBP invoice issued on order confirmation.`,
+    ...(gbp.fxIsFallback
+      ? [`⚠ Live FX feed unavailable at the time of generation — figures use a fallback indicative rate. Treat the GBP total as approximate (≈).`]
+      : []),
     `Working currency on the quote remains ${quoteCurrency}. This document is a courtesy landed-cost view for the UK end-client.`,
   ];
   notes.forEach((n) => {
