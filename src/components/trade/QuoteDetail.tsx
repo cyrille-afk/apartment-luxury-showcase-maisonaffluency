@@ -1139,46 +1139,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           <div>
             <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
             <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
-              <p className="font-medium text-foreground">AFFLUENCY ETC PTE. LTD.</p>
-              {currency === "SGD" ? (
-                <>
-                  <p>Account Number: 713127249001</p>
-                  <p>Bank: OCBC Bank</p>
-                  <p>Oversea-Chinese Banking Corporation Ltd</p>
-                  <p>BIC/SWIFT: OCBCSGSG</p>
-                  <p>Bank Code: 7339 · Branch Code: 713</p>
-                </>
-              ) : currency === "EUR" ? (
-                <>
-                  <p className="font-medium text-foreground/60 text-[9px] uppercase tracking-widest mt-1">SEPA (EEA transfers)</p>
-                  <p>IBAN: LT73 3250 0692 1856 8740</p>
-                  <p>BIC: REVOLT21</p>
-                  <p>Bank: Revolut Bank UAB</p>
-                  <p>Konstitucijos ave. 21B, 08130, Vilnius, Lithuania</p>
-                  <p className="font-medium text-foreground/60 text-[9px] uppercase tracking-widest mt-2">SWIFT (International)</p>
-                  <p>Account Number: 885111609218375</p>
-                  <p>SWIFT/BIC: REVOSGS2</p>
-                  <p>Intermediary BIC: BARCDEFF</p>
-                  <p>Bank: Revolut Technologies Singapore Pte. Ltd</p>
-                  <p>6 Battery Road, Floor 6-01, 049909, Singapore</p>
-                </>
-              ) : currency === "USD" ? (
-                <>
-                  <p>Account Number: 885111609218375</p>
-                  <p>SWIFT/BIC: REVOSGS2</p>
-                  <p>Intermediary BIC: BARCGB22</p>
-                  <p>Bank: Revolut Technologies Singapore Pte. Ltd</p>
-                  <p>6 Battery Road, Floor 6-01, 049909, Singapore</p>
-                </>
-              ) : (
-                <>
-                  <p>Account Number: 885111609218375</p>
-                  <p>SWIFT/BIC: REVOSGS2</p>
-                  <p>Intermediary BIC: BARCGB22</p>
-                  <p>Bank: Revolut Technologies Singapore Pte. Ltd</p>
-                  <p>6 Battery Road, Floor 6-01, 049909, Singapore</p>
-                </>
-              )}
+              <p className="font-medium text-foreground">AFFLUENCY ETC PTE LTD</p>
+              <p>1 Grange Garden, #16-05, Singapore, 249631</p>
+              <p className="mt-1">IBAN: LT73 3250 0692 1856 8740</p>
+              <p>BIC: REVOLT21</p>
+              <p>Bank: Revolut Bank UAB</p>
             </div>
           </div>
 
