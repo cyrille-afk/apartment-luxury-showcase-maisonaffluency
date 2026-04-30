@@ -612,26 +612,40 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
               {/* Subtotal */}
               <div className="border-t border-border mt-2 pt-4 flex justify-end">
-                <div className="w-64 space-y-1">
-                  <div className="flex justify-between font-body text-xs text-muted-foreground">
-                    <span>Subtotal</span>
-                    <span>{subtotalCents > 0 ? formatPrice(subtotalCents, currency) : "—"}</span>
-                  </div>
-                  {currency === "SGD" && subtotalCents > 0 && (
-                    <div className="flex justify-between font-body text-xs text-muted-foreground">
-                      <span>GST (9%)</span>
-                      <span>{formatPrice(Math.round(subtotalCents * 0.09), currency)}</span>
+                {(() => {
+                  const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
+                  const afterDiscountCents = subtotalCents - discountCents;
+                  // Strict GST guard: only when the quote is SGD AND fully loaded (never on the SGD fallback while quote is still null).
+                  const showGst = quote?.currency === "SGD" && afterDiscountCents > 0;
+                  const gstCents = showGst ? Math.round(afterDiscountCents * 0.09) : 0;
+                  const totalCents = afterDiscountCents + gstCents;
+                  return (
+                    <div className="w-72 space-y-1">
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>Subtotal</span>
+                        <span>{subtotalCents > 0 ? formatPrice(subtotalCents, currency) : "—"}</span>
+                      </div>
+                      {ownerDiscountPct > 0 && subtotalCents > 0 && (
+                        <div className="flex justify-between font-body text-xs text-emerald-600/80">
+                          <span>Trade discount ({(ownerDiscountPct * 100).toFixed(0)}% · {ownerTierLabel})</span>
+                          <span>− {formatPrice(discountCents, currency)}</span>
+                        </div>
+                      )}
+                      {showGst && (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>GST (9%)</span>
+                          <span>{formatPrice(gstCents, currency)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                        <span className="uppercase tracking-wider">Total {currency}</span>
+                        <span className="font-medium">
+                          {subtotalCents > 0 ? formatPrice(totalCents, currency) : "—"}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
-                    <span className="uppercase tracking-wider">Total {currency}</span>
-                    <span className="font-medium">
-                      {subtotalCents > 0
-                        ? formatPrice(currency === "SGD" ? subtotalCents + Math.round(subtotalCents * 0.09) : subtotalCents, currency)
-                        : "—"}
-                    </span>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
             </>
           )}
