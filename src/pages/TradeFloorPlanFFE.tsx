@@ -177,7 +177,66 @@ export default function TradeFloorPlanFFE() {
     }))};
     setSuggestions(next);
     setSelectedItem(null);
+    setSelectedIdxs([]);
     setConfirmed(false);
+  };
+
+  const removeMany = (roomIdx: number, indices: number[]) => {
+    if (!suggestions || indices.length === 0) return;
+    const set = new Set(indices);
+    const next = { ...suggestions, rooms: suggestions.rooms.map((r, i) => ({
+      ...r, items: i === roomIdx ? r.items.filter((_, j) => !set.has(j)) : r.items,
+    }))};
+    setSuggestions(next);
+    setSelectedItem(null);
+    setSelectedIdxs([]);
+    setConfirmed(false);
+  };
+
+  const moveMany = (roomIdx: number, indices: number[], dx: number, dy: number) => {
+    if (!suggestions || indices.length === 0) return;
+    const set = new Set(indices);
+    const next = {
+      ...suggestions,
+      rooms: suggestions.rooms.map((r, i) => i !== roomIdx ? r : {
+        ...r,
+        items: r.items.map((it, j) => set.has(j)
+          ? { ...it, x: Math.min(0.98, Math.max(0.02, it.x + dx)), y: Math.min(0.98, Math.max(0.02, it.y + dy)) }
+          : it),
+      }),
+    };
+    setSuggestions(next);
+    setConfirmed(false);
+  };
+
+  const toggleSelectIdx = (idx: number, additive: boolean) => {
+    if (!additive) {
+      setSelectedIdxs([idx]);
+      setSelectedItem({ room: activeRoom, item: idx });
+      return;
+    }
+    setSelectedIdxs((prev) => {
+      if (prev.includes(idx)) {
+        const next = prev.filter((i) => i !== idx);
+        setSelectedItem(next.length ? { room: activeRoom, item: next[next.length - 1] } : null);
+        return next;
+      }
+      const next = [...prev, idx];
+      setSelectedItem({ room: activeRoom, item: idx });
+      return next;
+    });
+  };
+
+  const selectAllInRoom = () => {
+    if (!suggestions) return;
+    const all = suggestions.rooms[activeRoom].items.map((_, i) => i);
+    setSelectedIdxs(all);
+    setSelectedItem(all.length ? { room: activeRoom, item: all[0] } : null);
+  };
+
+  const clearSelection = () => {
+    setSelectedIdxs([]);
+    setSelectedItem(null);
   };
 
   const discardSuggestions = () => {
