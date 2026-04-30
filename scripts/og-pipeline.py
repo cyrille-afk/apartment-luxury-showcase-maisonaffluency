@@ -124,10 +124,9 @@ def process_bridge(path: Path, apply: bool) -> dict:
         return {"file": path.name, "status": "would-rehost", "src": src}
 
     try:
-        raw = fetch(src)
-        out = fit_1200x630_under_300kb(raw)
-        slug = slug_for(path, src)
-        hosted = storage_put(slug, out)
+        slug = slug_for(path)
+        result = rehost_via_edge(src, slug)
+        hosted = result["url"]
         new_html = OG_TAG.sub(lambda m: m.group(1) + hosted + m.group(3), html)
         if new_html != html:
             path.write_text(new_html, encoding="utf-8")
@@ -136,7 +135,8 @@ def process_bridge(path: Path, apply: bool) -> dict:
             "status": "rehosted",
             "src": src,
             "hosted": hosted,
-            "bytes": len(out),
+            "bytes": result.get("bytes"),
+            "cached": result.get("cached"),
         }
     except Exception as exc:  # noqa: BLE001
         return {"file": path.name, "status": "error", "src": src, "error": str(exc)}
