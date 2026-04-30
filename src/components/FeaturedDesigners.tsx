@@ -170,9 +170,7 @@ import ericSchmittChairie from "@/assets/curators-picks/eric-schmitt-chairie.jpg
 const pierreBonnefilleBronzePainting = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1200, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleBronzePainting208 = cloudinaryUrl("Screen_Shot_2026-02-22_at_6.27.12_PM_haymp0", { width: 1200, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleMetamorphosisLamps = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.04.36_PM_wwoocz", { width: 1200, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleMetamorphosisPolygone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.14.02_PM_pmlpmu", { width: 1200, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleTabouretsStone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.21.03_PM_kyvd2j", { width: 1200, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleStoneD = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.25.11_PM_gctcgf", { width: 1200, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleEnfiladeBloc = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.33.49_PM_ivior2", { width: 1200, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleBlocSideboardII = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.47.27_PM_zmyb0m", { width: 1200, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleStoneFloorLamp = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.52.01_PM_lnerox", { width: 1200, quality: "auto:good", crop: "fill" });
