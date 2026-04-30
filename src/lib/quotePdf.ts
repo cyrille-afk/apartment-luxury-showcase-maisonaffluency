@@ -651,9 +651,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   const balance = grand - deposit;
 
   const rowH = 18;
-  const showLadder = !!(args.tradeDiscountApplied && args.tierBreakdown && args.tierBreakdown.length > 0);
-  const ladderH = showLadder ? 18 + (args.tierBreakdown!.length * 12) + 8 : 0;
-  const totalH = rows.length * rowH + 80 + ladderH;
+  const totalH = rows.length * rowH + 80;
   doc.rect(x, cy, blockW, totalH, "F");
 
   cy += 16;
@@ -689,40 +687,57 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.text("40% balance before shipment", x + 14, cy);
   doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
 
-  // Tier ladder — explains why this discount % was applied
-  if (showLadder) {
-    cy += 16;
-    doc.setDrawColor(220, 218, 210);
-    doc.setLineWidth(0.3);
-    doc.line(x + 14, cy - 6, x + blockW - 14, cy - 6);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text("TRADE TIERS", x + 14, cy);
-    cy += 10;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    args.tierBreakdown!.forEach((t) => {
-      const pctTxt = `${(t.pct * 100).toFixed(t.pct * 100 % 1 === 0 ? 0 : 1)}%`;
-      const minTxt = t.minSpendCents > 0
-        ? `from ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(t.minSpendCents / 100)} ${args.currency}`
-        : "entry";
-      const left = `${t.label}${t.active ? "  • current" : ""}`;
-      const right = `${pctTxt} · ${minTxt}`;
-      if (t.active) {
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-      } else {
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-      }
-      doc.text(left, x + 14, cy);
-      doc.text(right, x + blockW - 14, cy, { align: "right" });
-      cy += 12;
-    });
-  }
-
   return y + totalH + 12;
+}
+
+// -------- Trade Tiers block — separate card explaining the discount ladder ---
+function drawTierBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
+  if (!args.tradeDiscountApplied || !args.tierBreakdown || args.tierBreakdown.length === 0) return y;
+
+  const blockW = 280;
+  const x = M + contentW - blockW;
+  const padTop = 14;
+  const headerH = 18;
+  const rowH = 13;
+  const padBottom = 12;
+  const blockH = padTop + headerH + (args.tierBreakdown.length * rowH) + padBottom;
+
+  doc.setFillColor(250, 249, 246);
+  doc.rect(x, y, blockW, blockH, "F");
+
+  let cy = y + padTop + 4;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("TRADE TIERS", x + 14, cy);
+  cy += 6;
+
+  doc.setDrawColor(220, 218, 210);
+  doc.setLineWidth(0.3);
+  doc.line(x + 14, cy, x + blockW - 14, cy);
+  cy += 12;
+
+  doc.setFontSize(8);
+  args.tierBreakdown.forEach((t) => {
+    const pctTxt = `${(t.pct * 100).toFixed(t.pct * 100 % 1 === 0 ? 0 : 1)}%`;
+    const minTxt = t.minSpendCents > 0
+      ? `from ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(t.minSpendCents / 100)} ${args.currency}`
+      : "entry";
+    const left = `${t.label}${t.active ? "  • current" : ""}`;
+    const right = `${pctTxt} · ${minTxt}`;
+    if (t.active) {
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+    } else {
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    }
+    doc.text(left, x + 14, cy);
+    doc.text(right, x + blockW - 14, cy, { align: "right" });
+    cy += rowH;
+  });
+
+  return y + blockH + 12;
 }
 
 // -------- UK Landed Cost block (GBP DDP London) -------------------------
