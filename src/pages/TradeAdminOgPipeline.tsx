@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, RefreshCw, Zap, AlertCircle, CheckCircle2, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, RefreshCw, Zap, AlertCircle, CheckCircle2, Clock, ExternalLink, Search } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
