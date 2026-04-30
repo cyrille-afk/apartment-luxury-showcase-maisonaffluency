@@ -130,7 +130,7 @@ export function buildUkDdpPdf({
     ? (gbp.breakdown.vat_cents /
         Math.max(1, gbp.goodsEurCents + gbp.breakdown.freight_cents + gbp.breakdown.duty_cents)) * 100
     : 0;
-  costRow(doc, M, y, pageW - M, `Import duty (${dutyPct.toFixed(1)}% — furniture/lighting)`, fmtGbp(gbp.dutyGbpCents));
+  costRow(doc, M, y, pageW - M, `Import duty (${dutyPct.toFixed(1)}% - furniture/lighting)`, fmtGbp(gbp.dutyGbpCents));
   y += 16;
   costRow(doc, M, y, pageW - M, `UK VAT (${vatPct.toFixed(0)}% on goods + freight + duty)`, fmtGbp(gbp.vatGbpCents));
   y += 28;
