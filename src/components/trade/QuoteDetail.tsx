@@ -73,7 +73,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
-  const [gstEnabled, setGstEnabled] = useState(true);
+  // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
+  // The user can still toggle it on manually if needed.
+  const [gstEnabled, setGstEnabled] = useState(false);
+  const [gstUserTouched, setGstUserTouched] = useState(false);
   const [gstRate, setGstRate] = useState(9);
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
