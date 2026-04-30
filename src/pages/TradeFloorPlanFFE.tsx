@@ -470,7 +470,7 @@ export default function TradeFloorPlanFFE() {
               {suggestions.rooms.map((r, i) => (
                 <button
                   key={i}
-                  onClick={() => { setActiveRoom(i); setSelectedItem(null); }}
+                  onClick={() => { setActiveRoom(i); setSelectedItem(null); setSelectedIdxs([]); }}
                   className={`px-3 py-1.5 rounded-full text-xs font-body border transition-colors ${
                     i === activeRoom ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:border-foreground/30"
                   }`}
@@ -480,22 +480,52 @@ export default function TradeFloorPlanFFE() {
               ))}
             </div>
 
+            {/* Multi-select toolbar */}
+            <div className="flex flex-wrap items-center gap-2 text-xs font-body">
+              <span className="text-muted-foreground">
+                {selectedIdxs.length > 0
+                  ? `${selectedIdxs.length} selected`
+                  : (isMobile ? "Tap a piece to select · long-press to multi-select" : "Click to select · Shift/Cmd-click to add")}
+              </span>
+              <Button variant="outline" size="sm" onClick={selectAllInRoom}>Select all</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSelection}
+                disabled={selectedIdxs.length === 0}
+              >
+                Clear
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={selectedIdxs.length < 2}
+                onClick={() => removeMany(activeRoom, selectedIdxs)}
+              >
+                <Trash2 className="w-3.5 h-3.5" />Remove {selectedIdxs.length > 1 ? `(${selectedIdxs.length})` : ""}
+              </Button>
+            </div>
+
             {/* Desktop canvas */}
             {!isMobile && planUrl && (
               <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
                 <CanvasPreview
                   planUrl={planUrl}
                   room={suggestions.rooms[activeRoom]}
-                  selectedIdx={selectedItem?.room === activeRoom ? selectedItem?.item ?? null : null}
-                  onSelect={(idx) => setSelectedItem({ room: activeRoom, item: idx })}
+                  selectedIdxs={selectedIdxs}
+                  onSelect={(idx, additive) => toggleSelectIdx(idx, additive)}
+                  onClearSelection={clearSelection}
                   onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
+                  onMoveGroup={(dx, dy) => moveMany(activeRoom, selectedIdxs, dx, dy)}
                 />
                 <SidePanel
                   room={suggestions.rooms[activeRoom]}
                   selectedIdx={selectedItem?.room === activeRoom ? selectedItem?.item ?? null : null}
-                  onSelect={(idx) => setSelectedItem({ room: activeRoom, item: idx })}
+                  selectedIdxs={selectedIdxs}
+                  onSelect={(idx, additive) => toggleSelectIdx(idx, additive)}
                   onUpdate={(idx, patch) => updateItem(activeRoom, idx, patch)}
                   onRemove={(idx) => removeItem(activeRoom, idx)}
+                  onRemoveSelected={() => removeMany(activeRoom, selectedIdxs)}
                 />
               </div>
             )}
@@ -506,12 +536,16 @@ export default function TradeFloorPlanFFE() {
                 <CanvasPreview
                   planUrl={planUrl}
                   room={suggestions.rooms[activeRoom]}
-                  selectedIdx={selectedItem?.room === activeRoom ? selectedItem?.item ?? null : null}
-                  onSelect={(idx) => setSelectedItem({ room: activeRoom, item: idx })}
+                  selectedIdxs={selectedIdxs}
+                  onSelect={(idx, additive) => toggleSelectIdx(idx, additive)}
+                  onClearSelection={clearSelection}
                   onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
+                  onMoveGroup={(dx, dy) => moveMany(activeRoom, selectedIdxs, dx, dy)}
                 />
                 <MobileList
                   room={suggestions.rooms[activeRoom]}
+                  selectedIdxs={selectedIdxs}
+                  onToggle={(idx) => toggleSelectIdx(idx, true)}
                   onRemove={(idx) => removeItem(activeRoom, idx)}
                 />
                 <div className="sticky bottom-3 flex gap-2">
