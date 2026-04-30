@@ -457,10 +457,11 @@ const TradeProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
-    const isDualAxisSelection = (pricing?.size_variants || []).some(
-      (v: any) => (v.base && String(v.base).trim()) || (v.top && String(v.top).trim())
-    );
-    if (isDualAxisSelection && opts && (!opts.base || !opts.top)) {
+    const variantsForAxes = pricing?.size_variants || [];
+    const requiresBaseAndTopSelection =
+      variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
+      variantsForAxes.some((v: any) => v.top && String(v.top).trim());
+    if (requiresBaseAndTopSelection && opts && (!opts.base || !opts.top)) {
       // Partial Base/Top selections must not fall back to a standalone finish
       // key (e.g. clearing Top while Base remains). A clear/partial state
       // should show the primary product image until a complete pairing is set.
