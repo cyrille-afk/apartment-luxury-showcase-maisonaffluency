@@ -102,6 +102,14 @@ export function resolveVariantImageIndex(
     return typeof idx === "number" && idx >= 0 && idx < imageCount ? idx : undefined;
   };
 
+  // Dual-axis products always have at least one composite "base|top" key in
+  // the map. We use that as the signal to refuse single-axis fallbacks when
+  // the user has picked only one of the two axes — otherwise clearing one
+  // dropdown can land on the wrong finish image (e.g. clearing Top while
+  // Base remains used to resolve to whatever the standalone Base key
+  // happened to point at).
+  const isDualAxisMap = Object.keys(finishMap).some((k) => k.includes("|"));
+
   // 1) Full triple — most specific
   if (base && top && size) {
     const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(size)}`;
@@ -117,6 +125,11 @@ export function resolveVariantImageIndex(
     // image (e.g. picking "Aged Brass | Slip-Cast Porcelain" must not
     // resolve to whatever image "Slip-Cast Porcelain" alone maps to,
     // because the same Top is shared by every Base).
+    return undefined;
+  }
+  // Partial dual-axis selection: refuse single-axis fallbacks so the caller
+  // can snap the gallery back to the primary image instead of a stray finish.
+  if (isDualAxisMap && (base || top) && !(base && top)) {
     return undefined;
   }
   // 3) Single-axis fallbacks, in priority order
