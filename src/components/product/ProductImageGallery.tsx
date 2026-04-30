@@ -9,6 +9,8 @@ interface ProductImageGalleryProps {
   images: string[];
   alt: string;
   overlay?: React.ReactNode;
+  /** Badge rendered top-left of the main image, only when the first photo is active. */
+  firstImageBadge?: React.ReactNode;
   /** Optional controlled active index. When provided, the gallery jumps to it whenever it changes. */
   activeIndex?: number;
   /**
