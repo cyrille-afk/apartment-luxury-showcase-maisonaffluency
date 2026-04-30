@@ -111,11 +111,13 @@ export const UkLandedCostPanel = ({
   };
 
   const goodsGbp = eurToGbp(goodsEurCents);
-  const shippingEurCents = breakdown?.available
-    ? (breakdown.freight_cents + breakdown.fuel_cents + breakdown.insurance_cents +
-       breakdown.customs_cents + breakdown.handling_cents + breakdown.last_mile_cents)
-    : 0;
-  const shippingGbp = eurToGbp(shippingEurCents);
+  const freightGbp = eurToGbp(breakdown?.freight_cents ?? 0);
+  const fuelGbp = eurToGbp(breakdown?.fuel_cents ?? 0);
+  const insuranceGbp = eurToGbp(breakdown?.insurance_cents ?? 0);
+  const customsGbp = eurToGbp(breakdown?.customs_cents ?? 0);
+  const handlingGbp = eurToGbp(breakdown?.handling_cents ?? 0);
+  const lastMileGbp = eurToGbp(breakdown?.last_mile_cents ?? 0);
+  const shippingGbp = freightGbp + fuelGbp + insuranceGbp + customsGbp + handlingGbp + lastMileGbp;
   const dutyGbp = eurToGbp(breakdown?.duty_cents ?? 0);
   const vatGbp = eurToGbp(breakdown?.vat_cents ?? 0);
   const totalGbp = goodsGbp + shippingGbp + dutyGbp + vatGbp;
@@ -190,22 +192,71 @@ export const UkLandedCostPanel = ({
               {breakdown?.reason || "No shipping rate available."}
             </p>
           ) : (
-            <div className="space-y-1">
-              <Row label={`Goods (net, after trade discount)`} value={fmtGbp(goodsGbp)} />
-              <Row
-                label={`Shipping — ${breakdown.selected_carrier} · ${mode === "road" ? "Road" : "Courier"}${breakdown.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}`}
-                value={fmtGbp(shippingGbp)}
-              />
-              {dutyGbp > 0 && <Row label="Import duty" value={fmtGbp(dutyGbp)} />}
-              <Row label={`UK VAT (${(((breakdown.vat_cents) / Math.max(1, goodsEurCents + breakdown.freight_cents + breakdown.duty_cents)) * 100).toFixed(0)}%)`} value={fmtGbp(vatGbp)} />
-              <div className="flex justify-between border-t border-border pt-1.5 mt-1 font-display text-xs uppercase tracking-wider text-foreground">
-                <span>DDP delivered London</span>
-                <span className="font-medium">{fmtGbp(totalGbp)}</span>
+            <div className="space-y-2">
+              {/* Goods */}
+              <div className="space-y-1">
+                <Row label="Goods (net, after trade discount)" value={fmtGbp(goodsGbp)} bold />
               </div>
-              <p className="font-body text-[10px] text-muted-foreground/80 leading-relaxed pt-1">
-                Indicative. EUR→GBP @ {fxEurGbp?.toFixed(4)} (+{(FX_BUFFER * 100).toFixed(0)}% FX buffer).
-                Maison Affluency handles UK customs, duty &amp; VAT (DDP). Final invoice in GBP on confirmation.
-              </p>
+
+              {/* Freight breakdown */}
+              <div className="space-y-1 border-t border-border/40 pt-2">
+                <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                  <span>
+                    Freight — {breakdown.selected_carrier} · {mode === "road" ? "Road white-glove" : "Courier express"}
+                    {breakdown.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}
+                  </span>
+                  <span className="tabular-nums">{fmtGbp(shippingGbp)}</span>
+                </div>
+                {freightGbp > 0 && <Row label="· Base freight (Paris → London)" value={fmtGbp(freightGbp)} indent />}
+                {fuelGbp > 0 && <Row label="· Fuel surcharge" value={fmtGbp(fuelGbp)} indent />}
+                {insuranceGbp > 0 && <Row label="· Cargo insurance" value={fmtGbp(insuranceGbp)} indent />}
+                {customsGbp > 0 && <Row label="· Customs clearance" value={fmtGbp(customsGbp)} indent />}
+                {handlingGbp > 0 && <Row label="· Handling & documentation" value={fmtGbp(handlingGbp)} indent />}
+                {lastMileGbp > 0 && <Row label="· Last-mile delivery (London)" value={fmtGbp(lastMileGbp)} indent />}
+              </div>
+
+              {/* Duty + VAT */}
+              <div className="space-y-1 border-t border-border/40 pt-2">
+                <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                  <span>UK Import Taxes (DDP)</span>
+                </div>
+                <Row
+                  label={`· Import duty (${breakdown.duty_cents > 0 ? ((breakdown.duty_cents / Math.max(1, goodsEurCents)) * 100).toFixed(1) : "0"}% — furniture/lighting)`}
+                  value={fmtGbp(dutyGbp)}
+                  indent
+                />
+                <Row
+                  label={`· UK VAT (${(((breakdown.vat_cents) / Math.max(1, goodsEurCents + breakdown.freight_cents + breakdown.duty_cents)) * 100).toFixed(0)}% on goods + freight + duty)`}
+                  value={fmtGbp(vatGbp)}
+                  indent
+                />
+              </div>
+
+              {/* Total */}
+              <div className="flex justify-between border-t-2 border-foreground/20 pt-2 mt-1 font-display text-sm uppercase tracking-wider text-foreground">
+                <span>DDP delivered London — all in</span>
+                <span className="font-medium tabular-nums">{fmtGbp(totalGbp)}</span>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
+                <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
+                  <span className="font-medium text-foreground/80">Indicative estimate.</span>{" "}
+                  Freight is calculated on declared volume ({cbm} CBM) and weight ({kg} kg) — actual crating
+                  may vary on confirmation. Prices include UK customs clearance, import duty and VAT under
+                  Delivered Duty Paid (DDP) — no further charges on delivery to London.
+                </p>
+                <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
+                  <span className="font-medium text-foreground/80">FX:</span>{" "}
+                  EUR→GBP @ {fxEurGbp?.toFixed(4)} including a +{(FX_BUFFER * 100).toFixed(0)}% buffer to
+                  cushion currency movement between quote and invoice. Final GBP invoice issued on order
+                  confirmation at the rate of the day; the buffer protects the quoted figure for ~30 days.
+                </p>
+                <p className="font-body text-[10px] text-muted-foreground/70 leading-relaxed italic">
+                  Quote remains in {quoteCurrency} as the working currency. This panel is a courtesy
+                  landed-cost view for the UK end-client.
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -214,8 +265,8 @@ export const UkLandedCostPanel = ({
   );
 };
 
-const Row = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between font-body text-xs text-muted-foreground">
+const Row = ({ label, value, bold, indent }: { label: string; value: string; bold?: boolean; indent?: boolean }) => (
+  <div className={`flex justify-between font-body text-xs ${bold ? "text-foreground font-medium" : "text-muted-foreground"} ${indent ? "pl-2" : ""}`}>
     <span className="pr-2">{label}</span>
     <span className="tabular-nums">{value}</span>
   </div>
