@@ -7,7 +7,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 
 interface ExpandableSpecProps {
@@ -34,8 +33,8 @@ interface ExpandableSpecProps {
    * from the materials field. Has no effect if the dropdown isn't auto-split.
    */
   autoDetectedHint?: boolean;
-  /** Controlled selected index (for parent-managed selection, e.g. trade pricing). */
-  value?: number;
+  /** Controlled selected index (for parent-managed selection, e.g. trade pricing). Use null for an explicit cleared state. */
+  value?: number | null;
   onChange?: (index: number) => void;
   /**
    * Indices that should appear visually crossed-out and be unselectable.
@@ -92,7 +91,7 @@ export default function ExpandableSpec({
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
-  const selectedIdx = value ?? internalIdx;
+  const selectedIdx = value !== undefined ? value : internalIdx;
   const showAutoHint = autoDetectedHint && didAutoSplit;
 
   if (lines.length === 0) return null;
@@ -151,7 +150,7 @@ export default function ExpandableSpec({
               "focus:ring-0 focus:ring-offset-0 focus:outline-none",
               "hover:text-foreground transition-colors",
               "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
-              selectedIdx == null
+              !hasSelection
                 ? "text-muted-foreground"
                 : emphasized
                 ? "text-foreground font-medium"
@@ -160,7 +159,7 @@ export default function ExpandableSpec({
           >
             <span className="shrink-0">{icon}</span>
             <span className="flex-1 truncate">
-              <SelectValue placeholder={placeholder} />
+              {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
             </span>
           </SelectTrigger>
           <SelectContent className="z-[130] bg-background border-border">
