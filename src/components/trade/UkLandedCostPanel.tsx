@@ -11,7 +11,8 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { estimateShipping, ShippingBreakdown } from "@/lib/shippingEstimator";
-import { Truck, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Truck, Loader2, ChevronDown, ChevronUp, FileDown } from "lucide-react";
+import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
 
 interface Props {
   /** Net goods subtotal AFTER trade discount, in the quote's currency */
