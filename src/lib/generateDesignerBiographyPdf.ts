@@ -917,9 +917,9 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     }
     if (figure.media.isVideo) {
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.5);
+      doc.setFontSize(8);
       doc.setTextColor(80, 80, 160);
-      doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(figure.media.url)}`, mediaX, mediaY + 6, { url: figure.media.url });
+      doc.textWithLink("\u25B6  Watch video", mediaX, mediaY + 6, { url: figure.media.url });
       mediaY += linkH;
     }
 
