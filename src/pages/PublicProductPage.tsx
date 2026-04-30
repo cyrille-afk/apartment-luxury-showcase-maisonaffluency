@@ -614,7 +614,20 @@ const PublicProductPage: React.FC = () => {
     const requiresBaseAndTopSelection =
       variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
       variantsForAxes.some((v: any) => v.top && String(v.top).trim());
-    if (requiresBaseAndTopSelection && opts && (!opts.base || !opts.top)) {
+    // If the Base axis only offers one distinct value, treat it as implicitly
+    // selected so picking just the Top still resolves the composite key.
+    const distinctBases = Array.from(
+      new Set(variantsForAxes.map((v: any) => (v.base || "").trim()).filter(Boolean))
+    );
+    const distinctTops = Array.from(
+      new Set(variantsForAxes.map((v: any) => (v.top || "").trim()).filter(Boolean))
+    );
+    const effectiveOpts = opts ? { ...opts } : opts;
+    if (requiresBaseAndTopSelection && effectiveOpts) {
+      if (!effectiveOpts.base && distinctBases.length === 1) effectiveOpts.base = distinctBases[0];
+      if (!effectiveOpts.top && distinctTops.length === 1) effectiveOpts.top = distinctTops[0];
+    }
+    if (requiresBaseAndTopSelection && effectiveOpts && (!effectiveOpts.base || !effectiveOpts.top)) {
       // Do not resolve partial Base/Top state through a single-axis fallback;
       // wait for a complete pairing, otherwise clearing one axis can show the
       // wrong mapped finish image.
@@ -625,11 +638,11 @@ const PublicProductPage: React.FC = () => {
     // Prefer the composite Base|Top|Size key when present, then fall back to
     // Base|Top, then single-axis. Same canonical resolver as TradeProductPage
     // so hero, hover, and any related image always come from one source key.
-    const idx = opts && (opts.base || opts.top || opts.size)
+    const idx = effectiveOpts && (effectiveOpts.base || effectiveOpts.top || effectiveOpts.size)
       ? resolveVariantImageIndex(productFinishMap, {
-          base: opts.base,
-          top: opts.top,
-          size: opts.size,
+          base: effectiveOpts.base,
+          top: effectiveOpts.top,
+          size: effectiveOpts.size,
           label,
           imageCount: images.length,
         })
