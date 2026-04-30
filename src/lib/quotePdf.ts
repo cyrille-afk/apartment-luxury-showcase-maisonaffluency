@@ -53,6 +53,10 @@ export interface QuotePdfArgs {
   subtotalCents: number;
   tradeDiscountPct: number;          // 0..1 (e.g. 0.08)
   tradeDiscountApplied: boolean;
+  /** Active tier label (e.g. "Silver"). When provided, shown in the discount row + ladder. */
+  tierLabel?: string | null;
+  /** Tier ladder rendered under totals so the client understands why this rate applied. */
+  tierBreakdown?: Array<{ label: string; pct: number; minSpendCents: number; active: boolean }>;
   gstEnabled: boolean;
   gstRate: number;                   // percent
   insurancePremiumCents?: number;
