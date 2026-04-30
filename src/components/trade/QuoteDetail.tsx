@@ -109,6 +109,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const isFullyPaid = quoteStatus === "paid";
   const isReadOnly = !isDraft && !isSuperAdmin;
 
+  const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+    draft:        { label: "Draft",        cls: "bg-muted text-muted-foreground" },
+    submitted:    { label: "Submitted",    cls: "bg-primary/10 text-primary" },
+    reviewed:     { label: "Reviewed",     cls: "bg-emerald-500/10 text-emerald-600" },
+    priced:       { label: "Priced",       cls: "bg-amber-500/10 text-amber-600" },
+    confirmed:    { label: "Confirmed",    cls: "bg-blue-500/10 text-blue-600" },
+    deposit_paid: { label: "Deposit Paid", cls: "bg-emerald-500/10 text-emerald-600" },
+    paid:         { label: "Fully Paid",   cls: "bg-emerald-600 text-white" },
+    cancelled:    { label: "Cancelled",    cls: "bg-destructive/10 text-destructive" },
+  };
+  const StatusBadge = ({ className = "" }: { className?: string }) => {
+    const s = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "bg-muted text-muted-foreground" };
+    return (
+      <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-body uppercase tracking-wider ${s.cls} ${className}`}>
+        {s.label}
+      </span>
+    );
+  };
+
   const createdDate = new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
   expiryDate.setDate(expiryDate.getDate() + 7);
@@ -584,13 +603,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Quote Number</span>
                 <span className="text-foreground">{quoteNumber}</span>
               </div>
-              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
-                quoteStatus === "submitted" ? "bg-primary/10 text-primary" :
-                quoteStatus === "reviewed" ? "bg-emerald-500/10 text-emerald-600" :
-                "bg-muted text-muted-foreground"
-              }`}>
-                {quoteStatus}
-              </span>
+              <StatusBadge className="mt-1" />
             </div>
 
             {/* Right: Logo + Company details */}
@@ -1230,7 +1243,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                  <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-1">Confirm &amp; Pay</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-display text-xs uppercase tracking-[0.15em] text-foreground">Confirm &amp; Pay</p>
+                    <StatusBadge />
+                  </div>
                   <p className="font-body text-[11px] text-muted-foreground">
                     Pay your 60% deposit by card to confirm this order, or click Confirm Order to pay later by bank transfer.
                   </p>
@@ -1286,6 +1302,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
                     <CheckCircle className="h-4 w-4" />
                     <span>{isPayingBalance ? "Deposit paid — balance due" : "Order confirmed"}</span>
+                    <StatusBadge />
                   </div>
                   {isPayingBalance && (
                     <p className="font-body text-[10px] text-muted-foreground">
@@ -1336,6 +1353,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
               <CheckCircle className="h-4 w-4" />
               <span>Fully paid</span>
+              <StatusBadge />
             </div>
           </div>
         )}
