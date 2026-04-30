@@ -167,6 +167,8 @@ export default function Studios() {
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
         <link rel="canonical" href={canonical} />
+        <link rel="alternate" hrefLang="en" href={canonical} />
+        <link rel="alternate" hrefLang="x-default" href={canonical} />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
