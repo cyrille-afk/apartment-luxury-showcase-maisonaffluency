@@ -74,7 +74,11 @@ serve(async () => {
     .eq("is_published", true)
     .order("slug");
 
-  const staticEntries = STATIC_URLS.map((u) => urlEntry(u.loc, today, u.changefreq, u.priority));
+  const staticEntries = STATIC_URLS.map((u) =>
+    u.loc === "/studios"
+      ? urlEntryWithHreflang(u.loc, today, u.changefreq, u.priority)
+      : urlEntry(u.loc, today, u.changefreq, u.priority)
+  );
 
   const designerEntries = (designers || []).map((d: { slug: string; updated_at: string }) =>
     urlEntry(`/designers/${d.slug}`, d.updated_at.split("T")[0], "monthly", "0.7")
@@ -89,11 +93,11 @@ serve(async () => {
   );
 
   const studioEntries = (studios || []).map((s: { slug: string; updated_at: string }) =>
-    urlEntry(`/studios/${s.slug}`, s.updated_at.split("T")[0], "monthly", "0.7")
+    urlEntryWithHreflang(`/studios/${s.slug}`, s.updated_at.split("T")[0], "monthly", "0.7")
   );
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${[...staticEntries, ...designerEntries, ...articleEntries, ...productEntries, ...studioEntries].join("\n")}
 </urlset>`;
 
