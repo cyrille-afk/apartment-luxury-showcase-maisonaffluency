@@ -122,6 +122,13 @@ export default function TradeFloorPlanFFE() {
       return;
     }
     setSuggesting(true);
+    setProgressStep(0);
+    setElapsed(0);
+    const startedAt = Date.now();
+    const tick = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 500);
+    const stepTimer = setInterval(() => {
+      setProgressStep((s) => Math.min(s + 1, PROGRESS_STEPS.length - 2));
+    }, 4500);
     try {
       const brief = {
         rooms: roomsText.split(",").map((s) => s.trim()).filter(Boolean),
@@ -133,6 +140,7 @@ export default function TradeFloorPlanFFE() {
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const next = data as Suggestions;
+      setProgressStep(PROGRESS_STEPS.length - 1);
       setSuggestions(next);
       setActiveRoom(0);
       if (planId) {
@@ -145,6 +153,8 @@ export default function TradeFloorPlanFFE() {
     } catch (e: any) {
       toast({ title: "Could not generate layout", description: e.message, variant: "destructive" });
     } finally {
+      clearInterval(tick);
+      clearInterval(stepTimer);
       setSuggesting(false);
     }
   };
