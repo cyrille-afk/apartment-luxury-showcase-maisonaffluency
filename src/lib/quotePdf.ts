@@ -15,7 +15,7 @@
  * Used from the "Download PDF" button on the QuoteDetail screen.
  */
 import jsPDF from "jspdf";
-import affluencyLogoUrl from "@/assets/affluency-logo-square.jpg";
+import affluencyLogoUrl from "@/assets/affluency-quote-logo.jpg";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
