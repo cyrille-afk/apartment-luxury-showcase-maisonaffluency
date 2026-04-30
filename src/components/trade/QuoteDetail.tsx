@@ -131,7 +131,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const createdDate = new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
-  expiryDate.setDate(expiryDate.getDate() + 7);
+  expiryDate.setMonth(expiryDate.getMonth() + 1);
 
   const formatDate = (d: Date) =>
     d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
