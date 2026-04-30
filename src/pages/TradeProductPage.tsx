@@ -706,7 +706,7 @@ const TradeProductPage: React.FC = () => {
                   text={singleMaterialOptions.join("\n")}
                   placeholder="Select your material choice"
                   emphasized
-                  value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : undefined}
+                  value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : null}
                   onChange={(idx) => {
                     const newMat = singleMaterialOptions[idx] ?? null;
                     setSelectedSingleMaterial(newMat);
@@ -745,7 +745,7 @@ const TradeProductPage: React.FC = () => {
                     text={baseOptions.join("\n")}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
-                    value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : undefined}
+                    value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
                     onChange={(idx) => {
                       if (idx < 0) {
                         clearAllDualSelections();
@@ -776,7 +776,7 @@ const TradeProductPage: React.FC = () => {
                     text={topOptions.join("\n")}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
-                    value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : undefined}
+                    value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : null}
                     onChange={(idx) => {
                       if (idx < 0) {
                         clearAllDualSelections();
@@ -822,7 +822,7 @@ const TradeProductPage: React.FC = () => {
                   text={singleSizeOptions.join("\n")}
                   emphasized
                   placeholder="Select your size"
-                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : undefined}
+                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
                   onChange={(idx) => {
                     const newSize = singleSizeOptions[idx] ?? null;
                     setSelectedSingleSize(newSize);
@@ -861,7 +861,7 @@ const TradeProductPage: React.FC = () => {
                   }
                   emphasized
                   placeholder="Select your size"
-                  value={hasVariants ? (selectedVariantIdx ?? undefined) : undefined}
+                  value={hasVariants ? selectedVariantIdx : undefined}
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
                 />
               )}
@@ -871,7 +871,7 @@ const TradeProductPage: React.FC = () => {
                   text={dualSizeOptions.join("\n")}
                   emphasized
                   placeholder="Select your size"
-                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
+                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
                   onChange={(idx) => {
                     if (idx < 0) {
                       clearAllDualSelections();
