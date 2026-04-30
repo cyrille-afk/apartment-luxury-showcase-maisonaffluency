@@ -80,6 +80,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // The user can still toggle it on manually if needed.
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstUserTouched, setGstUserTouched] = useState(false);
+  /** Display the totals block in the quote currency or in GBP DDP landed cost. */
+  const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
   const [gstRate, setGstRate] = useState(9);
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
