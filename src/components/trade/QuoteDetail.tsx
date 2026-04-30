@@ -39,6 +39,8 @@ interface QuoteItemWithProduct {
     lead_time: string | null;
     sku: string | null;
   } | null;
+  /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
+  edition?: string | null;
 }
 
 interface QuoteDetailProps {
