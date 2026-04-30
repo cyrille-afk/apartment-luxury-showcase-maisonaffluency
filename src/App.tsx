@@ -52,6 +52,7 @@ const TradeShippingEstimator = lazy(() => import("./pages/TradeShippingEstimator
 const TradeAdminShippingRates = lazy(() => import("./pages/TradeAdminShippingRates"));
 const TradeAdminShippingSurcharges = lazy(() => import("./pages/TradeAdminShippingSurcharges"));
 const TradeAdminTaxonomyAudit = lazy(() => import("./pages/TradeAdminTaxonomyAudit"));
+const TradeAdminSyncStatus = lazy(() => import("./pages/TradeAdminSyncStatus"));
 const TradeAdminBrandLeadTimes = lazy(() => import("./pages/TradeAdminBrandLeadTimes"));
 const TradeAdminTiers = lazy(() => import("./pages/TradeAdminTiers"));
 const TradeAdminCadAssets = lazy(() => import("./pages/TradeAdminCadAssets"));
@@ -266,6 +267,7 @@ const App = () => {
                     <Route path="admin/shipping-rates" element={<TradeAdminShippingRates />} />
                     <Route path="admin/shipping-surcharges" element={<TradeAdminShippingSurcharges />} />
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
+                    <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
                     <Route path="admin/tiers" element={<TradeAdminTiers />} />
                     <Route path="admin/cad-assets" element={<TradeAdminCadAssets />} />
