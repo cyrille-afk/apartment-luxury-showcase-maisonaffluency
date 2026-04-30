@@ -294,10 +294,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
             onChange={(idx) => {
               if (idx < 0) {
-                setSelBase(null);
-                setSelTop(null);
-                setSelDualSize(null);
-                onMaterialChange?.(null);
+                clearAllDualSelections();
                 return;
               }
               const v = topOptions[idx] ?? null;
