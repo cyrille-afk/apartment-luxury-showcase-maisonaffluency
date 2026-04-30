@@ -593,7 +593,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
     doc.setTextColor(r.muted ? MUTED[0] : FG[0], r.muted ? MUTED[1] : FG[1], r.muted ? MUTED[2] : FG[2]);
     doc.text(r.label, x + 14, cy);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    doc.text(`${r.value} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+    doc.text(r.value, x + blockW - 14, cy, { align: "right" });
     cy += rowH;
   });
 
@@ -606,7 +606,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFontSize(11);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
   doc.text("Order total", x + 14, cy);
-  doc.text(`${fmtMoney(grand, args.currency)} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(grand, args.currency), x + blockW - 14, cy, { align: "right" });
   cy += 18;
 
   // deposit / balance
@@ -614,10 +614,10 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFontSize(9);
   doc.setTextColor(FG[0], FG[1], FG[2]);
   doc.text("60% deposit due now", x + 14, cy);
-  doc.text(`${fmtMoney(deposit, args.currency)} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(deposit, args.currency), x + blockW - 14, cy, { align: "right" });
   cy += 14;
   doc.text("40% balance before shipment", x + 14, cy);
-  doc.text(`${fmtMoney(balance, args.currency)} ${args.currency}`, x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
 
   return y + totalH + 12;
 }
