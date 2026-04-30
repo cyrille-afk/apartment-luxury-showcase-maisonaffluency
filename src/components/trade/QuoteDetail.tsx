@@ -8,6 +8,7 @@ import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
+import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
