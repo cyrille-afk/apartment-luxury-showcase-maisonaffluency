@@ -23,7 +23,7 @@ interface ProductImageGalleryProps {
   onIndexChange?: (index: number) => void;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
   // Sync with external controlled index. Re-runs whenever the index *or* the
