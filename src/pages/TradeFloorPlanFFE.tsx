@@ -911,25 +911,48 @@ function SidePanel({
     <div className="space-y-3 p-4 rounded-lg border border-border bg-background max-h-[600px] overflow-y-auto">
       <p className="font-body text-xs italic text-muted-foreground">{room.summary}</p>
       <div className="space-y-1.5">
-        {room.items.map((x, i) => {
-          const isSel = selectedIdxs.includes(i);
-          return (
-            <button
-              key={i}
-              onClick={(e) => onSelect(i, e.shiftKey || e.metaKey || e.ctrlKey)}
-              className={`w-full flex items-center gap-2 p-1.5 rounded text-left border ${
-                isSel ? "border-primary bg-muted" : "border-transparent hover:bg-muted/50"
-              }`}
-            >
-              <span className={`inline-block w-3 h-3 rounded-sm border ${isSel ? "bg-primary border-primary" : "border-muted-foreground/40"}`} />
-              <img src={x.product.image_url} alt="" className="w-10 h-10 object-cover rounded" />
-              <div className="min-w-0 flex-1">
-                <span className="block font-body text-xs font-medium text-foreground truncate">{x.product.title}</span>
-                <span className="block font-body text-[10px] text-muted-foreground truncate">{x.product.designer}</span>
-              </div>
-            </button>
-          );
-        })}
+        {(() => {
+          // Group identical SKUs (same title + designer) but keep canvas indices
+          const groups = new Map<string, { idxs: number[]; product: typeof room.items[number]["product"] }>();
+          room.items.forEach((x, i) => {
+            const key = `${x.product.title}__${x.product.designer}`;
+            const g = groups.get(key);
+            if (g) g.idxs.push(i);
+            else groups.set(key, { idxs: [i], product: x.product });
+          });
+          return Array.from(groups.values()).map((g, gi) => {
+            const allSel = g.idxs.every((i) => selectedIdxs.includes(i));
+            const someSel = !allSel && g.idxs.some((i) => selectedIdxs.includes(i));
+            return (
+              <button
+                key={gi}
+                onClick={(e) => {
+                  const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+                  // Toggle whole group: select first instance (or extend with all instances if additive)
+                  if (additive) {
+                    g.idxs.forEach((i) => onSelect(i, true));
+                  } else {
+                    onSelect(g.idxs[0], false);
+                    g.idxs.slice(1).forEach((i) => onSelect(i, true));
+                  }
+                }}
+                className={`w-full flex items-center gap-2 p-1.5 rounded text-left border ${
+                  allSel ? "border-primary bg-muted" : someSel ? "border-primary/40 bg-muted/40" : "border-transparent hover:bg-muted/50"
+                }`}
+              >
+                <span className={`inline-block w-3 h-3 rounded-sm border ${allSel ? "bg-primary border-primary" : someSel ? "bg-primary/40 border-primary/60" : "border-muted-foreground/40"}`} />
+                <img src={g.product.image_url} alt="" className="w-10 h-10 object-cover rounded" />
+                <div className="min-w-0 flex-1">
+                  <span className="block font-body text-xs font-medium text-foreground truncate">
+                    {g.product.title}
+                    {g.idxs.length > 1 && <span className="ml-1 text-muted-foreground">×{g.idxs.length}</span>}
+                  </span>
+                  <span className="block font-body text-[10px] text-muted-foreground truncate">{g.product.designer}</span>
+                </div>
+              </button>
+            );
+          });
+        })()}
       </div>
 
       {multi && (
