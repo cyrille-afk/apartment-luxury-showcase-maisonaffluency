@@ -5,9 +5,18 @@
  * Pure client-side via jsPDF — bypasses the browser print dialog so no
  * URL / date / page-number headers and footers are injected by Chrome/Safari.
  *
+ * Includes:
+ *   • Affluency logo + full company address block
+ *   • Product thumbnails (first gallery image, fetched as data URL)
+ *   • Insurance & coverage tier descriptions
+ *   • Bank transfer details (IBAN / BIC)
+ *   • Terms & Conditions paragraph
+ *
  * Used from the "Download PDF" button on the QuoteDetail screen.
  */
 import jsPDF from "jspdf";
+import affluencyLogoUrl from "@/assets/affluency-logo-square.jpg";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -26,6 +35,7 @@ export interface QuotePdfLine {
   quantity: number;
   unitPriceCents: number | null;     // already in quote currency
   lineTotalCents: number | null;     // already in quote currency
+  imageUrl?: string | null;          // optional product thumbnail
 }
 
 export interface QuotePdfArgs {
@@ -46,6 +56,7 @@ export interface QuotePdfArgs {
   insurancePremiumCents?: number;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
+  insuranceEnabled?: boolean;
   notes?: string | null;
 }
 
@@ -63,30 +74,74 @@ const fmtMoney = (cents: number | null | undefined, currency: string): string =>
 const fmtDate = (d: Date) =>
   d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-export function buildQuotePdf(args: QuotePdfArgs): jsPDF {
+/**
+ * Fetch an image URL and return a base64 data URL suitable for jsPDF.addImage.
+ * Uses Cloudinary auto-optimization for non-Cloudinary URLs (proxy → CORS-safe).
+ * Returns null on any failure (network, CORS, missing) so the PDF still renders.
+ */
+async function fetchImageDataUrl(url: string): Promise<{ data: string; w: number; h: number } | null> {
+  try {
+    // Inject a small Cloudinary thumbnail transform — fast + CORS-friendly via fetch proxy
+    const optimized = optimizeImageUrl(url, "w_400,h_400,c_fill,q_auto:good,f_jpg");
+    const res = await fetch(optimized, { mode: "cors" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    // Decode dimensions
+    const dims: { w: number; h: number } = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth || 1, h: img.naturalHeight || 1 });
+      img.onerror = () => resolve({ w: 1, h: 1 });
+      img.src = dataUrl;
+    });
+    return { data: dataUrl, w: dims.w, h: dims.h };
+  } catch {
+    return null;
+  }
+}
+
+export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 48;
   const contentW = pageW - 2 * M;
 
-  drawHeader(doc, args, pageW, M);
+  // Pre-fetch logo + product images in parallel (best-effort)
+  const [logo, ...productImages] = await Promise.all([
+    fetchImageDataUrl(affluencyLogoUrl),
+    ...args.lines.map((l) => (l.imageUrl ? fetchImageDataUrl(l.imageUrl) : Promise.resolve(null))),
+  ]);
+
+  drawHeader(doc, args, pageW, M, logo);
 
   let y = 168;
 
-  // ---- Meta block (Date / Expiry / Quote # / Client / Project)
-  y = drawMetaBlock(doc, args, M, y, contentW);
+  // ---- Company address block (left) + meta (right)
+  y = drawCompanyAndMeta(doc, args, M, y, contentW);
 
-  // ---- Line items table
-  y = drawTable(doc, args, M, y, contentW, pageH);
+  // ---- Line items table (with thumbnails)
+  y = drawTable(doc, args, M, y, contentW, pageH, productImages);
 
   // ---- Totals block (right aligned)
-  y = ensureSpace(doc, args, y, 220, M, pageW, pageH);
+  y = ensureSpace(doc, y, 220, pageH);
   y = drawTotals(doc, args, M, y, contentW);
+
+  // ---- Insurance & coverage (if enabled)
+  if (args.insuranceEnabled) {
+    y = ensureSpace(doc, y, 130, pageH);
+    y += 18;
+    y = drawInsuranceBlock(doc, args, M, y, contentW);
+  }
 
   // ---- Notes
   if (args.notes && args.notes.trim()) {
-    y = ensureSpace(doc, args, y, 80, M, pageW, pageH);
+    y = ensureSpace(doc, y, 80, pageH);
     y += 18;
     sectionTitle(doc, "Project notes", M, y);
     y += 18;
@@ -98,25 +153,15 @@ export function buildQuotePdf(args: QuotePdfArgs): jsPDF {
     y += wrapped.length * 12;
   }
 
-  // ---- Payment terms
-  y = ensureSpace(doc, args, y, 120, M, pageW, pageH);
+  // ---- Payment terms + bank details
+  y = ensureSpace(doc, y, 200, pageH);
   y += 22;
-  sectionTitle(doc, "Payment terms", M, y);
-  y += 16;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(FG[0], FG[1], FG[2]);
-  const terms = [
-    "60% deposit due on order confirmation; 40% balance due before shipment.",
-    "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
-    "Lead times start from receipt of cleared deposit and finalised specifications.",
-    `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
-  ];
-  terms.forEach((t) => {
-    const wrapped = doc.splitTextToSize(`• ${t}`, contentW);
-    doc.text(wrapped, M, y);
-    y += wrapped.length * 11 + 2;
-  });
+  y = drawPaymentTerms(doc, args, M, y, contentW);
+
+  // ---- Terms & Conditions
+  y = ensureSpace(doc, y, 90, pageH);
+  y += 18;
+  y = drawTermsAndConditions(doc, M, y, contentW);
 
   // ---- Footer on every page
   drawFooterAllPages(doc, args, pageW, pageH, M);
@@ -125,20 +170,38 @@ export function buildQuotePdf(args: QuotePdfArgs): jsPDF {
 }
 
 // -------- Header band ---------------------------------------------------
-function drawHeader(doc: jsPDF, args: QuotePdfArgs, pageW: number, M: number) {
+function drawHeader(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  pageW: number,
+  M: number,
+  logo: { data: string; w: number; h: number } | null,
+) {
   doc.setFillColor(JADE[0], JADE[1], JADE[2]);
   doc.rect(0, 0, pageW, 120, "F");
+
+  // Logo (left of brand text), if available
+  let textX = M;
+  if (logo) {
+    const logoSize = 56;
+    try {
+      doc.addImage(logo.data, "JPEG", M, 32, logoSize, logoSize);
+      textX = M + logoSize + 14;
+    } catch {
+      /* ignore — fall back to text only */
+    }
+  }
 
   // Brand
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("MAISON AFFLUENCY", M, 50);
+  doc.text("MAISON AFFLUENCY", textX, 56);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("Curated furniture, lighting and objets for trade", M, 68);
-  doc.text("Affluency Etc Pte. Ltd. - Singapore", M, 82);
+  doc.text("Curated furniture, lighting and objets for trade", textX, 72);
+  doc.text("Affluency Etc Pte. Ltd. - Singapore", textX, 86);
 
   // Right side: Quote ref + status
   doc.setFont("helvetica", "bold");
@@ -167,80 +230,130 @@ function drawHeader(doc: jsPDF, args: QuotePdfArgs, pageW: number, M: number) {
   doc.line(M, 110, pageW - M, 110);
 }
 
-// -------- Meta block ----------------------------------------------------
-function drawMetaBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
-  const colW = contentW / 4;
-  const labels = [
-    ["DATE", fmtDate(args.createdAt)],
-    ["EXPIRY", fmtDate(args.expiryAt)],
-    ["CLIENT", args.clientName || "—"],
-    ["PROJECT", args.projectName || "—"],
+// -------- Company address (left) + meta (right) -------------------------
+function drawCompanyAndMeta(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  M: number,
+  y: number,
+  contentW: number,
+): number {
+  const colW = contentW / 2;
+
+  // Left: company address
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("AFFLUENCY ETC PTE. LTD.", M, y);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  const addressLines = [
+    "1 Grange Garden, #16-05",
+    "The Grange, 249631",
+    "Singapore",
   ];
-  labels.forEach(([label, value], i) => {
-    const x = M + colW * i;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text(label, x, y);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(FG[0], FG[1], FG[2]);
-    const wrapped = doc.splitTextToSize(String(value), colW - 8);
-    doc.text(wrapped[0], x, y + 14);
+  addressLines.forEach((ln, i) => {
+    doc.text(ln, M, y + 14 + i * 11);
   });
-  return y + 38;
+
+  // Right: meta in 4 mini-columns (Date / Expiry / Client / Project)
+  const metaX = M + colW;
+  const metaColW = colW / 2;
+  const metaRows = [
+    [["DATE", fmtDate(args.createdAt)], ["EXPIRY", fmtDate(args.expiryAt)]],
+    [["CLIENT", args.clientName || "—"], ["PROJECT", args.projectName || "—"]],
+  ];
+  metaRows.forEach((row, rIdx) => {
+    row.forEach(([label, value], cIdx) => {
+      const x = metaX + cIdx * metaColW;
+      const ry = y + rIdx * 26;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text(label, x, ry);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      const wrapped = doc.splitTextToSize(String(value), metaColW - 8);
+      doc.text(wrapped[0], x, ry + 12);
+    });
+  });
+
+  return y + 60;
 }
 
 // -------- Items table ---------------------------------------------------
-function drawTable(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number, pageH: number): number {
-  // Columns: Description (flex), Qty, Unit, Amount
-  const colQty = 50;
-  const colUnit = 90;
-  const colAmt = 90;
-  const colDesc = contentW - colQty - colUnit - colAmt;
-  const xQty = M + colDesc;
+function drawTable(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  M: number,
+  y: number,
+  contentW: number,
+  pageH: number,
+  images: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[],
+): number {
+  // Columns: Image | Description (flex) | Qty | Unit | Amount
+  const colImg = 56;
+  const colQty = 44;
+  const colUnit = 80;
+  const colAmt = 84;
+  const colDesc = contentW - colImg - colQty - colUnit - colAmt;
+  const xImg = M;
+  const xDesc = xImg + colImg;
+  const xQty = xDesc + colDesc;
   const xUnit = xQty + colQty;
   const xAmt = xUnit + colUnit;
   const rowRight = M + contentW;
 
-  // header row
-  doc.setFillColor(245, 244, 240);
-  doc.rect(M, y, contentW, 22, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-  doc.text("DESCRIPTION", M + 8, y + 14);
-  doc.text("QTY", xQty + colQty / 2, y + 14, { align: "center" });
-  doc.text("UNIT PRICE", xUnit + colUnit - 4, y + 14, { align: "right" });
-  doc.text(`AMOUNT (${args.currency})`, rowRight - 4, y + 14, { align: "right" });
+  const drawHeaderRow = (yy: number) => {
+    doc.setFillColor(245, 244, 240);
+    doc.rect(M, yy, contentW, 22, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+    doc.text("DESCRIPTION", xDesc + 6, yy + 14);
+    doc.text("QTY", xQty + colQty / 2, yy + 14, { align: "center" });
+    doc.text("UNIT PRICE", xUnit + colUnit - 4, yy + 14, { align: "right" });
+    doc.text(`AMOUNT (${args.currency})`, rowRight - 4, yy + 14, { align: "right" });
+  };
+
+  drawHeaderRow(y);
   y += 28;
 
   // body rows
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  args.lines.forEach((line) => {
-    // estimate row height: 1 line title + brand + optional dims/materials/lead/notes
+  args.lines.forEach((line, idx) => {
     const meta = [line.dimensions, line.materials, line.leadTime, line.notes].filter(Boolean) as string[];
-    const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 16);
+    const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
     const metaHeight = meta.length * 10;
     const titleHeight = titleWrap.length * 12;
-    const rowH = Math.max(40, 12 /* brand */ + titleHeight + metaHeight + 10);
+    const rowH = Math.max(56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
     // page break
     if (y + rowH > pageH - 90) {
       doc.addPage();
       y = 60;
-      // repeat header
-      doc.setFillColor(245, 244, 240);
-      doc.rect(M, y, contentW, 22, "F");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-      doc.text("DESCRIPTION", M + 8, y + 14);
-      doc.text("QTY", xQty + colQty / 2, y + 14, { align: "center" });
-      doc.text("UNIT PRICE", xUnit + colUnit - 4, y + 14, { align: "right" });
-      doc.text(`AMOUNT (${args.currency})`, rowRight - 4, y + 14, { align: "right" });
+      drawHeaderRow(y);
       y += 28;
       doc.setTextColor(FG[0], FG[1], FG[2]);
+    }
+
+    // image thumbnail (left)
+    const img = images[idx];
+    if (img) {
+      try {
+        const thumb = 48;
+        const thumbY = y + 4;
+        // square crop is already done by Cloudinary transform — draw centered
+        doc.addImage(img.data, "JPEG", xImg + 2, thumbY, thumb, thumb);
+      } catch {
+        /* ignore */
+      }
+    } else {
+      // placeholder block
+      doc.setFillColor(248, 247, 243);
+      doc.rect(xImg + 2, y + 4, 48, 48, "F");
     }
 
     // brand
@@ -250,22 +363,22 @@ function drawTable(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, content
     const brand = (line.brandName || "").includes(" - ")
       ? line.brandName.split(" - ")[0].trim()
       : (line.brandName || "");
-    if (brand) doc.text(brand.toUpperCase(), M + 8, y + 4);
+    if (brand) doc.text(brand.toUpperCase(), xDesc + 6, y + 8);
 
     // title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    doc.text(titleWrap, M + 8, y + 16);
+    doc.text(titleWrap, xDesc + 6, y + 20);
 
     // meta lines
-    let metaY = y + 16 + titleHeight + 2;
+    let metaY = y + 20 + titleHeight + 2;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
     meta.forEach((m) => {
-      const wrapped = doc.splitTextToSize(m, colDesc - 16);
-      doc.text(wrapped[0], M + 8, metaY);
+      const wrapped = doc.splitTextToSize(m, colDesc - 12);
+      doc.text(wrapped[0], xDesc + 6, metaY);
       metaY += 10;
     });
 
@@ -273,10 +386,10 @@ function drawTable(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, content
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    doc.text(String(line.quantity), xQty + colQty / 2, y + 16, { align: "center" });
-    doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 16, { align: "right" });
+    doc.text(String(line.quantity), xQty + colQty / 2, y + 20, { align: "center" });
+    doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
     doc.setFont("helvetica", "bold");
-    doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 16, { align: "right" });
+    doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
 
     y += rowH;
     // separator
@@ -375,6 +488,124 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   return y + totalH + 12;
 }
 
+// -------- Insurance block -----------------------------------------------
+function drawInsuranceBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
+  sectionTitle(doc, "Coverage & insurance", M, y);
+  y += 16;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  const intro = "Bundled transit & all-risk coverage with this quote. Premium is calculated on net value after trade discount.";
+  const introWrap = doc.splitTextToSize(intro, contentW);
+  doc.text(introWrap, M, y);
+  y += introWrap.length * 11 + 6;
+
+  // Tier descriptions table
+  const tiers = [
+    { label: "Standard transit", rate: "0.50%", desc: "Loss & damage in transit. Door-to-door coverage." },
+    { label: "Premium transit", rate: "1.00%", desc: "Adds handling, storage in-transit, partial loss." },
+    { label: "All-risk fine art", rate: "1.80%", desc: "Comprehensive incl. installation, storage 30 days, named perils." },
+  ];
+  const colW = contentW / 3;
+  tiers.forEach((t, i) => {
+    const x = M + i * colW;
+    const isSelected = args.insuranceLabel && t.label.toLowerCase().includes(args.insuranceLabel.toLowerCase().split(" ")[0]);
+    if (isSelected) {
+      doc.setFillColor(245, 244, 240);
+      doc.rect(x, y - 2, colW - 8, 56, "F");
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+    doc.text(t.label.toUpperCase(), x + 6, y + 10);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    doc.text(t.rate, x + 6, y + 24);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    const w = doc.splitTextToSize(t.desc, colW - 14);
+    doc.text(w, x + 6, y + 36);
+  });
+  y += 64;
+
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  const note = "Indicative premiums underwritten by Maison Affluency partner brokers. Final certificate issued upon order confirmation.";
+  const w = doc.splitTextToSize(note, contentW);
+  doc.text(w, M, y);
+  y += w.length * 10;
+  return y;
+}
+
+// -------- Payment terms + bank ------------------------------------------
+function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
+  sectionTitle(doc, "Payment terms", M, y);
+  y += 16;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  const terms = [
+    "60% deposit due on order confirmation; 40% balance due before shipment.",
+    "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
+    "Lead times start from receipt of cleared deposit and finalised specifications.",
+    `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
+  ];
+  terms.forEach((t) => {
+    const wrapped = doc.splitTextToSize(`• ${t}`, contentW);
+    doc.text(wrapped, M, y);
+    y += wrapped.length * 11 + 2;
+  });
+
+  y += 10;
+  // Bank box
+  const boxH = 78;
+  doc.setFillColor(250, 249, 246);
+  doc.rect(M, y, contentW, boxH, "F");
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.4);
+  doc.rect(M, y, contentW, boxH);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("PAYMENT BY BANK TRANSFER TO", M + 12, y + 14);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text("AFFLUENCY ETC PTE LTD", M + 12, y + 30);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text("1 Grange Garden, #16-05, Singapore, 249631", M + 12, y + 44);
+
+  // right column: bank IBAN
+  const rightX = M + contentW / 2 + 20;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text("IBAN: LT73 3250 0692 1856 8740", rightX, y + 30);
+  doc.text("BIC: REVOLT21", rightX, y + 44);
+  doc.text("Bank: Revolut Bank UAB", rightX, y + 58);
+
+  return y + boxH;
+}
+
+// -------- Terms & Conditions --------------------------------------------
+function drawTermsAndConditions(doc: jsPDF, M: number, y: number, contentW: number): number {
+  sectionTitle(doc, "Terms & conditions", M, y);
+  y += 16;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  const t = "The terms and conditions will be given separately and shall apply to the quotation given for the supply of any items detailed herein. Please read carefully.";
+  const w = doc.splitTextToSize(t, contentW);
+  doc.text(w, M, y);
+  return y + w.length * 11;
+}
+
 // -------- Helpers -------------------------------------------------------
 function sectionTitle(doc: jsPDF, label: string, x: number, y: number) {
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
@@ -387,15 +618,7 @@ function sectionTitle(doc: jsPDF, label: string, x: number, y: number) {
   doc.setTextColor(FG[0], FG[1], FG[2]);
 }
 
-function ensureSpace(
-  doc: jsPDF,
-  args: QuotePdfArgs,
-  y: number,
-  needed: number,
-  M: number,
-  pageW: number,
-  pageH: number,
-): number {
+function ensureSpace(doc: jsPDF, y: number, needed: number, pageH: number): number {
   if (y + needed > pageH - 70) {
     doc.addPage();
     return 60;
@@ -424,8 +647,8 @@ function drawFooterAllPages(doc: jsPDF, args: QuotePdfArgs, pageW: number, pageH
 }
 
 /** Trigger a download in the browser using a blob URL (session-safe). */
-export function downloadQuotePdf(args: QuotePdfArgs) {
-  const doc = buildQuotePdf(args);
+export async function downloadQuotePdf(args: QuotePdfArgs) {
+  const doc = await buildQuotePdf(args);
   const blob = doc.output("blob");
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
