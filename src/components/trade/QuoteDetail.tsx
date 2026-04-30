@@ -252,6 +252,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     load();
   }, [quoteId, user]);
 
+  // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
+  useEffect(() => {
+    if (!gstUserTouched) setGstEnabled(currency === "SGD");
+  }, [currency, gstUserTouched]);
+
   const handleCurrencyChange = async (c: Currency) => {
     setCurrency(c);
     setCurrencyOpen(false);
