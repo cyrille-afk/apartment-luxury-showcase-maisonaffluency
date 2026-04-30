@@ -1530,6 +1530,57 @@ export type Database = {
         }
         Relationships: []
       }
+      og_rescrape_runs: {
+        Row: {
+          build_id: string | null
+          created_at: string
+          current_snapshot_size: number | null
+          error: string | null
+          forced: boolean
+          id: string
+          manifest_size: number | null
+          previous_snapshot_size: number | null
+          rescrape_result: Json | null
+          rescraped_count: number
+          skipped: boolean
+          skipped_reason: string | null
+          trigger_source: string
+          truncated: boolean
+        }
+        Insert: {
+          build_id?: string | null
+          created_at?: string
+          current_snapshot_size?: number | null
+          error?: string | null
+          forced?: boolean
+          id?: string
+          manifest_size?: number | null
+          previous_snapshot_size?: number | null
+          rescrape_result?: Json | null
+          rescraped_count?: number
+          skipped?: boolean
+          skipped_reason?: string | null
+          trigger_source?: string
+          truncated?: boolean
+        }
+        Update: {
+          build_id?: string | null
+          created_at?: string
+          current_snapshot_size?: number | null
+          error?: string | null
+          forced?: boolean
+          id?: string
+          manifest_size?: number | null
+          previous_snapshot_size?: number | null
+          rescrape_result?: Json | null
+          rescraped_count?: number
+          skipped?: boolean
+          skipped_reason?: string | null
+          trigger_source?: string
+          truncated?: boolean
+        }
+        Relationships: []
+      }
       order_duration_templates: {
         Row: {
           brand_name: string
