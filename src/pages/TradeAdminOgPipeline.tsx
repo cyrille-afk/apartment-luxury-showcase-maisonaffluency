@@ -336,3 +336,227 @@ function RunStatusBadge({ run }: { run: RescrapeRun }) {
     </span>
   );
 }
+
+interface InspectResult {
+  ok: boolean;
+  path: string;
+  bridgeUrl: string;
+  ogImage: string | null;
+  previousOgImage: string | null;
+  changedSinceSnapshot: boolean;
+  imageBytes: number | null;
+  imageContentType: string | null;
+  imageStatus: number | null;
+  compliant: boolean;
+}
+
+function formatBytes(b: number | null) {
+  if (b === null) return "—";
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  return `${(b / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function UrlInspector() {
+  const { toast } = useToast();
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [rescraping, setRescraping] = useState(false);
+  const [result, setResult] = useState<InspectResult | null>(null);
+  const [lastRunForPath, setLastRunForPath] = useState<RescrapeRun | null>(null);
+
+  // Basic client-side validation: must be a path or http(s) URL on our domain
+  const validate = (raw: string): string | null => {
+    const v = raw.trim();
+    if (!v) return "Enter a bridge URL or path.";
+    if (v.length > 500) return "URL too long.";
+    if (/^https?:\/\//i.test(v)) {
+      try {
+        const u = new URL(v);
+        if (!/maisonaffluency\.com$/i.test(u.hostname)) {
+          return "URL must be on maisonaffluency.com.";
+        }
+      } catch {
+        return "Invalid URL.";
+      }
+    } else if (!/^[a-zA-Z0-9/_\-.]+\.html?$/.test(v)) {
+      return "Path must end in .html and contain only safe characters.";
+    }
+    return null;
+  };
+
+  const inspect = async () => {
+    const err = validate(url);
+    if (err) {
+      toast({ title: "Invalid input", description: err, variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    setResult(null);
+    setLastRunForPath(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("post-deploy-rescrape", {
+        body: { mode: "inspect", url: url.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setResult(data as InspectResult);
+
+      // Find the most recent run that touched this single path (rescrape-one logs `single`)
+      const { data: runs } = await (supabase as any)
+        .from("og_rescrape_runs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      const match = (runs || []).find(
+        (r: any) => r.rescrape_result?.single === data.path,
+      );
+      setLastRunForPath(match ?? null);
+    } catch (e: any) {
+      toast({ title: "Inspect failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rescrapeNow = async () => {
+    if (!result) return;
+    setRescraping(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("post-deploy-rescrape", {
+        body: { mode: "rescrape-one", url: result.path, triggerSource: "admin-inspect" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: "Rescrape sent to Meta",
+        description: "Allow ~30s for the cache to refresh.",
+      });
+      // Re-inspect to pick up any change
+      setTimeout(() => inspect(), 1500);
+    } catch (e: any) {
+      toast({ title: "Rescrape failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setRescraping(false);
+    }
+  };
+
+  return (
+    <div className="border border-border rounded-lg p-6 mb-8 bg-card">
+      <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+        <Search className="h-5 w-5" /> Per-URL inspector
+      </h2>
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <input
+          type="text"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && !loading && inspect()}
+          placeholder="https://www.maisonaffluency.com/designers/apparatus-studio-og-v2.html"
+          maxLength={500}
+          className="flex-1 px-3 py-2 rounded-md border border-border bg-background text-sm font-mono"
+        />
+        <button
+          onClick={inspect}
+          disabled={loading}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+        >
+          <Search className={`h-4 w-4 ${loading ? "animate-pulse" : ""}`} />
+          Inspect
+        </button>
+      </div>
+
+      {result && (
+        <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 mt-4">
+          {/* Image preview */}
+          <div>
+            {result.ogImage ? (
+              <a href={result.ogImage} target="_blank" rel="noreferrer" className="block">
+                <img
+                  src={result.ogImage}
+                  alt="og:image preview"
+                  className="w-full aspect-[1200/630] object-cover rounded-md border border-border bg-muted"
+                />
+              </a>
+            ) : (
+              <div className="w-full aspect-[1200/630] rounded-md border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                no og:image
+              </div>
+            )}
+          </div>
+
+          {/* Details */}
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              {result.compliant ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">
+                  <CheckCircle2 className="h-3 w-3" /> compliant
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-destructive/10 text-destructive">
+                  <AlertCircle className="h-3 w-3" /> not compliant
+                </span>
+              )}
+              {result.changedSinceSnapshot && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  changed since last snapshot
+                </span>
+              )}
+            </div>
+
+            <DetailRow label="Bridge">
+              <a href={result.bridgeUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                {result.path} <ExternalLink className="h-3 w-3" />
+              </a>
+            </DetailRow>
+            <DetailRow label="Current og:image">
+              {result.ogImage ? (
+                <a href={result.ogImage} target="_blank" rel="noreferrer" className="text-primary hover:underline break-all">
+                  {result.ogImage}
+                </a>
+              ) : "—"}
+            </DetailRow>
+            <DetailRow label="Image size">
+              <span className={result.imageBytes && result.imageBytes > 300 * 1024 ? "text-destructive" : ""}>
+                {formatBytes(result.imageBytes)}
+                {result.imageBytes && result.imageBytes > 300 * 1024 && " (over 300 KB limit)"}
+              </span>
+            </DetailRow>
+            <DetailRow label="Image type">{result.imageContentType ?? "—"}</DetailRow>
+            <DetailRow label="HTTP status">{result.imageStatus ?? "—"}</DetailRow>
+            <DetailRow label="Snapshot og:image">
+              <span className="text-xs text-muted-foreground break-all">
+                {result.previousOgImage ?? "(not in snapshot yet)"}
+              </span>
+            </DetailRow>
+            <DetailRow label="Last rescrape (this URL)">
+              {lastRunForPath
+                ? `${formatRelative(lastRunForPath.created_at)} · ${lastRunForPath.trigger_source}`
+                : "no individual rescrape recorded"}
+            </DetailRow>
+
+            <div className="pt-2">
+              <button
+                onClick={rescrapeNow}
+                disabled={rescraping}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                <RefreshCw className={`h-4 w-4 ${rescraping ? "animate-spin" : ""}`} />
+                Rescrape now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[140px_1fr] gap-3">
+      <div className="text-xs uppercase tracking-wide text-muted-foreground pt-0.5">{label}</div>
+      <div className="break-all">{children}</div>
+    </div>
+  );
+}
