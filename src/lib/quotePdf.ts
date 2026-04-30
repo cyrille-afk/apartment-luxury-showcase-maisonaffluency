@@ -143,6 +143,13 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   y = ensureSpace(doc, y, 220, pageH);
   y = drawTotals(doc, args, M, y, contentW);
 
+  // ---- UK Landed Cost (GBP DDP London) — indicative
+  if (args.gbpLanded && args.gbpLanded.ready && args.gbpLanded.totalGbpCents > 0) {
+    y = ensureSpace(doc, y, 150, pageH);
+    y += 12;
+    y = drawGbpLandedBlock(doc, args, M, y, contentW);
+  }
+
   // ---- Insurance & coverage (if enabled)
   if (args.insuranceEnabled) {
     y = ensureSpace(doc, y, 130, pageH);
