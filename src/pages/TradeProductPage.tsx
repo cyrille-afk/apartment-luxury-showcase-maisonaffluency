@@ -873,6 +873,10 @@ const TradeProductPage: React.FC = () => {
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : undefined}
                   onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
                     const s = dualSizeOptions[idx] ?? null;
                     setSelectedDualSize(s);
                     let nextBase = selectedBase;
