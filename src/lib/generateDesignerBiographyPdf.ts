@@ -1204,7 +1204,7 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
           doc.setFont("helvetica", "normal");
           doc.setFontSize(8);
           doc.setTextColor(80, 80, 160);
-          doc.textWithLink(`Watch — ${sanitizeUrlForDisplay(block.media!.url)}`, imgX, leftY + 8, { url: block.media!.url });
+          doc.textWithLink("\u25B6  Watch video", imgX, leftY + 8, { url: block.media!.url });
           leftY += 14;
         }
 
