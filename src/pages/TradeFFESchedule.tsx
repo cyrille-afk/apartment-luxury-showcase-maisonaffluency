@@ -39,12 +39,14 @@ interface FFEItem {
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
 
-// Best-effort numeric weeks parsed from a free-text lead time (e.g. "12-14 weeks" -> 14)
+// Best-effort numeric weeks parsed from a free-text lead time. Returns the upper bound
+// of a range (e.g. "12-14 weeks" → 14, "18 to 20 weeks" → 20). Supports -, –, —, "to".
 function parseLeadWeeks(text: string | null): number | null {
   if (!text) return null;
-  const m = text.match(/(\d+)\s*(?:-\s*(\d+))?/);
-  if (!m) return null;
-  return m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
+  const range = text.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)/i);
+  if (range) return parseInt(range[2], 10);
+  const single = text.match(/\d+/);
+  return single ? parseInt(single[0], 10) : null;
 }
 
 function leadOverride(value: number | null): number | null {
