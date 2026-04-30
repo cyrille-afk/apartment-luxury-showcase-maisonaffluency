@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Upload, Sparkles, Trash2, Save, FileText, Paintbrush, FileSpreadsheet, Scissors, RotateCw, Plus, Minus, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload, Sparkles, Trash2, Save, FileText, Paintbrush, FileSpreadsheet, Scissors, RotateCw, Plus, Minus, Image as ImageIcon, Check, X, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +45,7 @@ export default function TradeFloorPlanFFE() {
   const [progressStep, setProgressStep] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<{ room: number; item: number } | null>(null);
 
@@ -78,6 +79,7 @@ export default function TradeFloorPlanFFE() {
         if (b.notes) setNotes(b.notes);
         if (data.suggestions && (data.suggestions as any).rooms) {
           setSuggestions(data.suggestions as Suggestions);
+          setConfirmed(true);
         }
       }
     })();
@@ -108,6 +110,7 @@ export default function TradeFloorPlanFFE() {
       if (insErr) throw insErr;
       setPlanId(row.id);
       setSuggestions(null);
+      setConfirmed(false);
       toast({ title: "Floor plan uploaded" });
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
@@ -142,14 +145,13 @@ export default function TradeFloorPlanFFE() {
       const next = data as Suggestions;
       setProgressStep(PROGRESS_STEPS.length - 1);
       setSuggestions(next);
+      setConfirmed(false);
       setActiveRoom(0);
-      if (planId) {
-        await supabase
-          .from("trade_floor_plans")
-          .update({ brief, suggestions: next as any })
-          .eq("id", planId);
-      }
-      toast({ title: "Layout suggested", description: `${next.rooms?.length || 0} rooms.` });
+      setSelectedItem(null);
+      toast({
+        title: "Layout ready for review",
+        description: `${next.rooms?.length || 0} rooms · adjust on the plan, then Confirm & Save.`,
+      });
     } catch (e: any) {
       toast({ title: "Could not generate layout", description: e.message, variant: "destructive" });
     } finally {
@@ -164,6 +166,7 @@ export default function TradeFloorPlanFFE() {
     const next = { ...suggestions, rooms: suggestions.rooms.map((r) => ({ ...r, items: [...r.items] })) };
     next.rooms[roomIdx].items[itemIdx] = { ...next.rooms[roomIdx].items[itemIdx], ...patch };
     setSuggestions(next);
+    setConfirmed(false);
   };
 
   const removeItem = (roomIdx: number, itemIdx: number) => {
@@ -173,18 +176,31 @@ export default function TradeFloorPlanFFE() {
     }))};
     setSuggestions(next);
     setSelectedItem(null);
+    setConfirmed(false);
+  };
+
+  const discardSuggestions = () => {
+    setSuggestions(null);
+    setConfirmed(false);
+    setSelectedItem(null);
+    toast({ title: "Suggestion discarded" });
   };
 
   const saveLayout = async () => {
     if (!planId || !suggestions || !user) return;
+    const brief = {
+      rooms: roomsText.split(",").map((s) => s.trim()).filter(Boolean),
+      style, budget, notes,
+    };
     const { error } = await supabase
       .from("trade_floor_plans")
-      .update({ suggestions: suggestions as any, name: planName })
+      .update({ suggestions: suggestions as any, brief, name: planName })
       .eq("id", planId);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Layout saved" });
+      setConfirmed(true);
+      toast({ title: "Layout confirmed & saved" });
     }
   };
 
@@ -344,9 +360,30 @@ export default function TradeFloorPlanFFE() {
         {suggestions && suggestions.rooms.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="font-display text-lg text-foreground">Proposed layout</h2>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="font-display text-lg text-foreground">Proposed layout</h2>
+                {confirmed ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-body bg-primary/10 text-primary border border-primary/20">
+                    <Check className="w-3 h-3" /> Confirmed
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-body bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                    <AlertCircle className="w-3 h-3" /> Pending review
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={saveLayout}><Save className="w-4 h-4" />Save</Button>
+                <Button
+                  variant={confirmed ? "outline" : "default"}
+                  size="sm"
+                  onClick={saveLayout}
+                  disabled={confirmed}
+                >
+                  <Check className="w-4 h-4" />{confirmed ? "Saved" : "Confirm & Save"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={discardSuggestions}>
+                  <X className="w-4 h-4" />Discard
+                </Button>
                 <Button variant="outline" size="sm" onClick={sendToMoodBoard}><Paintbrush className="w-4 h-4" />Mood Board</Button>
                 <Button variant="outline" size="sm" onClick={() => stageHandoff("trade:pendingFFE", "/trade/ffe-schedule", "FF&E Schedule")}>
                   <FileSpreadsheet className="w-4 h-4" />FF&amp;E Schedule
@@ -359,6 +396,13 @@ export default function TradeFloorPlanFFE() {
                 </Button>
               </div>
             </div>
+
+            {!confirmed && (
+              <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 font-body text-xs text-amber-800 dark:text-amber-300">
+                Drag pieces on the floor plan, adjust size & rotation, or remove items. Then{" "}
+                <strong>Confirm &amp; Save</strong> to lock this layout in.
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-2">
               {suggestions.rooms.map((r, i) => (
@@ -394,12 +438,34 @@ export default function TradeFloorPlanFFE() {
               </div>
             )}
 
-            {/* Mobile list */}
-            {isMobile && (
-              <MobileList
-                room={suggestions.rooms[activeRoom]}
-                onRemove={(idx) => removeItem(activeRoom, idx)}
-              />
+            {/* Mobile: overlay preview + list */}
+            {isMobile && planUrl && (
+              <div className="space-y-3">
+                <CanvasPreview
+                  planUrl={planUrl}
+                  room={suggestions.rooms[activeRoom]}
+                  selectedIdx={selectedItem?.room === activeRoom ? selectedItem?.item ?? null : null}
+                  onSelect={(idx) => setSelectedItem({ room: activeRoom, item: idx })}
+                  onMove={(idx, x, y) => updateItem(activeRoom, idx, { x, y })}
+                />
+                <MobileList
+                  room={suggestions.rooms[activeRoom]}
+                  onRemove={(idx) => removeItem(activeRoom, idx)}
+                />
+                <div className="sticky bottom-3 flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={saveLayout}
+                    disabled={confirmed}
+                    variant={confirmed ? "outline" : "default"}
+                  >
+                    <Check className="w-4 h-4" />{confirmed ? "Saved" : "Confirm & Save"}
+                  </Button>
+                  <Button variant="outline" onClick={discardSuggestions}>
+                    <X className="w-4 h-4" />Discard
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -418,40 +484,64 @@ function CanvasPreview({
   const wrapRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ idx: number; offsetX: number; offsetY: number } | null>(null);
 
-  const handleMouseDown = (e: React.MouseEvent, idx: number) => {
-    e.stopPropagation();
+  const beginDrag = (clientX: number, clientY: number, idx: number) => {
     onSelect(idx);
     const rect = wrapRef.current?.getBoundingClientRect();
     if (!rect) return;
     setDrag({
       idx,
-      offsetX: (e.clientX - rect.left) / rect.width - room.items[idx].x,
-      offsetY: (e.clientY - rect.top) / rect.height - room.items[idx].y,
+      offsetX: (clientX - rect.left) / rect.width - room.items[idx].x,
+      offsetY: (clientY - rect.top) / rect.height - room.items[idx].y,
     });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    beginDrag(e.clientX, e.clientY, idx);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent, idx: number) => {
+    e.stopPropagation();
+    const t = e.touches[0];
+    if (!t) return;
+    beginDrag(t.clientX, t.clientY, idx);
   };
 
   useEffect(() => {
     if (!drag) return;
-    const onMove2 = (e: MouseEvent) => {
+    const updateFromPoint = (clientX: number, clientY: number) => {
       const rect = wrapRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const x = Math.min(0.98, Math.max(0.02, (e.clientX - rect.left) / rect.width - drag.offsetX));
-      const y = Math.min(0.98, Math.max(0.02, (e.clientY - rect.top) / rect.height - drag.offsetY));
+      const x = Math.min(0.98, Math.max(0.02, (clientX - rect.left) / rect.width - drag.offsetX));
+      const y = Math.min(0.98, Math.max(0.02, (clientY - rect.top) / rect.height - drag.offsetY));
       onMove(drag.idx, x, y);
+    };
+    const onMove2 = (e: MouseEvent) => updateFromPoint(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      e.preventDefault();
+      updateFromPoint(t.clientX, t.clientY);
     };
     const onUp = () => setDrag(null);
     window.addEventListener("mousemove", onMove2);
     window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("touchcancel", onUp);
     return () => {
       window.removeEventListener("mousemove", onMove2);
       window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("touchcancel", onUp);
     };
   }, [drag, onMove]);
 
   return (
     <div
       ref={wrapRef}
-      className="relative w-full aspect-[4/3] rounded-lg border border-border bg-muted overflow-hidden select-none"
+      className="relative w-full aspect-[4/3] rounded-lg border border-border bg-muted overflow-hidden select-none touch-none"
       onClick={() => onSelect(-1)}
     >
       {/\.pdf($|\?)/i.test(planUrl) ? (
@@ -463,6 +553,7 @@ function CanvasPreview({
         <div
           key={idx}
           onMouseDown={(e) => handleMouseDown(e, idx)}
+          onTouchStart={(e) => handleTouchStart(e, idx)}
           className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move group ${
             selectedIdx === idx ? "ring-2 ring-foreground" : "ring-1 ring-foreground/30 hover:ring-foreground/60"
           } rounded-md overflow-hidden bg-background shadow-lg`}
