@@ -401,20 +401,24 @@ function drawCompanyAndMeta(
   metaRows.forEach((row, rIdx) => {
     row.forEach(([label, value], cIdx) => {
       const x = metaX + cIdx * metaColW;
-      const ry = y + rIdx * 26;
+      const ry = y + rIdx * 32;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       doc.text(label, x, ry);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(FG[0], FG[1], FG[2]);
       const wrapped = doc.splitTextToSize(String(value), metaColW - 8);
-      doc.text(wrapped[0], x, ry + 12);
+      // Render up to 2 lines so values like "Margot Watson — De Beers London" fit.
+      const lines = wrapped.slice(0, 2);
+      lines.forEach((ln: string, i: number) => {
+        doc.text(ln, x, ry + 12 + i * 10);
+      });
     });
   });
 
-  return y + 60;
+  return y + 70;
 }
 
 // -------- Items table ---------------------------------------------------
