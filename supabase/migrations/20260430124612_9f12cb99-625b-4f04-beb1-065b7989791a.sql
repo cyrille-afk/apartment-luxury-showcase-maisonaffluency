@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET title = 'Stone D (Medium) Limonite D''Eau Coffee Table' WHERE id = 'fcf7d863-28c9-4d17-aeb4-933801c3c3f6';
