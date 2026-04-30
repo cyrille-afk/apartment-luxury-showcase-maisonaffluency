@@ -615,8 +615,11 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
     ? Math.round(args.subtotalCents * args.tradeDiscountPct)
     : 0;
   if (discountCents > 0) {
+    const pctTxt = `${(args.tradeDiscountPct * 100).toFixed(args.tradeDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
     rows.push({
-      label: `Trade discount (${Math.round(args.tradeDiscountPct * 100)}%)`,
+      label: args.tierLabel
+        ? `Trade discount — ${args.tierLabel} (${pctTxt})`
+        : `Trade discount (${pctTxt})`,
       value: `- ${fmtMoney(discountCents, args.currency)}`,
       muted: true,
     });
