@@ -251,6 +251,13 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             emphasized
             value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : undefined}
             onChange={(idx) => {
+              if (idx < 0) {
+                setSelBase(null);
+                setSelTop(null);
+                setSelDualSize(null);
+                onMaterialChange?.(null);
+                return;
+              }
               const v = baseOptions[idx] ?? null;
               setSelBase(v);
               let nextTop = selTop;
@@ -277,6 +284,13 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             emphasized
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : undefined}
             onChange={(idx) => {
+              if (idx < 0) {
+                setSelBase(null);
+                setSelTop(null);
+                setSelDualSize(null);
+                onMaterialChange?.(null);
+                return;
+              }
               const v = topOptions[idx] ?? null;
               setSelTop(v);
               let nextBase = selBase;
