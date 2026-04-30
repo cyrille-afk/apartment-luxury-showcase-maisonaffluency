@@ -261,8 +261,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // Fetch project name when projectId changes
   useEffect(() => {
     if (!projectId) { setProjectName(null); return; }
-    supabase.from("trade_projects").select("name").eq("id", projectId).maybeSingle().then(({ data }) => {
-      setProjectName((data as any)?.name ?? null);
+    (supabase.from as any)("trade_projects").select("name").eq("id", projectId).maybeSingle().then(({ data }: any) => {
+      setProjectName(data?.name ?? null);
     });
   }, [projectId]);
 
