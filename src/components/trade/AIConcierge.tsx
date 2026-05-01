@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Send, Loader2, Sparkles } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
@@ -14,6 +14,7 @@ type TimelineItem =
 
 export function AIConcierge() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>([
@@ -113,11 +114,14 @@ export function AIConcierge() {
         role: "assistant",
         content:
           outcome === "approved"
-            ? `✓ Tearsheet created${info?.url ? ` — opening: ${info.url}` : ""}.`
+            ? `✓ Tearsheet created — taking you there now…`
             : "Got it — I've discarded that draft. Want me to try a different angle?",
       });
       return copy;
     });
+    if (outcome === "approved" && info?.url) {
+      setTimeout(() => navigate(info.url), 600);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
