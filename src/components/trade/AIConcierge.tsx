@@ -99,7 +99,7 @@ export function AIConcierge() {
   const handleProposalResolved = (
     proposalIndex: number,
     outcome: "approved" | "discarded",
-    info?: { boardId: string; url: string },
+    info?: { boardId: string; url: string; added: number; mode: "create" | "append" },
   ) => {
     // Mark in timeline so the card updates persist on re-render
     setTimeline((prev) => {
@@ -108,15 +108,15 @@ export function AIConcierge() {
       if (item?.kind === "proposal") {
         copy[proposalIndex] = { ...item, resolved: outcome };
       }
-      // Append a system-style assistant note so the next AI turn knows what happened
-      copy.push({
-        kind: "msg",
-        role: "assistant",
-        content:
-          outcome === "approved"
-            ? `✓ Tearsheet created — taking you there now…`
-            : "Got it — I've discarded that draft. Want me to try a different angle?",
-      });
+      let content: string;
+      if (outcome === "discarded") {
+        content = "Got it — I've discarded that draft. Want me to try a different angle?";
+      } else if (info?.mode === "append") {
+        content = `✓ Added ${info.added} ${info.added === 1 ? "piece" : "pieces"} to your tearsheet — taking you there now…`;
+      } else {
+        content = `✓ Tearsheet created — taking you there now…`;
+      }
+      copy.push({ kind: "msg", role: "assistant", content });
       return copy;
     });
     if (outcome === "approved" && info?.url) {
