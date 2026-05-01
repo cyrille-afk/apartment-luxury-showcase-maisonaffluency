@@ -2,17 +2,22 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, Send, Loader2, Sparkles } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
+import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { toast } from "sonner";
 
-const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or navigating the portal?";
+const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
+
+type TimelineItem =
+  | { kind: "msg"; role: "user" | "assistant"; content: string }
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
 
 export function AIConcierge() {
   const { pathname } = useLocation();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: GREETING },
+  const [timeline, setTimeline] = useState<TimelineItem[]>([
+    { kind: "msg", role: "assistant", content: GREETING },
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -23,7 +28,7 @@ export function AIConcierge() {
   // auto-scroll
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, [timeline]);
 
   // focus input when opened
   useEffect(() => {
@@ -34,31 +39,50 @@ export function AIConcierge() {
     const text = input.trim();
     if (!text || streaming) return;
 
-    const userMsg: ChatMessage = { role: "user", content: text };
-    const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
+    const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
+    const nextTimeline = [...timeline, userItem];
+    setTimeline(nextTimeline);
     setInput("");
     setStreaming(true);
 
+    // Build the chat message history for the API (text-only items)
+    const messagesForApi: ChatMessage[] = nextTimeline
+      .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
+      .map((t) => ({ role: t.role, content: t.content }));
+
     let assistantSoFar = "";
+    let assistantStarted = false;
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const upsert = (chunk: string) => {
+    const upsertAssistant = (chunk: string) => {
       assistantSoFar += chunk;
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant" && last !== messages[messages.length - 1]) {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+      setTimeline((prev) => {
+        if (assistantStarted) {
+          // Update the last assistant text bubble (which must be the last item)
+          const idx = prev.length - 1;
+          const last = prev[idx];
+          if (last?.kind === "msg" && last.role === "assistant") {
+            const copy = prev.slice();
+            copy[idx] = { ...last, content: assistantSoFar };
+            return copy;
+          }
         }
-        return [...prev, { role: "assistant", content: assistantSoFar }];
+        assistantStarted = true;
+        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar }];
       });
+    };
+
+    const handleProposal = (proposal: TearsheetProposal) => {
+      // Insert as its own timeline item (after current assistant text, if any)
+      setTimeline((prev) => [...prev, { kind: "proposal", proposal }]);
     };
 
     try {
       await streamConcierge({
-        messages: nextMessages,
-        onDelta: upsert,
+        messages: messagesForApi,
+        onDelta: upsertAssistant,
+        onProposal: handleProposal,
         onDone: () => setStreaming(false),
         onError: (msg) => {
           toast.error(msg);
@@ -69,7 +93,32 @@ export function AIConcierge() {
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, messages]);
+  }, [input, streaming, timeline]);
+
+  const handleProposalResolved = (
+    proposalIndex: number,
+    outcome: "approved" | "discarded",
+    info?: { boardId: string; url: string },
+  ) => {
+    // Mark in timeline so the card updates persist on re-render
+    setTimeline((prev) => {
+      const copy = prev.slice();
+      const item = copy[proposalIndex];
+      if (item?.kind === "proposal") {
+        copy[proposalIndex] = { ...item, resolved: outcome };
+      }
+      // Append a system-style assistant note so the next AI turn knows what happened
+      copy.push({
+        kind: "msg",
+        role: "assistant",
+        content:
+          outcome === "approved"
+            ? `✓ Tearsheet created${info?.url ? ` — opening: ${info.url}` : ""}.`
+            : "Got it — I've discarded that draft. Want me to try a different angle?",
+      });
+      return copy;
+    });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -77,6 +126,9 @@ export function AIConcierge() {
       send();
     }
   };
+
+  const lastItem = timeline[timeline.length - 1];
+  const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant");
 
   return (
     <>
@@ -103,8 +155,7 @@ export function AIConcierge() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
-          {/* Header */}
+        <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-accent" />
@@ -115,23 +166,33 @@ export function AIConcierge() {
             </button>
           </div>
 
-          {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-            {messages.map((msg, i) => (
-              <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
-                <div
-                  className={cn(
-                    "max-w-[85%] rounded-2xl px-3.5 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap",
-                    msg.role === "user"
-                      ? "bg-foreground text-background rounded-br-md"
-                      : "bg-muted text-foreground rounded-bl-md"
-                  )}
-                >
-                  {msg.content}
-                </div>
-              </div>
-            ))}
-            {streaming && messages[messages.length - 1]?.role !== "assistant" && (
+            {timeline.map((item, i) => {
+              if (item.kind === "msg") {
+                return (
+                  <div key={i} className={cn("flex", item.role === "user" ? "justify-end" : "justify-start")}>
+                    <div
+                      className={cn(
+                        "max-w-[85%] rounded-2xl px-3.5 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap",
+                        item.role === "user"
+                          ? "bg-foreground text-background rounded-br-md"
+                          : "bg-muted text-foreground rounded-bl-md"
+                      )}
+                    >
+                      {item.content}
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <TearsheetProposalCard
+                  key={i}
+                  proposal={item.proposal}
+                  onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
+                />
+              );
+            })}
+            {showTypingDots && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -140,7 +201,6 @@ export function AIConcierge() {
             )}
           </div>
 
-          {/* Input */}
           <div className="border-t border-border p-3">
             <div className="flex items-end gap-2">
               <textarea
@@ -163,7 +223,7 @@ export function AIConcierge() {
               </button>
             </div>
             <p className="font-body text-[10px] text-muted-foreground mt-1.5 text-center">
-              AI-powered · May not always be accurate
+              AI-powered · Tearsheet drafts require your approval
             </p>
           </div>
         </div>
