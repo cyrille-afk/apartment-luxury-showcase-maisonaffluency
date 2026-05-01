@@ -98,11 +98,14 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
     designerMap.set(d.id, d.display_name || d.name);
   });
 
-  // Fetch curator picks WITH IDs (the model needs them for tool calling)
+  // Fetch ALL curator picks WITH IDs (the model needs them for tool calling).
+  // Order deterministically so the catalog is stable across requests.
   const { data: picks } = await supabase
     .from("designer_curator_picks")
     .select("id, title, materials, category, designer_id")
-    .limit(300);
+    .order("designer_id", { ascending: true })
+    .order("title", { ascending: true })
+    .limit(2000);
 
   const { data: hotspotBrands } = await supabase
     .from("gallery_hotspots")
