@@ -1,64 +1,174 @@
+# Orchestrated Concierge — Tool-Calling with Human Approval Gate
 
-## Root causes
+**Goal:** Evolve the read-only `trade-concierge` into an *agentic* assistant that can **draft** tearsheets and **pre-fill** quote drafts on the user's behalf, while keeping a strict human-in-the-loop approval before anything persists or is sent.
 
-**1) Pierre Bonnefille lead time missing in admin (but visible in trade editor)**
-- `trade_products.lead_time` is `NULL` for both Pierre Bonnefille and Reda Amalou items.
-- Admin set per-line overrides on the quote: `lead_time_weeks_override = 16` (Reda Amalou) and `14` (Pierre Bonnefille). These ARE in `trade_quote_items` and visible in the network response.
-- The trade-side `QuoteDetail.tsx` uses `item.lead_time_weeks_override ?? parseLeadWeeks(product?.lead_time)` (line 411) — so it works there.
-- The admin `TradeQuotesAdmin.tsx` only calls `formatLeadTime(leadTimes[item.id])` from the `effective_product_availability` RPC, which returns NULL for both because there's no brand_lead_times row and no product-level override. The per-line override is **never read**.
+Scope: trade portal only. Public site unaffected.
 
-**2) FX rates not loading**
-- Network log shows: `GET https://api.frankfurter.app/latest?from=EUR&to=GBP → Failed to fetch` (CORS / blocked in the Lovable preview environment).
-- Result: `fxEurGbp` stays `null` indefinitely → panel sits at "Loading FX rates…" forever and `gbp.ready` is always `false`.
+---
 
-**3) GBP DDP click "freezes" everything**
-- It is not a real freeze — it's the same FX failure: when the user flips the totals toggle to "GBP DDP", every line shows `…` and never resolves because `fxEurGbp` is null. There is no fallback path and no error message, so the UI looks stuck.
-- Same applies to the "Download UK DDP estimate (PDF)" button — it's still clickable but would generate a PDF with zeroed values.
+## 1. Principles
 
-## Fixes
+1. **Catalog-grounded** — every tool call references real `designer_curator_picks` / `trade_products` IDs already known to the concierge context. No invented items.
+2. **Draft, never commit** — the AI produces *proposals*. Persisting to `trade_tearsheets` / `trade_quotes` requires an explicit user click.
+3. **One approval gate per side-effect** — tearsheet creation, item additions, and quote drafting each surface their own confirmation card in the chat.
+4. **Reversible** — every approved action returns a deep link (`/trade/tearsheets/:id`, `/trade/quotes/:id`) so the user can review and edit in the existing UI.
+5. **Auditable** — log every proposed + approved tool call to a new `trade_concierge_actions` table for support and analytics.
 
-### A. Admin lead-time display (`src/pages/TradeQuotesAdmin.tsx`)
+---
 
-In the line-item render around line 547, prefer the per-line override:
+## 2. Tool schema (sent to the model)
 
-```text
-leadLabel =
-  item.lead_time_weeks_override
-    ? `Lead time: ${item.lead_time_weeks_override} weeks`
-    : formatLeadTime(leadTimes[item.id])
+Three tools, all *intent-only* — they return a proposal payload, not a DB write.
+
+```ts
+tools: [
+  {
+    name: "propose_tearsheet",
+    description: "Draft a new tearsheet from a list of curator pick IDs.",
+    parameters: {
+      title: string,         // suggested title, user can edit
+      pick_ids: string[],    // must be IDs from CATALOG PIECES context
+      note?: string,         // optional intro/rationale
+    },
+  },
+  {
+    name: "propose_add_to_tearsheet",
+    description: "Add picks to an existing tearsheet the user owns.",
+    parameters: {
+      tearsheet_id: string,  // resolved from user's recent tearsheets list
+      pick_ids: string[],
+    },
+  },
+  {
+    name: "propose_quote_draft",
+    description: "Pre-fill a quote draft with selected trade products.",
+    parameters: {
+      project_name?: string,
+      client_name?: string,
+      items: Array<{
+        trade_product_id: string,
+        quantity: number,
+        variant_label?: string,    // matches size_variants
+        notes?: string,
+      }>,
+    },
+  },
+]
 ```
 
-This mirrors the trade view's behaviour and immediately surfaces the 14-week / 16-week values the admin already saved.
+The system prompt is extended with:
+- The user's **5 most recent tearsheets** (id + title) so `propose_add_to_tearsheet` can resolve "add to my Lemaire board".
+- The user's **active project folders** (id + name) so quotes can be associated.
 
-### B. Resilient FX fetcher (`src/hooks/useGbpLandedCost.ts` + `src/components/trade/UkLandedCostPanel.tsx`)
+---
 
-- Add a small helper `fetchFx(from, to)` that:
-  1. Tries `https://api.frankfurter.app/latest?from=...&to=...` with a 4 s `AbortController` timeout.
-  2. On failure, falls back to `https://api.exchangerate.host/latest?base=...&symbols=...` (CORS-enabled, free, no key).
-  3. On second failure, falls back to a **hardcoded sensible default** keyed by currency pair (e.g. `EUR→GBP ≈ 0.85`, `SGD→EUR ≈ 0.69`, `USD→EUR ≈ 0.92`) and exposes a flag `fxIsFallback = true`.
-- Hook now always resolves `ready=true` after the attempts; `fxEurGbp` and `fxQuoteEur` are guaranteed non-null.
-- When `fxIsFallback` is true, the panel and the totals GBP block render an amber notice: *"Live FX unavailable — using fallback rate. Treat the GBP figure as approximate."* and the disclaimer copy is updated. The PDF inherits the same flag and prints the warning.
+## 3. Edge function changes — `supabase/functions/trade-concierge/index.ts`
 
-### C. GBP DDP toggle no longer "freezes" (`src/pages/TradeQuotesAdmin.tsx`, `src/components/trade/QuoteDetail.tsx`)
+- Switch to **non-streaming** when `tool_choice` is auto and the response includes `tool_calls`. (Streaming continues to work for plain chat replies.)
+- After receiving `tool_calls`, the function does **not** execute them. It serialises the proposal back to the client as a structured SSE event:
+  ```
+  event: proposal
+  data: { "tool": "propose_tearsheet", "args": {...}, "preview": {...} }
+  ```
+  `preview` is hydrated server-side: pick titles, hero images, prices in the user's display currency — so the client can render a rich approval card without re-fetching.
+- Add a **`POST /trade-concierge/commit`** sub-route (or a new `trade-concierge-commit` function) that:
+  1. Validates the user's JWT (`supabase.auth.getClaims`).
+  2. Re-validates every `pick_id` / `trade_product_id` exists and is visible to this trade user.
+  3. Performs the actual insert into `trade_tearsheets` / `trade_tearsheet_items` / `trade_quotes` / `trade_quote_items`.
+  4. Logs to `trade_concierge_actions`.
+  5. Returns `{ id, url }` for the new resource.
 
-- Because `gbp.ready` is now guaranteed (B), the toggle never stays stuck.
-- Add a defensive guard: if after 8 s any rate is still missing, show the amber notice and a **"Switch back to {QUOTE_CCY}"** inline button so the user can recover with one click.
-- When `fxIsFallback` is true, set the GBP toggle to a slightly muted style and append "≈" before the GBP total so the approximation is visible at a glance.
+---
 
-### D. Files touched
+## 4. Client UX — `src/components/trade/AIConcierge.tsx`
 
-```text
-src/pages/TradeQuotesAdmin.tsx           # lead time fix + fallback notice on totals
-src/components/trade/QuoteDetail.tsx     # fallback notice on totals (uses same hook)
-src/hooks/useGbpLandedCost.ts            # multi-source FX fetcher + fxIsFallback flag
-src/components/trade/UkLandedCostPanel.tsx # surface FX fallback + amber notice
-src/lib/ukDdpPdf.ts                      # print "(approx.)" + warning when fallback used
+New message type: **ProposalCard** (rendered between regular bubbles).
+
+Layout per proposal:
+
+```
+┌────────────────────────────────────────────────┐
+│ ✨ Concierge proposes:                          │
+│ NEW TEARSHEET — "Lemaire study, oak palette"   │
+│                                                │
+│ [img] Bond Street Stool — Man of Parts         │
+│ [img] Madison Avenue Cocktail Table — MoP      │
+│ [img] Praia da Granja Coffee Table — MoP       │
+│                                                │
+│ Note: "Three pieces in fumed oak …"            │
+│                                                │
+│ [ Edit ]  [ Discard ]   [ Approve & create ]  │
+└────────────────────────────────────────────────┘
 ```
 
-No DB changes needed.
+Behaviours:
+- **Edit** → opens an inline form letting the user rename the title, untick picks, edit the note. State stays local; no DB write.
+- **Discard** → posts an assistant-visible "User declined" turn so the model can adapt.
+- **Approve & create** → calls the commit endpoint, replaces the card with a success state + deep link, and posts a confirmation turn back into the conversation so follow-ups stay coherent.
 
-## Verification (after build)
+Quote-draft card variant adds a per-line quantity stepper and a variant dropdown (populated from `size_variants`).
 
-- Open `QU-22A02A` in admin → both lines should show "Lead time: 14 weeks" / "Lead time: 16 weeks".
-- Toggle totals to **GBP DDP** → values render within 4–8 s either with live rate or with the amber "fallback rate" notice; never stuck on `…`.
-- Click **Download UK DDP estimate (PDF)** → PDF opens with values, including the fallback notice if applicable.
+---
+
+## 5. Database — new audit table
+
+```sql
+create table public.trade_concierge_actions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users on delete cascade,
+  conversation_id uuid,                       -- optional, for future threading
+  tool text not null,                         -- 'propose_tearsheet' | …
+  args jsonb not null,
+  status text not null,                       -- 'proposed' | 'approved' | 'discarded' | 'edited_then_approved'
+  resulting_resource_id uuid,                 -- tearsheet or quote id once committed
+  created_at timestamptz not null default now()
+);
+
+alter table public.trade_concierge_actions enable row level security;
+
+create policy "Users see their own concierge actions"
+  on public.trade_concierge_actions for select
+  using (auth.uid() = user_id);
+
+create policy "Users insert their own concierge actions"
+  on public.trade_concierge_actions for insert
+  with check (auth.uid() = user_id);
+```
+
+No `update`/`delete` policies — the table is append-only.
+
+---
+
+## 6. Guardrails
+
+- **Per-conversation cap**: max 3 commits per session to prevent runaway tool use.
+- **Idempotency key** on commit (`tool` + hash of `args` + `user_id`) → re-clicking "Approve" twice never duplicates.
+- **Visibility check**: the commit endpoint re-verifies each `pick_id` against the trade user's allowed brands (mirrors `useHiddenTradeProductIds`).
+- **Currency safety**: proposed quote items store *no* prices; pricing is resolved at commit time using the existing trade-pricing pipeline (manual override → trade_price_cents → FX). The proposal preview shows indicative prices only, labelled "indicative".
+
+---
+
+## 7. Files to touch
+
+```
+supabase/functions/trade-concierge/index.ts        # tool schema + proposal SSE event
+supabase/functions/trade-concierge-commit/index.ts # NEW — validated writes
+supabase/migrations/<ts>_concierge_actions.sql     # NEW — audit table + RLS
+src/components/trade/AIConcierge.tsx               # ProposalCard rendering, approve/discard
+src/components/trade/concierge/ProposalCard.tsx    # NEW — tearsheet & quote variants
+src/lib/tradeConciergeStream.ts                    # parse `event: proposal` SSE frames
+src/lib/conciergeCommit.ts                         # NEW — typed client for the commit endpoint
+```
+
+No changes to public surfaces, OG bridges, or the existing quote / tearsheet UIs — the concierge plugs into them, doesn't replace them.
+
+---
+
+## 8. Phased delivery
+
+1. **Phase 1 — Tearsheet drafts only** (1 tool, smallest surface). Proves the proposal/commit/approval loop end-to-end.
+2. **Phase 2 — Add-to-existing-tearsheet**, once context-passing of recent tearsheets is solid.
+3. **Phase 3 — Quote drafts**, gated behind Phase 1 + 2 because pricing & variants add complexity.
+4. **Phase 4 — Multi-step orchestration** (e.g. "build a tearsheet then turn it into a quote") via chained proposals.
+
+Each phase is independently shippable and the audit table makes it easy to measure approval vs discard rates before widening scope.
