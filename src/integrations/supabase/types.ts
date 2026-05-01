@@ -3073,6 +3073,42 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_concierge_actions: {
+        Row: {
+          args: Json
+          conversation_id: string | null
+          created_at: string
+          id: string
+          resulting_resource_id: string | null
+          resulting_resource_type: string | null
+          status: string
+          tool: string
+          user_id: string
+        }
+        Insert: {
+          args?: Json
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          resulting_resource_id?: string | null
+          resulting_resource_type?: string | null
+          status?: string
+          tool: string
+          user_id: string
+        }
+        Update: {
+          args?: Json
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          resulting_resource_id?: string | null
+          resulting_resource_type?: string | null
+          status?: string
+          tool?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trade_custom_request_activity: {
         Row: {
           action: string
