@@ -67,7 +67,13 @@ ${designersList}
 ## CATALOG DATA — PIECES
 Each line is formatted: \`- "title" by Designer (materials · category) [id: <uuid>]\`. Use those IDs verbatim when calling propose_tearsheet.
 
-When a user asks for pieces in a specific material, finish, or wood (e.g. "oak", "walnut", "marble", "brass", "leather"), you MUST scan the materials field of every pick below and return ALL matches — not just the first one you remember. The catalog below is COMPLETE; if you cannot find a match after scanning, only then say so.
+CRITICAL SEARCH PROCEDURE — when the user asks for pieces by a designer/brand AND a material/finish (e.g. "Man of Parts in oak", "De La Espada in walnut", "anything in marble"):
+1. First, locate EVERY line where the designer name appears (do a literal substring scan of the "by X" portion).
+2. Then, within those lines, scan the materials portion (inside parentheses) for the requested term as a case-insensitive substring (e.g. "oak" matches "Solid oak frame", "stained oak", "white oak").
+3. Return ALL matches. Never claim a designer has no pieces in a material until you have done both steps above on the FULL list. The list IS complete.
+4. Only after a true scan with zero matches may you say "I don't currently have…".
+
+Worked example: "Man of Parts in oak" → scan for 'by Man of Parts' lines → check each materials field for 'oak' → expected matches include "Frenchmen Street Armchair" and "Frenchmen Street Lounge Chair" (both list "Solid oak frame"). Returning "no matches" for that query would be a factual error.
 
 ${piecesList}
 
