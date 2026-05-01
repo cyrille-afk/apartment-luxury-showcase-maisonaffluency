@@ -60,7 +60,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       token,
     );
 
-    if (!res.ok) {
+    if (res.ok === false) {
       setStatus("pending");
       setError(res.error);
       toast.error(res.error);
