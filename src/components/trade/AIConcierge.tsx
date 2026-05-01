@@ -114,11 +114,14 @@ export function AIConcierge() {
         role: "assistant",
         content:
           outcome === "approved"
-            ? `✓ Tearsheet created${info?.url ? ` — opening: ${info.url}` : ""}.`
+            ? `✓ Tearsheet created — taking you there now…`
             : "Got it — I've discarded that draft. Want me to try a different angle?",
       });
       return copy;
     });
+    if (outcome === "approved" && info?.url) {
+      setTimeout(() => navigate(info.url), 600);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
