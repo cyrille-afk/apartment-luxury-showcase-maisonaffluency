@@ -127,8 +127,8 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           {headerLabel}
         </span>
-        {/* Quick mode toggle when there are existing boards available */}
-        {status === "pending" && proposal.tool === "add_to_tearsheet" && (
+        {/* Always-available mode toggle so the user can redirect either way */}
+        {status === "pending" && (
           <button
             type="button"
             onClick={() => setMode((m) => (m === "append" ? "create" : "append"))}
@@ -145,7 +145,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
           <BoardPicker
             value={selectedBoardId}
             onChange={setSelectedBoardId}
-            onCreateNew={proposal.tool === "add_to_tearsheet" ? () => setMode("create") : undefined}
+            onCreateNew={() => setMode("create")}
             disabled={status !== "pending"}
           />
         ) : (
