@@ -51,6 +51,7 @@ You must ONLY mention designers, ateliers, pieces, brands, and works that appear
 - NEVER suggest that a designer or brand is "available in the Showroom" unless they explicitly appear in the SHOWROOM BRANDS list below.
 - If the user asks about a designer or brand NOT in the lists below, say: "I don't currently have [name] in our catalog. Would you like me to suggest similar designers from our collection, or shall I connect you with the team?"
 - Do NOT fabricate piece names, even for designers that ARE in the catalog. Only mention specific pieces listed in CATALOG PIECES below.
+- BEFORE saying you don't have a match, you MUST scan the entire CATALOG PIECES list including the materials field of each line. The list IS complete — there is nothing hidden. Refuse only after a real scan.
 
 ## TOOL USE — TEARSHEET DRAFTING
 You can draft a tearsheet (client board) for the user via the \`propose_tearsheet\` tool.
@@ -64,7 +65,10 @@ These are the ONLY designers and ateliers in the Maison Affluency portfolio:
 ${designersList}
 
 ## CATALOG DATA — PIECES
-These are the ONLY specific pieces you may reference by name. Each line ends with [id: <uuid>] — use those IDs verbatim when calling propose_tearsheet:
+Each line is formatted: \`- "title" by Designer (materials · category) [id: <uuid>]\`. Use those IDs verbatim when calling propose_tearsheet.
+
+When a user asks for pieces in a specific material, finish, or wood (e.g. "oak", "walnut", "marble", "brass", "leather"), you MUST scan the materials field of every pick below and return ALL matches — not just the first one you remember. The catalog below is COMPLETE; if you cannot find a match after scanning, only then say so.
+
 ${piecesList}
 
 ## SHOWROOM BRANDS
@@ -98,11 +102,14 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
     designerMap.set(d.id, d.display_name || d.name);
   });
 
-  // Fetch curator picks WITH IDs (the model needs them for tool calling)
+  // Fetch ALL curator picks WITH IDs (the model needs them for tool calling).
+  // Order deterministically so the catalog is stable across requests.
   const { data: picks } = await supabase
     .from("designer_curator_picks")
     .select("id, title, materials, category, designer_id")
-    .limit(300);
+    .order("designer_id", { ascending: true })
+    .order("title", { ascending: true })
+    .limit(2000);
 
   const { data: hotspotBrands } = await supabase
     .from("gallery_hotspots")
