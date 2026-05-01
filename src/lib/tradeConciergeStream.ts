@@ -1,6 +1,8 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
-export type TearsheetProposal = {
+export type CreateTearsheetProposal = {
   tool: "propose_tearsheet";
   tool_call_id: string;
   args: {
@@ -8,14 +10,30 @@ export type TearsheetProposal = {
     pick_ids: string[];
     note: string | null;
   };
-  preview: Array<{
-    id: string;
-    title: string;
-    image_url: string | null;
-    materials: string | null;
-    category: string | null;
-    designer_name: string | null;
-  }>;
+  preview: PickPreview[];
+};
+
+export type AddToTearsheetProposal = {
+  tool: "add_to_tearsheet";
+  tool_call_id: string;
+  args: {
+    board_id: string | null;
+    board_title: string;
+    pick_ids: string[];
+    note: string | null;
+  };
+  preview: PickPreview[];
+};
+
+export type TearsheetProposal = CreateTearsheetProposal | AddToTearsheetProposal;
+
+export type PickPreview = {
+  id: string;
+  title: string;
+  image_url: string | null;
+  materials: string | null;
+  category: string | null;
+  designer_name: string | null;
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
@@ -35,11 +53,16 @@ export async function streamConcierge({
   onError: (msg: string) => void;
   signal?: AbortSignal;
 }) {
+  // Forward the user's session token so the edge function can list their existing tearsheets.
+  const { data: sess } = await supabase.auth.getSession();
+  const bearer = sess.session?.access_token || (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string);
+
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${bearer}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
     },
     body: JSON.stringify({ messages }),
     signal,
@@ -125,10 +148,14 @@ export async function streamConcierge({
 
 const COMMIT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge-commit`;
 
+export type CommitResult =
+  | { ok: true; board_id: string; url: string; added: number; duplicates?: number }
+  | { ok: false; error: string };
+
 export async function commitProposal(
   proposal: { tool: string; args: unknown },
   authToken: string,
-): Promise<{ ok: true; board_id: string; url: string; added: number } | { ok: false; error: string }> {
+): Promise<CommitResult> {
   try {
     const resp = await fetch(COMMIT_URL, {
       method: "POST",
@@ -140,7 +167,13 @@ export async function commitProposal(
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) return { ok: false, error: data.error || `Error ${resp.status}` };
-    return { ok: true, board_id: data.board_id, url: data.url, added: data.added };
+    return {
+      ok: true,
+      board_id: data.board_id,
+      url: data.url,
+      added: data.added,
+      duplicates: data.duplicates,
+    };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Network error" };
   }
