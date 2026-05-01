@@ -13,7 +13,7 @@ const TOOLS = [
     function: {
       name: "propose_tearsheet",
       description:
-        "Draft a NEW tearsheet (client board) for the trade user. Only call this when the user clearly asks to assemble, save, group, or share a selection of pieces. Always pick IDs strictly from CATALOG PIECES — never invent IDs.",
+        "Draft a NEW tearsheet (client board) for the trade user. Only call this when the user clearly asks to assemble, save, group, or share a NEW selection. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CATALOG PIECES — never invent IDs.",
       parameters: {
         type: "object",
         properties: {
@@ -38,9 +38,44 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "add_to_tearsheet",
+      description:
+        "Append pieces to one of the user's EXISTING tearsheets. Only call this when the user clearly references an existing tearsheet from USER'S EXISTING TEARSHEETS (by name or by saying 'add to my X tearsheet'). The board_id MUST be one of the UUIDs listed there. Never invent a board_id.",
+      parameters: {
+        type: "object",
+        properties: {
+          board_id: {
+            type: "string",
+            description: "UUID of the existing tearsheet, taken verbatim from USER'S EXISTING TEARSHEETS.",
+          },
+          pick_ids: {
+            type: "array",
+            description: "UUIDs of curator picks to append. Must come from CATALOG PIECES.",
+            items: { type: "string" },
+            minItems: 1,
+            maxItems: 24,
+          },
+          note: {
+            type: "string",
+            description: "Optional 1–2 sentence rationale for the additions.",
+          },
+        },
+        required: ["board_id", "pick_ids"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
-function buildSystemPrompt(designersList: string, piecesList: string, showroomBrands: string) {
+function buildSystemPrompt(
+  designersList: string,
+  piecesList: string,
+  showroomBrands: string,
+  userBoards: string,
+) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
 Your tone is warm yet polished, like a well-informed gallery advisor. Keep answers concise (2-4 sentences unless detail is requested).
@@ -54,18 +89,26 @@ You must ONLY mention designers, ateliers, pieces, brands, and works that appear
 - BEFORE saying you don't have a match, you MUST scan the entire CATALOG PIECES list including the materials field of each line. The list IS complete — there is nothing hidden. Refuse only after a real scan.
 
 ## TOOL USE — TEARSHEET DRAFTING
-You can draft a tearsheet (client board) for the user via the \`propose_tearsheet\` tool.
-- Only call it when the user explicitly asks to "build", "create", "assemble", "save", or "draft" a tearsheet / mood board / selection.
-- pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CATALOG PIECES below.
-- Do NOT call the tool just to recommend pieces in conversation — only when the user wants to PERSIST a selection.
-- After calling the tool, give one short sentence telling the user the draft is ready for their review (it will appear as an approval card; nothing is saved until they approve).
+You have two tools for tearsheets:
+- \`propose_tearsheet\` — draft a NEW tearsheet. Use when the user asks to "build", "create", "assemble", "save", "draft", or "start" a new tearsheet / mood board / selection.
+- \`add_to_tearsheet\` — append to one of the user's EXISTING tearsheets listed below. Use when the user says things like "add these to my Library project", "put them on my X tearsheet", "include in my existing board", or refers by name to a board in USER'S EXISTING TEARSHEETS.
+
+Rules for both tools:
+- pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CATALOG PIECES. Never invent IDs.
+- For \`add_to_tearsheet\`, board_id MUST be a UUID from USER'S EXISTING TEARSHEETS — never invent.
+- Do NOT call either tool just to recommend pieces in conversation — only when the user wants to PERSIST a selection.
+- After calling a tool, give one short sentence telling the user the draft is ready for their review (it appears as an approval card; nothing is saved until they approve).
+- If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, ask which they prefer before calling a tool.
+
+## USER'S EXISTING TEARSHEETS
+${userBoards}
 
 ## CATALOG DATA — DESIGNERS & ATELIERS
 These are the ONLY designers and ateliers in the Maison Affluency portfolio:
 ${designersList}
 
 ## CATALOG DATA — PIECES
-Each line is formatted: \`- "title" by Designer (materials · category) [id: <uuid>]\`. Use those IDs verbatim when calling propose_tearsheet.
+Each line is formatted: \`- "title" by Designer (materials · category) [id: <uuid>]\`. Use those IDs verbatim when calling the tearsheet tools.
 
 CRITICAL SEARCH PROCEDURE — when the user asks for pieces by a designer/brand AND a material/finish (e.g. "Man of Parts in oak", "De La Espada in walnut", "anything in marble"):
 1. First, locate EVERY line where the designer name appears (do a literal substring scan of the "by X" portion).
@@ -88,7 +131,7 @@ If a brand is in DESIGNERS but NOT in SHOWROOM BRANDS, tell the user: "We repres
 - **Designer knowledge**: Share background on designers listed above — their philosophy, materials, craftsmanship.
 - **Specification guidance**: Advise on materials, dimensions, lead times, and care for cataloged pieces.
 - **Trade portal navigation**: Guide users to Showroom, Gallery, Quote Builder, Sample Requests, Resources, 3D Studio, or Project Folders.
-- **Tearsheet drafting**: When asked, assemble a tearsheet via the tool above.
+- **Tearsheet drafting**: Create new tearsheets or append to existing ones via the tools above.
 
 You do NOT have live pricing or stock data. For specific pricing, direct users to the Quote Builder.
 
@@ -146,6 +189,29 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
     piecesList: pieceLines.join("\n") || "No pieces currently loaded.",
     showroomBrands: showroomBrandLines.join("\n") || "No showroom brands currently loaded.",
   };
+}
+
+/** Load the signed-in user's existing tearsheets for tool grounding. */
+async function loadUserBoards(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "(No user session — only new tearsheets can be drafted.)";
+  const { data: boards } = await supabase
+    .from("client_boards")
+    .select("id, title, client_name, status, updated_at")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(40);
+  if (!boards || boards.length === 0) {
+    return "(The user has no existing tearsheets yet — only \`propose_tearsheet\` is available.)";
+  }
+  return boards
+    .map((b: any) => {
+      const meta = [b.client_name, b.status].filter(Boolean).join(" · ");
+      return `- "${b.title || "Untitled"}"${meta ? ` (${meta})` : ""} [board_id: ${b.id}]`;
+    })
+    .join("\n");
 }
 
 /** Hydrate a list of pick IDs into a preview the chat UI can render. */
@@ -206,8 +272,20 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { designersList, piecesList, showroomBrands } = await loadCatalogContext(supabase);
-    const systemPrompt = buildSystemPrompt(designersList, piecesList, showroomBrands);
+    // Try to extract a user from the bearer token (optional — function is anon-callable).
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (token) {
+      const { data: u } = await supabase.auth.getUser(token);
+      userId = u?.user?.id || null;
+    }
+
+    const [{ designersList, piecesList, showroomBrands }, userBoards] = await Promise.all([
+      loadCatalogContext(supabase),
+      loadUserBoards(supabase, userId),
+    ]);
+    const systemPrompt = buildSystemPrompt(designersList, piecesList, showroomBrands, userBoards);
 
     const upstream = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -265,7 +343,7 @@ serve(async (req) => {
       async start(controller) {
         const flushProposal = async () => {
           for (const tc of toolCallBuffers.values()) {
-            if (tc.name !== "propose_tearsheet") continue;
+            if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
             let parsed: any = null;
             try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
               console.error("Could not parse tool args:", tc.argsText, e);
@@ -273,17 +351,45 @@ serve(async (req) => {
             }
             const pickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
             const preview = await hydratePickPreview(supabase, pickIds);
-            const proposal = {
-              tool: "propose_tearsheet",
-              tool_call_id: tc.id || crypto.randomUUID(),
-              args: {
-                title: typeof parsed.title === "string" ? parsed.title : "Untitled tearsheet",
-                pick_ids: pickIds,
-                note: typeof parsed.note === "string" ? parsed.note : null,
-              },
-              preview,
-            };
-            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+
+            if (tc.name === "add_to_tearsheet") {
+              const boardId: string | null = typeof parsed.board_id === "string" ? parsed.board_id : null;
+              // Lookup the board's current title for the card
+              let boardTitle = "your tearsheet";
+              if (boardId && userId) {
+                const { data: b } = await supabase
+                  .from("client_boards")
+                  .select("title")
+                  .eq("id", boardId)
+                  .eq("user_id", userId)
+                  .maybeSingle();
+                if (b?.title) boardTitle = b.title;
+              }
+              const proposal = {
+                tool: "add_to_tearsheet",
+                tool_call_id: tc.id || crypto.randomUUID(),
+                args: {
+                  board_id: boardId,
+                  board_title: boardTitle,
+                  pick_ids: pickIds,
+                  note: typeof parsed.note === "string" ? parsed.note : null,
+                },
+                preview,
+              };
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+            } else {
+              const proposal = {
+                tool: "propose_tearsheet",
+                tool_call_id: tc.id || crypto.randomUUID(),
+                args: {
+                  title: typeof parsed.title === "string" ? parsed.title : "Untitled tearsheet",
+                  pick_ids: pickIds,
+                  note: typeof parsed.note === "string" ? parsed.note : null,
+                },
+                preview,
+              };
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+            }
           }
         };
 
