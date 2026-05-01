@@ -14,6 +14,7 @@ type TimelineItem =
 
 export function AIConcierge() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>([
