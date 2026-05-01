@@ -94,13 +94,13 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Validate the user's JWT (uses signing keys per project standard)
-    const { data: claimsData, error: claimsError } = await (supabase.auth as any).getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
-      console.error("getClaims failed:", claimsError);
+    // Validate the user's JWT
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData?.user?.id) {
+      console.error("getUser failed:", userError);
       return json(401, { error: "Invalid auth token" });
     }
-    const userId: string = claimsData.claims.sub;
+    const userId: string = userData.user.id;
 
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") return json(400, { error: "Invalid JSON body" });
