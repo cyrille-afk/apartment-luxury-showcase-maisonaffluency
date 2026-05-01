@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Check, X, Pencil, ExternalLink } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,15 +10,18 @@ type Status = "pending" | "committing" | "approved" | "discarded";
 
 interface Props {
   proposal: TearsheetProposal;
-  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string }) => void;
+  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; mode: "create" | "append" }) => void;
 }
 
 export function TearsheetProposalCard({ proposal, onResolved }: Props) {
-  const [title, setTitle] = useState(proposal.args.title);
+  const isAppend = proposal.tool === "add_to_tearsheet";
+  const initialTitle = isAppend ? proposal.args.board_title : proposal.args.title;
+
+  const [title, setTitle] = useState(initialTitle);
   const [editingTitle, setEditingTitle] = useState(false);
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<Status>("pending");
-  const [result, setResult] = useState<{ boardId: string; url: string; added: number } | null>(null);
+  const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const visiblePicks = proposal.preview.filter((p) => !excluded.has(p.id));
@@ -48,17 +51,27 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       return;
     }
 
-    const res = await commitProposal(
-      {
-        tool: "propose_tearsheet",
-        args: {
-          title: title.trim() || "Untitled tearsheet",
-          note: proposal.args.note,
-          pick_ids: visiblePicks.map((p) => p.id),
-        },
-      },
-      token,
-    );
+    const pickIds = visiblePicks.map((p) => p.id);
+
+    const requestBody = isAppend
+      ? {
+          tool: "add_to_tearsheet" as const,
+          args: {
+            board_id: proposal.args.board_id,
+            note: proposal.args.note,
+            pick_ids: pickIds,
+          },
+        }
+      : {
+          tool: "propose_tearsheet" as const,
+          args: {
+            title: title.trim() || "Untitled tearsheet",
+            note: proposal.args.note,
+            pick_ids: pickIds,
+          },
+        };
+
+    const res = await commitProposal(requestBody, token);
 
     if (res.ok === false) {
       setStatus("pending");
@@ -67,8 +80,14 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       return;
     }
     setStatus("approved");
-    setResult({ boardId: res.board_id, url: res.url, added: res.added });
-    onResolved?.("approved", { boardId: res.board_id, url: res.url });
+    const duplicates = res.duplicates || 0;
+    setResult({ boardId: res.board_id, url: res.url, added: res.added, duplicates });
+    onResolved?.("approved", {
+      boardId: res.board_id,
+      url: res.url,
+      added: res.added,
+      mode: isAppend ? "append" : "create",
+    });
   };
 
   const handleDiscard = () => {
@@ -76,17 +95,24 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
     onResolved?.("discarded");
   };
 
+  const headerLabel = isAppend
+    ? "✦ Concierge proposes adding to your tearsheet"
+    : "✦ Concierge proposes a new tearsheet";
+
+  const approveLabel = isAppend ? "Approve & add" : "Approve & create";
+  const ApproveIcon = isAppend ? Plus : Check;
+
   return (
     <div className="rounded-2xl border border-accent/40 bg-accent/[0.04] p-3.5 my-2 animate-fade-in">
       <div className="flex items-center gap-2 mb-2">
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
-          ✦ Concierge proposes a new tearsheet
+          {headerLabel}
         </span>
       </div>
 
-      {/* Title (editable) */}
+      {/* Title — editable only in create mode */}
       <div className="flex items-center gap-2 mb-2">
-        {editingTitle && status === "pending" ? (
+        {!isAppend && editingTitle && status === "pending" ? (
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -97,9 +123,12 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
             className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-display text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
           />
         ) : (
-          <h4 className="flex-1 font-display text-sm text-foreground">{title || "Untitled tearsheet"}</h4>
+          <h4 className="flex-1 font-display text-sm text-foreground">
+            {isAppend && <span className="text-muted-foreground font-body text-[11px] mr-1">→</span>}
+            {title || "Untitled tearsheet"}
+          </h4>
         )}
-        {status === "pending" && (
+        {!isAppend && status === "pending" && (
           <button
             onClick={() => setEditingTitle((v) => !v)}
             className="text-muted-foreground hover:text-foreground transition-colors"
@@ -166,11 +195,11 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
           </button>
           <button
             onClick={handleApprove}
-            disabled={visiblePicks.length === 0}
+            disabled={visiblePicks.length === 0 || (isAppend && !proposal.args.board_id)}
             className="flex items-center gap-1.5 rounded-full bg-foreground text-background font-body text-[11px] uppercase tracking-widest px-3.5 py-1.5 hover:opacity-90 transition-opacity disabled:opacity-40"
           >
-            <Check className="h-3 w-3" />
-            Approve & create
+            <ApproveIcon className="h-3 w-3" />
+            {approveLabel}
           </button>
         </div>
       )}
@@ -178,14 +207,23 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       {status === "committing" && (
         <div className="flex items-center justify-end gap-2 text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          <span className="font-body text-[11px]">Creating tearsheet…</span>
+          <span className="font-body text-[11px]">
+            {isAppend ? "Adding to tearsheet…" : "Creating tearsheet…"}
+          </span>
         </div>
       )}
 
       {status === "approved" && result && (
         <div className="flex items-center justify-between">
           <span className="font-body text-[11px] text-foreground/80">
-            ✓ Created with {result.added} {result.added === 1 ? "piece" : "pieces"}
+            {isAppend ? (
+              <>
+                ✓ Added {result.added} {result.added === 1 ? "piece" : "pieces"}
+                {result.duplicates > 0 && ` · ${result.duplicates} already on board`}
+              </>
+            ) : (
+              <>✓ Created with {result.added} {result.added === 1 ? "piece" : "pieces"}</>
+            )}
           </span>
           <Link
             to={result.url}

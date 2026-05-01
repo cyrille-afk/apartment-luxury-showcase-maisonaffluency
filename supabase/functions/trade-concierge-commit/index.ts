@@ -78,6 +78,25 @@ async function resolvePickToTradeProduct(
   return { tradeProductId: created?.id || null, pick };
 }
 
+async function resolvePickIds(
+  supabase: ReturnType<typeof createClient>,
+  pickIds: string[],
+) {
+  const resolved: Array<{ pickId: string; tradeProductId: string }> = [];
+  const skipped: Array<{ pickId: string; reason: string }> = [];
+  for (const pid of pickIds) {
+    const { tradeProductId, pick } = await resolvePickToTradeProduct(supabase, pid);
+    if (!tradeProductId) {
+      skipped.push({ pickId: pid, reason: pick ? "could not create trade product" : "pick not found" });
+      continue;
+    }
+    if (!resolved.some((r) => r.tradeProductId === tradeProductId)) {
+      resolved.push({ pickId: pid, tradeProductId });
+    }
+  }
+  return { resolved, skipped };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -94,7 +113,6 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Validate the user's JWT
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData?.user?.id) {
       console.error("getUser failed:", userError);
@@ -108,92 +126,164 @@ serve(async (req) => {
     const tool: string = body.tool;
     const args = body.args || {};
 
-    if (tool !== "propose_tearsheet") {
-      return json(400, { error: `Unsupported tool: ${tool}` });
-    }
-
-    const title: string = (args.title || "Untitled tearsheet").toString().slice(0, 120);
     const note: string | null = typeof args.note === "string" ? args.note.slice(0, 500) : null;
     const pickIds: string[] = Array.isArray(args.pick_ids)
       ? args.pick_ids.filter((x: unknown) => typeof x === "string")
       : [];
-
     if (pickIds.length === 0) return json(400, { error: "pick_ids must contain at least one ID" });
     if (pickIds.length > 24) return json(400, { error: "Too many picks (max 24)" });
 
-    // Resolve every pick to a trade_products.id (create if needed)
-    const resolved: Array<{ pickId: string; tradeProductId: string }> = [];
-    const skipped: Array<{ pickId: string; reason: string }> = [];
+    // ============================================================
+    // TOOL: add_to_tearsheet  → append to existing board
+    // ============================================================
+    if (tool === "add_to_tearsheet") {
+      const boardId: string | null = typeof args.board_id === "string" ? args.board_id : null;
+      if (!boardId) return json(400, { error: "board_id is required" });
 
-    for (const pid of pickIds) {
-      const { tradeProductId, pick } = await resolvePickToTradeProduct(supabase, pid);
-      if (!tradeProductId) {
-        skipped.push({ pickId: pid, reason: pick ? "could not create trade product" : "pick not found" });
-        continue;
+      // Validate ownership
+      const { data: board, error: boardErr } = await supabase
+        .from("client_boards")
+        .select("id, title, user_id")
+        .eq("id", boardId)
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (boardErr || !board) {
+        return json(404, { error: "Tearsheet not found or you don't have access to it" });
       }
-      // Avoid dupes within the same proposal
-      if (!resolved.some((r) => r.tradeProductId === tradeProductId)) {
-        resolved.push({ pickId: pid, tradeProductId });
+
+      const { resolved, skipped } = await resolvePickIds(supabase, pickIds);
+      if (resolved.length === 0) {
+        return json(422, { error: "None of the picks could be resolved to a product", skipped });
       }
-    }
 
-    if (resolved.length === 0) {
-      return json(422, { error: "None of the picks could be resolved to a product", skipped });
-    }
+      // Dedupe against items already on the board
+      const productIds = resolved.map((r) => r.tradeProductId);
+      const { data: existing } = await supabase
+        .from("client_board_items")
+        .select("product_id, sort_order")
+        .eq("board_id", boardId)
+        .in("product_id", productIds);
 
-    // Create the board (status = draft so the user can rename/edit before sharing)
-    const { data: board, error: boardErr } = await supabase
-      .from("client_boards")
-      .insert({
+      const alreadyOnBoard = new Set((existing || []).map((e: any) => e.product_id));
+      const newRows = resolved.filter((r) => !alreadyOnBoard.has(r.tradeProductId));
+      const duplicates = resolved.length - newRows.length;
+
+      // Determine starting sort_order (max existing + 1)
+      const { data: maxRow } = await supabase
+        .from("client_board_items")
+        .select("sort_order")
+        .eq("board_id", boardId)
+        .order("sort_order", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const startOrder = (maxRow?.sort_order ?? -1) + 1;
+
+      let added = 0;
+      if (newRows.length > 0) {
+        const itemsPayload = newRows.map((r, i) => ({
+          board_id: boardId,
+          product_id: r.tradeProductId,
+          sort_order: startOrder + i,
+          notes: i === 0 && note ? note : null,
+        }));
+        const { error: itemsErr } = await supabase
+          .from("client_board_items")
+          .insert(itemsPayload);
+        if (itemsErr) {
+          console.error("Append items failed:", itemsErr);
+          return json(500, { error: "Could not append items to tearsheet" });
+        }
+        added = newRows.length;
+      }
+
+      // Bump board updated_at
+      await supabase
+        .from("client_boards")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", boardId);
+
+      await supabase.from("trade_concierge_actions").insert({
         user_id: userId,
-        title,
-        client_name: "",
-        status: "draft",
-      })
-      .select("id, share_token")
-      .single();
+        tool: "add_to_tearsheet",
+        args: { board_id: boardId, note, pick_ids: pickIds, added, duplicates, skipped },
+        status: "approved",
+        resulting_resource_id: boardId,
+        resulting_resource_type: "client_board",
+      });
 
-    if (boardErr || !board) {
-      console.error("Board insert failed:", boardErr);
-      return json(500, { error: "Could not create tearsheet" });
+      return json(200, {
+        ok: true,
+        board_id: boardId,
+        url: `/trade/boards/${boardId}`,
+        added,
+        duplicates,
+        skipped,
+      });
     }
 
-    // Insert items in order
-    const itemsPayload = resolved.map((r, i) => ({
-      board_id: board.id,
-      product_id: r.tradeProductId,
-      sort_order: i,
-      notes: i === 0 && note ? note : null,
-    }));
+    // ============================================================
+    // TOOL: propose_tearsheet  → create new board
+    // ============================================================
+    if (tool === "propose_tearsheet") {
+      const title: string = (args.title || "Untitled tearsheet").toString().slice(0, 120);
 
-    const { error: itemsErr } = await supabase
-      .from("client_board_items")
-      .insert(itemsPayload);
+      const { resolved, skipped } = await resolvePickIds(supabase, pickIds);
+      if (resolved.length === 0) {
+        return json(422, { error: "None of the picks could be resolved to a product", skipped });
+      }
 
-    if (itemsErr) {
-      console.error("Board items insert failed:", itemsErr);
-      // Roll back the empty board so the user doesn't see a stub
-      await supabase.from("client_boards").delete().eq("id", board.id);
-      return json(500, { error: "Could not add items to tearsheet" });
+      const { data: board, error: boardErr } = await supabase
+        .from("client_boards")
+        .insert({
+          user_id: userId,
+          title,
+          client_name: "",
+          status: "draft",
+        })
+        .select("id, share_token")
+        .single();
+
+      if (boardErr || !board) {
+        console.error("Board insert failed:", boardErr);
+        return json(500, { error: "Could not create tearsheet" });
+      }
+
+      const itemsPayload = resolved.map((r, i) => ({
+        board_id: board.id,
+        product_id: r.tradeProductId,
+        sort_order: i,
+        notes: i === 0 && note ? note : null,
+      }));
+
+      const { error: itemsErr } = await supabase
+        .from("client_board_items")
+        .insert(itemsPayload);
+
+      if (itemsErr) {
+        console.error("Board items insert failed:", itemsErr);
+        await supabase.from("client_boards").delete().eq("id", board.id);
+        return json(500, { error: "Could not add items to tearsheet" });
+      }
+
+      await supabase.from("trade_concierge_actions").insert({
+        user_id: userId,
+        tool: "propose_tearsheet",
+        args: { title, note, pick_ids: pickIds, resolved_count: resolved.length, skipped },
+        status: "approved",
+        resulting_resource_id: board.id,
+        resulting_resource_type: "client_board",
+      });
+
+      return json(200, {
+        ok: true,
+        board_id: board.id,
+        url: `/trade/boards/${board.id}`,
+        added: resolved.length,
+        skipped,
+      });
     }
 
-    // Audit log (non-fatal)
-    await supabase.from("trade_concierge_actions").insert({
-      user_id: userId,
-      tool: "propose_tearsheet",
-      args: { title, note, pick_ids: pickIds, resolved_count: resolved.length, skipped },
-      status: "approved",
-      resulting_resource_id: board.id,
-      resulting_resource_type: "client_board",
-    });
-
-    return json(200, {
-      ok: true,
-      board_id: board.id,
-      url: `/trade/boards/${board.id}`,
-      added: resolved.length,
-      skipped,
-    });
+    return json(400, { error: `Unsupported tool: ${tool}` });
   } catch (e) {
     console.error("trade-concierge-commit error:", e);
     return json(500, { error: e instanceof Error ? e.message : "Unknown error" });
