@@ -123,21 +123,41 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
 
   return (
     <div className="rounded-2xl border border-accent/40 bg-accent/[0.04] p-3.5 my-2 animate-fade-in">
-      <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="mb-2">
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           {headerLabel}
         </span>
-        {/* Always-available mode toggle so the user can redirect either way */}
-        {status === "pending" && (
+      </div>
+
+      {/* Segmented control — always visible while pending so the user can redirect either way */}
+      {status === "pending" && (
+        <div className="grid grid-cols-2 gap-1 p-0.5 rounded-lg bg-muted/60 mb-2.5">
           <button
             type="button"
-            onClick={() => setMode((m) => (m === "append" ? "create" : "append"))}
-            className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setMode("append")}
+            className={cn(
+              "rounded-md px-2 py-1.5 font-body text-[10px] uppercase tracking-wider transition-colors",
+              isAppend
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
           >
-            {isAppend ? "Create new instead" : "Add to existing"}
+            Add to existing
           </button>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={() => setMode("create")}
+            className={cn(
+              "rounded-md px-2 py-1.5 font-body text-[10px] uppercase tracking-wider transition-colors",
+              !isAppend
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Create new
+          </button>
+        </div>
+      )}
 
       {/* Target — picker in append mode, editable title in create mode */}
       <div className="mb-2.5">
