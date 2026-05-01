@@ -5,25 +5,39 @@ import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStre
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
+type Mode = "create" | "append";
 
 interface Props {
   proposal: TearsheetProposal;
-  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; mode: "create" | "append" }) => void;
+  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; mode: Mode }) => void;
 }
 
 export function TearsheetProposalCard({ proposal, onResolved }: Props) {
-  const isAppend = proposal.tool === "add_to_tearsheet";
-  const initialTitle = isAppend ? proposal.args.board_title : proposal.args.title;
+  const initialMode: Mode = proposal.tool === "add_to_tearsheet" ? "append" : "create";
+  const [mode, setMode] = useState<Mode>(initialMode);
 
+  // Title is only used in create mode. Default to AI's title (or a derived fallback for append→create switch).
+  const initialTitle =
+    proposal.tool === "propose_tearsheet"
+      ? proposal.args.title
+      : proposal.args.board_title || "New tearsheet";
   const [title, setTitle] = useState(initialTitle);
   const [editingTitle, setEditingTitle] = useState(false);
+
+  // Selected board for append mode (controlled — user can override the AI's pick).
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(
+    proposal.tool === "add_to_tearsheet" ? proposal.args.board_id : null,
+  );
+
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const isAppend = mode === "append";
   const visiblePicks = proposal.preview.filter((p) => !excluded.has(p.id));
 
   const togglePick = (id: string) => {
@@ -40,6 +54,11 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       toast.error("Select at least one piece to include.");
       return;
     }
+    if (isAppend && !selectedBoardId) {
+      toast.error("Choose a tearsheet to add these pieces to.");
+      return;
+    }
+
     setStatus("committing");
     setError(null);
 
@@ -57,7 +76,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       ? {
           tool: "add_to_tearsheet" as const,
           args: {
-            board_id: proposal.args.board_id,
+            board_id: selectedBoardId,
             note: proposal.args.note,
             pick_ids: pickIds,
           },
@@ -86,7 +105,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       boardId: res.board_id,
       url: res.url,
       added: res.added,
-      mode: isAppend ? "append" : "create",
+      mode,
     });
   };
 
@@ -104,38 +123,56 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
 
   return (
     <div className="rounded-2xl border border-accent/40 bg-accent/[0.04] p-3.5 my-2 animate-fade-in">
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center justify-between gap-2 mb-2">
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           {headerLabel}
         </span>
+        {/* Quick mode toggle when there are existing boards available */}
+        {status === "pending" && proposal.tool === "add_to_tearsheet" && (
+          <button
+            type="button"
+            onClick={() => setMode((m) => (m === "append" ? "create" : "append"))}
+            className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isAppend ? "Create new instead" : "Add to existing"}
+          </button>
+        )}
       </div>
 
-      {/* Title — editable only in create mode */}
-      <div className="flex items-center gap-2 mb-2">
-        {!isAppend && editingTitle && status === "pending" ? (
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => setEditingTitle(false)}
-            onKeyDown={(e) => { if (e.key === "Enter") setEditingTitle(false); }}
-            autoFocus
-            maxLength={120}
-            className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-display text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+      {/* Target — picker in append mode, editable title in create mode */}
+      <div className="mb-2.5">
+        {isAppend ? (
+          <BoardPicker
+            value={selectedBoardId}
+            onChange={setSelectedBoardId}
+            onCreateNew={proposal.tool === "add_to_tearsheet" ? () => setMode("create") : undefined}
+            disabled={status !== "pending"}
           />
         ) : (
-          <h4 className="flex-1 font-display text-sm text-foreground">
-            {isAppend && <span className="text-muted-foreground font-body text-[11px] mr-1">→</span>}
-            {title || "Untitled tearsheet"}
-          </h4>
-        )}
-        {!isAppend && status === "pending" && (
-          <button
-            onClick={() => setEditingTitle((v) => !v)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Rename"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {editingTitle && status === "pending" ? (
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => setEditingTitle(false)}
+                onKeyDown={(e) => { if (e.key === "Enter") setEditingTitle(false); }}
+                autoFocus
+                maxLength={120}
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-display text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+              />
+            ) : (
+              <h4 className="flex-1 font-display text-sm text-foreground">{title || "Untitled tearsheet"}</h4>
+            )}
+            {status === "pending" && (
+              <button
+                onClick={() => setEditingTitle((v) => !v)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Rename"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -195,7 +232,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
           </button>
           <button
             onClick={handleApprove}
-            disabled={visiblePicks.length === 0 || (isAppend && !proposal.args.board_id)}
+            disabled={visiblePicks.length === 0 || (isAppend && !selectedBoardId)}
             className="flex items-center gap-1.5 rounded-full bg-foreground text-background font-body text-[11px] uppercase tracking-widest px-3.5 py-1.5 hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             <ApproveIcon className="h-3 w-3" />
