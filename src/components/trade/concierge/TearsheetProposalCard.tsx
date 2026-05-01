@@ -145,7 +145,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
           <BoardPicker
             value={selectedBoardId}
             onChange={setSelectedBoardId}
-            onCreateNew={proposal.tool === "add_to_tearsheet" ? () => setMode("create") : undefined}
+            onCreateNew={() => setMode("create")}
             disabled={status !== "pending"}
           />
         ) : (
