@@ -64,7 +64,10 @@ These are the ONLY designers and ateliers in the Maison Affluency portfolio:
 ${designersList}
 
 ## CATALOG DATA — PIECES
-These are the ONLY specific pieces you may reference by name. Each line ends with [id: <uuid>] — use those IDs verbatim when calling propose_tearsheet:
+Each line is formatted: \`- "title" by Designer (materials · category) [id: <uuid>]\`. Use those IDs verbatim when calling propose_tearsheet.
+
+When a user asks for pieces in a specific material, finish, or wood (e.g. "oak", "walnut", "marble", "brass", "leather"), you MUST scan the materials field of every pick below and return ALL matches — not just the first one you remember. The catalog below is COMPLETE; if you cannot find a match after scanning, only then say so.
+
 ${piecesList}
 
 ## SHOWROOM BRANDS
