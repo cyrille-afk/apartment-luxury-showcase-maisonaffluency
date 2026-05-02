@@ -354,10 +354,10 @@ export default function TradeProjectDetail() {
           {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <Stat icon={FileText} label="Quotes" value={quotes.length} />
-          <Stat icon={FolderArchive} label="Boards" value={boards.length} />
-          <Stat icon={Package} label="Quote items" value={quoteItemCount} />
-          <Stat icon={ListChecks} label="Board items" value={boardItemCount} />
+          <Stat icon={FileText} label="Quotes" value={quotes.length} onClick={() => setActiveTab("quotes")} />
+          <Stat icon={FolderArchive} label="Boards" value={boards.length} onClick={() => setActiveTab("boards")} />
+          <Stat icon={Package} label="Quote items" value={quoteItemCount} onClick={() => setActiveTab("quotes")} />
+          <Stat icon={ListChecks} label="Board items" value={boardItemCount} onClick={() => setActiveTab("boards")} />
         </div>
         <div className="flex flex-wrap items-center gap-2 mb-5">
           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">Quick filter:</span>
