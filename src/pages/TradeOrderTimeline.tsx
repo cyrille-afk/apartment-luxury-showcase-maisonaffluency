@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
-import BackToProjectPill from "@/components/trade/BackToProjectPill";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 
 interface OrderTimeline {
   id: string;
