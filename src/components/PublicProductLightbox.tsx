@@ -190,14 +190,28 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const finishMap = buildProductFinishMap(product.variant_image_map);
   const galleryImages = (product.gallery_images || []).filter(Boolean);
   const sv = product.size_variants || [];
-  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  // True dual-axis only when BOTH base and top are populated. Base-only
+  // products (e.g. Atelier Pendhapa "Mangala Coffee Table") behave as
+  // single-axis on Base — see src/lib/parseSizeVariants.ts.
+  const hasAnyBase = sv.some((v) => (v.base && v.base.trim()));
+  const hasAnyTop = sv.some((v) => (v.top && v.top.trim()));
+  const isDualAxis = hasAnyBase && hasAnyTop;
   const baseOptions = isDualAxis
     ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
     : [];
   const topOptionsForResolve = isDualAxis
     ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
     : [];
-  const materialOptions = !isDualAxis && product.materials ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean) : [];
+  // For base-only products, surface the bases through the same dropdown the
+  // single-axis material picker uses below.
+  const baseOnlyOptions = !isDualAxis && hasAnyBase
+    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
+    : [];
+  const materialOptions = !isDualAxis && hasAnyBase
+    ? baseOnlyOptions
+    : !isDualAxis && product.materials
+      ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean)
+      : [];
   // Resolve which gallery image matches the current selection. For dual-axis
   // products we first try the composite Base|Top key (so rows that share the
   // same Top — e.g. Apparatus Lantern Table Lamp where every row is "Slip-cast
