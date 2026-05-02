@@ -311,6 +311,21 @@ export function AIConcierge() {
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  abortRef.current?.abort();
+                  setStreaming(false);
+                  setInput("");
+                  setStageOverride(null);
+                  setTimeline([{ kind: "msg", role: "assistant", content: GREETING }]);
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label="Start a new conversation"
+                title="Start a new conversation"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setMinimized((m) => !m)}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label={minimized ? "Expand" : "Collapse"}
