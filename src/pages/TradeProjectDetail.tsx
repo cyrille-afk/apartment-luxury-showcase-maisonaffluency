@@ -75,7 +75,29 @@ export default function TradeProjectDetail() {
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
   const [boardItems, setBoardItems] = useState<ProjectBoardItem[]>([]);
   const [quoteItems, setQuoteItems] = useState<ProjectQuoteItem[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const VALID_TABS = ["overview", "quotes", "boards", "tearsheets", "shipping", "ffe"] as const;
+  const initialTab = (() => {
+    const t = searchParams.get("tab");
+    return t && (VALID_TABS as readonly string[]).includes(t) ? t : "overview";
+  })();
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
+
+  // React to back/forward and external links that change ?tab=
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    const next = t && (VALID_TABS as readonly string[]).includes(t) ? t : "overview";
+    setActiveTab((prev) => (prev === next ? prev : next));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Reflect tab changes back into the URL (replace, no history spam).
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const next = new URLSearchParams(searchParams);
+    if (value === "overview") next.delete("tab"); else next.set("tab", value);
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
     if (project) {
