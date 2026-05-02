@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, type QuotePdfLine } from "@/lib/quotePdf";
@@ -91,6 +92,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string | null>(null);
+  // Add-product picker state
+  const [productOptions, setProductOptions] = useState<PickerItem[]>([]);
+  const [pendingProductId, setPendingProductId] = useState<string>("");
+  const [addingProduct, setAddingProduct] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Insurance bundling
   type InsuranceTier = "standard" | "premium" | "all_risk";
@@ -312,7 +318,60 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setLoading(false);
     };
     load();
-  }, [quoteId, user]);
+  }, [quoteId, user, reloadKey]);
+
+  // Fetch products for the in-quote "Add product" picker.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name")
+        .order("brand_name", { ascending: true })
+        .order("product_name", { ascending: true })
+        .limit(2000);
+      if (cancelled || !data) return;
+      const opts: PickerItem[] = data
+        .filter((p: any) => p.product_name && p.brand_name)
+        .map((p: any) => ({
+          id: p.id as string,
+          label: p.product_name as string,
+          group: (p.brand_name as string).includes(" - ")
+            ? (p.brand_name as string).split(" - ")[0].trim()
+            : (p.brand_name as string),
+        }));
+      setProductOptions(opts);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleAddProduct = async (productId: string) => {
+    if (!productId || addingProduct) return;
+    setAddingProduct(true);
+    try {
+      const { error } = await supabase.from("trade_quote_items").insert({
+        quote_id: quoteId,
+        product_id: productId,
+        quantity: 1,
+      } as any);
+      if (error) throw error;
+      const picked = productOptions.find((p) => p.id === productId);
+      toast({
+        title: "Added to quote",
+        description: picked ? `${picked.label} — ${picked.group}` : undefined,
+      });
+      setPendingProductId("");
+      setReloadKey((k) => k + 1);
+    } catch (err: any) {
+      toast({
+        title: "Couldn't add product",
+        description: err?.message ?? "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingProduct(false);
+    }
+  };
 
   // Fetch project name when projectId changes
   useEffect(() => {
@@ -678,6 +737,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mb-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Project</span>
                   <p className="font-display text-sm text-foreground uppercase tracking-wider">{projectName}</p>
+                  {projectId && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 print:hidden">
+                      <a
+                        href={`/trade/tearsheets?project=${projectId}`}
+                        className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        title="Open this project's tearsheets"
+                      >
+                        <Layers className="h-3 w-3" />
+                        Project tearsheets
+                      </a>
+                      <a
+                        href={`/trade/boards?project=${projectId}`}
+                        className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        title="Open this project's boards"
+                      >
+                        <FolderOpen className="h-3 w-3" />
+                        Project boards
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
               {isDraft ? (
@@ -851,12 +930,33 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {Array.from({ length: 3 }).map((_, i) => <QuoteItemSkeleton key={i} />)}
             </div>
           ) : items.length === 0 ? (
-            <div className="border border-dashed border-border rounded-lg p-12 text-center">
+            <div className="border border-dashed border-border rounded-lg p-8 md:p-12 text-center">
               <Package className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
               <p className="font-body text-sm text-muted-foreground mb-1">No items in this quote</p>
-              <p className="font-body text-[10px] text-muted-foreground">
-                Add products from the Trade Gallery to build your quote.
+              <p className="font-body text-[10px] text-muted-foreground mb-4">
+                Add a product below, or pick more from the Trade Gallery.
               </p>
+              <div className="max-w-sm mx-auto print:hidden">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1 min-w-0">
+                    <AlphabetProductPicker
+                      items={productOptions}
+                      value={pendingProductId}
+                      onChange={setPendingProductId}
+                      placeholder={productOptions.length === 0 ? "Loading catalogue…" : "Pick a product (A → Designer → Item)"}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddProduct(pendingProductId)}
+                    disabled={!pendingProductId || addingProduct}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {addingProduct ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    Add
+                  </button>
+                </div>
+              </div>
             </div>
           ) : (
             <>
@@ -1056,6 +1156,35 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Add another product to this quote */}
+              <div className="border-t border-dashed border-border mt-3 pt-4 print:hidden">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3">
+                  <div className="flex-1 min-w-0">
+                    <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                      Add another product
+                    </label>
+                    <AlphabetProductPicker
+                      items={productOptions}
+                      value={pendingProductId}
+                      onChange={setPendingProductId}
+                      placeholder={productOptions.length === 0 ? "Loading catalogue…" : "Pick a product (A → Designer → Item)"}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddProduct(pendingProductId)}
+                    disabled={!pendingProductId || addingProduct}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {addingProduct ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    Add to quote
+                  </button>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
+                  Forgot a piece? Add it here without leaving the quote — quantity, price and PO can be edited above.
+                </p>
               </div>
 
               {/* Insurance bundling */}
