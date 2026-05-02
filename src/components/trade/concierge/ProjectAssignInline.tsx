@@ -29,9 +29,43 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
 
   const handlePick = async (projectId: string, projectName: string) => {
     setSaving(projectId);
+
+    // Look up the chosen project + the board's current metadata so we only
+    // fill in fields that are still empty (never overwrite user edits).
+    const [{ data: proj }, { data: board }] = await Promise.all([
+      supabase
+        .from("projects" as any)
+        .select("client_name, studio_id, name")
+        .eq("id", projectId)
+        .maybeSingle(),
+      supabase
+        .from("client_boards")
+        .select("client_name, studio_id, title")
+        .eq("id", boardId)
+        .maybeSingle(),
+    ]);
+
+    const updates: Record<string, unknown> = {
+      project_id: projectId,
+      updated_at: new Date().toISOString(),
+    };
+    const projectClient = (proj as any)?.client_name?.trim?.() || "";
+    const projectStudio = (proj as any)?.studio_id ?? null;
+    const projectFullName = (proj as any)?.name?.trim?.() || "";
+    const boardClient = (board as any)?.client_name?.trim?.() || "";
+    const boardStudio = (board as any)?.studio_id ?? null;
+    const boardTitle = (board as any)?.title?.trim?.() || "";
+
+    if (!boardClient && projectClient) updates.client_name = projectClient;
+    if (!boardStudio && projectStudio) updates.studio_id = projectStudio;
+    // If the title is still the generic placeholder, prefix it with the project name.
+    if (projectFullName && /^untitled tearsheet$/i.test(boardTitle)) {
+      updates.title = `${projectFullName} — Tearsheet`;
+    }
+
     const { error } = await supabase
       .from("client_boards")
-      .update({ project_id: projectId, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq("id", boardId);
     setSaving(null);
     if (error) {
