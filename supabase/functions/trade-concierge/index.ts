@@ -108,15 +108,19 @@ These are the ONLY designers and ateliers in the Maison Affluency portfolio:
 ${designersList}
 
 ## CATALOG DATA — PIECES
-Each line is formatted: \`- "title" by Designer (materials · category) [id: <uuid>]\`. Use those IDs verbatim when calling the tearsheet tools.
+Each line is formatted: \`- "title" by Designer (subcategory-or-category · materials) [id: <uuid>]\`. Use those IDs verbatim when calling the tearsheet tools.
 
-CRITICAL SEARCH PROCEDURE — when the user asks for pieces by a designer/brand AND a material/finish (e.g. "Man of Parts in oak", "De La Espada in walnut", "anything in marble"):
-1. First, locate EVERY line where the designer name appears (do a literal substring scan of the "by X" portion).
-2. Then, within those lines, scan the materials portion (inside parentheses) for the requested term as a case-insensitive substring (e.g. "oak" matches "Solid oak frame", "stained oak", "white oak").
-3. Return ALL matches. Never claim a designer has no pieces in a material until you have done both steps above on the FULL list. The list IS complete.
-4. Only after a true scan with zero matches may you say "I don't currently have…".
+PIECE-TYPE FILTERING — when the user asks for a specific TYPE of piece (e.g. "chandeliers", "sconces", "dining tables", "armchairs"):
+1. Scan EVERY catalog line for that term as a case-insensitive substring across BOTH the title AND the metadata in parentheses (subcategory/category).
+2. A piece only qualifies if its title or its subcategory/category explicitly matches. Do NOT include items just because they share the broader category (e.g. "Lighting" alone is NOT a chandelier — only items whose title or subcategory contains "chandelier" qualify). A "Sconce" or a "Lamp" is NOT a "Chandelier".
+3. Return ALL qualifying matches. The list IS complete — never truncate or sample.
 
-Worked example: "Man of Parts in oak" → scan for 'by Man of Parts' lines → check each materials field for 'oak' → expected matches include "Frenchmen Street Armchair" and "Frenchmen Street Lounge Chair" (both list "Solid oak frame"). Returning "no matches" for that query would be a factual error.
+CRITICAL SEARCH PROCEDURE — when the user combines designer + material/finish (e.g. "Man of Parts in oak"):
+1. First, locate EVERY line where the designer name appears (literal substring scan of the "by X" portion).
+2. Then, within those lines, scan the materials portion for the requested term as a case-insensitive substring (e.g. "oak" matches "Solid oak frame").
+3. Return ALL matches. Only after a true scan with zero matches may you say "I don't currently have…".
+
+Worked example: "show me chandeliers" → scan every line for 'chandelier' in title or subcategory → expected matches include Calliope Medium Chandelier, Cloud Chandelier, Carolina Chandelier, Curve XXL Chandelier, Firefly Chandelier, MicMac Chandelier, Bronze MicMac Chandelier, and any other titles containing "Chandelier". Returning a sconce or table lamp for this query would be a factual error.
 
 ${piecesList}
 
@@ -150,38 +154,99 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   (designers || []).forEach((d: any) => {
     designerMap.set(d.id, d.display_name || d.name);
   });
+  // Brand-name → designer display map for matching trade_products rows that
+  // are not linked by designer_id but only carry a brand_name string.
+  const brandToDesigner = new Map<string, string>();
+  (designers || []).forEach((d: any) => {
+    const display = d.display_name || d.name;
+    if (d.name) brandToDesigner.set(String(d.name).trim().toLowerCase(), display);
+    if (d.display_name) brandToDesigner.set(String(d.display_name).trim().toLowerCase(), display);
+  });
 
-  // Fetch ALL curator picks WITH IDs (the model needs them for tool calling).
-  // Order deterministically so the catalog is stable across requests.
+  // Fetch ALL curator picks (these own the canonical pick_ids used by the
+  // tearsheet tools).
   const { data: picks } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, designer_id")
+    .select("id, title, materials, category, subcategory, designer_id")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
+    .limit(2000);
+
+  // Fetch the trade_products catalog so the assistant can SEE every active
+  // piece (not just the curator subset). Merged below by (brand,title) so
+  // we never list the same item twice.
+  const { data: tradeAll } = await supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, materials, category, subcategory")
+    .eq("is_active", true)
+    .order("brand_name", { ascending: true })
+    .order("product_name", { ascending: true })
     .limit(2000);
 
   const { data: hotspotBrands } = await supabase
     .from("gallery_hotspots")
     .select("designer_name");
 
-  const { data: tradeProducts } = await supabase
-    .from("trade_products")
-    .select("brand_name")
-    .eq("is_active", true);
-
   const designerLines = (designers || []).map(
     (d: any) => `- ${d.display_name || d.name} — ${d.specialty || "collectible design"}`
   );
 
-  const pieceLines = (picks || []).map((p: any) => {
+  // Merge: start with curator picks (canonical IDs), then layer in
+  // trade_products entries that have no curator twin. Dedup key is the
+  // case-insensitive (designer, title) pair.
+  type Line = {
+    id: string;
+    title: string;
+    designer: string;
+    materials: string | null;
+    category: string | null;
+    subcategory: string | null;
+  };
+  const merged = new Map<string, Line>();
+  const keyOf = (designer: string, title: string) =>
+    `${designer.trim().toLowerCase()}::${title.trim().toLowerCase()}`;
+
+  (picks || []).forEach((p: any) => {
     const designer = designerMap.get(p.designer_id) || "Unknown";
-    const meta = [p.materials, p.category].filter(Boolean).join(" · ");
-    return `- "${p.title}" by ${designer}${meta ? ` (${meta})` : ""} [id: ${p.id}]`;
+    merged.set(keyOf(designer, p.title), {
+      id: p.id,
+      title: p.title,
+      designer,
+      materials: p.materials || null,
+      category: p.category || null,
+      subcategory: p.subcategory || null,
+    });
   });
+  (tradeAll || []).forEach((t: any) => {
+    const rawBrand = String(t.brand_name || "");
+    const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
+    const designer =
+      brandToDesigner.get(rawBrand.trim().toLowerCase()) ||
+      brandToDesigner.get(baseBrand.toLowerCase()) ||
+      baseBrand ||
+      "Unknown";
+    const k = keyOf(designer, t.product_name);
+    if (merged.has(k)) return; // curator pick already covers it
+    merged.set(k, {
+      id: t.id,
+      title: t.product_name,
+      designer,
+      materials: t.materials || null,
+      category: t.category || null,
+      subcategory: t.subcategory || null,
+    });
+  });
+
+  const pieceLines = Array.from(merged.values())
+    .sort((a, b) => a.designer.localeCompare(b.designer) || a.title.localeCompare(b.title))
+    .map((p) => {
+      const meta = [p.subcategory || p.category, p.materials].filter(Boolean).join(" · ");
+      return `- "${p.title}" by ${p.designer}${meta ? ` (${meta})` : ""} [id: ${p.id}]`;
+    });
 
   const brandSet = new Set<string>();
   (hotspotBrands || []).forEach((h: any) => { if (h.designer_name) brandSet.add(h.designer_name); });
-  (tradeProducts || []).forEach((t: any) => { if (t.brand_name) brandSet.add(t.brand_name); });
+  (tradeAll || []).forEach((t: any) => { if (t.brand_name) brandSet.add(t.brand_name); });
   const showroomBrandLines = Array.from(brandSet).sort().map(b => `- ${b}`);
 
   return {
@@ -220,32 +285,58 @@ async function hydratePickPreview(
   pickIds: string[],
 ) {
   if (!pickIds.length) return [];
-  const { data } = await supabase
-    .from("designer_curator_picks")
-    .select("id, title, image_url, materials, category, designer_id")
-    .in("id", pickIds);
 
-  const designerIds = Array.from(new Set((data || []).map((p: any) => p.designer_id).filter(Boolean)));
+  // The concierge catalog merges curator picks AND trade_products, so an id
+  // may belong to either table. Look both up and prefer curator data when
+  // present (richer fields) but fall back to trade_products otherwise.
+  const [{ data: picks }, { data: trades }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("id, title, image_url, materials, category, designer_id")
+      .in("id", pickIds),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, image_url, materials, category")
+      .in("id", pickIds),
+  ]);
+
+  const designerIds = Array.from(new Set((picks || []).map((p: any) => p.designer_id).filter(Boolean)));
   const { data: designers } = designerIds.length
     ? await supabase.from("designers").select("id, name, display_name").in("id", designerIds)
     : { data: [] as any[] };
   const dmap = new Map<string, string>();
   (designers || []).forEach((d: any) => dmap.set(d.id, d.display_name || d.name));
 
-  // Preserve original order from the model
-  const byId = new Map((data || []).map((p: any) => [p.id, p]));
+  const pickById = new Map((picks || []).map((p: any) => [p.id, p]));
+  const tradeById = new Map((trades || []).map((t: any) => [t.id, t]));
+
   return pickIds
     .map((id) => {
-      const p = byId.get(id);
-      if (!p) return null;
-      return {
-        id: p.id,
-        title: p.title,
-        image_url: p.image_url,
-        materials: p.materials,
-        category: p.category,
-        designer_name: dmap.get(p.designer_id) || null,
-      };
+      const p = pickById.get(id);
+      if (p) {
+        return {
+          id: p.id,
+          title: p.title,
+          image_url: p.image_url,
+          materials: p.materials,
+          category: p.category,
+          designer_name: dmap.get(p.designer_id) || null,
+        };
+      }
+      const t = tradeById.get(id);
+      if (t) {
+        const rawBrand = String(t.brand_name || "");
+        const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
+        return {
+          id: t.id,
+          title: t.product_name,
+          image_url: t.image_url,
+          materials: t.materials,
+          category: t.category,
+          designer_name: baseBrand || null,
+        };
+      }
+      return null;
     })
     .filter(Boolean);
 }
