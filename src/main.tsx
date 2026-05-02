@@ -50,6 +50,7 @@ document.documentElement.classList.add("css-ready");
 createRoot(document.getElementById("root")!).render(
   <>
     <App />
+    <BuildUpdateBanner />
     <HmrStatusBanner />
   </>
 );
