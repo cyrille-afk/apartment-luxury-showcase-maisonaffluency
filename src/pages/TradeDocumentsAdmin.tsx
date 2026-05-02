@@ -22,6 +22,7 @@ interface TradeDocument {
   cover_image_url: string | null;
   sort_order: number;
   created_at: string;
+  is_featured_public: boolean;
 }
 
 const DOC_TYPES = ["tearsheet", "catalogue", "pricelist", "specification"];
