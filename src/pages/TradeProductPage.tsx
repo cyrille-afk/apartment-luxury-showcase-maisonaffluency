@@ -831,8 +831,10 @@ const TradeProductPage: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Link
-                  to={`/trade/designers/${designer.slug}`}
-                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                  to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                  onClick={() => {
+                    if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
+                  }}
                   className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
@@ -1233,8 +1235,10 @@ const TradeProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
-                      to={`/trade/designers/${designer.slug}`}
-                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                      to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                      onClick={() => {
+                        if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
+                      }}
                       className="hover:text-primary transition-colors"
                     >
                       {designerDisplay}
@@ -1248,7 +1252,7 @@ const TradeProductPage: React.FC = () => {
                     {relatedPicks.slice(0, 6).map((rp) => (
                       <Link
                         key={rp.id}
-                        to={`/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        to={designer.slug ? `/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}` : fallbackPath}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                       >
