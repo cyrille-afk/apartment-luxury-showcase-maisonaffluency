@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
+import BuildUpdateBanner from "./components/BuildUpdateBanner";
 
 const CACHE_RESET_SESSION_KEY = "__ma_frontend_cache_reset_v1";
 
@@ -49,6 +50,7 @@ document.documentElement.classList.add("css-ready");
 createRoot(document.getElementById("root")!).render(
   <>
     <App />
+    <BuildUpdateBanner />
     <HmrStatusBanner />
   </>
 );
