@@ -70,7 +70,11 @@ export default function TradeTearsheets() {
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Fetch the set of product IDs (from quotes + boards) belonging to the selected project
+  // Fetch the set of product IDs (from quotes + boards) belonging to the selected
+  // project. We also expand the set with curator-pick "twins" of any
+  // trade_products IDs — the merged catalog dedups (brand, title) pairs and
+  // keeps the curator id, so without this expansion a board referencing the
+  // trade id wouldn't match anything in the rendered list.
   const { data: projectProductIds } = useQuery({
     queryKey: ["tearsheet-project-product-ids", filterProjectId, user?.id],
     enabled: !!filterProjectId && !!user,
@@ -92,6 +96,49 @@ export default function TradeTearsheets() {
       ]);
       (qItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
       (bItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+
+      // Expand: add curator-pick IDs that share (brand, title) with any
+      // trade_products in `ids`, and vice versa. Either side may be the
+      // canonical id kept by the merge dedup.
+      if (ids.size > 0) {
+        const idArr = Array.from(ids);
+        const [tradeRows, curatorRows] = await Promise.all([
+          supabase.from("trade_products").select("brand_name, product_name").in("id", idArr),
+          supabase.from("designer_curator_picks").select("id, title, designers!inner(name, founder)").in("id", idArr),
+        ]);
+        // Build (brand|title) -> looking for matching twins.
+        const wantedPairs = new Set<string>();
+        (tradeRows.data || []).forEach((r: any) => {
+          if (r.brand_name && r.product_name) {
+            wantedPairs.add(`${r.brand_name.toLowerCase()}::${r.product_name.toLowerCase()}`);
+          }
+        });
+        (curatorRows.data || []).forEach((r: any) => {
+          const designer = (r as any).designers;
+          const name = designer?.name;
+          if (name && r.title) {
+            wantedPairs.add(`${name.toLowerCase()}::${r.title.toLowerCase()}`);
+          }
+        });
+        if (wantedPairs.size > 0) {
+          // Pull all curator picks + trade products and add ids whose pair matches.
+          const [allCurator, allTrade] = await Promise.all([
+            supabase.from("designer_curator_picks").select("id, title, designers!inner(name)"),
+            supabase.from("trade_products").select("id, product_name, brand_name"),
+          ]);
+          (allCurator.data || []).forEach((r: any) => {
+            const name = (r as any).designers?.name;
+            if (!name || !r.title) return;
+            const k = `${name.toLowerCase()}::${r.title.toLowerCase()}`;
+            if (wantedPairs.has(k)) ids.add(r.id);
+          });
+          (allTrade.data || []).forEach((r: any) => {
+            if (!r.brand_name || !r.product_name) return;
+            const k = `${r.brand_name.toLowerCase()}::${r.product_name.toLowerCase()}`;
+            if (wantedPairs.has(k)) ids.add(r.id);
+          });
+        }
+      }
       return ids;
     },
   });
