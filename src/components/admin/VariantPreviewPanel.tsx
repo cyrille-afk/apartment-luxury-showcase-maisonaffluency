@@ -26,7 +26,13 @@ export default function VariantPreviewPanel({
   topAxisLabel,
 }: VariantPreviewProps) {
   const sv = sizeVariants || [];
-  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  // Dual-axis only when BOTH base and top are populated. Base-only products
+  // (e.g. Atelier Pendhapa "Mangala Coffee Table") are functionally
+  // single-axis on Base. See src/lib/parseSizeVariants.ts.
+  const hasAnyBase = sv.length > 0 && sv.some((v) => v.base && v.base.trim());
+  const hasAnyTop = sv.length > 0 && sv.some((v) => v.top && v.top.trim());
+  const isDualAxis = hasAnyBase && hasAnyTop;
+  const isBaseOnly = hasAnyBase && !hasAnyTop;
 
   const sizeOptions = useMemo(() => {
     if (isDualAxis) {
