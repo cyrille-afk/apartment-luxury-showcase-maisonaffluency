@@ -74,9 +74,11 @@ const TradeBoards = () => {
       .select("*")
       .order("updated_at", { ascending: false });
     // Scope to current studio so teammates see each other's boards.
-    // RLS enforces actual visibility based on role + per-project overrides.
+    // Also include legacy boards created before a studio existed (studio_id NULL)
+    // that the current user owns — otherwise they vanish from the list once
+    // the user joins/creates a studio. RLS still enforces real visibility.
     if (currentStudio) {
-      q = q.eq("studio_id", currentStudio.id);
+      q = q.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
     } else {
       q = q.eq("user_id", user.id);
     }

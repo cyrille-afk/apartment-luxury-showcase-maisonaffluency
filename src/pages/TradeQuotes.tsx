@@ -69,10 +69,12 @@ const TradeQuotes = () => {
     
     // Super admins can toggle between studio quotes and all quotes.
     // Otherwise scope to current studio so all teammates see each other's work.
+    // Also include legacy quotes (studio_id NULL) owned by the user so they
+    // don't disappear once the user joins/creates a studio.
     // RLS enforces actual visibility based on role + per-project overrides.
     if (!showAll || !isSuperAdmin) {
       if (currentStudio) {
-        query = query.eq("studio_id", currentStudio.id);
+        query = query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
       } else {
         query = query.eq("user_id", user.id);
       }
