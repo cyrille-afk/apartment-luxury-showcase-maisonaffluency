@@ -485,32 +485,24 @@ const TradeProductPage: React.FC = () => {
   useEffect(() => {
     const sv = data?.pricing?.size_variants;
     if (!sv || !sv.length || selectedBase || selectedTop) return;
-    const baseOpts = Array.from(new Set(sv.map((v: any) => (v.base || "").trim()).filter(Boolean)));
-    const topOpts = Array.from(new Set(sv.map((v: any) => (v.top || "").trim()).filter(Boolean)));
-    if (!baseOpts.length || !topOpts.length) return;
-    // Only auto-default when there is genuinely one pairing to show. Products
-    // with multiple bases (e.g. Stone D Coffee Table) require an explicit user
-    // pick — otherwise the gallery jumps to a mapped finish image on load and
-    // hides the editorial photos that come before it.
-    if (baseOpts.length > 1) return;
-    const firstBase = baseOpts[0];
-    const compatTops = topOpts.filter((t) =>
-      sv.some((v: any) => (v.base || "").trim() === firstBase && (v.top || "").trim() === t)
-    );
-    if (compatTops.length === 1) {
-      setSelectedBase(firstBase);
-      setSelectedTop(compatTops[0]);
-      setDefaultPair({ base: firstBase, top: compatTops[0] });
-      // Sync gallery to the complete Base × Top mapped image (mirrors handleMaterialChange).
-      const rawMap = (data?.product as any)?.variant_image_map;
-      const finishMap = buildProductFinishMap(rawMap);
-      const imgCount = ((data?.product as any)?.gallery_images?.length) ||
-        ([(data?.product as any)?.image_url, (data?.product as any)?.hover_image_url].filter(Boolean).length);
-      const idx = resolveVariantImageIndex(finishMap, { base: firstBase, top: compatTops[0], imageCount: imgCount });
-      if (idx !== undefined) {
-        setGalleryActiveIndex(idx);
-        setGalleryJumpNonce((n) => n + 1);
-      }
+    // Shared gating: only auto-default when there is genuinely one pairing
+    // to show. Products with multiple bases (e.g. Stone D Coffee Table)
+    // require an explicit user pick — otherwise the gallery jumps to a
+    // mapped finish image on load and hides the editorial photos.
+    const pair = resolveAutoDefaultPair(sv as any);
+    if (!pair) return;
+    setSelectedBase(pair.base);
+    setSelectedTop(pair.top);
+    setDefaultPair(pair);
+    // Sync gallery to the complete Base × Top mapped image (mirrors handleMaterialChange).
+    const rawMap = (data?.product as any)?.variant_image_map;
+    const finishMap = buildProductFinishMap(rawMap);
+    const imgCount = ((data?.product as any)?.gallery_images?.length) ||
+      ([(data?.product as any)?.image_url, (data?.product as any)?.hover_image_url].filter(Boolean).length);
+    const idx = resolveVariantImageIndex(finishMap, { base: pair.base, top: pair.top, imageCount: imgCount });
+    if (idx !== undefined) {
+      setGalleryActiveIndex(idx);
+      setGalleryJumpNonce((n) => n + 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.product?.id]);
