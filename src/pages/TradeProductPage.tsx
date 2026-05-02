@@ -606,10 +606,10 @@ const TradeProductPage: React.FC = () => {
     // selected so picking just the Top still resolves the composite key.
     const distinctBases = Array.from(
       new Set(variantsForAxes.map((v: any) => (v.base || "").trim()).filter(Boolean))
-    );
+    ) as string[];
     const distinctTops = Array.from(
       new Set(variantsForAxes.map((v: any) => (v.top || "").trim()).filter(Boolean))
-    );
+    ) as string[];
     const effectiveOpts = opts ? { ...opts } : opts;
     if (requiresBaseAndTopSelection && effectiveOpts) {
       if (!effectiveOpts.base && distinctBases.length === 1) effectiveOpts.base = distinctBases[0];
