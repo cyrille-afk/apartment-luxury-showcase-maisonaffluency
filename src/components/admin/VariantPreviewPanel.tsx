@@ -26,7 +26,13 @@ export default function VariantPreviewPanel({
   topAxisLabel,
 }: VariantPreviewProps) {
   const sv = sizeVariants || [];
-  const isDualAxis = sv.length > 0 && sv.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  // Dual-axis only when BOTH base and top are populated. Base-only products
+  // (e.g. Atelier Pendhapa "Mangala Coffee Table") are functionally
+  // single-axis on Base. See src/lib/parseSizeVariants.ts.
+  const hasAnyBase = sv.length > 0 && sv.some((v) => v.base && v.base.trim());
+  const hasAnyTop = sv.length > 0 && sv.some((v) => v.top && v.top.trim());
+  const isDualAxis = hasAnyBase && hasAnyTop;
+  const isBaseOnly = hasAnyBase && !hasAnyTop;
 
   const sizeOptions = useMemo(() => {
     if (isDualAxis) {
@@ -36,8 +42,11 @@ export default function VariantPreviewPanel({
   }, [sv, isDualAxis]);
 
   const baseOptions = useMemo(
-    () => (isDualAxis ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean))) : []),
-    [sv, isDualAxis]
+    () =>
+      isDualAxis || isBaseOnly
+        ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
+        : [],
+    [sv, isDualAxis, isBaseOnly]
   );
   const topOptions = useMemo(
     () => (isDualAxis ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean))) : []),
@@ -66,9 +75,19 @@ export default function VariantPreviewPanel({
           (!effectiveTop || (v.top || "").trim() === effectiveTop)
       );
     }
+    if (isBaseOnly) {
+      if (baseNeedsSelection && !selectedBase) return undefined;
+      const effBase = baseNeedsSelection ? selectedBase : baseOptions[0] || "";
+      if (!effBase) return undefined;
+      return sv.find(
+        (v) =>
+          (v.base || "").trim() === effBase &&
+          (!sizeNeedsSelection || !selectedSize || (v.label || "").trim() === selectedSize)
+      );
+    }
     if (sizeNeedsSelection && !selectedSize) return undefined;
     return sv.find((v) => (v.label || "").trim() === effectiveSize);
-  }, [sv, isDualAxis, sizeNeedsSelection, selectedSize, effectiveSize, effectiveBase, effectiveTop, baseOptions.length, topOptions.length]);
+  }, [sv, isDualAxis, isBaseOnly, baseNeedsSelection, sizeNeedsSelection, selectedSize, selectedBase, effectiveSize, effectiveBase, effectiveTop, baseOptions, topOptions.length]);
 
   const sizePlaceholder = "Select your size";
   const materialPlaceholder = variantPlaceholder || "Select your material choice";
@@ -143,6 +162,29 @@ export default function VariantPreviewPanel({
                 </select>
               </label>
             </div>
+          ) : isBaseOnly ? (
+            <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Layers className="h-3 w-3" /> {baseAxisLabel || "Finish"}
+              </span>
+              <select
+                className="rounded border bg-background px-2 py-1.5 text-xs"
+                value={selectedBase}
+                onChange={(e) => {
+                  const nextBase = e.target.value;
+                  setSelectedBase(nextBase);
+                  if (!nextBase) setSelectedSize("");
+                }}
+              >
+                <option value="">
+                  {variantPlaceholder ||
+                    `Select your ${(baseAxisLabel || "finish").toLowerCase()} choice`}
+                </option>
+                {baseOptions.map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+            </label>
           ) : materials ? (
             <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
