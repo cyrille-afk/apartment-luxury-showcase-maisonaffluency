@@ -35,7 +35,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
     const [{ data: proj }, { data: board }] = await Promise.all([
       supabase
         .from("projects" as any)
-        .select("client_name, studio_id, name")
+        .select("client_name, studio_id, name, location")
         .eq("id", projectId)
         .maybeSingle(),
       supabase
@@ -52,15 +52,22 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
     const projectClient = (proj as any)?.client_name?.trim?.() || "";
     const projectStudio = (proj as any)?.studio_id ?? null;
     const projectFullName = (proj as any)?.name?.trim?.() || "";
+    const projectLocation = (proj as any)?.location?.trim?.() || "";
     const boardClient = (board as any)?.client_name?.trim?.() || "";
     const boardStudio = (board as any)?.studio_id ?? null;
     const boardTitle = (board as any)?.title?.trim?.() || "";
 
     if (!boardClient && projectClient) updates.client_name = projectClient;
     if (!boardStudio && projectStudio) updates.studio_id = projectStudio;
-    // If the title is still the generic placeholder, prefix it with the project name.
+    // If the title is still the generic placeholder, enrich it with the project
+    // name and (when present) the project location for at-a-glance context.
     if (projectFullName && /^untitled tearsheet$/i.test(boardTitle)) {
-      updates.title = `${projectFullName} — Tearsheet`;
+      // Avoid duplicating the location if it's already part of the project name.
+      const locationSuffix =
+        projectLocation && !new RegExp(`\\b${projectLocation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(projectFullName)
+          ? `, ${projectLocation}`
+          : "";
+      updates.title = `${projectFullName}${locationSuffix} — Tearsheet`;
     }
 
     const { error } = await supabase
