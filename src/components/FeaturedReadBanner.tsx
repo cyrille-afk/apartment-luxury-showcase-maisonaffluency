@@ -27,19 +27,35 @@ const FeaturedReadBanner = () => {
   const isDesigners = location.pathname.startsWith("/designers");
 
   useEffect(() => {
+    const load = async () => {
+      // Prefer admin-selected featured article
+      const { data: featured } = await supabase
+        .from("journal_articles")
+        .select("slug, title, category, author")
+        .eq("is_published", true)
+        .eq("is_featured", true)
+        .limit(1);
 
-    supabase
-      .from("journal_articles")
-      .select("slug, title, category, author")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .limit(1)
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setArticle(data[0] as FeaturedArticle);
-          setVisible(true);
-        }
-      });
+      if (featured && featured.length > 0) {
+        setArticle(featured[0] as FeaturedArticle);
+        setVisible(true);
+        return;
+      }
+
+      // Fallback: most recently published
+      const { data } = await supabase
+        .from("journal_articles")
+        .select("slug, title, category, author")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        setArticle(data[0] as FeaturedArticle);
+        setVisible(true);
+      }
+    };
+    void load();
   }, []);
 
   // Measure the fixed nav height (homepage only)

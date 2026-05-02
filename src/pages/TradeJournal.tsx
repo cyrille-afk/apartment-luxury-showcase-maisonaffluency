@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, Upload, X, ImageIcon, FileUp } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, Upload, X, ImageIcon, FileUp, Star } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import EditorialPipeline from "@/components/trade/EditorialPipeline";
 import { CATEGORY_LABELS, type JournalCategory } from "@/lib/journal";
@@ -26,6 +26,7 @@ interface Article {
   author: string;
   tags: string[];
   is_published: boolean;
+  is_featured: boolean;
   published_at: string | null;
   read_time_minutes: number | null;
   created_at: string;
@@ -70,6 +71,7 @@ const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   author: "Maison Affluency",
   tags: [],
   is_published: false,
+  is_featured: false,
   published_at: null,
   read_time_minutes: 5,
 });
@@ -174,6 +176,39 @@ const TradeJournal = () => {
       updated_at: new Date().toISOString(),
     }).eq("id", a.id);
     toast({ title: newStatus ? "Published" : "Unpublished" });
+    fetchArticles();
+  };
+
+  const toggleFeatured = async (a: Article) => {
+    if (a.is_featured) {
+      const { error } = await supabase.from("journal_articles")
+        .update({ is_featured: false, updated_at: new Date().toISOString() })
+        .eq("id", a.id);
+      if (error) {
+        toast({ title: "Could not update", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Featured Read cleared", description: `"${a.title}" is no longer the homepage Featured Read.` });
+      fetchArticles();
+      return;
+    }
+
+    // Clear any existing featured first (partial unique index requires this)
+    const { error: clearErr } = await supabase.from("journal_articles")
+      .update({ is_featured: false, updated_at: new Date().toISOString() })
+      .eq("is_featured", true);
+    if (clearErr) {
+      toast({ title: "Could not update", description: clearErr.message, variant: "destructive" });
+      return;
+    }
+    const { error: setErr } = await supabase.from("journal_articles")
+      .update({ is_featured: true, updated_at: new Date().toISOString() })
+      .eq("id", a.id);
+    if (setErr) {
+      toast({ title: "Could not update", description: setErr.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Featured Read set", description: `"${a.title}" now appears in the homepage banner.` });
     fetchArticles();
   };
 
@@ -611,13 +646,18 @@ const TradeJournal = () => {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-display text-base text-foreground truncate">{a.title}</h3>
                     <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       a.is_published ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                     }`}>
                       {a.is_published ? "Published" : "Draft"}
                     </span>
+                    {a.is_featured && (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider bg-primary/10 text-primary">
+                        <Star className="w-2.5 h-2.5 fill-current" /> Featured Read
+                      </span>
+                    )}
                   </div>
                   <p className="font-body text-xs text-muted-foreground truncate">{a.excerpt || "No excerpt"}</p>
                   <div className="flex items-center gap-3 mt-1.5">
@@ -646,6 +686,24 @@ const TradeJournal = () => {
                     title={a.is_published ? "Unpublish" : "Publish"}
                   >
                     {a.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                  <button
+                    onClick={() => toggleFeatured(a)}
+                    disabled={!a.is_published && !a.is_featured}
+                    className={`p-2 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                      a.is_featured
+                        ? "text-primary bg-primary/10 hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-primary hover:bg-muted"
+                    }`}
+                    title={
+                      a.is_featured
+                        ? "Remove from homepage Featured Read"
+                        : !a.is_published
+                          ? "Publish article before featuring"
+                          : "Set as homepage Featured Read (replaces current)"
+                    }
+                  >
+                    <Star className={`w-3.5 h-3.5 ${a.is_featured ? "fill-current" : ""}`} />
                   </button>
                   <button
                     onClick={() => startEdit(a)}
