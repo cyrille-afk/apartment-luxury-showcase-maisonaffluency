@@ -318,7 +318,60 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setLoading(false);
     };
     load();
-  }, [quoteId, user]);
+  }, [quoteId, user, reloadKey]);
+
+  // Fetch products for the in-quote "Add product" picker.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name")
+        .order("brand_name", { ascending: true })
+        .order("product_name", { ascending: true })
+        .limit(2000);
+      if (cancelled || !data) return;
+      const opts: PickerItem[] = data
+        .filter((p: any) => p.product_name && p.brand_name)
+        .map((p: any) => ({
+          id: p.id as string,
+          label: p.product_name as string,
+          group: (p.brand_name as string).includes(" - ")
+            ? (p.brand_name as string).split(" - ")[0].trim()
+            : (p.brand_name as string),
+        }));
+      setProductOptions(opts);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleAddProduct = async (productId: string) => {
+    if (!productId || addingProduct) return;
+    setAddingProduct(true);
+    try {
+      const { error } = await supabase.from("trade_quote_items").insert({
+        quote_id: quoteId,
+        product_id: productId,
+        quantity: 1,
+      } as any);
+      if (error) throw error;
+      const picked = productOptions.find((p) => p.id === productId);
+      toast({
+        title: "Added to quote",
+        description: picked ? `${picked.label} — ${picked.group}` : undefined,
+      });
+      setPendingProductId("");
+      setReloadKey((k) => k + 1);
+    } catch (err: any) {
+      toast({
+        title: "Couldn't add product",
+        description: err?.message ?? "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingProduct(false);
+    }
+  };
 
   // Fetch project name when projectId changes
   useEffect(() => {
