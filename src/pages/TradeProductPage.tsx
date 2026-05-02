@@ -598,7 +598,7 @@ const TradeProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
-    const variantsForAxes = pricing?.size_variants || [];
+    const variantsForAxes = pricing?.size_variants || product.size_variants || [];
     const requiresBaseAndTopSelection =
       variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
       variantsForAxes.some((v: any) => v.top && String(v.top).trim());
@@ -606,10 +606,10 @@ const TradeProductPage: React.FC = () => {
     // selected so picking just the Top still resolves the composite key.
     const distinctBases = Array.from(
       new Set(variantsForAxes.map((v: any) => (v.base || "").trim()).filter(Boolean))
-    );
+    ) as string[];
     const distinctTops = Array.from(
       new Set(variantsForAxes.map((v: any) => (v.top || "").trim()).filter(Boolean))
-    );
+    ) as string[];
     const effectiveOpts = opts ? { ...opts } : opts;
     if (requiresBaseAndTopSelection && effectiveOpts) {
       if (!effectiveOpts.base && distinctBases.length === 1) effectiveOpts.base = distinctBases[0];
@@ -630,6 +630,7 @@ const TradeProductPage: React.FC = () => {
           size: effectiveOpts.size,
           label,
           imageCount: images.length,
+          requireCompletePair: requiresBaseAndTopSelection,
         })
       : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {

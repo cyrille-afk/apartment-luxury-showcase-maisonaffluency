@@ -4,9 +4,8 @@
  * resolve to its mapped gallery image — the resolver cannot mistake them for
  * dual-axis products and refuse the fallback.
  *
- * Fixture mirrors the shape stored in `designer_curator_picks.variant_image_map`
- * for a base-only product: every key is a normalized single-axis label, never
- * a `base|top` composite.
+ * Fixture mirrors the real Mangala row: base-only selectable labels plus
+ * legacy composite aliases that must NOT make the product behave as dual-axis.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -16,53 +15,65 @@ import {
 } from "@/lib/variantImageMap";
 
 const MANGALA_VARIANT_IMAGE_MAP = {
-  // Normalized keys — see normFinish() in variantImageMap.ts
-  solidteak: 0,
-  burntoak: 1,
-  blackenedash: 2,
+  topbaseinredonyx: 8,
+  "redonyx|redonyx": 8,
+  topbaseinonyxhoney: 11,
+  "onyxhoney|onyxhoney": 11,
+  topinrakublanccrubaseinnaturalteak: 1,
+  "naturalteak|rakublanccru": 1,
+  topinlavastonecremebrulebaseinblackteak: 5,
+  "blackteak|lavastonecremebrule": 5,
 };
 
-const IMAGE_COUNT = 4;
+const IMAGE_COUNT = 14;
 
 describe("Base-only product: manual Base pick always swaps the gallery image", () => {
   const finishMap = buildProductFinishMap(MANGALA_VARIANT_IMAGE_MAP);
 
-  it("resolves Solid Teak → image 0", () => {
+  it("resolves Onyx Honey → image 11 even with legacy composite aliases present", () => {
     expect(
       resolveVariantImageIndex(finishMap, {
-        base: "Solid Teak",
+        base: "Top & Base in Onyx Honey",
         top: null,
         imageCount: IMAGE_COUNT,
+        requireCompletePair: false,
       })
-    ).toBe(0);
+    ).toBe(11);
   });
 
-  it("resolves Burnt Oak → image 1", () => {
+  it("resolves Raku Blanc écru / Natural Teak → image 1", () => {
     expect(
       resolveVariantImageIndex(finishMap, {
-        base: "Burnt Oak",
+        base: "Top in Raku Blanc écru & Base in Natural Teak",
         top: null,
         imageCount: IMAGE_COUNT,
+        requireCompletePair: false,
       })
     ).toBe(1);
   });
 
-  it("resolves Blackened Ash → image 2", () => {
+  it("resolves Lava Stone Creme Brulée / Black Teak → image 5", () => {
     expect(
       resolveVariantImageIndex(finishMap, {
-        base: "Blackened Ash",
+        base: "Top in Lava Stone Creme Brulée & Base in Black Teak",
         top: null,
         imageCount: IMAGE_COUNT,
+        requireCompletePair: false,
       })
-    ).toBe(2);
+    ).toBe(5);
   });
 
-  it("does NOT short-circuit as dual-axis when only single-axis keys exist", () => {
-    // The dual-axis short-circuit only applies when the map contains at least
-    // one `base|top` composite key. A base-only map must always allow the
-    // single-axis fallback even if `top` is null.
+  it("contains composite aliases, but base-only callers opt out of dual-axis short-circuiting", () => {
     const isDualAxisMap = Object.keys(finishMap || {}).some((k) => k.includes("|"));
-    expect(isDualAxisMap).toBe(false);
+    expect(isDualAxisMap).toBe(true);
+    expect(
+      resolveVariantImageIndex(finishMap, {
+        base: "Top & Base in Red Onyx",
+        top: null,
+        imageCount: IMAGE_COUNT,
+        requireCompletePair: false,
+      })
+    ).toBe(8);
   });
 
   it("returns undefined for unknown finish (instead of guessing)", () => {
@@ -75,11 +86,9 @@ describe("Base-only product: manual Base pick always swaps the gallery image", (
     ).toBeUndefined();
   });
 
-  it("also resolves via resolveFinishImageIndex (lightbox path)", () => {
-    // PublicProductLightbox uses resolveFinishImageIndex when the product is
-    // single-axis. Manual finish pick must work through that path too.
-    expect(resolveFinishImageIndex(finishMap, "Burnt Oak", IMAGE_COUNT)).toBe(1);
-    expect(resolveFinishImageIndex(finishMap, "Blackened Ash", IMAGE_COUNT)).toBe(2);
+  it("also resolves direct single-label lookups for legacy lightbox callers", () => {
+    expect(resolveFinishImageIndex(finishMap, "Top & Base in Red Onyx", IMAGE_COUNT)).toBe(8);
+    expect(resolveFinishImageIndex(finishMap, "Top & Base in Onyx Honey", IMAGE_COUNT)).toBe(11);
   });
 });
 
@@ -100,14 +109,16 @@ function pageGalleryIndexBaseOnly(opts: {
     base: opts.base,
     top: null,
     imageCount: opts.imageCount,
+    requireCompletePair: false,
   });
 }
 
 describe("Page handleMaterialChange (base-only branch): manual pick swaps image", () => {
   it.each([
-    ["Solid Teak", 0],
-    ["Burnt Oak", 1],
-    ["Blackened Ash", 2],
+    ["Top & Base in Red Onyx", 8],
+    ["Top & Base in Onyx Honey", 11],
+    ["Top in Raku Blanc écru & Base in Natural Teak", 1],
+    ["Top in Lava Stone Creme Brulée & Base in Black Teak", 5],
   ])("manual pick %s → gallery index %i", (label, expected) => {
     expect(
       pageGalleryIndexBaseOnly({ base: label as string, imageCount: IMAGE_COUNT })

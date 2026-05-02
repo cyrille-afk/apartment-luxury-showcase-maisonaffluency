@@ -240,10 +240,18 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
         base: baseLabel,
         top: topLabel,
         imageCount: galleryImages.length,
+        requireCompletePair: true,
       });
     } else if (selectedMaterialIdx != null && selectedMaterialIdx >= 0) {
       const v = materialOptions[selectedMaterialIdx];
-      if (v) finishImageIdx = resolveFinishImageIndex(finishMap, v, galleryImages.length);
+      if (v) {
+        finishImageIdx = resolveVariantImageIndex(finishMap, {
+          base: hasAnyBase ? v : null,
+          label: v,
+          imageCount: galleryImages.length,
+          requireCompletePair: false,
+        });
+      }
     }
   }
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
