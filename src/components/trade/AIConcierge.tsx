@@ -90,10 +90,19 @@ export function AIConcierge() {
     setInput("");
     setStreaming(true);
 
-    // Build the chat message history for the API (text-only items)
-    const messagesForApi: ChatMessage[] = nextTimeline
-      .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
-      .map((t) => ({ role: t.role, content: t.content }));
+    // Build the chat message history for the API (text-only items),
+    // prefixed with a lightweight stage-context note so the assistant
+    // always references the user's current workflow stage.
+    const stageContext: ChatMessage = {
+      role: "system",
+      content: `[Workflow context] Current stage: ${stage}. Tailor guidance to this stage and reference it explicitly when helpful.`,
+    };
+    const messagesForApi: ChatMessage[] = [
+      stageContext,
+      ...nextTimeline
+        .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
+        .map((t) => ({ role: t.role, content: t.content })),
+    ];
 
     let assistantSoFar = "";
     let assistantStarted = false;
