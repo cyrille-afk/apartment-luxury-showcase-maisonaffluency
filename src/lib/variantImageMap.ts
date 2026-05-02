@@ -91,10 +91,12 @@ export function resolveVariantImageIndex(
     label?: string | null;
     size?: string | null;
     imageCount: number;
+    /** True only for real Base × Top products; false for base-only products with legacy composite aliases. */
+    requireCompletePair?: boolean;
   }
 ): number | undefined {
   if (!finishMap) return undefined;
-  const { base, top, label, size, imageCount } = opts;
+  const { base, top, label, size, imageCount, requireCompletePair = true } = opts;
 
   const tryKey = (k: string | undefined): number | undefined => {
     if (!k) return undefined;
@@ -108,7 +110,7 @@ export function resolveVariantImageIndex(
   // dropdown can land on the wrong finish image (e.g. clearing Top while
   // Base remains used to resolve to whatever the standalone Base key
   // happened to point at).
-  const isDualAxisMap = Object.keys(finishMap).some((k) => k.includes("|"));
+  const isDualAxisMap = requireCompletePair && Object.keys(finishMap).some((k) => k.includes("|"));
 
   // 1) Full triple — most specific
   if (base && top && size) {
