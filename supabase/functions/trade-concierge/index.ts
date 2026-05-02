@@ -281,32 +281,58 @@ async function hydratePickPreview(
   pickIds: string[],
 ) {
   if (!pickIds.length) return [];
-  const { data } = await supabase
-    .from("designer_curator_picks")
-    .select("id, title, image_url, materials, category, designer_id")
-    .in("id", pickIds);
 
-  const designerIds = Array.from(new Set((data || []).map((p: any) => p.designer_id).filter(Boolean)));
+  // The concierge catalog merges curator picks AND trade_products, so an id
+  // may belong to either table. Look both up and prefer curator data when
+  // present (richer fields) but fall back to trade_products otherwise.
+  const [{ data: picks }, { data: trades }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("id, title, image_url, materials, category, designer_id")
+      .in("id", pickIds),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, image_url, materials, category")
+      .in("id", pickIds),
+  ]);
+
+  const designerIds = Array.from(new Set((picks || []).map((p: any) => p.designer_id).filter(Boolean)));
   const { data: designers } = designerIds.length
     ? await supabase.from("designers").select("id, name, display_name").in("id", designerIds)
     : { data: [] as any[] };
   const dmap = new Map<string, string>();
   (designers || []).forEach((d: any) => dmap.set(d.id, d.display_name || d.name));
 
-  // Preserve original order from the model
-  const byId = new Map((data || []).map((p: any) => [p.id, p]));
+  const pickById = new Map((picks || []).map((p: any) => [p.id, p]));
+  const tradeById = new Map((trades || []).map((t: any) => [t.id, t]));
+
   return pickIds
     .map((id) => {
-      const p = byId.get(id);
-      if (!p) return null;
-      return {
-        id: p.id,
-        title: p.title,
-        image_url: p.image_url,
-        materials: p.materials,
-        category: p.category,
-        designer_name: dmap.get(p.designer_id) || null,
-      };
+      const p = pickById.get(id);
+      if (p) {
+        return {
+          id: p.id,
+          title: p.title,
+          image_url: p.image_url,
+          materials: p.materials,
+          category: p.category,
+          designer_name: dmap.get(p.designer_id) || null,
+        };
+      }
+      const t = tradeById.get(id);
+      if (t) {
+        const rawBrand = String(t.brand_name || "");
+        const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
+        return {
+          id: t.id,
+          title: t.product_name,
+          image_url: t.image_url,
+          materials: t.materials,
+          category: t.category,
+          designer_name: baseBrand || null,
+        };
+      }
+      return null;
     })
     .filter(Boolean);
 }
