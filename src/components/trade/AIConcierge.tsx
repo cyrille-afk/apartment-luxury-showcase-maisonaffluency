@@ -329,9 +329,7 @@ export function AIConcierge() {
             </div>
           </div>
 
-          {!minimized && (
-            <></>
-          )}
+          {!minimized && (<>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {timeline.map((item, i) => {
