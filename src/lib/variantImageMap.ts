@@ -142,3 +142,50 @@ export function resolveVariantImageIndex(
   return undefined;
 }
 
+/**
+ * Reverse lookup: given a gallery image index, find the variant row in
+ * `size_variants` whose composite key (base|top|size, base|top, or single
+ * axis) maps to that index.
+ *
+ * Used to keep the finish/base/top dropdowns in sync when the user navigates
+ * the gallery via thumbnails or swipes — the dropdown should follow the
+ * picture, not just the other way around.
+ *
+ * Returns undefined when no variant maps to the given index (e.g. the user
+ * is viewing an editorial photo that isn't tied to any finish).
+ */
+export function findVariantForImageIndex(
+  finishMap: Record<string, number> | null,
+  variants: { label?: string | null; base?: string | null; top?: string | null }[] | null | undefined,
+  imageIndex: number
+):
+  | { base: string | null; top: string | null; label: string | null }
+  | undefined {
+  if (!finishMap || !variants || !variants.length) return undefined;
+  if (!Number.isFinite(imageIndex) || imageIndex < 0) return undefined;
+
+  // Iterate in declared order; first variant whose composite key resolves to
+  // this index wins. We try the most-specific key first so a triple-axis
+  // product still picks the correct row.
+  for (const v of variants) {
+    const base = (v.base || "").trim() || null;
+    const top = (v.top || "").trim() || null;
+    const label = (v.label || "").trim() || null;
+
+    const candidates: string[] = [];
+    if (base && top && label) candidates.push(`${normFinish(base)}|${normFinish(top)}|${normFinish(label)}`);
+    if (base && top) candidates.push(`${normFinish(base)}|${normFinish(top)}`);
+    if (top) candidates.push(normFinish(top));
+    if (base) candidates.push(normFinish(base));
+    if (label) candidates.push(normFinish(label));
+
+    for (const k of candidates) {
+      if (finishMap[k] === imageIndex) {
+        return { base, top, label };
+      }
+    }
+  }
+  return undefined;
+}
+
+

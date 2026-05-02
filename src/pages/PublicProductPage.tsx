@@ -26,7 +26,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
@@ -152,7 +152,12 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 /* ------------------------------------------------------------------ */
 /*  Variant selectors (controlled — enables cross-axis disabling)     */
 /* ------------------------------------------------------------------ */
-const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null }) => void }> = ({ product, onMaterialChange }) => {
+const VariantSelectors: React.FC<{
+  product: any;
+  onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null }) => void;
+  galleryActiveIndex?: number;
+  finishMap?: Record<string, number> | null;
+}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -173,6 +178,24 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
   const [selMat, setSelMat] = useState<string | null>(null);
   const [selSize, setSelSize] = useState<string | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
+
+  // Reverse sync: when the user navigates the gallery (thumbnail / swipe /
+  // arrow), update the dropdowns to reflect the variant whose mapped image
+  // is now showing. No-op when the active image isn't tied to a variant.
+  useEffect(() => {
+    if (galleryActiveIndex === undefined || !finishMap) return;
+    const variants = (product.size_variants || []) as { label?: string; base?: string; top?: string }[];
+    const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex);
+    if (!match) return;
+    if (isDualAxis || isBaseOnly) {
+      if ((match.base ?? null) !== selBase) setSelBase(match.base);
+      if (isDualAxis && (match.top ?? null) !== selTop) setSelTop(match.top);
+    } else if (hasSingleAxisSplit) {
+      if (match.label && match.label !== selMat) setSelMat(match.label);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [galleryActiveIndex, product?.id]);
+
 
   // Default the dual-axis pickers to the first base + its compatible top
   // so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -807,7 +830,13 @@ const PublicProductPage: React.FC = () => {
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
               <div className="flex flex-col gap-2">
-                <VariantSelectors product={product} onMaterialChange={handleMaterialChange} />
+                <VariantSelectors
+                  product={product}
+                  onMaterialChange={handleMaterialChange}
+                  galleryActiveIndex={galleryActiveIndex}
+                  finishMap={productFinishMap}
+                />
+
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
