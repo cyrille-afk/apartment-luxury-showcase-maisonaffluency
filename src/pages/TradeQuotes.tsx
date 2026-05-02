@@ -12,7 +12,7 @@ import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
 import SectionHero from "@/components/trade/SectionHero";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
-import BackToProjectPill from "@/components/trade/BackToProjectPill";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 
 interface Quote {
   id: string;
