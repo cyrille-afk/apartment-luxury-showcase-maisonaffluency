@@ -164,9 +164,13 @@ export function findVariantForImageIndex(
   if (!finishMap || !variants || !variants.length) return undefined;
   if (!Number.isFinite(imageIndex) || imageIndex < 0) return undefined;
 
-  // Iterate in declared order; first variant whose composite key resolves to
-  // this index wins. We try the most-specific key first so a triple-axis
-  // product still picks the correct row.
+  // Step 1: resolve every variant to its anchor index in the gallery (the
+  // index stored in `variant_image_map`). We try most-specific keys first.
+  type Anchor = {
+    variant: { base: string | null; top: string | null; label: string | null };
+    anchor: number;
+  };
+  const anchors: Anchor[] = [];
   for (const v of variants) {
     const base = (v.base || "").trim() || null;
     const top = (v.top || "").trim() || null;
@@ -179,13 +183,41 @@ export function findVariantForImageIndex(
     if (base) candidates.push(normFinish(base));
     if (label) candidates.push(normFinish(label));
 
+    let anchor: number | undefined;
     for (const k of candidates) {
-      if (finishMap[k] === imageIndex) {
-        return { base, top, label };
+      const idx = finishMap[k];
+      if (typeof idx === "number" && idx >= 0) {
+        anchor = idx;
+        break;
       }
     }
+    if (anchor !== undefined) {
+      anchors.push({ variant: { base, top, label }, anchor });
+    }
   }
-  return undefined;
+
+  if (!anchors.length) return undefined;
+
+  // Step 2: exact match wins immediately.
+  const exact = anchors.find((a) => a.anchor === imageIndex);
+  if (exact) return exact.variant;
+
+  // Step 3: range/span match. Each finish "owns" the contiguous run of images
+  // starting at its anchor index up to (but not including) the next anchor.
+  // This handles products like Mangala where one finish has 3-4 sequential
+  // photos in the gallery but only the first index is recorded in the map.
+  const sortedAnchorIdx = Array.from(new Set(anchors.map((a) => a.anchor))).sort((a, b) => a - b);
+
+  // Find the greatest anchor <= imageIndex.
+  let owner: number | undefined;
+  for (const idx of sortedAnchorIdx) {
+    if (idx <= imageIndex) owner = idx;
+    else break;
+  }
+  if (owner === undefined) return undefined;
+
+  const match = anchors.find((a) => a.anchor === owner);
+  return match?.variant;
 }
 
 
