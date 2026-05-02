@@ -74,6 +74,7 @@ export default function TradeProjectDetail() {
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
   const [boardItems, setBoardItems] = useState<ProjectBoardItem[]>([]);
   const [quoteItems, setQuoteItems] = useState<ProjectQuoteItem[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   useEffect(() => {
     if (project) {
@@ -334,7 +335,7 @@ export default function TradeProjectDetail() {
       </div>
 
       {/* Tabbed workspace hub */}
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4 flex flex-wrap h-auto bg-muted/30">
           <TabsTrigger value="overview" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
           <TabsTrigger value="quotes" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Quotes <span className="ml-1 text-[10px] text-muted-foreground">({quotes.length})</span></TabsTrigger>
@@ -353,10 +354,10 @@ export default function TradeProjectDetail() {
           {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <Stat icon={FileText} label="Quotes" value={quotes.length} />
-          <Stat icon={FolderArchive} label="Boards" value={boards.length} />
-          <Stat icon={Package} label="Quote items" value={quoteItemCount} />
-          <Stat icon={ListChecks} label="Board items" value={boardItemCount} />
+          <Stat icon={FileText} label="Quotes" value={quotes.length} onClick={() => setActiveTab("quotes")} />
+          <Stat icon={FolderArchive} label="Boards" value={boards.length} onClick={() => setActiveTab("boards")} />
+          <Stat icon={Package} label="Quote items" value={quoteItemCount} onClick={() => setActiveTab("quotes")} />
+          <Stat icon={ListChecks} label="Board items" value={boardItemCount} onClick={() => setActiveTab("boards")} />
         </div>
         <div className="flex flex-wrap items-center gap-2 mb-5">
           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">Quick filter:</span>
@@ -639,16 +640,37 @@ function Row({ to, title, meta }: { to: string; title: string; meta: string }) {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
-  return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-muted/10 p-3">
-      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-      <div className="min-w-0">
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  to,
+  onClick,
+}: {
+  icon: any;
+  label: string;
+  value: number;
+  to?: string;
+  onClick?: () => void;
+}) {
+  const inner = (
+    <>
+      <Icon className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors" />
+      <div className="min-w-0 text-left">
         <div className="font-display text-xl text-foreground leading-none">{value}</div>
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{label}</div>
       </div>
-    </div>
+    </>
   );
+  const baseCls = "flex items-center gap-3 rounded-md border border-border bg-muted/10 p-3";
+  const interactiveCls = " group cursor-pointer hover:border-foreground/40 hover:bg-muted/30 transition-colors text-left w-full";
+  if (to) {
+    return <Link to={to} className={baseCls + interactiveCls}>{inner}</Link>;
+  }
+  if (onClick) {
+    return <button type="button" onClick={onClick} className={baseCls + interactiveCls}>{inner}</button>;
+  }
+  return <div className={baseCls}>{inner}</div>;
 }
 
 type GridItem = {
