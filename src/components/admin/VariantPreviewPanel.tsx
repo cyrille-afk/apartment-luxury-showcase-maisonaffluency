@@ -162,6 +162,29 @@ export default function VariantPreviewPanel({
                 </select>
               </label>
             </div>
+          ) : isBaseOnly ? (
+            <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Layers className="h-3 w-3" /> {baseAxisLabel || "Finish"}
+              </span>
+              <select
+                className="rounded border bg-background px-2 py-1.5 text-xs"
+                value={selectedBase}
+                onChange={(e) => {
+                  const nextBase = e.target.value;
+                  setSelectedBase(nextBase);
+                  if (!nextBase) setSelectedSize("");
+                }}
+              >
+                <option value="">
+                  {variantPlaceholder ||
+                    `Select your ${(baseAxisLabel || "finish").toLowerCase()} choice`}
+                </option>
+                {baseOptions.map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+            </label>
           ) : materials ? (
             <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
