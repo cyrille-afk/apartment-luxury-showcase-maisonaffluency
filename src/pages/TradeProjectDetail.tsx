@@ -74,6 +74,7 @@ export default function TradeProjectDetail() {
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
   const [boardItems, setBoardItems] = useState<ProjectBoardItem[]>([]);
   const [quoteItems, setQuoteItems] = useState<ProjectQuoteItem[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   useEffect(() => {
     if (project) {
