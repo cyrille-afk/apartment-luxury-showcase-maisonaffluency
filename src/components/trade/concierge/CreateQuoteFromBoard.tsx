@@ -134,7 +134,13 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       });
       window.dispatchEvent(new CustomEvent("concierge:stage", {
         detail: {
-          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}). I can help you refine quantities, add notes, request finishes, or prepare it for the client. What would you like to do next?`,
+          stage: "Quote",
+          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}). What would you like to tackle next?`,
+          actions: [
+            { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
+            { label: "Add finishing details", prompt: "Help me add finishing details (fabric, finish, COM/COL, custom dimensions) to each line item. Start with the first one." },
+            { label: "Prepare to send", prompt: "Help me get this quote ready to submit: review missing info, suggest a client-facing note, and outline the next step." },
+          ],
         },
       }));
       navigate(`/trade/quotes?quote=${quote.id}`);
@@ -162,9 +168,15 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       );
       window.dispatchEvent(new CustomEvent("concierge:stage", {
         detail: {
+          stage: "Quote",
           message: added > 0
-            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added. Let me know if you'd like to adjust quantities, add notes, or prepare it for the client.`
-            : `We're now on the existing draft quote for this project — every eligible piece from "${board.title}" was already on it. Want me to help refine it before sending?`,
+            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added.`
+            : `We're now on the existing draft quote for this project — every eligible piece from "${board.title}" was already on it.`,
+          actions: [
+            { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
+            { label: "Add finishing details", prompt: "Help me add finishing details (fabric, finish, COM/COL, custom dimensions) to each line item. Start with the first one." },
+            { label: "Prepare to send", prompt: "Help me get this quote ready to submit: review missing info, suggest a client-facing note, and outline the next step." },
+          ],
         },
       }));
       navigate(`/trade/quotes?quote=${existingQuote.id}`);
