@@ -421,7 +421,39 @@ const TradeBoardBuilder = () => {
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="max-w-5xl">
         {/* Header */}
-        <TradeBreadcrumb current="Board builder" />
+        <TradeBreadcrumb
+          current="Boards"
+          currentTo={`/trade/boards${board.project_id ? `?project=${board.project_id}` : ""}`}
+          extraSegments={[
+            {
+              kind: focusedSubfolder ? "link" : "current",
+              label: board.title || "Untitled board",
+              ...(focusedSubfolder
+                ? {
+                    to: `#${sectionId(null)}`,
+                    // Override link click to scroll instead of routing.
+                  }
+                : {}),
+            } as any,
+            {
+              kind: "dropdown",
+              label: focusedSubfolder ?? "Top of board",
+              items: [
+                {
+                  label: "Top of board",
+                  active: focusedSubfolder === null,
+                  onSelect: () => jumpToSection(null),
+                },
+                ...subfolders.map((sf) => ({
+                  label: sf,
+                  active: focusedSubfolder === sf,
+                  onSelect: () => jumpToSection(sf),
+                })),
+              ],
+              emptyLabel: "No sub-folders yet",
+            },
+          ]}
+        />
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders
