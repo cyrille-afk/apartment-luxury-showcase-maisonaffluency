@@ -12,7 +12,7 @@ type Mode = "create" | "append";
 
 interface Props {
   proposal: TearsheetProposal;
-  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; mode: Mode }) => void;
+  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode }) => void;
 }
 
 export function TearsheetProposalCard({ proposal, onResolved }: Props) {
@@ -105,6 +105,7 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       boardId: res.board_id,
       url: res.url,
       added: res.added,
+      duplicates,
       mode,
     });
   };
