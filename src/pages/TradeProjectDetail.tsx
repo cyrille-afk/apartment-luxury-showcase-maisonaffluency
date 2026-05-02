@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
@@ -30,6 +30,7 @@ type LinkedTimeline = { id: string; quote_id: string; kanban_status: string; est
 type ProjectBoardItem = {
   id: string;
   board_id: string;
+  product_id: string;
   product_name: string | null;
   brand_name: string | null;
   image_url: string | null;
@@ -46,6 +47,7 @@ type ProjectQuoteItem = {
 export default function TradeProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAdmin } = useAuth();
   const { project, loading, refresh } = useProject(id);
   // Access is granted if the user owns the project OR is a member of its studio
@@ -135,7 +137,7 @@ export default function TradeProjectDetail() {
           ? sb.from("trade_quote_items").select("id, quote_id, quantity, trade_products(product_name, brand_name, image_url)").in("quote_id", quoteIds)
           : Promise.resolve({ data: [] }),
         boardIds.length
-          ? sb.from("client_board_items").select("id, board_id, trade_products(product_name, brand_name, image_url)").in("board_id", boardIds)
+          ? sb.from("client_board_items").select("id, board_id, product_id, trade_products(product_name, brand_name, image_url)").in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
       const qItemsData: any[] = qItems.data || [];
@@ -154,6 +156,7 @@ export default function TradeProjectDetail() {
       setBoardItems(bItemsData.map((r) => ({
         id: r.id,
         board_id: r.board_id,
+        product_id: r.product_id,
         product_name: r.trade_products?.product_name ?? null,
         brand_name: r.trade_products?.brand_name ?? null,
         image_url: r.trade_products?.image_url ?? null,
@@ -555,7 +558,8 @@ export default function TradeProjectDetail() {
                       subtitle: i.brand_name || "",
                       meta: "",
                       image: i.image_url,
-                      to: `/trade/boards/${i.board_id}?project=${project.id}`,
+                      to: `/trade/products/${i.product_id}`,
+                      from: location.pathname + location.search,
                     }))}
                   />
                 )}
