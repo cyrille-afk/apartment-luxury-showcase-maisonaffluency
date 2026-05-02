@@ -131,6 +131,20 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  const [featuredCatalogueTitle, setFeaturedCatalogueTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("trade_documents")
+      .select("title")
+      .eq("id", "268efc74-9268-4a68-925a-c0de96500590")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data?.title) setFeaturedCatalogueTitle(data.title);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     // All page section IDs in order
