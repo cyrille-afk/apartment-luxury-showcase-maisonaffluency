@@ -27,6 +27,7 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
@@ -180,21 +181,16 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
     if (!isDualAxis || selBase || selTop) return;
     const variants = product.size_variants || [];
     if (!variants.length || !baseOptions.length) return;
-    // Only auto-default when there is genuinely one pairing to show. If the
-    // product offers multiple bases (e.g. Stone D's three colorways), the user
-    // must pick one — otherwise we silently jump the gallery to a mapped
-    // finish image and skip the editorial photos shown before it.
-    if (baseOptions.length > 1) return;
-    const firstBase = baseOptions[0];
-    const compatTops = topOptions.filter((t) =>
-      variants.some((v: any) => (v.base || "").trim() === firstBase && (v.top || "").trim() === t)
-    );
-    if (compatTops.length === 1) {
-      setSelBase(firstBase);
-      setSelTop(compatTops[0]);
-      setDefaultPair({ base: firstBase, top: compatTops[0] });
-      onMaterialChange?.(firstBase, { base: firstBase, top: compatTops[0], size: null });
-    }
+    // Shared gating: only auto-default when there is genuinely one pairing
+    // to show. Multi-base products (e.g. Stone D's three colorways) must
+    // wait for an explicit user pick — otherwise we silently jump the
+    // gallery to a mapped finish image and skip the editorial photos.
+    const pair = resolveAutoDefaultPair(variants);
+    if (!pair) return;
+    setSelBase(pair.base);
+    setSelTop(pair.top);
+    setDefaultPair(pair);
+    onMaterialChange?.(pair.base, { base: pair.base, top: pair.top, size: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
 
