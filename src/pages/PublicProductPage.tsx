@@ -156,6 +156,7 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
+    isBaseOnly,
     baseOptions,
     topOptions,
     dualSizeOptions,
@@ -330,6 +331,24 @@ const VariantSelectors: React.FC<{ product: any; onMaterialChange?: (label: stri
             </button>
           )}
         </>
+      ) : isBaseOnly ? (
+        <ExpandableSpec
+          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          text={baseOptions.join("\n")}
+          placeholder={getBasePlaceholder(product)}
+          emphasized
+          value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              setSelBase(null);
+              onMaterialChange?.(null, { base: null, top: null, size: null });
+              return;
+            }
+            const v = baseOptions[idx] ?? null;
+            setSelBase(v);
+            onMaterialChange?.(v, { base: v, top: null, size: null });
+          }}
+        />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
           icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
