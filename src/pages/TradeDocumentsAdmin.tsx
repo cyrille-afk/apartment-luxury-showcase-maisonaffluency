@@ -477,6 +477,21 @@ const TradeDocumentsAdmin = () => {
                     </button>
                   )}
                   <button
+                    onClick={() => handleToggleFeatured(doc)}
+                    className={
+                      "p-2 rounded-md transition-colors " +
+                      (doc.is_featured_public
+                        ? "text-primary bg-primary/10 hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10")
+                    }
+                    title={doc.is_featured_public
+                      ? "Remove from public Featured Read"
+                      : "Set as public Featured Read (replaces current)"}
+                    aria-pressed={doc.is_featured_public}
+                  >
+                    <Star className={"w-3.5 h-3.5 " + (doc.is_featured_public ? "fill-current" : "")} />
+                  </button>
+                  <button
                     onClick={() => setEditing({ ...doc })}
                     className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     title="Edit"
