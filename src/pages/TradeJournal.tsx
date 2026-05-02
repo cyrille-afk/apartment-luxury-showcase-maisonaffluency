@@ -71,6 +71,7 @@ const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   author: "Maison Affluency",
   tags: [],
   is_published: false,
+  is_featured: false,
   published_at: null,
   read_time_minutes: 5,
 });
