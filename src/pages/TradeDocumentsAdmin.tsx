@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, FileText, X, Image, Loader2, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, X, Image, Loader2, ArrowUp, ArrowDown, Star } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import {
@@ -22,6 +22,7 @@ interface TradeDocument {
   cover_image_url: string | null;
   sort_order: number;
   created_at: string;
+  is_featured_public: boolean;
 }
 
 const DOC_TYPES = ["tearsheet", "catalogue", "pricelist", "specification"];
@@ -40,6 +41,7 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
   file_size_bytes: null,
   cover_image_url: null,
   sort_order: 0,
+  is_featured_public: false,
 });
 
 const inputClass =
@@ -164,6 +166,51 @@ const TradeDocumentsAdmin = () => {
     setDeleteTarget(null);
     fetchDocs();
   };
+
+  /**
+   * Toggle the public Featured Read flag. The DB has a partial unique index
+   * enforcing a single active featured row, so we explicitly clear any
+   * existing featured doc first when promoting a new one.
+   */
+  const handleToggleFeatured = useCallback(async (doc: TradeDocument) => {
+    if (doc.is_featured_public) {
+      // Un-feature
+      setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, is_featured_public: false } : d));
+      const { error } = await supabase
+        .from("trade_documents")
+        .update({ is_featured_public: false })
+        .eq("id", doc.id);
+      if (error) {
+        toast({ title: "Could not un-feature", description: error.message, variant: "destructive" });
+        fetchDocs();
+        return;
+      }
+      toast({ title: "Featured Read cleared", description: `"${doc.title}" is no longer the public featured catalogue.` });
+      return;
+    }
+
+    // Feature this one — clear any other featured first to honor the unique index
+    setDocuments(prev => prev.map(d => ({ ...d, is_featured_public: d.id === doc.id })));
+    const { error: clearErr } = await supabase
+      .from("trade_documents")
+      .update({ is_featured_public: false })
+      .eq("is_featured_public", true);
+    if (clearErr) {
+      toast({ title: "Could not update Featured Read", description: clearErr.message, variant: "destructive" });
+      fetchDocs();
+      return;
+    }
+    const { error: setErr } = await supabase
+      .from("trade_documents")
+      .update({ is_featured_public: true })
+      .eq("id", doc.id);
+    if (setErr) {
+      toast({ title: "Could not set Featured Read", description: setErr.message, variant: "destructive" });
+      fetchDocs();
+      return;
+    }
+    toast({ title: "Featured Read updated", description: `"${doc.title}" is now the public featured catalogue.` });
+  }, [toast]);
 
   const handleSetAsBrandThumbnail = useCallback(async (doc: TradeDocument) => {
     const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
@@ -376,7 +423,14 @@ const TradeDocumentsAdmin = () => {
               <div key={doc.id} className="border border-border rounded-lg p-5 flex items-center gap-4">
                 <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-sm text-foreground truncate">{doc.title}</h3>
+                  <h3 className="font-display text-sm text-foreground truncate flex items-center gap-2">
+                    {doc.title}
+                    {doc.is_featured_public && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[9px] uppercase tracking-[0.12em] font-body">
+                        <Star className="w-2.5 h-2.5 fill-current" /> Featured Read
+                      </span>
+                    )}
+                  </h3>
                   <p className="font-body text-[10px] text-muted-foreground">
                     {doc.brand_name} · {DOC_TYPE_LABELS[doc.document_type] || doc.document_type}
                   </p>
@@ -422,6 +476,21 @@ const TradeDocumentsAdmin = () => {
                       )}
                     </button>
                   )}
+                  <button
+                    onClick={() => handleToggleFeatured(doc)}
+                    className={
+                      "p-2 rounded-md transition-colors " +
+                      (doc.is_featured_public
+                        ? "text-primary bg-primary/10 hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10")
+                    }
+                    title={doc.is_featured_public
+                      ? "Remove from public Featured Read"
+                      : "Set as public Featured Read (replaces current)"}
+                    aria-pressed={doc.is_featured_public}
+                  >
+                    <Star className={"w-3.5 h-3.5 " + (doc.is_featured_public ? "fill-current" : "")} />
+                  </button>
                   <button
                     onClick={() => setEditing({ ...doc })}
                     className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
