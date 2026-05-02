@@ -182,8 +182,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       )}
 
       {/* Main image with arrows */}
-      <div className="flex-1 relative group">
-        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative">
+      <div className="flex-1 relative group" ref={inlineSwipeRef}>
+        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
