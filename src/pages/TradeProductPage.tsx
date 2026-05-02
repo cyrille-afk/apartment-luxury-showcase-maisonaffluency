@@ -630,6 +630,7 @@ const TradeProductPage: React.FC = () => {
           size: effectiveOpts.size,
           label,
           imageCount: images.length,
+          requireCompletePair: requiresBaseAndTopSelection,
         })
       : resolveFinishImageIndex(productFinishMap, label, images.length);
     if (idx !== undefined) {
