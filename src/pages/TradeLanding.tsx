@@ -125,19 +125,19 @@ const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  const andreePutmanCatalogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf";
+  const featuredCatalogueUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/architectural-digest-us-may-2026.pdf";
 
   const handleTrackedCatalogueDownload = useCallback(async (label: string) => {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session?.user) {
-      trackDownload(ANDREE_PUTMAN_CATALOG_DOCUMENT_ID, label);
+      trackDownload(FEATURED_CATALOGUE_DOCUMENT_ID, label);
     } else {
       // For guests, don't send browser-inferred country — let the edge function
       // resolve it from CDN geo headers (cf-ipcountry) for accuracy.
       void supabase.functions.invoke("log-public-download", {
         body: {
-          documentId: ANDREE_PUTMAN_CATALOG_DOCUMENT_ID,
+          documentId: FEATURED_CATALOGUE_DOCUMENT_ID,
           label,
           source: "trade-landing",
         },
@@ -145,20 +145,20 @@ const TradeLanding = () => {
     }
 
     try {
-      const response = await fetch(andreePutmanCatalogUrl);
+      const response = await fetch(featuredCatalogueUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = "Andrée Putman — Art Paris 2026.pdf";
+      link.download = "Architectural Digest US — May 2026.pdf";
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(blobUrl);
     } catch {
-      window.open(andreePutmanCatalogUrl, "_blank", "noopener,noreferrer");
+      window.open(featuredCatalogueUrl, "_blank", "noopener,noreferrer");
     }
-  }, [andreePutmanCatalogUrl]);
+  }, [featuredCatalogueUrl]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const regionParam = (searchParams.get("region") || "").toLowerCase();
