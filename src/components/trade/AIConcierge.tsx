@@ -99,7 +99,7 @@ export function AIConcierge() {
   const handleProposalResolved = (
     proposalIndex: number,
     outcome: "approved" | "discarded",
-    info?: { boardId: string; url: string; added: number; duplicates: number; mode: "create" | "append" },
+    info?: { boardId: string; url: string; added: number; duplicates: number; mode: "create" | "append"; deferNavigation?: boolean },
   ) => {
     // Mark in timeline so the card updates persist on re-render
     setTimeline((prev) => {
@@ -108,6 +108,7 @@ export function AIConcierge() {
       if (item?.kind === "proposal") {
         copy[proposalIndex] = { ...item, resolved: outcome };
       }
+      const trail = info?.deferNavigation ? "" : " — taking you there now…";
       let content: string;
       if (outcome === "discarded") {
         content = "Got it — I've discarded that draft. Want me to try a different angle?";
@@ -115,17 +116,21 @@ export function AIConcierge() {
         if (info.added === 0 && info.duplicates > 0) {
           content = "All pieces were already on this tearsheet — nothing new to add.";
         } else {
-          content = `✓ Added ${info.added} ${info.added === 1 ? "piece" : "pieces"} to your tearsheet — taking you there now…`;
+          content = `✓ Added ${info.added} ${info.added === 1 ? "piece" : "pieces"} to your tearsheet${trail}`;
         }
       } else {
-        content = `✓ Tearsheet created — taking you there now…`;
+        content = `✓ Tearsheet created${trail}`;
       }
       copy.push({ kind: "msg", role: "assistant", content });
       return copy;
     });
-    // Only auto-navigate when something actually changed
+    // Only auto-navigate when something actually changed AND the card isn't
+    // about to prompt the user for a project assignment.
     const shouldNavigate =
-      outcome === "approved" && info?.url && !(info.mode === "append" && info.added === 0);
+      outcome === "approved" &&
+      info?.url &&
+      !info.deferNavigation &&
+      !(info.mode === "append" && info.added === 0);
     if (shouldNavigate) {
       setTimeout(() => navigate(info!.url), 600);
     }

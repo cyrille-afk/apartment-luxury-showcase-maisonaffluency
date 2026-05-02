@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
+import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
 
 interface Props {
   proposal: TearsheetProposal;
-  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode }) => void;
+  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode; deferNavigation?: boolean }) => void;
 }
 
 export function TearsheetProposalCard({ proposal, onResolved }: Props) {
@@ -36,6 +37,10 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // After commit, holds the board's existing project_id (null = no project assigned yet).
+  const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
+  const [projectStepDone, setProjectStepDone] = useState(false);
+  const navigate = useNavigate();
 
   const isAppend = mode === "append";
   const visiblePicks = proposal.preview.filter((p) => !excluded.has(p.id));
@@ -101,13 +106,35 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
     setStatus("approved");
     const duplicates = res.duplicates || 0;
     setResult({ boardId: res.board_id, url: res.url, added: res.added, duplicates });
+
+    // Look up the board's existing project_id so we know whether to prompt.
+    const { data: boardRow } = await supabase
+      .from("client_boards")
+      .select("project_id")
+      .eq("id", res.board_id)
+      .maybeSingle();
+    const currentProjectId = (boardRow?.project_id as string | null) ?? null;
+    setExistingProjectId(currentProjectId);
+
+    // Defer parent's auto-navigation when we'll show the project picker.
+    const willPromptForProject = !currentProjectId;
+
     onResolved?.("approved", {
       boardId: res.board_id,
       url: res.url,
       added: res.added,
       duplicates,
       mode,
+      deferNavigation: willPromptForProject,
     });
+  };
+
+  const handleProjectStepResolved = (_projectId: string | null) => {
+    setProjectStepDone(true);
+    if (result?.url) {
+      // Give the user a beat to see the confirmation before navigating.
+      setTimeout(() => navigate(result.url), 700);
+    }
   };
 
   const handleDiscard = () => {
@@ -272,25 +299,35 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       )}
 
       {status === "approved" && result && (
-        <div className="flex items-center justify-between">
-          <span className="font-body text-[11px] text-foreground/80">
-            {isAppend ? (
-              <>
-                ✓ Added {result.added} {result.added === 1 ? "piece" : "pieces"}
-                {result.duplicates > 0 && ` · ${result.duplicates} already on board`}
-              </>
-            ) : (
-              <>✓ Created with {result.added} {result.added === 1 ? "piece" : "pieces"}</>
-            )}
-          </span>
-          <Link
-            to={result.url}
-            className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline"
-          >
-            Open
-            <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
+        <>
+          <div className="flex items-center justify-between">
+            <span className="font-body text-[11px] text-foreground/80">
+              {isAppend ? (
+                <>
+                  ✓ Added {result.added} {result.added === 1 ? "piece" : "pieces"}
+                  {result.duplicates > 0 && ` · ${result.duplicates} already on board`}
+                </>
+              ) : (
+                <>✓ Created with {result.added} {result.added === 1 ? "piece" : "pieces"}</>
+              )}
+            </span>
+            <Link
+              to={result.url}
+              className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline"
+            >
+              Open
+              <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
+
+          {/* Assign to project — only when the board has no project yet */}
+          {!existingProjectId && !projectStepDone && (
+            <ProjectAssignInline
+              boardId={result.boardId}
+              onResolved={handleProjectStepResolved}
+            />
+          )}
+        </>
       )}
 
       {status === "discarded" && (
