@@ -639,16 +639,37 @@ function Row({ to, title, meta }: { to: string; title: string; meta: string }) {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
-  return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-muted/10 p-3">
-      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-      <div className="min-w-0">
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  to,
+  onClick,
+}: {
+  icon: any;
+  label: string;
+  value: number;
+  to?: string;
+  onClick?: () => void;
+}) {
+  const inner = (
+    <>
+      <Icon className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors" />
+      <div className="min-w-0 text-left">
         <div className="font-display text-xl text-foreground leading-none">{value}</div>
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{label}</div>
       </div>
-    </div>
+    </>
   );
+  const baseCls = "flex items-center gap-3 rounded-md border border-border bg-muted/10 p-3";
+  const interactiveCls = " group cursor-pointer hover:border-foreground/40 hover:bg-muted/30 transition-colors text-left w-full";
+  if (to) {
+    return <Link to={to} className={baseCls + interactiveCls}>{inner}</Link>;
+  }
+  if (onClick) {
+    return <button type="button" onClick={onClick} className={baseCls + interactiveCls}>{inner}</button>;
+  }
+  return <div className={baseCls}>{inner}</div>;
 }
 
 type GridItem = {
