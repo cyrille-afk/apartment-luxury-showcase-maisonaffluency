@@ -567,7 +567,41 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     const currentImageNum = typeof currentImageIdx === "number" ? currentImageIdx + 1 : "";
                     return (
                     <div key={idx} className="space-y-1">
-                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
+                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
+                      <div className="flex flex-col items-center justify-center gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-3.5 w-5 p-0 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                          disabled={idx === 0}
+                          title="Move up"
+                          onClick={() => {
+                            const updated = [...(pick.size_variants || [])];
+                            if (idx <= 0 || idx >= updated.length) return;
+                            [updated[idx - 1], updated[idx]] = [updated[idx], updated[idx - 1]];
+                            updateField(pick.id, "size_variants", updated as any);
+                          }}
+                        >
+                          <ChevronUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-3.5 w-5 p-0 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                          disabled={idx === (pick.size_variants || []).length - 1}
+                          title="Move down"
+                          onClick={() => {
+                            const updated = [...(pick.size_variants || [])];
+                            if (idx < 0 || idx >= updated.length - 1) return;
+                            [updated[idx], updated[idx + 1]] = [updated[idx + 1], updated[idx]];
+                            updateField(pick.id, "size_variants", updated as any);
+                          }}
+                        >
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </div>
                       <Input
                         value={variant.label || ""}
                         onChange={(e) => {
