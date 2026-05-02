@@ -41,6 +41,7 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
   file_size_bytes: null,
   cover_image_url: null,
   sort_order: 0,
+  is_featured_public: false,
 });
 
 const inputClass =
