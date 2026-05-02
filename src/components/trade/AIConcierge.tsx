@@ -147,7 +147,7 @@ export function AIConcierge() {
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline]);
+  }, [input, streaming, timeline, stage]);
 
   const handleProposalResolved = (
     proposalIndex: number,
