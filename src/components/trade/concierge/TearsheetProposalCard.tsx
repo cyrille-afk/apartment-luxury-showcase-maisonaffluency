@@ -299,25 +299,35 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
       )}
 
       {status === "approved" && result && (
-        <div className="flex items-center justify-between">
-          <span className="font-body text-[11px] text-foreground/80">
-            {isAppend ? (
-              <>
-                ✓ Added {result.added} {result.added === 1 ? "piece" : "pieces"}
-                {result.duplicates > 0 && ` · ${result.duplicates} already on board`}
-              </>
-            ) : (
-              <>✓ Created with {result.added} {result.added === 1 ? "piece" : "pieces"}</>
-            )}
-          </span>
-          <Link
-            to={result.url}
-            className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline"
-          >
-            Open
-            <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
+        <>
+          <div className="flex items-center justify-between">
+            <span className="font-body text-[11px] text-foreground/80">
+              {isAppend ? (
+                <>
+                  ✓ Added {result.added} {result.added === 1 ? "piece" : "pieces"}
+                  {result.duplicates > 0 && ` · ${result.duplicates} already on board`}
+                </>
+              ) : (
+                <>✓ Created with {result.added} {result.added === 1 ? "piece" : "pieces"}</>
+              )}
+            </span>
+            <Link
+              to={result.url}
+              className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline"
+            >
+              Open
+              <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
+
+          {/* Assign to project — only when the board has no project yet */}
+          {!existingProjectId && !projectStepDone && (
+            <ProjectAssignInline
+              boardId={result.boardId}
+              onResolved={handleProjectStepResolved}
+            />
+          )}
+        </>
       )}
 
       {status === "discarded" && (
