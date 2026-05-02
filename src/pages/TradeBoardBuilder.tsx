@@ -261,6 +261,35 @@ const TradeBoardBuilder = () => {
     });
   };
 
+  // Stable id for an in-page section anchor (sub-folder or ungrouped).
+  const sectionId = (name: string | null) =>
+    name
+      ? `bb-sf-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "sf"}`
+      : "bb-top";
+
+  // Currently "focused" sub-folder for the breadcrumb leaf (set when the
+  // user picks one from the breadcrumb dropdown). null = top of board.
+  const [focusedSubfolder, setFocusedSubfolder] = useState<string | null>(null);
+
+  const jumpToSection = (name: string | null) => {
+    // Expand the target if collapsed, then scroll its anchor into view.
+    if (name) {
+      setCollapsedFolders(prev => {
+        if (!prev.has(name)) return prev;
+        const next = new Set(prev);
+        next.delete(name);
+        return next;
+      });
+    }
+    setFocusedSubfolder(name);
+    // Defer to next paint so newly-expanded content is laid out before scroll.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(sectionId(name));
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+
   const shareBoard = async () => {
     if (!board) return;
     const wasDraft = board.status === "draft";
