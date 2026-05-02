@@ -105,14 +105,14 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
     const { data: sess } = await supabase.auth.getSession();
     const userId = sess.session?.user?.id;
     if (userId) {
-      await supabase.from("trade_concierge_actions").insert({
+      await supabase.from("trade_concierge_actions").insert([{
         user_id: userId,
         tool: "assign_tearsheet_project",
         args: { board_id: boardId, project_id: null, skipped: true },
         status: "discarded",
         resulting_resource_id: boardId,
         resulting_resource_type: "client_board",
-      });
+      }]);
     }
     setDone({ projectName: "" });
     onResolved(null);
