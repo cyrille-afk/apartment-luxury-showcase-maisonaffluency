@@ -15,7 +15,7 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
-const ANDREE_PUTMAN_CATALOG_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
+const FEATURED_CATALOGUE_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
@@ -125,19 +125,19 @@ const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  const andreePutmanCatalogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1775858671249-g961t5.pdf";
+  const featuredCatalogueUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/architectural-digest-us-may-2026.pdf";
 
   const handleTrackedCatalogueDownload = useCallback(async (label: string) => {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session?.user) {
-      trackDownload(ANDREE_PUTMAN_CATALOG_DOCUMENT_ID, label);
+      trackDownload(FEATURED_CATALOGUE_DOCUMENT_ID, label);
     } else {
       // For guests, don't send browser-inferred country — let the edge function
       // resolve it from CDN geo headers (cf-ipcountry) for accuracy.
       void supabase.functions.invoke("log-public-download", {
         body: {
-          documentId: ANDREE_PUTMAN_CATALOG_DOCUMENT_ID,
+          documentId: FEATURED_CATALOGUE_DOCUMENT_ID,
           label,
           source: "trade-landing",
         },
@@ -145,20 +145,20 @@ const TradeLanding = () => {
     }
 
     try {
-      const response = await fetch(andreePutmanCatalogUrl);
+      const response = await fetch(featuredCatalogueUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = "Andrée Putman — Art Paris 2026.pdf";
+      link.download = "Architectural Digest US — May 2026.pdf";
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(blobUrl);
     } catch {
-      window.open(andreePutmanCatalogUrl, "_blank", "noopener,noreferrer");
+      window.open(featuredCatalogueUrl, "_blank", "noopener,noreferrer");
     }
-  }, [andreePutmanCatalogUrl]);
+  }, [featuredCatalogueUrl]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const regionParam = (searchParams.get("region") || "").toLowerCase();
@@ -554,12 +554,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               {/* Catalogue cover thumbnail */}
               <button
                 type="button"
-                onClick={() => void handleTrackedCatalogueDownload("Andrée Putman Art Paris 2026 — Landing")}
+                onClick={() => void handleTrackedCatalogueDownload("Architectural Digest US May 2026 — Landing")}
                 className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
               >
                 <img
-                  src={cloudinaryUrl("v1775859198/Screen_Shot_2026-04-11_at_6.06.05_AM_iznxoe", { width: 400, height: 533, quality: "auto:good", crop: "fill" })}
-                  alt="Andrée Putman Art Paris 2026 Catalogue"
+                  src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/ad-may-2026-cover.jpg"
+                  alt="Architectural Digest US May 2026 cover"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
@@ -571,20 +571,20 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 
               {/* Text + CTA */}
               <div className="flex-1 text-center md:text-left">
-                <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-2">Featured Catalogue</p>
+                <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-2">Featured Issue</p>
                 <h3 className="font-display text-lg md:text-xl text-foreground mb-2">
-                  Andrée Putman — Art Paris 2026
+                  Architectural Digest US — May 2026
                 </h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-lg">
-                  Explore the exclusive photoshoot catalogue from Art Paris 2026 by the talented photographer Sébastien Véronèse, showcasing Andrée Putman's iconic furniture and design legacy. Free to download.
+                  Browse the full May 2026 issue of Architectural Digest US — a curated edit of interiors, design talents and creative homes from around the world. Free to download.
                 </p>
                 <button
                   type="button"
-                  onClick={() => void handleTrackedCatalogueDownload("Andrée Putman Art Paris 2026 — Landing CTA")}
+                  onClick={() => void handleTrackedCatalogueDownload("Architectural Digest US May 2026 — Landing CTA")}
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
                 >
                   <FileDown className="h-3.5 w-3.5" />
-                  Download Catalogue
+                  Download Issue
                 </button>
               </div>
             </motion.div>
