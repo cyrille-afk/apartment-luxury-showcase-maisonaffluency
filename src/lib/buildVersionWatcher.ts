@@ -66,18 +66,16 @@ async function checkForUpdate() {
   const remote = await fetchRemoteBuildId();
   if (!remote) return;
   if (remote !== currentBuildId) {
-    // Kick off the OG rescrape for this new deploy *before* we reload.
+    // Kick off the OG rescrape for this new deploy *before* anything else.
     triggerPostDeployRescrape(remote);
-    // Avoid reloading while the user is mid-input (forms, contenteditable).
-    const active = document.activeElement as HTMLElement | null;
-    const isEditing =
-      active &&
-      (active.tagName === "INPUT" ||
-        active.tagName === "TEXTAREA" ||
-        active.isContentEditable);
-    if (isEditing) return;
-    // Hard reload bypassing the bfcache.
-    window.location.reload();
+    // Notify the UI so it can show a "Reload to latest" banner. We do NOT
+    // hard-reload automatically anymore — the user controls when to refresh
+    // (the banner gives an immediate one-click action, see BuildUpdateBanner).
+    window.dispatchEvent(
+      new CustomEvent("app:build-update-available", {
+        detail: { from: currentBuildId, to: remote },
+      }),
+    );
   }
 }
 
