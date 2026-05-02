@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import SliderDots from "@/components/ui/SliderDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -41,11 +42,32 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
 
+  // Swipe support — wired to both the inline main image and the fullscreen lightbox.
+  const inlineSwipeRef = useRef<HTMLDivElement>(null);
+  const lightboxSwipeRef = useRef<HTMLDivElement>(null);
+  const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
+
   const goTo = useCallback((i: number) => {
     const next = Math.max(0, Math.min(i, images.length - 1));
     setActiveIndex(next);
     onIndexChange?.(next);
   }, [images.length, onIndexChange]);
+
+  useLightboxSwipe({
+    containerRef: inlineSwipeRef,
+    enabled: images.length > 1 && !zoomOpen,
+    imageZoomedRef: noZoomRef,
+    onSwipeLeft: () => goTo(activeIndex + 1),
+    onSwipeRight: () => goTo(activeIndex - 1),
+  });
+
+  useLightboxSwipe({
+    containerRef: lightboxSwipeRef,
+    enabled: images.length > 1 && zoomOpen,
+    imageZoomedRef: noZoomRef,
+    onSwipeLeft: () => goTo(activeIndex + 1),
+    onSwipeRight: () => goTo(activeIndex - 1),
+  });
 
   const updateScrollState = useCallback(() => {
     const el = thumbsRef.current;
@@ -160,8 +182,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       )}
 
       {/* Main image with arrows */}
-      <div className="flex-1 relative group">
-        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative">
+      <div className="flex-1 relative group" ref={inlineSwipeRef}>
+        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
@@ -229,9 +251,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             <button
               onClick={() => goTo(activeIndex - 1)}
               disabled={activeIndex === 0}
+              aria-label="Previous image"
               className={cn(
                 "absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
-                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
+                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
               )}
             >
               <ChevronLeft size={18} className="text-foreground" />
@@ -239,9 +262,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             <button
               onClick={() => goTo(activeIndex + 1)}
               disabled={activeIndex === images.length - 1}
+              aria-label="Next image"
               className={cn(
                 "absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
-                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
+                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
               )}
             >
               <ChevronRight size={18} className="text-foreground" />
@@ -264,8 +288,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent
           hideClose
-          className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none"
+          className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none touch-pan-y"
         >
+          <div ref={lightboxSwipeRef} className="absolute inset-0" aria-hidden="true" />
           <VisuallyHidden>
             <DialogTitle>{alt}</DialogTitle>
           </VisuallyHidden>
