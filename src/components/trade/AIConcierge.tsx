@@ -99,7 +99,7 @@ export function AIConcierge() {
   const handleProposalResolved = (
     proposalIndex: number,
     outcome: "approved" | "discarded",
-    info?: { boardId: string; url: string; added: number; mode: "create" | "append" },
+    info?: { boardId: string; url: string; added: number; duplicates: number; mode: "create" | "append" },
   ) => {
     // Mark in timeline so the card updates persist on re-render
     setTimeline((prev) => {
@@ -112,15 +112,22 @@ export function AIConcierge() {
       if (outcome === "discarded") {
         content = "Got it — I've discarded that draft. Want me to try a different angle?";
       } else if (info?.mode === "append") {
-        content = `✓ Added ${info.added} ${info.added === 1 ? "piece" : "pieces"} to your tearsheet — taking you there now…`;
+        if (info.added === 0 && info.duplicates > 0) {
+          content = "All pieces were already on this tearsheet — nothing new to add.";
+        } else {
+          content = `✓ Added ${info.added} ${info.added === 1 ? "piece" : "pieces"} to your tearsheet — taking you there now…`;
+        }
       } else {
         content = `✓ Tearsheet created — taking you there now…`;
       }
       copy.push({ kind: "msg", role: "assistant", content });
       return copy;
     });
-    if (outcome === "approved" && info?.url) {
-      setTimeout(() => navigate(info.url), 600);
+    // Only auto-navigate when something actually changed
+    const shouldNavigate =
+      outcome === "approved" && info?.url && !(info.mode === "append" && info.added === 0);
+    if (shouldNavigate) {
+      setTimeout(() => navigate(info!.url), 600);
     }
   };
 
