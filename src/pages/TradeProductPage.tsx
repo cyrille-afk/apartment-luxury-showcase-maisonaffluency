@@ -320,7 +320,7 @@ function useTradeProductBySlug(
 }
 
 const TradeProductPage: React.FC = () => {
-  const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
+  const { id: tradeProductIdParam, slug: designerSlug, productSlug } = useParams<{ id: string; slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -347,7 +347,7 @@ const TradeProductPage: React.FC = () => {
     }
   }, [stateFrom]);
 
-  const { data, isLoading } = useTradeProductBySlug(designerSlug, productSlug);
+  const { data, isLoading } = useTradeProductBySlug(tradeProductIdParam, designerSlug, productSlug);
 
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
