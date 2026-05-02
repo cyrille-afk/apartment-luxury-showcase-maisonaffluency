@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
@@ -309,6 +309,21 @@ export function AIConcierge() {
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  abortRef.current?.abort();
+                  setStreaming(false);
+                  setInput("");
+                  setStageOverride(null);
+                  setTimeline([{ kind: "msg", role: "assistant", content: GREETING }]);
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label="Start a new conversation"
+                title="Start a new conversation"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setMinimized((m) => !m)}
