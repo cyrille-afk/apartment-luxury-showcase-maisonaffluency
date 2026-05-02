@@ -392,7 +392,7 @@ const TradeBoardBuilder = () => {
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="max-w-5xl">
         {/* Header */}
-        <BackToProjectPill />
+        <TradeBreadcrumb current="Board builder" />
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders
