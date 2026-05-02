@@ -688,6 +688,24 @@ const TradeJournal = () => {
                     {a.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                   <button
+                    onClick={() => toggleFeatured(a)}
+                    disabled={!a.is_published && !a.is_featured}
+                    className={`p-2 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                      a.is_featured
+                        ? "text-primary bg-primary/10 hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-primary hover:bg-muted"
+                    }`}
+                    title={
+                      a.is_featured
+                        ? "Remove from homepage Featured Read"
+                        : !a.is_published
+                          ? "Publish article before featuring"
+                          : "Set as homepage Featured Read (replaces current)"
+                    }
+                  >
+                    <Star className={`w-3.5 h-3.5 ${a.is_featured ? "fill-current" : ""}`} />
+                  </button>
+                  <button
                     onClick={() => startEdit(a)}
                     className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     title="Edit"
