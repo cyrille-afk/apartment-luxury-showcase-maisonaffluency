@@ -3247,6 +3247,7 @@ export type Database = {
           file_size_bytes: number | null
           file_url: string
           id: string
+          is_featured_public: boolean
           sort_order: number
           title: string
         }
@@ -3258,6 +3259,7 @@ export type Database = {
           file_size_bytes?: number | null
           file_url: string
           id?: string
+          is_featured_public?: boolean
           sort_order?: number
           title: string
         }
@@ -3269,6 +3271,7 @@ export type Database = {
           file_size_bytes?: number | null
           file_url?: string
           id?: string
+          is_featured_public?: boolean
           sort_order?: number
           title?: string
         }
