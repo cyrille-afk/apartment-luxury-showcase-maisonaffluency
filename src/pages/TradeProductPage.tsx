@@ -786,6 +786,14 @@ const TradeProductPage: React.FC = () => {
       </Helmet>
 
       <div className="max-w-7xl pb-12">
+        <button
+          type="button"
+          onClick={() => navigate(fromPath || fallbackPath)}
+          className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back
+        </button>
+
         {/* Breadcrumbs route back to the Trade Gallery grid pre-filtered
             to the same category/subcategory, so users stay inside the
             trade portal instead of being sent to the public catalogue. */}
