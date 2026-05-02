@@ -423,7 +423,14 @@ const TradeDocumentsAdmin = () => {
               <div key={doc.id} className="border border-border rounded-lg p-5 flex items-center gap-4">
                 <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-sm text-foreground truncate">{doc.title}</h3>
+                  <h3 className="font-display text-sm text-foreground truncate flex items-center gap-2">
+                    {doc.title}
+                    {doc.is_featured_public && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[9px] uppercase tracking-[0.12em] font-body">
+                        <Star className="w-2.5 h-2.5 fill-current" /> Featured Read
+                      </span>
+                    )}
+                  </h3>
                   <p className="font-body text-[10px] text-muted-foreground">
                     {doc.brand_name} · {DOC_TYPE_LABELS[doc.document_type] || doc.document_type}
                   </p>
