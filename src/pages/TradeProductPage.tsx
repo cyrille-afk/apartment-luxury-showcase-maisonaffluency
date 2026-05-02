@@ -44,6 +44,7 @@ import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
