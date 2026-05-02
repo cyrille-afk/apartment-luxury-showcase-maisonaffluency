@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { Helmet } from "react-helmet-async";
@@ -42,6 +42,7 @@ const TradeQuotes = () => {
   const { currentStudio, canEdit } = useStudio();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     projectFilter,
     designerFilter,
@@ -152,6 +153,12 @@ const TradeQuotes = () => {
     })();
   }, [designerFilter]);
 
+  // Deep-link: open a specific quote when ?quote=<id> is in the URL
+  useEffect(() => {
+    const q = searchParams.get("quote");
+    if (q && q !== selectedQuoteId) setSelectedQuoteId(q);
+  }, [searchParams]);
+
   const handleCreateQuote = async () => {
     if (!user) return;
     if (currentStudio && !canEdit) {
@@ -184,10 +191,18 @@ const TradeQuotes = () => {
         quoteNotes={quote?.notes || null}
         onBack={() => {
           setSelectedQuoteId(null);
+          if (searchParams.get("quote")) {
+            searchParams.delete("quote");
+            setSearchParams(searchParams, { replace: true });
+          }
           fetchQuotes();
         }}
         onStatusChange={() => {
           setSelectedQuoteId(null);
+          if (searchParams.get("quote")) {
+            searchParams.delete("quote");
+            setSearchParams(searchParams, { replace: true });
+          }
           fetchQuotes();
         }}
       />
