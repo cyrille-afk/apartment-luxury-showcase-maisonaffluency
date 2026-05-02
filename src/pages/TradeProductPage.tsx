@@ -125,7 +125,8 @@ function useTradeProductBySlug(
           .select("id, name, slug, display_name, biography")
           .eq("is_published", true)
         const designer = (designers || []).find((d: any) =>
-          [d.name, d.display_name].filter(Boolean).some((name: string) => {
+          [d.name, d.display_name].some((name) => {
+            if (!name) return false;
             const normalized = name.trim().toLowerCase();
             return normalized === brand.trim().toLowerCase() || normalized === brandBase.trim().toLowerCase();
           })
