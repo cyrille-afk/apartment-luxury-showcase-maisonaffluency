@@ -276,23 +276,62 @@ export function AIConcierge() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div
+          data-concierge-panel
+          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto" } : undefined}
+          className={cn(
+            "fixed z-[100] w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
+            !pos && "bottom-20 md:bottom-6 right-4",
+            minimized ? "h-auto" : "h-[560px] max-h-[calc(100vh-6rem)]"
+          )}
+        >
+          <div
+            onPointerDown={onDragStart}
+            onPointerMove={onDragMove}
+            onPointerUp={onDragEnd}
+            onPointerCancel={onDragEnd}
+            onDoubleClick={() => setMinimized((m) => !m)}
+            className="flex items-center justify-between px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none touch-none"
+            title="Drag to move · double-click to collapse"
+          >
             <div className="flex items-center gap-2 min-w-0">
+              <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
               <Sparkles className="h-4 w-4 text-accent shrink-0" />
               <span className="font-display text-sm uppercase tracking-widest">Concierge</span>
-              <span
-                className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
-                title={`Current workflow stage: ${stage}`}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                Stage: {stage}
-              </span>
+              {!minimized && (
+                <span
+                  className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
+                  title={`Current workflow stage: ${stage}`}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                  Stage: {stage}
+                </span>
+              )}
             </div>
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Close">
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setMinimized((m) => !m)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label={minimized ? "Expand" : "Collapse"}
+                title={minimized ? "Expand" : "Collapse"}
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setOpen(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+
+          {!minimized && (
+            <></>
+          )}
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {timeline.map((item, i) => {
