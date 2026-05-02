@@ -14,11 +14,22 @@ function json(status: number, body: unknown) {
   });
 }
 
-/** Resolve a curator pick to a trade_products.id, creating a row if needed. */
+/** Resolve a pick id (curator pick OR trade_products) to a trade_products.id, creating a row if needed. */
 async function resolvePickToTradeProduct(
   supabase: ReturnType<typeof createClient>,
   pickId: string,
 ): Promise<{ tradeProductId: string | null; pick: any | null }> {
+  // The concierge catalog now includes both curator picks and trade_products
+  // (so the assistant can see the full inventory). The id may therefore be
+  // either source — try trade_products first as a direct hit, then fall
+  // back to the curator-pick → trade-product resolution path.
+  const { data: directTrade } = await supabase
+    .from("trade_products")
+    .select("id")
+    .eq("id", pickId)
+    .maybeSingle();
+  if (directTrade?.id) return { tradeProductId: directTrade.id, pick: null };
+
   const { data: pick } = await supabase
     .from("designer_curator_picks")
     .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, description, origin, price_prefix, pdf_url")
