@@ -106,13 +106,35 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
     setStatus("approved");
     const duplicates = res.duplicates || 0;
     setResult({ boardId: res.board_id, url: res.url, added: res.added, duplicates });
+
+    // Look up the board's existing project_id so we know whether to prompt.
+    const { data: boardRow } = await supabase
+      .from("client_boards")
+      .select("project_id")
+      .eq("id", res.board_id)
+      .maybeSingle();
+    const currentProjectId = (boardRow?.project_id as string | null) ?? null;
+    setExistingProjectId(currentProjectId);
+
+    // Defer parent's auto-navigation when we'll show the project picker.
+    const willPromptForProject = !currentProjectId;
+
     onResolved?.("approved", {
       boardId: res.board_id,
       url: res.url,
       added: res.added,
       duplicates,
       mode,
+      deferNavigation: willPromptForProject,
     });
+  };
+
+  const handleProjectStepResolved = (_projectId: string | null) => {
+    setProjectStepDone(true);
+    if (result?.url) {
+      // Give the user a beat to see the confirmation before navigating.
+      setTimeout(() => navigate(result.url), 700);
+    }
   };
 
   const handleDiscard = () => {
