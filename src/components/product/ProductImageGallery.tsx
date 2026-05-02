@@ -42,11 +42,32 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
 
+  // Swipe support — wired to both the inline main image and the fullscreen lightbox.
+  const inlineSwipeRef = useRef<HTMLDivElement>(null);
+  const lightboxSwipeRef = useRef<HTMLDivElement>(null);
+  const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
+
   const goTo = useCallback((i: number) => {
     const next = Math.max(0, Math.min(i, images.length - 1));
     setActiveIndex(next);
     onIndexChange?.(next);
   }, [images.length, onIndexChange]);
+
+  useLightboxSwipe({
+    containerRef: inlineSwipeRef,
+    enabled: images.length > 1 && !zoomOpen,
+    imageZoomedRef: noZoomRef,
+    onSwipeLeft: () => goTo(activeIndex + 1),
+    onSwipeRight: () => goTo(activeIndex - 1),
+  });
+
+  useLightboxSwipe({
+    containerRef: lightboxSwipeRef,
+    enabled: images.length > 1 && zoomOpen,
+    imageZoomedRef: noZoomRef,
+    onSwipeLeft: () => goTo(activeIndex + 1),
+    onSwipeRight: () => goTo(activeIndex - 1),
+  });
 
   const updateScrollState = useCallback(() => {
     const el = thumbsRef.current;
