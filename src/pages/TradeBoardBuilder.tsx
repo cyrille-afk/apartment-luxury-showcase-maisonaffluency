@@ -427,7 +427,13 @@ const TradeBoardBuilder = () => {
         )}
       </button>
       <div className="p-3">
-        <p className="font-body text-sm text-foreground font-medium truncate">{item.product?.product_name}</p>
+        <button
+          type="button"
+          onClick={() => openProductSheet(item.product)}
+          className="font-body text-sm text-foreground font-medium truncate text-left w-full hover:underline focus:outline-none"
+        >
+          {item.product?.product_name}
+        </button>
         <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
         {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
         {isEditable && (
