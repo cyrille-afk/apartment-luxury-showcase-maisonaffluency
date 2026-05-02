@@ -737,6 +737,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mb-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Project</span>
                   <p className="font-display text-sm text-foreground uppercase tracking-wider">{projectName}</p>
+                  {projectId && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 print:hidden">
+                      <a
+                        href={`/trade/tearsheets?project=${projectId}`}
+                        className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        title="Open this project's tearsheets"
+                      >
+                        <Layers className="h-3 w-3" />
+                        Project tearsheets
+                      </a>
+                      <a
+                        href={`/trade/boards?project=${projectId}`}
+                        className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        title="Open this project's boards"
+                      >
+                        <FolderOpen className="h-3 w-3" />
+                        Project boards
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
               {isDraft ? (
