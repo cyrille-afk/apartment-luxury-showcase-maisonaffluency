@@ -261,6 +261,35 @@ const TradeBoardBuilder = () => {
     });
   };
 
+  // Stable id for an in-page section anchor (sub-folder or ungrouped).
+  const sectionId = (name: string | null) =>
+    name
+      ? `bb-sf-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "sf"}`
+      : "bb-top";
+
+  // Currently "focused" sub-folder for the breadcrumb leaf (set when the
+  // user picks one from the breadcrumb dropdown). null = top of board.
+  const [focusedSubfolder, setFocusedSubfolder] = useState<string | null>(null);
+
+  const jumpToSection = (name: string | null) => {
+    // Expand the target if collapsed, then scroll its anchor into view.
+    if (name) {
+      setCollapsedFolders(prev => {
+        if (!prev.has(name)) return prev;
+        const next = new Set(prev);
+        next.delete(name);
+        return next;
+      });
+    }
+    setFocusedSubfolder(name);
+    // Defer to next paint so newly-expanded content is laid out before scroll.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(sectionId(name));
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+
   const shareBoard = async () => {
     if (!board) return;
     const wasDraft = board.status === "draft";
@@ -392,7 +421,33 @@ const TradeBoardBuilder = () => {
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="max-w-5xl">
         {/* Header */}
-        <TradeBreadcrumb current="Board builder" />
+        <TradeBreadcrumb
+          current="Boards"
+          currentTo={`/trade/boards${board.project_id ? `?project=${board.project_id}` : ""}`}
+          extraSegments={[
+            {
+              kind: "current",
+              label: board.title || "Untitled board",
+            },
+            {
+              kind: "dropdown",
+              label: focusedSubfolder ?? "Top of board",
+              items: [
+                {
+                  label: "Top of board",
+                  active: focusedSubfolder === null,
+                  onSelect: () => jumpToSection(null),
+                },
+                ...subfolders.map((sf) => ({
+                  label: sf,
+                  active: focusedSubfolder === sf,
+                  onSelect: () => jumpToSection(sf),
+                })),
+              ],
+              emptyLabel: "No sub-folders yet",
+            },
+          ]}
+        />
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders
@@ -564,7 +619,7 @@ const TradeBoardBuilder = () => {
               const isRenaming = renameTarget === group.name;
 
               return (
-                <div key={group.name || "__ungrouped__"}>
+                <div key={group.name || "__ungrouped__"} id={sectionId(group.name)} className="scroll-mt-24">
                   {/* Sub-folder header */}
                   {group.name && (
                     <div className="flex items-center gap-2 mb-3 border-b border-border pb-2">
