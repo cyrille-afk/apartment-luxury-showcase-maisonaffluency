@@ -26,7 +26,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
