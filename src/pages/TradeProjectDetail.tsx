@@ -721,6 +721,7 @@ type GridItem = {
   meta: string;
   image: string | null;
   to: string;
+  from?: string;
 };
 
 function ItemGrid({ title, items }: { title: string; items: GridItem[] }) {
@@ -738,6 +739,7 @@ function ItemGrid({ title, items }: { title: string; items: GridItem[] }) {
           <Link
             key={it.id}
             to={it.to}
+            state={it.from ? { from: it.from } : undefined}
             className="group block rounded-md border border-border bg-background overflow-hidden hover:border-foreground/40 transition-colors"
           >
             <div className="aspect-square bg-muted/30 overflow-hidden">
