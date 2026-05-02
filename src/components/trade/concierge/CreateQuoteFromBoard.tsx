@@ -132,6 +132,11 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       toast.success("Quote created", {
         description: `Pre-filled with ${added} ${added === 1 ? "item" : "items"} from this tearsheet.`,
       });
+      window.dispatchEvent(new CustomEvent("concierge:stage", {
+        detail: {
+          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}). I can help you refine quantities, add notes, request finishes, or prepare it for the client. What would you like to do next?`,
+        },
+      }));
       navigate(`/trade/quotes?quote=${quote.id}`);
     } catch (err: any) {
       toast.error("Couldn't create quote", { description: err?.message });
@@ -155,6 +160,13 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
               : "All eligible items were already on the existing draft.",
         },
       );
+      window.dispatchEvent(new CustomEvent("concierge:stage", {
+        detail: {
+          message: added > 0
+            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added. Let me know if you'd like to adjust quantities, add notes, or prepare it for the client.`
+            : `We're now on the existing draft quote for this project — every eligible piece from "${board.title}" was already on it. Want me to help refine it before sending?`,
+        },
+      }));
       navigate(`/trade/quotes?quote=${existingQuote.id}`);
     } catch (err: any) {
       toast.error("Couldn't add to existing quote", { description: err?.message });
