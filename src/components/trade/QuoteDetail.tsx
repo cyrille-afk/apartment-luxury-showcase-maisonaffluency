@@ -201,75 +201,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         supabase.from("trade_quotes").select("currency, client_name, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
-      let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
+      const loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
 
-      // Fallback price lookup with fuzzy matching (same logic as Showroom)
-      const needsPrice = loadedItems.filter(
-        (i) => i.trade_products && !i.trade_products.trade_price_cents
-      );
-      if (needsPrice.length > 0) {
-        const { data: priced } = await supabase
-          .from("trade_products")
-          .select("product_name, trade_price_cents, currency")
-          .not("trade_price_cents", "is", null);
-
-        if (priced && priced.length > 0) {
-          const normalize = (s: string) =>
-            s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-          const tokenize = (s: string) =>
-            normalize(s).split(" ").filter((t) => t.length > 2);
-
-          const exactLookup = new Map<string, { cents: number; currency: string }>();
-          const entries: { name: string; cents: number; currency: string }[] = [];
-          for (const p of priced) {
-            const entry = { name: p.product_name, cents: p.trade_price_cents!, currency: p.currency };
-            entries.push(entry);
-            exactLookup.set(p.product_name.trim().toLowerCase(), entry);
-            const norm = normalize(p.product_name);
-            if (norm) exactLookup.set(norm, entry);
-          }
-
-          const findMatch = (name: string) => {
-            const key = name.trim().toLowerCase();
-            if (exactLookup.has(key)) return exactLookup.get(key)!;
-            const norm = normalize(name);
-            if (exactLookup.has(norm)) return exactLookup.get(norm)!;
-            for (const e of entries) {
-              const cn = normalize(e.name);
-              if (cn.includes(norm) || norm.includes(cn)) return e;
-            }
-            const targetTokens = new Set(tokenize(name));
-            if (targetTokens.size === 0) return undefined;
-            let best: typeof entries[0] | undefined;
-            let bestScore = 0;
-            for (const e of entries) {
-              const ct = tokenize(e.name);
-              let overlap = 0;
-              for (const t of ct) { if (targetTokens.has(t)) overlap++; }
-              const score = overlap / Math.max(targetTokens.size, ct.length);
-              if (score > 0.5 && score > bestScore) { bestScore = score; best = e; }
-            }
-            return best;
-          };
-
-          loadedItems = loadedItems.map((item) => {
-            if (item.trade_products && !item.trade_products.trade_price_cents) {
-              const match = findMatch(item.trade_products.product_name);
-              if (match) {
-                return {
-                  ...item,
-                  trade_products: {
-                    ...item.trade_products,
-                    trade_price_cents: match.cents,
-                    currency: match.currency,
-                  },
-                };
-              }
-            }
-            return item;
-          });
-        }
-      }
+      // NOTE: We intentionally do NOT fuzzy-match prices from other catalog rows.
+      // Per project rule, products with NULL trade_price_cents must show
+      // "Price on Request" / TBD — fuzzy fallback caused wildly incorrect
+      // prices (e.g. every "...Chandelier" inheriting an unrelated €47k price).
 
       // Enrich items with `edition` from designer_curator_picks (matched by title, normalized).
       try {
