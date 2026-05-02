@@ -233,6 +233,20 @@ export default function TradeProjectDetail() {
 
   return (
     <div className="max-w-6xl mx-auto">
+      <TradeBreadcrumb
+        includeProjectsRoot
+        project={{ id: project.id, name: project.name }}
+        current={
+          activeTab === "overview"
+            ? undefined
+            : activeTab === "quotes" ? "Quotes"
+            : activeTab === "boards" ? "Boards"
+            : activeTab === "tearsheets" ? "Tearsheets"
+            : activeTab === "shipping" ? "Shipping"
+            : activeTab === "ffe" ? "FF&E"
+            : undefined
+        }
+      />
       <ActiveFilterChips className="mb-4" confirmClearAll />
       {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
