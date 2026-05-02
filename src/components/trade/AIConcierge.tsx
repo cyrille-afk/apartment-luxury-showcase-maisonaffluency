@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Sparkles } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
@@ -29,6 +29,7 @@ export function AIConcierge() {
   const navigate = useNavigate();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>([
     { kind: "msg", role: "assistant", content: GREETING },
   ]);
@@ -39,6 +40,57 @@ export function AIConcierge() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Draggable position — persisted in localStorage. `null` = use default
+  // bottom-right anchor; once user drags, we switch to absolute top/left.
+  const PANEL_W = 380;
+  const PANEL_H_OPEN = 560;
+  const PANEL_H_MIN = 52;
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
+    try {
+      const raw = localStorage.getItem("concierge:pos");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const dragRef = useRef<{ dx: number; dy: number } | null>(null);
+
+  const clampPos = useCallback((x: number, y: number) => {
+    const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
+    const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
+    const maxY = Math.max(8, window.innerHeight - h - 8);
+    return { x: Math.min(Math.max(8, x), maxX), y: Math.min(Math.max(8, y), maxY) };
+  }, [minimized]);
+
+  const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Only react to primary button / touch
+    if (e.button !== undefined && e.button !== 0) return;
+    const panel = (e.currentTarget.closest("[data-concierge-panel]") as HTMLElement) || null;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    dragRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    const next = clampPos(e.clientX - dragRef.current.dx, e.clientY - dragRef.current.dy);
+    setPos(next);
+  };
+  const onDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    if (pos) {
+      try { localStorage.setItem("concierge:pos", JSON.stringify(pos)); } catch {}
+    }
+  };
+
+  // Keep panel inside viewport on resize
+  useEffect(() => {
+    if (!pos) return;
+    const onResize = () => setPos((p) => (p ? clampPos(p.x, p.y) : p));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [pos, clampPos]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
@@ -224,23 +276,60 @@ export function AIConcierge() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div
+          data-concierge-panel
+          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto" } : undefined}
+          className={cn(
+            "fixed z-[100] w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
+            !pos && "bottom-20 md:bottom-6 right-4",
+            minimized ? "h-auto" : "h-[560px] max-h-[calc(100vh-6rem)]"
+          )}
+        >
+          <div
+            onPointerDown={onDragStart}
+            onPointerMove={onDragMove}
+            onPointerUp={onDragEnd}
+            onPointerCancel={onDragEnd}
+            onDoubleClick={() => setMinimized((m) => !m)}
+            className="flex items-center justify-between px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none touch-none"
+            title="Drag to move · double-click to collapse"
+          >
             <div className="flex items-center gap-2 min-w-0">
+              <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
               <Sparkles className="h-4 w-4 text-accent shrink-0" />
               <span className="font-display text-sm uppercase tracking-widest">Concierge</span>
-              <span
-                className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
-                title={`Current workflow stage: ${stage}`}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                Stage: {stage}
-              </span>
+              {!minimized && (
+                <span
+                  className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
+                  title={`Current workflow stage: ${stage}`}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                  Stage: {stage}
+                </span>
+              )}
             </div>
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Close">
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setMinimized((m) => !m)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label={minimized ? "Expand" : "Collapse"}
+                title={minimized ? "Expand" : "Collapse"}
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setOpen(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+
+          {!minimized && (<>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {timeline.map((item, i) => {
@@ -316,6 +405,7 @@ export function AIConcierge() {
               AI-powered · Tearsheet drafts require your approval
             </p>
           </div>
+          </>)}
         </div>
       )}
     </>
