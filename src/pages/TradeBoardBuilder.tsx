@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-
-const slugifyForUrl = (s: string) =>
-  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette } from "lucide-react";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Switch } from "@/components/ui/switch";
@@ -82,38 +79,13 @@ const TradeBoardBuilder = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("designers")
-        .select("name, display_name, slug")
-        .eq("is_published", true);
-      if (!data) return;
-      const map = new Map<string, string>();
-      for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
-        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
-        if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
-      }
-      setDesignerSlugMap(map);
-    })();
-  }, []);
-
-  const openProductSheet = useCallback((product?: { product_name: string; brand_name: string }) => {
-    if (!product) return;
-    const brand = product.brand_name.includes(" - ")
-      ? product.brand_name.split(" - ")[0].trim()
-      : product.brand_name;
-    const designerSlug =
-      designerSlugMap.get(brand.toLowerCase()) ||
-      designerSlugMap.get(product.brand_name.toLowerCase()) ||
-      slugifyForUrl(brand);
-    const productSlug = slugifyForUrl(product.product_name);
-    navigate(`/trade/products/${designerSlug}/${productSlug}`, {
+  const openProductSheet = useCallback((item?: BoardItem) => {
+    if (!item?.product_id) return;
+    navigate(`/trade/products/${item.product_id}`, {
       state: { from: location.pathname + location.search },
     });
-  }, [designerSlugMap, navigate, location.pathname, location.search]);
+  }, [navigate, location.pathname, location.search]);
 
   const [board, setBoard] = useState<Board | null>(null);
   const [items, setItems] = useState<BoardItem[]>([]);
@@ -406,7 +378,7 @@ const TradeBoardBuilder = () => {
     <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
       <button
         type="button"
-        onClick={() => openProductSheet(item.product)}
+        onClick={() => openProductSheet(item)}
         className="aspect-square bg-muted relative w-full block cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
         aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
       >
@@ -429,7 +401,7 @@ const TradeBoardBuilder = () => {
       <div className="p-3">
         <button
           type="button"
-          onClick={() => openProductSheet(item.product)}
+          onClick={() => openProductSheet(item)}
           className="font-body text-sm text-foreground font-medium truncate text-left w-full hover:underline focus:outline-none"
         >
           {item.product?.product_name}

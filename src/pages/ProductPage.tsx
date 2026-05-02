@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,8 @@ const SITE_URL = "https://maisonaffluency.com";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -126,6 +128,7 @@ const ProductPage = () => {
   };
 
   const enquiryMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Enquiry: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in the ${product.product_name} by ${product.brand_name}.\n\nCould you please provide more information?\n\nThank you.`)}`;
+  const fromPath = (location.state as { from?: string } | null)?.from;
 
   return (
     <>
@@ -157,6 +160,16 @@ const ProductPage = () => {
         </header>
 
         <main className="max-w-6xl mx-auto px-4 py-6 md:py-10">
+          {fromPath && (
+            <button
+              type="button"
+              onClick={() => navigate(fromPath)}
+              className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Back
+            </button>
+          )}
+
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 mb-6 font-body text-xs text-muted-foreground">
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>

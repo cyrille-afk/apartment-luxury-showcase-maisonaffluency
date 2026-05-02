@@ -248,6 +248,7 @@ const App = () => {
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
+                    <Route path="products/:id" element={<TradeProductPage />} />
                     <Route path="products/:slug/:productSlug" element={<TradeProductPage />} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />

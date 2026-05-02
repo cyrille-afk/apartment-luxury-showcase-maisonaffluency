@@ -4,7 +4,7 @@
  * and an inline "Need a sample? Request via Procurement →" link (no big CTA,
  * since Sample Requests live in Procurement).
  *
- * Route: /trade/products/:slug/:productSlug
+ * Routes: /trade/products/:id and /trade/products/:slug/:productSlug
  *
  * Back navigation:
  *   1. location.state.from (preferred — set when navigating from grid/gallery)
@@ -87,10 +87,120 @@ interface TradePricing {
   size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
 }
 
-function useTradeProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
+type TradeProductResult = {
+  product: ProductRow;
+  designer: {
+    id: string;
+    name: string;
+    slug: string | null;
+    biography: string;
+  };
+  pricing: TradePricing | null;
+  relatedPicks: ProductRow[];
+  tradeProductId: string | null;
+};
+
+function useTradeProductBySlug(
+  tradeProductIdParam: string | undefined,
+  designerSlug: string | undefined,
+  productSlug: string | undefined,
+) {
   return useQuery({
-    queryKey: ["trade-product-page", designerSlug, productSlug],
+    queryKey: ["trade-product-page", tradeProductIdParam, designerSlug, productSlug],
     queryFn: async () => {
+      if (tradeProductIdParam) {
+        const { data: tradeProduct } = await supabase
+          .from("trade_products")
+          .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url")
+          .eq("id", tradeProductIdParam)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (!tradeProduct) return null;
+
+        const brand = (tradeProduct as any).brand_name as string;
+        const brandBase = brand.includes(" - ") ? brand.split(" - ")[0].trim() : brand;
+        const { data: designers } = await supabase
+          .from("designers")
+          .select("id, name, slug, display_name, biography")
+          .eq("is_published", true)
+        const designer = (designers || []).find((d: any) =>
+          [d.name, d.display_name].some((name) => {
+            if (!name) return false;
+            const normalized = name.trim().toLowerCase();
+            return normalized === brand.trim().toLowerCase() || normalized === brandBase.trim().toLowerCase();
+          })
+        ) || null;
+
+        let relatedPicks: ProductRow[] = [];
+        let curatorPick: any = null;
+        if (designer) {
+          const { data: picks } = await supabase
+            .from("designer_curator_picks")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition")
+            .eq("designer_id", (designer as any).id)
+            .order("sort_order", { ascending: true });
+          curatorPick = (picks || []).find((p: any) => p.title === (tradeProduct as any).product_name) || null;
+          relatedPicks = ((picks || []) as unknown as ProductRow[]).filter((p) => p.id !== curatorPick?.id);
+        }
+
+        const product: ProductRow = {
+          id: curatorPick?.id || (tradeProduct as any).id,
+          title: curatorPick?.title || (tradeProduct as any).product_name,
+          subtitle: curatorPick?.subtitle || null,
+          image_url: curatorPick?.image_url || (tradeProduct as any).image_url || null,
+          hover_image_url: curatorPick?.hover_image_url || null,
+          gallery_images: curatorPick?.gallery_images?.length ? curatorPick.gallery_images : (tradeProduct as any).gallery_images || null,
+          materials: curatorPick?.materials || (tradeProduct as any).materials || null,
+          dimensions: curatorPick?.dimensions || (tradeProduct as any).dimensions || null,
+          description: curatorPick?.description || (tradeProduct as any).description || null,
+          category: curatorPick?.category || (tradeProduct as any).category || null,
+          subcategory: curatorPick?.subcategory || (tradeProduct as any).subcategory || null,
+          pdf_url: curatorPick?.pdf_url || null,
+          pdf_urls: curatorPick?.pdf_urls || null,
+          lead_time: curatorPick?.lead_time || (tradeProduct as any).lead_time || null,
+          origin: curatorPick?.origin || (tradeProduct as any).origin || null,
+          designer_id: (designer as any)?.id || (tradeProduct as any).id,
+          variant_placeholder: curatorPick?.variant_placeholder || null,
+          base_axis_label: curatorPick?.base_axis_label || null,
+          top_axis_label: curatorPick?.top_axis_label || null,
+          variant_image_map: curatorPick?.variant_image_map || null,
+          edition: curatorPick?.edition || null,
+        };
+
+        const rawSizeVariants = Array.isArray(curatorPick?.size_variants)
+          ? (curatorPick.size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
+              .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
+                (typeof v.label === "string" && v.label.trim()) ||
+                (typeof v.base === "string" && v.base.trim()) ||
+                (typeof v.top === "string" && v.top.trim())
+              ))
+          : [];
+
+        const pricing: TradePricing | null = {
+          trade_price_cents: (tradeProduct as any).trade_price_cents ?? null,
+          rrp_price_cents: (tradeProduct as any).rrp_price_cents ?? (curatorPick as any)?.trade_price_cents ?? null,
+          currency: (tradeProduct as any).currency || (curatorPick as any)?.currency || "EUR",
+          price_unit: (tradeProduct as any).price_unit ?? null,
+          price_prefix: (tradeProduct as any).price_prefix ?? (curatorPick as any)?.price_prefix ?? null,
+          spec_sheet_url: (tradeProduct as any).spec_sheet_url ?? null,
+          size_variants: rawSizeVariants.length ? rawSizeVariants : null,
+        };
+
+        return {
+          product,
+          designer: {
+            id: (designer as any)?.id || (tradeProduct as any).id,
+            name: (designer as any)?.name || brand,
+            slug: (designer as any)?.slug || null,
+            biography: (designer as any)?.biography || "",
+          },
+          pricing: pricing.rrp_price_cents || pricing.trade_price_cents || pricing.size_variants ? pricing : null,
+          relatedPicks,
+          tradeProductId: (tradeProduct as any).id,
+        } satisfies TradeProductResult;
+      }
+
       if (!designerSlug || !productSlug) return null;
 
       const { data: designer } = await supabase
@@ -215,7 +325,7 @@ function useTradeProductBySlug(designerSlug: string | undefined, productSlug: st
 }
 
 const TradeProductPage: React.FC = () => {
-  const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
+  const { id: tradeProductIdParam, slug: designerSlug, productSlug } = useParams<{ id: string; slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -242,7 +352,7 @@ const TradeProductPage: React.FC = () => {
     }
   }, [stateFrom]);
 
-  const { data, isLoading } = useTradeProductBySlug(designerSlug, productSlug);
+  const { data, isLoading } = useTradeProductBySlug(tradeProductIdParam, designerSlug, productSlug);
 
   // ── Pricing display state ──
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
@@ -677,6 +787,14 @@ const TradeProductPage: React.FC = () => {
       </Helmet>
 
       <div className="max-w-7xl pb-12">
+        <button
+          type="button"
+          onClick={() => navigate(fromPath || fallbackPath)}
+          className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back
+        </button>
+
         {/* Breadcrumbs route back to the Trade Gallery grid pre-filtered
             to the same category/subcategory, so users stay inside the
             trade portal instead of being sent to the public catalogue. */}
@@ -726,8 +844,10 @@ const TradeProductPage: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Link
-                  to={`/trade/designers/${designer.slug}`}
-                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                  to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                  onClick={() => {
+                    if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
+                  }}
                   className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
@@ -1128,8 +1248,10 @@ const TradeProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
-                      to={`/trade/designers/${designer.slug}`}
-                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                      to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                      onClick={() => {
+                        if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
+                      }}
                       className="hover:text-primary transition-colors"
                     >
                       {designerDisplay}
@@ -1143,7 +1265,7 @@ const TradeProductPage: React.FC = () => {
                     {relatedPicks.slice(0, 6).map((rp) => (
                       <Link
                         key={rp.id}
-                        to={`/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        to={designer.slug ? `/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}` : fallbackPath}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                       >
@@ -1188,8 +1310,10 @@ const TradeProductPage: React.FC = () => {
                     </p>
                     <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                       <Link
-                        to={`/trade/designers/${designer.slug}`}
-                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                        to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                        onClick={() => {
+                          if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
+                        }}
                         className="hover:text-primary transition-colors"
                       >
                         {designerDisplay}

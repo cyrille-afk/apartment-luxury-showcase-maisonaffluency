@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { Check, X, MessageSquare, Send, Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ interface Comment {
 
 const ClientBoardViewer = () => {
   const { token } = useParams<{ token: string }>();
+  const location = useLocation();
   const { toast } = useToast();
   const [board, setBoard] = useState<Board | null>(null);
   const [items, setItems] = useState<BoardItem[]>([]);
@@ -261,10 +262,15 @@ const ClientBoardViewer = () => {
                   {group.items.map(item => {
                     const itemComments = comments.filter(c => c.item_id === item.id);
                     return (
-                      <div key={item.id} className="border border-border rounded-lg overflow-hidden">
-                        <div className="aspect-square bg-muted relative">
+                        <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
+                          <Link
+                            to={`/product/${item.product_id}`}
+                            state={{ from: location.pathname + location.search }}
+                            className="aspect-square bg-muted relative block focus:outline-none focus:ring-2 focus:ring-ring"
+                            aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
+                          >
                           {item.product?.image_url ? (
-                            <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover" />
+                              <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
                           )}
@@ -278,9 +284,17 @@ const ClientBoardViewer = () => {
                               <X className="h-3 w-3" /> Declined
                             </div>
                           )}
-                        </div>
+                          </Link>
                         <div className="p-4">
-                          <h3 className="font-display text-sm text-foreground">{item.product?.product_name}</h3>
+                          <h3 className="font-display text-sm text-foreground">
+                            <Link
+                              to={`/product/${item.product_id}`}
+                              state={{ from: location.pathname + location.search }}
+                              className="hover:underline underline-offset-4"
+                            >
+                              {item.product?.product_name}
+                            </Link>
+                          </h3>
                           <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
                           {item.product?.materials && (
                             <p className="font-body text-[11px] text-muted-foreground mt-1">{item.product.materials}</p>
