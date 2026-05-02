@@ -75,9 +75,19 @@ export default function VariantPreviewPanel({
           (!effectiveTop || (v.top || "").trim() === effectiveTop)
       );
     }
+    if (isBaseOnly) {
+      if (baseNeedsSelection && !selectedBase) return undefined;
+      const effBase = baseNeedsSelection ? selectedBase : baseOptions[0] || "";
+      if (!effBase) return undefined;
+      return sv.find(
+        (v) =>
+          (v.base || "").trim() === effBase &&
+          (!sizeNeedsSelection || !selectedSize || (v.label || "").trim() === selectedSize)
+      );
+    }
     if (sizeNeedsSelection && !selectedSize) return undefined;
     return sv.find((v) => (v.label || "").trim() === effectiveSize);
-  }, [sv, isDualAxis, sizeNeedsSelection, selectedSize, effectiveSize, effectiveBase, effectiveTop, baseOptions.length, topOptions.length]);
+  }, [sv, isDualAxis, isBaseOnly, baseNeedsSelection, sizeNeedsSelection, selectedSize, selectedBase, effectiveSize, effectiveBase, effectiveTop, baseOptions, topOptions.length]);
 
   const sizePlaceholder = "Select your size";
   const materialPlaceholder = variantPlaceholder || "Select your material choice";
