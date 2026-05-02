@@ -530,7 +530,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     </p>
                   )}
                   {(pick.size_variants || []).length > 0 && (
-                    <div className="grid grid-cols-[1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                      <span className="text-center">Order</span>
                       <span>Label / Size</span>
                       <span>{pick.base_axis_label || "Base"}</span>
                       <span>{pick.top_axis_label || "Top"}</span>
