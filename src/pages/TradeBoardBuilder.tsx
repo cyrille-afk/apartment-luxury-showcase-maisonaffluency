@@ -426,15 +426,9 @@ const TradeBoardBuilder = () => {
           currentTo={`/trade/boards${board.project_id ? `?project=${board.project_id}` : ""}`}
           extraSegments={[
             {
-              kind: focusedSubfolder ? "link" : "current",
+              kind: "current",
               label: board.title || "Untitled board",
-              ...(focusedSubfolder
-                ? {
-                    to: `#${sectionId(null)}`,
-                    // Override link click to scroll instead of routing.
-                  }
-                : {}),
-            } as any,
+            },
             {
               kind: "dropdown",
               label: focusedSubfolder ?? "Top of board",
