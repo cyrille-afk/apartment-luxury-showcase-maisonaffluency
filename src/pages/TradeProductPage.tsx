@@ -668,6 +668,7 @@ const TradeProductPage: React.FC = () => {
   const {
     hasVariants,
     isDualAxis,
+    isBaseOnly,
     baseOptions,
     topOptions,
     dualSizeOptions,
@@ -732,6 +733,10 @@ const TradeProductPage: React.FC = () => {
 
   const activeVariant = isDualAxis
     ? dualVariant
+    : isBaseOnly
+      ? (hasVariants && selectedBase
+        ? sizeVariants!.find((v) => (v.base || "").trim() === selectedBase) ?? null
+        : null)
     : hasSingleAxisSplit
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
