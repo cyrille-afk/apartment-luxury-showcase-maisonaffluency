@@ -167,6 +167,51 @@ const TradeDocumentsAdmin = () => {
     fetchDocs();
   };
 
+  /**
+   * Toggle the public Featured Read flag. The DB has a partial unique index
+   * enforcing a single active featured row, so we explicitly clear any
+   * existing featured doc first when promoting a new one.
+   */
+  const handleToggleFeatured = useCallback(async (doc: TradeDocument) => {
+    if (doc.is_featured_public) {
+      // Un-feature
+      setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, is_featured_public: false } : d));
+      const { error } = await supabase
+        .from("trade_documents")
+        .update({ is_featured_public: false })
+        .eq("id", doc.id);
+      if (error) {
+        toast({ title: "Could not un-feature", description: error.message, variant: "destructive" });
+        fetchDocs();
+        return;
+      }
+      toast({ title: "Featured Read cleared", description: `"${doc.title}" is no longer the public featured catalogue.` });
+      return;
+    }
+
+    // Feature this one — clear any other featured first to honor the unique index
+    setDocuments(prev => prev.map(d => ({ ...d, is_featured_public: d.id === doc.id })));
+    const { error: clearErr } = await supabase
+      .from("trade_documents")
+      .update({ is_featured_public: false })
+      .eq("is_featured_public", true);
+    if (clearErr) {
+      toast({ title: "Could not update Featured Read", description: clearErr.message, variant: "destructive" });
+      fetchDocs();
+      return;
+    }
+    const { error: setErr } = await supabase
+      .from("trade_documents")
+      .update({ is_featured_public: true })
+      .eq("id", doc.id);
+    if (setErr) {
+      toast({ title: "Could not set Featured Read", description: setErr.message, variant: "destructive" });
+      fetchDocs();
+      return;
+    }
+    toast({ title: "Featured Read updated", description: `"${doc.title}" is now the public featured catalogue.` });
+  }, [toast]);
+
   const handleSetAsBrandThumbnail = useCallback(async (doc: TradeDocument) => {
     const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
