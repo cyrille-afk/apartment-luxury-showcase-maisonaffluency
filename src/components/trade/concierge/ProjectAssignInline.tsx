@@ -72,11 +72,48 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
       toast.error(`Could not assign project: ${error.message}`);
       return;
     }
+
+    // Audit trail: log the project assignment so it's traceable later.
+    const { data: sess } = await supabase.auth.getSession();
+    const userId = sess.session?.user?.id;
+    if (userId) {
+      await supabase.from("trade_concierge_actions").insert([{
+        user_id: userId,
+        tool: "assign_tearsheet_project",
+        args: {
+          board_id: boardId,
+          project_id: projectId,
+          project_name: projectFullName || projectName,
+          autofilled: {
+            client_name: (updates.client_name as string | undefined) ?? null,
+            studio_id: (updates.studio_id as string | undefined) ?? null,
+            title: (updates.title as string | undefined) ?? null,
+          },
+        },
+        status: "approved",
+        resulting_resource_id: boardId,
+        resulting_resource_type: "client_board",
+      }]);
+    }
+
     setDone({ projectName });
     onResolved(projectId);
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    // Audit trail: log the explicit skip so we know it wasn't just abandoned.
+    const { data: sess } = await supabase.auth.getSession();
+    const userId = sess.session?.user?.id;
+    if (userId) {
+      await supabase.from("trade_concierge_actions").insert([{
+        user_id: userId,
+        tool: "assign_tearsheet_project",
+        args: { board_id: boardId, project_id: null, skipped: true },
+        status: "discarded",
+        resulting_resource_id: boardId,
+        resulting_resource_type: "client_board",
+      }]);
+    }
     setDone({ projectName: "" });
     onResolved(null);
   };
