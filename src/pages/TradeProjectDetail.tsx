@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import {
   ArrowLeft, Pencil, Save, Trash2, Loader2, FileText, FolderArchive,
   ListChecks, CalendarClock, Image as ImageIcon, ExternalLink, Archive, CheckCircle2,
