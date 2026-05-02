@@ -405,6 +405,7 @@ export function AIConcierge() {
               AI-powered · Tearsheet drafts require your approval
             </p>
           </div>
+          </>)}
         </div>
       )}
     </>
