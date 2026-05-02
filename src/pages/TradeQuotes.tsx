@@ -153,6 +153,12 @@ const TradeQuotes = () => {
     })();
   }, [designerFilter]);
 
+  // Deep-link: open a specific quote when ?quote=<id> is in the URL
+  useEffect(() => {
+    const q = searchParams.get("quote");
+    if (q && q !== selectedQuoteId) setSelectedQuoteId(q);
+  }, [searchParams]);
+
   const handleCreateQuote = async () => {
     if (!user) return;
     if (currentStudio && !canEdit) {
@@ -185,10 +191,18 @@ const TradeQuotes = () => {
         quoteNotes={quote?.notes || null}
         onBack={() => {
           setSelectedQuoteId(null);
+          if (searchParams.get("quote")) {
+            searchParams.delete("quote");
+            setSearchParams(searchParams, { replace: true });
+          }
           fetchQuotes();
         }}
         onStatusChange={() => {
           setSelectedQuoteId(null);
+          if (searchParams.get("quote")) {
+            searchParams.delete("quote");
+            setSearchParams(searchParams, { replace: true });
+          }
           fetchQuotes();
         }}
       />
