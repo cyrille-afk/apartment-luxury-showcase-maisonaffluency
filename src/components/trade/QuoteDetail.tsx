@@ -201,7 +201,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         supabase.from("trade_quotes").select("currency, client_name, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
-      const loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
+      let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
 
       // NOTE: We intentionally do NOT fuzzy-match prices from other catalog rows.
       // Per project rule, products with NULL trade_price_cents must show
