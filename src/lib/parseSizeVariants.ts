@@ -27,6 +27,8 @@ export interface ParsedSingleAxis {
 export interface VariantAxes {
   hasVariants: boolean;
   isDualAxis: boolean;
+  /** True when variants populate Base/Finish but no Top axis. */
+  isBaseOnly: boolean;
   /** Dual-axis: deduped base material options */
   baseOptions: string[];
   /** Dual-axis: deduped top material options */
@@ -172,8 +174,9 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
   const hasAnyBase = hasVariants && variants.some((v) => (v.base && v.base.trim()));
   const hasAnyTop = hasVariants && variants.some((v) => (v.top && v.top.trim()));
   const isDualAxis = hasAnyBase && hasAnyTop;
+  const isBaseOnly = hasAnyBase && !hasAnyTop;
 
-  const baseOptions = isDualAxis
+  const baseOptions = isDualAxis || isBaseOnly
     ? Array.from(new Set(variants.map((v) => (v.base || "").trim()).filter(Boolean)))
     : [];
   const topOptions = isDualAxis
@@ -203,6 +206,7 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
   return {
     hasVariants,
     isDualAxis,
+    isBaseOnly,
     baseOptions,
     topOptions,
     dualSizeOptions,
