@@ -104,6 +104,22 @@ describe("computeVariantAxes — single-axis dedup", () => {
     expect(axes.isDualAxis).toBe(false);
   });
 
+  it("treats base-only products as finish options, not hidden single-axis sizes", () => {
+    const variants: SizeVariant[] = [
+      { label: "L190 × W180 × H35 cm", base: "Top & Base in Onyx Honey", top: "" },
+      { label: "L190 × W180 × H35 cm", base: "Top & Base in Red Onyx", top: "" },
+      { label: "L190 × W180 × H35 cm", base: "Top in Lava Stone Creme Brulée & Base in Black Teak", top: "" },
+    ];
+    const axes = computeVariantAxes(variants);
+    expect(axes.isDualAxis).toBe(false);
+    expect(axes.isBaseOnly).toBe(true);
+    expect(axes.baseOptions).toEqual([
+      "Top & Base in Onyx Honey",
+      "Top & Base in Red Onyx",
+      "Top in Lava Stone Creme Brulée & Base in Black Teak",
+    ]);
+  });
+
   it("handles mixed/non-standard labels without dropping options", () => {
     const variants: SizeVariant[] = [
       { label: "Standard" },

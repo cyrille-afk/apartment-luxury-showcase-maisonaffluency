@@ -74,6 +74,7 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   edition: string | null;
 }
@@ -165,6 +166,7 @@ function useTradeProductBySlug(
           variant_placeholder: curatorPick?.variant_placeholder || null,
           base_axis_label: curatorPick?.base_axis_label || null,
           top_axis_label: curatorPick?.top_axis_label || null,
+          size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
         };
@@ -303,6 +305,7 @@ function useTradeProductBySlug(
           gallery_images: (product as any).gallery_images?.length
             ? (product as any).gallery_images
             : tradeProduct?.gallery_images || null,
+          size_variants: (product as any).size_variants || null,
         },
         designer: {
           id: designer.id,
@@ -663,11 +666,20 @@ const TradeProductPage: React.FC = () => {
 
   // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top).
   // Parsing/deduping logic is shared with PublicProductPage via computeVariantAxes.
-  const sizeVariants = pricing?.size_variants || null;
+  const productSizeVariants = Array.isArray((product as any).size_variants)
+    ? ((product as any).size_variants as { label?: string; base?: string; top?: string; price_cents?: number }[])
+        .filter((v) => v && (
+          (typeof v.label === "string" && v.label.trim()) ||
+          (typeof v.base === "string" && v.base.trim()) ||
+          (typeof v.top === "string" && v.top.trim())
+        ))
+    : [];
+  const sizeVariants = pricing?.size_variants || (productSizeVariants.length ? productSizeVariants : null);
   const axes = computeVariantAxes(sizeVariants);
   const {
     hasVariants,
     isDualAxis,
+    isBaseOnly,
     baseOptions,
     topOptions,
     dualSizeOptions,
@@ -732,6 +744,10 @@ const TradeProductPage: React.FC = () => {
 
   const activeVariant = isDualAxis
     ? dualVariant
+    : isBaseOnly
+      ? (hasVariants && selectedBase
+        ? sizeVariants!.find((v) => (v.base || "").trim() === selectedBase) ?? null
+        : null)
     : hasSingleAxisSplit
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
@@ -893,7 +909,26 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isDualAxis && !hasSingleAxisSplit && product.materials && (() => {
+              {isBaseOnly && (
+                <ExpandableSpec
+                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  text={baseOptions.join("\n")}
+                  placeholder={getBasePlaceholder(product)}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+              {!isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
@@ -1008,7 +1043,7 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
-              {product.dimensions && !isDualAxis && !hasSingleAxisSplit && (
+              {product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
