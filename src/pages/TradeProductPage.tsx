@@ -305,6 +305,7 @@ function useTradeProductBySlug(
           gallery_images: (product as any).gallery_images?.length
             ? (product as any).gallery_images
             : tradeProduct?.gallery_images || null,
+          size_variants: (product as any).size_variants || null,
         },
         designer: {
           id: designer.id,
@@ -665,7 +666,15 @@ const TradeProductPage: React.FC = () => {
 
   // Trade pricing rendering — supports single-axis (label) and dual-axis (base × top).
   // Parsing/deduping logic is shared with PublicProductPage via computeVariantAxes.
-  const sizeVariants = pricing?.size_variants || null;
+  const productSizeVariants = Array.isArray((product as any).size_variants)
+    ? ((product as any).size_variants as { label?: string; base?: string; top?: string; price_cents?: number }[])
+        .filter((v) => v && (
+          (typeof v.label === "string" && v.label.trim()) ||
+          (typeof v.base === "string" && v.base.trim()) ||
+          (typeof v.top === "string" && v.top.trim())
+        ))
+    : [];
+  const sizeVariants = pricing?.size_variants || (productSizeVariants.length ? productSizeVariants : null);
   const axes = computeVariantAxes(sizeVariants);
   const {
     hasVariants,
