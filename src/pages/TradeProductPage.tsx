@@ -74,6 +74,7 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   edition: string | null;
 }
@@ -165,6 +166,7 @@ function useTradeProductBySlug(
           variant_placeholder: curatorPick?.variant_placeholder || null,
           base_axis_label: curatorPick?.base_axis_label || null,
           top_axis_label: curatorPick?.top_axis_label || null,
+          size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
         };
