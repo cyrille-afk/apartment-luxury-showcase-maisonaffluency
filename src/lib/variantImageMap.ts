@@ -129,7 +129,13 @@ export function resolveVariantImageIndex(
   }
   // Partial dual-axis selection: refuse single-axis fallbacks so the caller
   // can snap the gallery back to the primary image instead of a stray finish.
-  if (isDualAxisMap && (base || top) && !(base && top)) {
+  // We only enforce this when the *caller* is actually dealing with a dual-
+  // axis product — i.e. it passed both base AND top labels somewhere. If the
+  // product is base-only (top is always null) we still want single-axis
+  // fallback to work even if the stored map happens to contain legacy `|`
+  // composite keys.
+  const callerIsDualAxis = base != null && top != null;
+  if (isDualAxisMap && callerIsDualAxis && (base || top) && !(base && top)) {
     return undefined;
   }
   // 3) Single-axis fallbacks, in priority order
