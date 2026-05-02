@@ -150,38 +150,99 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   (designers || []).forEach((d: any) => {
     designerMap.set(d.id, d.display_name || d.name);
   });
+  // Brand-name → designer display map for matching trade_products rows that
+  // are not linked by designer_id but only carry a brand_name string.
+  const brandToDesigner = new Map<string, string>();
+  (designers || []).forEach((d: any) => {
+    const display = d.display_name || d.name;
+    if (d.name) brandToDesigner.set(String(d.name).trim().toLowerCase(), display);
+    if (d.display_name) brandToDesigner.set(String(d.display_name).trim().toLowerCase(), display);
+  });
 
-  // Fetch ALL curator picks WITH IDs (the model needs them for tool calling).
-  // Order deterministically so the catalog is stable across requests.
+  // Fetch ALL curator picks (these own the canonical pick_ids used by the
+  // tearsheet tools).
   const { data: picks } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, designer_id")
+    .select("id, title, materials, category, subcategory, designer_id")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
+    .limit(2000);
+
+  // Fetch the trade_products catalog so the assistant can SEE every active
+  // piece (not just the curator subset). Merged below by (brand,title) so
+  // we never list the same item twice.
+  const { data: tradeAll } = await supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, materials, category, subcategory")
+    .eq("is_active", true)
+    .order("brand_name", { ascending: true })
+    .order("product_name", { ascending: true })
     .limit(2000);
 
   const { data: hotspotBrands } = await supabase
     .from("gallery_hotspots")
     .select("designer_name");
 
-  const { data: tradeProducts } = await supabase
-    .from("trade_products")
-    .select("brand_name")
-    .eq("is_active", true);
-
   const designerLines = (designers || []).map(
     (d: any) => `- ${d.display_name || d.name} — ${d.specialty || "collectible design"}`
   );
 
-  const pieceLines = (picks || []).map((p: any) => {
+  // Merge: start with curator picks (canonical IDs), then layer in
+  // trade_products entries that have no curator twin. Dedup key is the
+  // case-insensitive (designer, title) pair.
+  type Line = {
+    id: string;
+    title: string;
+    designer: string;
+    materials: string | null;
+    category: string | null;
+    subcategory: string | null;
+  };
+  const merged = new Map<string, Line>();
+  const keyOf = (designer: string, title: string) =>
+    `${designer.trim().toLowerCase()}::${title.trim().toLowerCase()}`;
+
+  (picks || []).forEach((p: any) => {
     const designer = designerMap.get(p.designer_id) || "Unknown";
-    const meta = [p.materials, p.category].filter(Boolean).join(" · ");
-    return `- "${p.title}" by ${designer}${meta ? ` (${meta})` : ""} [id: ${p.id}]`;
+    merged.set(keyOf(designer, p.title), {
+      id: p.id,
+      title: p.title,
+      designer,
+      materials: p.materials || null,
+      category: p.category || null,
+      subcategory: p.subcategory || null,
+    });
   });
+  (tradeAll || []).forEach((t: any) => {
+    const rawBrand = String(t.brand_name || "");
+    const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
+    const designer =
+      brandToDesigner.get(rawBrand.trim().toLowerCase()) ||
+      brandToDesigner.get(baseBrand.toLowerCase()) ||
+      baseBrand ||
+      "Unknown";
+    const k = keyOf(designer, t.product_name);
+    if (merged.has(k)) return; // curator pick already covers it
+    merged.set(k, {
+      id: t.id,
+      title: t.product_name,
+      designer,
+      materials: t.materials || null,
+      category: t.category || null,
+      subcategory: t.subcategory || null,
+    });
+  });
+
+  const pieceLines = Array.from(merged.values())
+    .sort((a, b) => a.designer.localeCompare(b.designer) || a.title.localeCompare(b.title))
+    .map((p) => {
+      const meta = [p.subcategory || p.category, p.materials].filter(Boolean).join(" · ");
+      return `- "${p.title}" by ${p.designer}${meta ? ` (${meta})` : ""} [id: ${p.id}]`;
+    });
 
   const brandSet = new Set<string>();
   (hotspotBrands || []).forEach((h: any) => { if (h.designer_name) brandSet.add(h.designer_name); });
-  (tradeProducts || []).forEach((t: any) => { if (t.brand_name) brandSet.add(t.brand_name); });
+  (tradeAll || []).forEach((t: any) => { if (t.brand_name) brandSet.add(t.brand_name); });
   const showroomBrandLines = Array.from(brandSet).sort().map(b => `- ${b}`);
 
   return {
