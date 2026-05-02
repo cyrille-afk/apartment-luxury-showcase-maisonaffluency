@@ -8,8 +8,10 @@ import { toast } from "sonner";
 
 const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
 
+export type ConciergeQuickAction = { label: string; prompt: string };
+
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
 
 type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
@@ -57,13 +59,18 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage }
+        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[] }
         | undefined;
       const message = detail?.message?.trim();
       if (message) {
         setTimeline((prev) => [
           ...prev,
-          { kind: "msg", role: "assistant", content: message },
+          {
+            kind: "msg",
+            role: "assistant",
+            content: message,
+            actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+          },
         ]);
       }
       if (detail?.stage) setStageOverride(detail.stage);
@@ -73,8 +80,8 @@ export function AIConcierge() {
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
   }, []);
 
-  const send = useCallback(async () => {
-    const text = input.trim();
+  const send = useCallback(async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
 
     const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
@@ -230,7 +237,7 @@ export function AIConcierge() {
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 return (
-                  <div key={i} className={cn("flex", item.role === "user" ? "justify-end" : "justify-start")}>
+                  <div key={i} className={cn("flex flex-col gap-2", item.role === "user" ? "items-end" : "items-start")}>
                     <div
                       className={cn(
                         "max-w-[85%] rounded-2xl px-3.5 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap",
@@ -241,6 +248,20 @@ export function AIConcierge() {
                     >
                       {item.content}
                     </div>
+                    {item.role === "assistant" && item.actions && item.actions.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 max-w-[85%]">
+                        {item.actions.map((a, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => send(a.prompt)}
+                            disabled={streaming}
+                            className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 transition-colors px-3 py-1 font-body text-xs text-foreground disabled:opacity-40"
+                          >
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               }
@@ -274,7 +295,7 @@ export function AIConcierge() {
                 disabled={streaming}
               />
               <button
-                onClick={send}
+                onClick={() => send()}
                 disabled={!input.trim() || streaming}
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
