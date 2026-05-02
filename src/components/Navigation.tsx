@@ -138,7 +138,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     supabase
       .from("trade_documents")
       .select("title")
-      .eq("id", "268efc74-9268-4a68-925a-c0de96500590")
+      .eq("id", "59d9fe9e-82ba-4300-9309-11e2e38127c6")
       .maybeSingle()
       .then(({ data }) => {
         if (!cancelled && data?.title) setFeaturedCatalogueTitle(data.title);
