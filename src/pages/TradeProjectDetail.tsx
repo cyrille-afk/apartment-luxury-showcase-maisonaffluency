@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
@@ -75,7 +75,29 @@ export default function TradeProjectDetail() {
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
   const [boardItems, setBoardItems] = useState<ProjectBoardItem[]>([]);
   const [quoteItems, setQuoteItems] = useState<ProjectQuoteItem[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const VALID_TABS = ["overview", "quotes", "boards", "tearsheets", "shipping", "ffe"] as const;
+  const initialTab = (() => {
+    const t = searchParams.get("tab");
+    return t && (VALID_TABS as readonly string[]).includes(t) ? t : "overview";
+  })();
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
+
+  // React to back/forward and external links that change ?tab=
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    const next = t && (VALID_TABS as readonly string[]).includes(t) ? t : "overview";
+    setActiveTab((prev) => (prev === next ? prev : next));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Reflect tab changes back into the URL (replace, no history spam).
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const next = new URLSearchParams(searchParams);
+    if (value === "overview") next.delete("tab"); else next.set("tab", value);
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
     if (project) {
@@ -350,7 +372,7 @@ export default function TradeProjectDetail() {
       </div>
 
       {/* Tabbed workspace hub */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-4 flex flex-wrap h-auto bg-muted/30">
           <TabsTrigger value="overview" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
           <TabsTrigger value="quotes" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Quotes <span className="ml-1 text-[10px] text-muted-foreground">({quotes.length})</span></TabsTrigger>
@@ -369,10 +391,10 @@ export default function TradeProjectDetail() {
           {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <Stat icon={FileText} label="Quotes" value={quotes.length} onClick={() => setActiveTab("quotes")} />
-          <Stat icon={FolderArchive} label="Boards" value={boards.length} onClick={() => setActiveTab("boards")} />
-          <Stat icon={Package} label="Quote items" value={quoteItemCount} onClick={() => setActiveTab("quotes")} />
-          <Stat icon={ListChecks} label="Board items" value={boardItemCount} onClick={() => setActiveTab("boards")} />
+          <Stat icon={FileText} label="Quotes" value={quotes.length} onClick={() => handleTabChange("quotes")} />
+          <Stat icon={FolderArchive} label="Boards" value={boards.length} onClick={() => handleTabChange("boards")} />
+          <Stat icon={Package} label="Quote items" value={quoteItemCount} onClick={() => handleTabChange("quotes")} />
+          <Stat icon={ListChecks} label="Board items" value={boardItemCount} onClick={() => handleTabChange("boards")} />
         </div>
         <div className="flex flex-wrap items-center gap-2 mb-5">
           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">Quick filter:</span>

@@ -45,6 +45,7 @@ export type BreadcrumbExtraSegment =
 export default function TradeBreadcrumb({
   current,
   currentTo,
+  currentProjectTab,
   project,
   includeProjectsRoot = false,
   extraSegments = [],
@@ -52,6 +53,14 @@ export default function TradeBreadcrumb({
 }: {
   current?: string;
   currentTo?: string;
+  /**
+   * When the URL has `?project=<id>` (or `project` prop is set), turning
+   * `currentProjectTab` on makes the `current` leaf clickable and routes
+   * to `/trade/projects/<id>?tab=<currentProjectTab>` so users can jump
+   * straight back into that section of the project hub. Ignored when
+   * `currentTo` is set or when there is no project in scope.
+   */
+  currentProjectTab?: "overview" | "quotes" | "boards" | "tearsheets" | "shipping" | "ffe";
   project?: { id: string; name: string };
   includeProjectsRoot?: boolean;
   extraSegments?: BreadcrumbExtraSegment[];
@@ -79,8 +88,17 @@ export default function TradeBreadcrumb({
 
   const projectId = project?.id ?? queryProjectId ?? null;
   const projectName = project?.name ?? fetchedName ?? (projectId ? "Project" : null);
+
+  // Auto-derive a project-tab link for the leaf when requested.
+  const derivedCurrentTo = (() => {
+    if (currentTo) return currentTo;
+    if (!currentProjectTab || !projectId) return undefined;
+    const suffix = currentProjectTab === "overview" ? "" : `?tab=${currentProjectTab}`;
+    return `/trade/projects/${projectId}${suffix}`;
+  })();
+
   // The `current` segment is a leaf only when there is no link target AND no extras.
-  const currentIsLeaf = !!current && !currentTo && extraSegments.length === 0;
+  const currentIsLeaf = !!current && !derivedCurrentTo && extraSegments.length === 0;
   // The project segment is a leaf only when nothing else follows it.
   const projectIsLeaf = !!project && !current && extraSegments.length === 0;
 
@@ -126,8 +144,8 @@ export default function TradeBreadcrumb({
           <ChevronRight className="h-3 w-3 opacity-60" />
           {currentIsLeaf ? (
             <span className={leafCls} aria-current="page">{current}</span>
-          ) : currentTo ? (
-            <Link to={currentTo} className={linkCls}>{current}</Link>
+          ) : derivedCurrentTo ? (
+            <Link to={derivedCurrentTo} className={linkCls}>{current}</Link>
           ) : (
             <span className={linkCls}>{current}</span>
           )}
