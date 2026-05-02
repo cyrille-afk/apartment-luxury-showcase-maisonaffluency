@@ -210,11 +210,18 @@ export function AIConcierge() {
       {open && (
         <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-accent" />
+            <div className="flex items-center gap-2 min-w-0">
+              <Sparkles className="h-4 w-4 text-accent shrink-0" />
               <span className="font-display text-sm uppercase tracking-widest">Concierge</span>
+              <span
+                className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
+                title={`Current workflow stage: ${stage}`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                Stage: {stage}
+              </span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
+            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Close">
               <X className="h-4 w-4" />
             </button>
           </div>
