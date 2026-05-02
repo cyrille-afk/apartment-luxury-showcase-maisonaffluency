@@ -42,6 +42,7 @@ interface Board {
   token_expires_at: string | null;
   token_rotated_at: string | null;
   project_id: string | null;
+  studio_id: string | null;
   studio_logo_url: string | null;
   studio_name: string | null;
   hide_maison_branding: boolean;
