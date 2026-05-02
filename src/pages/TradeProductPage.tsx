@@ -488,6 +488,11 @@ const TradeProductPage: React.FC = () => {
     const baseOpts = Array.from(new Set(sv.map((v: any) => (v.base || "").trim()).filter(Boolean)));
     const topOpts = Array.from(new Set(sv.map((v: any) => (v.top || "").trim()).filter(Boolean)));
     if (!baseOpts.length || !topOpts.length) return;
+    // Only auto-default when there is genuinely one pairing to show. Products
+    // with multiple bases (e.g. Stone D Coffee Table) require an explicit user
+    // pick — otherwise the gallery jumps to a mapped finish image on load and
+    // hides the editorial photos that come before it.
+    if (baseOpts.length > 1) return;
     const firstBase = baseOpts[0];
     const compatTops = topOpts.filter((t) =>
       sv.some((v: any) => (v.base || "").trim() === firstBase && (v.top || "").trim() === t)
