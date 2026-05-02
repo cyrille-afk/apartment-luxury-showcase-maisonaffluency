@@ -36,6 +36,26 @@ export function AIConcierge() {
     if (open) setTimeout(() => inputRef.current?.focus(), 200);
   }, [open]);
 
+  // Listen for stage-change events from elsewhere in the app (e.g. user
+  // creates a quote from a tearsheet). We append an assistant note so the
+  // concierge stays in sync with the user's current workflow stage.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as
+        | { message?: string; openPanel?: boolean }
+        | undefined;
+      const message = detail?.message?.trim();
+      if (!message) return;
+      setTimeline((prev) => [
+        ...prev,
+        { kind: "msg", role: "assistant", content: message },
+      ]);
+      if (detail?.openPanel) setOpen(true);
+    };
+    window.addEventListener("concierge:stage", handler as EventListener);
+    return () => window.removeEventListener("concierge:stage", handler as EventListener);
+  }, []);
+
   const send = useCallback(async () => {
     const text = input.trim();
     if (!text || streaming) return;
