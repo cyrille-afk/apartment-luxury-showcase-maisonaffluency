@@ -26,6 +26,21 @@ import {
 type LinkedQuote = { id: string; status: string; created_at: string; client_name: string | null };
 type LinkedBoard = { id: string; title: string; status: string; created_at: string };
 type LinkedTimeline = { id: string; quote_id: string; kanban_status: string; estimated_delivery_at: string | null };
+type ProjectBoardItem = {
+  id: string;
+  board_id: string;
+  product_name: string | null;
+  brand_name: string | null;
+  image_url: string | null;
+};
+type ProjectQuoteItem = {
+  id: string;
+  quote_id: string;
+  quantity: number;
+  product_name: string | null;
+  brand_name: string | null;
+  image_url: string | null;
+};
 
 export default function TradeProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +72,8 @@ export default function TradeProjectDetail() {
   const selectedDesignerLabel = useDesignerDisplayName(selectedDesigner);
   const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
+  const [boardItems, setBoardItems] = useState<ProjectBoardItem[]>([]);
+  const [quoteItems, setQuoteItems] = useState<ProjectQuoteItem[]>([]);
 
   useEffect(() => {
     if (project) {
@@ -91,10 +108,10 @@ export default function TradeProjectDetail() {
       const boardIds = bList.map((x) => x.id);
       const [qItems, bItems] = await Promise.all([
         quoteIds.length
-          ? sb.from("trade_quote_items").select("quote_id, quantity, trade_products(brand_name)").in("quote_id", quoteIds)
+          ? sb.from("trade_quote_items").select("id, quote_id, quantity, trade_products(product_name, brand_name, image_url)").in("quote_id", quoteIds)
           : Promise.resolve({ data: [] }),
         boardIds.length
-          ? sb.from("client_board_items").select("id, board_id, trade_products(brand_name)").in("board_id", boardIds)
+          ? sb.from("client_board_items").select("id, board_id, trade_products(product_name, brand_name, image_url)").in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
       const qItemsData: any[] = qItems.data || [];
@@ -102,6 +119,21 @@ export default function TradeProjectDetail() {
       const qCount = qItemsData.reduce((sum, r) => sum + (r.quantity || 1), 0);
       setQuoteItemCount(qCount);
       setBoardItemCount(bItemsData.length);
+      setQuoteItems(qItemsData.map((r) => ({
+        id: r.id,
+        quote_id: r.quote_id,
+        quantity: r.quantity || 1,
+        product_name: r.trade_products?.product_name ?? null,
+        brand_name: r.trade_products?.brand_name ?? null,
+        image_url: r.trade_products?.image_url ?? null,
+      })));
+      setBoardItems(bItemsData.map((r) => ({
+        id: r.id,
+        board_id: r.board_id,
+        product_name: r.trade_products?.product_name ?? null,
+        brand_name: r.trade_products?.brand_name ?? null,
+        image_url: r.trade_products?.image_url ?? null,
+      })));
 
       const tally = new Map<string, number>();
       const qByBrand: Record<string, Set<string>> = {};
