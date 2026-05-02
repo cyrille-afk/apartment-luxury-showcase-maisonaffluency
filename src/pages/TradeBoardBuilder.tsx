@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
+import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
 
 interface Board {
   id: string;
@@ -437,10 +438,16 @@ const TradeBoardBuilder = () => {
                     <RefreshCw className="h-3.5 w-3.5" /> Rotate Link
                   </Button>
                 )}
-                {approvedCount > 0 && (
+                {approvedCount > 0 ? (
                   <Button size="sm" className="gap-1.5" onClick={convertToQuote}>
-                    <FileText className="h-3.5 w-3.5" /> Convert to Quote
+                    <FileText className="h-3.5 w-3.5" /> Convert Approved to Quote
                   </Button>
+                ) : (
+                  <CreateQuoteFromBoard
+                    board={board}
+                    items={items.map(i => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status }))}
+                    userId={user!.id}
+                  />
                 )}
               </>
             )}
