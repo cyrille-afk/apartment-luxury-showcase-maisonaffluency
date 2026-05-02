@@ -593,7 +593,7 @@ const TradeBoardBuilder = () => {
               const isRenaming = renameTarget === group.name;
 
               return (
-                <div key={group.name || "__ungrouped__"}>
+                <div key={group.name || "__ungrouped__"} id={sectionId(group.name)} className="scroll-mt-24">
                   {/* Sub-folder header */}
                   {group.name && (
                     <div className="flex items-center gap-2 mb-3 border-b border-border pb-2">
