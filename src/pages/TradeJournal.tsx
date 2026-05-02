@@ -646,13 +646,18 @@ const TradeJournal = () => {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-display text-base text-foreground truncate">{a.title}</h3>
                     <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       a.is_published ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                     }`}>
                       {a.is_published ? "Published" : "Draft"}
                     </span>
+                    {a.is_featured && (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider bg-primary/10 text-primary">
+                        <Star className="w-2.5 h-2.5 fill-current" /> Featured Read
+                      </span>
+                    )}
                   </div>
                   <p className="font-body text-xs text-muted-foreground truncate">{a.excerpt || "No excerpt"}</p>
                   <div className="flex items-center gap-3 mt-1.5">
