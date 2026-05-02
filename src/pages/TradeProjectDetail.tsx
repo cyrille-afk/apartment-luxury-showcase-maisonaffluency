@@ -26,6 +26,21 @@ import {
 type LinkedQuote = { id: string; status: string; created_at: string; client_name: string | null };
 type LinkedBoard = { id: string; title: string; status: string; created_at: string };
 type LinkedTimeline = { id: string; quote_id: string; kanban_status: string; estimated_delivery_at: string | null };
+type ProjectBoardItem = {
+  id: string;
+  board_id: string;
+  product_name: string | null;
+  brand_name: string | null;
+  image_url: string | null;
+};
+type ProjectQuoteItem = {
+  id: string;
+  quote_id: string;
+  quantity: number;
+  product_name: string | null;
+  brand_name: string | null;
+  image_url: string | null;
+};
 
 export default function TradeProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +72,8 @@ export default function TradeProjectDetail() {
   const selectedDesignerLabel = useDesignerDisplayName(selectedDesigner);
   const [brandQuoteIds, setBrandQuoteIds] = useState<Record<string, Set<string>>>({});
   const [brandBoardIds, setBrandBoardIds] = useState<Record<string, Set<string>>>({});
+  const [boardItems, setBoardItems] = useState<ProjectBoardItem[]>([]);
+  const [quoteItems, setQuoteItems] = useState<ProjectQuoteItem[]>([]);
 
   useEffect(() => {
     if (project) {
@@ -91,10 +108,10 @@ export default function TradeProjectDetail() {
       const boardIds = bList.map((x) => x.id);
       const [qItems, bItems] = await Promise.all([
         quoteIds.length
-          ? sb.from("trade_quote_items").select("quote_id, quantity, trade_products(brand_name)").in("quote_id", quoteIds)
+          ? sb.from("trade_quote_items").select("id, quote_id, quantity, trade_products(product_name, brand_name, image_url)").in("quote_id", quoteIds)
           : Promise.resolve({ data: [] }),
         boardIds.length
-          ? sb.from("client_board_items").select("id, board_id, trade_products(brand_name)").in("board_id", boardIds)
+          ? sb.from("client_board_items").select("id, board_id, trade_products(product_name, brand_name, image_url)").in("board_id", boardIds)
           : Promise.resolve({ data: [] }),
       ]);
       const qItemsData: any[] = qItems.data || [];
@@ -102,6 +119,21 @@ export default function TradeProjectDetail() {
       const qCount = qItemsData.reduce((sum, r) => sum + (r.quantity || 1), 0);
       setQuoteItemCount(qCount);
       setBoardItemCount(bItemsData.length);
+      setQuoteItems(qItemsData.map((r) => ({
+        id: r.id,
+        quote_id: r.quote_id,
+        quantity: r.quantity || 1,
+        product_name: r.trade_products?.product_name ?? null,
+        brand_name: r.trade_products?.brand_name ?? null,
+        image_url: r.trade_products?.image_url ?? null,
+      })));
+      setBoardItems(bItemsData.map((r) => ({
+        id: r.id,
+        board_id: r.board_id,
+        product_name: r.trade_products?.product_name ?? null,
+        brand_name: r.trade_products?.brand_name ?? null,
+        image_url: r.trade_products?.image_url ?? null,
+      })));
 
       const tally = new Map<string, number>();
       const qByBrand: Record<string, Set<string>> = {};
@@ -401,59 +433,95 @@ export default function TradeProjectDetail() {
         </TabsContent>
 
         {/* QUOTES TAB */}
-        <TabsContent value="quotes" className="mt-0">
+        <TabsContent value="quotes" className="mt-0 space-y-4">
           {(() => {
             const visibleQuotes = selectedDesigner
               ? quotes.filter((q) => brandQuoteIds[selectedDesigner]?.has(q.id))
               : quotes;
+            const visibleQuoteItems = selectedDesigner
+              ? quoteItems.filter((i) => i.brand_name === selectedDesigner)
+              : quoteItems;
             return (
-              <Section
-                icon={FileText}
-                title="Quotes in this project"
-                count={visibleQuotes.length}
-                loading={loadingLinks}
-                empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
-                link={`/trade/quotes?project=${project.id}`}
-                linkLabel="Open quotes filtered by this project"
-              >
-                {visibleQuotes.map((q) => (
-                  <Row
-                    key={q.id}
-                    to="/trade/quotes"
-                    title={q.client_name || "Untitled quote"}
-                    meta={`${q.status} · ${new Date(q.created_at).toLocaleDateString()}`}
+              <>
+                <Section
+                  icon={FileText}
+                  title="Quotes in this project"
+                  count={visibleQuotes.length}
+                  loading={loadingLinks}
+                  empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
+                  link={`/trade/quotes?project=${project.id}`}
+                  linkLabel="Open quotes filtered by this project"
+                >
+                  {visibleQuotes.map((q) => (
+                    <Row
+                      key={q.id}
+                      to={`/trade/quotes?project=${project.id}&quote=${q.id}`}
+                      title={q.client_name || "Untitled quote"}
+                      meta={`${q.status} · ${new Date(q.created_at).toLocaleDateString()}`}
+                    />
+                  ))}
+                </Section>
+                {visibleQuoteItems.length > 0 && (
+                  <ItemGrid
+                    title="Quote items"
+                    items={visibleQuoteItems.map((i) => ({
+                      id: i.id,
+                      title: i.product_name || "Untitled product",
+                      subtitle: i.brand_name || "",
+                      meta: `Qty ${i.quantity}`,
+                      image: i.image_url,
+                      to: `/trade/quotes?project=${project.id}&quote=${i.quote_id}`,
+                    }))}
                   />
-                ))}
-              </Section>
+                )}
+              </>
             );
           })()}
         </TabsContent>
 
         {/* BOARDS TAB */}
-        <TabsContent value="boards" className="mt-0">
+        <TabsContent value="boards" className="mt-0 space-y-4">
           {(() => {
             const visibleBoards = selectedDesigner
               ? boards.filter((b) => brandBoardIds[selectedDesigner]?.has(b.id))
               : boards;
+            const visibleBoardItems = selectedDesigner
+              ? boardItems.filter((i) => i.brand_name === selectedDesigner)
+              : boardItems;
             return (
-              <Section
-                icon={FolderArchive}
-                title="Mood boards in this project"
-                count={visibleBoards.length}
-                loading={loadingLinks}
-                empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
-                link={`/trade/boards?project=${project.id}`}
-                linkLabel="Open boards filtered by this project"
-              >
-                {visibleBoards.map((b) => (
-                  <Row
-                    key={b.id}
-                    to={`/trade/boards/${b.id}`}
-                    title={b.title}
-                    meta={`${b.status} · ${new Date(b.created_at).toLocaleDateString()}`}
+              <>
+                <Section
+                  icon={FolderArchive}
+                  title="Mood boards in this project"
+                  count={visibleBoards.length}
+                  loading={loadingLinks}
+                  empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
+                  link={`/trade/boards?project=${project.id}`}
+                  linkLabel="Open boards filtered by this project"
+                >
+                  {visibleBoards.map((b) => (
+                    <Row
+                      key={b.id}
+                      to={`/trade/boards/${b.id}?project=${project.id}`}
+                      title={b.title}
+                      meta={`${b.status} · ${new Date(b.created_at).toLocaleDateString()}`}
+                    />
+                  ))}
+                </Section>
+                {visibleBoardItems.length > 0 && (
+                  <ItemGrid
+                    title="Board items"
+                    items={visibleBoardItems.map((i) => ({
+                      id: i.id,
+                      title: i.product_name || "Untitled product",
+                      subtitle: i.brand_name || "",
+                      meta: "",
+                      image: i.image_url,
+                      to: `/trade/boards/${i.board_id}?project=${project.id}`,
+                    }))}
                   />
-                ))}
-              </Section>
+                )}
+              </>
             );
           })()}
         </TabsContent>
@@ -578,6 +646,60 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: n
       <div className="min-w-0">
         <div className="font-display text-xl text-foreground leading-none">{value}</div>
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+type GridItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  meta: string;
+  image: string | null;
+  to: string;
+};
+
+function ItemGrid({ title, items }: { title: string; items: GridItem[] }) {
+  return (
+    <div className="border border-border rounded-md overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/20">
+        <div className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-sm text-foreground">{title}</h2>
+          <span className="text-[10px] text-muted-foreground">({items.length})</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3">
+        {items.map((it) => (
+          <Link
+            key={it.id}
+            to={it.to}
+            className="group block rounded-md border border-border bg-background overflow-hidden hover:border-foreground/40 transition-colors"
+          >
+            <div className="aspect-square bg-muted/30 overflow-hidden">
+              {it.image ? (
+                <img
+                  src={it.image}
+                  alt={it.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                  <ImageIcon className="h-6 w-6" />
+                </div>
+              )}
+            </div>
+            <div className="p-2">
+              <div className="font-body text-xs text-foreground truncate">{it.title}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-body text-[10px] text-muted-foreground truncate">{it.subtitle}</div>
+                {it.meta && <div className="font-body text-[10px] text-muted-foreground shrink-0">{it.meta}</div>}
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );
