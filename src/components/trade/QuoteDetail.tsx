@@ -92,6 +92,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string | null>(null);
+  // Add-product picker state
+  const [productOptions, setProductOptions] = useState<PickerItem[]>([]);
+  const [pendingProductId, setPendingProductId] = useState<string>("");
+  const [addingProduct, setAddingProduct] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Insurance bundling
   type InsuranceTier = "standard" | "premium" | "all_risk";
