@@ -144,8 +144,8 @@ export default function TradeBreadcrumb({
           <ChevronRight className="h-3 w-3 opacity-60" />
           {currentIsLeaf ? (
             <span className={leafCls} aria-current="page">{current}</span>
-          ) : currentTo ? (
-            <Link to={currentTo} className={linkCls}>{current}</Link>
+          ) : derivedCurrentTo ? (
+            <Link to={derivedCurrentTo} className={linkCls}>{current}</Link>
           ) : (
             <span className={linkCls}>{current}</span>
           )}
