@@ -37,6 +37,10 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // After commit, holds the board's existing project_id (null = no project assigned yet).
+  const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
+  const [projectStepDone, setProjectStepDone] = useState(false);
+  const navigate = useNavigate();
 
   const isAppend = mode === "append";
   const visiblePicks = proposal.preview.filter((p) => !excluded.has(p.id));
