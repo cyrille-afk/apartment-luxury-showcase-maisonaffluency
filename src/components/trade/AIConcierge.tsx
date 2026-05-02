@@ -94,7 +94,7 @@ export function AIConcierge() {
     // prefixed with a lightweight stage-context note so the assistant
     // always references the user's current workflow stage.
     const stageContext: ChatMessage = {
-      role: "system",
+      role: "user",
       content: `[Workflow context] Current stage: ${stage}. Tailor guidance to this stage and reference it explicitly when helpful.`,
     };
     const messagesForApi: ChatMessage[] = [
