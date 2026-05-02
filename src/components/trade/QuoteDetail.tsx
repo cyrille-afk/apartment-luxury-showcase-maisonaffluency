@@ -1138,6 +1138,35 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 })}
               </div>
 
+              {/* Add another product to this quote */}
+              <div className="border-t border-dashed border-border mt-3 pt-4 print:hidden">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3">
+                  <div className="flex-1 min-w-0">
+                    <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                      Add another product
+                    </label>
+                    <AlphabetProductPicker
+                      items={productOptions}
+                      value={pendingProductId}
+                      onChange={setPendingProductId}
+                      placeholder={productOptions.length === 0 ? "Loading catalogue…" : "Pick a product (A → Designer → Item)"}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddProduct(pendingProductId)}
+                    disabled={!pendingProductId || addingProduct}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {addingProduct ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    Add to quote
+                  </button>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
+                  Forgot a piece? Add it here without leaving the quote — quantity, price and PO can be edited above.
+                </p>
+              </div>
+
               {/* Insurance bundling */}
               <div className="border-t border-border mt-2 pt-4">
                 <div className="flex items-start justify-between gap-4 mb-3">
