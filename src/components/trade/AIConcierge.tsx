@@ -29,6 +29,7 @@ export function AIConcierge() {
   const navigate = useNavigate();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>([
     { kind: "msg", role: "assistant", content: GREETING },
   ]);
@@ -39,6 +40,57 @@ export function AIConcierge() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Draggable position — persisted in localStorage. `null` = use default
+  // bottom-right anchor; once user drags, we switch to absolute top/left.
+  const PANEL_W = 380;
+  const PANEL_H_OPEN = 560;
+  const PANEL_H_MIN = 52;
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
+    try {
+      const raw = localStorage.getItem("concierge:pos");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const dragRef = useRef<{ dx: number; dy: number } | null>(null);
+
+  const clampPos = useCallback((x: number, y: number) => {
+    const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
+    const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
+    const maxY = Math.max(8, window.innerHeight - h - 8);
+    return { x: Math.min(Math.max(8, x), maxX), y: Math.min(Math.max(8, y), maxY) };
+  }, [minimized]);
+
+  const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Only react to primary button / touch
+    if (e.button !== undefined && e.button !== 0) return;
+    const panel = (e.currentTarget.closest("[data-concierge-panel]") as HTMLElement) || null;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    dragRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    const next = clampPos(e.clientX - dragRef.current.dx, e.clientY - dragRef.current.dy);
+    setPos(next);
+  };
+  const onDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    if (pos) {
+      try { localStorage.setItem("concierge:pos", JSON.stringify(pos)); } catch {}
+    }
+  };
+
+  // Keep panel inside viewport on resize
+  useEffect(() => {
+    if (!pos) return;
+    const onResize = () => setPos((p) => (p ? clampPos(p.x, p.y) : p));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [pos, clampPos]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
