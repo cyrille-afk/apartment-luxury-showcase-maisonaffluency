@@ -27,6 +27,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
@@ -131,20 +132,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
-  const [featuredCatalogueTitle, setFeaturedCatalogueTitle] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    supabase
-      .from("trade_documents")
-      .select("title")
-      .eq("id", "59d9fe9e-82ba-4300-9309-11e2e38127c6")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled && data?.title) setFeaturedCatalogueTitle(data.title);
-      });
-    return () => { cancelled = true; };
-  }, []);
+  const { doc: featuredDoc } = useFeaturedPublicDocument();
 
   useEffect(() => {
     // All page section IDs in order
@@ -771,7 +759,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   {/* Hover tooltip */}
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover/trade:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
                     <div className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
-                      <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredCatalogueTitle ?? "Featured Catalogue"}</p>
+                      <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredDoc?.title ?? "Featured Catalogue"}</p>
                       <p className="font-body text-[9px] text-background/60">Free download</p>
                     </div>
                   </div>
