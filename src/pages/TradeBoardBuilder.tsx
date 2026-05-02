@@ -81,6 +81,39 @@ const TradeBoardBuilder = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [designerSlugMap, setDesignerSlugMap] = useState<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("designers")
+        .select("name, display_name, slug")
+        .eq("is_published", true);
+      if (!data) return;
+      const map = new Map<string, string>();
+      for (const d of data as Array<{ name: string; display_name: string | null; slug: string }>) {
+        if (d.name) map.set(d.name.trim().toLowerCase(), d.slug);
+        if (d.display_name) map.set(d.display_name.trim().toLowerCase(), d.slug);
+      }
+      setDesignerSlugMap(map);
+    })();
+  }, []);
+
+  const openProductSheet = useCallback((product?: { product_name: string; brand_name: string }) => {
+    if (!product) return;
+    const brand = product.brand_name.includes(" - ")
+      ? product.brand_name.split(" - ")[0].trim()
+      : product.brand_name;
+    const designerSlug =
+      designerSlugMap.get(brand.toLowerCase()) ||
+      designerSlugMap.get(product.brand_name.toLowerCase()) ||
+      slugifyForUrl(brand);
+    const productSlug = slugifyForUrl(product.product_name);
+    navigate(`/trade/products/${designerSlug}/${productSlug}`, {
+      state: { from: location.pathname + location.search },
+    });
+  }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   const [board, setBoard] = useState<Board | null>(null);
   const [items, setItems] = useState<BoardItem[]>([]);
