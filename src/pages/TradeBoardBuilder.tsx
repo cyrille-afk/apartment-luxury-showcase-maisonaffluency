@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
 
 interface Board {
   id: string;
@@ -629,6 +630,8 @@ const TradeBoardBuilder = () => {
             })}
           </div>
         )}
+
+        <BoardProjectHistory boardId={board.id} />
       </div>
 
       {/* Create sub-folder dialog */}
