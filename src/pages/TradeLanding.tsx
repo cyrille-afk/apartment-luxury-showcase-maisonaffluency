@@ -15,7 +15,7 @@ import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/Section
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
-const ANDREE_PUTMAN_CATALOG_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
+const FEATURED_CATALOGUE_DOCUMENT_ID = "268efc74-9268-4a68-925a-c0de96500590";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
