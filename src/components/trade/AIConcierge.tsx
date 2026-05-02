@@ -8,8 +8,10 @@ import { toast } from "sonner";
 
 const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
 
+export type ConciergeQuickAction = { label: string; prompt: string };
+
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
 
 type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
