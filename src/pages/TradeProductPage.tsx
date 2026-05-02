@@ -898,7 +898,26 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isDualAxis && !hasSingleAxisSplit && product.materials && (() => {
+              {isBaseOnly && (
+                <ExpandableSpec
+                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  text={baseOptions.join("\n")}
+                  placeholder={getBasePlaceholder(product)}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+              {!isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
