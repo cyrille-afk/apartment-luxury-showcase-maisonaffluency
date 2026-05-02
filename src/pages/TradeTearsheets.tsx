@@ -265,7 +265,7 @@ export default function TradeTearsheets() {
     <>
       <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
       <div className="max-w-6xl space-y-6">
-        <TradeBreadcrumb current="Tearsheets" />
+        <TradeBreadcrumb current="Tearsheets" currentProjectTab="tearsheets" />
         <div>
           <h1 className="font-display text-2xl text-foreground">Tearsheet Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
