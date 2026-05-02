@@ -86,11 +86,9 @@ describe("Base-only product: manual Base pick always swaps the gallery image", (
     ).toBeUndefined();
   });
 
-  it("also resolves via resolveFinishImageIndex (lightbox path)", () => {
-    // PublicProductLightbox uses resolveFinishImageIndex when the product is
-    // single-axis. Manual finish pick must work through that path too.
-    expect(resolveFinishImageIndex(finishMap, "Burnt Oak", IMAGE_COUNT)).toBe(1);
-    expect(resolveFinishImageIndex(finishMap, "Blackened Ash", IMAGE_COUNT)).toBe(2);
+  it("also resolves direct single-label lookups for legacy lightbox callers", () => {
+    expect(resolveFinishImageIndex(finishMap, "Top & Base in Red Onyx", IMAGE_COUNT)).toBe(8);
+    expect(resolveFinishImageIndex(finishMap, "Top & Base in Onyx Honey", IMAGE_COUNT)).toBe(11);
   });
 });
 
@@ -111,14 +109,16 @@ function pageGalleryIndexBaseOnly(opts: {
     base: opts.base,
     top: null,
     imageCount: opts.imageCount,
+    requireCompletePair: false,
   });
 }
 
 describe("Page handleMaterialChange (base-only branch): manual pick swaps image", () => {
   it.each([
-    ["Solid Teak", 0],
-    ["Burnt Oak", 1],
-    ["Blackened Ash", 2],
+    ["Top & Base in Red Onyx", 8],
+    ["Top & Base in Onyx Honey", 11],
+    ["Top in Raku Blanc écru & Base in Natural Teak", 1],
+    ["Top in Lava Stone Creme Brulée & Base in Black Teak", 5],
   ])("manual pick %s → gallery index %i", (label, expected) => {
     expect(
       pageGalleryIndexBaseOnly({ base: label as string, imageCount: IMAGE_COUNT })
