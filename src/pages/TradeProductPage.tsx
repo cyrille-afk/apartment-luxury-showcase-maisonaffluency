@@ -511,6 +511,36 @@ const TradeProductPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.product?.id]);
 
+  // Reverse sync: when the user navigates the gallery via thumbnails / swipe
+  // / arrows, snap the finish dropdowns to the variant whose mapped image is
+  // now showing. No-op when the active image isn't tied to any variant
+  // (e.g. an editorial photo) or when the dropdowns already match.
+  useEffect(() => {
+    if (galleryActiveIndex === undefined) return;
+    const rawMap = (data?.product as any)?.variant_image_map;
+    const finishMap = buildProductFinishMap(rawMap);
+    if (!finishMap) return;
+    const variants = (data?.pricing?.size_variants
+      || (data?.product as any)?.size_variants
+      || []) as { label?: string; base?: string; top?: string }[];
+    const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex);
+    if (!match) return;
+    const nextBase = match.base;
+    const nextTop = match.top;
+    const nextLabel = match.label;
+    // Dual-axis path
+    if (nextBase != null || nextTop != null) {
+      if ((nextBase ?? null) !== (selectedBase ?? null)) setSelectedBase(nextBase);
+      if ((nextTop ?? null) !== (selectedTop ?? null)) setSelectedTop(nextTop);
+    }
+    // Single-axis (label) path — keep singleMaterial in sync when applicable
+    if (nextLabel && nextLabel !== (selectedSingleMaterial ?? null)) {
+      setSelectedSingleMaterial(nextLabel);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [galleryActiveIndex, data?.product?.id]);
+
+
   if (isLoading) {
     return <div className="pt-8"><PageLoadingSkeleton /></div>;
   }
