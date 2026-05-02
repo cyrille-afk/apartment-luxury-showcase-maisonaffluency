@@ -759,7 +759,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   {/* Hover tooltip */}
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover/trade:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
                     <div className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
-                      <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredCatalogueTitle ?? "Featured Catalogue"}</p>
+                      <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredDoc?.title ?? "Featured Catalogue"}</p>
                       <p className="font-body text-[9px] text-background/60">Free download</p>
                     </div>
                   </div>
