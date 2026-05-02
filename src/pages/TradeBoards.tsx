@@ -209,7 +209,7 @@ const TradeBoards = () => {
           </Dialog>
         </SectionHero>
 
-        <BackToProjectPill />
+        <TradeBreadcrumb current="Boards" />
         <ActiveFilterChips className="mb-4" confirmClearAll />
 
         {(() => {
