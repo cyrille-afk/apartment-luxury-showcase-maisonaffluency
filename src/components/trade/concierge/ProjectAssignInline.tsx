@@ -85,9 +85,9 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
           project_id: projectId,
           project_name: projectFullName || projectName,
           autofilled: {
-            client_name: updates.client_name ?? null,
-            studio_id: updates.studio_id ?? null,
-            title: updates.title ?? null,
+            client_name: (updates.client_name as string | undefined) ?? null,
+            studio_id: (updates.studio_id as string | undefined) ?? null,
+            title: (updates.title as string | undefined) ?? null,
           },
         },
         status: "approved",
