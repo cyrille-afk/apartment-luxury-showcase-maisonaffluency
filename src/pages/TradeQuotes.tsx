@@ -240,7 +240,7 @@ const TradeQuotes = () => {
         </button>
       </SectionHero>
 
-      <BackToProjectPill />
+      <TradeBreadcrumb current="Quotes" />
       <ActiveFilterChips className="mb-4" confirmClearAll />
 
       {(() => {
