@@ -433,59 +433,95 @@ export default function TradeProjectDetail() {
         </TabsContent>
 
         {/* QUOTES TAB */}
-        <TabsContent value="quotes" className="mt-0">
+        <TabsContent value="quotes" className="mt-0 space-y-4">
           {(() => {
             const visibleQuotes = selectedDesigner
               ? quotes.filter((q) => brandQuoteIds[selectedDesigner]?.has(q.id))
               : quotes;
+            const visibleQuoteItems = selectedDesigner
+              ? quoteItems.filter((i) => i.brand_name === selectedDesigner)
+              : quoteItems;
             return (
-              <Section
-                icon={FileText}
-                title="Quotes in this project"
-                count={visibleQuotes.length}
-                loading={loadingLinks}
-                empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
-                link={`/trade/quotes?project=${project.id}`}
-                linkLabel="Open quotes filtered by this project"
-              >
-                {visibleQuotes.map((q) => (
-                  <Row
-                    key={q.id}
-                    to="/trade/quotes"
-                    title={q.client_name || "Untitled quote"}
-                    meta={`${q.status} · ${new Date(q.created_at).toLocaleDateString()}`}
+              <>
+                <Section
+                  icon={FileText}
+                  title="Quotes in this project"
+                  count={visibleQuotes.length}
+                  loading={loadingLinks}
+                  empty={selectedDesigner ? `No quotes contain ${selectedDesignerLabel}.` : "No quotes linked yet."}
+                  link={`/trade/quotes?project=${project.id}`}
+                  linkLabel="Open quotes filtered by this project"
+                >
+                  {visibleQuotes.map((q) => (
+                    <Row
+                      key={q.id}
+                      to={`/trade/quotes?project=${project.id}&quote=${q.id}`}
+                      title={q.client_name || "Untitled quote"}
+                      meta={`${q.status} · ${new Date(q.created_at).toLocaleDateString()}`}
+                    />
+                  ))}
+                </Section>
+                {visibleQuoteItems.length > 0 && (
+                  <ItemGrid
+                    title="Quote items"
+                    items={visibleQuoteItems.map((i) => ({
+                      id: i.id,
+                      title: i.product_name || "Untitled product",
+                      subtitle: i.brand_name || "",
+                      meta: `Qty ${i.quantity}`,
+                      image: i.image_url,
+                      to: `/trade/quotes?project=${project.id}&quote=${i.quote_id}`,
+                    }))}
                   />
-                ))}
-              </Section>
+                )}
+              </>
             );
           })()}
         </TabsContent>
 
         {/* BOARDS TAB */}
-        <TabsContent value="boards" className="mt-0">
+        <TabsContent value="boards" className="mt-0 space-y-4">
           {(() => {
             const visibleBoards = selectedDesigner
               ? boards.filter((b) => brandBoardIds[selectedDesigner]?.has(b.id))
               : boards;
+            const visibleBoardItems = selectedDesigner
+              ? boardItems.filter((i) => i.brand_name === selectedDesigner)
+              : boardItems;
             return (
-              <Section
-                icon={FolderArchive}
-                title="Mood boards in this project"
-                count={visibleBoards.length}
-                loading={loadingLinks}
-                empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
-                link={`/trade/boards?project=${project.id}`}
-                linkLabel="Open boards filtered by this project"
-              >
-                {visibleBoards.map((b) => (
-                  <Row
-                    key={b.id}
-                    to={`/trade/boards/${b.id}`}
-                    title={b.title}
-                    meta={`${b.status} · ${new Date(b.created_at).toLocaleDateString()}`}
+              <>
+                <Section
+                  icon={FolderArchive}
+                  title="Mood boards in this project"
+                  count={visibleBoards.length}
+                  loading={loadingLinks}
+                  empty={selectedDesigner ? `No boards contain ${selectedDesignerLabel}.` : "No mood boards linked yet."}
+                  link={`/trade/boards?project=${project.id}`}
+                  linkLabel="Open boards filtered by this project"
+                >
+                  {visibleBoards.map((b) => (
+                    <Row
+                      key={b.id}
+                      to={`/trade/boards/${b.id}?project=${project.id}`}
+                      title={b.title}
+                      meta={`${b.status} · ${new Date(b.created_at).toLocaleDateString()}`}
+                    />
+                  ))}
+                </Section>
+                {visibleBoardItems.length > 0 && (
+                  <ItemGrid
+                    title="Board items"
+                    items={visibleBoardItems.map((i) => ({
+                      id: i.id,
+                      title: i.product_name || "Untitled product",
+                      subtitle: i.brand_name || "",
+                      meta: "",
+                      image: i.image_url,
+                      to: `/trade/boards/${i.board_id}?project=${project.id}`,
+                    }))}
                   />
-                ))}
-              </Section>
+                )}
+              </>
             );
           })()}
         </TabsContent>
