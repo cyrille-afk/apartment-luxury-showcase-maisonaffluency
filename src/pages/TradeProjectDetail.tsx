@@ -650,3 +650,57 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: n
     </div>
   );
 }
+
+type GridItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  meta: string;
+  image: string | null;
+  to: string;
+};
+
+function ItemGrid({ title, items }: { title: string; items: GridItem[] }) {
+  return (
+    <div className="border border-border rounded-md overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/20">
+        <div className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-sm text-foreground">{title}</h2>
+          <span className="text-[10px] text-muted-foreground">({items.length})</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3">
+        {items.map((it) => (
+          <Link
+            key={it.id}
+            to={it.to}
+            className="group block rounded-md border border-border bg-background overflow-hidden hover:border-foreground/40 transition-colors"
+          >
+            <div className="aspect-square bg-muted/30 overflow-hidden">
+              {it.image ? (
+                <img
+                  src={it.image}
+                  alt={it.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                  <ImageIcon className="h-6 w-6" />
+                </div>
+              )}
+            </div>
+            <div className="p-2">
+              <div className="font-body text-xs text-foreground truncate">{it.title}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-body text-[10px] text-muted-foreground truncate">{it.subtitle}</div>
+                {it.meta && <div className="font-body text-[10px] text-muted-foreground shrink-0">{it.meta}</div>}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
