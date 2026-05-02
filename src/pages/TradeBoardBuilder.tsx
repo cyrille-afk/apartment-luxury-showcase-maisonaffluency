@@ -404,9 +404,14 @@ const TradeBoardBuilder = () => {
 
   const renderItemCard = (item: BoardItem) => (
     <div key={item.id} className="border border-border rounded-lg overflow-hidden group">
-      <div className="aspect-square bg-muted relative">
+      <button
+        type="button"
+        onClick={() => openProductSheet(item.product)}
+        className="aspect-square bg-muted relative w-full block cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+        aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
+      >
         {item.product?.image_url ? (
-          <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover" />
+          <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
         )}
@@ -420,7 +425,7 @@ const TradeBoardBuilder = () => {
             <X className="h-4 w-4 text-white" />
           </div>
         )}
-      </div>
+      </button>
       <div className="p-3">
         <p className="font-body text-sm text-foreground font-medium truncate">{item.product?.product_name}</p>
         <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
