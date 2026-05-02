@@ -120,12 +120,16 @@ function useTradeProductBySlug(
 
         const brand = (tradeProduct as any).brand_name as string;
         const brandBase = brand.includes(" - ") ? brand.split(" - ")[0].trim() : brand;
-        const { data: designer } = await supabase
+        const { data: designers } = await supabase
           .from("designers")
           .select("id, name, slug, display_name, biography")
-          .or(`name.eq.${brand},display_name.eq.${brand},name.eq.${brandBase},display_name.eq.${brandBase}`)
           .eq("is_published", true)
-          .maybeSingle();
+        const designer = (designers || []).find((d: any) =>
+          [d.name, d.display_name].filter(Boolean).some((name: string) => {
+            const normalized = name.trim().toLowerCase();
+            return normalized === brand.trim().toLowerCase() || normalized === brandBase.trim().toLowerCase();
+          })
+        ) || null;
 
         let relatedPicks: ProductRow[] = [];
         let curatorPick: any = null;
