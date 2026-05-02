@@ -59,13 +59,18 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage }
+        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[] }
         | undefined;
       const message = detail?.message?.trim();
       if (message) {
         setTimeline((prev) => [
           ...prev,
-          { kind: "msg", role: "assistant", content: message },
+          {
+            kind: "msg",
+            role: "assistant",
+            content: message,
+            actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+          },
         ]);
       }
       if (detail?.stage) setStageOverride(detail.stage);
@@ -75,8 +80,8 @@ export function AIConcierge() {
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
   }, []);
 
-  const send = useCallback(async () => {
-    const text = input.trim();
+  const send = useCallback(async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
 
     const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
