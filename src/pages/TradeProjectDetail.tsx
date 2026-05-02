@@ -372,7 +372,7 @@ export default function TradeProjectDetail() {
       </div>
 
       {/* Tabbed workspace hub */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-4 flex flex-wrap h-auto bg-muted/30">
           <TabsTrigger value="overview" className="gap-1.5"><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
           <TabsTrigger value="quotes" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Quotes <span className="ml-1 text-[10px] text-muted-foreground">({quotes.length})</span></TabsTrigger>
