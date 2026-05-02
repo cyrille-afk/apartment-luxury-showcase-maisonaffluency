@@ -179,6 +179,39 @@ const TradeJournal = () => {
     fetchArticles();
   };
 
+  const toggleFeatured = async (a: Article) => {
+    if (a.is_featured) {
+      const { error } = await supabase.from("journal_articles")
+        .update({ is_featured: false, updated_at: new Date().toISOString() })
+        .eq("id", a.id);
+      if (error) {
+        toast({ title: "Could not update", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Featured Read cleared", description: `"${a.title}" is no longer the homepage Featured Read.` });
+      fetchArticles();
+      return;
+    }
+
+    // Clear any existing featured first (partial unique index requires this)
+    const { error: clearErr } = await supabase.from("journal_articles")
+      .update({ is_featured: false, updated_at: new Date().toISOString() })
+      .eq("is_featured", true);
+    if (clearErr) {
+      toast({ title: "Could not update", description: clearErr.message, variant: "destructive" });
+      return;
+    }
+    const { error: setErr } = await supabase.from("journal_articles")
+      .update({ is_featured: true, updated_at: new Date().toISOString() })
+      .eq("id", a.id);
+    if (setErr) {
+      toast({ title: "Could not update", description: setErr.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Featured Read set", description: `"${a.title}" now appears in the homepage banner.` });
+    fetchArticles();
+  };
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
