@@ -281,7 +281,7 @@ export function AIConcierge() {
                 disabled={streaming}
               />
               <button
-                onClick={send}
+                onClick={() => send()}
                 disabled={!input.trim() || streaming}
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
