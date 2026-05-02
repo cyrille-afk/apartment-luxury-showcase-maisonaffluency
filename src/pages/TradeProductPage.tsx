@@ -319,7 +319,7 @@ function useTradeProductBySlug(
         tradeProductId: tradeProduct?.id || null,
       };
     },
-    enabled: !!designerSlug && !!productSlug,
+    enabled: !!tradeProductIdParam || (!!designerSlug && !!productSlug),
     staleTime: 5 * 60_000,
   });
 }
