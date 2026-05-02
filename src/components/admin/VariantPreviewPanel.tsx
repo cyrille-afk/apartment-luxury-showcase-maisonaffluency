@@ -42,8 +42,11 @@ export default function VariantPreviewPanel({
   }, [sv, isDualAxis]);
 
   const baseOptions = useMemo(
-    () => (isDualAxis ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean))) : []),
-    [sv, isDualAxis]
+    () =>
+      isDualAxis || isBaseOnly
+        ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
+        : [],
+    [sv, isDualAxis, isBaseOnly]
   );
   const topOptions = useMemo(
     () => (isDualAxis ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean))) : []),
