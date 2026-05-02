@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
-import BackToProjectPill from "@/components/trade/BackToProjectPill";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import {
   downloadProcurementWorkbook,
   autoPoNumber,
@@ -240,7 +240,7 @@ export default function TradeFFESchedule() {
     <>
       <Helmet><title>FF&E Schedule — Trade Portal</title></Helmet>
       <div className="max-w-6xl space-y-6">
-        <BackToProjectPill />
+        <TradeBreadcrumb current="FF&E schedule" />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl text-foreground">FF&E Schedule</h1>

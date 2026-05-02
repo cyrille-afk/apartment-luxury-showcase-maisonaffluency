@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
-import BackToProjectPill from "@/components/trade/BackToProjectPill";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 
 interface TearsheetProduct {
   id: string;
@@ -265,7 +265,7 @@ export default function TradeTearsheets() {
     <>
       <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
       <div className="max-w-6xl space-y-6">
-        <BackToProjectPill />
+        <TradeBreadcrumb current="Tearsheets" />
         <div>
           <h1 className="font-display text-2xl text-foreground">Tearsheet Builder</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">

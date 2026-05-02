@@ -10,7 +10,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
 import SectionHero from "@/components/trade/SectionHero";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
-import BackToProjectPill from "@/components/trade/BackToProjectPill";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -209,7 +209,7 @@ const TradeBoards = () => {
           </Dialog>
         </SectionHero>
 
-        <BackToProjectPill />
+        <TradeBreadcrumb current="Boards" />
         <ActiveFilterChips className="mb-4" confirmClearAll />
 
         {(() => {
