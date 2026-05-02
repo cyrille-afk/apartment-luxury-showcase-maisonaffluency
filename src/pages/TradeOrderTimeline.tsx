@@ -250,7 +250,7 @@ export default function TradeOrderTimeline() {
       <Helmet><title>Order Timeline — Trade Portal — Maison Affluency</title></Helmet>
 
       <div className="space-y-6">
-        <BackToProjectPill />
+        <TradeBreadcrumb current="Order timeline" />
         <div>
           <h1 className="font-display text-2xl text-foreground">Order Timeline</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
