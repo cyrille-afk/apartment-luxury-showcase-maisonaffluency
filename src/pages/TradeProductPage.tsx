@@ -1032,7 +1032,7 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
-              {product.dimensions && !isDualAxis && !hasSingleAxisSplit && (
+              {product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
