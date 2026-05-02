@@ -28,7 +28,8 @@ const FeaturedReadBanner = () => {
 
   useEffect(() => {
     const load = async () => {
-      // Prefer admin-selected featured article
+      // Only show an explicitly admin-selected featured article.
+      // If none is starred, the banner stays hidden.
       const { data: featured } = await supabase
         .from("journal_articles")
         .select("slug, title, category, author")
@@ -38,20 +39,6 @@ const FeaturedReadBanner = () => {
 
       if (featured && featured.length > 0) {
         setArticle(featured[0] as FeaturedArticle);
-        setVisible(true);
-        return;
-      }
-
-      // Fallback: most recently published
-      const { data } = await supabase
-        .from("journal_articles")
-        .select("slug, title, category, author")
-        .eq("is_published", true)
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(1);
-
-      if (data && data.length > 0) {
-        setArticle(data[0] as FeaturedArticle);
         setVisible(true);
       }
     };
