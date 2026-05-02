@@ -12,6 +12,16 @@ type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
 
+type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
+
+const stageFromPath = (pathname: string): Stage => {
+  if (pathname.startsWith("/trade/quotes") || pathname.includes("/quote/")) return "Quote";
+  if (pathname.startsWith("/trade/boards") || pathname.startsWith("/trade/tearsheets")) return "Tearsheet";
+  if (pathname.startsWith("/trade/orders") || pathname.startsWith("/trade/order")) return "Order";
+  if (pathname.startsWith("/trade/projects")) return "Project";
+  return "Discover";
+};
+
 export function AIConcierge() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -22,9 +32,14 @@ export function AIConcierge() {
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [stageOverride, setStageOverride] = useState<Stage | null>(null);
+  const stage: Stage = stageOverride ?? stageFromPath(pathname);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Reset any sticky stage override when the route changes
+  useEffect(() => { setStageOverride(null); }, [pathname]);
 
   // auto-scroll
   useEffect(() => {
@@ -42,14 +57,16 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean }
+        | { message?: string; openPanel?: boolean; stage?: Stage }
         | undefined;
       const message = detail?.message?.trim();
-      if (!message) return;
-      setTimeline((prev) => [
-        ...prev,
-        { kind: "msg", role: "assistant", content: message },
-      ]);
+      if (message) {
+        setTimeline((prev) => [
+          ...prev,
+          { kind: "msg", role: "assistant", content: message },
+        ]);
+      }
+      if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
     };
     window.addEventListener("concierge:stage", handler as EventListener);
@@ -193,11 +210,18 @@ export function AIConcierge() {
       {open && (
         <div className="fixed bottom-20 md:bottom-6 right-4 z-[100] w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-6rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-accent" />
+            <div className="flex items-center gap-2 min-w-0">
+              <Sparkles className="h-4 w-4 text-accent shrink-0" />
               <span className="font-display text-sm uppercase tracking-widest">Concierge</span>
+              <span
+                className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
+                title={`Current workflow stage: ${stage}`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                Stage: {stage}
+              </span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
+            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Close">
               <X className="h-4 w-4" />
             </button>
           </div>
