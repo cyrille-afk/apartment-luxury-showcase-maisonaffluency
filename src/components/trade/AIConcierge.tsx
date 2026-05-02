@@ -12,6 +12,16 @@ type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
 
+type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
+
+const stageFromPath = (pathname: string): Stage => {
+  if (pathname.startsWith("/trade/quotes") || pathname.includes("/quote/")) return "Quote";
+  if (pathname.startsWith("/trade/boards") || pathname.startsWith("/trade/tearsheets")) return "Tearsheet";
+  if (pathname.startsWith("/trade/orders") || pathname.startsWith("/trade/order")) return "Order";
+  if (pathname.startsWith("/trade/projects")) return "Project";
+  return "Discover";
+};
+
 export function AIConcierge() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -22,9 +32,14 @@ export function AIConcierge() {
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [stageOverride, setStageOverride] = useState<Stage | null>(null);
+  const stage: Stage = stageOverride ?? stageFromPath(pathname);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Reset any sticky stage override when the route changes
+  useEffect(() => { setStageOverride(null); }, [pathname]);
 
   // auto-scroll
   useEffect(() => {
@@ -42,14 +57,16 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean }
+        | { message?: string; openPanel?: boolean; stage?: Stage }
         | undefined;
       const message = detail?.message?.trim();
-      if (!message) return;
-      setTimeline((prev) => [
-        ...prev,
-        { kind: "msg", role: "assistant", content: message },
-      ]);
+      if (message) {
+        setTimeline((prev) => [
+          ...prev,
+          { kind: "msg", role: "assistant", content: message },
+        ]);
+      }
+      if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
     };
     window.addEventListener("concierge:stage", handler as EventListener);
