@@ -598,7 +598,7 @@ const TradeProductPage: React.FC = () => {
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
-    const variantsForAxes = pricing?.size_variants || [];
+    const variantsForAxes = pricing?.size_variants || product.size_variants || [];
     const requiresBaseAndTopSelection =
       variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
       variantsForAxes.some((v: any) => v.top && String(v.top).trim());
