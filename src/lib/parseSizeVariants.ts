@@ -164,8 +164,14 @@ export function parseMaterialsFallback(raw: string | null | undefined): string[]
 export function computeVariantAxes(sv: SizeVariant[] | null | undefined): VariantAxes {
   const variants = sv || [];
   const hasVariants = variants.length > 0;
-  const isDualAxis =
-    hasVariants && variants.some((v) => (v.base && v.base.trim()) || (v.top && v.top.trim()));
+  // True dual-axis only when BOTH base and top axes are populated somewhere
+  // in the variants. Products that fill only `base` (e.g. Atelier Pendhapa
+  // "Mangala Coffee Table") are functionally single-axis on Base, and
+  // mis-classifying them as dual-axis breaks the variant_image_map resolver
+  // (it would refuse single-axis fallbacks once the user picks a finish).
+  const hasAnyBase = hasVariants && variants.some((v) => (v.base && v.base.trim()));
+  const hasAnyTop = hasVariants && variants.some((v) => (v.top && v.top.trim()));
+  const isDualAxis = hasAnyBase && hasAnyTop;
 
   const baseOptions = isDualAxis
     ? Array.from(new Set(variants.map((v) => (v.base || "").trim()).filter(Boolean)))
