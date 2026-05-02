@@ -466,12 +466,12 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     </>
                   );
                 }
-                return product.materials ? (
+                return materialOptions.length > 0 ? (
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-                    text={product.materials}
-                    placeholder="Select your material choice"
-                    autoSplit
+                    text={materialOptions.join("\n")}
+                    placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
+                    autoSplit={!hasAnyBase}
                     value={selectedMaterialIdx ?? null}
                     onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                   />
