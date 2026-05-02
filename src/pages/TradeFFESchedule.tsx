@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
-import BackToProjectPill from "@/components/trade/BackToProjectPill";
+import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import {
   downloadProcurementWorkbook,
   autoPoNumber,
