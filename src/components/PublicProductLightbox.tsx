@@ -206,10 +206,16 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   let finishImageIdx: number | undefined;
   if (finishMap && galleryImages.length > 0) {
     if (isDualAxis) {
+      // When either axis only offers one option, treat it as implicitly
+      // selected so picking the other axis still resolves the composite key.
+      // (ExpandableSpec collapses single-option axes into a static row that
+      // never fires onChange, so the selected index stays null.)
       const topLabel =
-        selectedTopIdx != null && selectedTopIdx >= 0 ? topOptionsForResolve[selectedTopIdx] : null;
-      // When the Base axis only offers one option, treat it as implicitly
-      // selected so picking just the Top still resolves the composite key.
+        selectedTopIdx != null && selectedTopIdx >= 0
+          ? topOptionsForResolve[selectedTopIdx]
+          : topOptionsForResolve.length === 1
+            ? topOptionsForResolve[0]
+            : null;
       const baseLabel =
         selectedBaseIdx != null && selectedBaseIdx >= 0
           ? baseOptions[selectedBaseIdx]
