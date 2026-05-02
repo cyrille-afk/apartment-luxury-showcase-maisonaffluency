@@ -910,12 +910,33 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {Array.from({ length: 3 }).map((_, i) => <QuoteItemSkeleton key={i} />)}
             </div>
           ) : items.length === 0 ? (
-            <div className="border border-dashed border-border rounded-lg p-12 text-center">
+            <div className="border border-dashed border-border rounded-lg p-8 md:p-12 text-center">
               <Package className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
               <p className="font-body text-sm text-muted-foreground mb-1">No items in this quote</p>
-              <p className="font-body text-[10px] text-muted-foreground">
-                Add products from the Trade Gallery to build your quote.
+              <p className="font-body text-[10px] text-muted-foreground mb-4">
+                Add a product below, or pick more from the Trade Gallery.
               </p>
+              <div className="max-w-sm mx-auto print:hidden">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1 min-w-0">
+                    <AlphabetProductPicker
+                      items={productOptions}
+                      value={pendingProductId}
+                      onChange={setPendingProductId}
+                      placeholder={productOptions.length === 0 ? "Loading catalogue…" : "Pick a product (A → Designer → Item)"}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddProduct(pendingProductId)}
+                    disabled={!pendingProductId || addingProduct}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {addingProduct ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    Add
+                  </button>
+                </div>
+              </div>
             </div>
           ) : (
             <>
