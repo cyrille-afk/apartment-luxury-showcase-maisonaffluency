@@ -237,7 +237,7 @@ export function AIConcierge() {
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 return (
-                  <div key={i} className={cn("flex", item.role === "user" ? "justify-end" : "justify-start")}>
+                  <div key={i} className={cn("flex flex-col gap-2", item.role === "user" ? "items-end" : "items-start")}>
                     <div
                       className={cn(
                         "max-w-[85%] rounded-2xl px-3.5 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap",
@@ -248,6 +248,20 @@ export function AIConcierge() {
                     >
                       {item.content}
                     </div>
+                    {item.role === "assistant" && item.actions && item.actions.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 max-w-[85%]">
+                        {item.actions.map((a, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => send(a.prompt)}
+                            disabled={streaming}
+                            className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 transition-colors px-3 py-1 font-body text-xs text-foreground disabled:opacity-40"
+                          >
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               }
