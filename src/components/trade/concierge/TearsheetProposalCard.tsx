@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
+import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
 
 interface Props {
   proposal: TearsheetProposal;
-  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode }) => void;
+  onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode; deferNavigation?: boolean }) => void;
 }
 
 export function TearsheetProposalCard({ proposal, onResolved }: Props) {
