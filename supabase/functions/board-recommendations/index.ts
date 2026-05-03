@@ -300,24 +300,55 @@ Return a JSON object with a recommendations array:
       parsed = []
     }
 
+    const anchorLabel = (i: number) => {
+      const it = boardItems[i];
+      if (!it) return null;
+      return { name: it.name, brand: it.brand, category: it.category };
+    };
+
+    const fallbackAnchors = (): Array<{ name: string; brand: string; category: string }> => {
+      // Pick the top 3 distinct-category board items as a generic anchor set
+      const seen = new Set<string>();
+      const out: Array<{ name: string; brand: string; category: string }> = [];
+      for (const it of boardItems) {
+        const key = (it.category || it.name || '').toLowerCase();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        out.push({ name: it.name, brand: it.brand, category: it.category });
+        if (out.length >= 3) break;
+      }
+      return out;
+    };
+
     const fallbackRecommendations = trimmed.slice(0, 8).map((item) => ({
       product_id: item.id,
       score: Math.max(50, Math.min(100, Math.round(item.score))),
       reason: item.fitNote,
       source: item.source,
+      anchors: fallbackAnchors(),
     }))
 
     const aiRecommendations = parsed
       .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < trimmed.length)
       .slice(0, 8)
-      .map((r: any) => ({
-        product_id: trimmed[r.index].id,
-        score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
-        reason: r.reason || trimmed[r.index].fitNote,
-        source: trimmed[r.index].source,
-      }))
+      .map((r: any) => {
+        const anchors = Array.isArray(r.anchors)
+          ? r.anchors
+              .filter((n: any) => Number.isInteger(n) && n >= 0 && n < boardItems.length)
+              .slice(0, 3)
+              .map(anchorLabel)
+              .filter(Boolean)
+          : [];
+        return {
+          product_id: trimmed[r.index].id,
+          score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
+          reason: r.reason || trimmed[r.index].fitNote,
+          source: trimmed[r.index].source,
+          anchors: anchors.length ? anchors : fallbackAnchors(),
+        };
+      });
 
-    const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade' }> = []
+    const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade'; anchors?: Array<{ name: string; brand: string; category: string }> }> = []
     const seenProductIds = new Set<string>()
 
     for (const recommendation of [...aiRecommendations, ...fallbackRecommendations]) {
