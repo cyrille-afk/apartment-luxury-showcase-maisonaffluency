@@ -165,19 +165,29 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[] }
+        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean }
         | undefined;
       const message = detail?.message?.trim();
+      if (detail?.resetPanel) {
+        setPos(null);
+        setExpanded(false);
+        setMinimized(false);
+        setNameMenuOpen(false);
+        setToneMenuOpen(false);
+        setLangMenuOpen(false);
+        try {
+          localStorage.removeItem("concierge:pos");
+          localStorage.removeItem("concierge:expanded");
+        } catch {}
+      }
       if (message) {
-        setTimeline((prev) => [
-          ...prev,
-          {
-            kind: "msg",
-            role: "assistant",
-            content: message,
-            actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
-          },
-        ]);
+        const welcomeMessage: TimelineItem = {
+          kind: "msg",
+          role: "assistant",
+          content: message,
+          actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+        };
+        setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
       if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
@@ -457,7 +467,7 @@ export function AIConcierge() {
       {!open && !isDashboard && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed top-[4.5rem] right-4 z-[100] flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2.5 shadow-lg hover:opacity-90 transition-opacity print:hidden"
+          className="fixed bottom-20 md:bottom-6 right-4 z-[100] flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2.5 shadow-lg hover:opacity-90 transition-opacity print:hidden"
           aria-label="Open AI Concierge"
         >
           <Sparkles className="h-3.5 w-3.5" />
