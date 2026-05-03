@@ -301,8 +301,8 @@ export default function TradeMoodBoards() {
     },
   });
 
-  const sourceProducts = filter === "favourites" ? favouriteProducts : filter === "board" ? boardProducts : products;
-  const sourceLoading = filter === "favourites" ? loadingFavs : filter === "board" ? loadingBoards : isLoading;
+  const sourceProducts = filter === "favourites" ? favouriteProducts : filter === "board" ? (projectId ? projectTearsheetProducts : boardProducts) : products;
+  const sourceLoading = filter === "favourites" ? loadingFavs : filter === "board" ? (projectId ? loadingProjectTearsheetProducts : loadingBoards) : isLoading;
 
   const filtered = sourceProducts.filter((p: any) =>
     !search || [p.product_name, p.brand_name].some((f: string) => f?.toLowerCase().includes(search.toLowerCase()))
@@ -333,7 +333,7 @@ export default function TradeMoodBoards() {
   const filterOptions: { key: PickerFilter; label: string; icon: React.ReactNode }[] = [
     { key: "all", label: "All", icon: <LayoutGrid className="h-3 w-3" /> },
     { key: "favourites", label: "Favourites", icon: <Heart className="h-3 w-3" /> },
-    { key: "board", label: "Projects", icon: <FolderOpen className="h-3 w-3" /> },
+    { key: "board", label: projectId ? "Tearsheet" : "Projects", icon: <FolderOpen className="h-3 w-3" /> },
   ];
 
   return (
@@ -486,7 +486,7 @@ export default function TradeMoodBoards() {
                 <div className="flex justify-center py-10"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
               ) : filtered.length === 0 ? (
                 <p className="font-body text-xs text-muted-foreground text-center py-8">
-                  {filter === "favourites" ? "No favourited products yet." : filter === "board" ? "No products in your project boards." : "No products found."}
+                  {filter === "favourites" ? "No favourited products yet." : filter === "board" ? (projectId ? "No products in this project's tearsheet yet." : "No products in your project boards.") : "No products found."}
                 </p>
               ) : (
                 filtered.slice(0, 100).map((p: any) => {
