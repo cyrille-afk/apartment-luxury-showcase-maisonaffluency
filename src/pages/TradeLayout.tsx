@@ -242,6 +242,7 @@ const TradeLayout = () => {
         <CompareDrawer />
         <AIConcierge />
         <QuickTour />
+        <BriefWizard />
         <BackToTopButton />
       </Suspense>
     </SidebarProvider>
