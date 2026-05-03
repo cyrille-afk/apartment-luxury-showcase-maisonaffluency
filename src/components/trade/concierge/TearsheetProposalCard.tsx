@@ -248,11 +248,14 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                 isExcluded && "opacity-40",
               )}
             >
-              {p.image_url ? (
-                <img src={p.image_url} alt="" className="h-10 w-10 rounded object-cover bg-muted" loading="lazy" />
-              ) : (
-                <div className="h-10 w-10 rounded bg-muted" />
-              )}
+              <div className="relative h-10 w-10 shrink-0">
+                {p.image_url ? (
+                  <img src={p.image_url} alt="" className="h-10 w-10 rounded object-cover bg-muted" loading="lazy" />
+                ) : (
+                  <div className="h-10 w-10 rounded bg-muted" />
+                )}
+                {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="font-body text-xs text-foreground truncate">{p.title}</div>
                 <div className="font-body text-[10px] text-muted-foreground truncate">
