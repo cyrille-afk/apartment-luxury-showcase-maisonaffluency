@@ -41,6 +41,11 @@ const TOOLS = [
               properties: {
                 id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
                 reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+                detail: {
+                  type: "string",
+                  description:
+                    "Longer 2–4 sentence editorial explanation (max ~600 chars) expanding on the reason: how the piece dialogues with the rest of the selection, its material/scale/silhouette logic, and what it adds vs the item it replaces (when relevant). Required when the pick is a replacement.",
+                },
               },
               required: ["id", "reason"],
               additionalProperties: false,
