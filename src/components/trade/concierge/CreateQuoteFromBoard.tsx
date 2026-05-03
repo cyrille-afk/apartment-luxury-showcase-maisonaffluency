@@ -157,16 +157,21 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
         return;
       }
 
-      const added = await insertItems(quote.id, eligibleItems);
+      const { added, byRoom } = await insertItems(quote.id, eligibleItems);
       await logAction(quote.id, "new");
+      const roomBreakdown = Object.entries(byRoom)
+        .sort((a, b) => b[1] - a[1])
+        .map(([r, n]) => `${r} (${n})`)
+        .join(", ");
       toast.success("Quote created", {
         description: `Pre-filled with ${added} ${added === 1 ? "item" : "items"} from this tearsheet.`,
       });
       window.dispatchEvent(new CustomEvent("concierge:stage", {
         detail: {
           stage: "Quote",
-          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}). What would you like to tackle next?`,
+          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}).${roomBreakdown ? ` Items have been pre-grouped by room — ${roomBreakdown}. You can refine the room assignments on each line.` : ""} What would you like to tackle next?`,
           actions: [
+            { label: "Refine rooms", prompt: "Help me refine the room assignments for the quote items — list them grouped by room and suggest changes for any that look off." },
             { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
             { label: "Add finishing details", prompt: "Help me add finishing details (fabric, finish, COM/COL, custom dimensions) to each line item. Start with the first one." },
             { label: "Prepare to send", prompt: "Help me get this quote ready to submit: review missing info, suggest a client-facing note, and outline the next step." },
