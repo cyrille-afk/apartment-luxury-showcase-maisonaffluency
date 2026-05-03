@@ -402,6 +402,7 @@ const TradeBoardBuilder = () => {
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
         )}
+        {item.product?.image_from_hotspot && <HotspotImageBadge />}
         {item.approval_status === "approved" && (
           <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
             <Check className="h-4 w-4 text-white" />
