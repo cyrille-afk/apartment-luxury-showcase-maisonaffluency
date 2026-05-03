@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import TradePriceToggle from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
-import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
+
 import { TierBadge } from "@/components/trade/TierBadge";
 
 
@@ -226,7 +226,7 @@ const TradeLayout = () => {
             </div>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-6 lg:pb-8">
-            <OrphanAssignBanner />
+            
             <Suspense fallback={
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
