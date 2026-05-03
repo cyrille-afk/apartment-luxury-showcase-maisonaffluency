@@ -204,10 +204,9 @@ export const DEFAULT_GREETING = greetingForContext("Discover", "/trade", DEFAULT
 
 const LANG_NAMES: Record<Lang, string> = {
   en: "English",
-  fr: "French",
-  it: "Italian",
-  es: "Spanish",
-  de: "German",
+  id: "Bahasa Indonesia",
+  th: "Thai",
+  zh: "Simplified Chinese",
 };
 
 // Style + language guidance appended to model context so streamed answers
