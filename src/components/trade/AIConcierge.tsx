@@ -503,7 +503,7 @@ export function AIConcierge() {
                       className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                     <div className="mt-1 font-body text-[10px] text-muted-foreground">
-                      Up to 32 characters · saved on this device
+                      Up to 32 characters · syncs to your account
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <button
