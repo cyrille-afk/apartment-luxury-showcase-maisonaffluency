@@ -95,6 +95,9 @@ const TradeDashboard = () => {
       const firstName = profile?.first_name?.trim();
       const greeting = `Welcome to Maison Affluency${firstName ? `, ${firstName}` : ""} — I'm ${conciergeName}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`;
 
+      // Mark welcome as pending so other UI (e.g. OrphanAssignBanner) stays out of the way
+      try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
+
       // Defer slightly so the AIConcierge listener is mounted
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent("concierge:stage", {

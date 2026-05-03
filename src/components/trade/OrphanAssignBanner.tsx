@@ -35,10 +35,21 @@ export function OrphanAssignBanner() {
   const [bulkProject, setBulkProject] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const [welcomePending, setWelcomePending] = useState<boolean>(() => {
+    try { return localStorage.getItem("ma:welcome-pending") === "1"; } catch { return false; }
+  });
+
+  useEffect(() => {
+    const onDismiss = () => setWelcomePending(false);
+    window.addEventListener("ma:welcome-dismissed", onDismiss);
+    return () => window.removeEventListener("ma:welcome-dismissed", onDismiss);
+  }, []);
+
   const path = location.pathname;
   const hidden =
     !user ||
     (!isTradeUser && !isAdmin) ||
+    welcomePending ||
     path.startsWith("/trade/login") ||
     path.startsWith("/trade/register") ||
     path.startsWith("/trade/admin");
