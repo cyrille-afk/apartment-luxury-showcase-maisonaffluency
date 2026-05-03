@@ -704,6 +704,7 @@ export function AIConcierge() {
               >
                 <X className="h-4 w-4" />
               </button>
+              </div>
             </div>
             {!minimized && (
               <div className="flex items-center pl-6">
