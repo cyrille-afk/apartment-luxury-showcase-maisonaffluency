@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS has_seen_trade_intro boolean NOT NULL DEFAULT false;
