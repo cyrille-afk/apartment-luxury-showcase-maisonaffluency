@@ -120,8 +120,37 @@ export default function TradeTools() {
         </p>
       </div>
 
-      {/* Favorites — only shown after the user stars at least one tool */}
-      {favoriteTools.length > 0 && (
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search tools by name or description…"
+          aria-label="Search tools"
+          className="w-full h-11 pl-10 pr-10 rounded-xl border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-foreground/40 focus:ring-2 focus:ring-foreground/5 transition-colors"
+        />
+        {query && (
+          <button
+            onClick={() => setQuery("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      {isSearching && (
+        <p className="font-body text-xs text-muted-foreground -mt-6">
+          {totalMatches === 0
+            ? `No tools match "${query.trim()}"`
+            : `${totalMatches} tool${totalMatches === 1 ? "" : "s"} matching "${query.trim()}"`}
+        </p>
+      )}
+
+      {/* Favorites — only shown after the user stars at least one tool, hidden while searching */}
+      {!isSearching && favoriteTools.length > 0 && (
         <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
           <div className="flex items-baseline justify-between gap-4 mb-4">
             <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground flex items-center gap-2">
