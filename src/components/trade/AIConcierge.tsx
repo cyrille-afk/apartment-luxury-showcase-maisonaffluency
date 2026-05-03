@@ -399,7 +399,7 @@ export function AIConcierge() {
             <div className="flex items-center gap-2 min-w-0">
               <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
               <Sparkles className="h-4 w-4 text-accent shrink-0" />
-              <span className="font-display text-sm uppercase tracking-widest">Concierge</span>
+              <span className="font-display text-sm uppercase tracking-widest truncate" title={name}>{name}</span>
               {!minimized && (
                 <span
                   className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
