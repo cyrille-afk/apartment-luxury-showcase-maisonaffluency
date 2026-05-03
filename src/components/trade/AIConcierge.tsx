@@ -116,6 +116,20 @@ export function AIConcierge() {
     return () => window.removeEventListener("resize", onResize);
   }, [pos, clampPos]);
 
+  // Refresh the opening greeting whenever the route changes — but only while
+  // the conversation is still pristine (a single assistant message). Once the
+  // user has interacted, we leave the timeline alone.
+  useEffect(() => {
+    setTimeline((prev) => {
+      if (prev.length !== 1) return prev;
+      const only = prev[0];
+      if (only.kind !== "msg" || only.role !== "assistant") return prev;
+      const next = greetingForContext(stageFromPath(pathname), pathname);
+      if (only.content === next) return prev;
+      return [{ kind: "msg", role: "assistant", content: next }];
+    });
+  }, [pathname]);
+
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
 
