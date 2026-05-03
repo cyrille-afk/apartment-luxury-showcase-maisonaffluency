@@ -109,6 +109,16 @@ export function QuickTour() {
     navigate(STEPS[prevIdx].path);
   }, [stepIdx, navigate]);
 
+  // Expose current step id on <body> so target tiles can self-spotlight via CSS.
+  useEffect(() => {
+    if (!active) {
+      document.body.removeAttribute("data-tour-step");
+      return;
+    }
+    document.body.setAttribute("data-tour-step", STEPS[stepIdx]?.id ?? "");
+    return () => { document.body.removeAttribute("data-tour-step"); };
+  }, [active, stepIdx, STEPS]);
+
   if (!active) return null;
   const step = STEPS[stepIdx];
   const Icon = step.icon;
