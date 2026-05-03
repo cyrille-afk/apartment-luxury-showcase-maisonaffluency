@@ -372,7 +372,7 @@ export function AIConcierge() {
           aria-label="Open AI Concierge"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          <span className="font-body text-[11px] uppercase tracking-widest hidden sm:inline">Concierge</span>
+          <span className="font-body text-[11px] uppercase tracking-widest hidden sm:inline">{name}</span>
         </button>
       )}
 
