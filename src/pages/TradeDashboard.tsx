@@ -86,9 +86,9 @@ const TradeDashboard = () => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      try {
-        if (localStorage.getItem("trade_quick_tour_done")) return;
-      } catch {}
+      // The DB flag `profiles.has_seen_trade_intro` is the single source of
+      // truth so an admin reset can always replay the welcome. We intentionally
+      // do NOT short-circuit on the localStorage `trade_quick_tour_done` flag.
 
       const { data } = await supabase
         .from("profiles")
