@@ -254,7 +254,14 @@ export function AIConcierge() {
     }
     if (text === "__concierge:start_tour__") {
       setInput("");
-      window.dispatchEvent(new Event("trade-tour:start"));
+      const fire = () => window.dispatchEvent(new Event("trade-tour:start"));
+      if (window.location.pathname !== "/trade") {
+        window.history.pushState({}, "", "/trade");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+        setTimeout(fire, 350);
+      } else {
+        fire();
+      }
       setTimeline((prev) => [
         ...prev,
         { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers, and brief setup. You can skip at any time." },
