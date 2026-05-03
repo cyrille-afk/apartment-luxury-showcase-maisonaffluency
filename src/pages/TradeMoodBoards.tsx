@@ -39,22 +39,94 @@ export default function TradeMoodBoards() {
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project");
   const [search, setSearch] = useState("");
-  const [board, setBoard] = useState<any[]>(() => loadBoardFromStorage(projectId));
+  const [board, setBoard] = useState<any[]>(() => projectId ? [] : loadBoardFromStorage(null));
   const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
   const prevBoardIdsRef = useRef<string>("");
+  const seededProjectRef = useRef<string | null>(null);
 
-  // Reload board when switching project
+  const { data: projectTearsheetProducts = [], isLoading: loadingProjectTearsheetProducts } = useQuery({
+    queryKey: ["mood-board-tearsheet-products", projectId, user?.id],
+    enabled: !!projectId && !!user,
+    queryFn: async () => {
+      const ids = new Set<string>();
+      const [quotesRes, boardsRes] = await Promise.all([
+        supabase.from("trade_quotes").select("id").eq("project_id", projectId!),
+        supabase.from("client_boards").select("id").eq("project_id", projectId!),
+      ]);
+
+      const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
+      const boardIds = (boardsRes.data || []).map((b: any) => b.id);
+      const [qItems, bItems] = await Promise.all([
+        quoteIds.length
+          ? supabase.from("trade_quote_items").select("product_id").in("quote_id", quoteIds)
+          : Promise.resolve({ data: [] as any[] }),
+        boardIds.length
+          ? supabase.from("client_board_items").select("product_id").in("board_id", boardIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+
+      (qItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+      (bItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+      const idArr = Array.from(ids);
+      if (!idArr.length) return [];
+
+      const [tradeRes, curatorRes] = await Promise.all([
+        supabase.from("trade_products").select("id, product_name, brand_name, image_url, category").in("id", idArr).not("image_url", "is", null),
+        supabase.from("designer_curator_picks").select("id, title, image_url, category, designer_id").in("id", idArr).not("image_url", "is", null),
+      ]);
+
+      const designerIds = [...new Set((curatorRes.data || []).map((p: any) => p.designer_id).filter(Boolean))];
+      let designerMap = new Map<string, string>();
+      if (designerIds.length > 0) {
+        const { data: designers } = await supabase.from("designers").select("id, name").in("id", designerIds);
+        designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]));
+      }
+
+      const byId = new Map<string, any>();
+      (tradeRes.data || []).forEach((p: any) => byId.set(p.id, {
+        id: p.id,
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+        image_url: p.image_url,
+        category: p.category,
+        source: "trade",
+      }));
+      (curatorRes.data || []).forEach((p: any) => byId.set(p.id, {
+        id: p.id,
+        product_name: p.title,
+        brand_name: designerMap.get(p.designer_id) || "Unknown",
+        image_url: p.image_url,
+        category: p.category || "",
+        source: "curator",
+      }));
+
+      return idArr.map((id) => byId.get(id)).filter(Boolean);
+    },
+  });
+
+  // Project mood boards are seeded from that project's tearsheet products, not legacy local storage.
   useEffect(() => {
-    setBoard(loadBoardFromStorage(projectId));
+    setBoard(projectId ? [] : loadBoardFromStorage(null));
     prevBoardIdsRef.current = "";
+    seededProjectRef.current = null;
+    setRecommendations([]);
+    setRecError(null);
   }, [projectId]);
 
-  // Persist board to localStorage on change (per project)
   useEffect(() => {
-    localStorage.setItem(storageKeyFor(projectId), JSON.stringify(board));
+    if (!projectId || loadingProjectTearsheetProducts) return;
+    const seedKey = `${projectId}:${projectTearsheetProducts.map((p: any) => p.id).sort().join(",")}`;
+    if (seededProjectRef.current === seedKey) return;
+    seededProjectRef.current = seedKey;
+    setBoard(projectTearsheetProducts);
+  }, [projectId, loadingProjectTearsheetProducts, projectTearsheetProducts]);
+
+  // Persist the free-form builder only; project mode should always reflect project tearsheets.
+  useEffect(() => {
+    if (!projectId) localStorage.setItem(storageKeyFor(null), JSON.stringify(board));
   }, [board, projectId]);
 
   // Auto-fetch recommendations when board has 2+ items and composition changes
@@ -80,7 +152,7 @@ export default function TradeMoodBoards() {
     setRecError(null);
     try {
       const { data, error } = await supabase.functions.invoke("board-recommendations", {
-        body: { product_ids: productIds, source: "mood_board" },
+        body: { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId },
       });
       if (error) throw error;
       if (data?.recommendations) {
@@ -95,7 +167,7 @@ export default function TradeMoodBoards() {
             .map((r) => `- **${r.title}**${r.brand ? ` · ${r.brand}` : ""} — ${r.reason}`)
             .join("\n");
           const message =
-            `I've pulled ${top.length} complement${top.length === 1 ? "" : "s"} for the mood you're building. ` +
+            `${projectId ? "I used this project's tearsheet products as the anchors and" : "I've"} pulled ${top.length} complement${top.length === 1 ? "" : "s"} for the mood you're building. ` +
             `Here's why each was chosen:\n\n${bullets}\n\n` +
             `Tap any thumbnail to drop it onto the board, or ask me to refine the direction (warmer palette, smaller scale, more sculptural, etc.).`;
           window.dispatchEvent(
@@ -103,7 +175,7 @@ export default function TradeMoodBoards() {
               detail: {
                 stage: "Tearsheet",
                 message,
-                openPanel: false,
+                  openPanel: !!projectId,
                 actions: [
                   { label: "Make it warmer", prompt: "Suggest complements with a warmer, earthier palette for my current mood board." },
                   { label: "More sculptural", prompt: "Replace the current complements with more sculptural, statement pieces." },
@@ -120,7 +192,7 @@ export default function TradeMoodBoards() {
     } finally {
       setRecLoading(false);
     }
-  }, []);
+  }, [projectId]);
 
   // All products: merge trade_products + designer_curator_picks
   const { data: products = [], isLoading } = useQuery({
