@@ -3579,6 +3579,7 @@ export type Database = {
           product_id: string
           quantity: number
           quote_id: string
+          room: string | null
           unit_price_cents: number | null
           variant_label: string | null
         }
@@ -3594,6 +3595,7 @@ export type Database = {
           product_id: string
           quantity?: number
           quote_id: string
+          room?: string | null
           unit_price_cents?: number | null
           variant_label?: string | null
         }
@@ -3609,6 +3611,7 @@ export type Database = {
           product_id?: string
           quantity?: number
           quote_id?: string
+          room?: string | null
           unit_price_cents?: number | null
           variant_label?: string | null
         }
