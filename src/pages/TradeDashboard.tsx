@@ -105,7 +105,7 @@ const TradeDashboard = () => {
             openPanel: true,
             message: greeting,
             actions: [
-              { label: "Quick tour", prompt: "__concierge:start_tour__" },
+              { label: "Start Quick Tour", prompt: "__concierge:start_tour__", primary: true },
               { label: "Start from a brief", prompt: "__concierge:start_brief__" },
               { label: `Rename ${conciergeName}`, prompt: "__concierge:rename__" },
             ],

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export type ConciergeQuickAction = { label: string; prompt: string };
+export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
@@ -254,7 +254,14 @@ export function AIConcierge() {
     }
     if (text === "__concierge:start_tour__") {
       setInput("");
-      window.dispatchEvent(new Event("trade-tour:start"));
+      const fire = () => window.dispatchEvent(new Event("trade-tour:start"));
+      if (window.location.pathname !== "/trade") {
+        window.history.pushState({}, "", "/trade");
+        window.dispatchEvent(new PopStateEvent("popstate"));
+        setTimeout(fire, 350);
+      } else {
+        fire();
+      }
       setTimeline((prev) => [
         ...prev,
         { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers, and brief setup. You can skip at any time." },
@@ -781,8 +788,14 @@ export function AIConcierge() {
                             key={idx}
                             onClick={() => send(a.prompt)}
                             disabled={streaming}
-                            className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 transition-colors px-3 py-1 font-body text-xs text-foreground disabled:opacity-40"
+                            className={cn(
+                              "rounded-full border transition-colors px-3 py-1 font-body text-xs disabled:opacity-40",
+                              a.primary
+                                ? "border-foreground bg-foreground text-background hover:opacity-90 px-4 py-1.5 text-[13px] shadow-sm inline-flex items-center gap-1.5"
+                                : "border-border bg-background hover:bg-accent/10 hover:border-accent/40 text-foreground"
+                            )}
                           >
+                            {a.primary && <Sparkles className="h-3 w-3" />}
                             {a.label}
                           </button>
                         ))}
