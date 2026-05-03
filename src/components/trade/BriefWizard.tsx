@@ -214,14 +214,36 @@ export function BriefWizard() {
     } catch {}
   }, [answers, stepIdx]);
 
+  // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
-    const onOpen = () => {
-      // keep draft if present, otherwise start fresh with defaults
+    if (!user || prefilled) return;
+    let cancelled = false;
+    const hasDraft = (() => { try { return !!localStorage.getItem(DRAFT_KEY); } catch { return false; } })();
+    if (hasDraft) { setPrefilled(true); return; }
+    buildPrefill(user.id).then((p) => {
+      if (cancelled || Object.keys(p).length === 0) { setPrefilled(true); return; }
+      setAnswers((prev) => ({ ...prev, ...p }));
+      setPrefilled(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, prefilled]);
+
+  useEffect(() => {
+    const onOpen = async () => {
+      // keep draft if present, otherwise start fresh with defaults + prefill
       try {
         const raw = localStorage.getItem(DRAFT_KEY);
         if (!raw) {
           setStepIdx(0);
-          setAnswers(initialAnswers);
+          const base = { ...initialAnswers };
+          if (user) {
+            const p = await buildPrefill(user.id);
+            Object.assign(base, p);
+          }
+          setAnswers(base);
+          if (Object.keys(base).some((k) => (base as any)[k] !== (initialAnswers as any)[k])) {
+            toast.success("Pre-filled a few fields from your last project — tweak as needed.");
+          }
         }
       } catch {
         setStepIdx(0);
@@ -233,7 +255,7 @@ export function BriefWizard() {
     };
     window.addEventListener("trade-brief:open", onOpen);
     return () => window.removeEventListener("trade-brief:open", onOpen);
-  }, []);
+  }, [user]);
 
   const set = <K extends keyof Answers>(key: K, value: Answers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
