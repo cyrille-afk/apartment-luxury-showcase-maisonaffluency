@@ -314,43 +314,52 @@ async function hydratePickPreview(
   const pickById = new Map((picks || []).map((p: any) => [p.id, p]));
   const tradeById = new Map((trades || []).map((t: any) => [t.id, t]));
 
-  // Build a fallback image map from gallery_hotspots for products that have
-  // no image_url stored on their main row (e.g. Giudecca Rug — the only
-  // photo lives on the hotspot). Keyed by normalized product_name.
+  // Build a fallback image map from gallery_hotspots so any product whose
+  // main row lacks image_url (e.g. rugs like Giudecca, where the only photo
+  // lives on a hotspot) still renders a thumbnail. We always fetch — keyed
+  // by normalized product_name AND by brand|name so brand-collision titles
+  // (e.g. two "Side Table"s) don't cross over.
   const normName = (s: string) =>
     String(s || "").toLowerCase().replace(/\s*\(.*?\)\s*/g, "").replace(/[^a-z0-9]+/g, "").trim();
-  const missingNames = new Set<string>();
-  for (const id of pickIds) {
-    const p = pickById.get(id);
-    if (p && !p.image_url) missingNames.add(normName(p.title));
-    const t = tradeById.get(id);
-    if (t && !t.image_url) missingNames.add(normName(t.product_name));
-  }
-  const hotspotImageByName = new Map<string, string>();
-  if (missingNames.size) {
-    const { data: hotspots } = await supabase
-      .from("gallery_hotspots")
-      .select("product_name, product_image_url")
-      .not("product_image_url", "is", null);
-    (hotspots || []).forEach((h: any) => {
-      const key = normName(h.product_name);
-      if (key && missingNames.has(key) && !hotspotImageByName.has(key)) {
-        hotspotImageByName.set(key, h.product_image_url);
-      }
-    });
-  }
+  const normBrand = (s: string) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+
+  const { data: hotspots } = await supabase
+    .from("gallery_hotspots")
+    .select("product_name, designer_name, product_image_url")
+    .not("product_image_url", "is", null);
+
+  const hotspotByName = new Map<string, string>();
+  const hotspotByBrandName = new Map<string, string>();
+  (hotspots || []).forEach((h: any) => {
+    const nKey = normName(h.product_name);
+    if (nKey && !hotspotByName.has(nKey)) hotspotByName.set(nKey, h.product_image_url);
+    const bKey = `${normBrand(h.designer_name)}|${nKey}`;
+    if (nKey && !hotspotByBrandName.has(bKey)) hotspotByBrandName.set(bKey, h.product_image_url);
+  });
+
+  const resolveHotspotImage = (title: string, brand?: string | null) => {
+    const nKey = normName(title);
+    if (!nKey) return null;
+    if (brand) {
+      const bKey = `${normBrand(brand)}|${nKey}`;
+      const hit = hotspotByBrandName.get(bKey);
+      if (hit) return hit;
+    }
+    return hotspotByName.get(nKey) || null;
+  };
 
   return pickIds
     .map((id) => {
       const p = pickById.get(id);
       if (p) {
+        const designer = dmap.get(p.designer_id) || null;
         return {
           id: p.id,
           title: p.title,
-          image_url: p.image_url || hotspotImageByName.get(normName(p.title)) || null,
+          image_url: p.image_url || resolveHotspotImage(p.title, designer),
           materials: p.materials,
           category: p.category,
-          designer_name: dmap.get(p.designer_id) || null,
+          designer_name: designer,
         };
       }
       const t = tradeById.get(id);
@@ -360,7 +369,7 @@ async function hydratePickPreview(
         return {
           id: t.id,
           title: t.product_name,
-          image_url: t.image_url || hotspotImageByName.get(normName(t.product_name)) || null,
+          image_url: t.image_url || resolveHotspotImage(t.product_name, baseBrand),
           materials: t.materials,
           category: t.category,
           designer_name: baseBrand || null,
