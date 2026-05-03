@@ -131,10 +131,11 @@ const TradeDashboard = () => {
       }));
 
       try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
+      window.dispatchEvent(new CustomEvent("ma:welcome-pending"));
 
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent("concierge:stage", {
-          detail: { openPanel: true, message: greeting, actions },
+          detail: { openPanel: true, resetPanel: true, replaceTimeline: true, message: greeting, actions },
         }));
       }, 600);
 
