@@ -2,18 +2,21 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 type PickerFilter = "all" | "favourites" | "board";
 
-const BOARD_STORAGE_KEY = "mood-board-items";
+const BOARD_STORAGE_KEY_BASE = "mood-board-items";
+const storageKeyFor = (projectId: string | null) =>
+  projectId ? `${BOARD_STORAGE_KEY_BASE}:${projectId}` : BOARD_STORAGE_KEY_BASE;
 
-function loadBoardFromStorage(): any[] {
+function loadBoardFromStorage(projectId: string | null): any[] {
   try {
-    const stored = localStorage.getItem(BOARD_STORAGE_KEY);
+    const stored = localStorage.getItem(storageKeyFor(projectId));
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
