@@ -491,8 +491,7 @@ export function AIConcierge() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          const saved = saveName(nameDraft);
-                          setName(saved);
+                          void persistName(nameDraft);
                           setNameMenuOpen(false);
                         } else if (e.key === "Escape") {
                           setNameMenuOpen(false);
