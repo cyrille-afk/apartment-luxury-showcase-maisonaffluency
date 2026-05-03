@@ -12,7 +12,7 @@ export type ConciergeQuickAction = { label: string; prompt: string };
 
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
-  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[] };
 
 type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
 
