@@ -33,6 +33,7 @@ import {
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
 import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
+import { fillHotspotImages } from "@/lib/hotspotImageFallback";
 
 interface Board {
   id: string;
