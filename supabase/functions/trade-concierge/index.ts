@@ -694,6 +694,16 @@ serve(async (req) => {
 
     const stream = new ReadableStream({
       async start(controller) {
+        // Emit escalation event up-front when the classifier flagged it.
+        if (sentiment.escalate) {
+          const payload = {
+            sentiment: sentiment.sentiment,
+            intent: sentiment.intent,
+            user_id: userId,
+            excerpt: messages.slice(-4),
+          };
+          controller.enqueue(encoder.encode(`event: escalation\ndata: ${JSON.stringify(payload)}\n\n`));
+        }
         const flushProposal = async () => {
           for (const tc of toolCallBuffers.values()) {
             if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
