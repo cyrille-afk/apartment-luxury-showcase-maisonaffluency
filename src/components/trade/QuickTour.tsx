@@ -137,8 +137,8 @@ export function QuickTour() {
       </div>
 
       {onStepRoute && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] w-[calc(100vw-2rem)] max-w-md print:hidden animate-fade-in">
-          <div key={`card-${stepIdx}`} className="rounded-2xl border border-border bg-background shadow-2xl p-4 animate-scale-in">
+        <div className="fixed bottom-6 left-4 z-[120] w-[calc(100vw-2rem)] max-w-sm md:max-w-md print:hidden animate-fade-in">
+          <div key={`card-${stepIdx}`} className="rounded-2xl border border-border bg-muted text-foreground shadow-2xl p-4 animate-scale-in">
             <div className="flex items-start gap-3">
               <div className="shrink-0 h-9 w-9 rounded-full bg-accent/15 flex items-center justify-center">
                 <Icon className="h-4 w-4 text-accent" />
