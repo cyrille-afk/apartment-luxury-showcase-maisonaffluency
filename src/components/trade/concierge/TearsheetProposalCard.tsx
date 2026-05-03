@@ -280,124 +280,173 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         </div>
       )}
 
-      {/* Picks */}
-      <ul className="space-y-1.5 mb-3">
-        {uniquePreview.map((p) => {
-          const isExcluded = excluded.has(p.id);
-          const isNew = newPickIds ? newPickIds.includes(p.id) : false;
-          // Prefer the rationale baked onto the preview by the edge function;
-          // fall back to the per-id map on args for resilience.
-          const fromArgs = proposal.args.pick_rationales?.[p.id];
-          const rationale = (p as any).rationale || fromArgs?.reason || null;
-          const rationaleDetail =
-            (p as any).rationale_detail || fromArgs?.detail || null;
-          const showRationale = isNew && !!rationale;
-          const isExpanded = expandedDetail.has(p.id);
-          const toggleDetail = () => {
+      {/* Picks — grouped by designer so each section has its own collapse-all */}
+      {(() => {
+        // Stable groups in first-appearance order. Use "—" as the sectionless bucket.
+        const groupOrder: string[] = [];
+        const groups = new Map<string, typeof uniquePreview>();
+        for (const p of uniquePreview) {
+          const key = p.designer_name || "—";
+          if (!groups.has(key)) {
+            groups.set(key, []);
+            groupOrder.push(key);
+          }
+          groups.get(key)!.push(p);
+        }
+
+        return groupOrder.map((groupName) => {
+          const items = groups.get(groupName)!;
+          const groupIds = items.map((p) => p.id);
+          const expandedInGroup = groupIds.filter((id) => expandedDetail.has(id));
+          const collapseGroup = () => {
             setExpandedDetail((prev) => {
               const next = new Set(prev);
-              if (next.has(p.id)) next.delete(p.id);
-              else next.add(p.id);
+              for (const id of groupIds) next.delete(id);
               persistExpanded(next);
               return next;
             });
           };
+
           return (
-            <li
-              key={p.id}
-              className={cn(
-                "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
-                isExcluded && "opacity-40",
-              )}
-            >
-              <div className="relative h-10 w-10 shrink-0">
-                {p.image_url ? (
-                  <img src={p.image_url} alt="" className="h-10 w-10 rounded object-cover bg-muted" loading="lazy" />
-                ) : (
-                  <div className="h-10 w-10 rounded bg-muted" />
+            <div key={groupName} className="mb-2.5 last:mb-3">
+              <div className="flex items-center justify-between gap-2 px-1.5 mb-1">
+                <span className="font-display text-[10px] uppercase tracking-widest text-muted-foreground truncate">
+                  {groupName}
+                </span>
+                {expandedInGroup.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={collapseGroup}
+                    className="shrink-0 inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={`Collapse all reasoning in ${groupName}`}
+                  >
+                    <ChevronDown className="h-2.5 w-2.5 rotate-180" />
+                    Collapse ({expandedInGroup.length})
+                  </button>
                 )}
-                {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <div className="font-body text-xs text-foreground truncate">{p.title}</div>
-                  {isNew && (
-                    <span className="shrink-0 rounded-full bg-accent/15 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
-                      New
-                    </span>
-                  )}
-                </div>
-                <div className="font-body text-[10px] text-muted-foreground truncate">
-                  {p.designer_name || "—"}{p.materials ? ` · ${p.materials}` : ""}
-                </div>
-                {showRationale && (
-                  <>
-                    <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">
-                      {rationale}
-                    </div>
-                    {(rationaleDetail || rationale) && (
-                      <div className="mt-1 flex items-center gap-2">
-                        {rationaleDetail && (
-                          <button
-                            type="button"
-                            onClick={toggleDetail}
-                            aria-expanded={isExpanded}
-                            className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-accent hover:text-accent/80 transition-colors"
-                          >
-                            <ChevronDown
-                              className={cn(
-                                "h-2.5 w-2.5 transition-transform",
-                                isExpanded && "rotate-180",
-                              )}
-                            />
-                            {isExpanded ? "Hide reasoning" : "Why this pick"}
-                          </button>
+              <ul className="space-y-1.5">
+                {items.map((p) => {
+                  const isExcluded = excluded.has(p.id);
+                  const isNew = newPickIds ? newPickIds.includes(p.id) : false;
+                  const fromArgs = proposal.args.pick_rationales?.[p.id];
+                  const rationale = (p as any).rationale || fromArgs?.reason || null;
+                  const rationaleDetail =
+                    (p as any).rationale_detail || fromArgs?.detail || null;
+                  const showRationale = isNew && !!rationale;
+                  const isExpanded = expandedDetail.has(p.id);
+                  const toggleDetail = () => {
+                    setExpandedDetail((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(p.id)) next.delete(p.id);
+                      else next.add(p.id);
+                      persistExpanded(next);
+                      return next;
+                    });
+                  };
+                  return (
+                    <li
+                      key={p.id}
+                      className={cn(
+                        "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
+                        isExcluded && "opacity-40",
+                      )}
+                    >
+                      <div className="relative h-10 w-10 shrink-0">
+                        {p.image_url ? (
+                          <img src={p.image_url} alt="" className="h-10 w-10 rounded object-cover bg-muted" loading="lazy" />
+                        ) : (
+                          <div className="h-10 w-10 rounded bg-muted" />
                         )}
+                        {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <div className="font-body text-xs text-foreground truncate">{p.title}</div>
+                          {isNew && (
+                            <span className="shrink-0 rounded-full bg-accent/15 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
+                              New
+                            </span>
+                          )}
+                        </div>
+                        {p.materials && (
+                          <div className="font-body text-[10px] text-muted-foreground truncate">
+                            {p.materials}
+                          </div>
+                        )}
+                        {showRationale && (
+                          <>
+                            <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">
+                              {rationale}
+                            </div>
+                            {(rationaleDetail || rationale) && (
+                              <div className="mt-1 flex items-center gap-2">
+                                {rationaleDetail && (
+                                  <button
+                                    type="button"
+                                    onClick={toggleDetail}
+                                    aria-expanded={isExpanded}
+                                    className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-accent hover:text-accent/80 transition-colors"
+                                  >
+                                    <ChevronDown
+                                      className={cn(
+                                        "h-2.5 w-2.5 transition-transform",
+                                        isExpanded && "rotate-180",
+                                      )}
+                                    />
+                                    {isExpanded ? "Hide reasoning" : "Why this pick"}
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    const parts = [
+                                      `${p.title}${p.designer_name ? ` — ${p.designer_name}` : ""}`,
+                                      rationale,
+                                      rationaleDetail || undefined,
+                                    ].filter(Boolean) as string[];
+                                    const text = parts.join("\n\n");
+                                    try {
+                                      await navigator.clipboard.writeText(text);
+                                      toast.success("Reasoning copied");
+                                    } catch {
+                                      toast.error("Could not copy to clipboard");
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                                  aria-label="Copy reasoning for this pick"
+                                  title="Copy reasoning"
+                                >
+                                  <Copy className="h-2.5 w-2.5" />
+                                  Copy reasoning
+                                </button>
+                              </div>
+                            )}
+                            {rationaleDetail && isExpanded && (
+                              <div className="mt-1 rounded-md border border-accent/30 bg-accent/[0.04] px-2 py-1.5 font-body text-[10.5px] text-foreground/80 leading-relaxed animate-fade-in">
+                                {rationaleDetail}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {status === "pending" && (
                         <button
-                          type="button"
-                          onClick={async () => {
-                            const parts = [
-                              `${p.title}${p.designer_name ? ` — ${p.designer_name}` : ""}`,
-                              rationale,
-                              rationaleDetail || undefined,
-                            ].filter(Boolean) as string[];
-                            const text = parts.join("\n\n");
-                            try {
-                              await navigator.clipboard.writeText(text);
-                              toast.success("Reasoning copied");
-                            } catch {
-                              toast.error("Could not copy to clipboard");
-                            }
-                          }}
-                          className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Copy reasoning for this pick"
-                          title="Copy reasoning"
+                          onClick={() => togglePick(p.id)}
+                          className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border self-center"
+                          aria-label={isExcluded ? "Include" : "Exclude"}
                         >
-                          <Copy className="h-2.5 w-2.5" />
-                          Copy reasoning
+                          {isExcluded ? "Add" : "Skip"}
                         </button>
-                      </div>
-                    )}
-                    {rationaleDetail && isExpanded && (
-                      <div className="mt-1 rounded-md border border-accent/30 bg-accent/[0.04] px-2 py-1.5 font-body text-[10.5px] text-foreground/80 leading-relaxed animate-fade-in">
-                        {rationaleDetail}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-              {status === "pending" && (
-                <button
-                  onClick={() => togglePick(p.id)}
-                  className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border self-center"
-                  aria-label={isExcluded ? "Include" : "Exclude"}
-                >
-                  {isExcluded ? "Add" : "Skip"}
-                </button>
-              )}
-            </li>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           );
-        })}
+        });
+      })()}
       </ul>
 
       {error && (
