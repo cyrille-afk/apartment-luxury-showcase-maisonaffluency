@@ -627,11 +627,18 @@ serve(async (req) => {
       userId = u?.user?.id || null;
     }
 
-    const [{ designersList, piecesList, showroomBrands }, userBoards] = await Promise.all([
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
+
+    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment] = await Promise.all([
       loadCatalogContext(supabase),
       loadUserBoards(supabase, userId),
+      loadUserSignals(supabase, userId),
+      classifySentiment(LOVABLE_API_KEY, lastUserMsg),
     ]);
-    const systemPrompt = buildSystemPrompt(designersList, piecesList, showroomBrands, userBoards);
+    const sentimentDirective = buildSentimentDirective(sentiment);
+    const systemPrompt = buildSystemPrompt(
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective,
+    );
 
     const upstream = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
