@@ -129,6 +129,7 @@ Rules for both tools:
 - pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CATALOG PIECES. Never invent IDs.
 - For \`add_to_tearsheet\`, board_id MUST be a UUID from USER'S EXISTING TEARSHEETS — never invent.
 - Aim for 4–12 pieces per proposal — enough to feel like a curated edit, not a single suggestion.
+- ALWAYS populate \`pick_rationales\` with a short one-sentence reason for every NEW pick (any id not in the previous KEPT list). When replacing a removed item, the reason should briefly explain why this replacement honours the brief or addresses what the removed item was missing. Reasons must be specific (material, scale, mood, designer language) — never generic ("a great fit").
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
 - If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
 
