@@ -80,12 +80,12 @@ const TradeDashboard = () => {
 
   // First-session welcome: auto-open the AI Concierge with a personalised greeting
   // and a prompt to rename it. Gated by profiles.has_seen_trade_intro so it only fires once.
+  // Greeting template + buttons are loaded from `onboarding_flow_config` so an admin
+  // can edit the flow at /trade/admin/onboarding without touching code.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      // Local suppression: if the user already finished/skipped the quick tour
-      // on this device, don't prompt again even if the DB flag is reset.
       try {
         if (localStorage.getItem("trade_quick_tour_done")) return;
       } catch {}
@@ -97,29 +97,47 @@ const TradeDashboard = () => {
         .maybeSingle();
       if (cancelled || !data || data.has_seen_trade_intro !== false) return;
 
+      // Pull editable flow config (singleton row id='default')
+      const { data: cfg } = await supabase
+        .from("onboarding_flow_config")
+        .select("greeting_template, buttons, is_enabled")
+        .eq("id", "default")
+        .maybeSingle();
+
+      if (cfg && cfg.is_enabled === false) {
+        await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
+        return;
+      }
+
       const conciergeName = loadName() || DEFAULT_NAME;
       const firstName = profile?.first_name?.trim();
-      const greeting = `Welcome to Maison Affluency${firstName ? `, ${firstName}` : ""} — I'm ${conciergeName}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`;
+      const tpl = (cfg?.greeting_template as string | undefined) ||
+        `Welcome to Maison Affluency{first_name_comma} — I'm {concierge_name}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`;
+      const subst = (s: string) => s
+        .replace(/\{first_name_comma\}/g, firstName ? `, ${firstName}` : "")
+        .replace(/\{first_name\}/g, firstName || "")
+        .replace(/\{concierge_name\}/g, conciergeName);
+      const greeting = subst(tpl);
 
-      // Mark welcome as pending so other UI (e.g. OrphanAssignBanner) stays out of the way
+      const rawButtons = (cfg?.buttons as any[] | undefined) || [
+        { label: "Start Quick Tour", prompt: "__concierge:start_tour__", primary: true },
+        { label: "Start from a brief", prompt: "__concierge:start_brief__" },
+        { label: `Rename {concierge_name}`, prompt: "__concierge:rename__" },
+      ];
+      const actions = rawButtons.map((b) => ({
+        label: subst(String(b.label || "")),
+        prompt: String(b.prompt || ""),
+        primary: !!b.primary,
+      }));
+
       try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
 
-      // Defer slightly so the AIConcierge listener is mounted
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent("concierge:stage", {
-          detail: {
-            openPanel: true,
-            message: greeting,
-            actions: [
-              { label: "Start Quick Tour", prompt: "__concierge:start_tour__", primary: true },
-              { label: "Start from a brief", prompt: "__concierge:start_brief__" },
-              { label: `Rename ${conciergeName}`, prompt: "__concierge:rename__" },
-            ],
-          },
+          detail: { openPanel: true, message: greeting, actions },
         }));
       }, 600);
 
-      // Mark as seen so it doesn't re-fire on next visit
       await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
     })();
     return () => { cancelled = true; };
