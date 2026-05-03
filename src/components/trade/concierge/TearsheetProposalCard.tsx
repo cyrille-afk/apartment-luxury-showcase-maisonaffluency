@@ -243,11 +243,19 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       <ul className="space-y-1.5 mb-3">
         {uniquePreview.map((p) => {
           const isExcluded = excluded.has(p.id);
+          const isNew = newPickIds ? newPickIds.includes(p.id) : false;
+          // Prefer the rationale baked onto the preview by the edge function;
+          // fall back to the per-id map on args for resilience.
+          const rationale =
+            (p as any).rationale ||
+            proposal.args.pick_rationales?.[p.id] ||
+            null;
+          const showRationale = isNew && !!rationale;
           return (
             <li
               key={p.id}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg p-1.5 transition-opacity",
+                "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
                 isExcluded && "opacity-40",
               )}
             >
@@ -260,15 +268,27 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                 {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-body text-xs text-foreground truncate">{p.title}</div>
+                <div className="flex items-center gap-1.5">
+                  <div className="font-body text-xs text-foreground truncate">{p.title}</div>
+                  {isNew && (
+                    <span className="shrink-0 rounded-full bg-accent/15 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
+                      New
+                    </span>
+                  )}
+                </div>
                 <div className="font-body text-[10px] text-muted-foreground truncate">
                   {p.designer_name || "—"}{p.materials ? ` · ${p.materials}` : ""}
                 </div>
+                {showRationale && (
+                  <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">
+                    {rationale}
+                  </div>
+                )}
               </div>
               {status === "pending" && (
                 <button
                   onClick={() => togglePick(p.id)}
-                  className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border"
+                  className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border self-center"
                   aria-label={isExcluded ? "Include" : "Exclude"}
                 >
                   {isExcluded ? "Add" : "Skip"}
