@@ -254,6 +254,40 @@ const LANG_NAMES: Record<Lang, string> = {
 
 // Style + language guidance appended to model context so streamed answers
 // match the user's selected tone AND language (not just the opener).
+// Custom concierge name — trade users can personalise how they address the
+// assistant (e.g. "Margaux", "Atelier"). Persisted per-device in localStorage.
+export const DEFAULT_NAME = "Concierge";
+const NAME_KEY = "concierge:name";
+const MAX_NAME_LEN = 32;
+
+export const sanitizeName = (raw: string): string => {
+  // Strip control chars + collapse whitespace, cap length.
+  const cleaned = (raw || "").replace(/[\u0000-\u001f<>]/g, "").replace(/\s+/g, " ").trim();
+  return cleaned.slice(0, MAX_NAME_LEN);
+};
+
+export const loadName = (): string => {
+  try {
+    const raw = localStorage.getItem(NAME_KEY);
+    const v = raw ? sanitizeName(raw) : "";
+    return v || DEFAULT_NAME;
+  } catch {
+    return DEFAULT_NAME;
+  }
+};
+
+export const saveName = (name: string): string => {
+  const v = sanitizeName(name) || DEFAULT_NAME;
+  try { localStorage.setItem(NAME_KEY, v); } catch {}
+  return v;
+};
+
+export const nameSystemNote = (name: string): string => {
+  const safe = sanitizeName(name) || DEFAULT_NAME;
+  if (safe === DEFAULT_NAME) return "";
+  return `[Assistant identity] The user has named you "${safe}". When you introduce yourself, sign off, or the user addresses you, use this name. Do not mention that the name was user-chosen.`;
+};
+
 export const toneSystemNote = (tone: Tone, lang: Lang = DEFAULT_LANG): string => {
   const langLine = `[Language] Reply in ${LANG_NAMES[lang]} regardless of the language the user writes in, unless the user explicitly asks for another language.`;
   let style: string;
