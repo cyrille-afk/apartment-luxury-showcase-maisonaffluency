@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
 
@@ -43,8 +45,11 @@ export function AIConcierge() {
 
   // Draggable position — persisted in localStorage. `null` = use default
   // bottom-right anchor; once user drags, we switch to absolute top/left.
-  const PANEL_W = 380;
-  const PANEL_H_OPEN = 560;
+  const [expanded, setExpanded] = useState<boolean>(() => {
+    try { return localStorage.getItem("concierge:expanded") === "1"; } catch { return false; }
+  });
+  const PANEL_W = expanded ? 560 : 380;
+  const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
     try {
@@ -315,11 +320,11 @@ export function AIConcierge() {
       {open && (
         <div
           data-concierge-panel
-          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto" } : undefined}
+          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W } : { width: PANEL_W }}
           className={cn(
-            "fixed z-[100] w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
+            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
             !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : "h-[560px] max-h-[calc(100vh-6rem)]"
+            minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
           )}
         >
           <div
@@ -363,6 +368,21 @@ export function AIConcierge() {
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  setExpanded((v) => {
+                    const nv = !v;
+                    try { localStorage.setItem("concierge:expanded", nv ? "1" : "0"); } catch {}
+                    return nv;
+                  });
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label={expanded ? "Shrink" : "Expand"}
+                title={expanded ? "Shrink" : "Expand"}
+              >
+                {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setMinimized((m) => !m)}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label={minimized ? "Expand" : "Collapse"}
@@ -383,23 +403,48 @@ export function AIConcierge() {
 
           {!minimized && (<>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 return (
                   <div key={i} className={cn("flex flex-col gap-2", item.role === "user" ? "items-end" : "items-start")}>
                     <div
                       className={cn(
-                        "max-w-[85%] rounded-2xl px-3.5 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap",
+                        "rounded-2xl px-4 py-3 font-body text-sm leading-relaxed",
+                        expanded ? "max-w-[92%]" : "max-w-[88%]",
                         item.role === "user"
-                          ? "bg-foreground text-background rounded-br-md"
+                          ? "bg-foreground text-background rounded-br-md whitespace-pre-wrap"
                           : "bg-muted text-foreground rounded-bl-md"
                       )}
                     >
-                      {item.content}
+                      {item.role === "assistant" ? (
+                        <div className="concierge-md space-y-2.5">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ node, ...props }) => <p className="my-0" {...props} />,
+                              ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-2 my-1" {...props} />,
+                              ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
+                              li: ({ node, ...props }) => <li className="leading-relaxed [&>p]:my-0" {...props} />,
+                              strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
+                              em: ({ node, ...props }) => <em className="italic" {...props} />,
+                              a: ({ node, ...props }) => <a className="underline hover:text-accent" target="_blank" rel="noreferrer" {...props} />,
+                              h1: ({ node, ...props }) => <h3 className="font-display text-base mt-1 mb-1" {...props} />,
+                              h2: ({ node, ...props }) => <h3 className="font-display text-base mt-1 mb-1" {...props} />,
+                              h3: ({ node, ...props }) => <h3 className="font-display text-sm mt-1 mb-1 uppercase tracking-wide" {...props} />,
+                              hr: () => <hr className="my-2 border-border/60" />,
+                              code: ({ node, ...props }) => <code className="rounded bg-background/60 px-1 py-0.5 text-[0.85em]" {...props} />,
+                            }}
+                          >
+                            {item.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <span className="whitespace-pre-wrap">{item.content}</span>
+                      )}
                     </div>
                     {item.role === "assistant" && item.actions && item.actions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 max-w-[85%]">
+                      <div className={cn("flex flex-wrap gap-1.5", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
                         {item.actions.map((a, idx) => (
                           <button
                             key={idx}
