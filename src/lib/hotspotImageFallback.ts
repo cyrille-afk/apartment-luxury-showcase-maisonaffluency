@@ -47,6 +47,10 @@ export async function fillHotspotImages(items: Array<Record<string, any>>): Prom
     if (!n) continue;
     const hit =
       (brand && byBrandName.get(`${normBrand(brand)}|${n}`)) || byName.get(n) || null;
-    if (hit) p.image_url = hit;
+    if (hit) {
+      p.image_url = hit;
+      // Flag so the UI can render a small "from hotspot" indicator.
+      p.image_from_hotspot = true;
+    }
   }
 }

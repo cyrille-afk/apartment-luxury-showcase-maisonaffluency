@@ -353,10 +353,12 @@ async function hydratePickPreview(
       const p = pickById.get(id);
       if (p) {
         const designer = dmap.get(p.designer_id) || null;
+        const fallback = !p.image_url ? resolveHotspotImage(p.title, designer) : null;
         return {
           id: p.id,
           title: p.title,
-          image_url: p.image_url || resolveHotspotImage(p.title, designer),
+          image_url: p.image_url || fallback,
+          image_from_hotspot: !p.image_url && !!fallback,
           materials: p.materials,
           category: p.category,
           designer_name: designer,
@@ -366,10 +368,12 @@ async function hydratePickPreview(
       if (t) {
         const rawBrand = String(t.brand_name || "");
         const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
+        const fallback = !t.image_url ? resolveHotspotImage(t.product_name, baseBrand) : null;
         return {
           id: t.id,
           title: t.product_name,
-          image_url: t.image_url || resolveHotspotImage(t.product_name, baseBrand),
+          image_url: t.image_url || fallback,
+          image_from_hotspot: !t.image_url && !!fallback,
           materials: t.materials,
           category: t.category,
           designer_name: baseBrand || null,

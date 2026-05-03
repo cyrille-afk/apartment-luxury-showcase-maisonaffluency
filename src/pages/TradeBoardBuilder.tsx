@@ -34,6 +34,7 @@ import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
 import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
 import { fillHotspotImages } from "@/lib/hotspotImageFallback";
+import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 
 interface Board {
   id: string;
@@ -61,6 +62,7 @@ interface BoardItem {
     product_name: string;
     brand_name: string;
     image_url: string | null;
+    image_from_hotspot?: boolean;
     materials: string | null;
     dimensions: string | null;
   };
@@ -71,6 +73,7 @@ interface Product {
   product_name: string;
   brand_name: string;
   image_url: string | null;
+  image_from_hotspot?: boolean;
   category: string;
 }
 
@@ -399,6 +402,7 @@ const TradeBoardBuilder = () => {
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
         )}
+        {item.product?.image_from_hotspot && <HotspotImageBadge />}
         {item.approval_status === "approved" && (
           <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
             <Check className="h-4 w-4 text-white" />
@@ -770,8 +774,9 @@ const TradeBoardBuilder = () => {
                 onClick={() => addProduct(p.id)}
                 className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
               >
-                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
+                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
                   {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
+                  {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
