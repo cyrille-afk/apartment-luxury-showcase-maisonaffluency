@@ -73,7 +73,35 @@ export default function TradeMoodBoards() {
       });
       if (error) throw error;
       if (data?.recommendations) {
-        setRecommendations(data.recommendations);
+        const recs: MoodRec[] = data.recommendations;
+        setRecommendations(recs);
+
+        // Concierge steps in to narrate WHY these complements were chosen.
+        // We only fire when there's something meaningful to say.
+        if (recs.length > 0) {
+          const top = recs.slice(0, 6);
+          const bullets = top
+            .map((r) => `- **${r.title}**${r.brand ? ` · ${r.brand}` : ""} — ${r.reason}`)
+            .join("\n");
+          const message =
+            `I've pulled ${top.length} complement${top.length === 1 ? "" : "s"} for the mood you're building. ` +
+            `Here's why each was chosen:\n\n${bullets}\n\n` +
+            `Tap any thumbnail to drop it onto the board, or ask me to refine the direction (warmer palette, smaller scale, more sculptural, etc.).`;
+          window.dispatchEvent(
+            new CustomEvent("concierge:stage", {
+              detail: {
+                stage: "Tearsheet",
+                message,
+                openPanel: false,
+                actions: [
+                  { label: "Make it warmer", prompt: "Suggest complements with a warmer, earthier palette for my current mood board." },
+                  { label: "More sculptural", prompt: "Replace the current complements with more sculptural, statement pieces." },
+                  { label: "Different scale", prompt: "Suggest complements at a different scale (smaller accent pieces) for my mood board." },
+                ],
+              },
+            }),
+          );
+        }
       }
     } catch (err: any) {
       console.error("Mood board recommendations error:", err);
