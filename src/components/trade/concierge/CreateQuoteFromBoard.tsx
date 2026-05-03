@@ -44,8 +44,24 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
 
   const eligibleItems = items.filter((i) => (i.approval_status || "").toLowerCase() !== "rejected");
 
+  // Infer a room from a product's category/subcategory. Pure heuristic — the
+  // user can always edit per-line after navigating to the quote.
+  const inferRoom = (cat: string | null, sub: string | null): string => {
+    const t = `${cat || ""} ${sub || ""}`.toLowerCase();
+    if (/(bed|nightstand|headboard|dresser|wardrobe)/.test(t)) return "Bedroom";
+    if (/(dining|sideboard|buffet|credenza)/.test(t)) return "Dining Room";
+    if (/(kitchen|bar stool|barstool)/.test(t)) return "Kitchen";
+    if (/(bath|vanit|shower|towel)/.test(t)) return "Bathroom";
+    if (/(office|desk|task chair|bookcase)/.test(t)) return "Office";
+    if (/(outdoor|garden|patio|terrace)/.test(t)) return "Outdoor";
+    if (/(entry|hall|console|coat)/.test(t)) return "Entry";
+    if (/(sofa|armchair|lounge|coffee table|side table|tv|media|rug|lighting|chandelier|sconce|lamp|wall art|mirror)/.test(t))
+      return "Living Room";
+    return "Unassigned";
+  };
+
   const insertItems = async (quoteId: string, list: BoardItemLite[]) => {
-    if (list.length === 0) return 0;
+    if (list.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
     // Avoid duplicates if adding to an existing quote
     const { data: existingLines } = await supabase
@@ -54,14 +70,28 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       .eq("quote_id", quoteId);
     const existing = new Set((existingLines || []).map((l: any) => l.product_id));
 
-    const rows = list
-      .filter((i) => !existing.has(i.product_id))
-      .map((i) => ({ quote_id: quoteId, product_id: i.product_id, quantity: 1 }));
+    const filtered = list.filter((i) => !existing.has(i.product_id));
+    if (filtered.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
-    if (rows.length === 0) return 0;
+    // Look up category/subcategory in one batch to infer rooms.
+    const { data: prods } = await supabase
+      .from("trade_products")
+      .select("id, category, subcategory")
+      .in("id", filtered.map((i) => i.product_id));
+    const meta = new Map<string, { c: string | null; s: string | null }>();
+    for (const p of (prods || []) as any[]) meta.set(p.id, { c: p.category ?? null, s: p.subcategory ?? null });
+
+    const byRoom: Record<string, number> = {};
+    const rows = filtered.map((i) => {
+      const m = meta.get(i.product_id);
+      const room = inferRoom(m?.c ?? null, m?.s ?? null);
+      byRoom[room] = (byRoom[room] || 0) + 1;
+      return { quote_id: quoteId, product_id: i.product_id, quantity: 1, room };
+    });
+
     const { error } = await supabase.from("trade_quote_items").insert(rows as any);
     if (error) throw error;
-    return rows.length;
+    return { added: rows.length, byRoom };
   };
 
   const logAction = async (quoteId: string, mode: "new" | "merged") => {
@@ -127,16 +157,21 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
         return;
       }
 
-      const added = await insertItems(quote.id, eligibleItems);
+      const { added, byRoom } = await insertItems(quote.id, eligibleItems);
       await logAction(quote.id, "new");
+      const roomBreakdown = Object.entries(byRoom)
+        .sort((a, b) => b[1] - a[1])
+        .map(([r, n]) => `${r} (${n})`)
+        .join(", ");
       toast.success("Quote created", {
         description: `Pre-filled with ${added} ${added === 1 ? "item" : "items"} from this tearsheet.`,
       });
       window.dispatchEvent(new CustomEvent("concierge:stage", {
         detail: {
           stage: "Quote",
-          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}). What would you like to tackle next?`,
+          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}).${roomBreakdown ? ` Items have been pre-grouped by room — ${roomBreakdown}. You can refine the room assignments on each line.` : ""} What would you like to tackle next?`,
           actions: [
+            { label: "Refine rooms", prompt: "Help me refine the room assignments for the quote items — list them grouped by room and suggest changes for any that look off." },
             { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
             { label: "Add finishing details", prompt: "Help me add finishing details (fabric, finish, COM/COL, custom dimensions) to each line item. Start with the first one." },
             { label: "Prepare to send", prompt: "Help me get this quote ready to submit: review missing info, suggest a client-facing note, and outline the next step." },
@@ -155,8 +190,12 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     if (!existingQuote) return;
     setBusy(true);
     try {
-      const added = await insertItems(existingQuote.id, pendingItems);
+      const { added, byRoom } = await insertItems(existingQuote.id, pendingItems);
       await logAction(existingQuote.id, "merged");
+      const roomBreakdown = Object.entries(byRoom)
+        .sort((a, b) => b[1] - a[1])
+        .map(([r, n]) => `${r} (${n})`)
+        .join(", ");
       toast.success(
         added > 0 ? "Items added to existing draft" : "Already on this draft",
         {
@@ -170,9 +209,10 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
         detail: {
           stage: "Quote",
           message: added > 0
-            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added.`
+            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added.${roomBreakdown ? ` New items were grouped by room — ${roomBreakdown}.` : ""}`
             : `We're now on the existing draft quote for this project — every eligible piece from "${board.title}" was already on it.`,
           actions: [
+            { label: "Refine rooms", prompt: "Help me refine the room assignments for the quote items — list them grouped by room and suggest changes for any that look off." },
             { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
             { label: "Add finishing details", prompt: "Help me add finishing details (fabric, finish, COM/COL, custom dimensions) to each line item. Start with the first one." },
             { label: "Prepare to send", prompt: "Help me get this quote ready to submit: review missing info, suggest a client-facing note, and outline the next step." },
