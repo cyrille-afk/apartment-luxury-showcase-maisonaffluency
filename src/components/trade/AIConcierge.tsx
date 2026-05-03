@@ -165,19 +165,29 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[] }
+        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean }
         | undefined;
       const message = detail?.message?.trim();
+      if (detail?.resetPanel) {
+        setPos(null);
+        setExpanded(false);
+        setMinimized(false);
+        setNameMenuOpen(false);
+        setToneMenuOpen(false);
+        setLangMenuOpen(false);
+        try {
+          localStorage.removeItem("concierge:pos");
+          localStorage.removeItem("concierge:expanded");
+        } catch {}
+      }
       if (message) {
-        setTimeline((prev) => [
-          ...prev,
-          {
-            kind: "msg",
-            role: "assistant",
-            content: message,
-            actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
-          },
-        ]);
+        const welcomeMessage: TimelineItem = {
+          kind: "msg",
+          role: "assistant",
+          content: message,
+          actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+        };
+        setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
       if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);

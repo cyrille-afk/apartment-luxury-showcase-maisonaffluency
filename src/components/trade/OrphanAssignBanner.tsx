@@ -40,9 +40,14 @@ export function OrphanAssignBanner() {
   });
 
   useEffect(() => {
+    const onPending = () => setWelcomePending(true);
     const onDismiss = () => setWelcomePending(false);
+    window.addEventListener("ma:welcome-pending", onPending);
     window.addEventListener("ma:welcome-dismissed", onDismiss);
-    return () => window.removeEventListener("ma:welcome-dismissed", onDismiss);
+    return () => {
+      window.removeEventListener("ma:welcome-pending", onPending);
+      window.removeEventListener("ma:welcome-dismissed", onDismiss);
+    };
   }, []);
 
   const path = location.pathname;

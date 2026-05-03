@@ -40,7 +40,8 @@ export async function replayWelcome(opts?: { userId?: string; firstName?: string
   }));
 
   try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
+  window.dispatchEvent(new CustomEvent("ma:welcome-pending"));
   window.dispatchEvent(new CustomEvent("concierge:stage", {
-    detail: { openPanel: true, message: subst(tpl), actions },
+    detail: { openPanel: true, resetPanel: true, replaceTimeline: true, message: subst(tpl), actions },
   }));
 }
