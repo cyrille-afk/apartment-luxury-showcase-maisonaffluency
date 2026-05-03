@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export type ConciergeQuickAction = { label: string; prompt: string };
+export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
