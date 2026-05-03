@@ -76,6 +76,20 @@ const TOOLS = [
             type: "string",
             description: "Optional 1–2 sentence rationale for the additions.",
           },
+          pick_rationales: {
+            type: "array",
+            description:
+              "Per-piece, one-sentence reason for each pick being appended. REQUIRED for every id in pick_ids. Each entry's id MUST match an id in pick_ids.",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
+                reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+              },
+              required: ["id", "reason"],
+              additionalProperties: false,
+            },
+          },
         },
         required: ["board_id", "pick_ids"],
         additionalProperties: false,
