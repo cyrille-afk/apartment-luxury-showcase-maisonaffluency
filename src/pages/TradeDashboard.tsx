@@ -316,7 +316,7 @@ const TradeDashboard = () => {
             key={card.to}
             to={card.to}
             data-tour-target={card.key === "dash-designers" ? "designers" : undefined}
-            className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all data-[tour-target=designers]:body-data-tour-step-designers:ring-2"
+            className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all tour-target"
           >
             <div className="relative aspect-[3/2] overflow-hidden">
               {getCardImage(card) ? (
