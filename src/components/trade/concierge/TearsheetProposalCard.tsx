@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -317,28 +317,53 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                     <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">
                       {rationale}
                     </div>
-                    {rationaleDetail && (
-                      <>
+                    {(rationaleDetail || rationale) && (
+                      <div className="mt-1 flex items-center gap-2">
+                        {rationaleDetail && (
+                          <button
+                            type="button"
+                            onClick={toggleDetail}
+                            aria-expanded={isExpanded}
+                            className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-accent hover:text-accent/80 transition-colors"
+                          >
+                            <ChevronDown
+                              className={cn(
+                                "h-2.5 w-2.5 transition-transform",
+                                isExpanded && "rotate-180",
+                              )}
+                            />
+                            {isExpanded ? "Hide reasoning" : "Why this pick"}
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={toggleDetail}
-                          aria-expanded={isExpanded}
-                          className="mt-1 inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-accent hover:text-accent/80 transition-colors"
+                          onClick={async () => {
+                            const parts = [
+                              `${p.title}${p.designer_name ? ` — ${p.designer_name}` : ""}`,
+                              rationale,
+                              rationaleDetail || undefined,
+                            ].filter(Boolean) as string[];
+                            const text = parts.join("\n\n");
+                            try {
+                              await navigator.clipboard.writeText(text);
+                              toast.success("Reasoning copied");
+                            } catch {
+                              toast.error("Could not copy to clipboard");
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Copy reasoning for this pick"
+                          title="Copy reasoning"
                         >
-                          <ChevronDown
-                            className={cn(
-                              "h-2.5 w-2.5 transition-transform",
-                              isExpanded && "rotate-180",
-                            )}
-                          />
-                          {isExpanded ? "Hide reasoning" : "Why this pick"}
+                          <Copy className="h-2.5 w-2.5" />
+                          Copy reasoning
                         </button>
-                        {isExpanded && (
-                          <div className="mt-1 rounded-md border border-accent/30 bg-accent/[0.04] px-2 py-1.5 font-body text-[10.5px] text-foreground/80 leading-relaxed animate-fade-in">
-                            {rationaleDetail}
-                          </div>
-                        )}
-                      </>
+                      </div>
+                    )}
+                    {rationaleDetail && isExpanded && (
+                      <div className="mt-1 rounded-md border border-accent/30 bg-accent/[0.04] px-2 py-1.5 font-body text-[10.5px] text-foreground/80 leading-relaxed animate-fade-in">
+                        {rationaleDetail}
+                      </div>
                     )}
                   </>
                 )}
