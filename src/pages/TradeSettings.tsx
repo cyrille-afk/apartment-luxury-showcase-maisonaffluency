@@ -3,8 +3,9 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, TrendingUp } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, TrendingUp, Compass } from "lucide-react";
 import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
 const COUNTRIES = [
