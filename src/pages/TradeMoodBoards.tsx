@@ -47,6 +47,16 @@ export default function TradeMoodBoards() {
   const prevBoardIdsRef = useRef<string>("");
   const seededProjectRef = useRef<string | null>(null);
 
+  // Auto-clear legacy global mood-board storage when landing on this route.
+  // The new system scopes boards per project; the unscoped key is stale data.
+  useEffect(() => {
+    try {
+      localStorage.removeItem(BOARD_STORAGE_KEY_BASE);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const { data: projectTearsheetProducts = [], isLoading: loadingProjectTearsheetProducts } = useQuery({
     queryKey: ["mood-board-tearsheet-products", projectId, user?.id],
     enabled: !!projectId && !!user,
