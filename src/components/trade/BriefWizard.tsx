@@ -133,6 +133,55 @@ const formatBriefMarkdown = (a: Answers) => {
   return lines.join("\n");
 };
 
+// Parse a previously-saved brief markdown back into structured hints we can reuse as defaults.
+function parseBriefMarkdown(md: string | null | undefined): Partial<Answers> {
+  if (!md) return {};
+  const out: Partial<Answers> = {};
+  const pick = (label: string) => {
+    const re = new RegExp(`\\*\\*${label}:\\*\\*\\s*(.+)`, "i");
+    const m = md.match(re);
+    return m?.[1]?.trim();
+  };
+  const type = pick("Type"); if (type && PROJECT_TYPES.includes(type)) out.projectType = type;
+  const rooms = pick("Rooms"); if (rooms) {
+    const arr = rooms.split(",").map((r) => r.trim()).filter((r) => ROOMS.includes(r));
+    if (arr.length) out.rooms = arr;
+  }
+  const styles = pick("Style direction"); if (styles) {
+    const arr = styles.split(",").map((s) => s.trim()).filter((s) => STYLES.includes(s));
+    if (arr.length) out.styles = arr;
+  }
+  const budget = pick("Budget"); if (budget && BUDGETS.includes(budget)) out.budget = budget;
+  const timeline = pick("Timeline"); if (timeline && TIMELINES.includes(timeline)) out.timeline = timeline;
+  return out;
+}
+
+async function buildPrefill(userId: string): Promise<Partial<Answers>> {
+  const prefill: Partial<Answers> = {};
+  try {
+    const [profileRes, projectRes] = await Promise.all([
+      supabase.from("profiles").select("first_name, last_name, company, country").eq("id", userId).maybeSingle(),
+      supabase.from("projects").select("client_name, location, notes").eq("user_id", userId).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    const profile: any = profileRes.data || {};
+    const project: any = projectRes.data || {};
+
+    // Location: prefer most recent project location; fall back to profile country.
+    if (project.location) prefill.location = project.location;
+    else if (profile.country) prefill.location = profile.country;
+
+    // Client: reuse last project client (often the firm/family they work with).
+    if (project.client_name) prefill.clientName = project.client_name;
+    else if (profile.company) prefill.clientName = profile.company;
+
+    // Inherit creative direction & constraints from the last brief if we can parse it.
+    Object.assign(prefill, parseBriefMarkdown(project.notes));
+  } catch (e) {
+    console.warn("BriefWizard prefill failed", e);
+  }
+  return prefill;
+}
+
 export function BriefWizard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -142,6 +191,7 @@ export function BriefWizard() {
   const [saving, setSaving] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<keyof Answers, boolean>>>({});
   const [showStepErrors, setShowStepErrors] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
 
   // Restore draft if any
   useEffect(() => {
@@ -162,14 +212,36 @@ export function BriefWizard() {
     } catch {}
   }, [answers, stepIdx]);
 
+  // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
-    const onOpen = () => {
-      // keep draft if present, otherwise start fresh with defaults
+    if (!user || prefilled) return;
+    let cancelled = false;
+    const hasDraft = (() => { try { return !!localStorage.getItem(DRAFT_KEY); } catch { return false; } })();
+    if (hasDraft) { setPrefilled(true); return; }
+    buildPrefill(user.id).then((p) => {
+      if (cancelled || Object.keys(p).length === 0) { setPrefilled(true); return; }
+      setAnswers((prev) => ({ ...prev, ...p }));
+      setPrefilled(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, prefilled]);
+
+  useEffect(() => {
+    const onOpen = async () => {
+      // keep draft if present, otherwise start fresh with defaults + prefill
       try {
         const raw = localStorage.getItem(DRAFT_KEY);
         if (!raw) {
           setStepIdx(0);
-          setAnswers(initialAnswers);
+          const base = { ...initialAnswers };
+          if (user) {
+            const p = await buildPrefill(user.id);
+            Object.assign(base, p);
+          }
+          setAnswers(base);
+          if (Object.keys(base).some((k) => (base as any)[k] !== (initialAnswers as any)[k])) {
+            toast.success("Pre-filled a few fields from your last project — tweak as needed.");
+          }
         }
       } catch {
         setStepIdx(0);
@@ -181,7 +253,7 @@ export function BriefWizard() {
     };
     window.addEventListener("trade-brief:open", onOpen);
     return () => window.removeEventListener("trade-brief:open", onOpen);
-  }, []);
+  }, [user]);
 
   const set = <K extends keyof Answers>(key: K, value: Answers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
