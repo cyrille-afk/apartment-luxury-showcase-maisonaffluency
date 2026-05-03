@@ -598,6 +598,58 @@ export function AIConcierge() {
                   </div>
                 );
               }
+              if (item.kind === "escalation") {
+                return (
+                  <EscalationCard
+                    key={i}
+                    sentiment={item.sentiment}
+                    intent={item.intent}
+                    resolved={item.resolved}
+                    onAction={async (action) => {
+                      if (action === "dismissed") {
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "escalation") copy[i] = { ...t, resolved: "dismissed" };
+                          return copy;
+                        });
+                        return;
+                      }
+                      try {
+                        const { supabase } = await import("@/integrations/supabase/client");
+                        const { data: sess } = await supabase.auth.getSession();
+                        const token = sess.session?.access_token;
+                        if (!token) {
+                          toast.error("Please sign in to request a human concierge.");
+                          return;
+                        }
+                        const resp = await fetch(
+                          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-escalation`,
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({
+                              sentiment: item.sentiment,
+                              intent: item.intent,
+                              excerpt: item.excerpt,
+                            }),
+                          },
+                        );
+                        if (!resp.ok) throw new Error(`Error ${resp.status}`);
+                        toast.success("A concierge has been notified — they'll be in touch shortly.");
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "escalation") copy[i] = { ...t, resolved: "requested" };
+                          return copy;
+                        });
+                      } catch (e) {
+                        toast.error("Could not reach the concierge — please try again.");
+                      }
+                    }}
+                  />
+                );
+              }
               return (
                 <TearsheetProposalCard
                   key={i}
