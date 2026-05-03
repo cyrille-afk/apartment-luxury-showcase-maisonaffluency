@@ -20,7 +20,7 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const DEFAULT_STEPS: Step[] = [
   { id: "showroom",  path: "/trade/showroom",  title: "1. Browse the Showroom",            body: "Start here to explore curated rooms in situ. Click any hotspot on a photo to open the piece, see specs, trade pricing and add it to a tearsheet.", icon: MapPin,   ctaLabel: "Next: Designers" },
-  { id: "designers", path: "/trade/designers", title: "2. Discover Designers & Ateliers",  body: "Filter 274 designers across 32 ateliers by category, country or material. Open any designer to read their biography and shop their pieces.",         icon: Users,    ctaLabel: "Next: Brief setup" },
+  { id: "designers", path: "/trade", title: "2. Discover Designers & Ateliers",  body: "From your dashboard, open the Designers & Ateliers Library tile (highlighted) to filter 274 designers across 32 ateliers by category, country or material — and shop their pieces.", icon: Users,    ctaLabel: "Next: Brief setup" },
   { id: "brief",     path: "/trade/quotes",    title: "3. Set up a brief",                  body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.", icon: FileText, ctaLabel: "Next: Tools" },
   { id: "tools",     path: "/trade/tools",     title: "4. Your specification toolkit",      body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Finish tour" },
 ];
@@ -108,6 +108,16 @@ export function QuickTour() {
     try { localStorage.setItem(STORAGE_KEY, String(prevIdx)); } catch {}
     navigate(STEPS[prevIdx].path);
   }, [stepIdx, navigate]);
+
+  // Expose current step id on <body> so target tiles can self-spotlight via CSS.
+  useEffect(() => {
+    if (!active) {
+      document.body.removeAttribute("data-tour-step");
+      return;
+    }
+    document.body.setAttribute("data-tour-step", STEPS[stepIdx]?.id ?? "");
+    return () => { document.body.removeAttribute("data-tour-step"); };
+  }, [active, stepIdx, STEPS]);
 
   if (!active) return null;
   const step = STEPS[stepIdx];

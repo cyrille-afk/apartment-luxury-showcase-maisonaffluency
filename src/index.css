@@ -338,3 +338,19 @@ All colors MUST be HSL.
     margin-bottom: 0.75rem;
   }
 }
+
+/* Quick Tour: spotlight the active step's target tile on the dashboard */
+body[data-tour-step="designers"] [data-tour-target="designers"] {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px hsl(var(--accent) / 0.18), 0 12px 30px -10px hsl(var(--accent) / 0.45);
+  border-radius: 0.5rem;
+  animation: tour-pulse 1.8s ease-in-out infinite;
+  position: relative;
+  z-index: 110;
+}
+
+@keyframes tour-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px hsl(var(--accent) / 0.18), 0 12px 30px -10px hsl(var(--accent) / 0.45); }
+  50%      { box-shadow: 0 0 0 10px hsl(var(--accent) / 0.10), 0 12px 30px -10px hsl(var(--accent) / 0.45); }
+}
