@@ -14,9 +14,12 @@ type Mode = "create" | "append";
 interface Props {
   proposal: TearsheetProposal;
   onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode; deferNavigation?: boolean }) => void;
+  /** Lifted exclusion state so the parent can inject "kept vs removed" into the next chat turn. */
+  excluded?: Set<string>;
+  onExcludedChange?: (excluded: Set<string>) => void;
 }
 
-export function TearsheetProposalCard({ proposal, onResolved }: Props) {
+export function TearsheetProposalCard({ proposal, onResolved, excluded: excludedProp, onExcludedChange }: Props) {
   const initialMode: Mode = proposal.tool === "add_to_tearsheet" ? "append" : "create";
   const [mode, setMode] = useState<Mode>(initialMode);
 
@@ -33,7 +36,8 @@ export function TearsheetProposalCard({ proposal, onResolved }: Props) {
     proposal.tool === "add_to_tearsheet" ? proposal.args.board_id : null,
   );
 
-  const [excluded, setExcluded] = useState<Set<string>>(new Set());
+  const [excludedLocal, setExcludedLocal] = useState<Set<string>>(excludedProp ?? new Set());
+  const excluded = excludedProp ?? excludedLocal;
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
