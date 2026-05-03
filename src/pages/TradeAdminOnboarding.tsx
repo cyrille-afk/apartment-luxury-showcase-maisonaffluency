@@ -76,7 +76,7 @@ const TradeAdminOnboarding = () => {
       if (cfg) {
         setConfig({
           greeting_template: cfg.greeting_template || DEFAULT_GREETING,
-          buttons: Array.isArray(cfg.buttons) ? (cfg.buttons as ButtonCfg[]) : [],
+          buttons: Array.isArray(cfg.buttons) ? (cfg.buttons as unknown as ButtonCfg[]) : [],
           is_enabled: cfg.is_enabled ?? true,
         });
       }
