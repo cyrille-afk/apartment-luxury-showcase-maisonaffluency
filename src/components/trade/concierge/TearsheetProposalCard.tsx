@@ -41,7 +41,29 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const [excludedLocal, setExcludedLocal] = useState<Set<string>>(excludedProp ?? new Set());
   const excluded = excludedProp ?? excludedLocal;
-  const [expandedDetail, setExpandedDetail] = useState<Set<string>>(new Set());
+  // Persist "Why this pick" expanded state per proposal in sessionStorage so
+  // that switching views (panel collapse, route change, page refresh within
+  // the same tab) preserves the reading context the user was building.
+  const expandedStorageKey = `concierge:expanded:${proposal.tool_call_id}`;
+  const [expandedDetail, setExpandedDetail] = useState<Set<string>>(() => {
+    try {
+      const raw = sessionStorage.getItem(expandedStorageKey);
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? new Set(arr.filter((x) => typeof x === "string")) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+  // Mirror to sessionStorage on every change.
+  const persistExpanded = (next: Set<string>) => {
+    try {
+      if (next.size === 0) sessionStorage.removeItem(expandedStorageKey);
+      else sessionStorage.setItem(expandedStorageKey, JSON.stringify(Array.from(next)));
+    } catch {
+      /* quota or disabled — ignore */
+    }
+  };
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -258,6 +280,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               const next = new Set(prev);
               if (next.has(p.id)) next.delete(p.id);
               else next.add(p.id);
+              persistExpanded(next);
               return next;
             });
           };
