@@ -125,30 +125,25 @@ describe("language selector", () => {
     try { localStorage.clear(); } catch {}
   });
 
-  it("returns a French greeting when lang=fr", () => {
-    const msg = greetingForContext("Tearsheet", "/trade/mood-boards", "luxury", "fr");
-    expect(msg).toMatch(/Permettez-moi/);
+  it("returns an Indonesian greeting when lang=id", () => {
+    const msg = greetingForContext("Tearsheet", "/trade/mood-boards", "luxury", "id");
+    expect(msg).toMatch(/Izinkan saya/);
   });
 
-  it("returns an Italian greeting when lang=it", () => {
-    const msg = greetingForContext("Quote", "/trade/quotes/1", "luxury", "it");
-    expect(msg).toMatch(/Mi permetta/);
+  it("returns a Thai greeting when lang=th", () => {
+    const msg = greetingForContext("Quote", "/trade/quotes/1", "luxury", "th");
+    expect(msg).toMatch(/อนุญาต/);
   });
 
-  it("returns a Spanish greeting when lang=es", () => {
-    const msg = greetingForContext("Order", "/trade/orders/1", "luxury", "es");
-    expect(msg).toMatch(/Permítame/);
-  });
-
-  it("returns a German greeting when lang=de", () => {
-    const msg = greetingForContext("Project", "/trade/projects/1", "luxury", "de");
-    expect(msg).toMatch(/Gestatten Sie/);
+  it("returns a Simplified Chinese greeting when lang=zh", () => {
+    const msg = greetingForContext("Order", "/trade/orders/1", "luxury", "zh");
+    expect(msg).toMatch(/请允许/);
   });
 
   it("falls back to luxury in same language when tone unavailable", () => {
-    // Italian only translates 'luxury'; concise should fall back to it+luxury
-    const concise = greetingForContext("Tearsheet", "/trade/mood-boards", "concise", "it");
-    const luxury = greetingForContext("Tearsheet", "/trade/mood-boards", "luxury", "it");
+    // Indonesian only translates 'luxury'; concise should fall back to id+luxury
+    const concise = greetingForContext("Tearsheet", "/trade/mood-boards", "concise", "id");
+    const luxury = greetingForContext("Tearsheet", "/trade/mood-boards", "luxury", "id");
     expect(concise).toBe(luxury);
   });
 
@@ -159,19 +154,19 @@ describe("language selector", () => {
   });
 
   it("persists and reloads lang via localStorage", () => {
-    saveLang("fr");
-    expect(loadLang()).toBe("fr");
+    saveLang("id");
+    expect(loadLang()).toBe("id");
   });
 
   it("exposes localized tone labels via tonesFor", () => {
-    const fr = tonesFor("fr");
-    expect(fr.find((t) => t.id === "formal")?.label).toBe("Formel");
+    const id = tonesFor("id");
+    expect(id.find((t) => t.id === "formal")?.label).toBe("Formal");
     const en = tonesFor("en");
     expect(en.find((t) => t.id === "formal")?.label).toBe("Formal");
   });
 
   it("toneSystemNote includes a Language directive", () => {
-    const langs: Lang[] = ["en", "fr", "it", "es", "de"];
+    const langs: Lang[] = ["en", "id", "th", "zh"];
     for (const l of langs) {
       const note = toneSystemNote("luxury", l);
       expect(note).toMatch(/^\[Language\]/);
