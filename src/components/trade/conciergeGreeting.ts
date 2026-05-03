@@ -15,20 +15,54 @@ export const DEFAULT_LANG: Lang = "en";
 
 const LANG_STORAGE_KEY = "concierge:lang";
 
+// Legacy/unsupported language codes get coerced to the closest supported one
+// (or English as a safe fallback). This means users who picked French/Italian/
+// Spanish/German before the SEA pivot — or whose browser is set to one of those
+// locales — get a sensible, supported language instead of a silent fallback.
+const LEGACY_LANG_MAP: Record<string, Lang> = {
+  // Removed European locales → English (no closer SEA match).
+  fr: "en", it: "en", es: "en", de: "en",
+  // Common SEA browser variants → their canonical code.
+  in: "id", // legacy ISO 639-1 alias for Indonesian
+  ms: "id", // Malay → Bahasa Indonesia (closest in our set)
+  "zh-cn": "zh", "zh-hans": "zh", "zh-sg": "zh", "zh-tw": "zh", "zh-hk": "zh",
+};
+
+export const normalizeLang = (raw: string | null | undefined): Lang | null => {
+  if (!raw) return null;
+  const code = String(raw).trim().toLowerCase();
+  if (LANGUAGES.some((l) => l.id === code)) return code as Lang;
+  if (LEGACY_LANG_MAP[code]) return LEGACY_LANG_MAP[code];
+  // Try the language portion of a region tag (e.g. "fr-FR" → "fr").
+  const base = code.split(/[-_]/)[0];
+  if (base !== code) {
+    if (LANGUAGES.some((l) => l.id === base)) return base as Lang;
+    if (LEGACY_LANG_MAP[base]) return LEGACY_LANG_MAP[base];
+  }
+  return null;
+};
+
 export const loadLang = (): Lang => {
   try {
     const raw = localStorage.getItem(LANG_STORAGE_KEY);
-    if (raw && LANGUAGES.some((l) => l.id === raw)) return raw as Lang;
+    const mapped = normalizeLang(raw);
+    if (mapped) {
+      // Heal storage in place so we don't keep re-mapping on every load.
+      if (raw !== mapped) {
+        try { localStorage.setItem(LANG_STORAGE_KEY, mapped); } catch {}
+      }
+      return mapped;
+    }
   } catch {}
-  // Auto-detect from browser as a soft default
+  // Auto-detect from browser as a soft default.
   const nav = (typeof navigator !== "undefined" && navigator.language) || "";
-  const code = nav.slice(0, 2).toLowerCase();
-  if (LANGUAGES.some((l) => l.id === code)) return code as Lang;
-  return DEFAULT_LANG;
+  const detected = normalizeLang(nav);
+  return detected ?? DEFAULT_LANG;
 };
 
-export const saveLang = (lang: Lang) => {
-  try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch {}
+export const saveLang = (lang: Lang | string) => {
+  const safe = normalizeLang(lang) ?? DEFAULT_LANG;
+  try { localStorage.setItem(LANG_STORAGE_KEY, safe); } catch {}
 };
 
 // Tone label translations for the picker UI
