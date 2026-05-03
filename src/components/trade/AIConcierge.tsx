@@ -14,7 +14,17 @@ type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] };
 
-import { type Stage, stageFromPath, DEFAULT_GREETING, greetingForContext } from "./conciergeGreeting";
+import {
+  type Stage,
+  type Tone,
+  TONES,
+  loadTone,
+  saveTone,
+  stageFromPath,
+  DEFAULT_GREETING,
+  greetingForContext,
+  toneSystemNote,
+} from "./conciergeGreeting";
 
 
 export function AIConcierge() {
