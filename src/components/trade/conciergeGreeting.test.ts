@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   stageFromPath,
   greetingForContext,
@@ -102,7 +102,7 @@ describe("tone selector", () => {
   it("emits a style note per tone for the model", () => {
     const tones: Tone[] = ["formal", "luxury", "concise", "designer"];
     for (const t of tones) {
-      expect(toneSystemNote(t)).toMatch(/^\[Style\]/);
+      expect(toneSystemNote(t)).toMatch(/\[Style\]/);
     }
     expect(toneSystemNote("concise")).toMatch(/concise/i);
     expect(toneSystemNote("formal")).toMatch(/formal/i);
@@ -115,5 +115,71 @@ describe("tone selector", () => {
     const msg = greetingForContext("Discover", "/trade", "nonsense");
     expect(typeof msg).toBe("string");
     expect(msg.length).toBeGreaterThan(0);
+  });
+});
+
+import { LANGUAGES, loadLang, saveLang, tonesFor, type Lang } from "./conciergeGreeting";
+
+describe("language selector", () => {
+  beforeEach(() => {
+    try { localStorage.clear(); } catch {}
+  });
+
+  it("returns a French greeting when lang=fr", () => {
+    const msg = greetingForContext("Tearsheet", "/trade/mood-boards", "luxury", "fr");
+    expect(msg).toMatch(/Permettez-moi/);
+  });
+
+  it("returns an Italian greeting when lang=it", () => {
+    const msg = greetingForContext("Quote", "/trade/quotes/1", "luxury", "it");
+    expect(msg).toMatch(/Mi permetta/);
+  });
+
+  it("returns a Spanish greeting when lang=es", () => {
+    const msg = greetingForContext("Order", "/trade/orders/1", "luxury", "es");
+    expect(msg).toMatch(/Permítame/);
+  });
+
+  it("returns a German greeting when lang=de", () => {
+    const msg = greetingForContext("Project", "/trade/projects/1", "luxury", "de");
+    expect(msg).toMatch(/Gestatten Sie/);
+  });
+
+  it("falls back to luxury in same language when tone unavailable", () => {
+    // Italian only translates 'luxury'; concise should fall back to it+luxury
+    const concise = greetingForContext("Tearsheet", "/trade/mood-boards", "concise", "it");
+    const luxury = greetingForContext("Tearsheet", "/trade/mood-boards", "luxury", "it");
+    expect(concise).toBe(luxury);
+  });
+
+  it("falls back to English when lang missing entirely", () => {
+    // @ts-expect-error invalid lang
+    const msg = greetingForContext("Discover", "/trade", "luxury", "ja");
+    expect(msg).toMatch(/Allow me to help/);
+  });
+
+  it("persists and reloads lang via localStorage", () => {
+    saveLang("fr");
+    expect(loadLang()).toBe("fr");
+  });
+
+  it("exposes localized tone labels via tonesFor", () => {
+    const fr = tonesFor("fr");
+    expect(fr.find((t) => t.id === "formal")?.label).toBe("Formel");
+    const en = tonesFor("en");
+    expect(en.find((t) => t.id === "formal")?.label).toBe("Formal");
+  });
+
+  it("toneSystemNote includes a Language directive", () => {
+    const langs: Lang[] = ["en", "fr", "it", "es", "de"];
+    for (const l of langs) {
+      const note = toneSystemNote("luxury", l);
+      expect(note).toMatch(/^\[Language\]/);
+      expect(note).toMatch(/\[Style\]/);
+    }
+  });
+
+  it("ships 5 supported languages", () => {
+    expect(LANGUAGES.map((l) => l.id).sort()).toEqual(["de", "en", "es", "fr", "it"]);
   });
 });
