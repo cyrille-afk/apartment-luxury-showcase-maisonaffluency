@@ -466,24 +466,21 @@ export function AIConcierge() {
             onPointerUp={onDragEnd}
             onPointerCancel={onDragEnd}
             onDoubleClick={() => setMinimized((m) => !m)}
-            className="flex items-center justify-between px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none touch-none"
+            className="flex flex-col gap-1.5 px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none touch-none"
             title="Drag to move · double-click to collapse"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-              <Sparkles className="h-4 w-4 text-accent shrink-0" />
-              <span className="font-display text-sm uppercase tracking-widest truncate" title={name}>{name}</span>
-              {!minimized && (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                <Sparkles className="h-4 w-4 text-accent shrink-0" />
                 <span
-                  className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
-                  title={`Current workflow stage: ${stage}`}
+                  className="font-display text-sm uppercase tracking-[0.12em] whitespace-nowrap overflow-hidden text-ellipsis"
+                  title={name}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                  Stage: {stage}
+                  {name}
                 </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1 shrink-0 relative">
+              </div>
+              <div className="flex items-center gap-1 shrink-0 relative">
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
