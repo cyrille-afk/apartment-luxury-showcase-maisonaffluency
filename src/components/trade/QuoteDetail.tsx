@@ -29,6 +29,7 @@ interface QuoteItemWithProduct {
   lead_time_weeks_override: number | null;
   deposit_pct_override: number | null;
   variant_label: string | null;
+  room: string | null;
   trade_products: {
     product_name: string;
     brand_name: string;
