@@ -195,7 +195,7 @@ export default function TradeTools() {
         </section>
       )}
 
-      {categories.map((cat) => (
+      {filteredCategories.map((cat) => (
         <section key={cat.label}>
           <h2 className="font-display text-sm uppercase tracking-[0.15em] text-muted-foreground mb-4">
             {cat.label}
