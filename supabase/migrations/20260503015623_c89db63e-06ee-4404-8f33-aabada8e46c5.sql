@@ -1,0 +1,1 @@
+UPDATE public.trade_products SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1777207364/Snow-1_atpnke.jpg' WHERE id = '234c7f4c-f95a-4fe9-822e-efa288e39d01';
