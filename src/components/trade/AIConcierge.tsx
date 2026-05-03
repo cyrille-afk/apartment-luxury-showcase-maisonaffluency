@@ -413,6 +413,17 @@ export function AIConcierge() {
                 <TearsheetProposalCard
                   key={i}
                   proposal={item.proposal}
+                  excluded={new Set(item.excluded || [])}
+                  onExcludedChange={(next) => {
+                    setTimeline((prev) => {
+                      const copy = prev.slice();
+                      const t = copy[i];
+                      if (t?.kind === "proposal") {
+                        copy[i] = { ...t, excluded: Array.from(next) };
+                      }
+                      return copy;
+                    });
+                  }}
                   onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
                 />
               );
