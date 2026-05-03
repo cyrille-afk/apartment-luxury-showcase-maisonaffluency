@@ -774,8 +774,9 @@ const TradeBoardBuilder = () => {
                 onClick={() => addProduct(p.id)}
                 className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
               >
-                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden">
+                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
                   {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
+                  {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
