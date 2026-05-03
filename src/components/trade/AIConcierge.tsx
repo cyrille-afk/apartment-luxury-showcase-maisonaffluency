@@ -115,25 +115,28 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      const next = greetingForContext(stageFromPath(pathname), pathname, tone);
+      const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
-  }, [pathname, tone]);
+  }, [pathname, tone, lang]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
 
-  // Close tone menu when clicking outside the panel
+  // Close tone/lang menus when clicking outside the panel
   useEffect(() => {
-    if (!toneMenuOpen) return;
+    if (!toneMenuOpen && !langMenuOpen) return;
     const onDoc = (e: MouseEvent) => {
       const panel = (e.target as HTMLElement | null)?.closest("[data-concierge-panel]");
-      if (!panel) setToneMenuOpen(false);
+      if (!panel) {
+        setToneMenuOpen(false);
+        setLangMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
-  }, [toneMenuOpen]);
+  }, [toneMenuOpen, langMenuOpen]);
 
   // auto-scroll
   useEffect(() => {
