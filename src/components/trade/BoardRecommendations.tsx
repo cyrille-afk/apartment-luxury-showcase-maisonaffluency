@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Sparkles, RefreshCw, ArrowRight } from "lucide-react";
+import { Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -19,59 +19,49 @@ interface Recommendation {
 export function BoardRecommendations() {
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [boardTitle, setBoardTitle] = useState("");
-  const [boardId, setBoardId] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState("");
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [productIds, setProductIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    loadRecommendations();
+    loadForActiveProject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const loadRecommendations = async () => {
+  // Identify the user's "active project" = most recently updated project that
+  // has at least one tearsheet item (quote item or client_board item). Then
+  // aggregate the product IDs across those tearsheets and feed them to the
+  // recommendation engine, so the dashboard strip is always anchored to a
+  // real project context instead of a stray board.
+  const loadForActiveProject = async () => {
     if (!user) return;
     setLoading(true);
-
     try {
-      // Find user's most recently updated board with items
-      const { data: boards } = await supabase
-        .from("client_boards")
-        .select("id, title, updated_at")
+      const { data: projects } = await supabase
+        .from("projects")
+        .select("id, name, updated_at")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
-        .limit(5);
+        .limit(10);
 
-      if (!boards?.length) {
+      if (!projects?.length) {
         setLoading(false);
         return;
       }
 
-      // Find first board that has items
-      let activeBoardId: string | null = null;
-      let activeBoardTitle = "";
-      for (const b of boards) {
-        const { count } = await supabase
-          .from("client_board_items")
-          .select("*", { count: "exact", head: true })
-          .eq("board_id", b.id);
-        if (count && count > 0) {
-          activeBoardId = b.id;
-          activeBoardTitle = b.title;
+      for (const p of projects) {
+        const ids = await collectProjectProductIds(p.id);
+        if (ids.length > 0) {
+          setProjectId(p.id);
+          setProjectName(p.name);
+          setProductIds(ids);
+          await generateRecommendations(ids);
           break;
         }
       }
-
-      if (!activeBoardId) {
-        setLoading(false);
-        return;
-      }
-
-      setBoardId(activeBoardId);
-      setBoardTitle(activeBoardTitle);
-
-      // Generate fresh recommendations so relevance updates are reflected immediately
-      await generateRecommendations(activeBoardId);
     } catch (err) {
       console.error("Failed to load recommendations:", err);
     } finally {
@@ -79,21 +69,40 @@ export function BoardRecommendations() {
     }
   };
 
-  const generateRecommendations = async (id: string) => {
+  const collectProjectProductIds = async (pid: string): Promise<string[]> => {
+    const ids = new Set<string>();
+    const [quotesRes, boardsRes] = await Promise.all([
+      supabase.from("trade_quotes").select("id").eq("project_id", pid),
+      supabase.from("client_boards").select("id").eq("project_id", pid),
+    ]);
+    const quoteIds = (quotesRes.data || []).map((q: any) => q.id);
+    const boardIds = (boardsRes.data || []).map((b: any) => b.id);
+
+    const [qItems, bItems] = await Promise.all([
+      quoteIds.length
+        ? supabase.from("trade_quote_items").select("product_id").in("quote_id", quoteIds)
+        : Promise.resolve({ data: [] as any[] }),
+      boardIds.length
+        ? supabase.from("client_board_items").select("product_id").in("board_id", boardIds)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    (qItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+    (bItems.data || []).forEach((r: any) => r.product_id && ids.add(r.product_id));
+    return Array.from(ids).slice(0, 20);
+  };
+
+  const generateRecommendations = async (ids: string[]) => {
     setRefreshing(true);
     try {
       const { data, error } = await supabase.functions.invoke("board-recommendations", {
-        body: { board_id: id },
+        body: { product_ids: ids, source: "mood_board" },
       });
-
       if (error) {
         console.error("Recommendation error:", error);
         return;
       }
-
       if (data?.recommendations) {
         setRecommendations(data.recommendations);
-        if (data.board_title) setBoardTitle(data.board_title);
       }
     } catch (err) {
       console.error("Failed to generate recommendations:", err);
@@ -119,20 +128,26 @@ export function BoardRecommendations() {
     );
   }
 
-  if (!recommendations.length) return null;
+  if (!recommendations.length || !projectId) return null;
 
   return (
     <div className="mt-10">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-lg text-foreground flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          Suggested for <em className="not-italic text-primary">{boardTitle}</em>
+          Suggested for <em className="not-italic text-primary">{projectName}</em>
         </h2>
         <div className="flex items-center gap-2">
+          <Link
+            to={`/trade/mood-boards?project=${projectId}`}
+            className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+          >
+            Open mood board
+          </Link>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => boardId && generateRecommendations(boardId)}
+            onClick={() => productIds.length && generateRecommendations(productIds)}
             disabled={refreshing}
             className="text-xs text-muted-foreground"
           >
@@ -146,7 +161,7 @@ export function BoardRecommendations() {
         {recommendations.slice(0, 6).map((rec) => (
           <Link
             key={rec.product_id}
-            to="/trade/showroom"
+            to={`/trade/mood-boards?project=${projectId}`}
             className="group w-44 shrink-0"
           >
             <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-2 border border-border group-hover:border-primary/30 transition-colors">
