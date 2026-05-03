@@ -286,8 +286,36 @@ const TradeDashboard = () => {
                 if (user) {
                   await supabase.from("profiles").update({ has_seen_trade_intro: true } as any).eq("id", user.id);
                 }
-                window.dispatchEvent(new Event("trade-tour:start"));
-                setTimeout(() => window.dispatchEvent(new Event("trade-tour:start")), 150);
+
+                // Re-open the AI Concierge with the personalised greeting + buttons,
+                // exactly like the first-session welcome.
+                const { data: cfg } = await supabase
+                  .from("onboarding_flow_config")
+                  .select("greeting_template, buttons, is_enabled")
+                  .eq("id", "default")
+                  .maybeSingle();
+                const conciergeName = loadName() || DEFAULT_NAME;
+                const firstName = profile?.first_name?.trim();
+                const tpl = (cfg?.greeting_template as string | undefined) ||
+                  `Welcome to Maison Affluency{first_name_comma} — I'm {concierge_name}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`;
+                const subst = (s: string) => s
+                  .replace(/\{first_name_comma\}/g, firstName ? `, ${firstName}` : "")
+                  .replace(/\{first_name\}/g, firstName || "")
+                  .replace(/\{concierge_name\}/g, conciergeName);
+                const rawButtons = (cfg?.buttons as any[] | undefined) || [
+                  { label: "Start Quick Tour", prompt: "__concierge:start_tour__", primary: true },
+                  { label: "Start from a brief", prompt: "__concierge:start_brief__" },
+                  { label: `Rename {concierge_name}`, prompt: "__concierge:rename__" },
+                ];
+                const actions = rawButtons.map((b) => ({
+                  label: subst(String(b.label || "")),
+                  prompt: String(b.prompt || ""),
+                  primary: !!b.primary,
+                }));
+                try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
+                window.dispatchEvent(new CustomEvent("concierge:stage", {
+                  detail: { openPanel: true, message: subst(tpl), actions },
+                }));
               }}
               className="flex items-center gap-2 rounded-full border border-border bg-background text-foreground px-3 py-2 hover:bg-muted transition-colors"
               title="Replay the first-login welcome flow"
