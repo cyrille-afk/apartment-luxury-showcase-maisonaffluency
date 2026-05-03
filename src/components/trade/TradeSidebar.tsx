@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, RotateCcw,
 } from "lucide-react";
+import { replayWelcome } from "@/lib/replayWelcome";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -181,6 +182,14 @@ export function TradeSidebar() {
             )}
           </div>
         )}
+        <button
+          onClick={() => replayWelcome({ userId: user?.id, firstName: profile?.first_name })}
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-md font-body text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors min-h-[44px]"
+          title="Replay the first-login welcome flow"
+        >
+          <RotateCcw className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Replay welcome</span>}
+        </button>
         <button
           onClick={handleSignOut}
           className="flex items-center gap-2 w-full px-3 py-2 rounded-md font-body text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors min-h-[44px]"
