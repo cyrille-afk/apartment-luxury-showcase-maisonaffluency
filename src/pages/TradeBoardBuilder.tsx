@@ -205,6 +205,9 @@ const TradeBoardBuilder = () => {
       }
     }
 
+    // Final fallback: gallery_hotspots (e.g. rugs whose only photo is a hotspot)
+    await fillHotspotImages(unique.filter(p => !p.image_url));
+
     setProducts(unique);
   }, [user]);
 
