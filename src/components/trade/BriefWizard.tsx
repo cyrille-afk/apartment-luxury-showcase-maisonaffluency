@@ -362,6 +362,21 @@ export function BriefWizard() {
     toast.success("Draft cleared — sensible defaults restored.");
   };
 
+  const saveAndExit = () => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, savedAt: Date.now() }));
+    } catch {}
+    setOpen(false);
+    toast.success("Draft saved — pick up where you left off anytime.");
+    window.dispatchEvent(new CustomEvent("concierge:stage", {
+      detail: {
+        openPanel: true,
+        message: `Saved your brief draft${answers.projectName ? ` for **${answers.projectName}**` : ""}. Resume whenever you're ready.`,
+        actions: [{ label: "Resume brief", prompt: "__concierge:start_brief__" }],
+      },
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-lg">
