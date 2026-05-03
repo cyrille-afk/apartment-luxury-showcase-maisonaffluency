@@ -160,18 +160,16 @@ async function buildPrefill(userId: string): Promise<Partial<Answers>> {
   const prefill: Partial<Answers> = {};
   try {
     const [profileRes, projectRes] = await Promise.all([
-      supabase.from("profiles").select("first_name, last_name, company, country, city").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("first_name, last_name, company, country").eq("id", userId).maybeSingle(),
       supabase.from("projects").select("client_name, location, notes").eq("user_id", userId).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     const profile: any = profileRes.data || {};
     const project: any = projectRes.data || {};
 
-    // Location: prefer most recent project location; fall back to profile city/country.
+    // Location: prefer most recent project location; fall back to profile country.
     if (project.location) prefill.location = project.location;
-    else {
-      const loc = [profile.city, profile.country].filter(Boolean).join(", ");
-      if (loc) prefill.location = loc;
-    }
+    else if (profile.country) prefill.location = profile.country;
+
     // Client: reuse last project client (often the firm/family they work with).
     if (project.client_name) prefill.clientName = project.client_name;
     else if (profile.company) prefill.clientName = profile.company;
