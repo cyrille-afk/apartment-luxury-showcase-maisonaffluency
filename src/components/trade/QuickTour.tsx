@@ -40,6 +40,7 @@ const STEPS: Step[] = [
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
+export const TOUR_DONE_KEY = "trade_quick_tour_done";
 
 export function QuickTour() {
   const navigate = useNavigate();
@@ -73,7 +74,11 @@ export function QuickTour() {
 
   const finish = useCallback(() => {
     setActive(false);
-    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(TOUR_DONE_KEY, String(Date.now()));
+    } catch {}
+    window.dispatchEvent(new CustomEvent("trade-tour:done"));
   }, []);
 
   const next = useCallback(() => {
