@@ -58,6 +58,17 @@ const categories: ToolCategory[] = [
 export default function TradeTools() {
   const navigate = useNavigate();
 
+  const glanceTools: Tool[] = [
+    { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
+    { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
+    { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
+    { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
+    { title: "Quote Builder", description: "Build and submit project quotes", url: "/trade/quotes", icon: FileText },
+    { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
+    { title: "Floor Plan → FF&E", description: "AI-suggested layout from a plan", url: "/trade/floor-plan-ffe", icon: Map },
+    { title: "Material Library", description: "Swatches, finishes & samples", url: "/trade/materials", icon: Layers },
+  ];
+
   return (
     <div className="max-w-6xl mx-auto space-y-10">
       <div>
@@ -66,6 +77,36 @@ export default function TradeTools() {
           Everything you need to discover, specify and procure — all in one place.
         </p>
       </div>
+
+      <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
+        <div className="flex items-baseline justify-between gap-4 mb-4">
+          <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
+            Tools at a glance
+          </h2>
+          <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hidden sm:block">
+            Your specification toolkit
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {glanceTools.map((tool) => (
+            <button
+              key={tool.url}
+              onClick={() => navigate(tool.url)}
+              className="group flex items-center gap-2.5 p-3 rounded-lg border border-border bg-background hover:bg-foreground/5 hover:border-foreground/20 transition-all text-left"
+            >
+              <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
+                <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-body text-xs font-medium text-foreground block truncate">{tool.title}</span>
+                <span className="font-body text-[10px] text-muted-foreground leading-snug block truncate">
+                  {tool.description}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
 
       {categories.map((cat) => (
         <section key={cat.label}>
