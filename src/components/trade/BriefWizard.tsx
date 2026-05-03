@@ -29,6 +29,37 @@ const STYLES = ["Contemporary", "Mid-century", "Art Deco", "Minimalist", "Maxima
 const BUDGETS = ["< $25k", "$25k–$100k", "$100k–$500k", "$500k+"];
 const TIMELINES = ["< 1 month", "1–3 months", "3–6 months", "6+ months"];
 
+function Chips({ options, value, onChange, multi }: { options: string[]; value: string | string[]; onChange: (v: any) => void; multi?: boolean }) {
+  const isActive = (o: string) => multi ? (value as string[]).includes(o) : value === o;
+  const toggle = (o: string) => {
+    if (multi) {
+      const arr = value as string[];
+      onChange(arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o]);
+    } else {
+      onChange(value === o ? "" : o);
+    }
+  };
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o) => (
+        <button
+          key={o}
+          type="button"
+          onClick={() => toggle(o)}
+          className={cn(
+            "rounded-full border px-3 py-1 font-body text-xs transition-colors",
+            isActive(o)
+              ? "border-foreground bg-foreground text-background"
+              : "border-border bg-background text-foreground hover:border-foreground/40"
+          )}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const STEPS = [
   { id: "basics", title: "Project basics", description: "A name to remember it by, and where it sits." },
   { id: "scope", title: "Scope", description: "What kind of project, and which rooms?" },
