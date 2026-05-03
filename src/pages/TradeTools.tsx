@@ -94,6 +94,23 @@ export default function TradeTools() {
     [favorites, allTools],
   );
 
+  const trimmedQuery = query.trim().toLowerCase();
+  const isSearching = trimmedQuery.length > 0;
+  const filteredCategories = useMemo(() => {
+    if (!isSearching) return categories;
+    return categories
+      .map((cat) => ({
+        ...cat,
+        tools: cat.tools.filter(
+          (t) =>
+            t.title.toLowerCase().includes(trimmedQuery) ||
+            t.description.toLowerCase().includes(trimmedQuery),
+        ),
+      }))
+      .filter((cat) => cat.tools.length > 0);
+  }, [trimmedQuery, isSearching]);
+  const totalMatches = filteredCategories.reduce((n, c) => n + c.tools.length, 0);
+
   return (
     <div className="max-w-6xl mx-auto space-y-10">
       <div>
