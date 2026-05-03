@@ -2,6 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
+export type RationaleEntry = { reason: string; detail?: string | null };
+
 export type CreateTearsheetProposal = {
   tool: "propose_tearsheet";
   tool_call_id: string;
@@ -9,7 +11,7 @@ export type CreateTearsheetProposal = {
     title: string;
     pick_ids: string[];
     note: string | null;
-    pick_rationales?: Record<string, string>;
+    pick_rationales?: Record<string, RationaleEntry>;
   };
   preview: PickPreview[];
 };
@@ -22,7 +24,7 @@ export type AddToTearsheetProposal = {
     board_title: string;
     pick_ids: string[];
     note: string | null;
-    pick_rationales?: Record<string, string>;
+    pick_rationales?: Record<string, RationaleEntry>;
   };
   preview: PickPreview[];
 };
@@ -38,6 +40,7 @@ export type PickPreview = {
   category: string | null;
   designer_name: string | null;
   rationale?: string;
+  rationale_detail?: string | null;
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
