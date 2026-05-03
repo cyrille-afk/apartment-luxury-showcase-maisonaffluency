@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Loader2, Check, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Check, AlertCircle, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -362,8 +362,29 @@ export function BriefWizard() {
     toast.success("Draft cleared — sensible defaults restored.");
   };
 
+  const saveAndExit = () => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, savedAt: Date.now() }));
+    } catch {}
+    setOpen(false);
+    toast.success("Draft saved — pick up where you left off anytime.");
+    window.dispatchEvent(new CustomEvent("concierge:stage", {
+      detail: {
+        openPanel: true,
+        message: `Saved your brief draft${answers.projectName ? ` for **${answers.projectName}**` : ""}. Resume whenever you're ready.`,
+        actions: [{ label: "Resume brief", prompt: "__concierge:start_brief__" }],
+      },
+    }));
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => {
+      if (!o && open && !saving) {
+        // Auto-save draft when user dismisses (X / overlay / Esc)
+        try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, savedAt: Date.now() })); } catch {}
+      }
+      setOpen(o);
+    }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
@@ -481,14 +502,24 @@ export function BriefWizard() {
             </Button>
           </div>
           {isLast ? (
-            <Button onClick={finish} disabled={saving}>
-              {saving ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1" />}
-              Save brief
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={saveAndExit} disabled={saving}>
+                <Save className="h-3.5 w-3.5 mr-1" /> Save & exit
+              </Button>
+              <Button onClick={finish} disabled={saving}>
+                {saving ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+                Save brief
+              </Button>
+            </div>
           ) : (
-            <Button onClick={tryAdvance} disabled={saving}>
-              Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={saveAndExit} disabled={saving}>
+                <Save className="h-3.5 w-3.5 mr-1" /> Save & exit
+              </Button>
+              <Button onClick={tryAdvance} disabled={saving}>
+                Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
           )}
         </DialogFooter>
       </DialogContent>
