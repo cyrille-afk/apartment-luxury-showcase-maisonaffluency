@@ -513,7 +513,18 @@ serve(async (req) => {
               continue;
             }
             const pickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const preview = await hydratePickPreview(supabase, pickIds);
+            const rationaleMap: Record<string, string> = {};
+            if (Array.isArray(parsed.pick_rationales)) {
+              for (const r of parsed.pick_rationales) {
+                if (r && typeof r.id === "string" && typeof r.reason === "string") {
+                  rationaleMap[r.id] = r.reason.trim();
+                }
+              }
+            }
+            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            const preview = previewRaw.map((p: any) =>
+              p && rationaleMap[p.id] ? { ...p, rationale: rationaleMap[p.id] } : p,
+            );
 
             if (tc.name === "add_to_tearsheet") {
               const boardId: string | null = typeof parsed.board_id === "string" ? parsed.board_id : null;
@@ -536,6 +547,7 @@ serve(async (req) => {
                   board_title: boardTitle,
                   pick_ids: pickIds,
                   note: typeof parsed.note === "string" ? parsed.note : null,
+                  pick_rationales: rationaleMap,
                 },
                 preview,
               };
@@ -548,6 +560,7 @@ serve(async (req) => {
                   title: typeof parsed.title === "string" ? parsed.title : "Untitled tearsheet",
                   pick_ids: pickIds,
                   note: typeof parsed.note === "string" ? parsed.note : null,
+                  pick_rationales: rationaleMap,
                 },
                 preview,
               };
