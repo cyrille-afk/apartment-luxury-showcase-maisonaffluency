@@ -62,6 +62,7 @@ const FAV_KEY = "trade_tools_favorites_v1";
 export default function TradeTools() {
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
 
   // Load favorites once on mount
   useEffect(() => {
