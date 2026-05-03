@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
-import { LayoutDashboard, ChevronUp, RotateCcw } from "lucide-react";
+import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +16,7 @@ import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher"
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
 import { TierBadge } from "@/components/trade/TierBadge";
-import { replayWelcome } from "@/lib/replayWelcome";
+
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
@@ -92,7 +92,7 @@ const TradeLayout = () => {
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
 
-  const handleReplayWelcome = () => replayWelcome({ userId: user?.id, firstName: profile?.first_name });
+  
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
@@ -222,14 +222,6 @@ const TradeLayout = () => {
               <div className="hidden sm:block">
                 <TradePriceToggle />
               </div>
-              <button
-                onClick={handleReplayWelcome}
-                className="hidden lg:flex items-center gap-2 rounded-full border border-border bg-background text-foreground px-3 py-2 hover:bg-muted transition-colors"
-                title="Replay the first-login welcome flow"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span className="font-body text-[11px] uppercase tracking-[0.15em]">Replay welcome</span>
-              </button>
               <NotificationBell />
             </div>
           </header>
