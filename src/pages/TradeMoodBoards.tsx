@@ -36,18 +36,26 @@ interface MoodRec {
 
 export default function TradeMoodBoards() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("project");
   const [search, setSearch] = useState("");
-  const [board, setBoard] = useState<any[]>(loadBoardFromStorage);
-  const [filter, setFilter] = useState<PickerFilter>("all");
+  const [board, setBoard] = useState<any[]>(() => loadBoardFromStorage(projectId));
+  const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
   const prevBoardIdsRef = useRef<string>("");
 
-  // Persist board to localStorage on change
+  // Reload board when switching project
   useEffect(() => {
-    localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
-  }, [board]);
+    setBoard(loadBoardFromStorage(projectId));
+    prevBoardIdsRef.current = "";
+  }, [projectId]);
+
+  // Persist board to localStorage on change (per project)
+  useEffect(() => {
+    localStorage.setItem(storageKeyFor(projectId), JSON.stringify(board));
+  }, [board, projectId]);
 
   // Auto-fetch recommendations when board has 2+ items and composition changes
   useEffect(() => {
