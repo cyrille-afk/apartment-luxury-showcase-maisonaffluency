@@ -40,6 +40,7 @@ const STEPS: Step[] = [
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
+export const TOUR_DONE_KEY = "trade_quick_tour_done";
 
 export function QuickTour() {
   const navigate = useNavigate();
