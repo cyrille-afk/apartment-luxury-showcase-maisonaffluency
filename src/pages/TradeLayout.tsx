@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
-import { LayoutDashboard, ChevronUp } from "lucide-react";
+import { LayoutDashboard, ChevronUp, RotateCcw } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,7 @@ import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher"
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
 import { TierBadge } from "@/components/trade/TierBadge";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
@@ -86,10 +87,52 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
-  const { user, loading, applicationStatus, isAdmin } = useAuth();
+  const { user, loading, applicationStatus, isAdmin, profile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
+
+  const replayWelcome = async () => {
+    try {
+      localStorage.removeItem("trade_quick_tour_done");
+      localStorage.removeItem("trade_quick_tour_step");
+      localStorage.removeItem("ma:welcome-pending");
+    } catch {}
+
+    if (user) {
+      await supabase.from("profiles").update({ has_seen_trade_intro: true } as any).eq("id", user.id);
+    }
+
+    const { data: cfg } = await supabase
+      .from("onboarding_flow_config")
+      .select("greeting_template, buttons, is_enabled")
+      .eq("id", "default")
+      .maybeSingle();
+
+    const conciergeName = loadName() || DEFAULT_NAME;
+    const firstName = profile?.first_name?.trim();
+    const tpl = (cfg?.greeting_template as string | undefined) ||
+      `Welcome to Maison Affluency{first_name_comma} — I'm {concierge_name}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`;
+    const subst = (s: string) => s
+      .replace(/\{first_name_comma\}/g, firstName ? `, ${firstName}` : "")
+      .replace(/\{first_name\}/g, firstName || "")
+      .replace(/\{concierge_name\}/g, conciergeName);
+    const rawButtons = (cfg?.buttons as any[] | undefined) || [
+      { label: "Start Quick Tour", prompt: "__concierge:start_tour__", primary: true },
+      { label: "Start from a brief", prompt: "__concierge:start_brief__" },
+      { label: `Rename {concierge_name}`, prompt: "__concierge:rename__" },
+    ];
+    const actions = rawButtons.map((b) => ({
+      label: subst(String(b.label || "")),
+      prompt: String(b.prompt || ""),
+      primary: !!b.primary,
+    }));
+
+    try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
+    window.dispatchEvent(new CustomEvent("concierge:stage", {
+      detail: { openPanel: true, message: subst(tpl), actions },
+    }));
+  };
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
