@@ -261,6 +261,15 @@ export function AIConcierge() {
       ]);
       return;
     }
+    if (text === "__concierge:start_brief__") {
+      setInput("");
+      window.dispatchEvent(new Event("trade-brief:open"));
+      setTimeline((prev) => [
+        ...prev,
+        { kind: "msg", role: "assistant", content: "Let's scope your project — five quick questions and I'll create your starting brief." },
+      ]);
+      return;
+    }
 
     const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
     const nextTimeline = [...timeline, userItem];
