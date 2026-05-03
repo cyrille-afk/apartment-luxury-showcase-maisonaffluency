@@ -203,15 +203,14 @@ export default function TradeMoodBoards() {
     },
   });
 
-  // User's board items (from client_boards)
+  // User's board items (from client_boards) — scoped to current project when set
   const { data: boardProducts = [], isLoading: loadingBoards } = useQuery({
-    queryKey: ["mood-board-project-items", user?.id],
+    queryKey: ["mood-board-project-items", user?.id, projectId],
     enabled: !!user,
     queryFn: async () => {
-      const { data: boards } = await supabase
-        .from("client_boards")
-        .select("id")
-        .eq("user_id", user!.id);
+      let q = supabase.from("client_boards").select("id").eq("user_id", user!.id);
+      if (projectId) q = q.eq("project_id", projectId);
+      const { data: boards } = await q;
       if (!boards?.length) return [];
       const boardIds = boards.map((b) => b.id);
       const { data: items } = await supabase
