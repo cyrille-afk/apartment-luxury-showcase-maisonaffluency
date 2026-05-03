@@ -252,12 +252,15 @@ Categories present: ${boardCategories || 'mixed'}
 ${catalogList}
 
 Think step by step:
-1. Identify the strongest anchor item(s) on the board.
+1. Identify the strongest anchor item(s) on the board (refer to them by their [B#] tag).
 2. Choose items that directly pair to those anchors or complete the same room.
 3. Prefer higher pre-scores when options are otherwise similar.
 4. Select 8 items that would realistically sit in the same room.
 
-Return a JSON object with a recommendations array: {"recommendations": [{"index": number, "score": 1-100, "reason": "mention which board item it pairs with or what room gap it solves"}]}`
+For each pick, ALSO return up to 3 anchor board indices (the [B#] numbers) that drove the choice, in priority order.
+
+Return a JSON object with a recommendations array:
+{"recommendations": [{"index": number, "score": 1-100, "reason": "mention which board item it pairs with or what room gap it solves", "anchors": [0,2]}]}`
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
