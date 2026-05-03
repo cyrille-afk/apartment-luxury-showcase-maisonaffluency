@@ -1581,6 +1581,75 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_flow_config: {
+        Row: {
+          buttons: Json
+          greeting_template: string
+          id: string
+          is_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          buttons?: Json
+          greeting_template?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          buttons?: Json
+          greeting_template?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      onboarding_tour_steps: {
+        Row: {
+          body: string
+          created_at: string
+          cta_label: string
+          icon: string
+          id: string
+          is_active: boolean
+          path: string
+          sort_order: number
+          step_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          cta_label?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          path: string
+          sort_order?: number
+          step_key: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          cta_label?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          path?: string
+          sort_order?: number
+          step_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_duration_templates: {
         Row: {
           brand_name: string
@@ -4061,6 +4130,18 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      admin_onboarding_stats: {
+        Args: never
+        Returns: {
+          completed: number
+          pending: number
+          total_users: number
+        }[]
+      }
+      admin_reset_onboarding_for_user: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
       can_edit_project: {
         Args: { _project_id: string; _user_id: string }

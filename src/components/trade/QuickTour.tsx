@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check, Sparkles, Image as ImageIcon, Box, Compass, BookOpen, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 type Step = {
   id: string;
@@ -12,31 +13,15 @@ type Step = {
   ctaLabel: string;
 };
 
-const STEPS: Step[] = [
-  {
-    id: "showroom",
-    path: "/trade/showroom",
-    title: "1. Browse the Showroom",
-    body: "Start here to explore curated rooms in situ. Click any hotspot on a photo to open the piece, see specs, trade pricing and add it to a tearsheet.",
-    icon: MapPin,
-    ctaLabel: "Next: Designers",
-  },
-  {
-    id: "designers",
-    path: "/trade/designers",
-    title: "2. Discover Designers & Ateliers",
-    body: "Filter 274 designers across 32 ateliers by category, country or material. Open any designer to read their biography and shop their pieces.",
-    icon: Users,
-    ctaLabel: "Next: Brief setup",
-  },
-  {
-    id: "brief",
-    path: "/trade/quotes",
-    title: "3. Set up a brief",
-    body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.",
-    icon: FileText,
-    ctaLabel: "Finish tour",
-  },
+// Maps DB icon name → lucide component. Unknown names fall back to MapPin.
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  MapPin, Users, FileText, Sparkles, Image: ImageIcon, Box, Compass, BookOpen, FolderOpen,
+};
+
+const DEFAULT_STEPS: Step[] = [
+  { id: "showroom",  path: "/trade/showroom",  title: "1. Browse the Showroom",            body: "Start here to explore curated rooms in situ. Click any hotspot on a photo to open the piece, see specs, trade pricing and add it to a tearsheet.", icon: MapPin,   ctaLabel: "Next: Designers" },
+  { id: "designers", path: "/trade/designers", title: "2. Discover Designers & Ateliers",  body: "Filter 274 designers across 32 ateliers by category, country or material. Open any designer to read their biography and shop their pieces.",         icon: Users,    ctaLabel: "Next: Brief setup" },
+  { id: "brief",     path: "/trade/quotes",    title: "3. Set up a brief",                  body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.", icon: FileText, ctaLabel: "Finish tour" },
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
@@ -47,6 +32,29 @@ export function QuickTour() {
   const location = useLocation();
   const [active, setActive] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
+  const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
+
+  // Load tour steps from DB (fall back to hard-coded defaults if empty/error)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("onboarding_tour_steps")
+        .select("step_key, title, body, path, icon, cta_label, sort_order, is_active")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (cancelled || !data || data.length === 0) return;
+      setSteps(data.map((r: any) => ({
+        id: r.step_key,
+        path: r.path,
+        title: r.title,
+        body: r.body,
+        icon: ICONS[r.icon] || MapPin,
+        ctaLabel: r.cta_label,
+      })));
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Listen for the start event
   useEffect(() => {
