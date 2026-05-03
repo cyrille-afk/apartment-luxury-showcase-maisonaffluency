@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
@@ -31,6 +31,11 @@ import {
   DEFAULT_GREETING,
   greetingForContext,
   toneSystemNote,
+  loadName,
+  saveName,
+  sanitizeName,
+  nameSystemNote,
+  DEFAULT_NAME,
 } from "./conciergeGreeting";
 
 
@@ -42,6 +47,9 @@ export function AIConcierge() {
   const [minimized, setMinimized] = useState(false);
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
+  const [name, setName] = useState<string>(() => loadName());
+  const [nameDraft, setNameDraft] = useState<string>("");
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
@@ -225,10 +233,13 @@ export function AIConcierge() {
     }
 
     const toneContext: ChatMessage = { role: "user", content: toneSystemNote(tone, lang) };
+    const nameNote = nameSystemNote(name);
+    const identityContext: ChatMessage[] = nameNote ? [{ role: "user", content: nameNote }] : [];
 
     const messagesForApi: ChatMessage[] = [
       stageContext,
       toneContext,
+      ...identityContext,
       ...proposalContext,
       ...nextTimeline
         .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
@@ -290,7 +301,7 @@ export function AIConcierge() {
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline, stage, tone, lang]);
+  }, [input, streaming, timeline, stage, tone, lang, name]);
 
   const handleProposalResolved = (
     proposalIndex: number,
@@ -361,7 +372,7 @@ export function AIConcierge() {
           aria-label="Open AI Concierge"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          <span className="font-body text-[11px] uppercase tracking-widest hidden sm:inline">Concierge</span>
+          <span className="font-body text-[11px] uppercase tracking-widest hidden sm:inline">{name}</span>
         </button>
       )}
 
@@ -388,7 +399,7 @@ export function AIConcierge() {
             <div className="flex items-center gap-2 min-w-0">
               <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
               <Sparkles className="h-4 w-4 text-accent shrink-0" />
-              <span className="font-display text-sm uppercase tracking-widest">Concierge</span>
+              <span className="font-display text-sm uppercase tracking-widest truncate" title={name}>{name}</span>
               {!minimized && (
                 <span
                   className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
@@ -400,6 +411,89 @@ export function AIConcierge() {
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0 relative">
+              <div className="relative">
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setNameDraft(name === DEFAULT_NAME ? "" : name);
+                    setNameMenuOpen((v) => !v);
+                  }}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                  aria-label="Rename your concierge"
+                  aria-haspopup="dialog"
+                  aria-expanded={nameMenuOpen}
+                  title={`Name: ${name}`}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                {nameMenuOpen && (
+                  <div
+                    role="dialog"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-full mt-1 z-[110] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
+                  >
+                    <div className="font-display text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+                      Name your concierge
+                    </div>
+                    <input
+                      type="text"
+                      value={nameDraft}
+                      onChange={(e) => setNameDraft(e.target.value.slice(0, 32))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const saved = saveName(nameDraft);
+                          setName(saved);
+                          setNameMenuOpen(false);
+                        } else if (e.key === "Escape") {
+                          setNameMenuOpen(false);
+                        }
+                      }}
+                      autoFocus
+                      maxLength={32}
+                      placeholder={DEFAULT_NAME}
+                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                    <div className="mt-1 font-body text-[10px] text-muted-foreground">
+                      Up to 32 characters · saved on this device
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const saved = saveName("");
+                          setName(saved);
+                          setNameDraft("");
+                          setNameMenuOpen(false);
+                        }}
+                        className="font-body text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Reset
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setNameMenuOpen(false)}
+                          className="rounded-md px-2 py-1 font-body text-[11px] text-muted-foreground hover:bg-muted"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const saved = saveName(nameDraft);
+                            setName(saved);
+                            setNameMenuOpen(false);
+                          }}
+                          className="rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
