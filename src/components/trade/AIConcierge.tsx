@@ -707,7 +707,11 @@ export function AIConcierge() {
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  try { localStorage.removeItem("ma:welcome-pending"); } catch {}
+                  window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
+                }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Close"
               >
