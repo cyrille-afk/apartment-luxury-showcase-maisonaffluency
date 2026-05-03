@@ -37,6 +37,7 @@ import {
   nameSystemNote,
   DEFAULT_NAME,
 } from "./conciergeGreeting";
+import { supabase } from "@/integrations/supabase/client";
 
 
 export function AIConcierge() {
@@ -183,6 +184,54 @@ export function AIConcierge() {
     };
     window.addEventListener("concierge:stage", handler as EventListener);
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
+  }, []);
+
+  // Sync concierge name with the user's profile so it follows them across devices.
+  useEffect(() => {
+    let cancelled = false;
+    const sync = async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("concierge_name")
+        .eq("id", uid)
+        .maybeSingle();
+      if (cancelled) return;
+      const remote = sanitizeName(((data as any)?.concierge_name as string) || "");
+      if (remote) {
+        setName((prev) => (prev === remote ? prev : remote));
+        saveName(remote);
+      } else {
+        // No remote value yet — push local-only value up so other devices see it.
+        const local = loadName();
+        if (local && local !== DEFAULT_NAME) {
+          await supabase.from("profiles").update({ concierge_name: local }).eq("id", uid);
+        }
+      }
+    };
+    sync();
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "INITIAL_SESSION") return;
+      if (event === "SIGNED_IN") sync();
+    });
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const persistName = useCallback(async (value: string) => {
+    const saved = saveName(value);
+    setName(saved);
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user?.id;
+    if (!uid) return saved;
+    const toStore = saved === DEFAULT_NAME ? null : saved;
+    await supabase.from("profiles").update({ concierge_name: toStore }).eq("id", uid);
+    return saved;
   }, []);
 
   const send = useCallback(async (overrideText?: string) => {
@@ -442,8 +491,7 @@ export function AIConcierge() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          const saved = saveName(nameDraft);
-                          setName(saved);
+                          void persistName(nameDraft);
                           setNameMenuOpen(false);
                         } else if (e.key === "Escape") {
                           setNameMenuOpen(false);
@@ -455,14 +503,13 @@ export function AIConcierge() {
                       className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                     <div className="mt-1 font-body text-[10px] text-muted-foreground">
-                      Up to 32 characters · saved on this device
+                      Up to 32 characters · syncs to your account
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <button
                         type="button"
                         onClick={() => {
-                          const saved = saveName("");
-                          setName(saved);
+                          void persistName("");
                           setNameDraft("");
                           setNameMenuOpen(false);
                         }}
@@ -481,8 +528,7 @@ export function AIConcierge() {
                         <button
                           type="button"
                           onClick={() => {
-                            const saved = saveName(nameDraft);
-                            setName(saved);
+                            void persistName(nameDraft);
                             setNameMenuOpen(false);
                           }}
                           className="rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
