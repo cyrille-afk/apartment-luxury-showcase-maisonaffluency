@@ -282,7 +282,7 @@ export function AIConcierge() {
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline, stage, tone]);
+  }, [input, streaming, timeline, stage, tone, lang]);
 
   const handleProposalResolved = (
     proposalIndex: number,
