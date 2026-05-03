@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, Users, FileText, X, ArrowRight, Check } from "lucide-react";
+import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Step = {
