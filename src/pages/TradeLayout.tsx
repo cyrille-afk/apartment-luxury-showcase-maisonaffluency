@@ -98,6 +98,19 @@ const TradeLayout = () => {
     return ROUTE_TITLES[parentPath] || "Trade Portal";
   }, [location.pathname]);
 
+  // Remember last viewed trade section (excluding the dashboard itself) for personalised welcome copy
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/trade" || path === "/trade/") return;
+    const parentPath = path.split("/").slice(0, 3).join("/");
+    const label = ROUTE_TITLES[path] || ROUTE_TITLES[parentPath];
+    if (label) {
+      try {
+        localStorage.setItem("trade_last_section", JSON.stringify({ path: parentPath, label }));
+      } catch {}
+    }
+  }, [location.pathname]);
+
   // Fetch submitted quotes count for admin badge (shared between sidebar & mobile menu)
   useEffect(() => {
     if (!isAdmin) return;
