@@ -186,6 +186,54 @@ export function AIConcierge() {
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
   }, []);
 
+  // Sync concierge name with the user's profile so it follows them across devices.
+  useEffect(() => {
+    let cancelled = false;
+    const sync = async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("concierge_name")
+        .eq("id", uid)
+        .maybeSingle();
+      if (cancelled) return;
+      const remote = sanitizeName(((data as any)?.concierge_name as string) || "");
+      if (remote) {
+        setName((prev) => (prev === remote ? prev : remote));
+        saveName(remote);
+      } else {
+        // No remote value yet — push local-only value up so other devices see it.
+        const local = loadName();
+        if (local && local !== DEFAULT_NAME) {
+          await supabase.from("profiles").update({ concierge_name: local }).eq("id", uid);
+        }
+      }
+    };
+    sync();
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "INITIAL_SESSION") return;
+      if (event === "SIGNED_IN") sync();
+    });
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const persistName = useCallback(async (value: string) => {
+    const saved = saveName(value);
+    setName(saved);
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user?.id;
+    if (!uid) return saved;
+    const toStore = saved === DEFAULT_NAME ? null : saved;
+    await supabase.from("profiles").update({ concierge_name: toStore }).eq("id", uid);
+    return saved;
+  }, []);
+
   const send = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
