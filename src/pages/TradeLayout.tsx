@@ -222,14 +222,6 @@ const TradeLayout = () => {
               <div className="hidden sm:block">
                 <TradePriceToggle />
               </div>
-              <button
-                onClick={handleReplayWelcome}
-                className="hidden lg:flex items-center gap-2 rounded-full border border-border bg-background text-foreground px-3 py-2 hover:bg-muted transition-colors"
-                title="Replay the first-login welcome flow"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span className="font-body text-[11px] uppercase tracking-[0.15em]">Replay welcome</span>
-              </button>
               <NotificationBell />
             </div>
           </header>
