@@ -87,6 +87,14 @@ export function QuickTour() {
     navigate(STEPS[nextIdx].path);
   }, [stepIdx, navigate, finish]);
 
+  const back = useCallback(() => {
+    if (stepIdx === 0) return;
+    const prevIdx = stepIdx - 1;
+    setStepIdx(prevIdx);
+    try { localStorage.setItem(STORAGE_KEY, String(prevIdx)); } catch {}
+    navigate(STEPS[prevIdx].path);
+  }, [stepIdx, navigate]);
+
   if (!active) return null;
   const step = STEPS[stepIdx];
   const Icon = step.icon;
