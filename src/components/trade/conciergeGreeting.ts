@@ -2,14 +2,13 @@ export type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
 
 export type Tone = "formal" | "luxury" | "concise" | "designer";
 
-export type Lang = "en" | "fr" | "it" | "es" | "de";
+export type Lang = "en" | "id" | "th" | "zh";
 
 export const LANGUAGES: { id: Lang; label: string; native: string }[] = [
   { id: "en", label: "English", native: "English" },
-  { id: "fr", label: "French", native: "Français" },
-  { id: "it", label: "Italian", native: "Italiano" },
-  { id: "es", label: "Spanish", native: "Español" },
-  { id: "de", label: "German", native: "Deutsch" },
+  { id: "id", label: "Indonesian", native: "Bahasa Indonesia" },
+  { id: "th", label: "Thai", native: "ไทย" },
+  { id: "zh", label: "Chinese (Simplified)", native: "简体中文" },
 ];
 
 export const DEFAULT_LANG: Lang = "en";
@@ -40,29 +39,23 @@ const TONE_LABELS: Record<Lang, Record<Tone, { label: string; description: strin
     concise: { label: "Concise", description: "Brief, scannable, no flourish." },
     designer: { label: "Designer-friendly", description: "Studio shorthand, peer-to-peer." },
   },
-  fr: {
-    formal: { label: "Formel", description: "Soigné, professionnel, phrases complètes." },
-    luxury: { label: "Luxe", description: "Voix éditoriale, évocatrice, atelier." },
-    concise: { label: "Concis", description: "Bref, lisible, sans fioritures." },
-    designer: { label: "Style designer", description: "Langage d'atelier, entre pairs." },
+  id: {
+    formal: { label: "Formal", description: "Tertata, profesional, kalimat lengkap." },
+    luxury: { label: "Mewah", description: "Suara editorial, evokatif, ala atelier." },
+    concise: { label: "Ringkas", description: "Singkat, mudah dibaca, tanpa hiasan." },
+    designer: { label: "Gaya desainer", description: "Bahasa studio, antar rekan." },
   },
-  it: {
-    formal: { label: "Formale", description: "Curato, professionale, frasi complete." },
-    luxury: { label: "Lusso", description: "Voce editoriale, evocativa, da atelier." },
-    concise: { label: "Conciso", description: "Breve, scorrevole, senza fronzoli." },
-    designer: { label: "Stile designer", description: "Linguaggio da studio, tra pari." },
+  th: {
+    formal: { label: "ทางการ", description: "สุภาพ มืออาชีพ ประโยคสมบูรณ์" },
+    luxury: { label: "หรูหรา", description: "น้ำเสียงเชิงบรรณาธิการ ชวนจินตนาการ แบบอตอลีเย่" },
+    concise: { label: "กระชับ", description: "สั้น อ่านง่าย ไม่ฟุ่มเฟือย" },
+    designer: { label: "สไตล์ดีไซเนอร์", description: "ภาษาสตูดิโอ คุยกันแบบเพื่อนร่วมวงการ" },
   },
-  es: {
-    formal: { label: "Formal", description: "Pulido, profesional, frases completas." },
-    luxury: { label: "Lujo", description: "Voz editorial, evocadora, de atelier." },
-    concise: { label: "Conciso", description: "Breve, claro, sin adornos." },
-    designer: { label: "Estilo diseñador", description: "Lenguaje de estudio, entre pares." },
-  },
-  de: {
-    formal: { label: "Formell", description: "Gepflegt, professionell, ganze Sätze." },
-    luxury: { label: "Luxus", description: "Editorial, evokativ, Atelier-Stimme." },
-    concise: { label: "Knapp", description: "Kurz, übersichtlich, ohne Schnörkel." },
-    designer: { label: "Designer-Stil", description: "Studio-Sprache, auf Augenhöhe." },
+  zh: {
+    formal: { label: "正式", description: "考究、专业、完整句式。" },
+    luxury: { label: "奢华", description: "编辑式、富有意境、工坊语调。" },
+    concise: { label: "简洁", description: "简短、易读、毫无赘述。" },
+    designer: { label: "设计师口吻", description: "工作室行话，平等对话。" },
   },
 };
 
@@ -156,75 +149,40 @@ const EN: Record<Tone, ToneMap> = {
 
 // Non-EN packs translate the default tone (luxury) fully and each other
 // tone where natural. Missing entries fall back to the EN equivalent.
-const FR: LangPack = {
+const ID: LangPack = {
   luxury: {
-    mood: "Permettez-moi d'affiner ce mood board avec vous — je propose des pièces complémentaires en cohérence avec ce qui est déjà épinglé (palette, échelle, matérialité) et j'explique chaque choix. Indiquez la direction à donner et je l'affinerai.",
-    tearsheet: "Permettez-moi de façonner ce tearsheet avec vous — ajouter des pièces complémentaires, proposer des alternatives, ou composer un nouveau brouillon à partir d'un brief. Dites-moi ce que vous souhaitez ajuster.",
-    quote: "Permettez-moi d'affiner ce devis avec vous — clarifier les prix trade, délais et acomptes, ou proposer des alternatives lorsque c'est pertinent. Que souhaitez-vous revoir ?",
-    order: "Permettez-moi de suivre cette commande avec vous — calendriers de production, jalons logistiques et mises à jour de statut. Que souhaitez-vous vérifier ?",
-    project: "Permettez-moi de faire avancer ce projet avec vous — construire des tearsheets, rédiger des devis ou rassembler des références face au brief. Par où commençons-nous ?",
-    discover: "Permettez-moi de vous guider dans le catalogue — pièces, designers ou références alignées avec votre brief. Dites-moi ce que vous cherchez et je vous oriente.",
-  },
-  formal: {
-    mood: "Permettez-moi de vous assister dans l'affinement de ce mood board. Je proposerai des pièces complémentaires fondées sur les éléments déjà épinglés — palette, échelle, matérialité — en justifiant chaque suggestion.",
-    tearsheet: "Permettez-moi de vous assister dans l'élaboration de ce tearsheet. Je peux ajouter des pièces complémentaires, suggérer des alternatives ou composer un nouveau brouillon à partir d'un brief.",
-    quote: "Permettez-moi de vous assister dans la revue de ce devis. Je peux clarifier les prix trade, délais et acomptes, et proposer des alternatives le cas échéant.",
-    order: "Permettez-moi de vous assister dans le suivi de cette commande. Je peux détailler les calendriers de production, les jalons logistiques et le statut actuel.",
-    project: "Permettez-moi de vous assister dans l'avancement de ce projet. Je peux construire des tearsheets, rédiger des devis ou rassembler des références face au brief.",
-    discover: "Permettez-moi de vous assister dans l'exploration du catalogue. Décrivez ce que vous cherchez et je vous guiderai vers les pièces et designers les plus pertinents.",
-  },
-  concise: {
-    mood: "Mode mood board. Je propose des complémentaires (palette, échelle, matérialité). Indiquez la direction.",
-    tearsheet: "Mode tearsheet. J'ajoute, je remplace, je rédige à partir d'un brief. Que faut-il ?",
-    quote: "Mode devis. Prix, délais, acomptes, alternatives. Que revoir ?",
-    order: "Mode commande. Production, expédition, statut. Que vérifier ?",
-    project: "Mode projet. Tearsheets, devis, références. Par où commencer ?",
-    discover: "Mode découverte. Dites-moi ce que vous cherchez — pièce, designer ou référence.",
-  },
-  designer: {
-    mood: "On peaufine ce board. Je rebondis sur ce qui est épinglé (palette, échelle, matérialité) et je sors des pièces qui matchent. Donne-moi la direction (plus chaud, plus sculptural, plus léger…) et j'envoie.",
-    tearsheet: "On façonne ce tearsheet. Je peux glisser des complémentaires, virer ce qui sort du brief, ou repartir d'un draft. Quelle direction ?",
-    quote: "On bosse ce devis. Je peux décortiquer prix, délais et acomptes, ou proposer des swaps. On regarde quoi ?",
-    order: "On suit cette commande. Production, expédition, statut — qu'est-ce que tu veux savoir ?",
-    project: "On pousse ce projet. Tearsheets, devis, références — par où on attaque ?",
-    discover: "On trouve ce qu'il te faut. Donne-moi le brief — pièce, designer, vibe — et je sors les références.",
+    mood: "Izinkan saya menyempurnakan mood board ini bersama Anda — saya menyarankan elemen pelengkap yang selaras dengan yang sudah dipasang (palet, skala, materialitas) dan menjelaskan setiap pilihan. Beri tahu arah yang Anda inginkan.",
+    tearsheet: "Izinkan saya membentuk tearsheet ini bersama Anda — menambah pelengkap, menukar item, atau menyusun draf baru dari brief. Beri tahu apa yang ingin Anda sesuaikan.",
+    quote: "Izinkan saya menyempurnakan penawaran ini bersama Anda — memperjelas harga trade, lead time, dan deposit, atau mengusulkan alternatif bila perlu. Apa yang ingin ditinjau?",
+    order: "Izinkan saya memantau pesanan ini bersama Anda — jadwal produksi, tahapan pengiriman, dan pembaruan status. Apa yang ingin diperiksa?",
+    project: "Izinkan saya memajukan proyek ini bersama Anda — menyusun tearsheet, membuat penawaran, atau mengumpulkan referensi sesuai brief. Mulai dari mana?",
+    discover: "Izinkan saya memandu Anda menelusuri katalog — karya, desainer, atau referensi yang selaras dengan brief Anda. Beri tahu apa yang Anda cari.",
   },
 };
 
-const IT: LangPack = {
+const TH: LangPack = {
   luxury: {
-    mood: "Mi permetta di rifinire questa mood board con lei — propongo pezzi complementari coerenti con quanto già fissato (palette, scala, materia) e spiego perché ognuno funziona. Mi dica la direzione e affinerò.",
-    tearsheet: "Mi permetta di dare forma a questo tearsheet — aggiungere pezzi complementari, suggerire alternative o comporre una nuova bozza da un brief. Mi dica cosa desidera regolare.",
-    quote: "Mi permetta di rifinire questo preventivo — chiarire prezzi trade, tempi di consegna e acconti, o proporre alternative dove ha senso. Cosa desidera rivedere?",
-    order: "Mi permetta di seguire questo ordine — tempi di produzione, tappe di spedizione e aggiornamenti di stato. Cosa desidera verificare?",
-    project: "Mi permetta di far avanzare questo progetto — costruire tearsheet, redigere preventivi o raccogliere riferimenti rispetto al brief. Da dove cominciamo?",
-    discover: "Mi permetta di guidarla nel catalogo — pezzi, designer o riferimenti allineati al suo brief. Mi dica cosa cerca e la orienterò.",
+    mood: "อนุญาตให้ดิฉัน/ผมช่วยปรับมู้ดบอร์ดนี้กับคุณ — เสนอชิ้นที่เข้ากันบนพื้นฐานของสิ่งที่ปักไว้แล้ว (พาเล็ตต์ สเกล วัสดุ) พร้อมอธิบายเหตุผลทุกชิ้น บอกทิศทางที่ต้องการได้เลย",
+    tearsheet: "อนุญาตให้ช่วยจัดทีอร์ชีตนี้กับคุณ — เพิ่มชิ้นที่เข้ากัน เปลี่ยนทางเลือก หรือร่างใหม่จากบรีฟ บอกได้เลยว่าต้องการปรับอะไร",
+    quote: "อนุญาตให้ช่วยปรับใบเสนอราคานี้ — ชี้แจงราคา trade ลีดไทม์และมัดจำ หรือเสนอทางเลือกตามความเหมาะสม ต้องการตรวจสอบส่วนใด",
+    order: "อนุญาตให้ช่วยติดตามคำสั่งซื้อนี้ — กำหนดการผลิต ระยะการจัดส่ง และอัปเดตสถานะ ต้องการตรวจสอบอะไร",
+    project: "อนุญาตให้ช่วยขับเคลื่อนโปรเจกต์นี้ — สร้างทีอร์ชีต ร่างใบเสนอราคา หรือรวบรวมเรเฟอเรนซ์ตามบรีฟ จะเริ่มตรงไหนดี",
+    discover: "อนุญาตให้ช่วยพาคุณสำรวจแคตตาล็อก — ชิ้นงาน ดีไซเนอร์ หรือเรเฟอเรนซ์ที่ตรงกับบรีฟของคุณ บอกได้เลยว่ากำลังมองหาอะไร",
   },
 };
 
-const ES: LangPack = {
+const ZH: LangPack = {
   luxury: {
-    mood: "Permítame afinar este mood board con usted — propongo piezas complementarias coherentes con lo ya fijado (paleta, escala, materialidad) y explico por qué cada una encaja. Indíqueme la dirección y la afinaré.",
-    tearsheet: "Permítame dar forma a este tearsheet — añadir piezas complementarias, sugerir alternativas o componer un nuevo borrador a partir de un brief. Dígame qué desea ajustar.",
-    quote: "Permítame afinar este presupuesto — aclarar precios trade, plazos y depósitos, o proponer alternativas cuando tenga sentido. ¿Qué desea revisar?",
-    order: "Permítame seguir este pedido — plazos de producción, hitos de envío y actualizaciones de estado. ¿Qué desea consultar?",
-    project: "Permítame avanzar este proyecto — construir tearsheets, redactar presupuestos o reunir referencias frente al brief. ¿Por dónde empezamos?",
-    discover: "Permítame guiarle por el catálogo — piezas, diseñadores o referencias alineadas con su brief. Dígame qué busca y le orientaré.",
+    mood: "请允许我与您一同打磨这块情绪板——基于已固定的元素（色调、比例、材质）提出互补的作品，并解释每一项选择的理由。请告诉我您想推进的方向。",
+    tearsheet: "请允许我与您一同梳理这份 tearsheet——补充呼应作品、替换不合适的项目，或根据 brief 起草新版本。请告诉我您想调整的方向。",
+    quote: "请允许我与您一同细化此报价——厘清贸易价、交期与定金，或在合适处提出替代方案。您想先查看哪一部分？",
+    order: "请允许我与您一同跟进此订单——生产排程、物流节点与状态更新。您希望先确认什么？",
+    project: "请允许我与您一同推进此项目——构建 tearsheet、起草报价或按 brief 收集参考。我们从哪里开始？",
+    discover: "请允许我引领您浏览品类——按您的 brief 找出相符的作品、设计师与参考。请告诉我您正在寻找什么。",
   },
 };
 
-const DE: LangPack = {
-  luxury: {
-    mood: "Gestatten Sie, dass ich dieses Mood Board mit Ihnen verfeinere — ich schlage komplementäre Stücke vor, die sich an dem bereits Gepinnten orientieren (Palette, Maßstab, Materialität), und begründe jede Auswahl. Sagen Sie mir die Richtung, und ich verfeinere.",
-    tearsheet: "Gestatten Sie, dass ich dieses Tearsheet mit Ihnen forme — komplementäre Stücke ergänzen, Alternativen vorschlagen oder einen neuen Entwurf aus einem Brief erstellen. Sagen Sie mir, was Sie anpassen möchten.",
-    quote: "Gestatten Sie, dass ich dieses Angebot mit Ihnen verfeinere — Trade-Preise, Lieferzeiten und Anzahlungen klären oder Alternativen vorschlagen, wo es sinnvoll ist. Was möchten Sie prüfen?",
-    order: "Gestatten Sie, dass ich diesen Auftrag mit Ihnen verfolge — Produktionszeiten, Versandstationen und Statusaktualisierungen. Was möchten Sie prüfen?",
-    project: "Gestatten Sie, dass ich dieses Projekt mit Ihnen voranbringe — Tearsheets erstellen, Angebote entwerfen oder Referenzen zum Brief zusammenstellen. Wo beginnen wir?",
-    discover: "Gestatten Sie, dass ich Sie durch den Katalog führe — Stücke, Designer oder Referenzen passend zu Ihrem Brief. Sagen Sie mir, was Sie suchen, und ich leite Sie.",
-  },
-};
-
-const PACKS: Record<Lang, LangPack> = { en: EN as LangPack, fr: FR, it: IT, es: ES, de: DE };
+const PACKS: Record<Lang, LangPack> = { en: EN as LangPack, id: ID, th: TH, zh: ZH };
 
 export const greetingForContext = (
   stage: Stage,
@@ -246,10 +204,9 @@ export const DEFAULT_GREETING = greetingForContext("Discover", "/trade", DEFAULT
 
 const LANG_NAMES: Record<Lang, string> = {
   en: "English",
-  fr: "French",
-  it: "Italian",
-  es: "Spanish",
-  de: "German",
+  id: "Bahasa Indonesia",
+  th: "Thai",
+  zh: "Simplified Chinese",
 };
 
 // Style + language guidance appended to model context so streamed answers
