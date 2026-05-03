@@ -6,6 +6,8 @@ export async function replayWelcome(opts?: { userId?: string; firstName?: string
     localStorage.removeItem("trade_quick_tour_done");
     localStorage.removeItem("trade_quick_tour_step");
     localStorage.removeItem("ma:welcome-pending");
+    localStorage.removeItem("concierge:pos");
+    localStorage.removeItem("concierge:expanded");
   } catch {}
 
   if (opts?.userId) {
