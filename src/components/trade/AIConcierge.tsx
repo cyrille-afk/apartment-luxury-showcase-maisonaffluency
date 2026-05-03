@@ -8,27 +8,6 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const DEFAULT_GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
-
-const greetingForStage = (stage: Stage, pathname: string): string => {
-  if (pathname.startsWith("/trade/mood-boards")) {
-    return "Allow me to help you fine-tune your mood board. I'll suggest complementary pieces grounded in what's already on the board — palette, scale, materiality — and explain why each was chosen. Tell me the direction you'd like to push (warmer, more sculptural, different scale…) and I'll refine.";
-  }
-  if (pathname.startsWith("/trade/tearsheets") || pathname.startsWith("/trade/boards")) {
-    return "I'm here to help you shape this tearsheet — adding complementary pieces, swapping items for alternatives, or assembling a new draft from a brief. What would you like to do?";
-  }
-  if (stage === "Quote") {
-    return "I'm here to help with this quote — explaining trade pricing, lead times, deposits, or proposing alternatives. What can I clarify?";
-  }
-  if (stage === "Order") {
-    return "I'm here to help with this order — production timelines, shipping, or status updates. What would you like to know?";
-  }
-  if (stage === "Project") {
-    return "I'm here to help on this project — building tearsheets, drafting quotes, or pulling references. Where shall we start?";
-  }
-  return DEFAULT_GREETING;
-};
-
 export type ConciergeQuickAction = { label: string; prompt: string };
 
 type TimelineItem =
