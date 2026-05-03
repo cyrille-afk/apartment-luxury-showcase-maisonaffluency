@@ -19,7 +19,7 @@ const normBrand = (s: string) =>
  * Each item must expose `product_name` (or `title`) and optionally
  * `brand_name` (or `designer_name`) so we can disambiguate brand collisions.
  */
-export async function fillHotspotImages<T extends Record<string, any>>(items: T[]): Promise<void> {
+export async function fillHotspotImages(items: Array<Record<string, any>>): Promise<void> {
   const missing = items.filter((p) => !p.image_url);
   if (missing.length === 0) return;
 
