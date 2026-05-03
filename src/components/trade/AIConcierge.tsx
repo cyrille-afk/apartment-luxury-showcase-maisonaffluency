@@ -117,6 +117,17 @@ export function AIConcierge() {
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
 
+  // Close tone menu when clicking outside the panel
+  useEffect(() => {
+    if (!toneMenuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const panel = (e.target as HTMLElement | null)?.closest("[data-concierge-panel]");
+      if (!panel) setToneMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [toneMenuOpen]);
+
   // auto-scroll
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
