@@ -45,8 +45,11 @@ export function AIConcierge() {
 
   // Draggable position — persisted in localStorage. `null` = use default
   // bottom-right anchor; once user drags, we switch to absolute top/left.
-  const PANEL_W = 380;
-  const PANEL_H_OPEN = 560;
+  const [expanded, setExpanded] = useState<boolean>(() => {
+    try { return localStorage.getItem("concierge:expanded") === "1"; } catch { return false; }
+  });
+  const PANEL_W = expanded ? 560 : 380;
+  const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
     try {
