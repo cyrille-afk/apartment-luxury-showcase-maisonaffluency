@@ -61,6 +61,7 @@ interface BoardItem {
     product_name: string;
     brand_name: string;
     image_url: string | null;
+    image_from_hotspot?: boolean;
     materials: string | null;
     dimensions: string | null;
   };
@@ -71,6 +72,7 @@ interface Product {
   product_name: string;
   brand_name: string;
   image_url: string | null;
+  image_from_hotspot?: boolean;
   category: string;
 }
 
