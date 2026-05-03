@@ -5,6 +5,12 @@ import { Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+interface AnchorRef {
+  name: string;
+  brand: string;
+  category: string;
+}
+
 interface Recommendation {
   product_id: string;
   score: number;
@@ -14,6 +20,7 @@ interface Recommendation {
   image_url: string;
   category: string;
   brand: string;
+  anchors?: AnchorRef[];
 }
 
 export function BoardRecommendations() {
@@ -183,6 +190,15 @@ export function BoardRecommendations() {
             <p className="text-[10px] text-primary/70 mt-0.5 line-clamp-2 leading-tight">
               {rec.reason}
             </p>
+            {rec.anchors && rec.anchors.length > 0 && (
+              <p
+                className="text-[10px] text-muted-foreground/80 mt-1 leading-tight line-clamp-2"
+                title={`Why these picks: driven by ${rec.anchors.map((a) => `${a.name} (${a.category || a.brand})`).join(", ")}`}
+              >
+                <span className="uppercase tracking-wider text-[9px] text-muted-foreground/60 mr-1">Why</span>
+                {rec.anchors.slice(0, 3).map((a) => a.name).join(" · ")}
+              </p>
+            )}
           </Link>
         ))}
       </div>

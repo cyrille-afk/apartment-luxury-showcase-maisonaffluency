@@ -116,8 +116,8 @@ Deno.serve(async (req) => {
       })),
     ]
 
-    const boardContext = boardItems.map(p =>
-      `- "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}`
+    const boardContext = boardItems.map((p, i) =>
+      `[B${i}] "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}`
     ).join('\n')
 
     if (!boardContext.trim()) {
@@ -252,12 +252,15 @@ Categories present: ${boardCategories || 'mixed'}
 ${catalogList}
 
 Think step by step:
-1. Identify the strongest anchor item(s) on the board.
+1. Identify the strongest anchor item(s) on the board (refer to them by their [B#] tag).
 2. Choose items that directly pair to those anchors or complete the same room.
 3. Prefer higher pre-scores when options are otherwise similar.
 4. Select 8 items that would realistically sit in the same room.
 
-Return a JSON object with a recommendations array: {"recommendations": [{"index": number, "score": 1-100, "reason": "mention which board item it pairs with or what room gap it solves"}]}`
+For each pick, ALSO return up to 3 anchor board indices (the [B#] numbers) that drove the choice, in priority order.
+
+Return a JSON object with a recommendations array:
+{"recommendations": [{"index": number, "score": 1-100, "reason": "mention which board item it pairs with or what room gap it solves", "anchors": [0,2]}]}`
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -297,24 +300,55 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
       parsed = []
     }
 
+    const anchorLabel = (i: number) => {
+      const it = boardItems[i];
+      if (!it) return null;
+      return { name: it.name, brand: it.brand, category: it.category };
+    };
+
+    const fallbackAnchors = (): Array<{ name: string; brand: string; category: string }> => {
+      // Pick the top 3 distinct-category board items as a generic anchor set
+      const seen = new Set<string>();
+      const out: Array<{ name: string; brand: string; category: string }> = [];
+      for (const it of boardItems) {
+        const key = (it.category || it.name || '').toLowerCase();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        out.push({ name: it.name, brand: it.brand, category: it.category });
+        if (out.length >= 3) break;
+      }
+      return out;
+    };
+
     const fallbackRecommendations = trimmed.slice(0, 8).map((item) => ({
       product_id: item.id,
       score: Math.max(50, Math.min(100, Math.round(item.score))),
       reason: item.fitNote,
       source: item.source,
+      anchors: fallbackAnchors(),
     }))
 
     const aiRecommendations = parsed
       .filter((r: any) => typeof r.index === 'number' && r.index >= 0 && r.index < trimmed.length)
       .slice(0, 8)
-      .map((r: any) => ({
-        product_id: trimmed[r.index].id,
-        score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
-        reason: r.reason || trimmed[r.index].fitNote,
-        source: trimmed[r.index].source,
-      }))
+      .map((r: any) => {
+        const anchors = Array.isArray(r.anchors)
+          ? r.anchors
+              .filter((n: any) => Number.isInteger(n) && n >= 0 && n < boardItems.length)
+              .slice(0, 3)
+              .map(anchorLabel)
+              .filter(Boolean)
+          : [];
+        return {
+          product_id: trimmed[r.index].id,
+          score: r.score || Math.max(50, Math.min(100, Math.round(trimmed[r.index].score))),
+          reason: r.reason || trimmed[r.index].fitNote,
+          source: trimmed[r.index].source,
+          anchors: anchors.length ? anchors : fallbackAnchors(),
+        };
+      });
 
-    const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade' }> = []
+    const recommendations: Array<{ product_id: string; score: number; reason: string; source?: 'curator' | 'trade'; anchors?: Array<{ name: string; brand: string; category: string }> }> = []
     const seenProductIds = new Set<string>()
 
     for (const recommendation of [...aiRecommendations, ...fallbackRecommendations]) {
@@ -367,6 +401,7 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
           title: prod?.product_name || '', subtitle: '',
           image_url: prod?.image_url || '', category: prod?.category || '',
           brand: prod?.brand_name || '',
+          anchors: r.anchors || [],
         }
       }
       const prod = recCuratorProducts.find((p: any) => p.id === r.product_id)
@@ -375,6 +410,7 @@ Return a JSON object with a recommendations array: {"recommendations": [{"index"
         title: prod?.title || '', subtitle: prod?.subtitle || '',
         image_url: prod?.image_url || '', category: prod?.category || '',
         brand: designerMap.get(prod?.designer_id) || '',
+        anchors: r.anchors || [],
       }
     })
 
