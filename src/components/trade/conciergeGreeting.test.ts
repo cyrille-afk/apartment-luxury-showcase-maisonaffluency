@@ -78,3 +78,42 @@ describe("greetingForContext", () => {
     expect(greetingForContext(stageFromPath(path), path)).toMatch(/mood board/);
   });
 });
+
+import { TONES, toneSystemNote, type Tone } from "./conciergeGreeting";
+
+describe("tone selector", () => {
+  const path = "/trade/mood-boards";
+  it("returns a distinct opener for each tone on the same intent", () => {
+    const seen = new Set<string>();
+    for (const t of TONES) {
+      const msg = greetingForContext("Tearsheet", path, t.id);
+      expect(msg).toBeTruthy();
+      seen.add(msg);
+    }
+    expect(seen.size).toBe(TONES.length);
+  });
+
+  it("preserves intent (mentions mood board) across all tones", () => {
+    for (const t of TONES) {
+      expect(greetingForContext("Tearsheet", path, t.id).toLowerCase()).toMatch(/mood board|board/);
+    }
+  });
+
+  it("emits a style note per tone for the model", () => {
+    const tones: Tone[] = ["formal", "luxury", "concise", "designer"];
+    for (const t of tones) {
+      expect(toneSystemNote(t)).toMatch(/^\[Style\]/);
+    }
+    expect(toneSystemNote("concise")).toMatch(/concise/i);
+    expect(toneSystemNote("formal")).toMatch(/formal/i);
+    expect(toneSystemNote("designer")).toMatch(/designer|peer/i);
+    expect(toneSystemNote("luxury")).toMatch(/editorial|atelier/i);
+  });
+
+  it("falls back to default tone gracefully", () => {
+    // @ts-expect-error invalid tone
+    const msg = greetingForContext("Discover", "/trade", "nonsense");
+    expect(typeof msg).toBe("string");
+    expect(msg.length).toBeGreaterThan(0);
+  });
+});
