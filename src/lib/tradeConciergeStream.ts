@@ -112,6 +112,10 @@ export async function streamConcierge({
         if (onProposal) onProposal(parsed as TearsheetProposal);
         return;
       }
+      if (currentEvent === "escalation") {
+        if (onEscalation) onEscalation(parsed as EscalationEvent);
+        return;
+      }
       const content = parsed.choices?.[0]?.delta?.content as string | undefined;
       if (content) onDelta(content);
     } catch {
