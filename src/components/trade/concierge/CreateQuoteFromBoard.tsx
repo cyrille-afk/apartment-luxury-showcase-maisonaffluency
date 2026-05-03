@@ -14,6 +14,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface BoardItemLite {
   id: string;
@@ -36,16 +44,43 @@ interface Props {
   disabled?: boolean;
 }
 
+interface ReviewRow {
+  product_id: string;
+  product_name: string;
+  brand_name: string | null;
+  image_url: string | null;
+  room: string;
+}
+
+const COMMON_ROOMS = [
+  "Living Room",
+  "Dining Room",
+  "Kitchen",
+  "Bedroom",
+  "Primary Bedroom",
+  "Guest Bedroom",
+  "Bathroom",
+  "Office",
+  "Entry",
+  "Outdoor",
+  "Unassigned",
+];
+
 export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) => {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [existingQuote, setExistingQuote] = useState<{ id: string } | null>(null);
   const [pendingItems, setPendingItems] = useState<BoardItemLite[]>([]);
 
+  // Room review step (opens before any DB write)
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewRows, setReviewRows] = useState<ReviewRow[]>([]);
+  const [bulkRoom, setBulkRoom] = useState("");
+
   const eligibleItems = items.filter((i) => (i.approval_status || "").toLowerCase() !== "rejected");
 
-  // Infer a room from a product's category/subcategory. Pure heuristic — the
-  // user can always edit per-line after navigating to the quote.
+  // Infer a room from a product's category/subcategory.
   const inferRoom = (cat: string | null, sub: string | null): string => {
     const t = `${cat || ""} ${sub || ""}`.toLowerCase();
     if (/(bed|nightstand|headboard|dresser|wardrobe)/.test(t)) return "Bedroom";
@@ -60,7 +95,61 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     return "Unassigned";
   };
 
-  const insertItems = async (quoteId: string, list: BoardItemLite[]) => {
+  /** Open the review dialog: fetch product metadata + infer rooms. */
+  const openReview = async () => {
+    if (eligibleItems.length === 0) {
+      toast.error("No eligible items", { description: "All items are rejected — nothing to quote." });
+      return;
+    }
+    setReviewOpen(true);
+    setReviewLoading(true);
+    try {
+      const { data: prods } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, category, subcategory")
+        .in("id", eligibleItems.map((i) => i.product_id));
+      const meta = new Map<string, any>();
+      for (const p of (prods || []) as any[]) meta.set(p.id, p);
+      // Preserve tearsheet order; deduplicate by product_id (first appearance wins)
+      const seen = new Set<string>();
+      const rows: ReviewRow[] = [];
+      for (const i of eligibleItems) {
+        if (seen.has(i.product_id)) continue;
+        seen.add(i.product_id);
+        const m = meta.get(i.product_id);
+        rows.push({
+          product_id: i.product_id,
+          product_name: m?.product_name || "Untitled",
+          brand_name: m?.brand_name ?? null,
+          image_url: m?.image_url ?? null,
+          room: inferRoom(m?.category ?? null, m?.subcategory ?? null),
+        });
+      }
+      setReviewRows(rows);
+    } catch (err: any) {
+      toast.error("Couldn't load items", { description: err?.message });
+      setReviewOpen(false);
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  const updateRoom = (product_id: string, room: string) => {
+    setReviewRows((prev) => prev.map((r) => (r.product_id === product_id ? { ...r, room } : r)));
+  };
+
+  const applyBulk = () => {
+    const v = bulkRoom.trim();
+    if (!v) return;
+    setReviewRows((prev) => prev.map((r) => ({ ...r, room: v })));
+    setBulkRoom("");
+  };
+
+  const insertItems = async (
+    quoteId: string,
+    list: BoardItemLite[],
+    roomByProductId: Map<string, string>,
+  ) => {
     if (list.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
     // Avoid duplicates if adding to an existing quote
@@ -73,18 +162,9 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     const filtered = list.filter((i) => !existing.has(i.product_id));
     if (filtered.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
-    // Look up category/subcategory in one batch to infer rooms.
-    const { data: prods } = await supabase
-      .from("trade_products")
-      .select("id, category, subcategory")
-      .in("id", filtered.map((i) => i.product_id));
-    const meta = new Map<string, { c: string | null; s: string | null }>();
-    for (const p of (prods || []) as any[]) meta.set(p.id, { c: p.category ?? null, s: p.subcategory ?? null });
-
     const byRoom: Record<string, number> = {};
     const rows = filtered.map((i) => {
-      const m = meta.get(i.product_id);
-      const room = inferRoom(m?.c ?? null, m?.s ?? null);
+      const room = (roomByProductId.get(i.product_id) || "Unassigned").trim() || "Unassigned";
       byRoom[room] = (byRoom[room] || 0) + 1;
       return { quote_id: quoteId, product_id: i.product_id, quantity: 1, room };
     });
@@ -113,6 +193,17 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     } catch {
       // non-blocking
     }
+  };
+
+  const confirmReview = async () => {
+    setReviewOpen(false);
+    await createNewQuote();
+  };
+
+  const roomMap = (): Map<string, string> => {
+    const m = new Map<string, string>();
+    for (const r of reviewRows) m.set(r.product_id, r.room);
+    return m;
   };
 
   const createNewQuote = async (skipMergeCheck = false) => {
@@ -157,7 +248,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
         return;
       }
 
-      const { added, byRoom } = await insertItems(quote.id, eligibleItems);
+      const { added, byRoom } = await insertItems(quote.id, eligibleItems, roomMap());
       await logAction(quote.id, "new");
       const roomBreakdown = Object.entries(byRoom)
         .sort((a, b) => b[1] - a[1])
@@ -169,7 +260,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       window.dispatchEvent(new CustomEvent("concierge:stage", {
         detail: {
           stage: "Quote",
-          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}).${roomBreakdown ? ` Items have been pre-grouped by room — ${roomBreakdown}. You can refine the room assignments on each line.` : ""} What would you like to tackle next?`,
+          message: `We've moved on from the tearsheet "${board.title}" to a new draft quote (pre-filled with ${added} ${added === 1 ? "item" : "items"}).${roomBreakdown ? ` Items have been grouped by room — ${roomBreakdown}. You can refine the room assignments on each line.` : ""} What would you like to tackle next?`,
           actions: [
             { label: "Refine rooms", prompt: "Help me refine the room assignments for the quote items — list them grouped by room and suggest changes for any that look off." },
             { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
@@ -190,7 +281,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     if (!existingQuote) return;
     setBusy(true);
     try {
-      const { added, byRoom } = await insertItems(existingQuote.id, pendingItems);
+      const { added, byRoom } = await insertItems(existingQuote.id, pendingItems, roomMap());
       await logAction(existingQuote.id, "merged");
       const roomBreakdown = Object.entries(byRoom)
         .sort((a, b) => b[1] - a[1])
@@ -229,18 +320,109 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     }
   };
 
+  // Suggested rooms = common list ∪ rooms already chosen in this review
+  const datalistId = `tearsheet-rooms-${board.id}`;
+  const suggestedRooms = Array.from(
+    new Set([...COMMON_ROOMS, ...reviewRows.map((r) => r.room).filter(Boolean)])
+  );
+
   return (
     <>
       <Button
         variant="outline"
         size="sm"
-        onClick={() => createNewQuote()}
+        onClick={openReview}
         disabled={busy || disabled || eligibleItems.length === 0}
         className="gap-1.5"
       >
         {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
         Create Quote
       </Button>
+
+      {/* Room review step */}
+      <Dialog open={reviewOpen} onOpenChange={(open) => !open && !busy && setReviewOpen(false)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="font-display">Assign rooms</DialogTitle>
+            <DialogDescription>
+              Review the suggested room for each piece before saving the quote. You can edit again on the quote page.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Bulk apply */}
+          <div className="flex items-end gap-2 pt-1">
+            <div className="flex-1 min-w-0">
+              <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                Apply a room to all items
+              </label>
+              <input
+                type="text"
+                list={datalistId}
+                value={bulkRoom}
+                onChange={(e) => setBulkRoom(e.target.value)}
+                placeholder="e.g. Living Room"
+                className="w-full font-body text-xs text-foreground bg-background border border-border rounded px-2 py-1.5 focus:border-foreground/50 outline-none"
+              />
+            </div>
+            <Button variant="outline" size="sm" onClick={applyBulk} disabled={!bulkRoom.trim()}>
+              Apply to all
+            </Button>
+          </div>
+
+          <datalist id={datalistId}>
+            {suggestedRooms.map((r) => (
+              <option key={r} value={r} />
+            ))}
+          </datalist>
+
+          <div className="flex-1 overflow-y-auto -mx-6 px-6 py-2 border-y border-border">
+            {reviewLoading ? (
+              <div className="flex items-center justify-center py-10 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading items…
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {reviewRows.map((row) => (
+                  <li key={row.product_id} className="flex items-center gap-3 py-2">
+                    <div className="h-12 w-12 shrink-0 rounded bg-muted/30 overflow-hidden">
+                      {row.image_url ? (
+                        // eslint-disable-next-line jsx-a11y/alt-text
+                        <img src={row.image_url} className="h-full w-full object-cover" loading="lazy" />
+                      ) : null}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-body text-xs text-foreground truncate">{row.product_name}</div>
+                      {row.brand_name && (
+                        <div className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">
+                          {row.brand_name}
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      list={datalistId}
+                      value={row.room}
+                      onChange={(e) => updateRoom(row.product_id, e.target.value)}
+                      placeholder="Room"
+                      className="w-40 shrink-0 font-body text-xs text-foreground bg-background border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none"
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setReviewOpen(false)} disabled={busy}>
+              Cancel
+            </Button>
+            <Button onClick={confirmReview} disabled={busy || reviewLoading || reviewRows.length === 0}>
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : null}
+              Create quote
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!existingQuote} onOpenChange={(open) => !open && setExistingQuote(null)}>
         <AlertDialogContent>
