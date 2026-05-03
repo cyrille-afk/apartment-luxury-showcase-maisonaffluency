@@ -528,8 +528,7 @@ export function AIConcierge() {
                         <button
                           type="button"
                           onClick={() => {
-                            const saved = saveName(nameDraft);
-                            setName(saved);
+                            void persistName(nameDraft);
                             setNameMenuOpen(false);
                           }}
                           className="rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
