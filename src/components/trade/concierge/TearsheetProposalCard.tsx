@@ -41,6 +41,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const [excludedLocal, setExcludedLocal] = useState<Set<string>>(excludedProp ?? new Set());
   const excluded = excludedProp ?? excludedLocal;
+  const [expandedDetail, setExpandedDetail] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
