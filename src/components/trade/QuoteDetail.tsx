@@ -550,7 +550,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         return {
           po_number: item.po_number || autoPoNumber(quoteNumber, idx + 1),
           cost_code: item.cost_code || "",
-          room: clientName || "",
+          room: item.room || clientName || "",
           item_code: product?.sku || "",
           designer: product?.brand_name || "",
           product_name: product?.product_name || "—",
