@@ -33,6 +33,7 @@ import {
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
 import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
+import { fillHotspotImages } from "@/lib/hotspotImageFallback";
 
 interface Board {
   id: string;
@@ -126,7 +127,15 @@ const TradeBoardBuilder = () => {
         .select("id, product_name, brand_name, image_url, materials, dimensions")
         .in("id", productIds);
 
-      const prodMap = new Map(prods?.map((p: any) => [p.id, p]) || []);
+      // Fill missing image_url from gallery_hotspots (e.g. rugs whose only
+      // photo lives on a hotspot rather than the trade_products row).
+      const prodList = (prods || []) as any[];
+      const missing = prodList.filter((p) => !p.image_url);
+      if (missing.length > 0) {
+        await fillHotspotImages(missing);
+      }
+
+      const prodMap = new Map(prodList.map((p: any) => [p.id, p]));
       setItems(itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })));
       setAddedIds(new Set(itemsData.map((i: any) => i.product_id)));
     } else {
@@ -195,6 +204,9 @@ const TradeBoardBuilder = () => {
         });
       }
     }
+
+    // Final fallback: gallery_hotspots (e.g. rugs whose only photo is a hotspot)
+    await fillHotspotImages(unique.filter(p => !p.image_url));
 
     setProducts(unique);
   }, [user]);
