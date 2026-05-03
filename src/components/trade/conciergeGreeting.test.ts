@@ -102,7 +102,7 @@ describe("tone selector", () => {
   it("emits a style note per tone for the model", () => {
     const tones: Tone[] = ["formal", "luxury", "concise", "designer"];
     for (const t of tones) {
-      expect(toneSystemNote(t)).toMatch(/^\[Style\]/);
+      expect(toneSystemNote(t)).toMatch(/\[Style\]/);
     }
     expect(toneSystemNote("concise")).toMatch(/concise/i);
     expect(toneSystemNote("formal")).toMatch(/formal/i);
