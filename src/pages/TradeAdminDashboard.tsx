@@ -8,7 +8,7 @@ import {
   FolderArchive, PenLine, Box, Presentation, Sparkles, History,
   AlertCircle, ChevronRight, Image, Package, Globe, Instagram,
   ClipboardList, Layers, Settings2, CalendarClock, Users, Truck, Percent, FileBox,
-  Inbox,
+  Inbox, Sparkle,
 } from "lucide-react";
 
 interface AdminCard {
@@ -57,6 +57,7 @@ const systemGroup: AdminCard[] = [
   { title: "Taxonomy Audit", description: "Find curator picks with non-canonical or mismatched categories", url: "/trade/admin/taxonomy-audit", icon: Layers },
   { title: "Sync Status", description: "Compare Designer Editor vs trade products — flag mismatches", url: "/trade/admin/sync-status", icon: AlertCircle },
   { title: "CAD & 3D Assets", description: "Upload .dwg, .rfa, .skp files per product and per variant", url: "/trade/admin/cad-assets", icon: FileBox },
+  { title: "First-login Flow", description: "Edit welcome panel, Quick Tour steps, and replay onboarding for any user", url: "/trade/admin/onboarding", icon: Sparkle },
 ];
 
 const shippingGroup: AdminCard[] = [
