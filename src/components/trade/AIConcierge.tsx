@@ -245,11 +245,20 @@ export function AIConcierge() {
     const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
 
-    // Special intercept: open the rename dialog instead of sending a prompt
+    // Special intercepts: client-side actions instead of model calls
     if (text === "__concierge:rename__") {
       setNameDraft(name === DEFAULT_NAME ? "" : name);
       setNameMenuOpen(true);
       setInput("");
+      return;
+    }
+    if (text === "__concierge:start_tour__") {
+      setInput("");
+      window.dispatchEvent(new Event("trade-tour:start"));
+      setTimeline((prev) => [
+        ...prev,
+        { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers, and brief setup. You can skip at any time." },
+      ]);
       return;
     }
 

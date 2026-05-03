@@ -102,7 +102,7 @@ const TradeDashboard = () => {
             openPanel: true,
             message: greeting,
             actions: [
-              { label: "Quick tour", prompt: "Give me a quick guided tour of the trade portal." },
+              { label: "Quick tour", prompt: "__concierge:start_tour__" },
               { label: "Start from a brief", prompt: "I'd like to start from a brief — ask me a few questions to scope my project." },
               { label: `Rename ${conciergeName}`, prompt: "__concierge:rename__" },
             ],
