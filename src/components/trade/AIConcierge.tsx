@@ -420,6 +420,7 @@ export function AIConcierge() {
                   key={i}
                   proposal={item.proposal}
                   excluded={new Set(item.excluded || [])}
+                  newPickIds={item.newPickIds}
                   onExcludedChange={(next) => {
                     setTimeline((prev) => {
                       const copy = prev.slice();
