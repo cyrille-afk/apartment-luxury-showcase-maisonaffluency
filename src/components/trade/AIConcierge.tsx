@@ -273,6 +273,12 @@ export function AIConcierge() {
         messages: messagesForApi,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onEscalation: (ev) => {
+          setTimeline((prev) => [
+            ...prev,
+            { kind: "escalation", sentiment: ev.sentiment, intent: ev.intent, excerpt: ev.excerpt },
+          ]);
+        },
         onDone: () => setStreaming(false),
         onError: (msg) => {
           toast.error(msg);
