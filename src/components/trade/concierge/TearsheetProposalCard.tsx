@@ -447,8 +447,6 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
           );
         });
       })()}
-      </ul>
-
       {error && (
         <p className="font-body text-[11px] text-destructive mb-2">{error}</p>
       )}
