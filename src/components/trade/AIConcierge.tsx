@@ -320,11 +320,11 @@ export function AIConcierge() {
       {open && (
         <div
           data-concierge-panel
-          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto" } : undefined}
+          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W } : { width: PANEL_W }}
           className={cn(
-            "fixed z-[100] w-[380px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
+            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
             !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : "h-[560px] max-h-[calc(100vh-6rem)]"
+            minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
           )}
         >
           <div
