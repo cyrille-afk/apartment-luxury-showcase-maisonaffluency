@@ -44,8 +44,24 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
 
   const eligibleItems = items.filter((i) => (i.approval_status || "").toLowerCase() !== "rejected");
 
+  // Infer a room from a product's category/subcategory. Pure heuristic — the
+  // user can always edit per-line after navigating to the quote.
+  const inferRoom = (cat: string | null, sub: string | null): string => {
+    const t = `${cat || ""} ${sub || ""}`.toLowerCase();
+    if (/(bed|nightstand|headboard|dresser|wardrobe)/.test(t)) return "Bedroom";
+    if (/(dining|sideboard|buffet|credenza)/.test(t)) return "Dining Room";
+    if (/(kitchen|bar stool|barstool)/.test(t)) return "Kitchen";
+    if (/(bath|vanit|shower|towel)/.test(t)) return "Bathroom";
+    if (/(office|desk|task chair|bookcase)/.test(t)) return "Office";
+    if (/(outdoor|garden|patio|terrace)/.test(t)) return "Outdoor";
+    if (/(entry|hall|console|coat)/.test(t)) return "Entry";
+    if (/(sofa|armchair|lounge|coffee table|side table|tv|media|rug|lighting|chandelier|sconce|lamp|wall art|mirror)/.test(t))
+      return "Living Room";
+    return "Unassigned";
+  };
+
   const insertItems = async (quoteId: string, list: BoardItemLite[]) => {
-    if (list.length === 0) return 0;
+    if (list.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
     // Avoid duplicates if adding to an existing quote
     const { data: existingLines } = await supabase
@@ -54,14 +70,28 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       .eq("quote_id", quoteId);
     const existing = new Set((existingLines || []).map((l: any) => l.product_id));
 
-    const rows = list
-      .filter((i) => !existing.has(i.product_id))
-      .map((i) => ({ quote_id: quoteId, product_id: i.product_id, quantity: 1 }));
+    const filtered = list.filter((i) => !existing.has(i.product_id));
+    if (filtered.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
-    if (rows.length === 0) return 0;
+    // Look up category/subcategory in one batch to infer rooms.
+    const { data: prods } = await supabase
+      .from("trade_products")
+      .select("id, category, subcategory")
+      .in("id", filtered.map((i) => i.product_id));
+    const meta = new Map<string, { c: string | null; s: string | null }>();
+    for (const p of (prods || []) as any[]) meta.set(p.id, { c: p.category ?? null, s: p.subcategory ?? null });
+
+    const byRoom: Record<string, number> = {};
+    const rows = filtered.map((i) => {
+      const m = meta.get(i.product_id);
+      const room = inferRoom(m?.c ?? null, m?.s ?? null);
+      byRoom[room] = (byRoom[room] || 0) + 1;
+      return { quote_id: quoteId, product_id: i.product_id, quantity: 1, room };
+    });
+
     const { error } = await supabase.from("trade_quote_items").insert(rows as any);
     if (error) throw error;
-    return rows.length;
+    return { added: rows.length, byRoom };
   };
 
   const logAction = async (quoteId: string, mode: "new" | "merged") => {
