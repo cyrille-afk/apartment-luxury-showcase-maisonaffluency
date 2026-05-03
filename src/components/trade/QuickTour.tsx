@@ -142,7 +142,21 @@ export function QuickTour() {
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">{step.body}</p>
+                {/* Horizontal progress bar — fills as steps advance */}
+                <div
+                  className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={STEPS.length}
+                  aria-valuenow={stepIdx + 1}
+                  aria-label={`Tour progress: step ${stepIdx + 1} of ${STEPS.length}`}
+                >
+                  <div
+                    className="h-full bg-accent transition-all duration-500 ease-out"
+                    style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }}
+                  />
+                </div>
+                <p className="font-body text-xs text-muted-foreground mt-3 leading-relaxed">{step.body}</p>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (
