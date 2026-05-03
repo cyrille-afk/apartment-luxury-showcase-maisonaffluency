@@ -73,13 +73,48 @@ const initialAnswers: Answers = {
   projectName: "",
   clientName: "",
   location: "",
-  projectType: "",
-  rooms: [],
-  styles: [],
-  budget: "",
-  timeline: "",
+  projectType: "Residential",
+  rooms: ["Living"],
+  styles: ["Contemporary"],
+  budget: "$25k–$100k",
+  timeline: "1–3 months",
   notes: "",
 };
+
+const DRAFT_KEY = "trade_brief_wizard_draft";
+
+const briefSchema = z.object({
+  projectName: z.string().trim().min(2, "Give your project a short name (2+ characters).").max(100, "Keep it under 100 characters."),
+  clientName: z.string().trim().max(100, "Keep it under 100 characters.").optional().or(z.literal("")),
+  location: z.string().trim().max(100, "Keep it under 100 characters.").optional().or(z.literal("")),
+  projectType: z.string().min(1, "Pick a project type."),
+  rooms: z.array(z.string()).min(1, "Pick at least one room."),
+  styles: z.array(z.string()).min(1, "Pick at least one style direction."),
+  budget: z.string().min(1, "Pick a rough budget — we'll refine later."),
+  timeline: z.string().min(1, "Pick a timeline — we'll refine later."),
+  notes: z.string().max(1500, "Keep notes under 1500 characters.").optional().or(z.literal("")),
+});
+
+type FieldErrors = Partial<Record<keyof Answers, string>>;
+
+const STEP_FIELDS: Record<(typeof STEPS)[number]["id"], (keyof Answers)[]> = {
+  basics: ["projectName", "clientName", "location"],
+  scope: ["projectType", "rooms"],
+  direction: ["styles"],
+  constraints: ["budget", "timeline"],
+  notes: ["notes"],
+};
+
+function validateAll(a: Answers): FieldErrors {
+  const result = briefSchema.safeParse(a);
+  if (result.success) return {};
+  const errs: FieldErrors = {};
+  for (const issue of result.error.issues) {
+    const k = issue.path[0] as keyof Answers;
+    if (k && !errs[k]) errs[k] = issue.message;
+  }
+  return errs;
+}
 
 const formatBriefMarkdown = (a: Answers) => {
   const lines: string[] = [];
