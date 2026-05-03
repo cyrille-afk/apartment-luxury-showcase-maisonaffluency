@@ -186,8 +186,24 @@ const TradeSettings = () => {
     setChangingPassword(false);
   };
 
+  const handleResetTour = async () => {
+    try {
+      localStorage.removeItem("trade_quick_tour_done");
+      localStorage.removeItem("trade_quick_tour_step");
+    } catch { /* ignore */ }
+    if (user) {
+      await supabase.from("profiles").update({ has_seen_trade_intro: false } as any).eq("id", user.id);
+    }
+    toast({ title: "Quick tour reset", description: "Starting tour from the beginning…" });
+    navigate("/trade");
+    setTimeout(() => {
+      window.dispatchEvent(new Event("trade-tour:start"));
+    }, 150);
+  };
+
   const inputClass =
     "w-full px-4 py-3 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
+
 
   const errorInputClass = "border-destructive focus:ring-destructive/30 focus:border-destructive/50";
 
