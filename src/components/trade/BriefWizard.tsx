@@ -140,35 +140,100 @@ export function BriefWizard() {
   const [stepIdx, setStepIdx] = useState(0);
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
   const [saving, setSaving] = useState(false);
+  const [touched, setTouched] = useState<Partial<Record<keyof Answers, boolean>>>({});
+  const [showStepErrors, setShowStepErrors] = useState(false);
+
+  // Restore draft if any
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.answers) setAnswers({ ...initialAnswers, ...parsed.answers });
+        if (typeof parsed?.stepIdx === "number") setStepIdx(parsed.stepIdx);
+      }
+    } catch {}
+  }, []);
+
+  // Persist draft
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx }));
+    } catch {}
+  }, [answers, stepIdx]);
 
   useEffect(() => {
     const onOpen = () => {
-      setStepIdx(0);
-      setAnswers(initialAnswers);
+      // keep draft if present, otherwise start fresh with defaults
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) {
+          setStepIdx(0);
+          setAnswers(initialAnswers);
+        }
+      } catch {
+        setStepIdx(0);
+        setAnswers(initialAnswers);
+      }
+      setTouched({});
+      setShowStepErrors(false);
       setOpen(true);
     };
     window.addEventListener("trade-brief:open", onOpen);
     return () => window.removeEventListener("trade-brief:open", onOpen);
   }, []);
 
-  const set = <K extends keyof Answers>(key: K, value: Answers[K]) =>
+  const set = <K extends keyof Answers>(key: K, value: Answers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
+    setTouched((t) => ({ ...t, [key]: true }));
+  };
 
   const step = STEPS[stepIdx];
   const isLast = stepIdx === STEPS.length - 1;
-  const canAdvance = (() => {
-    switch (step.id) {
-      case "basics": return answers.projectName.trim().length > 0;
-      case "scope": return answers.projectType !== "" && answers.rooms.length > 0;
-      case "direction": return answers.styles.length > 0;
-      case "constraints": return answers.budget !== "" && answers.timeline !== "";
-      case "notes": return true;
+
+  const allErrors = useMemo(() => validateAll(answers), [answers]);
+  const stepFieldKeys = STEP_FIELDS[step.id];
+  const stepErrors: FieldErrors = useMemo(() => {
+    const out: FieldErrors = {};
+    for (const k of stepFieldKeys) if (allErrors[k]) out[k] = allErrors[k];
+    return out;
+  }, [allErrors, stepFieldKeys]);
+  const stepHasErrors = Object.keys(stepErrors).length > 0;
+  const fieldError = (k: keyof Answers) =>
+    (touched[k] || showStepErrors) ? stepErrors[k] : undefined;
+
+  const tryAdvance = () => {
+    if (stepHasErrors) {
+      setShowStepErrors(true);
+      const first = Object.values(stepErrors)[0];
+      if (first) toast.error(first);
+      return;
     }
-  })();
+    setShowStepErrors(false);
+    setStepIdx((i) => Math.min(STEPS.length - 1, i + 1));
+  };
+
+  const jumpToFirstInvalidStep = () => {
+    for (let i = 0; i < STEPS.length; i++) {
+      const id = STEPS[i].id;
+      if (STEP_FIELDS[id].some((k) => allErrors[k])) {
+        setStepIdx(i);
+        setShowStepErrors(true);
+        const k = STEP_FIELDS[id].find((k) => allErrors[k])!;
+        toast.error(allErrors[k]!);
+        return true;
+      }
+    }
+    return false;
+  };
 
   const finish = useCallback(async () => {
     if (!user) {
       toast.error("Please sign in to save your brief.");
+      return;
+    }
+    if (Object.keys(allErrors).length > 0) {
+      jumpToFirstInvalidStep();
       return;
     }
     setSaving(true);
@@ -178,18 +243,18 @@ export function BriefWizard() {
         .from("projects")
         .insert({
           user_id: user.id,
-          name: answers.projectName || "Untitled Project",
-          client_name: answers.clientName || "",
-          location: answers.location || "",
+          name: answers.projectName.trim() || "Untitled Project",
+          client_name: answers.clientName?.trim() || "",
+          location: answers.location?.trim() || "",
           notes: briefMd,
           status: "active",
         })
         .select("id")
         .single();
       if (error) throw error;
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
       toast.success("Brief saved as a new project.");
       setOpen(false);
-      // Notify the concierge so it can confirm in chat
       window.dispatchEvent(new CustomEvent("concierge:stage", {
         detail: {
           openPanel: true,
@@ -200,7 +265,6 @@ export function BriefWizard() {
           ],
         },
       }));
-      // Best-effort navigation
       setTimeout(() => navigate(`/trade/projects/${data.id}`), 400);
     } catch (e: any) {
       console.error(e);
@@ -208,7 +272,23 @@ export function BriefWizard() {
     } finally {
       setSaving(false);
     }
-  }, [answers, user, navigate]);
+  }, [answers, user, navigate, allErrors]);
+
+  const ErrorMsg = ({ msg }: { msg?: string }) =>
+    msg ? (
+      <p className="flex items-center gap-1 text-xs text-destructive">
+        <AlertCircle className="h-3 w-3" /> {msg}
+      </p>
+    ) : null;
+
+  const resetDraft = () => {
+    setAnswers(initialAnswers);
+    setStepIdx(0);
+    setTouched({});
+    setShowStepErrors(false);
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    toast.success("Draft cleared — sensible defaults restored.");
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -221,16 +301,24 @@ export function BriefWizard() {
           <DialogDescription>{step.description}</DialogDescription>
         </DialogHeader>
 
-        {/* Progress dots */}
+        {/* Progress dots — clickable to jump between completed/visited steps */}
         <div className="flex items-center gap-1.5 mb-2">
-          {STEPS.map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${
-                i < stepIdx ? "w-3 bg-accent" : i === stepIdx ? "w-6 bg-accent" : "w-3 bg-muted"
-              }`}
-            />
-          ))}
+          {STEPS.map((s, i) => {
+            const hasErr = STEP_FIELDS[s.id].some((k) => allErrors[k]);
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => { setShowStepErrors(false); setStepIdx(i); }}
+                aria-label={`Go to step ${i + 1}: ${s.title}`}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  i === stepIdx ? "w-6" : "w-3",
+                  i === stepIdx ? "bg-accent" : i < stepIdx ? (hasErr ? "bg-destructive/70" : "bg-accent") : "bg-muted hover:bg-muted-foreground/30"
+                )}
+              />
+            );
+          })}
         </div>
 
         <div className="space-y-4 py-2">
@@ -239,17 +327,23 @@ export function BriefWizard() {
               <div className="space-y-1.5">
                 <Label htmlFor="bw-name">Project name *</Label>
                 <Input id="bw-name" value={answers.projectName} maxLength={100}
-                  onChange={(e) => set("projectName", e.target.value)} placeholder="e.g. Soho Loft Refresh" />
+                  onChange={(e) => set("projectName", e.target.value)}
+                  onBlur={() => setTouched((t) => ({ ...t, projectName: true }))}
+                  placeholder="e.g. Soho Loft Refresh"
+                  aria-invalid={!!fieldError("projectName")} />
+                <ErrorMsg msg={fieldError("projectName")} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="bw-client">Client (optional)</Label>
                 <Input id="bw-client" value={answers.clientName} maxLength={100}
                   onChange={(e) => set("clientName", e.target.value)} placeholder="e.g. The Tan Family" />
+                <ErrorMsg msg={fieldError("clientName")} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="bw-loc">Location (optional)</Label>
                 <Input id="bw-loc" value={answers.location} maxLength={100}
                   onChange={(e) => set("location", e.target.value)} placeholder="e.g. Singapore" />
+                <ErrorMsg msg={fieldError("location")} />
               </div>
             </>
           )}
@@ -259,10 +353,12 @@ export function BriefWizard() {
               <div className="space-y-1.5">
                 <Label>Project type *</Label>
                 <Chips options={PROJECT_TYPES} value={answers.projectType} onChange={(v) => set("projectType", v)} />
+                <ErrorMsg msg={fieldError("projectType")} />
               </div>
               <div className="space-y-1.5">
                 <Label>Rooms involved *</Label>
                 <Chips options={ROOMS} value={answers.rooms} onChange={(v) => set("rooms", v)} multi />
+                <ErrorMsg msg={fieldError("rooms")} />
               </div>
             </>
           )}
@@ -271,6 +367,7 @@ export function BriefWizard() {
             <div className="space-y-1.5">
               <Label>Pick one or more styles *</Label>
               <Chips options={STYLES} value={answers.styles} onChange={(v) => set("styles", v)} multi />
+              <ErrorMsg msg={fieldError("styles")} />
             </div>
           )}
 
@@ -279,10 +376,12 @@ export function BriefWizard() {
               <div className="space-y-1.5">
                 <Label>Budget *</Label>
                 <Chips options={BUDGETS} value={answers.budget} onChange={(v) => set("budget", v)} />
+                <ErrorMsg msg={fieldError("budget")} />
               </div>
               <div className="space-y-1.5">
                 <Label>Timeline *</Label>
                 <Chips options={TIMELINES} value={answers.timeline} onChange={(v) => set("timeline", v)} />
+                <ErrorMsg msg={fieldError("timeline")} />
               </div>
             </>
           )}
@@ -293,21 +392,29 @@ export function BriefWizard() {
               <Textarea id="bw-notes" value={answers.notes} maxLength={1500} rows={5}
                 onChange={(e) => set("notes", e.target.value)}
                 placeholder="Mood, materials, must-haves, things to avoid…" />
+              <p className="text-[11px] text-muted-foreground text-right">{answers.notes.length}/1500</p>
+              <ErrorMsg msg={fieldError("notes")} />
             </div>
           )}
         </div>
 
-        <DialogFooter className="flex-row justify-between sm:justify-between">
-          <Button variant="ghost" disabled={stepIdx === 0 || saving} onClick={() => setStepIdx((i) => Math.max(0, i - 1))}>
-            <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
-          </Button>
+        <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" disabled={stepIdx === 0 || saving} onClick={() => { setShowStepErrors(false); setStepIdx((i) => Math.max(0, i - 1)); }}>
+              <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
+            </Button>
+            <Button variant="ghost" size="sm" type="button" onClick={resetDraft} disabled={saving}
+              className="text-xs text-muted-foreground hover:text-foreground">
+              Reset
+            </Button>
+          </div>
           {isLast ? (
-            <Button onClick={finish} disabled={!canAdvance || saving}>
+            <Button onClick={finish} disabled={saving}>
               {saving ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1" />}
               Save brief
             </Button>
           ) : (
-            <Button onClick={() => setStepIdx((i) => Math.min(STEPS.length - 1, i + 1))} disabled={!canAdvance}>
+            <Button onClick={tryAdvance} disabled={saving}>
               Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Button>
           )}
