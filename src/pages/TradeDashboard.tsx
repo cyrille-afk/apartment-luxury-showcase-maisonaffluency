@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
+import { WelcomeIntroDialog } from "@/components/trade/WelcomeIntroDialog";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -198,6 +199,7 @@ const TradeDashboard = () => {
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
+      <WelcomeIntroDialog />
       <div className="mb-6 md:mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>

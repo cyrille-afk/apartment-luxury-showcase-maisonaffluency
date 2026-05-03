@@ -1905,6 +1905,7 @@ export type Database = {
           created_at: string
           email: string
           first_name: string
+          has_seen_trade_intro: boolean
           id: string
           last_name: string
           phone: string
@@ -1922,6 +1923,7 @@ export type Database = {
           created_at?: string
           email: string
           first_name?: string
+          has_seen_trade_intro?: boolean
           id: string
           last_name?: string
           phone?: string
@@ -1941,6 +1943,7 @@ export type Database = {
           created_at?: string
           email?: string
           first_name?: string
+          has_seen_trade_intro?: boolean
           id?: string
           last_name?: string
           phone?: string
