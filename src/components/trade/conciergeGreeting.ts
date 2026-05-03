@@ -39,29 +39,23 @@ const TONE_LABELS: Record<Lang, Record<Tone, { label: string; description: strin
     concise: { label: "Concise", description: "Brief, scannable, no flourish." },
     designer: { label: "Designer-friendly", description: "Studio shorthand, peer-to-peer." },
   },
-  fr: {
-    formal: { label: "Formel", description: "Soigné, professionnel, phrases complètes." },
-    luxury: { label: "Luxe", description: "Voix éditoriale, évocatrice, atelier." },
-    concise: { label: "Concis", description: "Bref, lisible, sans fioritures." },
-    designer: { label: "Style designer", description: "Langage d'atelier, entre pairs." },
+  id: {
+    formal: { label: "Formal", description: "Tertata, profesional, kalimat lengkap." },
+    luxury: { label: "Mewah", description: "Suara editorial, evokatif, ala atelier." },
+    concise: { label: "Ringkas", description: "Singkat, mudah dibaca, tanpa hiasan." },
+    designer: { label: "Gaya desainer", description: "Bahasa studio, antar rekan." },
   },
-  it: {
-    formal: { label: "Formale", description: "Curato, professionale, frasi complete." },
-    luxury: { label: "Lusso", description: "Voce editoriale, evocativa, da atelier." },
-    concise: { label: "Conciso", description: "Breve, scorrevole, senza fronzoli." },
-    designer: { label: "Stile designer", description: "Linguaggio da studio, tra pari." },
+  th: {
+    formal: { label: "ทางการ", description: "สุภาพ มืออาชีพ ประโยคสมบูรณ์" },
+    luxury: { label: "หรูหรา", description: "น้ำเสียงเชิงบรรณาธิการ ชวนจินตนาการ แบบอตอลีเย่" },
+    concise: { label: "กระชับ", description: "สั้น อ่านง่าย ไม่ฟุ่มเฟือย" },
+    designer: { label: "สไตล์ดีไซเนอร์", description: "ภาษาสตูดิโอ คุยกันแบบเพื่อนร่วมวงการ" },
   },
-  es: {
-    formal: { label: "Formal", description: "Pulido, profesional, frases completas." },
-    luxury: { label: "Lujo", description: "Voz editorial, evocadora, de atelier." },
-    concise: { label: "Conciso", description: "Breve, claro, sin adornos." },
-    designer: { label: "Estilo diseñador", description: "Lenguaje de estudio, entre pares." },
-  },
-  de: {
-    formal: { label: "Formell", description: "Gepflegt, professionell, ganze Sätze." },
-    luxury: { label: "Luxus", description: "Editorial, evokativ, Atelier-Stimme." },
-    concise: { label: "Knapp", description: "Kurz, übersichtlich, ohne Schnörkel." },
-    designer: { label: "Designer-Stil", description: "Studio-Sprache, auf Augenhöhe." },
+  zh: {
+    formal: { label: "正式", description: "考究、专业、完整句式。" },
+    luxury: { label: "奢华", description: "编辑式、富有意境、工坊语调。" },
+    concise: { label: "简洁", description: "简短、易读、毫无赘述。" },
+    designer: { label: "设计师口吻", description: "工作室行话，平等对话。" },
   },
 };
 
