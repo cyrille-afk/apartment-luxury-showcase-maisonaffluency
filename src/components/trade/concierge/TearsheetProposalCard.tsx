@@ -280,6 +280,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               const next = new Set(prev);
               if (next.has(p.id)) next.delete(p.id);
               else next.add(p.id);
+              persistExpanded(next);
               return next;
             });
           };
