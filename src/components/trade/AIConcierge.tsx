@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
@@ -14,7 +14,17 @@ type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] };
 
-import { type Stage, stageFromPath, DEFAULT_GREETING, greetingForContext } from "./conciergeGreeting";
+import {
+  type Stage,
+  type Tone,
+  TONES,
+  loadTone,
+  saveTone,
+  stageFromPath,
+  DEFAULT_GREETING,
+  greetingForContext,
+  toneSystemNote,
+} from "./conciergeGreeting";
 
 
 export function AIConcierge() {
@@ -23,8 +33,10 @@ export function AIConcierge() {
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [tone, setTone] = useState<Tone>(() => loadTone());
+  const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
-    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname) },
+    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone()) },
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -96,14 +108,25 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      const next = greetingForContext(stageFromPath(pathname), pathname);
+      const next = greetingForContext(stageFromPath(pathname), pathname, tone);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
-  }, [pathname]);
+  }, [pathname, tone]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
+
+  // Close tone menu when clicking outside the panel
+  useEffect(() => {
+    if (!toneMenuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const panel = (e.target as HTMLElement | null)?.closest("[data-concierge-panel]");
+      if (!panel) setToneMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [toneMenuOpen]);
 
   // auto-scroll
   useEffect(() => {
@@ -189,8 +212,11 @@ export function AIConcierge() {
       proposalContext.push({ role: "user", content: lines.join("\n") });
     }
 
+    const toneContext: ChatMessage = { role: "user", content: toneSystemNote(tone) };
+
     const messagesForApi: ChatMessage[] = [
       stageContext,
+      toneContext,
       ...proposalContext,
       ...nextTimeline
         .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
@@ -246,7 +272,7 @@ export function AIConcierge() {
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline, stage]);
+  }, [input, streaming, timeline, stage, tone]);
 
   const handleProposalResolved = (
     proposalIndex: number,
@@ -355,7 +381,56 @@ export function AIConcierge() {
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 relative">
+              <div className="relative">
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => setToneMenuOpen((v) => !v)}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                  aria-label="Choose concierge tone"
+                  aria-haspopup="menu"
+                  aria-expanded={toneMenuOpen}
+                  title={`Tone: ${TONES.find((t) => t.id === tone)?.label ?? tone}`}
+                >
+                  <Palette className="h-3.5 w-3.5" />
+                </button>
+                {toneMenuOpen && (
+                  <div
+                    role="menu"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-full mt-1 z-[110] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
+                  >
+                    <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Concierge tone
+                    </div>
+                    {TONES.map((t) => {
+                      const active = t.id === tone;
+                      return (
+                        <button
+                          key={t.id}
+                          role="menuitemradio"
+                          aria-checked={active}
+                          onClick={() => {
+                            setTone(t.id);
+                            saveTone(t.id);
+                            setToneMenuOpen(false);
+                          }}
+                          className={cn(
+                            "w-full text-left px-3 py-2 hover:bg-muted/60 transition-colors flex items-start gap-2",
+                            active && "bg-muted/40"
+                          )}
+                        >
+                          <Check className={cn("h-3.5 w-3.5 mt-0.5 shrink-0", active ? "text-accent" : "opacity-0")} />
+                          <span className="flex-1 min-w-0">
+                            <span className="block font-body text-xs text-foreground">{t.label}</span>
+                            <span className="block font-body text-[11px] text-muted-foreground leading-snug">{t.description}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
@@ -363,7 +438,7 @@ export function AIConcierge() {
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
-                  setTimeline([{ kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname) }]);
+                  setTimeline([{ kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, tone) }]);
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Start a new conversation"
