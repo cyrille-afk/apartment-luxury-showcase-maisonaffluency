@@ -16,7 +16,7 @@ import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher"
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { OrphanAssignBanner } from "@/components/trade/OrphanAssignBanner";
 import { TierBadge } from "@/components/trade/TierBadge";
-import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
+import { replayWelcome } from "@/lib/replayWelcome";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
