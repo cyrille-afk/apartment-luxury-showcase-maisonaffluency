@@ -2,18 +2,21 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 type PickerFilter = "all" | "favourites" | "board";
 
-const BOARD_STORAGE_KEY = "mood-board-items";
+const BOARD_STORAGE_KEY_BASE = "mood-board-items";
+const storageKeyFor = (projectId: string | null) =>
+  projectId ? `${BOARD_STORAGE_KEY_BASE}:${projectId}` : BOARD_STORAGE_KEY_BASE;
 
-function loadBoardFromStorage(): any[] {
+function loadBoardFromStorage(projectId: string | null): any[] {
   try {
-    const stored = localStorage.getItem(BOARD_STORAGE_KEY);
+    const stored = localStorage.getItem(storageKeyFor(projectId));
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
@@ -33,18 +36,26 @@ interface MoodRec {
 
 export default function TradeMoodBoards() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("project");
   const [search, setSearch] = useState("");
-  const [board, setBoard] = useState<any[]>(loadBoardFromStorage);
-  const [filter, setFilter] = useState<PickerFilter>("all");
+  const [board, setBoard] = useState<any[]>(() => loadBoardFromStorage(projectId));
+  const [filter, setFilter] = useState<PickerFilter>(projectId ? "board" : "all");
   const [recommendations, setRecommendations] = useState<MoodRec[]>([]);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
   const prevBoardIdsRef = useRef<string>("");
 
-  // Persist board to localStorage on change
+  // Reload board when switching project
   useEffect(() => {
-    localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
-  }, [board]);
+    setBoard(loadBoardFromStorage(projectId));
+    prevBoardIdsRef.current = "";
+  }, [projectId]);
+
+  // Persist board to localStorage on change (per project)
+  useEffect(() => {
+    localStorage.setItem(storageKeyFor(projectId), JSON.stringify(board));
+  }, [board, projectId]);
 
   // Auto-fetch recommendations when board has 2+ items and composition changes
   useEffect(() => {
@@ -192,15 +203,14 @@ export default function TradeMoodBoards() {
     },
   });
 
-  // User's board items (from client_boards)
+  // User's board items (from client_boards) — scoped to current project when set
   const { data: boardProducts = [], isLoading: loadingBoards } = useQuery({
-    queryKey: ["mood-board-project-items", user?.id],
+    queryKey: ["mood-board-project-items", user?.id, projectId],
     enabled: !!user,
     queryFn: async () => {
-      const { data: boards } = await supabase
-        .from("client_boards")
-        .select("id")
-        .eq("user_id", user!.id);
+      let q = supabase.from("client_boards").select("id").eq("user_id", user!.id);
+      if (projectId) q = q.eq("project_id", projectId);
+      const { data: boards } = await q;
       if (!boards?.length) return [];
       const boardIds = boards.map((b) => b.id);
       const { data: items } = await supabase
