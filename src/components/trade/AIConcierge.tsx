@@ -368,6 +368,21 @@ export function AIConcierge() {
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  setExpanded((v) => {
+                    const nv = !v;
+                    try { localStorage.setItem("concierge:expanded", nv ? "1" : "0"); } catch {}
+                    return nv;
+                  });
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label={expanded ? "Shrink" : "Expand"}
+                title={expanded ? "Shrink" : "Expand"}
+              >
+                {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setMinimized((m) => !m)}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label={minimized ? "Expand" : "Collapse"}
