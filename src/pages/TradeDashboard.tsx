@@ -7,11 +7,11 @@ import {
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
-import { WelcomeIntroDialog } from "@/components/trade/WelcomeIntroDialog";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 
 interface BrandFolder {
   brand_name: string;
@@ -71,12 +71,50 @@ const formatRelativeDate = (dateStr: string) => {
 };
 
 const TradeDashboard = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
+
+  // First-session welcome: auto-open the AI Concierge with a personalised greeting
+  // and a prompt to rename it. Gated by profiles.has_seen_trade_intro so it only fires once.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("has_seen_trade_intro")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled || !data || data.has_seen_trade_intro !== false) return;
+
+      const conciergeName = loadName() || DEFAULT_NAME;
+      const firstName = profile?.first_name?.trim();
+      const greeting = `Welcome to Maison Affluency${firstName ? `, ${firstName}` : ""} — I'm ${conciergeName}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`;
+
+      // Defer slightly so the AIConcierge listener is mounted
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("concierge:stage", {
+          detail: {
+            openPanel: true,
+            message: greeting,
+            actions: [
+              { label: "Quick tour", prompt: "Give me a quick guided tour of the trade portal." },
+              { label: "Start from a brief", prompt: "I'd like to start from a brief — ask me a few questions to scope my project." },
+              { label: `Rename ${conciergeName}`, prompt: "__concierge:rename__" },
+            ],
+          },
+        }));
+      }, 600);
+
+      // Mark as seen so it doesn't re-fire on next visit
+      await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
+    })();
+    return () => { cancelled = true; };
+  }, [user, profile?.first_name]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,7 +237,6 @@ const TradeDashboard = () => {
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
-      <WelcomeIntroDialog />
       <div className="mb-6 md:mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>

@@ -245,6 +245,14 @@ export function AIConcierge() {
     const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
 
+    // Special intercept: open the rename dialog instead of sending a prompt
+    if (text === "__concierge:rename__") {
+      setNameDraft(name === DEFAULT_NAME ? "" : name);
+      setNameMenuOpen(true);
+      setInput("");
+      return;
+    }
+
     const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
     const nextTimeline = [...timeline, userItem];
     setTimeline(nextTimeline);
