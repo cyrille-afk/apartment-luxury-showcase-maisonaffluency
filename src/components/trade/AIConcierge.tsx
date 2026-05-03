@@ -224,8 +224,15 @@ export function AIConcierge() {
   }, []);
 
   const persistName = useCallback(async (value: string) => {
+    const previous = loadName();
     const saved = saveName(value);
     setName(saved);
+    if (saved !== previous) {
+      const message = saved === DEFAULT_NAME
+        ? `Noted — I'll go back to ${DEFAULT_NAME} from now on.`
+        : `Noted — I'll answer to ${saved} from now on.`;
+      setTimeline((prev) => [...prev, { kind: "msg", role: "assistant", content: message }]);
+    }
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user?.id;
     if (!uid) return saved;
