@@ -50,12 +50,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const visiblePicks = proposal.preview.filter((p) => !excluded.has(p.id));
 
   const togglePick = (id: string) => {
-    setExcluded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    const next = new Set(excluded);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setExcludedLocal(next);
+    onExcludedChange?.(next);
   };
 
   const handleApprove = async () => {
