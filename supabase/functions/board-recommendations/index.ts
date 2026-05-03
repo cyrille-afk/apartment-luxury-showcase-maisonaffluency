@@ -401,6 +401,7 @@ Return a JSON object with a recommendations array:
           title: prod?.product_name || '', subtitle: '',
           image_url: prod?.image_url || '', category: prod?.category || '',
           brand: prod?.brand_name || '',
+          anchors: r.anchors || [],
         }
       }
       const prod = recCuratorProducts.find((p: any) => p.id === r.product_id)
@@ -409,6 +410,7 @@ Return a JSON object with a recommendations array:
         title: prod?.title || '', subtitle: prod?.subtitle || '',
         image_url: prod?.image_url || '', category: prod?.category || '',
         brand: designerMap.get(prod?.designer_id) || '',
+        anchors: r.anchors || [],
       }
     })
 
