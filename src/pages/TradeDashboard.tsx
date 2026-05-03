@@ -84,6 +84,12 @@ const TradeDashboard = () => {
     if (!user) return;
     let cancelled = false;
     (async () => {
+      // Local suppression: if the user already finished/skipped the quick tour
+      // on this device, don't prompt again even if the DB flag is reset.
+      try {
+        if (localStorage.getItem("trade_quick_tour_done")) return;
+      } catch {}
+
       const { data } = await supabase
         .from("profiles")
         .select("has_seen_trade_intro")
