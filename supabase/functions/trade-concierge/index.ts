@@ -331,7 +331,171 @@ async function loadUserBoards(
     .join("\n");
 }
 
-/** Hydrate a list of pick IDs into a preview the chat UI can render. */
+/** Load predictive personalization signals for the signed-in user. */
+async function loadUserSignals(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "(No user session — generic guidance only.)";
+
+  const [profileQ, favsQ, projectsQ, quotesQ, viewsQ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("first_name, company, country, trade_tier")
+      .eq("id", userId)
+      .maybeSingle(),
+    supabase
+      .from("trade_favorites")
+      .select("product_id, created_at, trade_products(product_name, brand_name, category, materials)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(15),
+    supabase
+      .from("projects")
+      .select("name, client_name, location, status")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("updated_at", { ascending: false })
+      .limit(8),
+    supabase
+      .from("trade_quotes")
+      .select("id, status, updated_at, project_id, projects(name), trade_quote_items(trade_products(product_name, brand_name, category))")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("trade_recent_views")
+      .select("entity_type, entity_label, brand_name, category, viewed_at")
+      .eq("user_id", userId)
+      .order("viewed_at", { ascending: false })
+      .limit(20),
+  ]);
+
+  const lines: string[] = [];
+  const p: any = profileQ.data;
+  if (p) {
+    const who = [p.first_name, p.company && `(${p.company})`].filter(Boolean).join(" ");
+    lines.push(`- Identity: ${who || "trade professional"}${p.country ? ` · ${p.country}` : ""} · tier: ${p.trade_tier}`);
+  }
+
+  const projects = (projectsQ.data || []) as any[];
+  if (projects.length) {
+    lines.push(
+      `- Active projects: ${projects
+        .map((pr) => `"${pr.name}"${pr.location ? ` (${pr.location})` : ""}${pr.client_name ? ` for ${pr.client_name}` : ""}`)
+        .join("; ")}`
+    );
+  }
+
+  const favs = (favsQ.data || []) as any[];
+  if (favs.length) {
+    const brands = new Map<string, number>();
+    const cats = new Map<string, number>();
+    favs.forEach((f) => {
+      const tp = f.trade_products;
+      if (tp?.brand_name) brands.set(tp.brand_name, (brands.get(tp.brand_name) || 0) + 1);
+      if (tp?.category) cats.set(tp.category, (cats.get(tp.category) || 0) + 1);
+    });
+    const topBrands = Array.from(brands.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([n]) => n);
+    const topCats = Array.from(cats.entries()).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([n]) => n);
+    lines.push(`- Favorited brands: ${topBrands.join(", ") || "—"}`);
+    if (topCats.length) lines.push(`- Favorited categories: ${topCats.join(", ")}`);
+    const recentTitles = favs.slice(0, 5).map((f) => f.trade_products?.product_name).filter(Boolean);
+    if (recentTitles.length) lines.push(`- Recently saved pieces: ${recentTitles.join("; ")}`);
+  }
+
+  const quotes = (quotesQ.data || []) as any[];
+  if (quotes.length) {
+    const summary = quotes.slice(0, 3).map((q) => {
+      const items: any[] = q.trade_quote_items || [];
+      const brands = Array.from(new Set(items.map((i) => i.trade_products?.brand_name).filter(Boolean))).slice(0, 3);
+      const project = q.projects?.name ? ` for "${q.projects.name}"` : "";
+      return `${q.status}${project}${brands.length ? ` [${brands.join(", ")}]` : ""}`;
+    });
+    lines.push(`- Recent quotes: ${summary.join("; ")}`);
+  }
+
+  const views = (viewsQ.data || []) as any[];
+  if (views.length) {
+    const labels = Array.from(new Set(views.map((v) => v.entity_label).filter(Boolean))).slice(0, 8);
+    if (labels.length) lines.push(`- Recently viewed (not saved): ${labels.join("; ")}`);
+  }
+
+  return lines.length ? lines.join("\n") : "(New user — no engagement signals yet.)";
+}
+
+/** Run a fast classifier on the latest user message to detect sentiment + intent. */
+async function classifySentiment(
+  apiKey: string,
+  latestUserMessage: string,
+): Promise<{ sentiment: string; intent: string; escalate: boolean }> {
+  const fallback = { sentiment: "neutral", intent: "question", escalate: false };
+  if (!latestUserMessage || latestUserMessage.length < 2) return fallback;
+
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Be conservative — only flag escalate=true when the user is clearly frustrated, complains repeatedly, threatens to leave, or explicitly asks for a human.",
+          },
+          { role: "user", content: latestUserMessage.slice(0, 1500) },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "classify",
+              description: "Return sentiment + intent + escalation flag.",
+              parameters: {
+                type: "object",
+                properties: {
+                  sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
+                  intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
+                  escalate: { type: "boolean", description: "True when a human concierge should step in." },
+                },
+                required: ["sentiment", "intent", "escalate"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "classify" } },
+      }),
+    });
+    if (!resp.ok) return fallback;
+    const data = await resp.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return fallback;
+    const parsed = JSON.parse(args);
+    return {
+      sentiment: parsed.sentiment || "neutral",
+      intent: parsed.intent || "question",
+      escalate: !!parsed.escalate,
+    };
+  } catch (e) {
+    console.error("sentiment classifier failed:", e);
+    return fallback;
+  }
+}
+
+function buildSentimentDirective(c: { sentiment: string; intent: string; escalate: boolean }): string {
+  if (c.sentiment === "frustrated" || c.intent === "complaint") {
+    return "The user appears FRUSTRATED. Open by acknowledging the friction in one sentence ('I hear you — that's not the experience we want'), validate the concern, then offer a concrete next step. Do NOT upsell or pivot to recommendations. Avoid jargon. Keep it human.";
+  }
+  if (c.sentiment === "anxious" || c.sentiment === "confused") {
+    return "The user seems UNCERTAIN. Slow down, confirm what they're trying to achieve, and offer one clear next step rather than several options.";
+  }
+  if (c.sentiment === "delighted") {
+    return "The user is POSITIVE. Match their energy briefly and keep momentum — propose the next logical step (tearsheet, sample, quote) without over-selling.";
+  }
+  return "Tone: warm, refined, helpful. Default register.";
+}
 async function hydratePickPreview(
   supabase: ReturnType<typeof createClient>,
   pickIds: string[],
