@@ -906,9 +906,57 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-right">Amount {currency}</span>
               </div>
 
-              {/* Items */}
-              <div className="divide-y divide-border">
-                {items.map((item) => {
+              {/* Datalist of existing rooms in this quote, for the per-line input. */}
+              <datalist id={`rooms-${quoteId}`}>
+                {Array.from(new Set(items.map((i) => (i.room || "").trim()).filter(Boolean))).map((r) => (
+                  <option key={r} value={r} />
+                ))}
+              </datalist>
+
+              {/* Items — grouped by room. Items with no room go under "Unassigned". */}
+              {(() => {
+                const groups = new Map<string, typeof items>();
+                for (const it of items) {
+                  const k = (it.room || "").trim() || "Unassigned";
+                  if (!groups.has(k)) groups.set(k, [] as any);
+                  groups.get(k)!.push(it);
+                }
+                // Stable order: known rooms in first-appearance order, then "Unassigned" last.
+                const keys = Array.from(groups.keys()).sort((a, b) => {
+                  if (a === "Unassigned") return 1;
+                  if (b === "Unassigned") return -1;
+                  return 0;
+                });
+                return keys.map((roomKey) => {
+                  const groupItems = groups.get(roomKey)!;
+                  const groupSubtotal = groupItems.reduce((sum, it) => {
+                    const p = it.trade_products;
+                    const raw = it.unit_price_cents ?? p?.trade_price_cents ?? null;
+                    const fc = it.unit_price_cents != null ? currency : (p?.currency || currency);
+                    const u = convertCents(raw, fc, currency);
+                    return sum + (u ? u * it.quantity : 0);
+                  }, 0);
+                  return (
+                    <div key={roomKey} className="border-t border-border first:border-t-0">
+                      <div className="flex items-center justify-between gap-3 pt-4 pb-2">
+                        <h3 className="font-display text-[11px] md:text-xs text-foreground uppercase tracking-widest">
+                          {roomKey}
+                          <span className="ml-2 font-body text-[10px] text-muted-foreground normal-case tracking-normal">
+                            · {groupItems.length} {groupItems.length === 1 ? "item" : "items"}
+                          </span>
+                        </h3>
+                        <span className="font-body text-[10px] md:text-[11px] text-muted-foreground tabular-nums">
+                          {groupSubtotal > 0 ? `${currencySymbol(currency)} ${formatPriceRaw(groupSubtotal, currency)}` : ""}
+                        </span>
+                      </div>
+                      <div className="divide-y divide-border">
+                        {groupItems.map((item) => {
+                  const product = item.trade_products;
+                  const rawUnitPrice = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+                  // unit_price_cents is already in the quote currency (admin converts before saving)
+                  const prodCurrency = item.unit_price_cents != null ? currency : (product?.currency || currency);
+                  const unitPrice = convertCents(rawUnitPrice, prodCurrency, currency);
+                  const lineTotal = unitPrice ? unitPrice * item.quantity : null;
                   const product = item.trade_products;
                   const rawUnitPrice = item.unit_price_cents ?? product?.trade_price_cents ?? null;
                   // unit_price_cents is already in the quote currency (admin converts before saving)
