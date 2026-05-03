@@ -198,7 +198,6 @@ const TradeDashboard = () => {
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
-      <WelcomeIntroDialog />
       <div className="mb-6 md:mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
