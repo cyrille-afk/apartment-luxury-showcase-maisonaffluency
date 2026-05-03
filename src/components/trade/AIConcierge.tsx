@@ -201,8 +201,11 @@ export function AIConcierge() {
       proposalContext.push({ role: "user", content: lines.join("\n") });
     }
 
+    const toneContext: ChatMessage = { role: "user", content: toneSystemNote(tone) };
+
     const messagesForApi: ChatMessage[] = [
       stageContext,
+      toneContext,
       ...proposalContext,
       ...nextTimeline
         .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
