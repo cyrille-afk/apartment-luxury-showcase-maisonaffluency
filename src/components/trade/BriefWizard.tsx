@@ -378,7 +378,13 @@ export function BriefWizard() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => {
+      if (!o && open && !saving) {
+        // Auto-save draft when user dismisses (X / overlay / Esc)
+        try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, savedAt: Date.now() })); } catch {}
+      }
+      setOpen(o);
+    }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
