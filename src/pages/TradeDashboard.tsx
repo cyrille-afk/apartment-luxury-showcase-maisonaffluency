@@ -281,13 +281,13 @@ const TradeDashboard = () => {
                 try {
                   localStorage.removeItem("trade_quick_tour_done");
                   localStorage.removeItem("trade_quick_tour_step");
+                  localStorage.removeItem("ma:welcome-pending");
                 } catch {}
                 if (user) {
-                  await supabase.from("profiles").update({ has_seen_trade_intro: false } as any).eq("id", user.id);
+                  await supabase.from("profiles").update({ has_seen_trade_intro: true } as any).eq("id", user.id);
                 }
-                // Trigger the welcome effect by reloading the dashboard route.
-                // (The effect is gated on the DB flag we just flipped.)
-                window.location.assign("/trade");
+                window.dispatchEvent(new Event("trade-tour:start"));
+                setTimeout(() => window.dispatchEvent(new Event("trade-tour:start")), 150);
               }}
               className="flex items-center gap-2 rounded-full border border-border bg-background text-foreground px-3 py-2 hover:bg-muted transition-colors"
               title="Replay the first-login welcome flow"
