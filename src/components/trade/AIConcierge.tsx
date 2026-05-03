@@ -211,8 +211,14 @@ export function AIConcierge() {
     };
 
     const handleProposal = (proposal: TearsheetProposal) => {
+      // Compute which picks are NEW relative to the previous proposal so the
+      // card can highlight rationales for replacements/additions only.
+      const prevIds = new Set(
+        lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
+      );
+      const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
       // Insert as its own timeline item (after current assistant text, if any)
-      setTimeline((prev) => [...prev, { kind: "proposal", proposal }]);
+      setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
     };
 
     try {
