@@ -18,7 +18,7 @@ type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
 
 const stageFromPath = (pathname: string): Stage => {
   if (pathname.startsWith("/trade/quotes") || pathname.includes("/quote/")) return "Quote";
-  if (pathname.startsWith("/trade/boards") || pathname.startsWith("/trade/tearsheets")) return "Tearsheet";
+  if (pathname.startsWith("/trade/boards") || pathname.startsWith("/trade/tearsheets") || pathname.startsWith("/trade/mood-boards")) return "Tearsheet";
   if (pathname.startsWith("/trade/orders") || pathname.startsWith("/trade/order")) return "Order";
   if (pathname.startsWith("/trade/projects")) return "Project";
   return "Discover";
