@@ -119,7 +119,7 @@ export function QuickTour() {
 
       {onStepRoute && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] w-[calc(100vw-2rem)] max-w-md print:hidden animate-fade-in">
-          <div className="rounded-2xl border border-border bg-background shadow-2xl p-4">
+          <div key={`card-${stepIdx}`} className="rounded-2xl border border-border bg-background shadow-2xl p-4 animate-scale-in">
             <div className="flex items-start gap-3">
               <div className="shrink-0 h-9 w-9 rounded-full bg-accent/15 flex items-center justify-center">
                 <Icon className="h-4 w-4 text-accent" />
@@ -131,7 +131,7 @@ export function QuickTour() {
                       Step {stepIdx + 1} of {STEPS.length}
                     </span>
                     <span className="font-body text-[10px] text-muted-foreground/60">·</span>
-                    <h4 className="font-display text-sm text-foreground truncate">{step.title.replace(/^\d+\.\s*/, "")}</h4>
+                    <h4 key={`t-${stepIdx}`} className="font-display text-sm text-foreground truncate animate-fade-in">{step.title.replace(/^\d+\.\s*/, "")}</h4>
                   </div>
                   <button
                     onClick={finish}
@@ -152,11 +152,11 @@ export function QuickTour() {
                   aria-label={`Tour progress: step ${stepIdx + 1} of ${STEPS.length}`}
                 >
                   <div
-                    className="h-full bg-accent transition-all duration-500 ease-out"
+                    className="h-full bg-accent transition-[width] duration-700 ease-out"
                     style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }}
                   />
                 </div>
-                <p className="font-body text-xs text-muted-foreground mt-3 leading-relaxed">{step.body}</p>
+                <p key={`b-${stepIdx}`} className="font-body text-xs text-muted-foreground mt-3 leading-relaxed animate-fade-in">{step.body}</p>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (
