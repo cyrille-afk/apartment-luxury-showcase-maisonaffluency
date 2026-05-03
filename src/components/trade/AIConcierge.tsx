@@ -47,6 +47,9 @@ export function AIConcierge() {
   const [minimized, setMinimized] = useState(false);
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
+  const [name, setName] = useState<string>(() => loadName());
+  const [nameDraft, setNameDraft] = useState<string>("");
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
