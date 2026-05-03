@@ -1160,8 +1160,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       </div>
                     </div>
                   );
-                })}
-              </div>
+                        })}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
 
               {/* Add another product to this quote */}
               <div className="border-t border-dashed border-border mt-3 pt-4 print:hidden">
