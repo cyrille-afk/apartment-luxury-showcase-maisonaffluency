@@ -262,6 +262,24 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
       )}
 
+      {/* Collapse all reasoning panels — only when something is currently expanded */}
+      {expandedDetail.size > 0 && (
+        <div className="flex justify-end mb-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setExpandedDetail(new Set());
+              persistExpanded(new Set());
+            }}
+            className="inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Collapse all reasoning panels"
+          >
+            <ChevronDown className="h-2.5 w-2.5 rotate-180" />
+            Collapse all ({expandedDetail.size})
+          </button>
+        </div>
+      )}
+
       {/* Picks */}
       <ul className="space-y-1.5 mb-3">
         {uniquePreview.map((p) => {
