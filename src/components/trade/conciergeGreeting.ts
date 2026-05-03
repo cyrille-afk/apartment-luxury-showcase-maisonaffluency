@@ -2,14 +2,13 @@ export type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
 
 export type Tone = "formal" | "luxury" | "concise" | "designer";
 
-export type Lang = "en" | "fr" | "it" | "es" | "de";
+export type Lang = "en" | "id" | "th" | "zh";
 
 export const LANGUAGES: { id: Lang; label: string; native: string }[] = [
   { id: "en", label: "English", native: "English" },
-  { id: "fr", label: "French", native: "Français" },
-  { id: "it", label: "Italian", native: "Italiano" },
-  { id: "es", label: "Spanish", native: "Español" },
-  { id: "de", label: "German", native: "Deutsch" },
+  { id: "id", label: "Indonesian", native: "Bahasa Indonesia" },
+  { id: "th", label: "Thai", native: "ไทย" },
+  { id: "zh", label: "Chinese (Simplified)", native: "简体中文" },
 ];
 
 export const DEFAULT_LANG: Lang = "en";
