@@ -1029,6 +1029,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">PO #</span>
                           <input
                             type="text"
                             defaultValue={item.po_number || ""}
