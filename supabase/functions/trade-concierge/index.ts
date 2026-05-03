@@ -310,6 +310,32 @@ async function hydratePickPreview(
   const pickById = new Map((picks || []).map((p: any) => [p.id, p]));
   const tradeById = new Map((trades || []).map((t: any) => [t.id, t]));
 
+  // Build a fallback image map from gallery_hotspots for products that have
+  // no image_url stored on their main row (e.g. Giudecca Rug — the only
+  // photo lives on the hotspot). Keyed by normalized product_name.
+  const normName = (s: string) =>
+    String(s || "").toLowerCase().replace(/\s*\(.*?\)\s*/g, "").replace(/[^a-z0-9]+/g, "").trim();
+  const missingNames = new Set<string>();
+  for (const id of pickIds) {
+    const p = pickById.get(id);
+    if (p && !p.image_url) missingNames.add(normName(p.title));
+    const t = tradeById.get(id);
+    if (t && !t.image_url) missingNames.add(normName(t.product_name));
+  }
+  const hotspotImageByName = new Map<string, string>();
+  if (missingNames.size) {
+    const { data: hotspots } = await supabase
+      .from("gallery_hotspots")
+      .select("product_name, product_image_url")
+      .not("product_image_url", "is", null);
+    (hotspots || []).forEach((h: any) => {
+      const key = normName(h.product_name);
+      if (key && missingNames.has(key) && !hotspotImageByName.has(key)) {
+        hotspotImageByName.set(key, h.product_image_url);
+      }
+    });
+  }
+
   return pickIds
     .map((id) => {
       const p = pickById.get(id);
@@ -317,7 +343,7 @@ async function hydratePickPreview(
         return {
           id: p.id,
           title: p.title,
-          image_url: p.image_url,
+          image_url: p.image_url || hotspotImageByName.get(normName(p.title)) || null,
           materials: p.materials,
           category: p.category,
           designer_name: dmap.get(p.designer_id) || null,
@@ -330,7 +356,7 @@ async function hydratePickPreview(
         return {
           id: t.id,
           title: t.product_name,
-          image_url: t.image_url,
+          image_url: t.image_url || hotspotImageByName.get(normName(t.product_name)) || null,
           materials: t.materials,
           category: t.category,
           designer_name: baseBrand || null,
