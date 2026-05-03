@@ -223,7 +223,7 @@ const TradeLayout = () => {
                 <TradePriceToggle />
               </div>
               <button
-                onClick={replayWelcome}
+                onClick={handleReplayWelcome}
                 className="hidden lg:flex items-center gap-2 rounded-full border border-border bg-background text-foreground px-3 py-2 hover:bg-muted transition-colors"
                 title="Replay the first-login welcome flow"
               >
