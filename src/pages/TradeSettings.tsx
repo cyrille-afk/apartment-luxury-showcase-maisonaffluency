@@ -34,6 +34,7 @@ const passwordSchema = z.object({
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { tier, tierLabel, discountLabel, config: tierConfig } = useTradeDiscount();
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
