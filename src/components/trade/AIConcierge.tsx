@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
+import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -12,7 +13,8 @@ export type ConciergeQuickAction = { label: string; prompt: string };
 
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
-  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] };
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
+  | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
 
 import {
   type Stage,
@@ -272,6 +274,12 @@ export function AIConcierge() {
         messages: messagesForApi,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onEscalation: (ev) => {
+          setTimeline((prev) => [
+            ...prev,
+            { kind: "escalation", sentiment: ev.sentiment, intent: ev.intent, excerpt: ev.excerpt },
+          ]);
+        },
         onDone: () => setStreaming(false),
         onError: (msg) => {
           toast.error(msg);
@@ -595,6 +603,58 @@ export function AIConcierge() {
                       </div>
                     )}
                   </div>
+                );
+              }
+              if (item.kind === "escalation") {
+                return (
+                  <EscalationCard
+                    key={i}
+                    sentiment={item.sentiment}
+                    intent={item.intent}
+                    resolved={item.resolved}
+                    onAction={async (action) => {
+                      if (action === "dismissed") {
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "escalation") copy[i] = { ...t, resolved: "dismissed" };
+                          return copy;
+                        });
+                        return;
+                      }
+                      try {
+                        const { supabase } = await import("@/integrations/supabase/client");
+                        const { data: sess } = await supabase.auth.getSession();
+                        const token = sess.session?.access_token;
+                        if (!token) {
+                          toast.error("Please sign in to request a human concierge.");
+                          return;
+                        }
+                        const resp = await fetch(
+                          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-escalation`,
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({
+                              sentiment: item.sentiment,
+                              intent: item.intent,
+                              excerpt: item.excerpt,
+                            }),
+                          },
+                        );
+                        if (!resp.ok) throw new Error(`Error ${resp.status}`);
+                        toast.success("A concierge has been notified — they'll be in touch shortly.");
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "escalation") copy[i] = { ...t, resolved: "requested" };
+                          return copy;
+                        });
+                      } catch (e) {
+                        toast.error("Could not reach the concierge — please try again.");
+                      }
+                    }}
+                  />
                 );
               }
               return (

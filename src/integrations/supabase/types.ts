@@ -3109,6 +3109,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_concierge_escalations: {
+        Row: {
+          conversation_excerpt: Json
+          created_at: string
+          id: string
+          notified_admins: boolean
+          notified_email: boolean
+          status: string
+          trigger_intent: string | null
+          trigger_sentiment: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_excerpt?: Json
+          created_at?: string
+          id?: string
+          notified_admins?: boolean
+          notified_email?: boolean
+          status?: string
+          trigger_intent?: string | null
+          trigger_sentiment: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_excerpt?: Json
+          created_at?: string
+          id?: string
+          notified_admins?: boolean
+          notified_email?: boolean
+          status?: string
+          trigger_intent?: string | null
+          trigger_sentiment?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trade_custom_request_activity: {
         Row: {
           action: string
@@ -3709,6 +3748,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trade_recent_views: {
+        Row: {
+          brand_name: string | null
+          category: string | null
+          entity_id: string | null
+          entity_label: string | null
+          entity_type: string
+          id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          brand_name?: string | null
+          category?: string | null
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type: string
+          id?: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          brand_name?: string | null
+          category?: string | null
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type?: string
+          id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
       }
       trade_sample_requests: {
         Row: {

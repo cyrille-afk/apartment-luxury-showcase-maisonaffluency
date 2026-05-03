@@ -31,6 +31,13 @@ export type AddToTearsheetProposal = {
 
 export type TearsheetProposal = CreateTearsheetProposal | AddToTearsheetProposal;
 
+export type EscalationEvent = {
+  sentiment: string;
+  intent: string;
+  user_id: string | null;
+  excerpt: ChatMessage[];
+};
+
 export type PickPreview = {
   id: string;
   title: string;
@@ -49,6 +56,7 @@ export async function streamConcierge({
   messages,
   onDelta,
   onProposal,
+  onEscalation,
   onDone,
   onError,
   signal,
@@ -56,6 +64,7 @@ export async function streamConcierge({
   messages: ChatMessage[];
   onDelta: (text: string) => void;
   onProposal?: (proposal: TearsheetProposal) => void;
+  onEscalation?: (event: EscalationEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
   signal?: AbortSignal;
@@ -101,6 +110,10 @@ export async function streamConcierge({
       const parsed = JSON.parse(jsonStr);
       if (currentEvent === "proposal") {
         if (onProposal) onProposal(parsed as TearsheetProposal);
+        return;
+      }
+      if (currentEvent === "escalation") {
+        if (onEscalation) onEscalation(parsed as EscalationEvent);
         return;
       }
       const content = parsed.choices?.[0]?.delta?.content as string | undefined;
