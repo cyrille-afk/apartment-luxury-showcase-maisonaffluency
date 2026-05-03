@@ -502,14 +502,24 @@ export function BriefWizard() {
             </Button>
           </div>
           {isLast ? (
-            <Button onClick={finish} disabled={saving}>
-              {saving ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1" />}
-              Save brief
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={saveAndExit} disabled={saving}>
+                <Save className="h-3.5 w-3.5 mr-1" /> Save & exit
+              </Button>
+              <Button onClick={finish} disabled={saving}>
+                {saving ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+                Save brief
+              </Button>
+            </div>
           ) : (
-            <Button onClick={tryAdvance} disabled={saving}>
-              Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={saveAndExit} disabled={saving}>
+                <Save className="h-3.5 w-3.5 mr-1" /> Save & exit
+              </Button>
+              <Button onClick={tryAdvance} disabled={saving}>
+                Next <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
           )}
         </DialogFooter>
       </DialogContent>
