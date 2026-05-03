@@ -39,9 +39,11 @@ export function AIConcierge() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [tone, setTone] = useState<Tone>(() => loadTone());
+  const [lang, setLang] = useState<Lang>(() => loadLang());
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
-    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone()) },
+    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
