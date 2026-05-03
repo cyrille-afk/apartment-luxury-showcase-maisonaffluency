@@ -190,8 +190,12 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     if (!existingQuote) return;
     setBusy(true);
     try {
-      const added = await insertItems(existingQuote.id, pendingItems);
+      const { added, byRoom } = await insertItems(existingQuote.id, pendingItems);
       await logAction(existingQuote.id, "merged");
+      const roomBreakdown = Object.entries(byRoom)
+        .sort((a, b) => b[1] - a[1])
+        .map(([r, n]) => `${r} (${n})`)
+        .join(", ");
       toast.success(
         added > 0 ? "Items added to existing draft" : "Already on this draft",
         {
@@ -205,9 +209,10 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
         detail: {
           stage: "Quote",
           message: added > 0
-            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added.`
+            ? `We've moved on from the tearsheet "${board.title}" to the existing draft quote — ${added} ${added === 1 ? "piece" : "pieces"} just added.${roomBreakdown ? ` New items were grouped by room — ${roomBreakdown}.` : ""}`
             : `We're now on the existing draft quote for this project — every eligible piece from "${board.title}" was already on it.`,
           actions: [
+            { label: "Refine rooms", prompt: "Help me refine the room assignments for the quote items — list them grouped by room and suggest changes for any that look off." },
             { label: "Adjust quantities", prompt: "Walk me through the line items so I can adjust quantities — list them with current qty and ask which ones to change." },
             { label: "Add finishing details", prompt: "Help me add finishing details (fabric, finish, COM/COL, custom dimensions) to each line item. Start with the first one." },
             { label: "Prepare to send", prompt: "Help me get this quote ready to submit: review missing info, suggest a client-facing note, and outline the next step." },
