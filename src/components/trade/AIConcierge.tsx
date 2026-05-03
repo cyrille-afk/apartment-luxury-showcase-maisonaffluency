@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
+import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
