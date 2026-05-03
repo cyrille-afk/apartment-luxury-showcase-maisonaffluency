@@ -116,8 +116,8 @@ Deno.serve(async (req) => {
       })),
     ]
 
-    const boardContext = boardItems.map(p =>
-      `- "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}`
+    const boardContext = boardItems.map((p, i) =>
+      `[B${i}] "${p.name}" by ${p.brand} — Category: ${p.category}, Materials: ${p.materials}${p.dimensions ? ', Dimensions: ' + p.dimensions : ''}`
     ).join('\n')
 
     if (!boardContext.trim()) {
