@@ -238,7 +238,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
       {/* Picks */}
       <ul className="space-y-1.5 mb-3">
-        {proposal.preview.map((p) => {
+        {uniquePreview.map((p) => {
           const isExcluded = excluded.has(p.id);
           return (
             <li
