@@ -12,7 +12,7 @@ export type ConciergeQuickAction = { label: string; prompt: string };
 
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
-  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded" };
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[] };
 
 type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
 
@@ -149,8 +149,39 @@ export function AIConcierge() {
       role: "user",
       content: `[Workflow context] Current stage: ${stage}. Tailor guidance to this stage and reference it explicitly when helpful.`,
     };
+
+    // Find the most recent proposal (resolved or not) so we can tell the
+    // model which items the user kept vs removed. Without this context the
+    // model regenerates a fresh selection on every follow-up turn, which
+    // looks like it "forgets" the user's edits.
+    const lastProposal = [...timeline].reverse().find((t): t is Extract<TimelineItem, { kind: "proposal" }> => t.kind === "proposal");
+    const proposalContext: ChatMessage[] = [];
+    if (lastProposal) {
+      const excludedSet = new Set(lastProposal.excluded || []);
+      const kept = lastProposal.proposal.preview.filter((p) => !excludedSet.has(p.id));
+      const removed = lastProposal.proposal.preview.filter((p) => excludedSet.has(p.id));
+      const fmt = (p: { id: string; title: string; designer_name: string | null }) =>
+        `  - "${p.title}" by ${p.designer_name || "—"} [id: ${p.id}]`;
+      const lines: string[] = [
+        `[Current tearsheet draft state — preserve KEPT items verbatim in any new proposal.]`,
+        `KEPT (must remain in the next proposal, with the SAME ids):`,
+        kept.length ? kept.map(fmt).join("\n") : "  (none)",
+      ];
+      if (removed.length) {
+        lines.push(
+          `REMOVED by the user (do NOT bring these back unless the user explicitly re-requests them):`,
+          removed.map(fmt).join("\n"),
+        );
+      }
+      lines.push(
+        `When the user asks for a replacement or a new search, build the next proposal as: KEPT ids + the NEW pieces you suggest. Do not silently drop kept items, do not re-introduce removed items.`,
+      );
+      proposalContext.push({ role: "user", content: lines.join("\n") });
+    }
+
     const messagesForApi: ChatMessage[] = [
       stageContext,
+      ...proposalContext,
       ...nextTimeline
         .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
         .map((t) => ({ role: t.role, content: t.content })),
@@ -382,6 +413,17 @@ export function AIConcierge() {
                 <TearsheetProposalCard
                   key={i}
                   proposal={item.proposal}
+                  excluded={new Set(item.excluded || [])}
+                  onExcludedChange={(next) => {
+                    setTimeline((prev) => {
+                      const copy = prev.slice();
+                      const t = copy[i];
+                      if (t?.kind === "proposal") {
+                        copy[i] = { ...t, excluded: Array.from(next) };
+                      }
+                      return copy;
+                    });
+                  }}
                   onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
                 />
               );
