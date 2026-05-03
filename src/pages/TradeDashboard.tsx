@@ -11,6 +11,7 @@ import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 
 interface BrandFolder {
   brand_name: string;
