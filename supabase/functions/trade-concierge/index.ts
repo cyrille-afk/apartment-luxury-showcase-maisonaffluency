@@ -32,6 +32,20 @@ const TOOLS = [
             type: "string",
             description: "Optional 1–2 sentence rationale shown alongside the tearsheet.",
           },
+          pick_rationales: {
+            type: "array",
+            description:
+              "Per-piece, one-sentence reason explaining why each NEWLY suggested pick fits the brief. REQUIRED for any pick that was not in the previous proposal's KEPT list (i.e. any replacement or addition). Each entry's id MUST match an id in pick_ids.",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
+                reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+              },
+              required: ["id", "reason"],
+              additionalProperties: false,
+            },
+          },
         },
         required: ["title", "pick_ids"],
         additionalProperties: false,
