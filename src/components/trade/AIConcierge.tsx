@@ -414,6 +414,89 @@ export function AIConcierge() {
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    setNameDraft(name === DEFAULT_NAME ? "" : name);
+                    setNameMenuOpen((v) => !v);
+                  }}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                  aria-label="Rename your concierge"
+                  aria-haspopup="dialog"
+                  aria-expanded={nameMenuOpen}
+                  title={`Name: ${name}`}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                {nameMenuOpen && (
+                  <div
+                    role="dialog"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-full mt-1 z-[110] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
+                  >
+                    <div className="font-display text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+                      Name your concierge
+                    </div>
+                    <input
+                      type="text"
+                      value={nameDraft}
+                      onChange={(e) => setNameDraft(e.target.value.slice(0, 32))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const saved = saveName(nameDraft);
+                          setName(saved);
+                          setNameMenuOpen(false);
+                        } else if (e.key === "Escape") {
+                          setNameMenuOpen(false);
+                        }
+                      }}
+                      autoFocus
+                      maxLength={32}
+                      placeholder={DEFAULT_NAME}
+                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                    <div className="mt-1 font-body text-[10px] text-muted-foreground">
+                      Up to 32 characters · saved on this device
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const saved = saveName("");
+                          setName(saved);
+                          setNameDraft("");
+                          setNameMenuOpen(false);
+                        }}
+                        className="font-body text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Reset
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setNameMenuOpen(false)}
+                          className="rounded-md px-2 py-1 font-body text-[11px] text-muted-foreground hover:bg-muted"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const saved = saveName(nameDraft);
+                            setName(saved);
+                            setNameMenuOpen(false);
+                          }}
+                          className="rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => setToneMenuOpen((v) => !v)}
                   className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                   aria-label="Choose concierge tone"
