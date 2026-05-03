@@ -1,0 +1,1 @@
+UPDATE public.onboarding_tour_steps SET path='/trade', body='From your dashboard, open the Designers & Ateliers Library tile (highlighted) to filter 274 designers across 32 ateliers by category, country or material — and shop their pieces.' WHERE step_key='designers';
