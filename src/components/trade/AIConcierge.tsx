@@ -108,11 +108,11 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      const next = greetingForContext(stageFromPath(pathname), pathname);
+      const next = greetingForContext(stageFromPath(pathname), pathname, tone);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
-  }, [pathname]);
+  }, [pathname, tone]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
