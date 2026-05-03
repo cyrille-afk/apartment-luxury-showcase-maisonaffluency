@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
-import { LayoutDashboard, ChevronUp, RotateCcw } from "lucide-react";
+import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
