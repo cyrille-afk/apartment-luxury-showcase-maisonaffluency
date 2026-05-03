@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { loadName, DEFAULT_NAME } from "@/lib/conciergeGreeting";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 
 export async function replayWelcome(opts?: { userId?: string; firstName?: string | null }) {
   try {
