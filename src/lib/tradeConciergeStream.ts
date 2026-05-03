@@ -31,6 +31,7 @@ export type PickPreview = {
   id: string;
   title: string;
   image_url: string | null;
+  image_from_hotspot?: boolean;
   materials: string | null;
   category: string | null;
   designer_name: string | null;
