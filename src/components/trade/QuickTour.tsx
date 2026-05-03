@@ -121,10 +121,16 @@ export function QuickTour() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <h4 className="font-display text-sm text-foreground">{step.title}</h4>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-body text-[10px] uppercase tracking-[0.18em] text-accent shrink-0">
+                      Step {stepIdx + 1} of {STEPS.length}
+                    </span>
+                    <span className="font-body text-[10px] text-muted-foreground/60">·</span>
+                    <h4 className="font-display text-sm text-foreground truncate">{step.title.replace(/^\d+\.\s*/, "")}</h4>
+                  </div>
                   <button
                     onClick={finish}
-                    className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1"
+                    className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
                     aria-label="Skip tour"
                     title="Skip tour"
                   >
@@ -144,13 +150,29 @@ export function QuickTour() {
                       />
                     ))}
                   </div>
-                  <button
-                    onClick={next}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90"
-                  >
-                    {step.ctaLabel}
-                    {stepIdx === STEPS.length - 1 ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={finish}
+                      className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2 py-1.5"
+                    >
+                      Skip
+                    </button>
+                    <button
+                      onClick={back}
+                      disabled={stepIdx === 0}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                      Back
+                    </button>
+                    <button
+                      onClick={next}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90"
+                    >
+                      {stepIdx === STEPS.length - 1 ? "Finish" : "Next"}
+                      {stepIdx === STEPS.length - 1 ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
