@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Map,
+  Wand2, Map, Star,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Tool = { title: string; description: string; url: string; icon: any };
 type ToolCategory = { label: string; tools: Tool[] };
@@ -55,19 +57,41 @@ const categories: ToolCategory[] = [
   },
 ];
 
+const FAV_KEY = "trade_tools_favorites_v1";
+
 export default function TradeTools() {
   const navigate = useNavigate();
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  const glanceTools: Tool[] = [
-    { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
-    { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
-    { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
-    { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
-    { title: "Quote Builder", description: "Build and submit project quotes", url: "/trade/quotes", icon: FileText },
-    { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
-    { title: "Floor Plan → FF&E", description: "AI-suggested layout from a plan", url: "/trade/floor-plan-ffe", icon: Map },
-    { title: "Material Library", description: "Swatches, finishes & samples", url: "/trade/materials", icon: Layers },
-  ];
+  // Load favorites once on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(FAV_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setFavorites(parsed.filter((x) => typeof x === "string"));
+      }
+    } catch {}
+  }, []);
+
+  const persist = useCallback((next: string[]) => {
+    setFavorites(next);
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(next)); } catch {}
+  }, []);
+
+  const toggleFavorite = useCallback((url: string) => {
+    persist(
+      favorites.includes(url)
+        ? favorites.filter((u) => u !== url)
+        : [...favorites, url],
+    );
+  }, [favorites, persist]);
+
+  const allTools = useMemo(() => categories.flatMap((c) => c.tools), []);
+  const favoriteTools = useMemo(
+    () => favorites.map((url) => allTools.find((t) => t.url === url)).filter(Boolean) as Tool[],
+    [favorites, allTools],
+  );
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
@@ -78,35 +102,51 @@ export default function TradeTools() {
         </p>
       </div>
 
-      <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
-        <div className="flex items-baseline justify-between gap-4 mb-4">
-          <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
-            Tools at a glance
-          </h2>
-          <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hidden sm:block">
-            Your specification toolkit
-          </span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-          {glanceTools.map((tool) => (
-            <button
-              key={tool.url}
-              onClick={() => navigate(tool.url)}
-              className="group flex items-center gap-2.5 p-3 rounded-lg border border-border bg-background hover:bg-foreground/5 hover:border-foreground/20 transition-all text-left"
-            >
-              <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
-                <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+      {/* Favorites — only shown after the user stars at least one tool */}
+      {favoriteTools.length > 0 && (
+        <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
+          <div className="flex items-baseline justify-between gap-4 mb-4">
+            <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground flex items-center gap-2">
+              <Star className="h-3.5 w-3.5 fill-accent text-accent" />
+              Your favorites
+            </h2>
+            <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hidden sm:block">
+              {favoriteTools.length} pinned
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {favoriteTools.map((tool) => (
+              <div
+                key={tool.url}
+                className="group relative flex items-center gap-2.5 p-3 rounded-lg border border-border bg-background hover:bg-foreground/5 hover:border-foreground/20 transition-all"
+              >
+                <button
+                  onClick={() => navigate(tool.url)}
+                  className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
+                >
+                  <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
+                    <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-body text-xs font-medium text-foreground block truncate">{tool.title}</span>
+                    <span className="font-body text-[10px] text-muted-foreground leading-snug block truncate">
+                      {tool.description}
+                    </span>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(tool.url); }}
+                  className="shrink-0 p-1 rounded hover:bg-muted text-accent"
+                  aria-label={`Remove ${tool.title} from favorites`}
+                  title="Remove from favorites"
+                >
+                  <Star className="h-3.5 w-3.5 fill-accent" />
+                </button>
               </div>
-              <div className="min-w-0">
-                <span className="font-body text-xs font-medium text-foreground block truncate">{tool.title}</span>
-                <span className="font-body text-[10px] text-muted-foreground leading-snug block truncate">
-                  {tool.description}
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {categories.map((cat) => (
         <section key={cat.label}>
@@ -114,23 +154,43 @@ export default function TradeTools() {
             {cat.label}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {cat.tools.map((tool) => (
-              <button
-                key={tool.url}
-                onClick={() => navigate(tool.url)}
-                className="group flex items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all text-left"
-              >
-                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
-                  <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+            {cat.tools.map((tool) => {
+              const isFav = favorites.includes(tool.url);
+              return (
+                <div
+                  key={tool.url}
+                  className="group relative flex items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
+                >
+                  <button
+                    onClick={() => navigate(tool.url)}
+                    className="flex items-start gap-3 flex-1 min-w-0 text-left"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
+                      <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    </div>
+                    <div className="min-w-0 pr-6">
+                      <span className="font-body text-sm font-medium text-foreground block">{tool.title}</span>
+                      <span className="font-body text-xs text-muted-foreground leading-snug block mt-0.5">
+                        {tool.description}
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleFavorite(tool.url); }}
+                    className={cn(
+                      "absolute top-2.5 right-2.5 p-1.5 rounded-md transition-colors",
+                      isFav
+                        ? "text-accent hover:bg-muted"
+                        : "text-muted-foreground/40 hover:text-accent hover:bg-muted opacity-0 group-hover:opacity-100 focus:opacity-100",
+                    )}
+                    aria-label={isFav ? `Remove ${tool.title} from favorites` : `Add ${tool.title} to favorites`}
+                    title={isFav ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Star className={cn("h-3.5 w-3.5", isFav && "fill-accent")} />
+                  </button>
                 </div>
-                <div className="min-w-0">
-                  <span className="font-body text-sm font-medium text-foreground block">{tool.title}</span>
-                  <span className="font-body text-xs text-muted-foreground leading-snug block mt-0.5">
-                    {tool.description}
-                  </span>
-                </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         </section>
       ))}
