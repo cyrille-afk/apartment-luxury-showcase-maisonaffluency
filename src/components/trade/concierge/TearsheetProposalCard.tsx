@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +41,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const [excludedLocal, setExcludedLocal] = useState<Set<string>>(excludedProp ?? new Set());
   const excluded = excludedProp ?? excludedLocal;
+  const [expandedDetail, setExpandedDetail] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<Status>("pending");
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -246,11 +247,20 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
           const isNew = newPickIds ? newPickIds.includes(p.id) : false;
           // Prefer the rationale baked onto the preview by the edge function;
           // fall back to the per-id map on args for resilience.
-          const rationale =
-            (p as any).rationale ||
-            proposal.args.pick_rationales?.[p.id] ||
-            null;
+          const fromArgs = proposal.args.pick_rationales?.[p.id];
+          const rationale = (p as any).rationale || fromArgs?.reason || null;
+          const rationaleDetail =
+            (p as any).rationale_detail || fromArgs?.detail || null;
           const showRationale = isNew && !!rationale;
+          const isExpanded = expandedDetail.has(p.id);
+          const toggleDetail = () => {
+            setExpandedDetail((prev) => {
+              const next = new Set(prev);
+              if (next.has(p.id)) next.delete(p.id);
+              else next.add(p.id);
+              return next;
+            });
+          };
           return (
             <li
               key={p.id}
@@ -280,9 +290,34 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                   {p.designer_name || "—"}{p.materials ? ` · ${p.materials}` : ""}
                 </div>
                 {showRationale && (
-                  <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">
-                    {rationale}
-                  </div>
+                  <>
+                    <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">
+                      {rationale}
+                    </div>
+                    {rationaleDetail && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={toggleDetail}
+                          aria-expanded={isExpanded}
+                          className="mt-1 inline-flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-accent hover:text-accent/80 transition-colors"
+                        >
+                          <ChevronDown
+                            className={cn(
+                              "h-2.5 w-2.5 transition-transform",
+                              isExpanded && "rotate-180",
+                            )}
+                          />
+                          {isExpanded ? "Hide reasoning" : "Why this pick"}
+                        </button>
+                        {isExpanded && (
+                          <div className="mt-1 rounded-md border border-accent/30 bg-accent/[0.04] px-2 py-1.5 font-body text-[10.5px] text-foreground/80 leading-relaxed animate-fade-in">
+                            {rationaleDetail}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
                 )}
               </div>
               {status === "pending" && (

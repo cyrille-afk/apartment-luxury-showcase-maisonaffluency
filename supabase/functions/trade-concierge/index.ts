@@ -41,6 +41,11 @@ const TOOLS = [
               properties: {
                 id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
                 reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+                detail: {
+                  type: "string",
+                  description:
+                    "Longer 2–4 sentence editorial explanation (max ~600 chars) expanding on the reason: how the piece dialogues with the rest of the selection, its material/scale/silhouette logic, and what it adds vs the item it replaces (when relevant). Required when the pick is a replacement.",
+                },
               },
               required: ["id", "reason"],
               additionalProperties: false,
@@ -85,6 +90,11 @@ const TOOLS = [
               properties: {
                 id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
                 reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+                detail: {
+                  type: "string",
+                  description:
+                    "Longer 2–4 sentence editorial explanation (max ~600 chars) expanding on the reason: how the piece dialogues with the rest of the selection, its material/scale/silhouette logic, and what it adds vs the item it replaces (when relevant). Required when the pick is a replacement.",
+                },
               },
               required: ["id", "reason"],
               additionalProperties: false,
@@ -129,7 +139,7 @@ Rules for both tools:
 - pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CATALOG PIECES. Never invent IDs.
 - For \`add_to_tearsheet\`, board_id MUST be a UUID from USER'S EXISTING TEARSHEETS — never invent.
 - Aim for 4–12 pieces per proposal — enough to feel like a curated edit, not a single suggestion.
-- ALWAYS populate \`pick_rationales\` with a short one-sentence reason for every NEW pick (any id not in the previous KEPT list). When replacing a removed item, the reason should briefly explain why this replacement honours the brief or addresses what the removed item was missing. Reasons must be specific (material, scale, mood, designer language) — never generic ("a great fit").
+- ALWAYS populate \`pick_rationales\` with a short one-sentence \`reason\` for every NEW pick (any id not in the previous KEPT list). When the pick is a REPLACEMENT for a removed item, you MUST also include a longer \`detail\` field — 2–4 editorial sentences expanding on the reason: how the piece converses with the rest of the selection (material, scale, silhouette, palette, designer language) and what it adds vs the item it replaces. Reasons must be specific — never generic ("a great fit").
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
 - If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
 
@@ -513,18 +523,23 @@ serve(async (req) => {
               continue;
             }
             const pickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const rationaleMap: Record<string, string> = {};
+            const rationaleMap: Record<string, { reason: string; detail?: string }> = {};
             if (Array.isArray(parsed.pick_rationales)) {
               for (const r of parsed.pick_rationales) {
                 if (r && typeof r.id === "string" && typeof r.reason === "string") {
-                  rationaleMap[r.id] = r.reason.trim();
+                  rationaleMap[r.id] = {
+                    reason: r.reason.trim(),
+                    detail: typeof r.detail === "string" && r.detail.trim() ? r.detail.trim() : undefined,
+                  };
                 }
               }
             }
             const previewRaw = await hydratePickPreview(supabase, pickIds);
-            const preview = previewRaw.map((p: any) =>
-              p && rationaleMap[p.id] ? { ...p, rationale: rationaleMap[p.id] } : p,
-            );
+            const preview = previewRaw.map((p: any) => {
+              const r = p && rationaleMap[p.id];
+              if (!r) return p;
+              return { ...p, rationale: r.reason, rationale_detail: r.detail || null };
+            });
 
             if (tc.name === "add_to_tearsheet") {
               const boardId: string | null = typeof parsed.board_id === "string" ? parsed.board_id : null;
