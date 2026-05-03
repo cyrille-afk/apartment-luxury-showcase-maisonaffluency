@@ -275,17 +275,38 @@ const TradeDashboard = () => {
               Your trade dashboard
             </p>
           </div>
-          <button
-            onClick={() => {
-              // Find and click the floating concierge button
-              const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
-              if (btn) btn.click();
-            }}
-            className="shrink-0 flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 shadow-sm hover:opacity-90 transition-all"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span className="font-body text-[11px] uppercase tracking-[0.15em]">Concierge</span>
-          </button>
+          <div className="shrink-0 flex items-center gap-2">
+            <button
+              onClick={async () => {
+                try {
+                  localStorage.removeItem("trade_quick_tour_done");
+                  localStorage.removeItem("trade_quick_tour_step");
+                } catch {}
+                if (user) {
+                  await supabase.from("profiles").update({ has_seen_trade_intro: false } as any).eq("id", user.id);
+                }
+                // Trigger the welcome effect by reloading the dashboard route.
+                // (The effect is gated on the DB flag we just flipped.)
+                window.location.assign("/trade");
+              }}
+              className="flex items-center gap-2 rounded-full border border-border bg-background text-foreground px-3 py-2 hover:bg-muted transition-colors"
+              title="Replay the first-login welcome flow"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span className="font-body text-[11px] uppercase tracking-[0.15em] hidden sm:inline">Replay welcome</span>
+            </button>
+            <button
+              onClick={() => {
+                // Find and click the floating concierge button
+                const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
+                if (btn) btn.click();
+              }}
+              className="flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 shadow-sm hover:opacity-90 transition-all"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span className="font-body text-[11px] uppercase tracking-[0.15em]">Concierge</span>
+            </button>
+          </div>
         </div>
       </div>
 
