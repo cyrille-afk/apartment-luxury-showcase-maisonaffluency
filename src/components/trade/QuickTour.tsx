@@ -131,7 +131,7 @@ export function QuickTour() {
                       Step {stepIdx + 1} of {STEPS.length}
                     </span>
                     <span className="font-body text-[10px] text-muted-foreground/60">·</span>
-                    <h4 className="font-display text-sm text-foreground truncate">{step.title.replace(/^\d+\.\s*/, "")}</h4>
+                    <h4 key={`t-${stepIdx}`} className="font-display text-sm text-foreground truncate animate-fade-in">{step.title.replace(/^\d+\.\s*/, "")}</h4>
                   </div>
                   <button
                     onClick={finish}
