@@ -509,8 +509,7 @@ export function AIConcierge() {
                       <button
                         type="button"
                         onClick={() => {
-                          const saved = saveName("");
-                          setName(saved);
+                          void persistName("");
                           setNameDraft("");
                           setNameMenuOpen(false);
                         }}
