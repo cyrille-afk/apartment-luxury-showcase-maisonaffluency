@@ -5,6 +5,12 @@ import { Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+interface AnchorRef {
+  name: string;
+  brand: string;
+  category: string;
+}
+
 interface Recommendation {
   product_id: string;
   score: number;
@@ -14,6 +20,7 @@ interface Recommendation {
   image_url: string;
   category: string;
   brand: string;
+  anchors?: AnchorRef[];
 }
 
 export function BoardRecommendations() {
