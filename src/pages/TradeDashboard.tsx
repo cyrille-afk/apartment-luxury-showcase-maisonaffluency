@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
+import { WelcomeIntroDialog } from "@/components/trade/WelcomeIntroDialog";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
