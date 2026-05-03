@@ -1009,9 +1009,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       </div>
 
                       {/* Procurement metadata — editable on draft/priced quotes, read-only otherwise */}
-                      <div className="md:col-span-4 mt-2 md:mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 print:hidden">
+                      <div className="md:col-span-4 mt-2 md:mt-3 grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 print:hidden">
                         <label className="flex flex-col gap-0.5">
-                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">PO #</span>
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Room</span>
+                          <input
+                            type="text"
+                            defaultValue={item.room || ""}
+                            placeholder="e.g. Living Room"
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            aria-disabled={isReadOnly}
+                            list={`rooms-${quoteId}`}
+                            onBlur={(e) => {
+                              if (isReadOnly) return;
+                              const v = e.target.value.trim();
+                              if (v !== (item.room || "")) updateItemField(item.id, { room: v || null });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
+                          />
+                        </label>
                           <input
                             type="text"
                             defaultValue={item.po_number || ""}
