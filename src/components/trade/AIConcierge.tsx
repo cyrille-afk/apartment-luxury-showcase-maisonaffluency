@@ -51,8 +51,8 @@ export function AIConcierge() {
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [timeline, setTimeline] = useState<TimelineItem[]>([
-    { kind: "msg", role: "assistant", content: GREETING },
+  const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
+    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname) },
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
