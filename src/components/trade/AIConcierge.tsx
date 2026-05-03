@@ -8,8 +8,6 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
-
 export type ConciergeQuickAction = { label: string; prompt: string };
 
 type TimelineItem =
@@ -26,14 +24,35 @@ const stageFromPath = (pathname: string): Stage => {
   return "Discover";
 };
 
+const DEFAULT_GREETING = "Hello! I'm your Maison Affluency concierge. How can I assist you today — looking for a specific piece, exploring a designer, or building a tearsheet?";
+
+const greetingForContext = (stage: Stage, pathname: string): string => {
+  if (pathname.startsWith("/trade/mood-boards")) {
+    return "Allow me to help you fine-tune your mood board. I'll suggest complementary pieces grounded in what's already on the board — palette, scale, materiality — and explain why each was chosen. Tell me the direction you'd like to push (warmer, more sculptural, different scale…) and I'll refine.";
+  }
+  if (pathname.startsWith("/trade/tearsheets") || pathname.startsWith("/trade/boards")) {
+    return "I'm here to help you shape this tearsheet — adding complementary pieces, swapping items for alternatives, or assembling a new draft from a brief. What would you like to do?";
+  }
+  if (stage === "Quote") {
+    return "I'm here to help with this quote — explaining trade pricing, lead times, deposits, or proposing alternatives. What can I clarify?";
+  }
+  if (stage === "Order") {
+    return "I'm here to help with this order — production timelines, shipping, or status updates. What would you like to know?";
+  }
+  if (stage === "Project") {
+    return "I'm here to help on this project — building tearsheets, drafting quotes, or pulling references. Where shall we start?";
+  }
+  return DEFAULT_GREETING;
+};
+
 export function AIConcierge() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [timeline, setTimeline] = useState<TimelineItem[]>([
-    { kind: "msg", role: "assistant", content: GREETING },
+  const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
+    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname) },
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -96,6 +115,20 @@ export function AIConcierge() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [pos, clampPos]);
+
+  // Refresh the opening greeting whenever the route changes — but only while
+  // the conversation is still pristine (a single assistant message). Once the
+  // user has interacted, we leave the timeline alone.
+  useEffect(() => {
+    setTimeline((prev) => {
+      if (prev.length !== 1) return prev;
+      const only = prev[0];
+      if (only.kind !== "msg" || only.role !== "assistant") return prev;
+      const next = greetingForContext(stageFromPath(pathname), pathname);
+      if (only.content === next) return prev;
+      return [{ kind: "msg", role: "assistant", content: next }];
+    });
+  }, [pathname]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
@@ -358,7 +391,7 @@ export function AIConcierge() {
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
-                  setTimeline([{ kind: "msg", role: "assistant", content: GREETING }]);
+                  setTimeline([{ kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname) }]);
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Start a new conversation"
