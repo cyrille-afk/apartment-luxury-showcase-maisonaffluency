@@ -37,6 +37,7 @@ import {
   nameSystemNote,
   DEFAULT_NAME,
 } from "./conciergeGreeting";
+import { supabase } from "@/integrations/supabase/client";
 
 
 export function AIConcierge() {
