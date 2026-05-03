@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
