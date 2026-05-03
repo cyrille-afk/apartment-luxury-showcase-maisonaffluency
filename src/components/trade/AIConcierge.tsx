@@ -222,7 +222,7 @@ export function AIConcierge() {
       proposalContext.push({ role: "user", content: lines.join("\n") });
     }
 
-    const toneContext: ChatMessage = { role: "user", content: toneSystemNote(tone) };
+    const toneContext: ChatMessage = { role: "user", content: toneSystemNote(tone, lang) };
 
     const messagesForApi: ChatMessage[] = [
       stageContext,
