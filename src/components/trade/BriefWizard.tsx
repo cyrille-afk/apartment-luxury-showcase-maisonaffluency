@@ -222,19 +222,11 @@ export function BriefWizard() {
             <>
               <div className="space-y-1.5">
                 <Label>Project type *</Label>
-                <ToggleGroup type="single" value={answers.projectType} onValueChange={(v) => v && set("projectType", v)} className="flex-wrap justify-start">
-                  {PROJECT_TYPES.map((t) => (
-                    <ToggleGroupItem key={t} value={t} className="text-xs">{t}</ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                <Chips options={PROJECT_TYPES} value={answers.projectType} onChange={(v) => set("projectType", v)} />
               </div>
               <div className="space-y-1.5">
                 <Label>Rooms involved *</Label>
-                <ToggleGroup type="multiple" value={answers.rooms} onValueChange={(v) => set("rooms", v)} className="flex-wrap justify-start">
-                  {ROOMS.map((r) => (
-                    <ToggleGroupItem key={r} value={r} className="text-xs">{r}</ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                <Chips options={ROOMS} value={answers.rooms} onChange={(v) => set("rooms", v)} multi />
               </div>
             </>
           )}
@@ -242,11 +234,7 @@ export function BriefWizard() {
           {step.id === "direction" && (
             <div className="space-y-1.5">
               <Label>Pick one or more styles *</Label>
-              <ToggleGroup type="multiple" value={answers.styles} onValueChange={(v) => set("styles", v)} className="flex-wrap justify-start">
-                {STYLES.map((s) => (
-                  <ToggleGroupItem key={s} value={s} className="text-xs">{s}</ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+              <Chips options={STYLES} value={answers.styles} onChange={(v) => set("styles", v)} multi />
             </div>
           )}
 
@@ -254,19 +242,11 @@ export function BriefWizard() {
             <>
               <div className="space-y-1.5">
                 <Label>Budget *</Label>
-                <ToggleGroup type="single" value={answers.budget} onValueChange={(v) => v && set("budget", v)} className="flex-wrap justify-start">
-                  {BUDGETS.map((b) => (
-                    <ToggleGroupItem key={b} value={b} className="text-xs">{b}</ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                <Chips options={BUDGETS} value={answers.budget} onChange={(v) => set("budget", v)} />
               </div>
               <div className="space-y-1.5">
                 <Label>Timeline *</Label>
-                <ToggleGroup type="single" value={answers.timeline} onValueChange={(v) => v && set("timeline", v)} className="flex-wrap justify-start">
-                  {TIMELINES.map((t) => (
-                    <ToggleGroupItem key={t} value={t} className="text-xs">{t}</ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                <Chips options={TIMELINES} value={answers.timeline} onChange={(v) => set("timeline", v)} />
               </div>
             </>
           )}
