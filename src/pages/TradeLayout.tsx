@@ -92,7 +92,7 @@ const TradeLayout = () => {
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
 
-  const handleReplayWelcome = () => replayWelcome({ userId: user?.id, firstName: profile?.first_name });
+  
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
