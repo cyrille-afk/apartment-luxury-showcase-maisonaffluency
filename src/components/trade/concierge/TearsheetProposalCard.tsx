@@ -47,7 +47,12 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const navigate = useNavigate();
 
   const isAppend = mode === "append";
-  const visiblePicks = proposal.preview.filter((p) => !excluded.has(p.id));
+  // Dedupe by id (the AI occasionally repeats an id) to avoid duplicate React keys.
+  const uniquePreview = (() => {
+    const seen = new Set<string>();
+    return proposal.preview.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+  })();
+  const visiblePicks = uniquePreview.filter((p) => !excluded.has(p.id));
 
   const togglePick = (id: string) => {
     const next = new Set(excluded);
