@@ -12,7 +12,7 @@ export type ConciergeQuickAction = { label: string; prompt: string };
 
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
-  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[] };
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] };
 
 type Stage = "Discover" | "Tearsheet" | "Quote" | "Order" | "Project";
 
@@ -211,8 +211,14 @@ export function AIConcierge() {
     };
 
     const handleProposal = (proposal: TearsheetProposal) => {
+      // Compute which picks are NEW relative to the previous proposal so the
+      // card can highlight rationales for replacements/additions only.
+      const prevIds = new Set(
+        lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
+      );
+      const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
       // Insert as its own timeline item (after current assistant text, if any)
-      setTimeline((prev) => [...prev, { kind: "proposal", proposal }]);
+      setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
     };
 
     try {
@@ -414,6 +420,7 @@ export function AIConcierge() {
                   key={i}
                   proposal={item.proposal}
                   excluded={new Set(item.excluded || [])}
+                  newPickIds={item.newPickIds}
                   onExcludedChange={(next) => {
                     setTimeline((prev) => {
                       const copy = prev.slice();

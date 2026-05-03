@@ -9,6 +9,7 @@ export type CreateTearsheetProposal = {
     title: string;
     pick_ids: string[];
     note: string | null;
+    pick_rationales?: Record<string, string>;
   };
   preview: PickPreview[];
 };
@@ -21,6 +22,7 @@ export type AddToTearsheetProposal = {
     board_title: string;
     pick_ids: string[];
     note: string | null;
+    pick_rationales?: Record<string, string>;
   };
   preview: PickPreview[];
 };
@@ -35,6 +37,7 @@ export type PickPreview = {
   materials: string | null;
   category: string | null;
   designer_name: string | null;
+  rationale?: string;
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;

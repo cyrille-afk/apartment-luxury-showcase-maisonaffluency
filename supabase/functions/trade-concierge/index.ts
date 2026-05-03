@@ -32,6 +32,20 @@ const TOOLS = [
             type: "string",
             description: "Optional 1–2 sentence rationale shown alongside the tearsheet.",
           },
+          pick_rationales: {
+            type: "array",
+            description:
+              "Per-piece, one-sentence reason explaining why each NEWLY suggested pick fits the brief. REQUIRED for any pick that was not in the previous proposal's KEPT list (i.e. any replacement or addition). Each entry's id MUST match an id in pick_ids.",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
+                reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+              },
+              required: ["id", "reason"],
+              additionalProperties: false,
+            },
+          },
         },
         required: ["title", "pick_ids"],
         additionalProperties: false,
@@ -61,6 +75,20 @@ const TOOLS = [
           note: {
             type: "string",
             description: "Optional 1–2 sentence rationale for the additions.",
+          },
+          pick_rationales: {
+            type: "array",
+            description:
+              "Per-piece, one-sentence reason for each pick being appended. REQUIRED for every id in pick_ids. Each entry's id MUST match an id in pick_ids.",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", description: "UUID of the pick — must appear in pick_ids." },
+                reason: { type: "string", description: "One short sentence (max ~140 chars) explaining the choice." },
+              },
+              required: ["id", "reason"],
+              additionalProperties: false,
+            },
           },
         },
         required: ["board_id", "pick_ids"],
@@ -101,6 +129,7 @@ Rules for both tools:
 - pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CATALOG PIECES. Never invent IDs.
 - For \`add_to_tearsheet\`, board_id MUST be a UUID from USER'S EXISTING TEARSHEETS — never invent.
 - Aim for 4–12 pieces per proposal — enough to feel like a curated edit, not a single suggestion.
+- ALWAYS populate \`pick_rationales\` with a short one-sentence reason for every NEW pick (any id not in the previous KEPT list). When replacing a removed item, the reason should briefly explain why this replacement honours the brief or addresses what the removed item was missing. Reasons must be specific (material, scale, mood, designer language) — never generic ("a great fit").
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
 - If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
 
@@ -484,7 +513,18 @@ serve(async (req) => {
               continue;
             }
             const pickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const preview = await hydratePickPreview(supabase, pickIds);
+            const rationaleMap: Record<string, string> = {};
+            if (Array.isArray(parsed.pick_rationales)) {
+              for (const r of parsed.pick_rationales) {
+                if (r && typeof r.id === "string" && typeof r.reason === "string") {
+                  rationaleMap[r.id] = r.reason.trim();
+                }
+              }
+            }
+            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            const preview = previewRaw.map((p: any) =>
+              p && rationaleMap[p.id] ? { ...p, rationale: rationaleMap[p.id] } : p,
+            );
 
             if (tc.name === "add_to_tearsheet") {
               const boardId: string | null = typeof parsed.board_id === "string" ? parsed.board_id : null;
@@ -507,6 +547,7 @@ serve(async (req) => {
                   board_title: boardTitle,
                   pick_ids: pickIds,
                   note: typeof parsed.note === "string" ? parsed.note : null,
+                  pick_rationales: rationaleMap,
                 },
                 preview,
               };
@@ -519,6 +560,7 @@ serve(async (req) => {
                   title: typeof parsed.title === "string" ? parsed.title : "Untitled tearsheet",
                   pick_ids: pickIds,
                   note: typeof parsed.note === "string" ? parsed.note : null,
+                  pick_rationales: rationaleMap,
                 },
                 preview,
               };
