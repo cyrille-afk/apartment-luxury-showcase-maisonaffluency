@@ -152,11 +152,11 @@ export function QuickTour() {
                   aria-label={`Tour progress: step ${stepIdx + 1} of ${STEPS.length}`}
                 >
                   <div
-                    className="h-full bg-accent transition-all duration-500 ease-out"
+                    className="h-full bg-accent transition-[width] duration-700 ease-out"
                     style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }}
                   />
                 </div>
-                <p className="font-body text-xs text-muted-foreground mt-3 leading-relaxed">{step.body}</p>
+                <p key={`b-${stepIdx}`} className="font-body text-xs text-muted-foreground mt-3 leading-relaxed animate-fade-in">{step.body}</p>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (
