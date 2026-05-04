@@ -379,12 +379,23 @@ const ShowroomGridView = ({
               descriptionLookup.set(ppKey, desc);
               if (normalizedName) normalizedDescriptionLookup.set(normalizedName, desc);
             }
-            const rrp = pp.rrp_price_cents ?? pp.trade_price_cents;
-            if (!rrp) continue;
-            const entry: PriceMatch = { name: pp.product_name, cents: rrp, rrp_cents: pp.rrp_price_cents ?? undefined, currency: pp.currency, price_unit: pp.price_unit };
+          }
+        }
+
+        // Pull prices exclusively from designer_curator_picks (Designer Editor).
+        const { data: curatorPriced } = await supabase
+          .from("designer_curator_picks")
+          .select("title, trade_price_cents, currency")
+          .not("trade_price_cents", "is", null);
+        if (curatorPriced) {
+          for (const cp of curatorPriced as any[]) {
+            if (!cp.trade_price_cents) continue;
+            const cpKey = cp.title.trim().toLowerCase();
+            const normalizedName = normalizeProductName(cp.title);
+            const entry: PriceMatch = { name: cp.title, cents: cp.trade_price_cents, rrp_cents: cp.trade_price_cents, currency: cp.currency, price_unit: undefined };
             priceEntries.push(entry);
-            priceLookup.set(ppKey, entry);
-            if (normalizedName) priceLookup.set(normalizedName, entry);
+            if (!priceLookup.has(cpKey)) priceLookup.set(cpKey, entry);
+            if (normalizedName && !priceLookup.has(normalizedName)) priceLookup.set(normalizedName, entry);
           }
         }
 
