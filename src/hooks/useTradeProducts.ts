@@ -16,11 +16,12 @@ import {
   type TradeProduct,
 } from "@/lib/tradeProducts";
 import {
+  getTradeProductHideKey,
   inferSubcategory,
   normalizeCategory,
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
-import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
+import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
   hasExplicitCategory: boolean;
