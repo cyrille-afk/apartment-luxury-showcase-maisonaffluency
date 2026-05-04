@@ -95,12 +95,12 @@ function pickToLightboxItem(
     description: pick.description,
     category: pick.category || undefined,
     subcategory: pick.subcategory || undefined,
-    pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+    pdf_url: pick.pdf_url || pick.pdf_urls?.[0]?.url || undefined,
     price,
-    size_variants: (pick as any).size_variants ?? null,
-    variant_placeholder: (pick as any).variant_placeholder ?? null,
-    base_axis_label: (pick as any).base_axis_label ?? null,
-    top_axis_label: (pick as any).top_axis_label ?? null,
+    size_variants: pick.size_variants ?? null,
+    variant_placeholder: pick.variant_placeholder ?? null,
+    base_axis_label: pick.base_axis_label ?? null,
+    top_axis_label: pick.top_axis_label ?? null,
     currency,
   };
 }
