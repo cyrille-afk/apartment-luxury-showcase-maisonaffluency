@@ -7,6 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
