@@ -86,40 +86,35 @@ const TradeQuotes = () => {
 
     const { data: quotesData } = await query;
 
-    // Fetch profiles for super admin view
-    let profileMap: Record<string, any> = {};
-    if (showAll && isSuperAdmin && quotesData && quotesData.length > 0) {
-      const userIds = [...new Set(quotesData.map((q: any) => q.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, company, email")
-        .in("id", userIds);
-      (profiles || []).forEach((p: any) => { profileMap[p.id] = p; });
-    }
-
-    // Get item counts
     const quoteIds = (quotesData || []).map((q: any) => q.id);
-    let itemCounts: Record<string, number> = {};
-    if (quoteIds.length > 0) {
-      const { data: itemsData } = await supabase
-        .from("trade_quote_items")
-        .select("quote_id")
-        .in("quote_id", quoteIds);
-      (itemsData || []).forEach((item: any) => {
-        itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
-      });
-    }
-
-    // Fetch project names for assigned projects
+    const userIds = showAll && isSuperAdmin
+      ? [...new Set((quotesData || []).map((q: any) => q.user_id))]
+      : [];
     const projectIds = [...new Set(((quotesData || []) as any[]).map((q) => q.project_id).filter(Boolean))] as string[];
-    let projectMap: Record<string, string> = {};
-    if (projectIds.length > 0) {
-      const { data: projects } = await supabase
-        .from("projects" as any)
-        .select("id, name")
-        .in("id", projectIds);
-      (projects || []).forEach((p: any) => { projectMap[p.id] = p.name; });
-    }
+
+    // Parallelize secondary fetches
+    const [profilesRes, itemsRes, projectsRes] = await Promise.all([
+      userIds.length > 0
+        ? supabase.from("profiles").select("id, first_name, last_name, company, email").in("id", userIds)
+        : Promise.resolve({ data: [] as any[] }),
+      quoteIds.length > 0
+        ? supabase.from("trade_quote_items").select("quote_id").in("quote_id", quoteIds)
+        : Promise.resolve({ data: [] as any[] }),
+      projectIds.length > 0
+        ? supabase.from("projects" as any).select("id, name").in("id", projectIds)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+
+    const profileMap: Record<string, any> = {};
+    (profilesRes.data || []).forEach((p: any) => { profileMap[p.id] = p; });
+
+    const itemCounts: Record<string, number> = {};
+    (itemsRes.data || []).forEach((item: any) => {
+      itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
+    });
+
+    const projectMap: Record<string, string> = {};
+    (projectsRes.data || []).forEach((p: any) => { projectMap[p.id] = p.name; });
 
     setQuotes(
       (quotesData || []).map((q: any) => ({
