@@ -1,6 +1,63 @@
 import type { Lang } from "@/components/trade/conciergeGreeting";
+import { supabase } from "@/integrations/supabase/client";
 
 export type LocalizableAction = { label: string; prompt: string; primary?: boolean };
+
+// In-memory + localStorage cache for translated welcome messages.
+// Key: `${lang}::${sourceContent}` → translated text.
+const translationCache = new Map<string, string>();
+const inflight = new Map<string, Promise<string>>();
+
+const CACHE_KEY = "concierge:welcome_translations:v1";
+try {
+  const raw = typeof localStorage !== "undefined" ? localStorage.getItem(CACHE_KEY) : null;
+  if (raw) {
+    const obj = JSON.parse(raw) as Record<string, string>;
+    Object.entries(obj).forEach(([k, v]) => translationCache.set(k, v));
+  }
+} catch {}
+
+const persistCache = () => {
+  try {
+    const obj: Record<string, string> = {};
+    translationCache.forEach((v, k) => { obj[k] = v; });
+    localStorage.setItem(CACHE_KEY, JSON.stringify(obj));
+  } catch {}
+};
+
+export const getCachedTranslation = (sourceContent: string, lang: Lang): string | undefined => {
+  if (lang === "en") return sourceContent;
+  return translationCache.get(`${lang}::${sourceContent}`);
+};
+
+export const translateWelcomeMessage = async (sourceContent: string, lang: Lang): Promise<string> => {
+  if (lang === "en") return sourceContent;
+  const key = `${lang}::${sourceContent}`;
+  const cached = translationCache.get(key);
+  if (cached) return cached;
+  const existing = inflight.get(key);
+  if (existing) return existing;
+  const p = (async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("translate-text", {
+        body: { text: sourceContent, lang },
+      });
+      if (error) throw error;
+      const translated = (data as { translated?: string })?.translated?.trim();
+      if (!translated) throw new Error("empty translation");
+      translationCache.set(key, translated);
+      persistCache();
+      return translated;
+    } catch (e) {
+      console.error("[concierge] translate failed", e);
+      return sourceContent; // fall back to source
+    } finally {
+      inflight.delete(key);
+    }
+  })();
+  inflight.set(key, p);
+  return p;
+};
 
 export const isOnboardingActionPrompt = (prompt: string) =>
   prompt === "__concierge:start_tour__" ||
@@ -50,14 +107,22 @@ const parseWelcomeNames = (content: string) => {
 export const localizeOnboardingMessage = (sourceContent: string, lang: Lang): string => {
   if (lang === "en") return sourceContent;
   const { firstName, conciergeName } = parseWelcomeNames(sourceContent);
-  const template = localizedWelcomeTemplate(
+  const knownTemplate = localizedWelcomeTemplate(
     "Welcome to Maison Affluency{first_name_comma} — I'm {concierge_name}, your AI Trade Concierge. Would you like me to give you a quick tour of the platform to start with, or shall we start from a brief?\n\n_Tip: you can rename me at any time — I'm here to help you and guide at any step of the way and can be as hands on or off as you want me to be._",
     lang,
   );
-  return template
-    .replace(/\{first_name_comma\}/g, firstNamePart(firstName))
-    .replace(/\{first_name\}/g, firstName)
-    .replace(/\{concierge_name\}/g, conciergeName);
+  // If the source matches a known template, use the curated translation.
+  const matchesKnown = knownTemplate !== sourceContent && /Welcome to Maison Affluency/.test(sourceContent);
+  if (matchesKnown && /[ก-๙\u4e00-\u9fff]|Selamat datang/.test(knownTemplate)) {
+    return knownTemplate
+      .replace(/\{first_name_comma\}/g, firstNamePart(firstName))
+      .replace(/\{first_name\}/g, firstName)
+      .replace(/\{concierge_name\}/g, conciergeName);
+  }
+  // Custom welcome — return cached AI translation if available, else source.
+  // The caller (AIConcierge useEffect) kicks off translateWelcomeMessage()
+  // and re-renders when it resolves.
+  return getCachedTranslation(sourceContent, lang) ?? sourceContent;
 };
 
 export const localizeOnboardingActions = (

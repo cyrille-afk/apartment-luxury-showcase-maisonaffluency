@@ -14,6 +14,7 @@ import {
   isOnboardingActionPrompt,
   localizeOnboardingActions,
   localizeOnboardingMessage,
+  translateWelcomeMessage,
 } from "@/lib/conciergeI18n";
 
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
@@ -135,10 +136,6 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      // Never overwrite the customised first-login welcome — neither its
-      // content nor its action buttons. Language/tone affect future replies
-      // (via toneSystemNote) but the welcome panel itself stays exactly as
-      // configured by the admin.
       if (only.onboarding || hasWelcomeActions(only.actions)) {
         const sourceContent = only.sourceContent ?? only.content;
         const sourceActions = only.sourceActions ?? only.actions;
@@ -153,12 +150,33 @@ export function AIConcierge() {
         if (only.content === next.content && only.actions === next.actions && only.onboarding) return prev;
         return [next];
       }
-      // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
       const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
+    // If the welcome is a custom (non-templated) message and we don't yet have a
+    // cached translation for the chosen language, fetch one in the background
+    // and patch the timeline when it arrives.
+    if (lang !== "en") {
+      setTimeline((prev) => {
+        const only = prev[0];
+        if (!only || only.kind !== "msg" || !only.onboarding) return prev;
+        const source = only.sourceContent ?? only.content;
+        if (only.content !== source) return prev; // already translated
+        // Kick off async translation
+        translateWelcomeMessage(source, lang).then((translated) => {
+          if (translated === source) return;
+          setTimeline((cur) => {
+            const item = cur[0];
+            if (!item || item.kind !== "msg" || !item.onboarding) return cur;
+            if ((item.sourceContent ?? item.content) !== source) return cur;
+            return [{ ...item, content: translated }, ...cur.slice(1)];
+          });
+        });
+        return prev;
+      });
+    }
   }, [pathname, tone, lang, name]);
 
   // Reset any sticky stage override when the route changes
