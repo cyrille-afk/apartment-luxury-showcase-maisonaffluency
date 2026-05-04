@@ -356,28 +356,74 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             </div>
 
             <div className="flex flex-col">
-              {product.materials && (
+              {axes.hasVariants && axes.isDualAxis ? (
+                <>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.baseOptions.join("\n")}
+                    placeholder="Select base"
+                    value={baseIdx}
+                    onChange={setBaseIdx}
+                  />
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.topOptions.join("\n")}
+                    placeholder="Select top / finish"
+                    value={topIdx}
+                    onChange={setTopIdx}
+                  />
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.dualSizeOptions.join("\n")}
+                    placeholder="Select size"
+                    emphasized
+                    value={sizeIdx}
+                    onChange={setSizeIdx}
+                  />
+                </>
+              ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-                  text={product.materials}
-                  placeholder="Select your material choice"
-                  autoSplit
+                  text={axes.baseOptions.join("\n")}
+                  placeholder="Select finish / size"
+                  value={baseIdx}
+                  onChange={setBaseIdx}
                 />
-              )}
-              {product.dimensions && (
+              ) : axes.hasVariants ? (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={formatDimensionsMultiline(product.dimensions)}
+                  text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
+                  placeholder="Select option"
                   emphasized
-                  placeholder="Select your size"
+                  value={sizeIdx}
+                  onChange={setSizeIdx}
                 />
+              ) : (
+                <>
+                  {product.materials && (
+                    <ExpandableSpec
+                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      text={product.materials}
+                      placeholder="Select your material choice"
+                      autoSplit
+                    />
+                  )}
+                  {product.dimensions && (
+                    <ExpandableSpec
+                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      text={formatDimensionsMultiline(product.dimensions)}
+                      emphasized
+                      placeholder="Select your size"
+                    />
+                  )}
+                </>
               )}
             </div>
 
 
-            {product.price && (
+            {livePrice && (
               <p className="font-display text-base md:text-lg text-accent font-semibold">
-                {product.price}
+                {livePrice}
               </p>
             )}
 
