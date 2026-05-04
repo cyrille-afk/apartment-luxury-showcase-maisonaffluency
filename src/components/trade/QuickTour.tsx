@@ -175,7 +175,9 @@ export function QuickTour() {
                     style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }}
                   />
                 </div>
-                <p key={`b-${stepIdx}`} className="font-body text-xs text-muted-foreground mt-3 leading-relaxed animate-fade-in">{step.body}</p>
+                <div key={`b-${stepIdx}`} className="mt-3 bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5 animate-fade-in">
+                  <p className="font-body text-xs text-foreground leading-relaxed">{step.body}</p>
+                </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (
