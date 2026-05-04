@@ -14,6 +14,7 @@ import {
   isOnboardingActionPrompt,
   localizeOnboardingActions,
   localizeOnboardingMessage,
+  translateWelcomeMessage,
 } from "@/lib/conciergeI18n";
 
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
