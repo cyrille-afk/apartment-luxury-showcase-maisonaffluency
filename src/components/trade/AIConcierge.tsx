@@ -38,38 +38,6 @@ import {
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
 
-const ACTION_LABELS: Record<Lang, Record<string, (name: string) => string>> = {
-  en: {
-    "__concierge:start_tour__": () => "Start Quick Tour",
-    "__concierge:start_brief__": () => "Start from a brief",
-    "__concierge:rename__": (name) => `Rename ${name}`,
-  },
-  id: {
-    "__concierge:start_tour__": () => "Mulai Tur Singkat",
-    "__concierge:start_brief__": () => "Mulai dari brief",
-    "__concierge:rename__": (name) => `Ganti nama ${name}`,
-  },
-  th: {
-    "__concierge:start_tour__": () => "เริ่มทัวร์สั้น ๆ",
-    "__concierge:start_brief__": () => "เริ่มจากบรีฟ",
-    "__concierge:rename__": (name) => `เปลี่ยนชื่อ ${name}`,
-  },
-  zh: {
-    "__concierge:start_tour__": () => "开始快速导览",
-    "__concierge:start_brief__": () => "从 brief 开始",
-    "__concierge:rename__": (name) => `重命名 ${name}`,
-  },
-};
-
-const isBuiltInActionLabel = (action: ConciergeQuickAction, name: string) =>
-  Object.values(ACTION_LABELS).some((labels) => labels[action.prompt]?.(name) === action.label);
-
-const localizeWelcomeActions = (actions: ConciergeQuickAction[] | undefined, nextLang: Lang, name: string) =>
-  actions?.map((action) => ({
-    ...action,
-    label: isBuiltInActionLabel(action, name) ? ACTION_LABELS[nextLang][action.prompt]?.(name) ?? action.label : action.label,
-  }));
-
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => action.prompt === "__concierge:start_tour__" || action.prompt === "__concierge:start_brief__");
 
@@ -160,13 +128,7 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      if (hasWelcomeActions(only.actions)) {
-        return [{
-          ...only,
-          content: only.content,
-          actions: localizeWelcomeActions(only.actions, lang, name),
-        }];
-      }
+      if (hasWelcomeActions(only.actions)) return prev;
       // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
       const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
