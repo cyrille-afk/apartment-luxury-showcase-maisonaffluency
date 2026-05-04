@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check, Sparkles, Image as ImageIcon, Box, Compass, BookOpen, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { loadLang } from "@/components/trade/conciergeGreeting";
+import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
 
 type Step = {
   id: string;
@@ -34,6 +36,7 @@ export function QuickTour() {
   const [active, setActive] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
+  const lang = loadLang();
 
   // Load tour steps from DB (fall back to hard-coded defaults if empty/error)
   useEffect(() => {
@@ -121,6 +124,8 @@ export function QuickTour() {
 
   if (!active) return null;
   const step = STEPS[stepIdx];
+  const localizedStep = localizeTourStep(step, lang);
+  const chrome = tourChromeCopy(lang);
   const Icon = step.icon;
   // Only show the overlay when the user is actually on the matching route.
   // Otherwise the overlay would obscure navigation between steps.
@@ -147,16 +152,16 @@ export function QuickTour() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-body text-[10px] uppercase tracking-[0.18em] text-accent shrink-0">
-                      Step {stepIdx + 1} of {STEPS.length}
+                      {chrome.stepOf(stepIdx + 1, STEPS.length)}
                     </span>
                     <span className="font-body text-[10px] text-muted-foreground/60">·</span>
-                    <h4 key={`t-${stepIdx}`} className="font-display text-sm text-foreground truncate animate-fade-in">{step.title.replace(/^\d+\.\s*/, "")}</h4>
+                    <h4 key={`t-${stepIdx}`} className="font-display text-sm text-foreground truncate animate-fade-in">{localizedStep.title.replace(/^\d+\.\s*/, "")}</h4>
                   </div>
                   <button
                     onClick={finish}
                     className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
                     aria-label="Skip tour"
-                    title="Skip tour"
+                    title={chrome.skipTour}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -168,7 +173,7 @@ export function QuickTour() {
                   aria-valuemin={0}
                   aria-valuemax={STEPS.length}
                   aria-valuenow={stepIdx + 1}
-                  aria-label={`Tour progress: step ${stepIdx + 1} of ${STEPS.length}`}
+                  aria-label={chrome.progress(stepIdx + 1, STEPS.length)}
                 >
                   <div
                     className="h-full bg-accent transition-[width] duration-700 ease-out"
@@ -176,7 +181,7 @@ export function QuickTour() {
                   />
                 </div>
                 <div key={`b-${stepIdx}`} className="mt-3 bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5 animate-fade-in">
-                  <p className="font-body text-xs text-foreground leading-relaxed">{step.body}</p>
+                  <p className="font-body text-xs text-foreground leading-relaxed">{localizedStep.body}</p>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
@@ -195,7 +200,7 @@ export function QuickTour() {
                       onClick={finish}
                       className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2 py-1.5"
                     >
-                      Skip
+                      {chrome.skip}
                     </button>
                     <button
                       onClick={back}
@@ -203,13 +208,13 @@ export function QuickTour() {
                       className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <ArrowLeft className="h-3 w-3" />
-                      Back
+                      {chrome.back}
                     </button>
                     <button
                       onClick={next}
                       className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90"
                     >
-                      {stepIdx === STEPS.length - 1 ? "Finish" : "Next"}
+                      {stepIdx === STEPS.length - 1 ? chrome.finish : chrome.next}
                       {stepIdx === STEPS.length - 1 ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                     </button>
                   </div>
