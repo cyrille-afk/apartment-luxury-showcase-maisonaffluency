@@ -8,6 +8,7 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
+import { getBasePlaceholder, getMaterialPlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
@@ -32,6 +33,9 @@ export interface TradeProductLightboxItem {
    *  lightbox shows each variant's price in the price block so users see how
    *  selecting a different finish/size changes the price. */
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  variant_placeholder?: string | null;
+  base_axis_label?: string | null;
+  top_axis_label?: string | null;
   currency?: string | null;
 }
 
