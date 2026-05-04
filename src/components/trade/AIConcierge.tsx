@@ -8,11 +8,18 @@ import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  conciergeCopy,
+  conciergeStatusCopy,
+  isOnboardingActionPrompt,
+  localizeOnboardingActions,
+  localizeOnboardingMessage,
+} from "@/lib/conciergeI18n";
 
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
 
@@ -39,7 +46,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
-  !!actions?.some((action) => action.prompt === "__concierge:start_tour__" || action.prompt === "__concierge:start_brief__");
+  !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
 
 
 export function AIConcierge() {
