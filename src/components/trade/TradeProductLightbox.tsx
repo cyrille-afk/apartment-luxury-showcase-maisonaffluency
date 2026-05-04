@@ -121,6 +121,34 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
   // Variant axes — drives Base/Top/Size dropdowns when size_variants are present
   const axes = computeVariantAxes(product.size_variants ?? []);
+  const hasDualSize = axes.dualSizeOptions.length > 1;
+  const variantsList = product.size_variants || [];
+  const selectedBase = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
+  const selectedTop = topIdx != null && topIdx >= 0 ? axes.topOptions[topIdx] : null;
+  const selectedSize = sizeIdx != null && sizeIdx >= 0 ? axes.dualSizeOptions[sizeIdx] : null;
+  const matchesDual = (
+    v: { label?: string; base?: string; top?: string },
+    b: string | null,
+    t: string | null,
+    s: string | null,
+  ) =>
+    (b == null || (v.base || "").trim() === b) &&
+    (t == null || (v.top || "").trim() === t) &&
+    (s == null || (v.label || "").trim() === s);
+  const disabledBaseIdx = axes.isDualAxis && selectedSize
+    ? axes.baseOptions.map((b, i) => (variantsList.some((v) => matchesDual(v, b, null, selectedSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledTopIdx = axes.isDualAxis && selectedSize
+    ? axes.topOptions.map((t, i) => (variantsList.some((v) => matchesDual(v, null, t, selectedSize)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const disabledDualSizeIdx = axes.isDualAxis && (selectedBase || selectedTop)
+    ? axes.dualSizeOptions.map((s, i) => (variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
+    : [];
+  const clearAllDualSelections = () => {
+    setBaseIdx(null);
+    setTopIdx(null);
+    setSizeIdx(null);
+  };
   const currencySymbol = (() => {
     switch ((product.currency || "EUR").toUpperCase()) {
       case "USD": return "$";
@@ -134,11 +162,12 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     if (!axes.hasVariants) return null;
     const variants = product.size_variants || [];
     if (axes.isDualAxis) {
-      const base = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
-      const top = topIdx != null && topIdx >= 0 ? axes.topOptions[topIdx] : null;
-      const size = sizeIdx != null && sizeIdx >= 0 ? axes.dualSizeOptions[sizeIdx] : null;
-      if (!base || !top || !size) return null;
-      return variants.find(v => (v.base || "").trim() === base && (v.top || "").trim() === top && (v.label || "").trim() === size) || null;
+      if (!selectedBase || !selectedTop || (hasDualSize && !selectedSize)) return null;
+      return variants.find(v =>
+        (v.base || "").trim() === selectedBase &&
+        (v.top || "").trim() === selectedTop &&
+        (!hasDualSize || (v.label || "").trim() === selectedSize)
+      ) || null;
     }
     if (axes.isBaseOnly) {
       const base = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
