@@ -353,6 +353,11 @@ const VariantSelectors: React.FC<{
               Reset to default pairing
             </button>
           )}
+          {selTop && /customer'?s own material|^com\b|\(com\)/i.test(selTop) && (
+            <p className="self-start mt-1 ml-[26px] font-body text-[11px] italic text-muted-foreground leading-snug max-w-md">
+              Photography shows the piece in a representative upholstery — your COM fabric will be applied in production.
+            </p>
+          )}
         </>
       ) : isBaseOnly ? (
         <ExpandableSpec
