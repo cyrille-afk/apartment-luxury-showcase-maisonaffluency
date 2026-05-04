@@ -12,7 +12,7 @@ import remarkGfm from "remark-gfm";
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[] }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
 
@@ -128,6 +128,11 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
+      // Never overwrite the customised first-login welcome — neither its
+      // content nor its action buttons. Language/tone affect future replies
+      // (via toneSystemNote) but the welcome panel itself stays exactly as
+      // configured by the admin.
+      if (only.onboarding) return prev;
       if (hasWelcomeActions(only.actions)) return prev;
       // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
@@ -170,7 +175,7 @@ export function AIConcierge() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean }
+        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean }
         | undefined;
       const message = detail?.message?.trim();
       if (detail?.resetPanel) {
@@ -191,6 +196,7 @@ export function AIConcierge() {
           role: "assistant",
           content: message,
           actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+          onboarding: !!detail?.onboarding,
         };
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
