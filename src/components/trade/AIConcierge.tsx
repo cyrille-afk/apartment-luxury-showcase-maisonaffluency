@@ -8,11 +8,18 @@ import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  conciergeCopy,
+  conciergeStatusCopy,
+  isOnboardingActionPrompt,
+  localizeOnboardingActions,
+  localizeOnboardingMessage,
+} from "@/lib/conciergeI18n";
 
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
 
@@ -39,7 +46,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
-  !!actions?.some((action) => action.prompt === "__concierge:start_tour__" || action.prompt === "__concierge:start_brief__");
+  !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
 
 
 export function AIConcierge() {
@@ -132,8 +139,20 @@ export function AIConcierge() {
       // content nor its action buttons. Language/tone affect future replies
       // (via toneSystemNote) but the welcome panel itself stays exactly as
       // configured by the admin.
-      if (only.onboarding) return prev;
-      if (hasWelcomeActions(only.actions)) return prev;
+      if (only.onboarding || hasWelcomeActions(only.actions)) {
+        const sourceContent = only.sourceContent ?? only.content;
+        const sourceActions = only.sourceActions ?? only.actions;
+        const next: TimelineItem = {
+          ...only,
+          onboarding: true,
+          sourceContent,
+          sourceActions,
+          content: localizeOnboardingMessage(sourceContent, lang),
+          actions: localizeOnboardingActions(sourceActions, lang, name),
+        };
+        if (only.content === next.content && only.actions === next.actions && only.onboarding) return prev;
+        return [next];
+      }
       // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
       const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
@@ -194,9 +213,15 @@ export function AIConcierge() {
         const welcomeMessage: TimelineItem = {
           kind: "msg",
           role: "assistant",
-          content: message,
-          actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+          content: detail?.onboarding ? localizeOnboardingMessage(message, lang) : message,
+          actions: detail?.actions && detail.actions.length > 0
+            ? detail.onboarding
+              ? localizeOnboardingActions(detail.actions, lang, name)
+              : detail.actions
+            : undefined,
           onboarding: !!detail?.onboarding,
+          sourceContent: detail?.onboarding ? message : undefined,
+          sourceActions: detail?.onboarding ? detail?.actions : undefined,
         };
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
@@ -285,7 +310,7 @@ export function AIConcierge() {
       }
       setTimeline((prev) => [
         ...prev,
-        { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers & Ateliers, brief setup, and your specification toolkit. You can skip at any time." },
+        { kind: "msg", role: "assistant", content: conciergeStatusCopy("tour", lang) },
       ]);
       return;
     }
@@ -294,7 +319,7 @@ export function AIConcierge() {
       window.dispatchEvent(new Event("trade-brief:open"));
       setTimeline((prev) => [
         ...prev,
-        { kind: "msg", role: "assistant", content: "Let's scope your project — five quick questions and I'll create your starting brief." },
+        { kind: "msg", role: "assistant", content: conciergeStatusCopy("brief", lang) },
       ]);
       return;
     }
@@ -462,6 +487,7 @@ export function AIConcierge() {
 
   const lastItem = timeline[timeline.length - 1];
   const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant");
+  const copy = conciergeCopy(lang);
 
   return (
     <>
@@ -540,7 +566,7 @@ export function AIConcierge() {
                     className="absolute right-0 top-full mt-1 z-[110] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
                   >
                     <div className="font-display text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-                      Name your concierge
+                      {copy.nameDialogTitle}
                     </div>
                     <input
                       type="text"
@@ -561,7 +587,7 @@ export function AIConcierge() {
                       className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                     <div className="mt-1 font-body text-[10px] text-muted-foreground">
-                      Up to 32 characters · syncs to your account
+                      {copy.nameHint}
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <button
@@ -573,7 +599,7 @@ export function AIConcierge() {
                         }}
                         className="font-body text-[11px] text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        Reset
+                        {copy.reset}
                       </button>
                       <div className="flex items-center gap-2">
                         <button
@@ -581,7 +607,7 @@ export function AIConcierge() {
                           onClick={() => setNameMenuOpen(false)}
                           className="rounded-md px-2 py-1 font-body text-[11px] text-muted-foreground hover:bg-muted"
                         >
-                          Cancel
+                          {copy.cancel}
                         </button>
                         <button
                           type="button"
@@ -591,7 +617,7 @@ export function AIConcierge() {
                           }}
                           className="rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
                         >
-                          Save
+                          {copy.save}
                         </button>
                       </div>
                     </div>
@@ -617,7 +643,7 @@ export function AIConcierge() {
                     className="absolute right-0 top-full mt-1 z-[110] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Concierge tone
+                      {copy.tone}
                     </div>
                     {tonesFor(lang).map((t) => {
                       const active = t.id === tone;
@@ -666,7 +692,7 @@ export function AIConcierge() {
                     className="absolute right-0 top-full mt-1 z-[110] w-52 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Language
+                      {copy.language}
                     </div>
                     {LANGUAGES.map((l) => {
                       const active = l.id === lang;
@@ -754,7 +780,7 @@ export function AIConcierge() {
                   title={`Current workflow stage: ${stage}`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                  Stage: {stage}
+                  {copy.stage}: {stage}
                 </span>
               </div>
             )}
@@ -913,7 +939,7 @@ export function AIConcierge() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask me anything…"
+                placeholder={copy.ask}
                 rows={1}
                 className="flex-1 resize-none rounded-xl border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                 disabled={streaming}
@@ -928,7 +954,7 @@ export function AIConcierge() {
               </button>
             </div>
             <p className="font-body text-[10px] text-muted-foreground mt-1.5 text-center">
-              AI-powered · Tearsheet drafts require your approval
+              {copy.footer}
             </p>
           </div>
           </>)}

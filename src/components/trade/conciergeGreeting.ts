@@ -62,7 +62,10 @@ export const loadLang = (): Lang => {
 
 export const saveLang = (lang: Lang | string) => {
   const safe = normalizeLang(lang) ?? DEFAULT_LANG;
-  try { localStorage.setItem(LANG_STORAGE_KEY, safe); } catch {}
+  try {
+    localStorage.setItem(LANG_STORAGE_KEY, safe);
+    window.dispatchEvent(new CustomEvent("concierge:language", { detail: { lang: safe } }));
+  } catch {}
 };
 
 // Tone label translations for the picker UI
