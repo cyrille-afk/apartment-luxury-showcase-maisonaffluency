@@ -76,8 +76,8 @@ export default function DuplicateProductsBanner({
             className="inline-block h-2 w-2 rounded-full bg-amber-500"
             style={{ boxShadow: "0 0 0 4px rgba(245,158,11,0.18)" }}
           />
-          Dev warning · {groups.length} duplicate group
-          {groups.length === 1 ? "" : "s"} ({totalDupes} cards) detected
+          Dev warning · {safeGroups.length} duplicate group
+          {safeGroups.length === 1 ? "" : "s"} ({totalDupes} cards) detected
           {hiddenCount > 0 ? ` · ${hiddenCount} hidden` : ""}
         </div>
         <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export default function DuplicateProductsBanner({
             restore.
           </p>
           <ul className="mt-2 space-y-3 text-xs">
-            {groups.map((g, i) => (
+            {safeGroups.map((g, i) => (
               <li
                 key={`${g.brand}-${i}`}
                 className="rounded border border-amber-400/40 bg-white/60 p-2 dark:bg-black/20"
@@ -123,12 +123,12 @@ export default function DuplicateProductsBanner({
                 <div className="mb-2 font-medium">{g.brand}</div>
                 <div className="flex flex-wrap gap-3">
                   {g.items.map((it) => {
-                    const isHidden = hiddenIds.has(it.id);
+                    const isHidden = hiddenIds.has(it.id) || hiddenIds.has(it.hide_key);
                     return (
                       <button
-                        key={it.id}
+                        key={it.hide_key}
                         type="button"
-                        onClick={() => (isHidden ? unhide(it.id) : hide(it.id))}
+                        onClick={() => (isHidden ? unhide(it.hide_key) : hide(it.hide_key))}
                         title={
                           isHidden
                             ? `Restore "${it.product_name}"`
