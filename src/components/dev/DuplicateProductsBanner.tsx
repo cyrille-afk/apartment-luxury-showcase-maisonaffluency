@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DuplicateGroup } from "@/hooks/useTradeProducts";
 import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 
@@ -21,12 +21,44 @@ export default function DuplicateProductsBanner({
   const { ids: hiddenIds, hide, unhide, clear } = useHiddenTradeProductIds();
 
   if (!import.meta.env.DEV) return null;
-  if (dismissed) return null;
-  if (!groups || groups.length === 0) return null;
 
-  const totalDupes = groups.reduce((sum, g) => sum + g.items.length, 0);
-  const hiddenCount = groups.reduce(
-    (sum, g) => sum + g.items.filter((it) => hiddenIds.has(it.id)).length,
+  const safeGroups = groups || [];
+  const hasGroups = safeGroups.length > 0;
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    console.info("[Trade duplicate inspector]", {
+      groups: safeGroups.map((group) => ({
+        brand: group.brand,
+        items: group.items.map((item) => ({
+          id: item.id,
+          hide_key: item.hide_key,
+          product_name: item.product_name,
+          hidden: hiddenIds.has(item.id) || hiddenIds.has(item.hide_key),
+        })),
+      })),
+      hiddenKeys: Array.from(hiddenIds),
+    });
+  }, [safeGroups, hiddenIds]);
+
+  if (dismissed || !hasGroups) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-md border border-border bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur">
+        <button type="button" onClick={() => setDismissed(false)} className="font-medium hover:text-accent">
+          Dev duplicates · {safeGroups.length}
+        </button>
+        {hiddenIds.size > 0 && (
+          <button type="button" onClick={clear} className="text-muted-foreground underline hover:text-foreground">
+            Restore hidden
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const totalDupes = safeGroups.reduce((sum, g) => sum + g.items.length, 0);
+  const hiddenCount = safeGroups.reduce(
+    (sum, g) => sum + g.items.filter((it) => hiddenIds.has(it.id) || hiddenIds.has(it.hide_key)).length,
     0
   );
 
