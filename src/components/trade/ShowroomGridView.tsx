@@ -269,9 +269,13 @@ const ShowroomGridView = ({
           }
         }
 
+        // Trade gallery prices come ONLY from the Designer Editor
+        // (designer_curator_picks). trade_products may include scraped/CSV
+        // values not yet manually reviewed, so they are excluded here.
+        // We still query trade_products for non-price metadata below.
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, description, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
+          .select("id, product_name, description, currency, gallery_images, price_unit")
           .eq("is_active", true);
 
         // Fetch descriptions + categorization from curator picks (live DB)
