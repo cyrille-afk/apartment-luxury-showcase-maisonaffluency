@@ -36,7 +36,17 @@ export function QuickTour() {
   const [active, setActive] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
-  const lang = loadLang();
+  const [lang, setLang] = useState(() => loadLang());
+
+  useEffect(() => {
+    const onLang = () => setLang(loadLang());
+    window.addEventListener("concierge:language", onLang as EventListener);
+    window.addEventListener("storage", onLang);
+    return () => {
+      window.removeEventListener("concierge:language", onLang as EventListener);
+      window.removeEventListener("storage", onLang);
+    };
+  }, []);
 
   // Load tour steps from DB (fall back to hard-coded defaults if empty/error)
   useEffect(() => {
