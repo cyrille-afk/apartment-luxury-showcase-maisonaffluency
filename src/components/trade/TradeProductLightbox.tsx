@@ -489,7 +489,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
-                  placeholder="Select option"
+                  placeholder={getMaterialPlaceholder(product)}
                   emphasized
                   value={sizeIdx}
                   onChange={setSizeIdx}
