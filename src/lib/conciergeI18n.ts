@@ -107,14 +107,22 @@ const parseWelcomeNames = (content: string) => {
 export const localizeOnboardingMessage = (sourceContent: string, lang: Lang): string => {
   if (lang === "en") return sourceContent;
   const { firstName, conciergeName } = parseWelcomeNames(sourceContent);
-  const template = localizedWelcomeTemplate(
+  const knownTemplate = localizedWelcomeTemplate(
     "Welcome to Maison Affluency{first_name_comma} — I'm {concierge_name}, your AI Trade Concierge. Would you like me to give you a quick tour of the platform to start with, or shall we start from a brief?\n\n_Tip: you can rename me at any time — I'm here to help you and guide at any step of the way and can be as hands on or off as you want me to be._",
     lang,
   );
-  return template
-    .replace(/\{first_name_comma\}/g, firstNamePart(firstName))
-    .replace(/\{first_name\}/g, firstName)
-    .replace(/\{concierge_name\}/g, conciergeName);
+  // If the source matches a known template, use the curated translation.
+  const matchesKnown = knownTemplate !== sourceContent && /Welcome to Maison Affluency/.test(sourceContent);
+  if (matchesKnown && /[ก-๙\u4e00-\u9fff]|Selamat datang/.test(knownTemplate)) {
+    return knownTemplate
+      .replace(/\{first_name_comma\}/g, firstNamePart(firstName))
+      .replace(/\{first_name\}/g, firstName)
+      .replace(/\{concierge_name\}/g, conciergeName);
+  }
+  // Custom welcome — return cached AI translation if available, else source.
+  // The caller (AIConcierge useEffect) kicks off translateWelcomeMessage()
+  // and re-renders when it resolves.
+  return getCachedTranslation(sourceContent, lang) ?? sourceContent;
 };
 
 export const localizeOnboardingActions = (
