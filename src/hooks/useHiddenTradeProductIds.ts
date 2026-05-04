@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { TradeProduct } from "@/lib/tradeProducts";
 
 /**
  * Dev-only helper: tracks a localStorage-persisted set of TradeProduct IDs
@@ -11,6 +12,19 @@ import { useCallback, useEffect, useState } from "react";
  */
 const STORAGE_KEY = "dev:hiddenTradeProductIds";
 const EVENT_NAME = "dev:hiddenTradeProductIds:change";
+
+const normalizeForHideKey = (value: string | null | undefined) =>
+  (value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
+export function getTradeProductHideKey(
+  product: Pick<TradeProduct, "brand_name" | "product_name">
+) {
+  return `product:${normalizeForHideKey(product.brand_name)}::${normalizeForHideKey(product.product_name)}`;
+}
 
 function readIds(): Set<string> {
   if (!import.meta.env.DEV) return new Set();
