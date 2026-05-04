@@ -109,7 +109,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         category: p.category,
         subcategory: p.subcategory,
       } as TradeProductLightboxItem));
-  }, [product?.id, product?.brand_name, allPicks, tradeProds]);
+  }, [product, allPicks, tradeProds]);
 
   if (!product) return null;
 
