@@ -121,6 +121,7 @@ const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+const DevDuplicateBannerHost = lazy(() => import("@/components/dev/DuplicateProductsBannerHost"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 
 // Set to false to disable maintenance mode and show the real site
@@ -309,6 +310,11 @@ const App = () => {
                     <PageTracker />
                     <CookieConsent />
                   </TooltipProvider>
+                </Suspense>
+              )}
+              {import.meta.env.DEV && showDeferredUi && (
+                <Suspense fallback={null}>
+                  <DevDuplicateBannerHost />
                 </Suspense>
               )}
             </BrowserRouter>
