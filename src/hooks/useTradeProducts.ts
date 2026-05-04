@@ -20,7 +20,7 @@ import {
   normalizeCategory,
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
-import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
+import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
   hasExplicitCategory: boolean;
@@ -176,10 +176,16 @@ export function useTradeProducts() {
     return Array.from(merged.values());
   }, [staticProducts, liveProducts]);
 
-  // Apply dev-only hidden-IDs filter (used by the duplicate banner so devs
+  // Apply dev-only hidden-key filter (used by the duplicate banner so devs
   // can suppress unwanted near-duplicate cards from the live grid).
   const allProducts = useMemo(
-    () => (hiddenIds.size === 0 ? mergedProducts : mergedProducts.filter((p) => !hiddenIds.has(p.id))),
+    () =>
+      hiddenIds.size === 0
+        ? mergedProducts
+        : mergedProducts.filter((p) =>
+            !hiddenIds.has(getHideKey(p)) &&
+            (p.id.startsWith("tp-") || !hiddenIds.has(p.id))
+          ),
     [mergedProducts, hiddenIds]
   );
 
@@ -222,7 +228,7 @@ export function useTradeProducts() {
           seen.add(i);
           groups.push({
             brand: items[i].brand_name,
-            items: group.map(g => ({ id: g.id, product_name: g.product_name, image_url: g.image_url })),
+            items: group.map(g => ({ id: g.id, hide_key: getHideKey(g), product_name: g.product_name, image_url: g.image_url })),
           });
         }
       }
@@ -235,5 +241,5 @@ export function useTradeProducts() {
 
 export interface DuplicateGroup {
   brand: string;
-  items: { id: string; product_name: string; image_url: string | null }[];
+  items: { id: string; hide_key: string; product_name: string; image_url: string | null }[];
 }

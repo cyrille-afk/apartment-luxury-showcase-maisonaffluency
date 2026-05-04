@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DuplicateGroup } from "@/hooks/useTradeProducts";
 import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 
@@ -9,7 +9,7 @@ import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
  * renders as a thumbnail; click to hide that specific card from the grid
  * (state is persisted in localStorage and respected by `useTradeProducts`).
  *
- * Renders nothing in production builds or when no duplicates are detected.
+ * In dev, a small persistent pill remains available even after dismissing.
  */
 export default function DuplicateProductsBanner({
   groups,
@@ -20,13 +20,45 @@ export default function DuplicateProductsBanner({
   const [expanded, setExpanded] = useState(true);
   const { ids: hiddenIds, hide, unhide, clear } = useHiddenTradeProductIds();
 
-  if (!import.meta.env.DEV) return null;
-  if (dismissed) return null;
-  if (!groups || groups.length === 0) return null;
+  const safeGroups = groups || [];
+  const hasGroups = safeGroups.length > 0;
 
-  const totalDupes = groups.reduce((sum, g) => sum + g.items.length, 0);
-  const hiddenCount = groups.reduce(
-    (sum, g) => sum + g.items.filter((it) => hiddenIds.has(it.id)).length,
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    console.info("[Trade duplicate inspector]", {
+      groups: safeGroups.map((group) => ({
+        brand: group.brand,
+        items: group.items.map((item) => ({
+          id: item.id,
+          hide_key: item.hide_key,
+          product_name: item.product_name,
+          hidden: hiddenIds.has(item.id) || hiddenIds.has(item.hide_key),
+        })),
+      })),
+      hiddenKeys: Array.from(hiddenIds),
+    });
+  }, [safeGroups, hiddenIds]);
+
+  if (!import.meta.env.DEV) return null;
+
+  if (dismissed || !hasGroups) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-md border border-border bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur">
+        <button type="button" onClick={() => setDismissed(false)} className="font-medium hover:text-accent">
+          Dev duplicates · {safeGroups.length}
+        </button>
+        {hiddenIds.size > 0 && (
+          <button type="button" onClick={clear} className="text-muted-foreground underline hover:text-foreground">
+            Restore hidden
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const totalDupes = safeGroups.reduce((sum, g) => sum + g.items.length, 0);
+  const hiddenCount = safeGroups.reduce(
+    (sum, g) => sum + g.items.filter((it) => hiddenIds.has(it.id) || hiddenIds.has(it.hide_key)).length,
     0
   );
 
@@ -44,8 +76,8 @@ export default function DuplicateProductsBanner({
             className="inline-block h-2 w-2 rounded-full bg-amber-500"
             style={{ boxShadow: "0 0 0 4px rgba(245,158,11,0.18)" }}
           />
-          Dev warning · {groups.length} duplicate group
-          {groups.length === 1 ? "" : "s"} ({totalDupes} cards) detected
+          Dev warning · {safeGroups.length} duplicate group
+          {safeGroups.length === 1 ? "" : "s"} ({totalDupes} cards) detected
           {hiddenCount > 0 ? ` · ${hiddenCount} hidden` : ""}
         </div>
         <div className="flex items-center gap-2">
@@ -83,7 +115,7 @@ export default function DuplicateProductsBanner({
             restore.
           </p>
           <ul className="mt-2 space-y-3 text-xs">
-            {groups.map((g, i) => (
+            {safeGroups.map((g, i) => (
               <li
                 key={`${g.brand}-${i}`}
                 className="rounded border border-amber-400/40 bg-white/60 p-2 dark:bg-black/20"
@@ -91,12 +123,19 @@ export default function DuplicateProductsBanner({
                 <div className="mb-2 font-medium">{g.brand}</div>
                 <div className="flex flex-wrap gap-3">
                   {g.items.map((it) => {
-                    const isHidden = hiddenIds.has(it.id);
+                    const isHidden = hiddenIds.has(it.id) || hiddenIds.has(it.hide_key);
                     return (
                       <button
-                        key={it.id}
+                        key={it.hide_key}
                         type="button"
-                        onClick={() => (isHidden ? unhide(it.id) : hide(it.id))}
+                        onClick={() => {
+                          if (isHidden) {
+                            unhide(it.hide_key);
+                            unhide(it.id);
+                          } else {
+                            hide(it.hide_key);
+                          }
+                        }}
                         title={
                           isHidden
                             ? `Restore "${it.product_name}"`

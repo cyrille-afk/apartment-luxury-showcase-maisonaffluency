@@ -1,16 +1,31 @@
 import { useCallback, useEffect, useState } from "react";
+import type { TradeProduct } from "@/lib/tradeProducts";
 
 /**
- * Dev-only helper: tracks a localStorage-persisted set of TradeProduct IDs
- * that should be hidden from the Trade grid. Used by the duplicate-products
- * banner so a developer can quickly suppress unwanted near-duplicate cards.
+ * Dev-only helper: tracks a localStorage-persisted set of stable TradeProduct
+ * hide keys that should be hidden from the Trade grid. Used by the
+ * duplicate-products banner so a developer can quickly suppress unwanted
+ * near-duplicate cards.
  *
- * Storage key: `dev:hiddenTradeProductIds` (JSON array of strings).
+ * Storage key: `dev:hiddenTradeProductIds` (JSON array of stable keys).
  * In production builds the hook is inert (always returns an empty set and
  * a no-op `hide`).
  */
 const STORAGE_KEY = "dev:hiddenTradeProductIds";
 const EVENT_NAME = "dev:hiddenTradeProductIds:change";
+
+const normalizeForHideKey = (value: string | null | undefined) =>
+  (value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
+export function getTradeProductHideKey(
+  product: Pick<TradeProduct, "brand_name" | "product_name">
+) {
+  return `product:${normalizeForHideKey(product.brand_name)}::${normalizeForHideKey(product.product_name)}`;
+}
 
 function readIds(): Set<string> {
   if (!import.meta.env.DEV) return new Set();
@@ -67,5 +82,11 @@ export function useHiddenTradeProductIds() {
     writeIds(new Set());
   }, []);
 
-  return { ids, hide, unhide, clear };
+  const isHidden = useCallback(
+    (product: Pick<TradeProduct, "brand_name" | "product_name">) =>
+      ids.has(getTradeProductHideKey(product)),
+    [ids]
+  );
+
+  return { ids, hide, unhide, clear, isHidden };
 }
