@@ -1,6 +1,63 @@
 import type { Lang } from "@/components/trade/conciergeGreeting";
+import { supabase } from "@/integrations/supabase/client";
 
 export type LocalizableAction = { label: string; prompt: string; primary?: boolean };
+
+// In-memory + localStorage cache for translated welcome messages.
+// Key: `${lang}::${sourceContent}` → translated text.
+const translationCache = new Map<string, string>();
+const inflight = new Map<string, Promise<string>>();
+
+const CACHE_KEY = "concierge:welcome_translations:v1";
+try {
+  const raw = typeof localStorage !== "undefined" ? localStorage.getItem(CACHE_KEY) : null;
+  if (raw) {
+    const obj = JSON.parse(raw) as Record<string, string>;
+    Object.entries(obj).forEach(([k, v]) => translationCache.set(k, v));
+  }
+} catch {}
+
+const persistCache = () => {
+  try {
+    const obj: Record<string, string> = {};
+    translationCache.forEach((v, k) => { obj[k] = v; });
+    localStorage.setItem(CACHE_KEY, JSON.stringify(obj));
+  } catch {}
+};
+
+export const getCachedTranslation = (sourceContent: string, lang: Lang): string | undefined => {
+  if (lang === "en") return sourceContent;
+  return translationCache.get(`${lang}::${sourceContent}`);
+};
+
+export const translateWelcomeMessage = async (sourceContent: string, lang: Lang): Promise<string> => {
+  if (lang === "en") return sourceContent;
+  const key = `${lang}::${sourceContent}`;
+  const cached = translationCache.get(key);
+  if (cached) return cached;
+  const existing = inflight.get(key);
+  if (existing) return existing;
+  const p = (async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("translate-text", {
+        body: { text: sourceContent, lang },
+      });
+      if (error) throw error;
+      const translated = (data as { translated?: string })?.translated?.trim();
+      if (!translated) throw new Error("empty translation");
+      translationCache.set(key, translated);
+      persistCache();
+      return translated;
+    } catch (e) {
+      console.error("[concierge] translate failed", e);
+      return sourceContent; // fall back to source
+    } finally {
+      inflight.delete(key);
+    }
+  })();
+  inflight.set(key, p);
+  return p;
+};
 
 export const isOnboardingActionPrompt = (prompt: string) =>
   prompt === "__concierge:start_tour__" ||
