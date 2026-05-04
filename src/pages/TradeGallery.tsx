@@ -91,16 +91,14 @@ const TradeGallery = () => {
     normalizeName(s).split(" ").filter((t) => t.length > 2);
 
   const refreshPrices = async () => {
-    const [{ data: tpData }, { data: cpData }] = await Promise.all([
-      supabase
-        .from("trade_products")
-        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix")
-        .not("trade_price_cents", "is", null),
-      supabase
-        .from("designer_curator_picks")
-        .select("title, trade_price_cents, currency, price_prefix")
-        .not("trade_price_cents", "is", null),
-    ]);
+    // Source of truth for trade gallery prices is the Designer Editor only
+    // (designer_curator_picks). trade_products may contain scraped/CSV values
+    // that haven't been manually reviewed, so we deliberately do NOT read
+    // prices from there in the gallery views.
+    const { data: cpData } = await supabase
+      .from("designer_curator_picks")
+      .select("title, trade_price_cents, currency, price_prefix")
+      .not("trade_price_cents", "is", null);
 
     const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null }>();
     const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null }[] = [];
@@ -113,14 +111,8 @@ const TradeGallery = () => {
       if (norm) lookup.set(norm, entry);
     };
 
-    // Trade products prices
-    for (const p of tpData ?? []) {
-      if (p.trade_price_cents) addEntry(p.product_name, p.trade_price_cents, p.currency, p.price_unit, p.price_prefix);
-    }
-
-    // Curator picks prices (only add if not already present from trade_products)
     for (const p of cpData ?? []) {
-      if (p.trade_price_cents && !lookup.has(p.title.trim().toLowerCase())) {
+      if (p.trade_price_cents) {
         addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix);
       }
     }
