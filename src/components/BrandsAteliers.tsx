@@ -454,17 +454,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
   },
   "lobjet": {
     name: "L'Objet",
-    curatorPicks: [
-      {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773144202/haas-monster-incense-burner-l-objet-2_290345f1-0704-4435-887c-4a19bd458600_800x_dxtyx7.jpg",
-        title: "Haas Monster Incense Burner White",
-        category: "Decorative Object",
-        subcategory: "Decorative Objects",
-        tags: ["Decorative Object", "Decorative Objects"],
-        materials: "Fine Porcelain · Brass · 24k Gold",
-        dimensions: "24 D x 36 H cm",
-      },
-    ],
+    curatorPicks: [],
   },
   "cazes-conquet": {
     name: "Cazes & Conquet",
