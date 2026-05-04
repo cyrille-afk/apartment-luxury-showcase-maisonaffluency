@@ -139,8 +139,20 @@ export function AIConcierge() {
       // content nor its action buttons. Language/tone affect future replies
       // (via toneSystemNote) but the welcome panel itself stays exactly as
       // configured by the admin.
-      if (only.onboarding) return prev;
-      if (hasWelcomeActions(only.actions)) return prev;
+      if (only.onboarding || hasWelcomeActions(only.actions)) {
+        const sourceContent = only.sourceContent ?? only.content;
+        const sourceActions = only.sourceActions ?? only.actions;
+        const next: TimelineItem = {
+          ...only,
+          onboarding: true,
+          sourceContent,
+          sourceActions,
+          content: localizeOnboardingMessage(sourceContent, lang),
+          actions: localizeOnboardingActions(sourceActions, lang, name),
+        };
+        if (only.content === next.content && only.actions === next.actions && only.onboarding) return prev;
+        return [next];
+      }
       // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
       const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
@@ -201,9 +213,15 @@ export function AIConcierge() {
         const welcomeMessage: TimelineItem = {
           kind: "msg",
           role: "assistant",
-          content: message,
-          actions: detail?.actions && detail.actions.length > 0 ? detail.actions : undefined,
+          content: detail?.onboarding ? localizeOnboardingMessage(message, lang) : message,
+          actions: detail?.actions && detail.actions.length > 0
+            ? detail.onboarding
+              ? localizeOnboardingActions(detail.actions, lang, name)
+              : detail.actions
+            : undefined,
           onboarding: !!detail?.onboarding,
+          sourceContent: detail?.onboarding ? message : undefined,
+          sourceActions: detail?.onboarding ? detail?.actions : undefined,
         };
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
