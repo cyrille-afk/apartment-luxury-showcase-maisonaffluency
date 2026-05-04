@@ -21,7 +21,19 @@ export default function DuplicateProductsBanner({
   const { ids: hiddenIds, hide, unhide, clear } = useHiddenTradeProductIds();
 
   const safeGroups = groups || [];
-  const hasGroups = safeGroups.length > 0;
+  const isHiddenItem = (item: DuplicateGroup["items"][number]) =>
+    hiddenIds.has(item.id) || hiddenIds.has(item.hide_key);
+  const hiddenCount = safeGroups.reduce(
+    (sum, g) => sum + g.items.filter(isHiddenItem).length,
+    0
+  );
+  const visibleGroups = safeGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !isHiddenItem(item)),
+    }))
+    .filter((group) => group.items.length > 1);
+  const hasVisibleGroups = visibleGroups.length > 0;
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -55,7 +67,7 @@ export default function DuplicateProductsBanner({
   // Always show a floating pill in dev so the banner can be re-opened at any
   // time, even when no duplicates are currently detected (so the dev can also
   // restore previously-hidden items).
-  if (dismissed || !hasGroups) {
+  if (dismissed || !hasVisibleGroups) {
     return (
       <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-md border border-border bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur">
         <button
@@ -65,9 +77,9 @@ export default function DuplicateProductsBanner({
             setExpanded(true);
           }}
           className="font-medium hover:text-accent"
-          title={hasGroups ? "Show duplicate inspector" : "No duplicates detected right now"}
+          title={hasVisibleGroups ? "Show duplicate inspector" : "No visible duplicates detected right now"}
         >
-          Dev duplicates · {safeGroups.length}
+          Dev duplicates · {visibleGroups.length}
         </button>
         {hiddenIds.size > 0 && (
           <button type="button" onClick={clear} className="text-muted-foreground underline hover:text-foreground">
@@ -78,11 +90,7 @@ export default function DuplicateProductsBanner({
     );
   }
 
-  const totalDupes = safeGroups.reduce((sum, g) => sum + g.items.length, 0);
-  const hiddenCount = safeGroups.reduce(
-    (sum, g) => sum + g.items.filter((it) => hiddenIds.has(it.id) || hiddenIds.has(it.hide_key)).length,
-    0
-  );
+  const totalDupes = visibleGroups.reduce((sum, g) => sum + g.items.length, 0);
 
   return (
     <div
@@ -98,8 +106,8 @@ export default function DuplicateProductsBanner({
             className="inline-block h-2 w-2 rounded-full bg-amber-500"
             style={{ boxShadow: "0 0 0 4px rgba(245,158,11,0.18)" }}
           />
-          Dev warning · {safeGroups.length} duplicate group
-          {safeGroups.length === 1 ? "" : "s"} ({totalDupes} cards) detected
+          Dev warning · {visibleGroups.length} duplicate group
+          {visibleGroups.length === 1 ? "" : "s"} ({totalDupes} visible cards) detected
           {hiddenCount > 0 ? ` · ${hiddenCount} hidden` : ""}
         </div>
         <div className="flex items-center gap-2">
@@ -137,7 +145,7 @@ export default function DuplicateProductsBanner({
             restore.
           </p>
           <ul className="mt-2 space-y-3 text-xs">
-            {safeGroups.map((g, i) => (
+             {visibleGroups.map((g, i) => (
               <li
                 key={`${g.brand}-${i}`}
                 className="rounded border border-amber-400/40 bg-white/60 p-2 dark:bg-black/20"
@@ -145,7 +153,7 @@ export default function DuplicateProductsBanner({
                 <div className="mb-2 font-medium">{g.brand}</div>
                 <div className="flex flex-wrap gap-3">
                   {g.items.map((it) => {
-                    const isHidden = hiddenIds.has(it.id) || hiddenIds.has(it.hide_key);
+                    const isHidden = isHiddenItem(it);
                     return (
                       <button
                         key={it.hide_key}
