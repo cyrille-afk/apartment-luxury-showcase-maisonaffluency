@@ -331,34 +331,11 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             </div>
 
 
-            {(() => {
-              const pricedVariants = (product.size_variants || []).filter(
-                (v) => typeof v?.price_cents === "number" && (v!.price_cents as number) > 0
-              );
-              if (pricedVariants.length > 1) {
-                const cur = (product.currency || "EUR").toUpperCase();
-                const symbol = cur === "USD" ? "$" : cur === "EUR" ? "€" : `${cur} `;
-                return (
-                  <div className="flex flex-col gap-0.5">
-                    {pricedVariants.map((v, i) => {
-                      const labelParts = [v.base, v.top, v.label].map((s) => (s || "").trim()).filter(Boolean);
-                      const label = labelParts.join(" · ") || `Option ${i + 1}`;
-                      return (
-                        <p key={i} className="font-display text-sm md:text-base text-accent">
-                          <span className="text-foreground/80 font-sans text-xs md:text-sm mr-2">{label}</span>
-                          <span className="font-semibold">{symbol}{((v.price_cents as number) / 100).toLocaleString()}</span>
-                        </p>
-                      );
-                    })}
-                  </div>
-                );
-              }
-              return product.price ? (
-                <p className="font-display text-base md:text-lg text-accent font-semibold">
-                  {product.price}
-                </p>
-              ) : null;
-            })()}
+            {product.price && (
+              <p className="font-display text-base md:text-lg text-accent font-semibold">
+                {product.price}
+              </p>
+            )}
 
             {/* Actions */}
             <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
