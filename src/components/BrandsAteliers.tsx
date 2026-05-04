@@ -452,10 +452,6 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
-  "lobjet": {
-    name: "L'Objet",
-    curatorPicks: [],
-  },
   "cazes-conquet": {
     name: "Cazes & Conquet",
     curatorPicks: [
@@ -1437,15 +1433,6 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/leberrevevaud/",
   },
   {
-    id: "lobjet",
-    name: "L'Objet",
-    category: "Decorative Object",
-    subcategory: "Decorative Objects",
-    origin: "France",
-    description: "L'Objet is a luxury design house founded by Elad Yifrach, creating exquisite tableware, home décor, and fragrances that blend artisanal craftsmanship with bold sculptural vision. Each piece — from porcelain to 24k gold-plated objets — is conceived as a work of art, elevating everyday rituals into extraordinary experiences.",
-    instagram: "https://www.instagram.com/lobjet",
-  },
-  {
     id: "galerie-mcde",
     name: "Galerie MCDE",
     category: "Decorative Object",
@@ -1821,7 +1808,7 @@ const brandBgMap: Record<string, string> = {
   "Achille Salvagni Atelier": achilleSalvagniBg,
   "Valérie Rostaing": valerieRostaingBg,
   "MMairo": mmairoBg,
-  "L'Objet": lobjetBg,
+  
   "La Chance Paris": laChanceParisBg,
   "Osanna Visconti": osannaViscontiBg,
   "Pierre Augustin Rose": pierreAugustinRoseBg,
@@ -1884,7 +1871,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Poltrona Frau": "poltrona-frau",
   "Jindrich Halabala": "jindrich-halabala",
   "Iksel": "iksel",
-  "L'Objet": "lobjet",
+  
   "Saint-Louis": "saint-louis",
   "Peter Reed 1861": "peter-reed",
   "Alpange": "alpange",
