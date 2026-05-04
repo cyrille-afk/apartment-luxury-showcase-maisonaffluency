@@ -28,7 +28,6 @@ import {
   loadLang,
   saveLang,
   stageFromPath,
-  DEFAULT_GREETING,
   greetingForContext,
   toneSystemNote,
   loadName,
@@ -38,6 +37,45 @@ import {
   DEFAULT_NAME,
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
+
+const WELCOME_COPY: Record<Lang, (name: string) => string> = {
+  en: (name) => `Welcome to Maison Affluency — I'm ${name}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`,
+  id: (name) => `Selamat datang di Maison Affluency — saya ${name}. Ingin tur singkat, atau mulai dari brief?\n\n_Tip: Anda bisa mengganti nama saya kapan saja — saya akan merespons nama yang terasa tepat._`,
+  th: (name) => `ยินดีต้อนรับสู่ Maison Affluency — ฉันคือ ${name} ต้องการทัวร์สั้น ๆ หรือเริ่มจากบรีฟดีคะ/ครับ?\n\n_เคล็ดลับ: คุณเปลี่ยนชื่อฉันได้ทุกเมื่อ — ฉันจะตอบรับชื่อนั้นให้เป็นธรรมชาติ._`,
+  zh: (name) => `欢迎来到 Maison Affluency — 我是 ${name}。想先快速导览，还是从 brief 开始？\n\n_提示：你可以随时为我改名——我会用你觉得合适的名字回应。_`,
+};
+
+const ACTION_LABELS: Record<Lang, Record<string, (name: string) => string>> = {
+  en: {
+    "__concierge:start_tour__": () => "Start Quick Tour",
+    "__concierge:start_brief__": () => "Start from a brief",
+    "__concierge:rename__": (name) => `Rename ${name}`,
+  },
+  id: {
+    "__concierge:start_tour__": () => "Mulai Tur Singkat",
+    "__concierge:start_brief__": () => "Mulai dari brief",
+    "__concierge:rename__": (name) => `Ganti nama ${name}`,
+  },
+  th: {
+    "__concierge:start_tour__": () => "เริ่มทัวร์สั้น ๆ",
+    "__concierge:start_brief__": () => "เริ่มจากบรีฟ",
+    "__concierge:rename__": (name) => `เปลี่ยนชื่อ ${name}`,
+  },
+  zh: {
+    "__concierge:start_tour__": () => "开始快速导览",
+    "__concierge:start_brief__": () => "从 brief 开始",
+    "__concierge:rename__": (name) => `重命名 ${name}`,
+  },
+};
+
+const localizeWelcomeActions = (actions: ConciergeQuickAction[] | undefined, nextLang: Lang, name: string) =>
+  actions?.map((action) => ({
+    ...action,
+    label: ACTION_LABELS[nextLang][action.prompt]?.(name) ?? action.label,
+  }));
+
+const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
+  !!actions?.some((action) => action.prompt === "__concierge:start_tour__" || action.prompt === "__concierge:start_brief__");
 
 
 export function AIConcierge() {
@@ -126,13 +164,16 @@ export function AIConcierge() {
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      // Don't clobber the welcome message (it carries quick-action buttons).
+      if (hasWelcomeActions(only.actions)) {
+        return [{ ...only, content: WELCOME_COPY[lang](name), actions: localizeWelcomeActions(only.actions, lang, name) }];
+      }
+      // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
       const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
-  }, [pathname, tone, lang]);
+  }, [pathname, tone, lang, name]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
