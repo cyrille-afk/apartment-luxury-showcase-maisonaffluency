@@ -138,7 +138,7 @@ export function QuickTour() {
 
       {onStepRoute && (
         <div className="fixed bottom-6 left-4 z-[120] w-[calc(100vw-2rem)] max-w-sm md:max-w-md print:hidden animate-fade-in">
-          <div key={`card-${stepIdx}`} className="rounded-2xl border border-border bg-muted text-foreground shadow-2xl p-4 animate-scale-in">
+          <div key={`card-${stepIdx}`} className="rounded-2xl border border-border bg-background text-foreground shadow-2xl p-4 animate-scale-in">
             <div className="flex items-start gap-3">
               <div className="shrink-0 h-9 w-9 rounded-full bg-accent/15 flex items-center justify-center">
                 <Icon className="h-4 w-4 text-accent" />
@@ -175,7 +175,9 @@ export function QuickTour() {
                     style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }}
                   />
                 </div>
-                <p key={`b-${stepIdx}`} className="font-body text-xs text-muted-foreground mt-3 leading-relaxed animate-fade-in">{step.body}</p>
+                <div key={`b-${stepIdx}`} className="mt-3 bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5 animate-fade-in">
+                  <p className="font-body text-xs text-foreground leading-relaxed">{step.body}</p>
+                </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (

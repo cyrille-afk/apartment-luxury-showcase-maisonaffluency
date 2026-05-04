@@ -219,7 +219,7 @@ export default function TradeTools() {
       )}
 
       {filteredCategories.map((cat) => (
-        <section key={cat.label}>
+        <section key={cat.label} data-tour-target={cat.label === "Specification" ? "tools" : undefined}>
           <h2 className="font-display text-sm uppercase tracking-[0.15em] text-muted-foreground mb-4">
             {cat.label}
           </h2>

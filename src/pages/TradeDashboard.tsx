@@ -297,7 +297,7 @@ const TradeDashboard = () => {
           <Link
             key={card.to}
             to={card.to}
-            data-tour-target={card.key === "dash-designers" ? "designers" : undefined}
+            data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
             className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all tour-target"
           >
             <div className="relative aspect-[3/2] overflow-hidden">
