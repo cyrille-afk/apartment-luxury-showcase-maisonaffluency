@@ -310,7 +310,7 @@ export function AIConcierge() {
       }
       setTimeline((prev) => [
         ...prev,
-        { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers & Ateliers, brief setup, and your specification toolkit. You can skip at any time." },
+        { kind: "msg", role: "assistant", content: conciergeStatusCopy("tour", lang) },
       ]);
       return;
     }
@@ -319,7 +319,7 @@ export function AIConcierge() {
       window.dispatchEvent(new Event("trade-brief:open"));
       setTimeline((prev) => [
         ...prev,
-        { kind: "msg", role: "assistant", content: "Let's scope your project — five quick questions and I'll create your starting brief." },
+        { kind: "msg", role: "assistant", content: conciergeStatusCopy("brief", lang) },
       ]);
       return;
     }
@@ -487,6 +487,7 @@ export function AIConcierge() {
 
   const lastItem = timeline[timeline.length - 1];
   const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant");
+  const copy = conciergeCopy(lang);
 
   return (
     <>
