@@ -311,6 +311,11 @@ const App = () => {
                   </TooltipProvider>
                 </Suspense>
               )}
+              {import.meta.env.DEV && showDeferredUi && (
+                <Suspense fallback={null}>
+                  <DevDuplicateBannerHost />
+                </Suspense>
+              )}
             </BrowserRouter>
           </QueryClientProvider>
         </CompareProvider>
