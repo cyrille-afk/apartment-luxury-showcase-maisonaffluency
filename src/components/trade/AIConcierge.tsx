@@ -28,7 +28,6 @@ import {
   loadLang,
   saveLang,
   stageFromPath,
-  DEFAULT_GREETING,
   greetingForContext,
   toneSystemNote,
   loadName,
