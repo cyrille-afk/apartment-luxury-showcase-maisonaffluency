@@ -125,7 +125,7 @@ const privatiselectionemBg = cloudinaryUrl("privatiselectionem-bg_qn3lgz", { wid
 const achilleSalvagniBg = cloudinaryUrl("achille-salvagni-atelier-bg", { width: 1200, quality: "auto:good", crop: "fill" });
 const valerieRostaingBg = cloudinaryUrl("valerie-rostaing-bg_y7qe57", { width: 1200, quality: "auto:good", crop: "fill" });
 const mmairoBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.10.53_AM_cuc62s", { width: 1200, quality: "auto:good", crop: "fill" });
-const lobjetBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.14.39_AM_jodm2a", { width: 1200, quality: "auto:good", crop: "fill" });
+
 const osannaViscontiBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.25.23_AM_psgxsu", { width: 1200, quality: "auto:good", crop: "fill" });
 const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1t6", { width: 1200, quality: "auto:good", crop: "fill" });
 
@@ -451,10 +451,6 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         dimensions: "Original H 300 × W 243 cm",
       },
     ],
-  },
-  "lobjet": {
-    name: "L'Objet",
-    curatorPicks: [],
   },
   "cazes-conquet": {
     name: "Cazes & Conquet",
@@ -1437,15 +1433,6 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/leberrevevaud/",
   },
   {
-    id: "lobjet",
-    name: "L'Objet",
-    category: "Decorative Object",
-    subcategory: "Decorative Objects",
-    origin: "France",
-    description: "L'Objet is a luxury design house founded by Elad Yifrach, creating exquisite tableware, home décor, and fragrances that blend artisanal craftsmanship with bold sculptural vision. Each piece — from porcelain to 24k gold-plated objets — is conceived as a work of art, elevating everyday rituals into extraordinary experiences.",
-    instagram: "https://www.instagram.com/lobjet",
-  },
-  {
     id: "galerie-mcde",
     name: "Galerie MCDE",
     category: "Decorative Object",
@@ -1821,7 +1808,7 @@ const brandBgMap: Record<string, string> = {
   "Achille Salvagni Atelier": achilleSalvagniBg,
   "Valérie Rostaing": valerieRostaingBg,
   "MMairo": mmairoBg,
-  "L'Objet": lobjetBg,
+  
   "La Chance Paris": laChanceParisBg,
   "Osanna Visconti": osannaViscontiBg,
   "Pierre Augustin Rose": pierreAugustinRoseBg,
@@ -1884,7 +1871,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Poltrona Frau": "poltrona-frau",
   "Jindrich Halabala": "jindrich-halabala",
   "Iksel": "iksel",
-  "L'Objet": "lobjet",
+  
   "Saint-Louis": "saint-louis",
   "Peter Reed 1861": "peter-reed",
   "Alpange": "alpange",
