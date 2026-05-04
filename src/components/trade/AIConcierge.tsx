@@ -274,7 +274,7 @@ export function AIConcierge() {
       }
       setTimeline((prev) => [
         ...prev,
-        { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers, and brief setup. You can skip at any time." },
+        { kind: "msg", role: "assistant", content: "Starting your guided tour — I'll walk you through the Showroom, Designers & Ateliers, brief setup, and your specification toolkit. You can skip at any time." },
       ]);
       return;
     }
