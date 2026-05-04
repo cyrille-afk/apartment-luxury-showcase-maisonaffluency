@@ -165,7 +165,16 @@ export function AIConcierge() {
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
       if (hasWelcomeActions(only.actions)) {
-        return [{ ...only, content: WELCOME_COPY[lang](name), actions: localizeWelcomeActions(only.actions, lang, name) }];
+        // Preserve custom welcome content (e.g. from replayWelcome) — only re-translate
+        // the content if it currently matches one of the built-in WELCOME_COPY variants.
+        const isDefault = (Object.keys(WELCOME_COPY) as Lang[]).some(
+          (l) => WELCOME_COPY[l](name) === only.content,
+        );
+        return [{
+          ...only,
+          content: isDefault ? WELCOME_COPY[lang](name) : only.content,
+          actions: localizeWelcomeActions(only.actions, lang, name),
+        }];
       }
       // Don't clobber any other assistant message that carries custom quick-action buttons.
       if (only.actions && only.actions.length > 0) return prev;
