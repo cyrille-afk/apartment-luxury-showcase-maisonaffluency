@@ -38,13 +38,6 @@ import {
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
 
-const WELCOME_COPY: Record<Lang, (name: string) => string> = {
-  en: (name) => `Welcome to Maison Affluency — I'm ${name}. Want a quick tour, or shall we start from a brief?\n\n_Tip: you can rename me any time — I'll answer to whatever feels right._`,
-  id: (name) => `Selamat datang di Maison Affluency — saya ${name}. Ingin tur singkat, atau mulai dari brief?\n\n_Tip: Anda bisa mengganti nama saya kapan saja — saya akan merespons nama yang terasa tepat._`,
-  th: (name) => `ยินดีต้อนรับสู่ Maison Affluency — ฉันคือ ${name} ต้องการทัวร์สั้น ๆ หรือเริ่มจากบรีฟดีคะ/ครับ?\n\n_เคล็ดลับ: คุณเปลี่ยนชื่อฉันได้ทุกเมื่อ — ฉันจะตอบรับชื่อนั้นให้เป็นธรรมชาติ._`,
-  zh: (name) => `欢迎来到 Maison Affluency — 我是 ${name}。想先快速导览，还是从 brief 开始？\n\n_提示：你可以随时为我改名——我会用你觉得合适的名字回应。_`,
-};
-
 const ACTION_LABELS: Record<Lang, Record<string, (name: string) => string>> = {
   en: {
     "__concierge:start_tour__": () => "Start Quick Tour",
@@ -68,10 +61,13 @@ const ACTION_LABELS: Record<Lang, Record<string, (name: string) => string>> = {
   },
 };
 
+const isBuiltInActionLabel = (action: ConciergeQuickAction, name: string) =>
+  Object.values(ACTION_LABELS).some((labels) => labels[action.prompt]?.(name) === action.label);
+
 const localizeWelcomeActions = (actions: ConciergeQuickAction[] | undefined, nextLang: Lang, name: string) =>
   actions?.map((action) => ({
     ...action,
-    label: ACTION_LABELS[nextLang][action.prompt]?.(name) ?? action.label,
+    label: isBuiltInActionLabel(action, name) ? ACTION_LABELS[nextLang][action.prompt]?.(name) ?? action.label : action.label,
   }));
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
@@ -165,14 +161,9 @@ export function AIConcierge() {
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
       if (hasWelcomeActions(only.actions)) {
-        // Preserve custom welcome content (e.g. from replayWelcome) — only re-translate
-        // the content if it currently matches one of the built-in WELCOME_COPY variants.
-        const isDefault = (Object.keys(WELCOME_COPY) as Lang[]).some(
-          (l) => WELCOME_COPY[l](name) === only.content,
-        );
         return [{
           ...only,
-          content: isDefault ? WELCOME_COPY[lang](name) : only.content,
+          content: only.content,
           actions: localizeWelcomeActions(only.actions, lang, name),
         }];
       }
