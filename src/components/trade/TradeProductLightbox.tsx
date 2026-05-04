@@ -7,6 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
@@ -54,14 +55,19 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [imageFailed, setImageFailed] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
-  
+  const [baseIdx, setBaseIdx] = useState<number | null>(null);
+  const [topIdx, setTopIdx] = useState<number | null>(null);
+  const [sizeIdx, setSizeIdx] = useState<number | null>(null);
 
-  // Reset image states when product changes
+  // Reset image + variant states when product changes
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
+    setBaseIdx(null);
+    setTopIdx(null);
+    setSizeIdx(null);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
@@ -108,6 +114,44 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const designerDisplay = product.brand_name.includes(" - ")
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
+
+  // Variant axes — drives Base/Top/Size dropdowns when size_variants are present
+  const axes = computeVariantAxes(product.size_variants ?? []);
+  const currencySymbol = (() => {
+    switch ((product.currency || "EUR").toUpperCase()) {
+      case "USD": return "$";
+      case "GBP": return "£";
+      case "EUR": default: return "€";
+    }
+  })();
+
+  // Find the matching variant for the current selection
+  const selectedVariant = (() => {
+    if (!axes.hasVariants) return null;
+    const variants = product.size_variants || [];
+    if (axes.isDualAxis) {
+      const base = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
+      const top = topIdx != null && topIdx >= 0 ? axes.topOptions[topIdx] : null;
+      const size = sizeIdx != null && sizeIdx >= 0 ? axes.dualSizeOptions[sizeIdx] : null;
+      if (!base || !top || !size) return null;
+      return variants.find(v => (v.base || "").trim() === base && (v.top || "").trim() === top && (v.label || "").trim() === size) || null;
+    }
+    if (axes.isBaseOnly) {
+      const base = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
+      if (!base) return null;
+      return variants.find(v => (v.base || "").trim() === base) || null;
+    }
+    // single-axis label
+    if (sizeIdx != null && sizeIdx >= 0) {
+      return variants[sizeIdx] || null;
+    }
+    return null;
+  })();
+
+  const livePrice = selectedVariant?.price_cents
+    ? `${currencySymbol}${(selectedVariant.price_cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+    : product.price;
+
 
   const compareItem: CompareItem = {
     pick: {
@@ -312,28 +356,74 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             </div>
 
             <div className="flex flex-col">
-              {product.materials && (
+              {axes.hasVariants && axes.isDualAxis ? (
+                <>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.baseOptions.join("\n")}
+                    placeholder="Select base"
+                    value={baseIdx}
+                    onChange={setBaseIdx}
+                  />
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.topOptions.join("\n")}
+                    placeholder="Select top / finish"
+                    value={topIdx}
+                    onChange={setTopIdx}
+                  />
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.dualSizeOptions.join("\n")}
+                    placeholder="Select size"
+                    emphasized
+                    value={sizeIdx}
+                    onChange={setSizeIdx}
+                  />
+                </>
+              ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
-                  text={product.materials}
-                  placeholder="Select your material choice"
-                  autoSplit
+                  text={axes.baseOptions.join("\n")}
+                  placeholder="Select finish / size"
+                  value={baseIdx}
+                  onChange={setBaseIdx}
                 />
-              )}
-              {product.dimensions && (
+              ) : axes.hasVariants ? (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={formatDimensionsMultiline(product.dimensions)}
+                  text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
+                  placeholder="Select option"
                   emphasized
-                  placeholder="Select your size"
+                  value={sizeIdx}
+                  onChange={setSizeIdx}
                 />
+              ) : (
+                <>
+                  {product.materials && (
+                    <ExpandableSpec
+                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      text={product.materials}
+                      placeholder="Select your material choice"
+                      autoSplit
+                    />
+                  )}
+                  {product.dimensions && (
+                    <ExpandableSpec
+                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      text={formatDimensionsMultiline(product.dimensions)}
+                      emphasized
+                      placeholder="Select your size"
+                    />
+                  )}
+                </>
               )}
             </div>
 
 
-            {product.price && (
+            {livePrice && (
               <p className="font-display text-base md:text-lg text-accent font-semibold">
-                {product.price}
+                {livePrice}
               </p>
             )}
 
