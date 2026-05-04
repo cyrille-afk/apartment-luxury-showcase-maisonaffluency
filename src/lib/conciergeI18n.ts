@@ -66,6 +66,7 @@ export const localizeOnboardingActions = (
   conciergeName: string,
 ): LocalizableAction[] | undefined => {
   if (!actions) return undefined;
+  if (lang === "en") return actions;
   const labels: Record<Lang, Record<string, string>> = {
     en: {
       "__concierge:start_tour__": "Start Quick Tour",
