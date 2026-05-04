@@ -183,8 +183,7 @@ export function useTradeProducts() {
       hiddenIds.size === 0
         ? mergedProducts
         : mergedProducts.filter((p) =>
-            !hiddenIds.has(getHideKey(p)) &&
-            (p.id.startsWith("tp-") || !hiddenIds.has(p.id))
+            !hiddenIds.has(getHideKey(p)) && !hiddenIds.has(p.id)
           ),
     [mergedProducts, hiddenIds]
   );
