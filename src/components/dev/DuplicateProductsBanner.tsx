@@ -25,31 +25,53 @@ export default function DuplicateProductsBanner({
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-    console.info("[Trade duplicate inspector]", {
-      groups: safeGroups.map((group) => ({
-        brand: group.brand,
-        items: group.items.map((item) => ({
+    if (safeGroups.length === 0) {
+      console.info("[Trade duplicate inspector] no duplicate groups detected", {
+        hiddenKeys: Array.from(hiddenIds),
+      });
+      return;
+    }
+    console.groupCollapsed(
+      `[Trade duplicate inspector] ${safeGroups.length} group(s) · ${safeGroups.reduce((s, g) => s + g.items.length, 0)} cards`
+    );
+    for (const group of safeGroups) {
+      console.groupCollapsed(`${group.brand} · ${group.items.length} items`);
+      console.table(
+        group.items.map((item) => ({
+          product_name: item.product_name,
           id: item.id,
           hide_key: item.hide_key,
-          product_name: item.product_name,
           hidden: hiddenIds.has(item.id) || hiddenIds.has(item.hide_key),
-        })),
-      })),
-      hiddenKeys: Array.from(hiddenIds),
-    });
+        }))
+      );
+      console.groupEnd();
+    }
+    console.info("hiddenKeys:", Array.from(hiddenIds));
+    console.groupEnd();
   }, [safeGroups, hiddenIds]);
 
   if (!import.meta.env.DEV) return null;
 
+  // Always show a floating pill in dev so the banner can be re-opened at any
+  // time, even when no duplicates are currently detected (so the dev can also
+  // restore previously-hidden items).
   if (dismissed || !hasGroups) {
     return (
       <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-md border border-border bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur">
-        <button type="button" onClick={() => setDismissed(false)} className="font-medium hover:text-accent">
+        <button
+          type="button"
+          onClick={() => {
+            setDismissed(false);
+            setExpanded(true);
+          }}
+          className="font-medium hover:text-accent"
+          title={hasGroups ? "Show duplicate inspector" : "No duplicates detected right now"}
+        >
           Dev duplicates · {safeGroups.length}
         </button>
         {hiddenIds.size > 0 && (
           <button type="button" onClick={clear} className="text-muted-foreground underline hover:text-foreground">
-            Restore hidden
+            Restore {hiddenIds.size} hidden
           </button>
         )}
       </div>
