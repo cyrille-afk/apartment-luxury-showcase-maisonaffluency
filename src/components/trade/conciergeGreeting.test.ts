@@ -174,7 +174,7 @@ describe("language selector", () => {
     }
   });
 
-  it("ships 5 supported languages", () => {
-    expect(LANGUAGES.map((l) => l.id).sort()).toEqual(["de", "en", "es", "fr", "it"]);
+  it("ships the supported concierge languages", () => {
+    expect(LANGUAGES.map((l) => l.id).sort()).toEqual(["en", "id", "th", "zh"]);
   });
 });
