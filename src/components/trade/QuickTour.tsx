@@ -80,7 +80,7 @@ export function QuickTour() {
     };
     window.addEventListener("trade-tour:start", onStart);
     return () => window.removeEventListener("trade-tour:start", onStart);
-  }, [navigate]);
+  }, [navigate, STEPS]);
 
   // Resume across reloads / route changes if a tour was in progress
   useEffect(() => {
@@ -112,7 +112,7 @@ export function QuickTour() {
     setStepIdx(nextIdx);
     try { localStorage.setItem(STORAGE_KEY, String(nextIdx)); } catch {}
     navigate(STEPS[nextIdx].path);
-  }, [stepIdx, navigate, finish]);
+  }, [stepIdx, STEPS, navigate, finish]);
 
   const back = useCallback(() => {
     if (stepIdx === 0) return;
@@ -120,7 +120,7 @@ export function QuickTour() {
     setStepIdx(prevIdx);
     try { localStorage.setItem(STORAGE_KEY, String(prevIdx)); } catch {}
     navigate(STEPS[prevIdx].path);
-  }, [stepIdx, navigate]);
+  }, [stepIdx, STEPS, navigate]);
 
   // Expose current step id on <body> so target tiles can self-spotlight via CSS.
   useEffect(() => {
