@@ -394,31 +394,94 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={axes.baseOptions.join("\n")}
-                    placeholder="Select base"
+                    placeholder={getBasePlaceholder(product)}
+                    emphasized
                     value={baseIdx}
-                    onChange={setBaseIdx}
+                    onChange={(idx) => {
+                      if (idx < 0) {
+                        clearAllDualSelections();
+                        return;
+                      }
+                      const nextBase = axes.baseOptions[idx] ?? null;
+                      let nextTop = selectedTop;
+                      let nextSize = selectedSize;
+                      if (nextBase && nextTop && !variantsList.some((v) => matchesDual(v, nextBase, nextTop, nextSize))) {
+                        setTopIdx(null);
+                        nextTop = null;
+                      }
+                      if (nextBase && nextSize && !variantsList.some((v) => matchesDual(v, nextBase, nextTop, nextSize))) {
+                        setSizeIdx(null);
+                        nextSize = null;
+                      }
+                      if (nextBase && !nextTop) {
+                        const compatTopIdx = axes.topOptions.findIndex((t) => variantsList.some((v) => matchesDual(v, nextBase, t, nextSize)));
+                        if (compatTopIdx >= 0 && axes.topOptions.filter((t) => variantsList.some((v) => matchesDual(v, nextBase, t, nextSize))).length === 1) {
+                          setTopIdx(compatTopIdx);
+                        }
+                      }
+                      setBaseIdx(idx);
+                    }}
+                    disabledIndices={disabledBaseIdx}
                   />
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={axes.topOptions.join("\n")}
-                    placeholder="Select top / finish"
-                    value={topIdx}
-                    onChange={setTopIdx}
-                  />
-                  <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                    text={axes.dualSizeOptions.join("\n")}
-                    placeholder="Select size"
+                    placeholder={getTopPlaceholder(product)}
                     emphasized
-                    value={sizeIdx}
-                    onChange={setSizeIdx}
+                    value={topIdx}
+                    onChange={(idx) => {
+                      if (idx < 0) {
+                        clearAllDualSelections();
+                        return;
+                      }
+                      const nextTop = axes.topOptions[idx] ?? null;
+                      let nextBase = selectedBase;
+                      let nextSize = selectedSize;
+                      if (nextTop && nextBase && !variantsList.some((v) => matchesDual(v, nextBase, nextTop, nextSize))) {
+                        setBaseIdx(null);
+                        nextBase = null;
+                      }
+                      if (nextTop && nextSize && !variantsList.some((v) => matchesDual(v, nextBase, nextTop, nextSize))) {
+                        setSizeIdx(null);
+                        nextSize = null;
+                      }
+                      if (nextTop && !nextBase) {
+                        const compatBaseIdx = axes.baseOptions.findIndex((b) => variantsList.some((v) => matchesDual(v, b, nextTop, nextSize)));
+                        if (compatBaseIdx >= 0 && axes.baseOptions.filter((b) => variantsList.some((v) => matchesDual(v, b, nextTop, nextSize))).length === 1) {
+                          setBaseIdx(compatBaseIdx);
+                        }
+                      }
+                      setTopIdx(idx);
+                    }}
+                    disabledIndices={disabledTopIdx}
                   />
+                  {hasDualSize && (
+                    <ExpandableSpec
+                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      text={axes.dualSizeOptions.join("\n")}
+                      placeholder="Select your size"
+                      emphasized
+                      value={sizeIdx}
+                      onChange={(idx) => {
+                        if (idx < 0) {
+                          clearAllDualSelections();
+                          return;
+                        }
+                        const nextSize = axes.dualSizeOptions[idx] ?? null;
+                        if (nextSize && selectedBase && !variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, nextSize))) setBaseIdx(null);
+                        if (nextSize && selectedTop && !variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, nextSize))) setTopIdx(null);
+                        setSizeIdx(idx);
+                      }}
+                      disabledIndices={disabledDualSizeIdx}
+                    />
+                  )}
                 </>
               ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={axes.baseOptions.join("\n")}
-                  placeholder="Select finish / size"
+                  placeholder={getBasePlaceholder(product)}
+                  emphasized
                   value={baseIdx}
                   onChange={setBaseIdx}
                 />
