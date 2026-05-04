@@ -233,6 +233,7 @@ const TradeQuotes = () => {
           </button>
         )}
         <button
+          data-tour-target="brief"
           onClick={handleCreateQuote}
           disabled={creating}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-background text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-background/90 transition-colors disabled:opacity-50"
