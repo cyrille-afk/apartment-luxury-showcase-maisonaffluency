@@ -9,7 +9,7 @@ import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
  * renders as a thumbnail; click to hide that specific card from the grid
  * (state is persisted in localStorage and respected by `useTradeProducts`).
  *
- * Renders nothing in production builds or when no duplicates are detected.
+ * In dev, a small persistent pill remains available even after dismissing.
  */
 export default function DuplicateProductsBanner({
   groups,
@@ -128,7 +128,14 @@ export default function DuplicateProductsBanner({
                       <button
                         key={it.hide_key}
                         type="button"
-                        onClick={() => (isHidden ? unhide(it.hide_key) : hide(it.hide_key))}
+                        onClick={() => {
+                          if (isHidden) {
+                            unhide(it.hide_key);
+                            unhide(it.id);
+                          } else {
+                            hide(it.hide_key);
+                          }
+                        }}
                         title={
                           isHidden
                             ? `Restore "${it.product_name}"`
