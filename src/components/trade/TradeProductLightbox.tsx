@@ -115,6 +115,44 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
 
+  // Variant axes — drives Base/Top/Size dropdowns when size_variants are present
+  const axes = computeVariantAxes(product.size_variants ?? []);
+  const currencySymbol = (() => {
+    switch ((product.currency || "EUR").toUpperCase()) {
+      case "USD": return "$";
+      case "GBP": return "£";
+      case "EUR": default: return "€";
+    }
+  })();
+
+  // Find the matching variant for the current selection
+  const selectedVariant = (() => {
+    if (!axes.hasVariants) return null;
+    const variants = product.size_variants || [];
+    if (axes.isDualAxis) {
+      const base = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
+      const top = topIdx != null && topIdx >= 0 ? axes.topOptions[topIdx] : null;
+      const size = sizeIdx != null && sizeIdx >= 0 ? axes.dualSizeOptions[sizeIdx] : null;
+      if (!base || !top || !size) return null;
+      return variants.find(v => (v.base || "").trim() === base && (v.top || "").trim() === top && (v.label || "").trim() === size) || null;
+    }
+    if (axes.isBaseOnly) {
+      const base = baseIdx != null && baseIdx >= 0 ? axes.baseOptions[baseIdx] : null;
+      if (!base) return null;
+      return variants.find(v => (v.base || "").trim() === base) || null;
+    }
+    // single-axis label
+    if (sizeIdx != null && sizeIdx >= 0) {
+      return variants[sizeIdx] || null;
+    }
+    return null;
+  })();
+
+  const livePrice = selectedVariant?.price_cents
+    ? `${currencySymbol}${(selectedVariant.price_cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+    : product.price;
+
+
   const compareItem: CompareItem = {
     pick: {
       title: product.product_name,
