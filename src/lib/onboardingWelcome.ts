@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Lang } from "@/components/trade/conciergeGreeting";
+import { localizedWelcomeTemplate } from "@/lib/conciergeI18n";
 
 export interface WelcomeAction {
   label: string;
@@ -24,6 +26,7 @@ const DEFAULT_BUTTONS: WelcomeAction[] = [
 export interface LoadWelcomeOpts {
   firstName?: string | null;
   conciergeName: string;
+  lang?: Lang;
 }
 
 /**
@@ -38,7 +41,7 @@ export async function loadOnboardingWelcome(opts: LoadWelcomeOpts): Promise<Rend
     .eq("id", "default")
     .maybeSingle();
 
-  const template = (cfg?.greeting_template as string | undefined) || DEFAULT_TEMPLATE;
+  const template = localizedWelcomeTemplate((cfg?.greeting_template as string | undefined) || DEFAULT_TEMPLATE, opts.lang ?? "en");
   const rawButtons = (cfg?.buttons as any[] | undefined) || DEFAULT_BUTTONS;
   const enabled = cfg?.is_enabled !== false;
 
