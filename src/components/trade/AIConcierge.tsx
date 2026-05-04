@@ -566,7 +566,7 @@ export function AIConcierge() {
                     className="absolute right-0 top-full mt-1 z-[110] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
                   >
                     <div className="font-display text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-                      Name your concierge
+                      {copy.nameDialogTitle}
                     </div>
                     <input
                       type="text"
@@ -587,7 +587,7 @@ export function AIConcierge() {
                       className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                     <div className="mt-1 font-body text-[10px] text-muted-foreground">
-                      Up to 32 characters · syncs to your account
+                      {copy.nameHint}
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <button
@@ -599,7 +599,7 @@ export function AIConcierge() {
                         }}
                         className="font-body text-[11px] text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        Reset
+                        {copy.reset}
                       </button>
                       <div className="flex items-center gap-2">
                         <button
@@ -607,7 +607,7 @@ export function AIConcierge() {
                           onClick={() => setNameMenuOpen(false)}
                           className="rounded-md px-2 py-1 font-body text-[11px] text-muted-foreground hover:bg-muted"
                         >
-                          Cancel
+                          {copy.cancel}
                         </button>
                         <button
                           type="button"
@@ -617,7 +617,7 @@ export function AIConcierge() {
                           }}
                           className="rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
                         >
-                          Save
+                          {copy.save}
                         </button>
                       </div>
                     </div>
@@ -643,7 +643,7 @@ export function AIConcierge() {
                     className="absolute right-0 top-full mt-1 z-[110] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Concierge tone
+                      {copy.tone}
                     </div>
                     {tonesFor(lang).map((t) => {
                       const active = t.id === tone;
@@ -692,7 +692,7 @@ export function AIConcierge() {
                     className="absolute right-0 top-full mt-1 z-[110] w-52 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Language
+                      {copy.language}
                     </div>
                     {LANGUAGES.map((l) => {
                       const active = l.id === lang;
