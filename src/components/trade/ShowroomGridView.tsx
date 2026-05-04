@@ -117,34 +117,17 @@ const tokenizeProductName = (value: string): string[] =>
 const findBestPriceMatch = (
   productName: string,
   exactLookup: Map<string, PriceMatch>,
-  priceEntries: PriceMatch[],
+  _priceEntries: PriceMatch[],
 ): PriceMatch | undefined => {
+  // Exact / normalized match only — no substring or token-overlap fuzzy match.
+  // Fuzzy matching previously leaked prices between unrelated products that
+  // shared a word (e.g. "PEDRO Coffee Table" picking up "Pedro the Croc Box").
+  // Designer Editor is the source of truth: no exact match → no price.
   const direct = exactLookup.get(productName.trim().toLowerCase());
   if (direct) return direct;
   const targetNorm = normalizeProductName(productName);
   if (!targetNorm) return undefined;
-  const normalized = exactLookup.get(targetNorm);
-  if (normalized) return normalized;
-  const targetTokens = new Set(tokenizeProductName(productName));
-  let best: PriceMatch | undefined;
-  let bestScore = 0;
-  for (const entry of priceEntries) {
-    const candidateNorm = normalizeProductName(entry.name);
-    if (!candidateNorm) continue;
-    if (candidateNorm.includes(targetNorm) || targetNorm.includes(candidateNorm)) {
-      const score = Math.min(candidateNorm.length, targetNorm.length) / Math.max(candidateNorm.length, targetNorm.length);
-      if (score > bestScore) { best = entry; bestScore = score; }
-      continue;
-    }
-    const candidateTokens = tokenizeProductName(entry.name);
-    if (!candidateTokens.length || !targetTokens.size) continue;
-    let overlap = 0;
-    for (const token of candidateTokens) { if (targetTokens.has(token)) overlap++; }
-    const shorter = Math.min(candidateTokens.length, targetTokens.size);
-    const score = shorter > 0 ? overlap / shorter : 0;
-    if (score > bestScore && score > 0.5) { best = entry; bestScore = score; }
-  }
-  return best;
+  return exactLookup.get(targetNorm);
 };
 
 const ShowroomGridView = ({
