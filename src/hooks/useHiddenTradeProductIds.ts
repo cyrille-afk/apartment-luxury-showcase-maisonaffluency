@@ -28,7 +28,6 @@ export function getTradeProductHideKey(
 }
 
 function readIds(): Set<string> {
-  if (!import.meta.env.DEV) return new Set();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return new Set();
@@ -53,7 +52,6 @@ export function useHiddenTradeProductIds() {
   const [ids, setIds] = useState<Set<string>>(() => readIds());
 
   useEffect(() => {
-    if (!import.meta.env.DEV) return;
     const sync = () => setIds(readIds());
     window.addEventListener(EVENT_NAME, sync);
     window.addEventListener("storage", sync);
@@ -64,21 +62,18 @@ export function useHiddenTradeProductIds() {
   }, []);
 
   const hide = useCallback((id: string) => {
-    if (!import.meta.env.DEV) return;
     const next = new Set(readIds());
     next.add(id);
     writeIds(next);
   }, []);
 
   const unhide = useCallback((id: string) => {
-    if (!import.meta.env.DEV) return;
     const next = new Set(readIds());
     next.delete(id);
     writeIds(next);
   }, []);
 
   const clear = useCallback(() => {
-    if (!import.meta.env.DEV) return;
     writeIds(new Set());
   }, []);
 
