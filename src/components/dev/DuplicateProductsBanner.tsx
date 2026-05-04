@@ -20,8 +20,6 @@ export default function DuplicateProductsBanner({
   const [expanded, setExpanded] = useState(true);
   const { ids: hiddenIds, hide, unhide, clear } = useHiddenTradeProductIds();
 
-  if (!import.meta.env.DEV) return null;
-
   const safeGroups = groups || [];
   const hasGroups = safeGroups.length > 0;
 
@@ -40,6 +38,8 @@ export default function DuplicateProductsBanner({
       hiddenKeys: Array.from(hiddenIds),
     });
   }, [safeGroups, hiddenIds]);
+
+  if (!import.meta.env.DEV) return null;
 
   if (dismissed || !hasGroups) {
     return (
