@@ -474,7 +474,6 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                             const file = (url.split("/").pop() || "").replace(/\.[a-z0-9]+$/i, "");
                             return new Set(normTokens(file));
                           });
-                          const normFinishLocal = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
                           // Start fresh — drop stale keys (e.g. from when keys were derived from Base only)
                           const nextMap: Record<string, number> = {};
                           let assigned = 0;
@@ -482,15 +481,10 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                             const baseTrim = (v.base || "").trim();
                             const topTrim = (v.top || "").trim();
                             const labelTrim = (v.label || "").trim();
-                            const isComposite = Boolean(baseTrim && topTrim);
-                            const key = isComposite
-                              ? `${normFinishLocal(baseTrim)}|${normFinishLocal(topTrim)}`
-                              : normFinishLocal(topTrim || baseTrim || labelTrim);
-                            // Match against the most descriptive label available so each
-                            // composite row can still find its own gallery image.
-                            const labelSrc = isComposite
-                              ? `${baseTrim} ${topTrim}`
-                              : (topTrim || baseTrim || labelTrim);
+                            const key = variantImageKey(baseTrim, topTrim, labelTrim, labelTrim);
+                            // Match against the full row identity so rows with the same
+                            // Base × Top but different dimensions/concepts map separately.
+                            const labelSrc = [baseTrim, topTrim, labelTrim].filter(Boolean).join(" ");
                             if (!key || !labelSrc) continue;
                             const tokens = normTokens(labelSrc);
                             if (tokens.length === 0) continue;
