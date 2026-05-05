@@ -130,7 +130,7 @@ export function resolveVariantImageIndex(
   const isDualAxisMap = requireCompletePair && Object.keys(finishMap).some((k) => k.includes("|"));
 
   // 1) Full triple — most specific
-  const rowLabel = resolveVariantRowLabel(variants, base, top, size || label);
+  const rowLabel = resolveVariantRowLabel(variants, base, top, size);
   if (base && top && rowLabel) {
     const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(rowLabel)}`;
     const hit = tryKey(triple);
