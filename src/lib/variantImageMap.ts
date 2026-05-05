@@ -65,10 +65,26 @@ export function variantImageKey(
 ): string {
   const b = normFinish((base || "").trim());
   const t = normFinish((top || "").trim());
-  const s = normFinish((size || "").trim());
+  const s = normFinish((size || label || "").trim());
   if (b && t && s) return `${b}|${t}|${s}`;
   if (b && t) return `${b}|${t}`;
   return normFinish(top || base || label || size || "");
+}
+
+function resolveVariantRowLabel(
+  variants: { label?: string | null; base?: string | null; top?: string | null }[] | null | undefined,
+  base?: string | null,
+  top?: string | null,
+  explicitSize?: string | null
+): string | null {
+  if (explicitSize && explicitSize.trim()) return explicitSize.trim();
+  if (!variants || !variants.length || !base || !top) return null;
+  const matches = variants.filter((v) =>
+    (v.base || "").trim() === base.trim() &&
+    (v.top || "").trim() === top.trim()
+  );
+  if (matches.length !== 1) return null;
+  return (matches[0].label || "").trim() || null;
 }
 
 /**
@@ -90,13 +106,14 @@ export function resolveVariantImageIndex(
     top?: string | null;
     label?: string | null;
     size?: string | null;
+    variants?: { label?: string | null; base?: string | null; top?: string | null }[] | null;
     imageCount: number;
     /** True only for real Base × Top products; false for base-only products with legacy composite aliases. */
     requireCompletePair?: boolean;
   }
 ): number | undefined {
   if (!finishMap) return undefined;
-  const { base, top, label, size, imageCount, requireCompletePair = true } = opts;
+  const { base, top, label, size, variants, imageCount, requireCompletePair = true } = opts;
 
   const tryKey = (k: string | undefined): number | undefined => {
     if (!k) return undefined;
@@ -113,8 +130,9 @@ export function resolveVariantImageIndex(
   const isDualAxisMap = requireCompletePair && Object.keys(finishMap).some((k) => k.includes("|"));
 
   // 1) Full triple — most specific
-  if (base && top && size) {
-    const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(size)}`;
+  const rowLabel = resolveVariantRowLabel(variants, base, top, size);
+  if (base && top && rowLabel) {
+    const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(rowLabel)}`;
     const hit = tryKey(triple);
     if (hit !== undefined) return hit;
   }
@@ -177,7 +195,7 @@ export function findVariantForImageIndex(
     const label = (v.label || "").trim() || null;
 
     const candidates: string[] = [];
-    if (base && top && label) candidates.push(`${normFinish(base)}|${normFinish(top)}|${normFinish(label)}`);
+    if (base && top) candidates.push(variantImageKey(base, top, label, label));
     if (base && top) candidates.push(`${normFinish(base)}|${normFinish(top)}`);
     if (top) candidates.push(normFinish(top));
     if (base) candidates.push(normFinish(base));

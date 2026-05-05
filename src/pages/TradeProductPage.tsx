@@ -503,7 +503,12 @@ const TradeProductPage: React.FC = () => {
     const finishMap = buildProductFinishMap(rawMap);
     const imgCount = ((data?.product as any)?.gallery_images?.length) ||
       ([(data?.product as any)?.image_url, (data?.product as any)?.hover_image_url].filter(Boolean).length);
-    const idx = resolveVariantImageIndex(finishMap, { base: pair.base, top: pair.top, imageCount: imgCount });
+    const idx = resolveVariantImageIndex(finishMap, {
+      base: pair.base,
+      top: pair.top,
+      variants: sv as any,
+      imageCount: imgCount,
+    });
     if (idx !== undefined) {
       setGalleryActiveIndex(idx);
       setGalleryJumpNonce((n) => n + 1);
@@ -532,6 +537,7 @@ const TradeProductPage: React.FC = () => {
     if (nextBase != null || nextTop != null) {
       if ((nextBase ?? null) !== (selectedBase ?? null)) setSelectedBase(nextBase);
       if ((nextTop ?? null) !== (selectedTop ?? null)) setSelectedTop(nextTop);
+      if (nextLabel && nextLabel !== (selectedDualSize ?? null)) setSelectedDualSize(nextLabel);
     }
     // Single-axis (label) path — keep singleMaterial in sync when applicable
     if (nextLabel && nextLabel !== (selectedSingleMaterial ?? null)) {
@@ -659,6 +665,7 @@ const TradeProductPage: React.FC = () => {
           top: effectiveOpts.top,
           size: effectiveOpts.size,
           label,
+          variants: variantsForAxes as any,
           imageCount: images.length,
           requireCompletePair: requiresBaseAndTopSelection,
         })

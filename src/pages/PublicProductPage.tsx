@@ -190,6 +190,7 @@ const VariantSelectors: React.FC<{
     if (isDualAxis || isBaseOnly) {
       if ((match.base ?? null) !== selBase) setSelBase(match.base);
       if (isDualAxis && (match.top ?? null) !== selTop) setSelTop(match.top);
+      if (isDualAxis && match.label && match.label !== selDualSize) setSelDualSize(match.label);
     } else if (hasSingleAxisSplit) {
       if (match.label && match.label !== selMat) setSelMat(match.label);
     }
@@ -692,6 +693,7 @@ const PublicProductPage: React.FC = () => {
           top: effectiveOpts.top,
           size: effectiveOpts.size,
           label,
+          variants: variantsForAxes as any,
           imageCount: images.length,
           requireCompletePair: requiresBaseAndTopSelection,
         })

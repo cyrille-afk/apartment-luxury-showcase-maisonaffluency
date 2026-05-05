@@ -22,6 +22,7 @@ import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAu
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
+import { variantImageKey } from "@/lib/variantImageMap";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -473,23 +474,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                             const file = (url.split("/").pop() || "").replace(/\.[a-z0-9]+$/i, "");
                             return new Set(normTokens(file));
                           });
-                          const normFinishLocal = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
                           // Start fresh — drop stale keys (e.g. from when keys were derived from Base only)
                           const nextMap: Record<string, number> = {};
                           let assigned = 0;
-                          for (const v of variants) {
+                          let sequentialAssigned = 0;
+                          for (const [variantIdx, v] of variants.entries()) {
                             const baseTrim = (v.base || "").trim();
                             const topTrim = (v.top || "").trim();
                             const labelTrim = (v.label || "").trim();
-                            const isComposite = Boolean(baseTrim && topTrim);
-                            const key = isComposite
-                              ? `${normFinishLocal(baseTrim)}|${normFinishLocal(topTrim)}`
-                              : normFinishLocal(topTrim || baseTrim || labelTrim);
-                            // Match against the most descriptive label available so each
-                            // composite row can still find its own gallery image.
-                            const labelSrc = isComposite
-                              ? `${baseTrim} ${topTrim}`
-                              : (topTrim || baseTrim || labelTrim);
+                            const key = variantImageKey(baseTrim, topTrim, labelTrim, labelTrim);
+                            // Match against the full row identity so rows with the same
+                            // Base × Top but different dimensions/concepts map separately.
+                            const labelSrc = [baseTrim, topTrim, labelTrim].filter(Boolean).join(" ");
                             if (!key || !labelSrc) continue;
                             const tokens = normTokens(labelSrc);
                             if (tokens.length === 0) continue;
@@ -499,17 +495,20 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                               const score = tokens.reduce((acc, t) => acc + (gset.has(t) ? 1 : 0), 0);
                               if (score > bestScore) { bestScore = score; bestIdx = i; }
                             });
-                            if (bestIdx >= 0 && bestScore > 0) {
-                              nextMap[key] = bestIdx;
+                            const fallbackIdx = variantIdx < gallery.length ? variantIdx : -1;
+                            const resolvedIdx = bestIdx >= 0 && bestScore > 0 ? bestIdx : fallbackIdx;
+                            if (resolvedIdx >= 0) {
+                              nextMap[key] = resolvedIdx;
                               assigned++;
+                              if (bestScore === 0) sequentialAssigned++;
                             }
                           }
                           updateField(pick.id, "variant_image_map", Object.keys(nextMap).length ? nextMap : null);
                           toast({
                             title: assigned > 0 ? "Images auto-filled" : "No matches found",
                             description: assigned > 0
-                              ? `${assigned} variant(s) mapped by filename token match. Review and adjust if needed.`
-                              : "Couldn't match variant labels to gallery filenames. Rename images (e.g. include 'lacquer' or 'sand-blasted-ash') or set Image # manually.",
+                              ? `${assigned} variant(s) mapped${sequentialAssigned ? `, including ${sequentialAssigned} by row order` : " by filename token match"}.`
+                              : "Couldn't map variants because there are more rows than gallery images.",
                             variant: assigned > 0 ? "default" : "destructive",
                           });
                         }}
@@ -542,24 +541,25 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   )}
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
-                    const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
                     const baseTrim = variant.base?.trim() || "";
                     const topTrim = variant.top?.trim() || "";
                     const labelTrim = variant.label?.trim() || "";
-                    // Composite key when both axes are filled (decouples rows that
-                    // share the same Top, e.g. Apparatus Lantern Table Lamp).
+                    // Prefer the full Base × Top × Label key so rows that share the
+                    // same finishes but have different dimensions/concepts do not collide.
+                    const isTriple = Boolean(baseTrim && topTrim && labelTrim);
                     const isComposite = Boolean(baseTrim && topTrim);
-                    const keySource: "Base × Top" | "Top" | "Base" | "Label" | null =
-                      isComposite ? "Base × Top"
+                    const keySource: "Base × Top × Label" | "Base × Top" | "Top" | "Base" | "Label" | null =
+                      isTriple ? "Base × Top × Label"
+                      : isComposite ? "Base × Top"
                       : topTrim ? "Top"
                       : baseTrim ? "Base"
                       : labelTrim ? "Label"
                       : null;
-                    const mapKey = isComposite
-                      ? `${normFinish(baseTrim)}|${normFinish(topTrim)}`
-                      : normFinish(topTrim || baseTrim || labelTrim);
-                    const keyDisplay = isComposite
-                      ? `${normFinish(baseTrim)} | ${normFinish(topTrim)}`
+                    const mapKey = variantImageKey(baseTrim, topTrim, labelTrim, labelTrim);
+                    const keyDisplay = isTriple
+                      ? mapKey.replace(/\|/g, " | ")
+                      : isComposite
+                        ? mapKey.replace(/\|/g, " | ")
                       : mapKey;
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
