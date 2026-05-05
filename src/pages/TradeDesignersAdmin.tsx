@@ -22,6 +22,7 @@ import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAu
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
+import { variantImageKey } from "@/lib/variantImageMap";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
