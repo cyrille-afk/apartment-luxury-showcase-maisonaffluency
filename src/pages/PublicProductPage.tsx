@@ -692,6 +692,7 @@ const PublicProductPage: React.FC = () => {
           top: effectiveOpts.top,
           size: effectiveOpts.size,
           label,
+          variants: variantsForAxes as any,
           imageCount: images.length,
           requireCompletePair: requiresBaseAndTopSelection,
         })
