@@ -537,6 +537,7 @@ const TradeProductPage: React.FC = () => {
     if (nextBase != null || nextTop != null) {
       if ((nextBase ?? null) !== (selectedBase ?? null)) setSelectedBase(nextBase);
       if ((nextTop ?? null) !== (selectedTop ?? null)) setSelectedTop(nextTop);
+      if (nextLabel && nextLabel !== (selectedDualSize ?? null)) setSelectedDualSize(nextLabel);
     }
     // Single-axis (label) path — keep singleMaterial in sync when applicable
     if (nextLabel && nextLabel !== (selectedSingleMaterial ?? null)) {
