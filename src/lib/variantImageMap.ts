@@ -106,13 +106,14 @@ export function resolveVariantImageIndex(
     top?: string | null;
     label?: string | null;
     size?: string | null;
+    variants?: { label?: string | null; base?: string | null; top?: string | null }[] | null;
     imageCount: number;
     /** True only for real Base × Top products; false for base-only products with legacy composite aliases. */
     requireCompletePair?: boolean;
   }
 ): number | undefined {
   if (!finishMap) return undefined;
-  const { base, top, label, size, imageCount, requireCompletePair = true } = opts;
+  const { base, top, label, size, variants, imageCount, requireCompletePair = true } = opts;
 
   const tryKey = (k: string | undefined): number | undefined => {
     if (!k) return undefined;
@@ -129,8 +130,9 @@ export function resolveVariantImageIndex(
   const isDualAxisMap = requireCompletePair && Object.keys(finishMap).some((k) => k.includes("|"));
 
   // 1) Full triple — most specific
-  if (base && top && size) {
-    const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(size)}`;
+  const rowLabel = resolveVariantRowLabel(variants, base, top, size || label);
+  if (base && top && rowLabel) {
+    const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(rowLabel)}`;
     const hit = tryKey(triple);
     if (hit !== undefined) return hit;
   }
