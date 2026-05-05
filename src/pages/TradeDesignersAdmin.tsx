@@ -537,24 +537,25 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   )}
                   {(pick.size_variants || []).map((variant, idx) => {
                     const galleryCount = (pick.gallery_images || []).length;
-                    const normFinish = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
                     const baseTrim = variant.base?.trim() || "";
                     const topTrim = variant.top?.trim() || "";
                     const labelTrim = variant.label?.trim() || "";
-                    // Composite key when both axes are filled (decouples rows that
-                    // share the same Top, e.g. Apparatus Lantern Table Lamp).
+                    // Prefer the full Base × Top × Label key so rows that share the
+                    // same finishes but have different dimensions/concepts do not collide.
+                    const isTriple = Boolean(baseTrim && topTrim && labelTrim);
                     const isComposite = Boolean(baseTrim && topTrim);
-                    const keySource: "Base × Top" | "Top" | "Base" | "Label" | null =
-                      isComposite ? "Base × Top"
+                    const keySource: "Base × Top × Label" | "Base × Top" | "Top" | "Base" | "Label" | null =
+                      isTriple ? "Base × Top × Label"
+                      : isComposite ? "Base × Top"
                       : topTrim ? "Top"
                       : baseTrim ? "Base"
                       : labelTrim ? "Label"
                       : null;
-                    const mapKey = isComposite
-                      ? `${normFinish(baseTrim)}|${normFinish(topTrim)}`
-                      : normFinish(topTrim || baseTrim || labelTrim);
-                    const keyDisplay = isComposite
-                      ? `${normFinish(baseTrim)} | ${normFinish(topTrim)}`
+                    const mapKey = variantImageKey(baseTrim, topTrim, labelTrim, labelTrim);
+                    const keyDisplay = isTriple
+                      ? mapKey.replace(/\|/g, " | ")
+                      : isComposite
+                        ? mapKey.replace(/\|/g, " | ")
                       : mapKey;
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
