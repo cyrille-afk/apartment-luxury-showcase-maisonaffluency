@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET edition = 'Created in Collaboration with CC-Tapis' WHERE id = 'fcda149e-1b3f-4ace-b0fa-37999b2a49f3';
