@@ -477,7 +477,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                           // Start fresh — drop stale keys (e.g. from when keys were derived from Base only)
                           const nextMap: Record<string, number> = {};
                           let assigned = 0;
-                          for (const v of variants) {
+                          let sequentialAssigned = 0;
+                          for (const [variantIdx, v] of variants.entries()) {
                             const baseTrim = (v.base || "").trim();
                             const topTrim = (v.top || "").trim();
                             const labelTrim = (v.label || "").trim();
@@ -494,17 +495,20 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                               const score = tokens.reduce((acc, t) => acc + (gset.has(t) ? 1 : 0), 0);
                               if (score > bestScore) { bestScore = score; bestIdx = i; }
                             });
-                            if (bestIdx >= 0 && bestScore > 0) {
-                              nextMap[key] = bestIdx;
+                            const fallbackIdx = variantIdx < gallery.length ? variantIdx : -1;
+                            const resolvedIdx = bestIdx >= 0 && bestScore > 0 ? bestIdx : fallbackIdx;
+                            if (resolvedIdx >= 0) {
+                              nextMap[key] = resolvedIdx;
                               assigned++;
+                              if (bestScore === 0) sequentialAssigned++;
                             }
                           }
                           updateField(pick.id, "variant_image_map", Object.keys(nextMap).length ? nextMap : null);
                           toast({
                             title: assigned > 0 ? "Images auto-filled" : "No matches found",
                             description: assigned > 0
-                              ? `${assigned} variant(s) mapped by filename token match. Review and adjust if needed.`
-                              : "Couldn't match variant labels to gallery filenames. Rename images (e.g. include 'lacquer' or 'sand-blasted-ash') or set Image # manually.",
+                              ? `${assigned} variant(s) mapped${sequentialAssigned ? `, including ${sequentialAssigned} by row order` : " by filename token match"}.`
+                              : "Couldn't map variants because there are more rows than gallery images.",
                             variant: assigned > 0 ? "default" : "destructive",
                           });
                         }}
