@@ -12,6 +12,7 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates 
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
+import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -41,6 +42,7 @@ const TradeGallery = () => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const { allProducts, brands, categories, duplicateGroups } = useTradeProducts();
+  const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState("");
@@ -308,6 +310,7 @@ const TradeGallery = () => {
 
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
+      if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
       const q = search.toLowerCase();
       const matchesSearch =
         !q ||
@@ -321,7 +324,7 @@ const TradeGallery = () => {
       const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
       return matchesSearch && matchesBrand && matchesCategory && matchesSub;
     });
-  }, [allProducts, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
+  }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
     pick: {
