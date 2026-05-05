@@ -20,7 +20,7 @@ import {
   normalizeCategory,
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
-import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey } from "@/hooks/useHiddenTradeProductIds";
+import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey, isTradeProductMarkedHidden } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
   hasExplicitCategory: boolean;
@@ -182,9 +182,7 @@ export function useTradeProducts() {
     () =>
       hiddenIds.size === 0
         ? mergedProducts
-        : mergedProducts.filter((p) =>
-            !hiddenIds.has(getHideKey(p)) && !hiddenIds.has(p.id)
-          ),
+        : mergedProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenIds)),
     [mergedProducts, hiddenIds]
   );
 
