@@ -195,7 +195,7 @@ export function findVariantForImageIndex(
     const label = (v.label || "").trim() || null;
 
     const candidates: string[] = [];
-    if (base && top && label) candidates.push(`${normFinish(base)}|${normFinish(top)}|${normFinish(label)}`);
+    if (base && top) candidates.push(variantImageKey(base, top, label, label));
     if (base && top) candidates.push(`${normFinish(base)}|${normFinish(top)}`);
     if (top) candidates.push(normFinish(top));
     if (base) candidates.push(normFinish(base));
