@@ -65,10 +65,26 @@ export function variantImageKey(
 ): string {
   const b = normFinish((base || "").trim());
   const t = normFinish((top || "").trim());
-  const s = normFinish((size || "").trim());
+  const s = normFinish((size || label || "").trim());
   if (b && t && s) return `${b}|${t}|${s}`;
   if (b && t) return `${b}|${t}`;
   return normFinish(top || base || label || size || "");
+}
+
+function resolveVariantRowLabel(
+  variants: { label?: string | null; base?: string | null; top?: string | null }[] | null | undefined,
+  base?: string | null,
+  top?: string | null,
+  explicitSize?: string | null
+): string | null {
+  if (explicitSize && explicitSize.trim()) return explicitSize.trim();
+  if (!variants || !variants.length || !base || !top) return null;
+  const matches = variants.filter((v) =>
+    (v.base || "").trim() === base.trim() &&
+    (v.top || "").trim() === top.trim()
+  );
+  if (matches.length !== 1) return null;
+  return (matches[0].label || "").trim() || null;
 }
 
 /**
