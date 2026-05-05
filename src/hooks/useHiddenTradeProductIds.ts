@@ -27,6 +27,13 @@ export function getTradeProductHideKey(
   return `product:${normalizeForHideKey(product.brand_name)}::${normalizeForHideKey(product.product_name)}`;
 }
 
+export function isTradeProductMarkedHidden(
+  product: Pick<TradeProduct, "id" | "brand_name" | "product_name">,
+  hiddenIds: Set<string>
+) {
+  return hiddenIds.has(product.id) || hiddenIds.has(getTradeProductHideKey(product));
+}
+
 function readIds(): Set<string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -78,8 +85,8 @@ export function useHiddenTradeProductIds() {
   }, []);
 
   const isHidden = useCallback(
-    (product: Pick<TradeProduct, "brand_name" | "product_name">) =>
-      ids.has(getTradeProductHideKey(product)),
+    (product: Pick<TradeProduct, "id" | "brand_name" | "product_name">) =>
+      isTradeProductMarkedHidden(product, ids),
     [ids]
   );
 
