@@ -647,7 +647,7 @@ const PublicDesignerProfile = () => {
                       src={heroImage}
                       alt={name}
                       className="absolute inset-0 w-full h-full object-cover"
-                      style={{ objectPosition: designer.hero_focus || "center top" }}
+                      style={{ objectPosition: "center 70%" }}
                       loading="eager"
                     />
                   )}
