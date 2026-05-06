@@ -1035,6 +1035,46 @@ export default function EditorialBiography({
 
         // Always render images — never suppress them
 
+        // If no following text to pair with, try to borrow the immediately
+        // preceding text paragraph so the image still renders side-by-side
+        // (prevents lonely centered images at the end of the biography).
+        if (paired.length === 0 && elements.length > 0) {
+          const prev = elements[elements.length - 1];
+          const prevKey = String(prev.key || "");
+          const isPrevText =
+            !prevKey.startsWith("split-") &&
+            !prevKey.startsWith("fw-") &&
+            !prevKey.startsWith("vid-") &&
+            !prevKey.startsWith("manual-vid-") &&
+            !prevKey.startsWith("manual-img-") &&
+            prevKey !== "mobile-early-img";
+          if (isPrevText) {
+            // Look back through parsed text blocks to find the last text content
+            let lastTextIdx = -1;
+            for (let k = i - 2; k >= 0; k--) {
+              if (parsed[k].type === "text") { lastTextIdx = k; break; }
+              if (parsed[k].type !== "text") break;
+            }
+            if (lastTextIdx >= 0) {
+              const lastText = (parsed[lastTextIdx] as { type: "text"; content: string }).content;
+              // Replace the previous text element: drop its last paragraph
+              elements.pop();
+              // Re-render preceding text minus last paragraph if any others existed
+              const precedingTexts: string[] = [];
+              for (let k = lastTextIdx - 1; k >= 0; k--) {
+                if (parsed[k].type !== "text") break;
+                precedingTexts.unshift((parsed[k] as { type: "text"; content: string }).content);
+              }
+              // Note: we only strip the single last text paragraph for pairing.
+              // (The earlier text elements were already pushed in their own block;
+              // simplest safe approach: just push the borrowed text as paired.)
+              paired.push(lastText);
+              // Re-add a slim text element if it had content other than the borrowed line
+              // (Skip — preceding paragraphs are still in their own pushed elements.)
+            }
+          }
+        }
+
         if (paired.length > 0) {
           if (debugMediaOrder) debugEvents.push(`Split image rendered with ${paired.length} paired paragraph${paired.length > 1 ? "s" : ""}: ${block.url}`);
           elements.push(
