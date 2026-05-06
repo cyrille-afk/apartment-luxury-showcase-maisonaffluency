@@ -637,11 +637,11 @@ function SplitImageBlock({
       transition={transition}
       className="shrink-0 w-full"
     >
-      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : "max-h-[420px]"}`}>
+      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className="w-full h-full object-contain"
+          className={`w-full h-auto object-contain ${isSmall ? "" : "max-h-[420px]"}`}
           loading="lazy"
         />
       </div>
@@ -1044,6 +1044,24 @@ export default function EditorialBiography({
               designerName={designerName}
               index={imageIdx}
               paragraphs={paired}
+              overrideCaption={block.caption}
+              forceAlign={block.align}
+              size={block.size}
+            />
+          );
+        } else if (block.align) {
+          // Trailing/standalone image with explicit left/right alignment —
+          // render as a SplitImageBlock with no paired text so it sits at
+          // the requested side with caption directly below (instead of
+          // centered full-width).
+          if (debugMediaOrder) debugEvents.push(`Aligned standalone image rendered (${block.align}): ${block.url}`);
+          elements.push(
+            <SplitImageBlock
+              key={`split-${imageIdx}`}
+              url={block.url}
+              designerName={designerName}
+              index={imageIdx}
+              paragraphs={[]}
               overrideCaption={block.caption}
               forceAlign={block.align}
               size={block.size}
