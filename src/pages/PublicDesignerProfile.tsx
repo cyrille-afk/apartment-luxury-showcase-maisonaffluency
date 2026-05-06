@@ -641,7 +641,7 @@ const PublicDesignerProfile = () => {
                 transition={transition}
                 className="relative mx-auto w-full max-w-[720px] rounded-xl overflow-hidden shrink-0"
               >
-                <div className="aspect-[3/2] md:aspect-[16/10] max-h-[70vh]">
+                <div className="aspect-[4/5] md:aspect-[3/4] max-h-[78vh]">
                   {heroImage && (
                     <img
                       src={heroImage}
