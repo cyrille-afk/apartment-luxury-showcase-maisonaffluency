@@ -1,19 +1,39 @@
 /**
  * Auto-update watcher.
  *
- * Polls /version.json periodically and reloads the app when the deployed
+ * Polls /version.json periodically and notifies the app when the deployed
  * build id no longer matches the one stamped into index.html at build time.
  *
  * - Reads the current build id from <meta name="app-build-id">.
- * - Skips silently in dev (no /version.json is emitted by the dev server).
+ * - Skips silently in dev / Lovable preview (no app-controlled refreshes there).
  * - Polls every 60s and on tab focus / regained network connectivity.
- * - Reloads with cache-bypass when a mismatch is detected.
+ * - Never reloads automatically; the user controls refresh via the banner.
  */
 
 const POLL_INTERVAL_MS = 60_000;
 
 let started = false;
 let currentBuildId: string | null = null;
+
+function isPreviewOrDev(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return true;
+
+  const host = window.location.hostname;
+  const isLovablePreview =
+    host.includes("lovableproject.com") ||
+    host.includes("lovable.app") ||
+    host.includes("id-preview--");
+
+  let isFramed = false;
+  try {
+    isFramed = window.self !== window.top;
+  } catch {
+    isFramed = true;
+  }
+
+  return isLovablePreview || isFramed;
+}
 
 function readMetaBuildId(): string | null {
   if (typeof document === "undefined") return null;
@@ -82,6 +102,7 @@ async function checkForUpdate() {
 export function startBuildVersionWatcher() {
   if (started) return;
   started = true;
+  if (isPreviewOrDev()) return;
   currentBuildId = readMetaBuildId();
   // No build id stamped → likely dev server. Nothing to watch.
   if (!currentBuildId) return;
