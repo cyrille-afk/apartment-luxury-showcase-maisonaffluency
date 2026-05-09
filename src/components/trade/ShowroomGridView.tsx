@@ -259,12 +259,14 @@ const ShowroomGridView = ({
         const { data: pricedProducts } = await supabase
           .from("trade_products")
           .select("id, product_name, description, currency, gallery_images, price_unit")
-          .eq("is_active", true);
+          .eq("is_active", true)
+          .eq("is_hidden", false);
 
         // Fetch descriptions + categorization from curator picks (live DB)
         const { data: curatorDescriptions } = await supabase
           .from("designer_curator_picks")
-          .select("title, subtitle, description, category, subcategory, tags");
+          .select("title, subtitle, description, category, subcategory, tags")
+          .eq("is_hidden", false);
 
         const descriptionLookup = new Map<string, string>();
         const normalizedDescriptionLookup = new Map<string, string>();
