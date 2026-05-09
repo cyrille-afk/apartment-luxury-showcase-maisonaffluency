@@ -5,36 +5,35 @@ import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
 
-const CACHE_RESET_SESSION_KEY = "__ma_frontend_cache_reset_v1";
+const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v1";
 
+/**
+ * Clears any leftover service worker / Cache Storage from older builds.
+ * Runs at most once per browser (tracked in localStorage) and never reloads
+ * the page — reloading here was causing the preview/test environment to
+ * refresh on its own in a loop whenever a SW or cache happened to exist.
+ */
 async function clearStaleFrontendCachesOnce() {
   if (typeof window === "undefined") return;
-  if (sessionStorage.getItem(CACHE_RESET_SESSION_KEY)) return;
-
-  sessionStorage.setItem(CACHE_RESET_SESSION_KEY, "true");
-
-  let shouldReload = false;
+  try {
+    if (localStorage.getItem(CACHE_RESET_KEY)) return;
+    localStorage.setItem(CACHE_RESET_KEY, "true");
+  } catch {
+    return;
+  }
 
   if ("serviceWorker" in navigator) {
-    const registrations = await navigator.serviceWorker.getRegistrations();
-
-    if (registrations.length > 0) {
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-      shouldReload = true;
-    }
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((r) => r.unregister()));
+    } catch { /* noop */ }
   }
 
   if ("caches" in window) {
-    const cacheKeys = await caches.keys();
-
-    if (cacheKeys.length > 0) {
-      await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
-      shouldReload = true;
-    }
-  }
-
-  if (shouldReload) {
-    window.location.reload();
+    try {
+      const cacheKeys = await caches.keys();
+      await Promise.all(cacheKeys.map((k) => caches.delete(k)));
+    } catch { /* noop */ }
   }
 }
 
