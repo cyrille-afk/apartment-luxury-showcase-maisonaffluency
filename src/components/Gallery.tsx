@@ -278,7 +278,7 @@ const DesktopCarouselStrip = ({
           <div
             key={`${item.title}-${index}-desktop-strip`}
             className="group relative flex-none w-full snap-center cursor-pointer aspect-[16/10] max-h-[calc(100vh-280px)] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] rounded-sm overflow-hidden"
-            onClick={() => openLightbox(originalSectionIndex, index)}
+            onClick={() => openLightbox(originalSectionIndex, activeIdx)}
           >
             <img
               src={item.image}
