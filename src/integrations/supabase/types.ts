@@ -781,6 +781,7 @@ export type Database = {
           hover_image_url: string | null
           id: string
           image_url: string
+          is_hidden: boolean
           lead_time: string | null
           materials: string | null
           origin: string | null
@@ -813,6 +814,7 @@ export type Database = {
           hover_image_url?: string | null
           id?: string
           image_url?: string
+          is_hidden?: boolean
           lead_time?: string | null
           materials?: string | null
           origin?: string | null
@@ -845,6 +847,7 @@ export type Database = {
           hover_image_url?: string | null
           id?: string
           image_url?: string
+          is_hidden?: boolean
           lead_time?: string | null
           materials?: string | null
           origin?: string | null
@@ -3608,6 +3611,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_hidden: boolean
           lead_time: string | null
           lead_weeks_max_override: number | null
           lead_weeks_min_override: number | null
@@ -3635,6 +3639,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_hidden?: boolean
           lead_time?: string | null
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
@@ -3662,6 +3667,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_hidden?: boolean
           lead_time?: string | null
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
