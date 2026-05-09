@@ -120,6 +120,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .select("image_url, gallery_images")
         .eq("product_name", (product as any).title)
         .eq("is_active", true)
+        .eq("is_hidden", false)
         .limit(1);
 
       if (brandCandidates.length === 1) {

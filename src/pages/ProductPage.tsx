@@ -43,6 +43,7 @@ const ProductPage = () => {
         .select("id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active")
         .eq("id", id)
         .eq("is_active", true)
+        .eq("is_hidden", false)
         .single();
       if (error || !data) {
         setNotFound(true);
