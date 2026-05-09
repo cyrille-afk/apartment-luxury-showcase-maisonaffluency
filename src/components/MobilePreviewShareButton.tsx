@@ -103,10 +103,9 @@ const MobilePreviewShareButton = () => {
             }}
           >
             <iframe
-              key={`${device}-${orientation}`}
               src={currentUrl}
               title="Mobile preview"
-              className="bg-background rounded-[1.75rem] block"
+              className="bg-background rounded-[1.75rem] block transition-all"
               style={{
                 width: frameW,
                 height: frameH,
