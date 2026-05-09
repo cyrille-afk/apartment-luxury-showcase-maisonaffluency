@@ -15,6 +15,7 @@ const LazyHelmetProvider = lazy(() =>
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
+const MobilePreviewShareButton = lazy(() => import("./components/MobilePreviewShareButton"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 
 // Trade portal pages
