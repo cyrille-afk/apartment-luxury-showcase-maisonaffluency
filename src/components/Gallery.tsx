@@ -1107,7 +1107,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              openLightbox(originalSectionIndex, index);
+                              openLightbox(originalSectionIndex, activeIdx);
                             }}
                             className="absolute bottom-2 left-2 z-10"
                             aria-label="View full image"
