@@ -16,6 +16,8 @@ import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import DesignerInstagramSection from "@/components/DesignerInstagramSection";
+import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
