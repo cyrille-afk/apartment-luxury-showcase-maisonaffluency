@@ -82,6 +82,7 @@ serve(async () => {
     .from("trade_products")
     .select("id, updated_at")
     .eq("is_active", true)
+    .eq("is_hidden", false)
     .order("updated_at", { ascending: false });
 
   // Fetch published studios with media for image sitemap entries
