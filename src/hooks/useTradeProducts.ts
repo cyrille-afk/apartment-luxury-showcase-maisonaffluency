@@ -50,6 +50,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       price_prefix,
       designers(name, founder)
     `)
+    .eq("is_hidden", false)
     .order("sort_order", { ascending: true });
 
   if (error) throw error;
