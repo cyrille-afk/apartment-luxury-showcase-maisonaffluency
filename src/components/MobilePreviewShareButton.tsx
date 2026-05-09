@@ -3,12 +3,12 @@ import { useLocation } from "react-router-dom";
 import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type Device = "se" | "iphone14" | "pixel";
+type Device = "se" | "pro_max" | "pixel";
 
 const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
-  se:      { label: "iPhone SE", w: 375, h: 667 },
-  iphone14: { label: "iPhone 14", w: 390, h: 844 },
-  pixel:   { label: "Pixel",     w: 412, h: 915 },
+  se:      { label: "iPhone SE",        w: 375, h: 667 },
+  pro_max: { label: "iPhone 16 Pro Max", w: 440, h: 956 },
+  pixel:   { label: "Pixel",            w: 412, h: 915 },
 };
 
 /**
@@ -21,19 +21,19 @@ const MobilePreviewShareButton = () => {
   const isMobileViewport = useIsMobile();
   const [open, setOpen] = useState(false);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
-  const [device, setDevice] = useState<Device>("iphone14");
+  const [device, setDevice] = useState<Device>("pro_max");
 
-  // Only show on trade routes and only on desktop viewports
-  const isTradeRoute = pathname.startsWith("/trade");
-  if (!isTradeRoute || isMobileViewport) return null;
-
-  // Lock body scroll while preview is open
+  // Lock body scroll while preview is open — must run before any early return
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, [open]);
+
+  // Only show on trade routes and only on desktop viewports
+  const isTradeRoute = pathname.startsWith("/trade");
+  if (!isTradeRoute || isMobileViewport) return null;
 
   const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
