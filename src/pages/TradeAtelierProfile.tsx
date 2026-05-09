@@ -569,7 +569,7 @@ const TradeAtelierProfile = () => {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
                 {(isTradeUser || isAdmin) && (
                   <button
                     onClick={() => setShowTradePrice(!showTradePrice)}
