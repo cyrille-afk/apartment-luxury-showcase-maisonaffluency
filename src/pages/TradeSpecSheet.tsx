@@ -1,14 +1,64 @@
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/trackDownload";
 import { getSignedSpecSheetUrl } from "@/utils/signedSpecSheetUrl";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { FileDown, Lock } from "lucide-react";
+import { FileDown, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AuthGateDialog from "@/components/AuthGateDialog";
+
+const normalizeSheetKey = (value?: string | null) =>
+  (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toLowerCase();
+
+/**
+ * PdfFrame — isolated, memoized iframe wrapper.
+ * Tracks its own load state so parent rerenders (e.g. resize, auth refresh)
+ * don't force the iframe to reflow or re-fetch the PDF.
+ */
+const PdfFrame = memo(function PdfFrame({
+  src,
+  title,
+  className,
+}: {
+  src: string;
+  title: string;
+  className?: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className={`relative w-full h-full bg-muted/20 ${className || ""}`}>
+      {!loaded && (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted/20"
+          aria-hidden="true"
+        >
+          <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+          <p className="font-body text-xs text-muted-foreground tracking-wide">
+            Loading spec sheet…
+          </p>
+        </div>
+      )}
+      <iframe
+        src={src}
+        title={title}
+        className="w-full h-full border-0"
+        allow="fullscreen"
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        style={{ opacity: loaded ? 1 : 0, transition: "opacity 200ms ease-out" }}
+      />
+    </div>
+  );
+});
 
 /**
  * In-app spec sheet viewer.
@@ -29,21 +79,15 @@ export default function TradeSpecSheet() {
   const { user, loading: authLoading } = useAuth();
   const [gateOpen, setGateOpen] = useState(false);
 
-  const normalizeSheetKey = (value?: string | null) =>
-    (value || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-zA-Z0-9]+/g, " ")
-      .trim()
-      .toLowerCase();
-
-  const pageTitle = product
-    ? `${brand} — ${product} Spec Sheet`
-    : `${brand} Spec Sheet`;
+  const pageTitle = useMemo(
+    () => (product ? `${brand} — ${product} Spec Sheet` : `${brand} Spec Sheet`),
+    [brand, product]
+  );
 
   useEffect(() => {
     if (!product || !user) { setLoading(false); return; }
 
+    let cancelled = false;
     const resolve = async () => {
       const { data: pick } = await supabase
         .from("designer_curator_picks")
@@ -68,8 +112,10 @@ export default function TradeSpecSheet() {
 
       if (resolvedUrl) {
         const signed = await getSignedSpecSheetUrl(resolvedUrl);
-        setPdfUrl(signed);
-        setLoading(false);
+        if (!cancelled) {
+          setPdfUrl(signed);
+          setLoading(false);
+        }
         return;
       }
 
@@ -81,15 +127,42 @@ export default function TradeSpecSheet() {
         .limit(1)
         .maybeSingle();
 
-      if (tp?.spec_sheet_url) {
-        const signed = await getSignedSpecSheetUrl(tp.spec_sheet_url);
-        setPdfUrl(signed);
+      if (!cancelled) {
+        if (tp?.spec_sheet_url) {
+          const signed = await getSignedSpecSheetUrl(tp.spec_sheet_url);
+          setPdfUrl(signed);
+        }
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     resolve();
+    return () => { cancelled = true; };
   }, [product, user, sheetLabel, sheetIndex]);
+
+  const handleDownload = useCallback(async () => {
+    if (!pdfUrl) return;
+    trackDownload(undefined, `${brand} — ${product} Spec Sheet`);
+    try {
+      const res = await fetch(pdfUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${brand} — ${product} Spec Sheet.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(pdfUrl, '_blank');
+    }
+  }, [pdfUrl, brand, product]);
+
+  const googleViewerUrl = useMemo(
+    () => (pdfUrl ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}` : ""),
+    [pdfUrl]
+  );
 
   if (loading || authLoading) {
     return (
@@ -137,28 +210,8 @@ export default function TradeSpecSheet() {
     );
   }
 
-  const handleDownload = async () => {
-    trackDownload(undefined, `${brand} — ${product} Spec Sheet`);
-    try {
-      const res = await fetch(pdfUrl!);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${brand} — ${product} Spec Sheet.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(pdfUrl!, '_blank');
-    }
-  };
-
   /* Mobile: Google Docs viewer iframe + prominent download button */
   if (isMobile) {
-    const googleViewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
-
     return (
       <>
         <Helmet>
@@ -183,13 +236,8 @@ export default function TradeSpecSheet() {
           </div>
 
           {/* Google Docs viewer for mobile-friendly PDF rendering */}
-          <div className="flex-1 bg-muted/20">
-            <iframe
-              src={googleViewerUrl}
-              title={pageTitle}
-              className="w-full h-full border-0"
-              allow="fullscreen"
-            />
+          <div className="flex-1">
+            <PdfFrame src={googleViewerUrl} title={pageTitle} />
           </div>
         </div>
       </>
@@ -203,12 +251,7 @@ export default function TradeSpecSheet() {
         <title>{pageTitle} | Maison & Ateliers</title>
       </Helmet>
       <div className="w-full h-[calc(100vh-4rem)]">
-        <iframe
-          src={pdfUrl}
-          title={pageTitle}
-          className="w-full h-full border-0"
-          allow="fullscreen"
-        />
+        <PdfFrame src={pdfUrl} title={pageTitle} />
       </div>
     </>
   );
