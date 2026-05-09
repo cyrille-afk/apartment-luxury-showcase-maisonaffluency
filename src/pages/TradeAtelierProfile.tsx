@@ -520,6 +520,8 @@ const TradeAtelierProfile = () => {
           );
         })()}
 
+        <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+
         {/* Curator's Picks */}
         {picks.length > 0 && (() => {
           const isGrouped = isParentBrand && groupedPicks.length > 0;
