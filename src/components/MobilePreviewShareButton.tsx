@@ -62,26 +62,19 @@ const MobilePreviewShareButton = () => {
               {frameW}×{frameH}
             </span>
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setDevice("iphone")}
-                className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
-                  device === "iphone"
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                iPhone
-              </button>
-              <button
-                onClick={() => setDevice("android")}
-                className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
-                  device === "android"
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Android
-              </button>
+              {(Object.keys(DEVICES) as Device[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setDevice(key)}
+                  className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
+                    device === key
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {DEVICES[key].label}
+                </button>
+              ))}
             </div>
             <button
               onClick={() =>
