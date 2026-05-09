@@ -274,15 +274,47 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           </>
         )}
 
-        {/* Dot indicators */}
+        {/* Dot indicators (desktop only — mobile uses the thumb strip below) */}
         <SliderDots
           count={images.length}
           activeIndex={activeIndex}
           onSelect={goTo}
           variant="light"
           ariaPrefix="View image"
-          className="absolute bottom-3 left-1/2 -translate-x-1/2"
+          className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
         />
+      </div>
+
+      {/* Mobile horizontal thumb strip — placed under main photo */}
+      {images.length > 1 && (
+        <div className="md:hidden -mx-1 px-1 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`View image ${i + 1}`}
+                aria-current={i === activeIndex}
+                className={cn(
+                  "relative w-16 h-16 shrink-0 rounded-md overflow-hidden border-2 transition-all",
+                  i === activeIndex
+                    ? "border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.5)]"
+                    : "border-border/60 opacity-70 hover:opacity-100"
+                )}
+              >
+                <img
+                  src={img}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Fullscreen lightbox */}
