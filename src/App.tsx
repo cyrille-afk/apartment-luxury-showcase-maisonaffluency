@@ -317,6 +317,11 @@ const App = () => {
                   <DevDuplicateBannerHost />
                 </Suspense>
               )}
+              {showDeferredUi && (
+                <Suspense fallback={null}>
+                  <MobilePreviewShareButton />
+                </Suspense>
+              )}
             </BrowserRouter>
           </QueryClientProvider>
         </CompareProvider>
