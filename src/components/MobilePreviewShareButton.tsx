@@ -45,7 +45,7 @@ const MobilePreviewShareButton = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 px-3 h-10 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
+        className="fixed bottom-6 right-[14rem] z-[100] flex items-center gap-2 px-3 h-10 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
         aria-label="Preview this page in mobile size"
       >
         <Smartphone className="w-4 h-4" />
