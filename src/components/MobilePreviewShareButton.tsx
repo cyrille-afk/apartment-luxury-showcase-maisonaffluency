@@ -1,100 +1,121 @@
-import { useState } from "react";
-import { Smartphone, Check } from "lucide-react";
-import { toast } from "sonner";
-import QRCode from "qrcode";
+import { useState, useEffect } from "react";
+import { Smartphone, X, RotateCw } from "lucide-react";
 
 /**
- * Floating one-click button that generates a shareable mobile preview link
- * for the user's current page state (path + query + hash).
- *
- * - On mobile: triggers the native share sheet.
- * - On desktop: copies the link to clipboard and shows a QR code popover
- *   so the user can scan it with their phone instantly.
+ * Floating one-click button that opens the current page in a
+ * phone-sized preview frame on desktop. On real mobile devices the
+ * button is hidden (you're already on a phone).
  */
 const MobilePreviewShareButton = () => {
   const [open, setOpen] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [device, setDevice] = useState<"iphone" | "android">("iphone");
 
-  const buildShareUrl = () => {
-    const { pathname, search, hash } = window.location;
-    return `${window.location.origin}${pathname}${search}${hash}`;
-  };
-
-  const isMobile = typeof navigator !== "undefined"
+  const isMobileUA = typeof navigator !== "undefined"
     && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-  const handleClick = async () => {
-    const url = buildShareUrl();
+  // Lock body scroll while preview is open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
 
-    if (isMobile && navigator.share) {
-      try {
-        await navigator.share({ title: document.title, url });
-      } catch {
-        /* user cancelled */
-      }
-      return;
-    }
+  if (isMobileUA) return null;
 
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-      toast.success("Link copied — scan the QR with your phone");
-    } catch {
-      toast.error("Could not copy link");
-    }
+  const dims = device === "iphone" ? { w: 390, h: 844 } : { w: 412, h: 915 };
+  const frameW = orientation === "portrait" ? dims.w : dims.h;
+  const frameH = orientation === "portrait" ? dims.h : dims.w;
 
-    try {
-      const dataUrl = await QRCode.toDataURL(url, {
-        width: 220,
-        margin: 1,
-        color: { dark: "#000000", light: "#ffffff" },
-      });
-      setQrDataUrl(dataUrl);
-      setOpen(true);
-    } catch {
-      /* QR generation failed silently */
-    }
-  };
+  const currentUrl = typeof window !== "undefined"
+    ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+    : "/";
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 print:hidden">
-      {open && qrDataUrl && (
-        <div className="absolute bottom-14 left-0 bg-background border border-border rounded-lg shadow-xl p-4 w-[260px] animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-display text-xs uppercase tracking-[0.15em] text-foreground">
-              Open on phone
-            </span>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-muted-foreground hover:text-foreground text-xs"
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          </div>
-          <img
-            src={qrDataUrl}
-            alt="Scan to open this page on your phone"
-            className="w-full h-auto rounded"
-          />
-          <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
-            Scan with your phone camera. Link is also copied to your clipboard.
-          </p>
-        </div>
-      )}
+    <>
       <button
-        onClick={handleClick}
-        className="flex items-center gap-2 px-3 h-10 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity"
-        aria-label="Share mobile preview link"
+        onClick={() => setOpen(true)}
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 px-3 h-10 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
+        aria-label="Preview this page in mobile size"
       >
-        {copied ? <Check className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+        <Smartphone className="w-4 h-4" />
         <span className="font-body text-[10px] uppercase tracking-[0.15em]">
-          {copied ? "Copied" : "Mobile preview"}
+          Mobile preview
         </span>
       </button>
-    </div>
+
+      {open && (
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4 print:hidden">
+          {/* Toolbar */}
+          <div className="flex items-center gap-2 mb-3 bg-background border border-border rounded-full px-3 py-1.5 shadow-lg">
+            <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">
+              {frameW}×{frameH}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setDevice("iphone")}
+                className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
+                  device === "iphone"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                iPhone
+              </button>
+              <button
+                onClick={() => setDevice("android")}
+                className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
+                  device === "android"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Android
+              </button>
+            </div>
+            <button
+              onClick={() =>
+                setOrientation((o) => (o === "portrait" ? "landscape" : "portrait"))
+              }
+              className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition"
+              aria-label="Rotate"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setOpen(false)}
+              className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition"
+              aria-label="Close preview"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Phone frame */}
+          <div
+            className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
+            style={{
+              maxHeight: "calc(100vh - 6rem)",
+              maxWidth: "calc(100vw - 2rem)",
+            }}
+          >
+            <iframe
+              key={`${device}-${orientation}`}
+              src={currentUrl}
+              title="Mobile preview"
+              className="bg-background rounded-[1.75rem] block"
+              style={{
+                width: frameW,
+                height: frameH,
+                maxHeight: "calc(100vh - 7rem)",
+                maxWidth: "calc(100vw - 3rem)",
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
