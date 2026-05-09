@@ -533,11 +533,11 @@ const TradeAtelierProfile = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.25 }}
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 gap-3">
               <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">
                 Curators' Picks
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3 shrink-0">
                 <div>
                   <TooltipProvider>
                     <Tooltip>
@@ -571,12 +571,12 @@ const TradeAtelierProfile = () => {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
+                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact className="hidden md:flex" />
                 {(isTradeUser || isAdmin) && (
                   <button
                     onClick={() => setShowTradePrice(!showTradePrice)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
+                      "hidden md:flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
                       showTradePrice
                         ? "border-accent bg-accent/10 text-accent"
                         : "border-border text-muted-foreground hover:text-foreground"
@@ -604,7 +604,7 @@ const TradeAtelierProfile = () => {
                       className="group cursor-pointer flex flex-col"
                       onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice, TRADE_DISCOUNT))}
                     >
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
+                      <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
                         {/* Tag badges — upper-left */}
                         {(() => {
                           const tags: string[] = pick.tags || [];
@@ -686,8 +686,8 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1">
-                        <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
+                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center md:text-left">
+                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
                           {pick.title}
                         </h3>
                         {designerLabel && designerSlug ? (
@@ -704,8 +704,8 @@ const TradeAtelierProfile = () => {
                           </span>
                         ) : null}
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
-                        <div className="mt-auto pt-1">
-                          <p className="font-display text-sm text-center inline-flex items-center justify-center gap-1.5 flex-wrap w-full">
+                        <div className="mt-1 md:mt-auto md:pt-1">
+                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide text-center md:inline-flex md:items-center md:justify-center md:gap-1.5 md:flex-wrap md:w-full">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice
