@@ -246,7 +246,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             })}
           </div>
 
-        {/* Prev / Next arrows */}
+        {/* Prev / Next arrows — desktop only on the main image (mobile uses arrows next to the thumb strip) */}
         {images.length > 1 && (
           <>
             <button
@@ -254,8 +254,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === 0}
               aria-label="Previous image"
               className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
-                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                "hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
+                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
               )}
             >
               <ChevronLeft size={18} className="text-foreground" />
@@ -265,8 +265,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === images.length - 1}
               aria-label="Next image"
               className={cn(
-                "absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
-                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                "hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
+                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
               )}
             >
               <ChevronRight size={18} className="text-foreground" />
