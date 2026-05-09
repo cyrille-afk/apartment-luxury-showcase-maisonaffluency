@@ -16,6 +16,8 @@ import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import DesignerInstagramSection from "@/components/DesignerInstagramSection";
+import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
@@ -143,6 +145,7 @@ const TradeAtelierProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = isParentBrand && groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
+  const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
 
   // Extract image URLs used in biography to deprioritize matching picks
   const bioImageUrls = useMemo(() => {
@@ -380,7 +383,6 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                         <WhatsAppShareButton
-                          hideOn="mobile"
                           onClick={(e) => {
                             e.stopPropagation();
                             sharePageOnWhatsApp(
@@ -518,6 +520,8 @@ const TradeAtelierProfile = () => {
           );
         })()}
 
+        <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+
         {/* Curator's Picks */}
         {picks.length > 0 && (() => {
           const isGrouped = isParentBrand && groupedPicks.length > 0;
@@ -566,7 +570,7 @@ const TradeAtelierProfile = () => {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
                 {(isTradeUser || isAdmin) && (
                   <button
                     onClick={() => setShowTradePrice(!showTradePrice)}
@@ -585,7 +589,7 @@ const TradeAtelierProfile = () => {
               </div>
             </div>
 
-                <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridCols === 4 ? "grid-cols-3 md:grid-cols-4" : "grid-cols-2 md:grid-cols-3")}>
+                <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
                   {picks.map((pick) => {
                     const isAdding = addingProductId === pick.id;
                     const isAdded = addedProductIds.has(pick.id);
