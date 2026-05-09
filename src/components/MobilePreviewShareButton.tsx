@@ -31,6 +31,13 @@ const MobilePreviewShareButton = () => {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
+  const currentUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    const url = new URL(window.location.href);
+    url.searchParams.set("mobile_preview", "1");
+    return `${url.pathname}${url.search}${url.hash}`;
+  }, [pathname]);
+
   // Only show on trade routes and only on desktop viewports
   const isTradeRoute = pathname.startsWith("/trade");
   if (!isTradeRoute || isMobileViewport) return null;
@@ -38,12 +45,6 @@ const MobilePreviewShareButton = () => {
   const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
-
-  const currentUrl = useMemo(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("mobile_preview", "1");
-    return `${url.pathname}${url.search}${url.hash}`;
-  }, [pathname, device, orientation]);
 
   return (
     <>
