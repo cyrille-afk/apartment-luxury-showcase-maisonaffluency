@@ -1076,12 +1076,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     <div
                       ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
                       onScroll={() => handleStripScroll(originalSectionIndex)}
-                      className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                      className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl"
                     >
                       {section.items.map((item, index) => (
                         <div
                           key={`${item.title}-${index}-mobile`}
-                          className={`relative flex-none w-full snap-center cursor-pointer ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
+                          className={`relative flex-none w-full snap-center cursor-pointer overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
                           onClick={() => openLightbox(originalSectionIndex, index)}
                         >
                           <img
@@ -1119,7 +1119,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                       ))}
                     </div>
-                    {/* Instagram-style indicator — top right: icon on first photo, counter on others */}
+                    {/* Instagram-style indicator — top right */}
                     {section.items.length > 1 && (
                       <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full pointer-events-none w-7 h-7 flex items-center justify-center">
                         {activeIdx === 0 ? (
@@ -1137,23 +1137,64 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         {section.items[activeIdx]?.title}
                       </h4>
                     </div>
-                    {/* Dot indicators */}
-                    {section.items.length > 1 && (
-                      <SliderDots
-                        count={section.items.length}
-                        activeIndex={activeIdx}
-                        onSelect={(dotIndex) => {
-                          const strip = scrollStripRefs.current[originalSectionIndex];
-                          if (!strip) return;
-                          const cardWidth = strip.scrollWidth / section.items.length;
-                          strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
-                        }}
-                        variant="dark"
-                        size="sm"
-                        className="mt-2"
-                        ariaPrefix="Go to photo"
-                      />
-                    )}
+                    {/* Thumbnail strip with arrows — like product sheet */}
+                    {section.items.length > 1 && (() => {
+                      const goToPhoto = (idx: number) => {
+                        const strip = scrollStripRefs.current[originalSectionIndex];
+                        if (!strip) return;
+                        const cardWidth = strip.scrollWidth / section.items.length;
+                        strip.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
+                      };
+                      const clamped = Math.max(0, Math.min(section.items.length - 1, activeIdx));
+                      return (
+                        <div className="flex items-center gap-1 mt-3">
+                          <button
+                            type="button"
+                            onClick={() => goToPhoto(clamped - 1)}
+                            disabled={clamped === 0}
+                            aria-label="Previous photo"
+                            className={`shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity ${clamped === 0 ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
+                          >
+                            <ChevronLeft className="w-4 h-4 text-foreground" />
+                          </button>
+                          <div className="flex-1 -mx-1 px-1 overflow-x-auto scrollbar-hide">
+                            <div className="flex gap-2">
+                              {section.items.map((item, i) => (
+                                <button
+                                  key={`thumb-${i}`}
+                                  type="button"
+                                  onClick={() => goToPhoto(i)}
+                                  aria-label={`View photo ${i + 1}`}
+                                  aria-current={i === clamped}
+                                  className={`relative w-16 h-16 shrink-0 rounded-md overflow-hidden border-2 transition-all ${
+                                    i === clamped
+                                      ? 'border-foreground shadow-[0_0_0_1px_hsl(var(--foreground)/0.4)]'
+                                      : 'border-border/60 opacity-70 hover:opacity-100'
+                                  }`}
+                                >
+                                  <img
+                                    src={item.image}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                  />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => goToPhoto(clamped + 1)}
+                            disabled={clamped === section.items.length - 1}
+                            aria-label="Next photo"
+                            className={`shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity ${clamped === section.items.length - 1 ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
+                          >
+                            <ChevronRight className="w-4 h-4 text-foreground" />
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}
