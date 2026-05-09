@@ -278,7 +278,7 @@ const DesktopCarouselStrip = ({
           <div
             key={`${item.title}-${index}-desktop-strip`}
             className="group relative flex-none w-full snap-center cursor-pointer aspect-[16/10] max-h-[calc(100vh-280px)] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] rounded-sm overflow-hidden"
-            onClick={() => openLightbox(originalSectionIndex, index)}
+            onClick={() => openLightbox(originalSectionIndex, activeIdx)}
           >
             <img
               src={item.image}
@@ -313,7 +313,7 @@ const DesktopCarouselStrip = ({
             )}
             {/* Expand icon */}
             <button
-              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, activeIdx); }}
               className="absolute bottom-4 right-4 flex opacity-100 transition-opacity duration-300"
               aria-label="View full image"
             >
@@ -1082,7 +1082,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         <div
                           key={`${item.title}-${index}-mobile`}
                           className={`relative flex-none w-full snap-center cursor-pointer overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
-                          onClick={() => openLightbox(originalSectionIndex, index)}
+                          onClick={() => openLightbox(originalSectionIndex, activeIdx)}
                         >
                           <img
                             src={item.image}
@@ -1107,7 +1107,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              openLightbox(originalSectionIndex, index);
+                              openLightbox(originalSectionIndex, activeIdx);
                             }}
                             className="absolute bottom-2 left-2 z-10"
                             aria-label="View full image"
