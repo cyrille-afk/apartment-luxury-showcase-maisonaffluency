@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET subtitle = NULL WHERE id = 'be988b38-e8f9-402d-a7f1-7d8ffad9fae2' AND subtitle = 'Table Lamp';
