@@ -214,6 +214,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         .from("designer_curator_picks")
         .select("*")
         .in("designer_id", designerIds)
+        .eq("is_hidden", false)
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
