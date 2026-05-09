@@ -1,18 +1,23 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Smartphone, X, RotateCw } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
- * Floating one-click button that opens the current page in a
- * phone-sized preview frame on desktop. On real mobile devices the
- * button is hidden (you're already on a phone).
+ * Floating button that opens the current trade page in a phone-sized
+ * preview frame on desktop. Hidden on real mobile devices and on all
+ * public (non-trade) routes.
  */
 const MobilePreviewShareButton = () => {
+  const { pathname } = useLocation();
+  const isMobileViewport = useIsMobile();
   const [open, setOpen] = useState(false);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [device, setDevice] = useState<"iphone" | "android">("iphone");
 
-  const isMobileUA = typeof navigator !== "undefined"
-    && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // Only show on trade routes and only on desktop viewports
+  const isTradeRoute = pathname.startsWith("/trade");
+  if (!isTradeRoute || isMobileViewport) return null;
 
   // Lock body scroll while preview is open
   useEffect(() => {
@@ -22,15 +27,11 @@ const MobilePreviewShareButton = () => {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
-  if (isMobileUA) return null;
-
   const dims = device === "iphone" ? { w: 390, h: 844 } : { w: 412, h: 915 };
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
 
-  const currentUrl = typeof window !== "undefined"
-    ? `${window.location.pathname}${window.location.search}${window.location.hash}`
-    : "/";
+  const currentUrl = `${pathname}${window.location.search}${window.location.hash}`;
 
   return (
     <>
