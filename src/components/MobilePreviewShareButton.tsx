@@ -3,6 +3,14 @@ import { useLocation } from "react-router-dom";
 import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+type Device = "se" | "iphone14" | "pixel";
+
+const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
+  se:      { label: "iPhone SE", w: 375, h: 667 },
+  iphone14: { label: "iPhone 14", w: 390, h: 844 },
+  pixel:   { label: "Pixel",     w: 412, h: 915 },
+};
+
 /**
  * Floating button that opens the current trade page in a phone-sized
  * preview frame on desktop. Hidden on real mobile devices and on all
@@ -13,7 +21,7 @@ const MobilePreviewShareButton = () => {
   const isMobileViewport = useIsMobile();
   const [open, setOpen] = useState(false);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
-  const [device, setDevice] = useState<"iphone" | "android">("iphone");
+  const [device, setDevice] = useState<Device>("iphone14");
 
   // Only show on trade routes and only on desktop viewports
   const isTradeRoute = pathname.startsWith("/trade");
@@ -27,7 +35,7 @@ const MobilePreviewShareButton = () => {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
-  const dims = device === "iphone" ? { w: 390, h: 844 } : { w: 412, h: 915 };
+  const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
 
@@ -54,26 +62,19 @@ const MobilePreviewShareButton = () => {
               {frameW}×{frameH}
             </span>
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setDevice("iphone")}
-                className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
-                  device === "iphone"
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                iPhone
-              </button>
-              <button
-                onClick={() => setDevice("android")}
-                className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
-                  device === "android"
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Android
-              </button>
+              {(Object.keys(DEVICES) as Device[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setDevice(key)}
+                  className={`px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
+                    device === key
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {DEVICES[key].label}
+                </button>
+              ))}
             </div>
             <button
               onClick={() =>
