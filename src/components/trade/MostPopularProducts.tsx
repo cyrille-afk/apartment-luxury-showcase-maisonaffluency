@@ -48,7 +48,8 @@ export function MostPopularProducts() {
       const { data: prods } = await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, image_url")
-        .in("id", top5.map(([id]) => id));
+        .in("id", top5.map(([id]) => id))
+        .eq("is_hidden", false);
 
       const prodMap = new Map((prods || []).map((p: any) => [p.id, p]));
       const result: PopularProduct[] = [];
