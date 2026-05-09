@@ -1,0 +1,12 @@
+UPDATE public.designers
+SET biography = $$Alpange is a French piano house founded by Raphaël Soudre and Franck Bacquet, the result of a shared dream to reimagine the grand piano for the twenty-first century. A pianist since childhood, Soudre had long wondered how the instrument could attain absolute acoustic excellence while breaking free from its traditional constraints of weight, footprint, and tuning. To answer that question he turned to Bacquet, a software engineer, and together — supported by a team of cabinetmakers, acoustic engineers, and designers — they spent years developing what would become the Alpange piano.
+
+The name itself fuses 'Alpes' and 'Ange' — the Alps and the angel — evoking the spiritual elevation of the mountain landscape that inspired its creators. Behind the poetry sits more than fifteen years of research and development: a proprietary algorithm in which a network of processors instantly calculates, for every note played, the physical interactions of strings, soundboard, and structure. The result is the purity, balance, and harmonic richness of a concert grand, liberated from tuning and from the spatial limits of a conventional instrument.
+
+<strong>'What excites us is writing a new page in musical luxury.'</strong>
+
+Sound radiates 360° through fourteen acoustic diffusers housed within a meticulously cabinet-made wooden body, while a companion application, Alpange Peaker, lets the pianist reshape the instrument's timbre with a swipe and record every performance to the cloud. Renowned pianists including Thomas Enhco, Nour Ayadi, Christophe Chassol, and Tigran Hamasyan have endorsed its musicality.
+
+Each Alpange is hand-built in the brand's Nantes atelier in three signature finishes — walnut, ash, and maple — with bespoke commissions available on request. More than ninety per cent of its wooden components are sourced from certified French timber, anchoring the project firmly within the country's tradition of fine cabinetmaking. Now distributed in France, the United Kingdom, the United States, and Japan, and recently the subject of an ultra-luxury 'Manor Edition' created for the Wayne Enterprise Experience, Alpange has rapidly established itself as a singular voice at the intersection of acoustic mastery, digital craft, and contemporary French design.$$,
+    updated_at = now()
+WHERE id = 'e1334580-6443-4036-9712-68ee8c7f85c3';
