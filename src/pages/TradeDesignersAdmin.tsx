@@ -247,12 +247,15 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
       </label>
       <div className="mt-2 space-y-2">
         {picks.map((pick) => (
-          <div key={pick.id} className="rounded-md border border-border/60 p-2">
+          <div key={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
             <div className="flex items-center gap-2">
               {pick.image_url && (
                 <img src={pick.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0" />
               )}
-              <span className="text-xs font-medium flex-1 truncate">{pick.title || "Untitled"}</span>
+              <span className="text-xs font-medium flex-1 truncate">
+                {pick.title || "Untitled"}
+                {(pick as any).is_hidden && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">(hidden)</span>}
+              </span>
               {(pick.pdf_url || (pick.pdf_urls && pick.pdf_urls.length > 0)) && (
                 <Badge variant="outline" className="text-[10px] border-[hsl(var(--pdf-red))]/40 text-[hsl(var(--pdf-red))]">
                   <FileDown className="w-2.5 h-2.5 mr-0.5" />
@@ -260,6 +263,13 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </Badge>
               )}
               {pick.category && <Badge variant="outline" className="text-[10px]">{pick.category}</Badge>}
+              <button
+                onClick={() => updateField(pick.id, "is_hidden", !(pick as any).is_hidden)}
+                title={(pick as any).is_hidden ? "Show on galleries" : "Hide from galleries"}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                {(pick as any).is_hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
               <button
                 onClick={() => setExpandedPickId(expandedPickId === pick.id ? null : pick.id)}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1"

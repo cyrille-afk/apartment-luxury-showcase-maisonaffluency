@@ -116,7 +116,8 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     const fetchPrices = async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit");
+        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .eq("is_hidden", false);
       if (data) {
         const entries = data
           .map(p => ({ name: p.product_name, cents: p.trade_price_cents ?? p.rrp_price_cents ?? 0, currency: p.currency, price_unit: p.price_unit }))
