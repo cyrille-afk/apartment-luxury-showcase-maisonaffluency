@@ -1,6 +1,26 @@
 import { useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 
+function isPreviewOrDev(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return true;
+
+  const host = window.location.hostname;
+  const isLovablePreview =
+    host.includes("lovableproject.com") ||
+    host.includes("lovable.app") ||
+    host.includes("id-preview--");
+
+  let isFramed = false;
+  try {
+    isFramed = window.self !== window.top;
+  } catch {
+    isFramed = true;
+  }
+
+  return isLovablePreview || isFramed;
+}
+
 /**
  * Floating "Reload to latest" banner.
  *
@@ -15,6 +35,7 @@ export default function BuildUpdateBanner() {
   const [reloading, setReloading] = useState(false);
 
   useEffect(() => {
+    if (isPreviewOrDev()) return;
     const onAvailable = () => setAvailable(true);
     window.addEventListener("app:build-update-available", onAvailable);
     return () =>

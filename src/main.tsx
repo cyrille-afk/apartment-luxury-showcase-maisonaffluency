@@ -7,6 +7,26 @@ import BuildUpdateBanner from "./components/BuildUpdateBanner";
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v1";
 
+function isPreviewOrDev(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return true;
+
+  const host = window.location.hostname;
+  const isLovablePreview =
+    host.includes("lovableproject.com") ||
+    host.includes("lovable.app") ||
+    host.includes("id-preview--");
+
+  let isFramed = false;
+  try {
+    isFramed = window.self !== window.top;
+  } catch {
+    isFramed = true;
+  }
+
+  return isLovablePreview || isFramed;
+}
+
 /**
  * Clears any leftover service worker / Cache Storage from older builds.
  * Runs at most once per browser (tracked in localStorage) and never reloads
@@ -15,6 +35,7 @@ const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v1";
  */
 async function clearStaleFrontendCachesOnce() {
   if (typeof window === "undefined") return;
+  if (isPreviewOrDev()) return;
   try {
     if (localStorage.getItem(CACHE_RESET_KEY)) return;
     localStorage.setItem(CACHE_RESET_KEY, "true");
@@ -39,7 +60,7 @@ async function clearStaleFrontendCachesOnce() {
 
 void clearStaleFrontendCachesOnce();
 
-// Start watching /version.json so the app auto-reloads when a new build ships.
+// Watch /version.json only in production so preview/test never refreshes itself.
 startBuildVersionWatcher();
 
 // CSS is now loaded (import above is synchronous in the bundled output).
