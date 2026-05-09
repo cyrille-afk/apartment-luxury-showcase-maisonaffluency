@@ -383,6 +383,7 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                         <WhatsAppShareButton
+                          hideOn="mobile"
                           onClick={(e) => {
                             e.stopPropagation();
                             sharePageOnWhatsApp(
