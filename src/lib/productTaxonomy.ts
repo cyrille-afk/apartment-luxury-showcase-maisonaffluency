@@ -7,7 +7,7 @@ export const SUBCATEGORY_MAP: Record<string, string[]> = {
   Storage: ["Bookcases", "Cabinets", "Sideboards"],
   "Bedroom Furniture": ["Headboards", "Bedside Tables"],
   Rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  Décor: ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
+  Décor: ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects", "Statement Pieces"],
 };
 
 // Map non-canonical category values to canonical taxonomy labels
