@@ -191,7 +191,7 @@ const TradeLayout = () => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 md:h-14 flex items-center border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden relative">
+          <header className={`h-14 md:h-14 ${/^\/trade\/products\//.test(location.pathname) ? "hidden md:flex" : "flex"} items-center border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden relative`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
               <TradeMobileMenu

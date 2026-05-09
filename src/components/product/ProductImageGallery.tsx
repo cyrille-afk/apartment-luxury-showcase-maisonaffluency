@@ -246,7 +246,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             })}
           </div>
 
-        {/* Prev / Next arrows */}
+        {/* Prev / Next arrows — desktop only on the main image (mobile uses arrows next to the thumb strip) */}
         {images.length > 1 && (
           <>
             <button
@@ -254,8 +254,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === 0}
               aria-label="Previous image"
               className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
-                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                "hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
+                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
               )}
             >
               <ChevronLeft size={18} className="text-foreground" />
@@ -265,8 +265,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === images.length - 1}
               aria-label="Next image"
               className={cn(
-                "absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
-                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                "hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
+                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
               )}
             >
               <ChevronRight size={18} className="text-foreground" />
@@ -285,34 +285,60 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         />
       </div>
 
-      {/* Mobile horizontal thumb strip — placed under main photo */}
+      {/* Mobile horizontal thumb strip — placed under main photo, with side arrows */}
       {images.length > 1 && (
-        <div className="md:hidden -mx-1 px-1 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
-            {images.map((img, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => goTo(i)}
-                aria-label={`View image ${i + 1}`}
-                aria-current={i === activeIndex}
-                className={cn(
-                  "relative w-16 h-16 shrink-0 rounded-md overflow-hidden border-2 transition-all",
-                  i === activeIndex
-                    ? "border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.5)]"
-                    : "border-border/60 opacity-70 hover:opacity-100"
-                )}
-              >
-                <img
-                  src={img}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </button>
-            ))}
+        <div className="md:hidden flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => goTo(activeIndex - 1)}
+            disabled={activeIndex === 0}
+            aria-label="Previous image"
+            className={cn(
+              "shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
+              activeIndex === 0 ? "opacity-30 pointer-events-none" : "opacity-100"
+            )}
+          >
+            <ChevronLeft size={16} className="text-foreground" />
+          </button>
+          <div className="flex-1 -mx-1 px-1 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2">
+              {images.map((img, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-label={`View image ${i + 1}`}
+                  aria-current={i === activeIndex}
+                  className={cn(
+                    "relative w-16 h-16 shrink-0 rounded-md overflow-hidden border-2 transition-all",
+                    i === activeIndex
+                      ? "border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.5)]"
+                      : "border-border/60 opacity-70 hover:opacity-100"
+                  )}
+                >
+                  <img
+                    src={img}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => goTo(activeIndex + 1)}
+            disabled={activeIndex === images.length - 1}
+            aria-label="Next image"
+            className={cn(
+              "shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
+              activeIndex === images.length - 1 ? "opacity-30 pointer-events-none" : "opacity-100"
+            )}
+          >
+            <ChevronRight size={16} className="text-foreground" />
+          </button>
         </div>
       )}
       </div>
