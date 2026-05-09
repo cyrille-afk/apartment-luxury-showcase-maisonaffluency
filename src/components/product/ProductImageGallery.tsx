@@ -181,8 +181,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         </div>
       )}
 
-      {/* Main image with arrows */}
-      <div className="flex-1 relative group" ref={inlineSwipeRef}>
+      {/* Main image + (mobile) thumb strip below */}
+      <div className="flex-1 flex flex-col gap-3 min-w-0">
+      <div className="relative group" ref={inlineSwipeRef}>
         <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
           <button
             type="button"
