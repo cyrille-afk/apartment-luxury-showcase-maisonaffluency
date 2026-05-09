@@ -119,6 +119,12 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      watch: {
+        ignored: [
+          "**/src/integrations/supabase/types.ts",
+          "**/supabase/migrations/**",
+        ],
+      },
     },
     plugins: [
       react(),
