@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,7 +39,11 @@ const MobilePreviewShareButton = () => {
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
 
-  const currentUrl = `${pathname}${window.location.search}${window.location.hash}`;
+  const currentUrl = useMemo(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("mobile_preview", "1");
+    return `${url.pathname}${url.search}${url.hash}`;
+  }, [pathname, device, orientation]);
 
   return (
     <>
@@ -103,6 +107,7 @@ const MobilePreviewShareButton = () => {
             }}
           >
             <iframe
+              key={`${device}-${orientation}`}
               src={currentUrl}
               title="Mobile preview"
               className="bg-background rounded-[1.75rem] block transition-all"
