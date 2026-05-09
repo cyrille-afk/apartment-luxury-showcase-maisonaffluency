@@ -1082,7 +1082,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         <div
                           key={`${item.title}-${index}-mobile`}
                           className={`relative flex-none w-full snap-center cursor-pointer overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
-                          onClick={() => openLightbox(originalSectionIndex, index)}
+                          onClick={() => openLightbox(originalSectionIndex, activeIdx)}
                         >
                           <img
                             src={item.image}
