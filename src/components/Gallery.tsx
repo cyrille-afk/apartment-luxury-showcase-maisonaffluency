@@ -313,7 +313,7 @@ const DesktopCarouselStrip = ({
             )}
             {/* Expand icon */}
             <button
-              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, activeIdx); }}
               className="absolute bottom-4 right-4 flex opacity-100 transition-opacity duration-300"
               aria-label="View full image"
             >
