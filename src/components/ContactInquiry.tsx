@@ -118,7 +118,7 @@ const ContactInquiry = () => {
   };
 
   return (
-    <section id="contact" ref={ref} className="py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
+    <section id="contact" ref={ref} className="py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-header-offset">
       <div className="mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

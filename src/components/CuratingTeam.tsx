@@ -40,7 +40,7 @@ const CuratingTeam = () => {
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.8, delay: 0.2 }}
-      className="mt-0 pt-4 md:pt-6 pb-12 md:pb-16 px-4 md:px-12 scroll-mt-24 bg-white"
+      className="mt-0 pt-4 md:pt-6 pb-12 md:pb-16 px-4 md:px-12 scroll-header-offset bg-white"
     >
       <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
         <div className="text-center md:text-left">
