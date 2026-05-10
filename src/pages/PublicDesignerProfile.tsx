@@ -26,6 +26,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
+import { sortCuratorPicks } from "@/lib/curatorPickSort";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -164,18 +165,6 @@ const PublicDesignerProfile = () => {
     : designer?.philosophy;
 
   const picks = useMemo(() => {
-    const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
-
-    const keepOuranosOffFirstRow = (items: typeof rawPicks) => {
-      if (designer?.slug !== "christopher-boots" || items.length <= columns) return items;
-      const idx = items.findIndex((pick) => /^ouranos i$/i.test((pick.title || "").trim()));
-      if (idx === -1 || idx >= columns) return items;
-      const next = [...items];
-      const [ouranos] = next.splice(idx, 1);
-      next.push(ouranos);
-      return next;
-    };
-
     // Collect image URLs used in biography so matching picks are excluded from the grid.
     const bioUrls = new Set<string>();
     for (const entry of displayBiographyImages || []) {
@@ -199,51 +188,8 @@ const PublicDesignerProfile = () => {
       ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
       : rawPicks;
 
-    const stabilizedFiltered = keepOuranosOffFirstRow(filtered);
-    if (stabilizedFiltered.length <= 2) return stabilizedFiltered;
-
-    const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
-      if (pick.category?.trim()) return pick.category.trim().toLowerCase();
-      if (pick.subcategory?.trim()) return pick.subcategory.trim().toLowerCase();
-      return "other";
-    };
-
-    const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of stabilizedFiltered) {
-      const key = getFunctionalCategory(pick);
-      if (!buckets.has(key)) buckets.set(key, []);
-      buckets.get(key)!.push(pick);
-    }
-
-    const queues = [...buckets.entries()].map(([category, items]) => ({
-      category,
-      items: [...items],
-    }));
-
-    const arranged: typeof rawPicks = [];
-    while (arranged.length < stabilizedFiltered.length) {
-      const index = arranged.length;
-      // Block the category directly above AND directly to the left
-      const blockedCategories = new Set<string>();
-      if (index >= columns) blockedCategories.add(getFunctionalCategory(arranged[index - columns]));
-      if (index % columns !== 0 && index > 0) blockedCategories.add(getFunctionalCategory(arranged[index - 1]));
-
-      const candidates = queues
-        .filter((q) => q.items.length > 0 && !blockedCategories.has(q.category))
-        .sort((a, b) => b.items.length - a.items.length);
-
-      const fallback = queues
-        .filter((q) => q.items.length > 0)
-        .sort((a, b) => b.items.length - a.items.length)[0];
-
-      const selected = candidates[0] ?? fallback;
-      if (!selected) break;
-
-      arranged.push(selected.items.shift()!);
-    }
-
-    return keepOuranosOffFirstRow(arranged.length === stabilizedFiltered.length ? arranged : stabilizedFiltered);
-  }, [rawPicks, gridCols, isMobile, displayBiographyImages, displayBiography, designer?.slug, isGrouped]);
+    return sortCuratorPicks(filtered);
+  }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
 
   useEffect(() => {
     if (scrollToSection !== "picks" || picks.length === 0) return;
