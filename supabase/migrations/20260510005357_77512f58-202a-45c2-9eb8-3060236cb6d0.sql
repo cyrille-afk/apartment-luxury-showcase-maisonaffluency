@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/w_1920,c_fill,q_auto:good,f_auto/v1778366599/Pianiste_ucfnow.jpg' WHERE slug = 'alpange';
