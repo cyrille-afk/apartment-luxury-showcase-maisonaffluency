@@ -1726,13 +1726,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
             )}
-            {!isLoading && filteredPicks ? (
+              {!isLoading && filteredPicks ? (
               filteredPicks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 text-center">
                   <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                 </div>
               ) : (
-                <div className="grid gap-4 grid-cols-2">
+                  <div data-category-results className="grid gap-4 grid-cols-2 scroll-mt-28">
                   {filteredPicks.map((pick) => (
                     <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                   ))}
