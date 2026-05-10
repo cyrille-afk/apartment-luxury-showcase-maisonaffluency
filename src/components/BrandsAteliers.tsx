@@ -3040,7 +3040,7 @@ const BrandsAteliers = () => {
   };
 
   return (
-    <section ref={ref} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-16">
+    <section ref={ref} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-header-offset">
       {/* Gradient accent band */}
       <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-accent via-jade-light to-jade opacity-80" />
       <div className="mx-auto max-w-7xl">

@@ -877,7 +877,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     minDistance: minSwipeDistance,
   });
   return <>
-       <section id="gallery" ref={ref} className="pt-0 pb-16 md:pt-0 md:pb-24 bg-white scroll-mt-24">
+       <section id="gallery" ref={ref} className="pt-0 pb-16 md:pt-0 md:pb-24 bg-white scroll-header-offset">
         <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
           <motion.div initial={{
           opacity: 0,
@@ -941,7 +941,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 </span>
               </button>
               <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-3'}`}>
-              {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[10rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
+              {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-header-offset" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
             y: 20
