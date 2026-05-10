@@ -54,7 +54,7 @@ const ParallaxInterlude = ({
   return (
     <div
       ref={ref}
-      className="relative w-full h-[50vh] md:h-[70vh] overflow-hidden"
+      className="relative hidden md:block w-full h-[70vh] overflow-hidden"
       aria-hidden="true"
     >
       {/* Parallax background image */}
