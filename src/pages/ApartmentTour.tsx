@@ -72,7 +72,7 @@ const ApartmentTour = () => {
         </div>
 
         {/* Video */}
-        <div className="w-full max-w-5xl relative">
+        <div className="w-full max-w-5xl">
           <video
             ref={videoRef}
             src={VIDEO_URL}
@@ -83,14 +83,15 @@ const ApartmentTour = () => {
             style={{ aspectRatio: "16/9" }}
           />
 
-          {/* Share button — frosted glass overlay */}
-          <div className="absolute top-3 right-3 md:bottom-4 md:right-4 md:top-auto z-10">
+          {/* Share button — placed below the video so it never covers controls */}
+          <div className="flex justify-end mt-3">
             <ShareMenu
               url={SHARE_URL}
               message={SHARE_MESSAGE}
-              className="bg-black/50 backdrop-blur-md hover:bg-black/70 text-white/80 hover:text-white rounded-full w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-all"
+              className="flex items-center gap-2 text-[#d4bea0]/70 hover:text-[#d4bea0] transition-colors"
               iconSize="w-4 h-4"
-              showLabel={false}
+              showLabel={true}
+              labelSize="text-[10px]"
             />
           </div>
         </div>
