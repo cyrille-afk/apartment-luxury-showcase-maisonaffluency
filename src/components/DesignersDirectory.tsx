@@ -1418,7 +1418,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="mb-6 md:mb-16 text-left"
+              className="mb-2 md:mb-16 text-left"
             >
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
                 <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
