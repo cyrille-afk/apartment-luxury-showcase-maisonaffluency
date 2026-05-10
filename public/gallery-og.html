@@ -30,6 +30,6 @@
   <body>
     <h1>Interactive Gallery — Maison Affluency</h1>
     <p>Step inside our curated apartment gallery in Singapore — explore room-by-room interiors featuring collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers.</p>
-    <script>if(!/bot|crawl|spider|WhatsApp|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Pinterest|Googlebot/i.test(navigator.userAgent)){var p=new URLSearchParams(location.search);sessionStorage.setItem("openGalleryIndex",p.get("item")||"0");if(p.get("designer"))sessionStorage.setItem("galleryFilterDesigner",p.get("designer"));window.location.replace("https://www.maisonaffluency.com/gallery");}</script>
+    <script>if(!/bot|crawl|spider|WhatsApp|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Pinterest|Googlebot/i.test(navigator.userAgent)){var p=new URLSearchParams(location.search);sessionStorage.setItem("openGalleryIndex",p.get("item")||"0");sessionStorage.setItem("galleryOpenIntentAt",String(Date.now()));if(p.get("designer"))sessionStorage.setItem("galleryFilterDesigner",p.get("designer"));window.location.replace("https://www.maisonaffluency.com/gallery");}</script>
   </body>
 </html>
