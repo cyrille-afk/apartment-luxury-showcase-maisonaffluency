@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
+import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
@@ -123,19 +124,20 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
     queryFn: async () => {
       if (!designerId) return [];
       if (publicOnly) {
-        const { data, error } = await supabase
-          .from("designer_curator_picks_public")
-          .select("*")
-          .eq("designer_id", designerId)
-          .order("sort_order", { ascending: true });
+        const { data, error } = await applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks_public")
+            .select("*")
+            .eq("designer_id", designerId)
+        );
         if (error) throw error;
-        return dedupePicks((data || []).map((d) => ({
+        return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
-        })) as unknown as DesignerCuratorPick[]);
+        })) as unknown as DesignerCuratorPick[]));
       }
       const { data, error } = await supabase
         .from("designer_curator_picks")
@@ -193,13 +195,14 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
       const nameMap = Object.fromEntries(allDesigners.map((d) => [d.id, { name: d.name, slug: d.slug }]));
 
       if (publicOnly) {
-        const { data, error } = await supabase
-          .from("designer_curator_picks_public")
-          .select("*")
-          .in("designer_id", designerIds)
-          .order("sort_order", { ascending: true });
+        const { data, error } = await applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks_public")
+            .select("*")
+            .in("designer_id", designerIds)
+        );
         if (error) throw error;
-        return dedupePicks((data || []).map((d) => ({
+        return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
           trade_price_cents: null,
@@ -207,7 +210,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
           designer_name: nameMap[d.designer_id]?.name || designer.name,
           designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
-        })) as unknown as AttributedCuratorPick[]);
+        })) as unknown as AttributedCuratorPick[]));
       }
 
       const { data, error } = await supabase
