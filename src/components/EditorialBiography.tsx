@@ -507,7 +507,7 @@ function VideoBlock({
             </button>
           ) : useDirectYouTubeEmbed ? (
             <iframe
-              src={buildYouTubeEmbedUrl(ytId!, { autoplay: true, muted: false, subtitles: true })}
+              src={buildYouTubeEmbedUrl(ytId!, { autoplay: true, muted: true, subtitles: false })}
               title={caption || `${designerName} — video`}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
