@@ -28,7 +28,9 @@ export function useDbCuratorPicks() {
       // Fetch all picks via public view
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order");
+        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order")
+        .order("sort_order", { ascending: true, nullsFirst: false })
+        .order("id", { ascending: true });
 
       if (!picks?.length) return [];
 
