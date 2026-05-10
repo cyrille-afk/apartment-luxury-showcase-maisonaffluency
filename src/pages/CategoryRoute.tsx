@@ -83,7 +83,7 @@ const CategoryRoute = () => {
         categorySlug={categorySlug!}
         subcategorySlug={subcategorySlug ?? null}
       />
-      <Index />
+      <Index categoryMode />
     </>
   );
 };
