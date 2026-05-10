@@ -45,10 +45,7 @@ const CategoryRoute = () => {
       if (cancelled) return;
         const target =
           document.getElementById("designers") ||
-          document.getElementById("product-grid") ||
-          document.getElementById("featured-designers") ||
-          document.querySelector("[data-section='designers']") ||
-          document.querySelector("[data-category-results]");
+          document.querySelector("[data-section='designers']");
       if (target instanceof HTMLElement) {
         // Re-broadcast in case sections mounted after our first dispatch.
         window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
