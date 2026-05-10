@@ -892,7 +892,7 @@ const PublicDesignerProfile = () => {
                             <Maximize2 className="h-3 w-3" />
                           </div>
                         </div>
-                        <ProductCardDescriptionOverlay description={pick.description} />
+                        {/* Description overlay removed on curators' picks per design */}
                         {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (
                           <div className="absolute bottom-2 right-2 hidden md:flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <SpecSheetButton
