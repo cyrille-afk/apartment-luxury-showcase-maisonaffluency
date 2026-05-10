@@ -290,6 +290,7 @@ const App = () => {
         <CompareProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
+              <PreviewViewContinuity />
               {MAINTENANCE_MODE ? (
                 <Routes>
                   <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
