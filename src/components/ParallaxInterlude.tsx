@@ -54,6 +54,7 @@ const ParallaxInterlude = ({
   return (
     <div
       ref={ref}
+      data-testid="parallax-interlude"
       className="relative hidden md:block w-full h-[70vh] overflow-hidden"
       aria-hidden="true"
     >
