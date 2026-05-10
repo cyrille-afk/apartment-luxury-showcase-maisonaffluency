@@ -460,6 +460,10 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
     return fallbackGalleryIndices[thumbPosition] ?? fallbackGalleryIndices[0] ?? null;
   };
 
+  const protectCardControl = (e: React.SyntheticEvent<HTMLElement>) => {
+    e.stopPropagation();
+  };
+
   return (
     <div
       id={`designer-card-${item.slug}`}
@@ -522,6 +526,9 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                       <button
                         type="button"
                         key={i}
+                        onPointerDown={protectCardControl}
+                        onPointerMove={protectCardControl}
+                        onPointerUp={protectCardControl}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
