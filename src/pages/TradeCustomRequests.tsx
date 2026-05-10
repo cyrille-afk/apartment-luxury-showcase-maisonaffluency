@@ -4,6 +4,7 @@
  * admins see all and can reply directly with concierge notes + status updates.
  */
 import { useEffect, useMemo, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Loader2, Wand2, Inbox, Save, ShieldCheck, History, ChevronDown, ChevronUp } from "lucide-react";

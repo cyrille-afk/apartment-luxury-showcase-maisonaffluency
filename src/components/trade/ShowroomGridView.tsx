@@ -3,6 +3,7 @@
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";

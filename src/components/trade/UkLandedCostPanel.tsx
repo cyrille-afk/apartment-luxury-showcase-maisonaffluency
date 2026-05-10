@@ -10,6 +10,7 @@
  * helper for UK clients quoted in EUR.
  */
 import { useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Truck, Loader2, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
 import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
 import { useGbpLandedCost, FX_BUFFER, fmtGbp } from "@/hooks/useGbpLandedCost";
