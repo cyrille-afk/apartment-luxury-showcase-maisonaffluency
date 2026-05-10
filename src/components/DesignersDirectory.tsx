@@ -1725,13 +1725,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 )}
                 {!isLoading && alphaGroups.length > 0 && (
                   <div className="border-t border-border/40">
-                    {alphaGroups.map(([letter, designers]) => (
+                    {alphaGroups.map(([letter, designers], idx) => (
                       <MobileLetterRow
                         key={letter}
                         letter={letter}
                         anchorId={getDesignersDirectoryAnchorId(letter, "mobile")}
                         designers={designers}
-                        defaultOpen={forcedLetters.has(letter) || !!searchQuery.trim()}
+                        defaultOpen={idx === 0 || forcedLetters.has(letter) || !!searchQuery.trim()}
                         parentDesignerCountByName={parentDesignerCountByName}
                         fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                         initialExpand={initialExpand}
