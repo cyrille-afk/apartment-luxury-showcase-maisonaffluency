@@ -445,6 +445,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
@@ -460,7 +461,16 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   };
 
   return (
-    <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
+    <div
+      id={`designer-card-${item.slug}`}
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate(`/designers/${item.slug}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") navigate(`/designers/${item.slug}`);
+      }}
+      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
+    >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
@@ -565,7 +575,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Portrait</span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
