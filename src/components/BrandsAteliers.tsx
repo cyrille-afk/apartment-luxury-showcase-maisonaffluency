@@ -3040,7 +3040,7 @@ const BrandsAteliers = () => {
   };
 
   return (
-    <section ref={ref} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-16">
+    <section ref={ref} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-header-offset">
       {/* Gradient accent band */}
       <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-accent via-jade-light to-jade opacity-80" />
       <div className="mx-auto max-w-7xl">
@@ -3319,7 +3319,7 @@ const BrandsAteliers = () => {
             const brands = alphaGroups.find(([l]) => l === letter)?.[1];
             const subs = subDesignerIndexByLetter[letter] || [];
             return (
-              <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
+              <div key={letter} id={`alpha-group-${letter}`} className="scroll-header-offset">
                 {brands && brands.length > 0 ? (
                   <AlphaStrip
                     letter={letter}

@@ -67,7 +67,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
 
   if (compact) {
     return (
-      <section ref={ref} id="apartment-tour" className="pt-4 md:pt-8 pb-0 md:pb-0 bg-white scroll-mt-32">
+      <section ref={ref} id="apartment-tour" className="pt-4 md:pt-8 pb-0 md:pb-0 bg-white scroll-header-offset">
         <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -103,7 +103,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
 
               {/* The Curating Team — inline */}
-              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center md:text-left scroll-mt-28">
+              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center md:text-left scroll-header-offset">
                 & Meet the Curating Team
               </h3>
               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3 text-center md:text-left">
@@ -208,7 +208,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
   }
 
   return (
-    <section ref={ref} id="apartment-tour" className="pt-8 md:pt-12 pb-2 md:pb-4 bg-white scroll-mt-32">
+    <section ref={ref} id="apartment-tour" className="pt-8 md:pt-12 pb-2 md:pb-4 bg-white scroll-header-offset">
       <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

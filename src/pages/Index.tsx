@@ -393,12 +393,12 @@ const Index = () => {
             {!isCategoryRoute() && (
               <>
                 <div className="bg-white">
-                  <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
+                  <section id="overview" className="scroll-header-offset">
                     <Suspense fallback={null}>
                       <ApartmentTourInterlude compact />
                     </Suspense>
                   </section>
-                  <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
+                  <section id="gallery" className="scroll-header-offset">
                     <Suspense fallback={<SectionFallback />}>
                       <Gallery />
                     </Suspense>
@@ -423,7 +423,7 @@ const Index = () => {
             <Suspense fallback={null}>
               <ProductGrid sectionScope="designers" />
             </Suspense>
-            <section id="designers" className="scroll-mt-20 md:scroll-mt-24">
+            <section id="designers" className="scroll-header-offset">
               <Suspense fallback={<SectionFallback />}>
                 <DesignersDirectory mode="products" showTradeCTA={false} />
               </Suspense>
@@ -445,7 +445,7 @@ const Index = () => {
                 <Suspense fallback={null}>
                   <ProductGrid sectionScope="collectibles" />
                 </Suspense>
-                <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+                <section id="collectibles" className="scroll-header-offset" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
                   <Suspense fallback={<SectionFallback />}>
                     <Collectibles />
                   </Suspense>
@@ -461,12 +461,12 @@ const Index = () => {
                   />
                 </Suspense>
 
-                <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
+                <section id="details" className="scroll-header-offset" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
                   <Suspense fallback={<SectionFallback />}>
                     <DesignDetails />
                   </Suspense>
                 </section>
-                <section id="contact" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
+                <section id="contact" className="scroll-header-offset" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
                   <Suspense fallback={<SectionFallback />}>
                     <ContactInquiry />
                   </Suspense>

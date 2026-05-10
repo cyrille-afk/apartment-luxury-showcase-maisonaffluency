@@ -629,7 +629,7 @@ function MobileLetterRow({
   }, [defaultOpen]);
 
   return (
-    <div id={anchorId} data-alpha-letter={letter} className="border-b border-border/40 scroll-mt-32">
+    <div id={anchorId} data-alpha-letter={letter} className="border-b border-border/40 scroll-header-offset">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -725,7 +725,7 @@ function LetterGroup({
   const needsCarousel = designers.length > (isMobile ? 2 : 5);
 
   return (
-    <div id={anchorId} data-alpha-letter={letter} className="scroll-mt-32 mb-6">
+    <div id={anchorId} data-alpha-letter={letter} className="scroll-header-offset mb-6">
       <div ref={sentinelRef} />
       <div className="flex items-center gap-3 mb-4 px-1">
         <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
@@ -1427,7 +1427,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   return (
     <>
-    <div ref={sectionRef} className="relative pt-1 pb-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
+    <div ref={sectionRef} className="relative pt-1 pb-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-header-offset">
       {/* Gradient accent band */}
       <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-jade via-jade-light to-accent opacity-80" />
 
@@ -1732,7 +1732,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                 </div>
               ) : (
-                  <div data-category-results className="grid gap-4 grid-cols-2 scroll-mt-28">
+                  <div data-category-results className="grid gap-4 grid-cols-2 scroll-header-offset">
                   {filteredPicks.map((pick) => (
                     <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                   ))}
