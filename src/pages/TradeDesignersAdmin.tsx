@@ -281,6 +281,29 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </Badge>
               )}
               {pick.category && <Badge variant="outline" className="text-[10px]">{pick.category}</Badge>}
+              {(() => {
+                const idx = picks.findIndex((p) => p.id === pick.id);
+                return (
+                  <>
+                    <button
+                      onClick={() => movePick(pick.id, -1)}
+                      disabled={idx <= 0}
+                      title="Move up"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => movePick(pick.id, 1)}
+                      disabled={idx >= picks.length - 1}
+                      title="Move down"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                );
+              })()}
               <button
                 onClick={() => updateField(pick.id, "is_hidden", !(pick as any).is_hidden)}
                 title={(pick as any).is_hidden ? "Show on galleries" : "Hide from galleries"}
