@@ -1187,7 +1187,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             <ChevronLeft className="w-4 h-4 text-foreground" />
                           </button>
                           <div className="flex-1 -mx-1 px-1 overflow-x-auto scrollbar-hide">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 justify-center min-w-full">
                               {section.items.map((item, i) => (
                                 <button
                                   key={`thumb-${i}`}
