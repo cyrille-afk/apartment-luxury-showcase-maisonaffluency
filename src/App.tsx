@@ -186,13 +186,14 @@ function PreviewViewContinuity() {
       if (timer) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         try {
+          anchorIdRef.current = getPreviewAnchorId() || anchorIdRef.current;
           localStorage.setItem(
             PREVIEW_VIEW_STATE_KEY,
             JSON.stringify({
               path: location.pathname,
               search: location.search,
               scrollY: window.scrollY,
-              anchorId: anchorIdRef.current || getPreviewAnchorId(),
+              anchorId: anchorIdRef.current,
               ts: Date.now(),
             }),
           );
@@ -263,11 +264,17 @@ function restorePreviewLocationBeforeRouter() {
     if (!raw) return;
     const saved = JSON.parse(raw) as { path?: string; search?: string; ts?: number };
     const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 30 * 60 * 1000;
-    const currentIsRoot = window.location.pathname === "/" && !window.location.search && !window.location.hash;
+    const currentSearch = new URLSearchParams(window.location.search);
+    currentSearch.delete("__lovable_token");
+    const currentIsRoot = window.location.pathname === "/" && !currentSearch.toString() && !window.location.hash;
     const savedPath = saved.path || "/";
 
     if (isFresh && currentIsRoot && savedPath !== "/") {
-      window.history.replaceState(null, "", `${savedPath}${saved.search || ""}`);
+      const token = new URLSearchParams(window.location.search).get("__lovable_token");
+      const nextSearch = new URLSearchParams(saved.search || "");
+      if (token) nextSearch.set("__lovable_token", token);
+      const search = nextSearch.toString();
+      window.history.replaceState(null, "", `${savedPath}${search ? `?${search}` : ""}`);
     }
   } catch {
     /* noop */
