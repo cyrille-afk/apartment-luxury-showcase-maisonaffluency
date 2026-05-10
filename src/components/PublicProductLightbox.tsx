@@ -296,7 +296,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-          className="relative max-w-4xl w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col"
+          className="relative max-w-4xl w-full h-[100svh] max-h-[100svh] md:h-auto md:max-h-[90vh] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
@@ -314,11 +314,11 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           </button>
 
           {/* Scrollable mobile body */}
-          <div className="flex-1 overflow-y-auto md:flex md:flex-row md:overflow-visible">
+          <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-visible">
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 h-[55vh] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-0 md:min-h-[400px]"
+            className="relative w-full md:w-1/2 h-[44svh] max-h-[360px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-0 md:min-h-[400px]"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
@@ -415,7 +415,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           </div>
 
           {/* Details */}
-          <div className="flex-1 p-5 md:p-8 flex flex-col gap-3 md:gap-4 overflow-y-auto">
+          <div className="flex-1 min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
             <div>
               <button
                 type="button"
