@@ -107,6 +107,11 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridColsTouched, setGridColsTouched] = useState(false);
+  useEffect(() => {
+    if (gridColsTouched) return;
+    if (designer?.slug === "alpange") setGridCols(3);
+  }, [designer?.slug, gridColsTouched]);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
@@ -765,7 +770,7 @@ const PublicDesignerProfile = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
+                  onClick={() => { setGridColsTouched(true); setGridCols((prev) => (prev === 3 ? 4 : 3)); }}
                   className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
                   aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                   title={gridCols === 3 ? "Display 4" : "Display 3"}
