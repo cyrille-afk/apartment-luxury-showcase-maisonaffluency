@@ -106,7 +106,7 @@ const PublicDesignerProfile = () => {
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<3 | 4>(designer?.slug === "alpange" ? 3 : 4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
