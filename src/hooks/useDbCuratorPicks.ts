@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
+import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 
 export interface DbProductItem {
   pick: CuratorPick;
