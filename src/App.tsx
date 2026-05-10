@@ -161,7 +161,6 @@ function isPreviewOrDev(): boolean {
   const host = window.location.hostname;
   const isLovablePreview =
     host.includes("lovableproject.com") ||
-    host.includes("lovable.app") ||
     host.includes("id-preview--");
 
   let isFramed = false;
