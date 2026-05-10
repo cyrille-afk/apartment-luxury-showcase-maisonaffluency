@@ -239,6 +239,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     const isMobileSheetNav = isOpen && window.innerWidth < 768;
 
     if (href.startsWith("/")) {
+      if (href === "/gallery") {
+        sessionStorage.removeItem('openGalleryIndex');
+        sessionStorage.removeItem('gallerySourceId');
+        sessionStorage.removeItem('galleryFilterDesigner');
+        sessionStorage.removeItem('galleryOpenIntentAt');
+      }
       setIsOpen(false);
       navigate(href);
       return;
