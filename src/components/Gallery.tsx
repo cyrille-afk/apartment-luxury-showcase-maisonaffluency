@@ -230,6 +230,22 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
+type GalleryGridCols = 1 | 3 | 4;
+
+const GalleryGridIcon = ({ columns }: { columns: GalleryGridCols }) => {
+  const bars = columns === 1 ? [{ x: 9, width: 6 }] : columns === 3
+    ? [{ x: 2, width: 5.5 }, { x: 9.25, width: 5.5 }, { x: 16.5, width: 5.5 }]
+    : [{ x: 1.5, width: 4 }, { x: 7, width: 4 }, { x: 12.5, width: 4 }, { x: 18, width: 4 }];
+
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {bars.map((bar) => (
+        <rect key={bar.x} x={bar.x} y="3" width={bar.width} height="18" rx="1" fill="currentColor" />
+      ))}
+    </svg>
+  );
+};
+
 /** Desktop single-column carousel strip (mirrors mobile swipe UX) */
 const DesktopCarouselStrip = ({
   section,
@@ -363,7 +379,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(3);
+  const [gridCols, setGridCols] = useState<GalleryGridCols>(1);
   const [activeMobilePill, setActiveMobilePill] = useState(0);
   const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -984,31 +1000,22 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {section.subtitle}
                         </p>
                         <div className="flex-1 flex justify-end">
-                          <div className="flex items-center gap-1">
-                            {/* 3-column option */}
+                          <div className="flex items-center gap-2 relative z-30">
                             <button
-                              onClick={() => setGridCols(3)}
-                              className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols === 3 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
-                              aria-label="Switch to 3 columns"
+                              type="button"
+                              onClick={() => setGridCols(gridCols === 1 ? 3 : 1)}
+                              className="flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-background text-foreground transition-colors hover:bg-muted"
+                              aria-label={gridCols === 1 ? "Switch to 3 columns" : "Switch to 1 column"}
                             >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <rect x="2" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" />
-                                <rect x="9.25" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" />
-                                <rect x="16.5" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" />
-                              </svg>
+                              <GalleryGridIcon columns={gridCols === 1 ? 3 : 1} />
                             </button>
-                            {/* 4-column option */}
                             <button
-                              onClick={() => setGridCols(4)}
-                              className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols === 4 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
-                              aria-label="Switch to 4 columns"
+                              type="button"
+                              onClick={() => setGridCols(gridCols === 4 ? 3 : 4)}
+                              className="flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-background text-foreground transition-colors hover:bg-muted"
+                              aria-label={gridCols === 4 ? "Switch to 3 columns" : "Switch to 4 columns"}
                             >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <rect x="1.5" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                                <rect x="7" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                                <rect x="12.5" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                                <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                              </svg>
+                              <GalleryGridIcon columns={gridCols === 4 ? 3 : 4} />
                             </button>
                           </div>
                         </div>
@@ -1176,17 +1183,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       };
                       const clamped = Math.max(0, Math.min(section.items.length - 1, activeIdx));
                       return (
-                        <div className="flex items-center gap-1 mt-3">
+                        <div className="relative mt-3">
                           <button
                             type="button"
                             onClick={() => goToPhoto(clamped - 1)}
                             disabled={clamped === 0}
                             aria-label="Previous photo"
-                            className={`shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity ${clamped === 0 ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
+                            className={`absolute left-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity ${clamped === 0 ? 'opacity-35 pointer-events-none' : 'opacity-100'}`}
                           >
-                            <ChevronLeft className="w-4 h-4 text-foreground" />
+                            <ChevronLeft className="w-5 h-5 text-foreground drop-shadow-sm" strokeWidth={1.75} />
                           </button>
-                          <div className="flex-1 -mx-1 px-1 overflow-x-auto scrollbar-hide">
+                          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                             <div className="flex gap-2 justify-center min-w-full">
                               {section.items.map((item, i) => (
                                 <button
@@ -1212,14 +1219,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                               ))}
                             </div>
                           </div>
+                          <div className="pointer-events-none absolute inset-y-0 left-[-1rem] z-10 w-12 bg-gradient-to-r from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
+                          <div className="pointer-events-none absolute inset-y-0 right-[-1rem] z-10 w-12 bg-gradient-to-l from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
                           <button
                             type="button"
                             onClick={() => goToPhoto(clamped + 1)}
                             disabled={clamped === section.items.length - 1}
                             aria-label="Next photo"
-                            className={`shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity ${clamped === section.items.length - 1 ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
+                            className={`absolute right-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity ${clamped === section.items.length - 1 ? 'opacity-35 pointer-events-none' : 'opacity-100'}`}
                           >
-                            <ChevronRight className="w-4 h-4 text-foreground" />
+                            <ChevronRight className="w-5 h-5 text-foreground drop-shadow-sm" strokeWidth={1.75} />
                           </button>
                         </div>
                       );

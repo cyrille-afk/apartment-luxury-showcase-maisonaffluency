@@ -1098,14 +1098,7 @@ const Collectibles = () => {
                                </div>
                              </div>
 
-                              {/* Share — bottom-left */}
-                              <ShareMenu
-                                url={heroProduct ? buildPieceOgUrl(designer.name, heroProduct.title) : buildDesignerOgUrl(designer.name)}
-                                message={heroProduct ? `${heroProduct.title} by ${designer.name} — Maison Affluency: ${buildPieceOgUrl(designer.name, heroProduct.title)}` : `Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
-                                className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors"
-                                iconSize="w-3.5 h-3.5"
-                                labelSize="text-[9px]"
-                              />
+                              {/* Share — below the card so the image/view area remains fully accessible */}
 
                              {/* Designer portrait thumbnail + IG handle — bottom-right */}
                              <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1">
@@ -1131,13 +1124,22 @@ const Collectibles = () => {
                                })()}
                              </div>
 
-                             {/* Hover overlay */}
+                              {/* Hover overlay */}
                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
                                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
                                  View Profile
                                </span>
                              </div>
                           </div>
+                           <div className="px-3 py-2 border-t border-border bg-background">
+                             <ShareMenu
+                               url={heroProduct ? buildPieceOgUrl(designer.name, heroProduct.title) : buildDesignerOgUrl(designer.name)}
+                               message={heroProduct ? `${heroProduct.title} by ${designer.name} — Maison Affluency: ${buildPieceOgUrl(designer.name, heroProduct.title)}` : `Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
+                               className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                               iconSize="w-3.5 h-3.5"
+                               labelSize="text-[9px]"
+                             />
+                           </div>
                         </div>
                       );
                     })
@@ -1206,14 +1208,7 @@ const Collectibles = () => {
                                {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
                              </p>
                            </div>
-                            {/* Share — bottom-left */}
-                            <ShareMenu
-                              url={heroProduct ? buildPieceOgUrl(designer.name, heroProduct.title) : buildDesignerOgUrl(designer.name)}
-                              message={heroProduct ? `${heroProduct.title} by ${designer.name} — Maison Affluency: ${buildPieceOgUrl(designer.name, heroProduct.title)}` : `Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
-                              className="absolute bottom-2 left-2 z-10 flex items-center gap-1 text-white/70 hover:text-white transition-colors"
-                              iconSize="w-3 h-3"
-                              labelSize="text-[8px]"
-                            />
+                             {/* Share — below the card so it never blocks tap targets on mobile */}
                            {/* Designer portrait + IG handle — bottom-right */}
                            <div className="absolute bottom-2 right-2 z-10 flex flex-col items-end gap-1">
                              <div className="w-20 h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
@@ -1237,7 +1232,16 @@ const Collectibles = () => {
                                );
                              })()}
                            </div>
-                        </div>
+                         </div>
+                         <div className="px-2.5 py-2 border-t border-border bg-background">
+                           <ShareMenu
+                             url={heroProduct ? buildPieceOgUrl(designer.name, heroProduct.title) : buildDesignerOgUrl(designer.name)}
+                             message={heroProduct ? `${heroProduct.title} by ${designer.name} — Maison Affluency: ${buildPieceOgUrl(designer.name, heroProduct.title)}` : `Check out ${designer.name} at Maison Affluency: ${buildDesignerOgUrl(designer.name)}`}
+                             className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                             iconSize="w-3 h-3"
+                             labelSize="text-[8px]"
+                           />
+                         </div>
                       </div>
                     );
                   })
