@@ -136,6 +136,7 @@ const PageTracker = lazy(() => import("./hooks/usePageTracking").then(m => {
 const queryClient = new QueryClient();
 
 const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
+let previewLocationRestored = false;
 
 function isPreviewOrDev(): boolean {
   if (import.meta.env.DEV) return true;
@@ -163,27 +164,7 @@ function PreviewViewContinuity() {
   useEffect(() => {
     if (!isPreviewOrDev()) return;
 
-    try {
-      const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
-      if (!raw) return;
-
-      const saved = JSON.parse(raw) as { path?: string; search?: string; scrollY?: number; ts?: number };
-      const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 30 * 60 * 1000;
-      const currentIsRoot = window.location.pathname === "/" && !window.location.search && !window.location.hash;
-      const savedPath = saved.path || "/";
-
-      if (isFresh && currentIsRoot && savedPath !== "/") {
-        window.history.replaceState(null, "", `${savedPath}${saved.search || ""}`);
-      }
-    } catch {
-      /* noop */
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isPreviewOrDev()) return;
-
-    let timer: ReturnType<typeof setTimeout> | null = null;
+    let timer: number | null = null;
     const save = () => {
       if (timer) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
@@ -240,7 +221,28 @@ function PreviewViewContinuity() {
   return null;
 }
 
+function restorePreviewLocationBeforeRouter() {
+  if (previewLocationRestored || !isPreviewOrDev() || typeof window === "undefined") return;
+  previewLocationRestored = true;
+
+  try {
+    const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw) as { path?: string; search?: string; ts?: number };
+    const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 30 * 60 * 1000;
+    const currentIsRoot = window.location.pathname === "/" && !window.location.search && !window.location.hash;
+    const savedPath = saved.path || "/";
+
+    if (isFresh && currentIsRoot && savedPath !== "/") {
+      window.history.replaceState(null, "", `${savedPath}${saved.search || ""}`);
+    }
+  } catch {
+    /* noop */
+  }
+}
+
 const App = () => {
+  restorePreviewLocationBeforeRouter();
   const [showDeferredUi, setShowDeferredUi] = useState(false);
 
   // Block Pinterest browser extension globally
