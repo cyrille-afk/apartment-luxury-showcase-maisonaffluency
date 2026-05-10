@@ -615,7 +615,7 @@ function singularizeSub(s: string): string {
       <Dialog modal={false} open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
         <DialogContent
           hideClose
-          className="max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
+          className="top-0 left-0 translate-x-0 translate-y-0 max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
           aria-describedby={undefined}
           onKeyDown={(e) => {
             if (!filtered.length) return;
