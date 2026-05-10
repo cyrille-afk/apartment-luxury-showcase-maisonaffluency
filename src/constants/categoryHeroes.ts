@@ -168,6 +168,12 @@ export const CATEGORY_HEROES: Record<string, CategoryHero> = {
     summary:
       "Editions, tapestries, ceramic reliefs and works on paper from designer-makers whose practice extends into the territory of fine art.",
   },
+  "Statement Pieces": {
+    title: "Statement Pieces",
+    image: cld("v1778366592/NYC_Penthouse_Alpange_zmchhm.jpg"),
+    summary:
+      "Singular, room-defining objects — sculptural anchors and conversation-makers from ateliers who treat each piece as a declaration.",
+  },
 
   // ── Outdoor ────────────────────────────────────────────────
   Outdoor: {
