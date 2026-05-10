@@ -239,6 +239,23 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     await supabase.from("designer_curator_picks").update({ [field]: value } as any).eq("id", id);
   };
 
+  const movePick = async (id: string, direction: -1 | 1) => {
+    const idx = picks.findIndex((p) => p.id === id);
+    if (idx < 0) return;
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= picks.length) return;
+    const reordered = [...picks];
+    [reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]];
+    const renumbered = reordered.map((p, i) => ({ ...p, sort_order: i }));
+    setPicks(renumbered);
+    await Promise.all(
+      renumbered.map((p) =>
+        supabase.from("designer_curator_picks").update({ sort_order: p.sort_order }).eq("id", p.id)
+      )
+    );
+    queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+  };
+
   if (!loaded) return null;
 
   return (
