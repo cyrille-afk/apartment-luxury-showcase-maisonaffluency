@@ -512,72 +512,102 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
   if (heroLoaded) {
-    // Full-bleed hero (top ~62% — editorial proportion)
-    const heroH = pageHeight * 0.62;
+    // Full-bleed hero covering the entire cover page (mirrors website hero)
     const ratio = heroLoaded.width / heroLoaded.height;
-    const drawW = pageWidth;
-    const drawH = drawW / ratio;
-    const offsetY = drawH > heroH ? -(drawH - heroH) / 2 : 0;
-    doc.addImage(heroLoaded.dataUrl, heroLoaded.format, 0, offsetY, drawW, drawH, undefined, "FAST");
-    // Bottom block (cream-white)
-    doc.setFillColor(252, 250, 246);
-    doc.rect(0, heroH, pageWidth, pageHeight - heroH, "F");
+    const pageRatio = pageWidth / pageHeight;
+    let drawW: number, drawH: number, offsetX: number, offsetY: number;
+    if (ratio > pageRatio) {
+      // Image wider than page — fit height, center horizontally
+      drawH = pageHeight;
+      drawW = drawH * ratio;
+      offsetX = -(drawW - pageWidth) / 2;
+      offsetY = 0;
+    } else {
+      drawW = pageWidth;
+      drawH = drawW / ratio;
+      offsetX = 0;
+      offsetY = -(drawH - pageHeight) / 2;
+    }
+    doc.addImage(heroLoaded.dataUrl, heroLoaded.format, offsetX, offsetY, drawW, drawH, undefined, "FAST");
+
+    // Soft dark gradient at bottom for legibility (simulated by stacked translucent bands)
+    const gradH = pageHeight * 0.42;
+    const bands = 24;
+    for (let i = 0; i < bands; i++) {
+      const y = pageHeight - gradH + (gradH * i) / bands;
+      const alpha = (i / bands) * 0.55;
+      doc.setFillColor(0, 0, 0);
+      doc.setGState(doc.GState({ opacity: alpha }));
+      doc.rect(0, y, pageWidth, gradH / bands + 0.5, "F");
+    }
+    doc.setGState(doc.GState({ opacity: 1 }));
+
+    // Top-right "Prepared for …" pill
+    if (recipient || input.downloadedAt) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.setGState(doc.GState({ opacity: 0.92 }));
+      doc.text(preparedLine, pageWidth - marginX, marginTop, { align: "right" });
+      doc.setGState(doc.GState({ opacity: 1 }));
+    }
+
+    // Eyebrow + title overlaid bottom-left, in white (mirrors site hero)
+    const baseY = pageHeight - marginBottom - 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.setGState(doc.GState({ opacity: 0.85 }));
+    doc.setCharSpace(2.4);
+    doc.text("MAISON AFFLUENCY  ·  DESIGNER BIOGRAPHY", marginX, baseY - 86);
+    doc.setCharSpace(0);
+    doc.setGState(doc.GState({ opacity: 1 }));
+
+    // Designer name (brand) — large display serif in white
+    doc.setFont("times", "normal");
+    doc.setFontSize(48);
+    doc.setTextColor(255, 255, 255);
+    doc.text(input.designerName, marginX, baseY - 36, { maxWidth: contentWidth });
+
+    // Specialty subtitle in soft white
+    if (input.specialty) {
+      doc.setFont("times", "italic");
+      doc.setFontSize(14);
+      doc.setTextColor(255, 255, 255);
+      doc.setGState(doc.GState({ opacity: 0.9 }));
+      doc.text(input.specialty, marginX, baseY - 12, { maxWidth: contentWidth });
+      doc.setGState(doc.GState({ opacity: 1 }));
+    }
   } else {
+    // Fallback (no hero image) — cream cover with dark text
     doc.setFillColor(252, 250, 246);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
-  }
-
-  // Eyebrow label above the title
-  const titleBlockTop = heroLoaded ? pageHeight * 0.62 + 56 : pageHeight * 0.32;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...muted);
-  doc.setCharSpace(2.4);
-  doc.text("MAISON AFFLUENCY  ·  DESIGNER BIOGRAPHY", marginX, titleBlockTop);
-  doc.setCharSpace(0);
-
-  // Hairline under eyebrow
-  doc.setDrawColor(...rule);
-  doc.setLineWidth(0.4);
-  doc.line(marginX, titleBlockTop + 10, marginX + 56, titleBlockTop + 10);
-
-  // Designer name — display serif, generous size
-  doc.setFont("times", "normal");
-  doc.setFontSize(40);
-  doc.setTextColor(...ink);
-  doc.text(input.designerName, marginX, titleBlockTop + 50, { maxWidth: contentWidth });
-
-  if (input.specialty) {
-    doc.setFont("times", "italic");
-    doc.setFontSize(13);
-    doc.setTextColor(...inkSoft);
-    doc.text(input.specialty, marginX, titleBlockTop + 76, { maxWidth: contentWidth });
-  }
-
-  // Cover footer: brand left, URL right, hairline above
-  doc.setDrawColor(...rule);
-  doc.setLineWidth(0.4);
-  doc.line(marginX, pageHeight - marginBottom + 18, pageWidth - marginX, pageHeight - marginBottom + 18);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...muted);
-  doc.setCharSpace(1.6);
-  doc.text("MAISON AFFLUENCY", marginX, pageHeight - marginBottom + 34);
-  doc.setCharSpace(0);
-  if (input.profileUrl) {
-    doc.setFontSize(8);
-    doc.text(sanitizeUrlForDisplay(input.profileUrl), pageWidth - marginX, pageHeight - marginBottom + 34, { align: "right" });
-  }
-  // Personalized recipient line — placed on the cream block above the footer
-  // hairline so it sits on a light surface and reads clearly (was overlaid on
-  // the dark hero image previously and was barely visible).
-  if (recipient || input.downloadedAt) {
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-    doc.setTextColor(...inkSoft);
-    doc.text(preparedLine, marginX, pageHeight - marginBottom);
+    const titleBlockTop = pageHeight * 0.32;
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.setCharSpace(2.4);
+    doc.text("MAISON AFFLUENCY  ·  DESIGNER BIOGRAPHY", marginX, titleBlockTop);
+    doc.setCharSpace(0);
+    doc.setDrawColor(...rule);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, titleBlockTop + 10, marginX + 56, titleBlockTop + 10);
+    doc.setFont("times", "normal");
+    doc.setFontSize(40);
+    doc.setTextColor(...ink);
+    doc.text(input.designerName, marginX, titleBlockTop + 50, { maxWidth: contentWidth });
+    if (input.specialty) {
+      doc.setFont("times", "italic");
+      doc.setFontSize(13);
+      doc.setTextColor(...inkSoft);
+      doc.text(input.specialty, marginX, titleBlockTop + 76, { maxWidth: contentWidth });
+    }
+    if (recipient || input.downloadedAt) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      doc.setTextColor(...inkSoft);
+      doc.text(preparedLine, pageWidth - marginX, marginTop, { align: "right" });
+    }
   }
 
   /* -------------------- BODY -------------------- */
