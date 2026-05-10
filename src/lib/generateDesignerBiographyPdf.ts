@@ -1250,45 +1250,64 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         doc.setFontSize(11);
         doc.setTextColor(...ink);
         let rightY = startY;
-        // Allow text to flow up to ~2 lines past the bottom of the image+caption
-        // before spilling underneath, to avoid orphan single lines.
-        const rightFlowMaxY = startY + figureH + bodyLineH * 2;
+        // Right column flows down to the bottom of the figure+caption block.
+        // After the figure ends, any remaining text continues full-width
+        // beneath as a continuous paragraph (no per-line orphan splits).
+        const figureBottomY = startY + figureH;
 
-        const remainder: string[] = [];
+        // Track remainder per paragraph as a single re-joined string so we can
+        // re-wrap to full width without breaking words mid-paragraph.
+        const remainderParagraphs: string[] = [];
         let stoppedEarly = false;
         for (let p = 0; p < rightParagraphs.length; p++) {
           const para = rightParagraphs[p];
+          const leftover: string[] = [];
           for (let l = 0; l < para.length; l++) {
-            if (stoppedEarly || rightY + bodyLineH > rightFlowMaxY) {
+            if (stoppedEarly || rightY + bodyLineH > figureBottomY) {
               stoppedEarly = true;
-              remainder.push(para[l]);
+              leftover.push(para[l]);
               continue;
             }
             doc.text(para[l], rightX, rightY + 4);
             rightY += bodyLineH;
           }
-          if (p < rightParagraphs.length - 1) {
-            if (stoppedEarly) remainder.push("");
-            else rightY += paragraphGap;
+          if (leftover.length) remainderParagraphs.push(leftover.join(" "));
+          if (p < rightParagraphs.length - 1 && !stoppedEarly) {
+            rightY += paragraphGap;
           }
         }
 
         cursorY = startY + Math.max(leftY - startY, rightY - startY) + 12;
 
-        if (remainder.length) {
+        if (remainderParagraphs.length) {
           doc.setFont("times", "normal");
           doc.setFontSize(11);
           doc.setTextColor(...ink);
-          for (const line of remainder) {
-            if (line === "") { cursorY += paragraphGap; continue; }
-            ensureSpace(bodyLineH);
-            // Re-wrap to full width in case original wrap was narrower
-            const wide = doc.splitTextToSize(line, contentWidth);
-            for (const wl of wide) {
-              ensureSpace(bodyLineH);
-              doc.text(wl, marginX, cursorY + 4);
-              cursorY += bodyLineH;
+          for (let pi = 0; pi < remainderParagraphs.length; pi++) {
+            const paraText = remainderParagraphs[pi];
+            if (!paraText.trim()) continue;
+            const wide = doc.splitTextToSize(paraText, contentWidth);
+            // Orphan control: if only the LAST 1 line would overflow to a new
+            // page, pull it onto the current page by allowing slight bottom
+            // margin compression rather than orphaning a single line.
+            for (let li = 0; li < wide.length; li++) {
+              const isLastLine = li === wide.length - 1;
+              const wouldOrphan =
+                isLastLine &&
+                cursorY + bodyLineH > pageHeight - marginBottom &&
+                li > 0; // not the only line
+              if (wouldOrphan) {
+                // Allow ~1 line of overflow into bottom margin to keep the
+                // paragraph whole on this page.
+                doc.text(wide[li], marginX, cursorY + 4);
+                cursorY += bodyLineH;
+              } else {
+                ensureSpace(bodyLineH);
+                doc.text(wide[li], marginX, cursorY + 4);
+                cursorY += bodyLineH;
+              }
             }
+            if (pi < remainderParagraphs.length - 1) cursorY += paragraphGap;
           }
         }
         cursorY += 12;
