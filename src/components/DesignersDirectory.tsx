@@ -1379,11 +1379,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           <div className="flex flex-col gap-4 mb-5 md:mb-6 md:hidden">
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className="order-first">
-                <Popover open={filterOpen} onOpenChange={(open) => {
+                <Sheet open={filterOpen} onOpenChange={(open) => {
                   setFilterOpen(open);
                   if (!open && selectedCategory) broadcastFilter(selectedCategory, selectedSubcategory);
                 }}>
-                  <PopoverTrigger asChild>
+                  <SheetTrigger asChild>
                     <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
                       <SlidersHorizontal className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
@@ -1391,56 +1391,66 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                         <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
                       )}
                     </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
-                      <div className="flex items-center gap-2">
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0 flex flex-col">
+                    <SheetHeader className="px-5 pt-4 pb-3 border-b border-border/40 flex-shrink-0">
+                      <div className="mx-auto w-10 h-1 bg-border rounded-full mb-3" />
+                      <div className="flex items-center justify-between">
+                        <SheetTitle className="font-serif text-base text-foreground flex items-center gap-2 text-left">
+                          <SlidersHorizontal className="h-4 w-4" /> Filter
+                        </SheetTitle>
                         {selectedCategory && (
                           <button onClick={() => setSelectedCategory(null)} className="px-3 py-1 rounded-full border border-[hsl(var(--gold))] bg-white text-xs font-body font-medium text-foreground shadow-sm hover:shadow-md transition-all duration-200">Clear</button>
                         )}
-                        <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-full bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors" aria-label="Close filter">
-                          <X className="h-4 w-4" />
-                        </button>
+                      </div>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto px-5 py-4 pb-[env(safe-area-inset-bottom)]">
+                      <div className="space-y-1">
+                        {categories.map((category) => (
+                          <div key={category}>
+                            <label className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                              <Checkbox
+                                checked={selectedCategory === category}
+                                onCheckedChange={() => {
+                                  if (selectedCategory === category) setSelectedCategory(null, true);
+                                  else setSelectedCategory(category, true);
+                                }}
+                              />
+                              <span className="text-sm text-foreground font-body">{category}</span>
+                            </label>
+                            {selectedCategory === category && SUBCATEGORY_MAP[category]?.length > 0 && (
+                              <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                                <button
+                                  onClick={() => setSelectedSubcategory(null)}
+                                  className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1.5 ${!selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'}`}
+                                >
+                                  All {category}
+                                </button>
+                                {SUBCATEGORY_MAP[category].map(sub => (
+                                  <button
+                                    key={sub}
+                                    onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
+                                    className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1.5 ${selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'}`}
+                                  >
+                                    {sub}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      {categories.map((category) => (
-                        <div key={category}>
-                          <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
-                            <Checkbox
-                              checked={selectedCategory === category}
-                              onCheckedChange={() => {
-                                if (selectedCategory === category) setSelectedCategory(null, true);
-                                else setSelectedCategory(category, true);
-                              }}
-                            />
-                            <span className="text-sm text-foreground font-body">{category}</span>
-                          </label>
-                          {selectedCategory === category && SUBCATEGORY_MAP[category]?.length > 0 && (
-                            <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
-                              <button
-                                onClick={() => setSelectedSubcategory(null)}
-                                className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${!selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'}`}
-                              >
-                                All {category}
-                              </button>
-                              {SUBCATEGORY_MAP[category].map(sub => (
-                                <button
-                                  key={sub}
-                                  onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
-                                  className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'}`}
-                                >
-                                  {sub}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                    <div className="px-5 py-3 border-t border-border/40 flex-shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                      <button
+                        onClick={() => setFilterOpen(false)}
+                        className="w-full h-11 rounded-full bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] hover:opacity-90 transition-opacity"
+                      >
+                        Apply
+                      </button>
                     </div>
-                  </PopoverContent>
-                </Popover>
+                  </SheetContent>
+                </Sheet>
               </div>
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
