@@ -631,8 +631,9 @@ function MobileLetterRow({
           >
             <div className="pb-5 pt-1">
               {/* Single-large-card horizontal swipe with peek */}
-              <div className="-mx-4 px-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
-                <div className="flex gap-3 pr-6">
+              <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-pl-4">
+                <div className="flex gap-3 pl-4 pr-8">
+
                   {designers.map((item) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
