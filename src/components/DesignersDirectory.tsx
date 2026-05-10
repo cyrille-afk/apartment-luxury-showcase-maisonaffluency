@@ -1473,21 +1473,20 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         <div className="relative">
           {/* Mobile: Search above, Filter below */}
           <div className="flex flex-col items-start gap-2 mb-2 md:mb-6 md:hidden">
-            <div className="relative w-[60%] max-w-[14rem]">
-              <Input
-                type="text"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-4 pr-9 h-8 text-[16px] bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+            <div className="w-[70%] max-w-[16rem]">
+              <AlphabetDesignerPicker
+                brands={items.map((d) => d.display_name || d.name)}
+                value={
+                  searchQuery &&
+                  items.some((d) => (d.display_name || d.name) === searchQuery)
+                    ? searchQuery
+                    : "all"
+                }
+                onChange={(v) => setSearchQuery(v === "all" ? "" : v)}
+                allLabel="Search a Designer"
+                hideCount
+                selectClassName="px-4 h-8 text-[12px] bg-background border border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
               />
-              {searchQuery ? (
-                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              ) : (
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-              )}
             </div>
             <div>
               <Sheet open={filterOpen} onOpenChange={(open) => {
