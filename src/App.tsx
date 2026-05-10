@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import TradeAxonometric from "./pages/TradeAxonometric";
@@ -135,7 +135,153 @@ const PageTracker = lazy(() => import("./hooks/usePageTracking").then(m => {
 
 const queryClient = new QueryClient();
 
+const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
+let previewLocationRestored = false;
+
+function getPreviewAnchorId(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const probeY = Math.min(Math.max(window.innerHeight * 0.35, 120), window.innerHeight - 80);
+  const elements = document.elementsFromPoint(window.innerWidth / 2, probeY);
+
+  for (const element of elements) {
+    const anchored = element.closest<HTMLElement>("section[id], main[id], article[id], [data-preview-anchor][id]");
+    if (anchored?.id && anchored.id !== "main-content") return anchored.id;
+  }
+
+  const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id], article[id], [data-preview-anchor][id]"));
+  return sections
+    .map((el) => ({ id: el.id, distance: Math.abs(el.getBoundingClientRect().top - probeY) }))
+    .sort((a, b) => a.distance - b.distance)[0]?.id;
+}
+
+function isPreviewOrDev(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return false;
+
+  const host = window.location.hostname;
+  const isLovablePreview =
+    host.includes("lovableproject.com") ||
+    host.includes("id-preview--");
+
+  let isFramed = false;
+  try {
+    isFramed = window.self !== window.top;
+  } catch {
+    isFramed = true;
+  }
+
+  return isLovablePreview || isFramed;
+}
+
+function PreviewViewContinuity() {
+  const location = useLocation();
+  const anchorIdRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isPreviewOrDev()) return;
+
+    let timer: number | null = null;
+    const save = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        try {
+          anchorIdRef.current = getPreviewAnchorId() || anchorIdRef.current;
+          localStorage.setItem(
+            PREVIEW_VIEW_STATE_KEY,
+            JSON.stringify({
+              path: location.pathname,
+              search: location.search,
+              scrollY: window.scrollY,
+              anchorId: anchorIdRef.current,
+              ts: Date.now(),
+            }),
+          );
+        } catch {
+          /* noop */
+        }
+      }, 120);
+    };
+
+    save();
+    const updateAnchor = () => {
+      anchorIdRef.current = getPreviewAnchorId() || anchorIdRef.current;
+      save();
+    };
+    const restoreAnchorAfterResize = () => {
+      const anchorId = anchorIdRef.current;
+      if (!anchorId) return;
+      window.setTimeout(() => {
+        document.getElementById(anchorId)?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior });
+      }, 80);
+    };
+    window.addEventListener("scroll", save, { passive: true });
+    window.addEventListener("scrollend", updateAnchor);
+    window.addEventListener("resize", restoreAnchorAfterResize);
+    window.addEventListener("pagehide", save);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("scroll", save);
+      window.removeEventListener("scrollend", updateAnchor);
+      window.removeEventListener("resize", restoreAnchorAfterResize);
+      window.removeEventListener("pagehide", save);
+    };
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!isPreviewOrDev()) return;
+    try {
+      const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { path?: string; search?: string; scrollY?: number };
+      if (saved.path !== location.pathname || (saved.search || "") !== location.search) return;
+      if (!saved.scrollY || saved.scrollY <= 0) return;
+
+      let attempts = 0;
+      const restore = () => {
+        if (document.documentElement.scrollHeight >= saved.scrollY! + window.innerHeight * 0.5 || attempts >= 20) {
+          window.scrollTo({ top: saved.scrollY, behavior: "instant" as ScrollBehavior });
+          return;
+        }
+        attempts += 1;
+        window.setTimeout(restore, 150);
+      };
+      window.setTimeout(restore, 80);
+    } catch {
+      /* noop */
+    }
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
+function restorePreviewLocationBeforeRouter() {
+  if (previewLocationRestored || !isPreviewOrDev() || typeof window === "undefined") return;
+  previewLocationRestored = true;
+
+  try {
+    const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw) as { path?: string; search?: string; ts?: number };
+    const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 30 * 60 * 1000;
+    const currentSearch = new URLSearchParams(window.location.search);
+    currentSearch.delete("__lovable_token");
+    const currentIsRoot = window.location.pathname === "/" && !currentSearch.toString() && !window.location.hash;
+    const savedPath = saved.path || "/";
+
+    if (isFresh && currentIsRoot && savedPath !== "/") {
+      const token = new URLSearchParams(window.location.search).get("__lovable_token");
+      const nextSearch = new URLSearchParams(saved.search || "");
+      if (token) nextSearch.set("__lovable_token", token);
+      const search = nextSearch.toString();
+      window.history.replaceState(null, "", `${savedPath}${search ? `?${search}` : ""}`);
+    }
+  } catch {
+    /* noop */
+  }
+}
+
 const App = () => {
+  restorePreviewLocationBeforeRouter();
   const [showDeferredUi, setShowDeferredUi] = useState(false);
 
   // Block Pinterest browser extension globally
@@ -183,6 +329,7 @@ const App = () => {
         <CompareProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
+              <PreviewViewContinuity />
               {MAINTENANCE_MODE ? (
                 <Routes>
                   <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
