@@ -536,6 +536,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                             sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
                             sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
                             sessionStorage.setItem('galleryFilterDesigner', item.name);
+                            sessionStorage.setItem('galleryOpenIntentAt', String(Date.now()));
                             const galleryEl = document.getElementById('gallery');
                             if (galleryEl) {
                               galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
