@@ -30,6 +30,7 @@ import { getCategoryHero } from "@/constants/categoryHeroes";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
+import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
