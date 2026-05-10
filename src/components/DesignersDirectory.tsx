@@ -1404,7 +1404,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   return (
     <>
-    <div ref={sectionRef} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
+    <div ref={sectionRef} className="relative pt-1 pb-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
       {/* Gradient accent band */}
       <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-jade via-jade-light to-accent opacity-80" />
 
