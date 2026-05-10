@@ -20,6 +20,10 @@ interface Props {
   onChange: (next: string) => void;
   /** Tailwind classes inherited from neighbouring filter selects. */
   selectClassName?: string;
+  /** Override the "All Designers & Makers (N)" label. */
+  allLabel?: string;
+  /** Hide the count suffix on the closed-state label. */
+  hideCount?: boolean;
 }
 
 const stripAccents = (s: string) =>
@@ -39,6 +43,8 @@ const AlphabetDesignerPicker = ({
   value,
   onChange,
   selectClassName,
+  allLabel,
+  hideCount,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [expandedLetter, setExpandedLetter] = useState<string>("");
@@ -97,9 +103,10 @@ const AlphabetDesignerPicker = ({
   }, [open]);
 
   const totalCount = brands.length;
+  const defaultAllLabel = allLabel ?? "All Designers & Makers";
   const buttonLabel =
     value === "all"
-      ? `All Designers & Makers (${totalCount})`
+      ? hideCount ? defaultAllLabel : `${defaultAllLabel} (${totalCount})`
       : value;
 
   const handlePickAll = () => {
@@ -151,7 +158,7 @@ const AlphabetDesignerPicker = ({
               value === "all" && "text-foreground font-medium"
             )}
           >
-            <span>All Designers &amp; Makers ({totalCount})</span>
+            <span>{defaultAllLabel} ({totalCount})</span>
             {value === "all" && <Check size={14} className="text-[hsl(var(--gold))]" />}
           </button>
 
