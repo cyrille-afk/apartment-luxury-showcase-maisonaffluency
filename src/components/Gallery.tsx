@@ -230,6 +230,22 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
+type GalleryGridCols = 1 | 3 | 4;
+
+const GalleryGridIcon = ({ columns }: { columns: GalleryGridCols }) => {
+  const bars = columns === 1 ? [{ x: 9, width: 6 }] : columns === 3
+    ? [{ x: 2, width: 5.5 }, { x: 9.25, width: 5.5 }, { x: 16.5, width: 5.5 }]
+    : [{ x: 1.5, width: 4 }, { x: 7, width: 4 }, { x: 12.5, width: 4 }, { x: 18, width: 4 }];
+
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {bars.map((bar) => (
+        <rect key={bar.x} x={bar.x} y="3" width={bar.width} height="18" rx="1" fill="currentColor" />
+      ))}
+    </svg>
+  );
+};
+
 /** Desktop single-column carousel strip (mirrors mobile swipe UX) */
 const DesktopCarouselStrip = ({
   section,
