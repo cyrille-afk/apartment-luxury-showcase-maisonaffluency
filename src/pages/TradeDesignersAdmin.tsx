@@ -24,6 +24,7 @@ import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealth
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
+import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
