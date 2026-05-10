@@ -770,7 +770,7 @@ const PublicDesignerProfile = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
+                  onClick={() => { setGridColsTouched(true); setGridCols((prev) => (prev === 3 ? 4 : 3)); }}
                   className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
                   aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                   title={gridCols === 3 ? "Display 4" : "Display 3"}
