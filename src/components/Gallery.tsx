@@ -880,7 +880,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           </motion.div>
 
           {/* Mobile: Interactive Gallery badge — outside section loop so it stays visible */}
-          <div className="md:hidden">
+          <div className="md:hidden pt-6">
             <div className="flex justify-start mb-4">
               <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-foreground font-body font-light">
                 <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
@@ -1187,7 +1187,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             <ChevronLeft className="w-4 h-4 text-foreground" />
                           </button>
                           <div className="flex-1 -mx-1 px-1 overflow-x-auto scrollbar-hide">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 justify-center min-w-full">
                               {section.items.map((item, i) => (
                                 <button
                                   key={`thumb-${i}`}
