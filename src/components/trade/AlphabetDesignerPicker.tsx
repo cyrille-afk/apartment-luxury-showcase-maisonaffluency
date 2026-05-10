@@ -103,9 +103,10 @@ const AlphabetDesignerPicker = ({
   }, [open]);
 
   const totalCount = brands.length;
+  const defaultAllLabel = allLabel ?? "All Designers & Makers";
   const buttonLabel =
     value === "all"
-      ? `All Designers & Makers (${totalCount})`
+      ? hideCount ? defaultAllLabel : `${defaultAllLabel} (${totalCount})`
       : value;
 
   const handlePickAll = () => {
