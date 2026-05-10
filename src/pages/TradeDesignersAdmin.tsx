@@ -1411,15 +1411,37 @@ const TradeDesignersAdmin = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <a
-              href="/downloads/thierry-lemaire-biography.pdf"
-              download="Thierry-Lemaire-Biography.pdf"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
-              title="Download a clean PDF summary of Thierry Lemaire's biography & highlights"
-            >
-              <FileDown className="h-3.5 w-3.5" />
-              Lemaire PDF
-            </a>
+            {(() => {
+              const expanded = designers.find((d) => d.id === expandedId);
+              if (!expanded) {
+                return (
+                  <span
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border text-xs font-body text-muted-foreground/70"
+                    title="Expand a designer accordion below to enable the biography PDF download"
+                  >
+                    <FileDown className="h-3.5 w-3.5" />
+                    Biography PDF
+                  </span>
+                );
+              }
+              const merged = { ...expanded, ...(editBuffer[expanded.id] ?? {}) } as DesignerRow;
+              return (
+                <BiographyPdfButton
+                  designerName={merged.display_name || merged.name}
+                  specialty={merged.specialty}
+                  philosophy={merged.philosophy ?? ""}
+                  biography={merged.biography ?? ""}
+                  biographyImages={(merged.biography_images as string[] | null) ?? []}
+                  heroImageUrl={merged.hero_image_url ?? merged.image_url ?? null}
+                  heroImageFallbackUrl={
+                    merged.hero_image_url && merged.image_url && merged.hero_image_url !== merged.image_url
+                      ? merged.image_url
+                      : null
+                  }
+                  profileUrl={`https://www.maisonaffluency.com/designers/${merged.slug}`}
+                />
+              );
+            })()}
             <Link
               to="/trade/designers/instagram"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
