@@ -36,18 +36,19 @@ const CategoryRoute = () => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
     // 4. Poll for the scroll target — Suspense chunks may mount late on mobile.
-    // Prefer #product-grid (the filtered products section) over #designers
-    // (the directory below it), so the user lands on the actual results.
+    // On category routes the DesignersDirectory header contains the category
+    // title/intro. Scrolling directly to [data-category-results] hides that
+    // text behind the fixed mobile header, so land on the section wrapper.
     let cancelled = false;
     const start = performance.now();
     const tryScroll = () => {
       if (cancelled) return;
         const target =
-          document.getElementById("product-grid") ||
-          document.querySelector("[data-category-results]") ||
           document.getElementById("designers") ||
+          document.getElementById("product-grid") ||
           document.getElementById("featured-designers") ||
-          document.querySelector("[data-section='designers']");
+          document.querySelector("[data-section='designers']") ||
+          document.querySelector("[data-category-results]");
       if (target instanceof HTMLElement) {
         // Re-broadcast in case sections mounted after our first dispatch.
         window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
