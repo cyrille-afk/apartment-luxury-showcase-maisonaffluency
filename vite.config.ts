@@ -119,6 +119,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      hmr: false,
       watch: {
         ignored: [
           "**/src/integrations/supabase/types.ts",
