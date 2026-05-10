@@ -12,6 +12,7 @@
  *   3. /trade/gallery as final fallback
  */
 import React, { useState, useEffect, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {

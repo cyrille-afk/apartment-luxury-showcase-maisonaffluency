@@ -4,6 +4,7 @@
  * target lead time, and budget. Persists to trade_custom_requests.
  */
 import { useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate } from "react-router-dom";
 import { X, Loader2, Wand2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

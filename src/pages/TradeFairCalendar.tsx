@@ -4,6 +4,7 @@
  * Each event includes website link + .ics download.
  */
 import { useEffect, useMemo, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Loader2, CalendarDays, MapPin, ExternalLink, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
