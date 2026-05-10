@@ -285,9 +285,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         />
       </div>
 
-      {/* Mobile horizontal thumb strip — larger rectangular peek carousel
-          (Sotheby's-style): fewer, bigger 4:3 tiles with blurred edges and
-          overlaid prev/next arrows. */}
+      {/* Mobile horizontal thumb strip — Sotheby's-style peek carousel:
+          ~4 visible landscape thumbs, edges clipped (peek), with overlaid
+          prev/next arrows. */}
       {images.length > 1 && (
         <div className="md:hidden relative">
           <div
@@ -304,10 +304,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                   aria-current={i === activeIndex}
                   className={cn(
                     "relative shrink-0 snap-center rounded-md overflow-hidden border-2 transition-all",
-                    "w-[34%] aspect-[4/3]",
+                    "w-[23%] aspect-[4/3]",
                     i === activeIndex
                       ? "border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.5)]"
-                      : "border-border/60 opacity-70"
+                      : "border-border/60 opacity-80"
                   )}
                 >
                   <img
@@ -321,10 +321,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               ))}
             </div>
           </div>
-
-          {/* Edge fades — give the carousel its blurred-edge feel */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent" />
 
           {/* Floating prev/next arrows overlaid on the edges */}
           <button
