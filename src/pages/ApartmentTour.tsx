@@ -15,11 +15,11 @@ const ApartmentTour = () => {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+    // Ensure sound is on by default. We don't auto-play because browsers
+    // block autoplay with sound — the user's tap on the play control is the
+    // gesture that unlocks audio, so the video starts unmuted.
     v.muted = false;
-    v.play().catch(() => {
-      v.muted = true;
-      v.play();
-    });
+    v.volume = 1;
 
     // Track play/pause events
     const onPlay = () => trackVideoEvent("play", "showroom-tour");
