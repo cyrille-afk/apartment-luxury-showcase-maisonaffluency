@@ -1,4 +1,5 @@
 import { scrollToSection } from "@/lib/scrollToSection";
+import InstallAppDialog from "@/components/InstallAppDialog";
 
 const Footer = () => {
   return (
