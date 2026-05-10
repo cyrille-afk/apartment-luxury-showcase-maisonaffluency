@@ -1445,7 +1445,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       <Share2 className="w-4 h-4" />
                     </button>
                   </div>
-                  <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-3 md:mb-4 text-justify line-clamp-3 md:line-clamp-none">
+                  <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-3 md:mb-4 text-justify">
                     {hero
                       ? hero.summary
                       : "Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture."}
@@ -1470,11 +1470,26 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         })()}
 
         <div className="relative">
-          {/* Mobile: Search + Filter row */}
-          <div className="flex flex-col gap-4 mb-5 md:mb-6 md:hidden">
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="order-first">
-                <Sheet open={filterOpen} onOpenChange={(open) => {
+          {/* Mobile: Search above, Filter below */}
+          <div className="flex flex-col items-start gap-3 mb-5 md:mb-6 md:hidden">
+            <div className="relative w-[60%] max-w-[14rem]">
+              <Input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-4 pr-9 h-8 text-[16px] bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+              />
+              {searchQuery ? (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              )}
+            </div>
+            <div>
+              <Sheet open={filterOpen} onOpenChange={(open) => {
                   setFilterOpen(open);
                   if (!open && selectedCategory) broadcastFilter(selectedCategory, selectedSubcategory);
                 }}>
