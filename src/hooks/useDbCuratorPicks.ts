@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
+import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 
 export interface DbProductItem {
   pick: CuratorPick;
@@ -26,13 +27,16 @@ export function useDbCuratorPicks() {
       if (!designers?.length) return [];
 
       // Fetch all picks via public view
-      const { data: picks } = await supabase
-        .from("designer_curator_picks_public" as any)
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order")
-        .order("sort_order", { ascending: true, nullsFirst: false })
-        .order("id", { ascending: true });
+      const { data: picksRaw } = await applyCuratorPickOrder(
+        supabase
+          .from("designer_curator_picks_public" as any)
+          .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
+      );
 
-      if (!picks?.length) return [];
+      // Defensive client-side sort using identical rules (in case the view drops ORDER BY through joins).
+      const picks = picksRaw ? sortCuratorPicks(picksRaw as any[]) : [];
+
+      if (!picks.length) return [];
 
       // Build designer lookup
       const designerMap = new Map(

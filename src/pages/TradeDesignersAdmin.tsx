@@ -24,6 +24,7 @@ import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealth
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
+import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -168,11 +169,12 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   const [expandedPickId, setExpandedPickId] = useState<string | null>(null);
 
   const loadPicks = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("designer_curator_picks")
-      .select("*")
-      .eq("designer_id", designerId)
-      .order("sort_order", { ascending: true });
+    const { data, error } = await applyCuratorPickOrder(
+      supabase
+        .from("designer_curator_picks")
+        .select("*")
+        .eq("designer_id", designerId)
+    );
 
     if (error) {
       toast({ title: "Failed to load picks", description: error.message, variant: "destructive" });
@@ -180,7 +182,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
       return;
     }
 
-    setPicks((data as any[]) || []);
+    setPicks(sortCuratorPicks((data as any[]) || []) as any);
     setLoaded(true);
   }, [designerId, toast]);
 
