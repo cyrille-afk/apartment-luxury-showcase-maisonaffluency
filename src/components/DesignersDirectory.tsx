@@ -1503,20 +1503,22 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         <div className="relative">
           {/* Mobile: Search above, Filter below */}
           <div className="flex flex-col items-start gap-2 mb-2 md:mb-6 md:hidden">
-            <div className="w-[70%] max-w-[16rem]">
-              <AlphabetDesignerPicker
-                brands={items.map((d) => d.display_name || d.name)}
-                value={
-                  searchQuery &&
-                  items.some((d) => (d.display_name || d.name) === searchQuery)
-                    ? searchQuery
-                    : "all"
-                }
-                onChange={(v) => setSearchQuery(v === "all" ? "" : v)}
-                allLabel="Search a Designer"
-                selectClassName="px-4 h-8 text-[12px] bg-background border border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
-              />
-            </div>
+            {mode !== "products" && (
+              <div className="w-[70%] max-w-[16rem]">
+                <AlphabetDesignerPicker
+                  brands={items.map((d) => d.display_name || d.name)}
+                  value={
+                    searchQuery &&
+                    items.some((d) => (d.display_name || d.name) === searchQuery)
+                      ? searchQuery
+                      : "all"
+                  }
+                  onChange={(v) => setSearchQuery(v === "all" ? "" : v)}
+                  allLabel="Search a Designer"
+                  selectClassName="px-4 h-8 text-[12px] bg-background border border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+                />
+              </div>
+            )}
             <div>
               <Sheet open={filterOpen} onOpenChange={(open) => {
                   setFilterOpen(open);
