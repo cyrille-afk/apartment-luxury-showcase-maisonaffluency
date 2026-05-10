@@ -1402,10 +1402,19 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   emit({ stage: "finalizing", ratio: 0.92, label: "Adding page footers…" });
   await tick();
 
-  // Footer on every page (except cover)
+  // Footer on every page (except cover) + "Prepared for…" in top-right corner of every page
   const pageCount = doc.getNumberOfPages();
-  for (let i = 2; i <= pageCount; i++) {
+  for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
+    // Top-right "Prepared for …" stamp on every page (incl. cover)
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.text(preparedLine, pageWidth - marginX, 28, { align: "right" });
+    doc.setFont("helvetica", "normal");
+
+    if (i === 1) continue; // skip footer on cover
+
     // Hairline above footer
     doc.setDrawColor(...rule);
     doc.setLineWidth(0.4);
@@ -1418,12 +1427,6 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
     doc.text("MAISON AFFLUENCY", pageWidth / 2, pageHeight - marginBottom + 44, { align: "center" });
     doc.setCharSpace(0);
     doc.text(`${i} / ${pageCount}`, pageWidth - marginX, pageHeight - marginBottom + 44, { align: "right" });
-    // Personalized recipient line under the main footer row
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(7);
-    doc.setTextColor(...muted);
-    doc.text(preparedLine, pageWidth / 2, pageHeight - marginBottom + 56, { align: "center" });
-    doc.setFont("helvetica", "normal");
   }
 
   emit({ stage: "finalizing", ratio: 0.97, label: "Encoding PDF…" });
