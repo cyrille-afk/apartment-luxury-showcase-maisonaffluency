@@ -107,6 +107,7 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [mobileCols, setMobileCols] = useState<1 | 2>(2);
   const [gridColsTouched, setGridColsTouched] = useState(false);
   useEffect(() => {
     if (gridColsTouched) return;
