@@ -3319,7 +3319,7 @@ const BrandsAteliers = () => {
             const brands = alphaGroups.find(([l]) => l === letter)?.[1];
             const subs = subDesignerIndexByLetter[letter] || [];
             return (
-              <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
+              <div key={letter} id={`alpha-group-${letter}`} className="scroll-header-offset">
                 {brands && brands.length > 0 ? (
                   <AlphaStrip
                     letter={letter}
