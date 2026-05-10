@@ -47,7 +47,8 @@ export function cloudinaryUrl(
   if (blur) parts.push(`e_blur:${blur}`);
 
   const transformStr = parts.join(",");
-  return `${BASE_URL}/${transformStr}/${publicId}`;
+  const encodedTransformStr = transformStr.replace(/,/g, "%2C");
+  return `${BASE_URL}/${encodedTransformStr}/${publicId}`;
 }
 
 /**
