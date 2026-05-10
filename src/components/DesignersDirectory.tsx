@@ -12,6 +12,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
 import { trackCTA } from "@/lib/analytics";
