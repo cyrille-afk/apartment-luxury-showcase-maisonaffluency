@@ -30,6 +30,7 @@ import { getCategoryHero } from "@/constants/categoryHeroes";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
+import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
@@ -237,6 +238,8 @@ function useDesignerHotspotFallbacks() {
 type PickItem = {
   id: string;
   designer_id: string;
+  sort_order: number | null;
+  created_at: string | null;
   image_url: string;
   hover_image_url?: string | null;
   title: string;
@@ -258,16 +261,18 @@ function useFullCuratorPicks(enabled: boolean) {
     queryKey: ["full-curator-picks-directory"],
     queryFn: async () => {
       const [{ data: picks }, { data: designers }] = await Promise.all([
-        supabase
-          .from("designer_curator_picks_public")
-          .select("id, designer_id, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls"),
+        applyCuratorPickOrder(
+          supabase
+            .from("designer_curator_picks_public")
+            .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls")
+        ),
         supabase
           .from("designers")
           .select("id, name, slug"),
       ]);
       if (!picks) return [];
       const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
-      return (picks as any[]).map((p): PickItem => ({
+      return sortCuratorPicks(picks as any[]).map((p): PickItem => ({
         ...p,
         designer_name: designerMap.get(p.designer_id)?.name || "Unknown",
         designer_slug: designerMap.get(p.designer_id)?.slug || "",
