@@ -1330,7 +1330,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 })}
               </div>
               )}
-            </div>;
+            </div>
+            </React.Fragment>;
           });
           })()}
         </div>
