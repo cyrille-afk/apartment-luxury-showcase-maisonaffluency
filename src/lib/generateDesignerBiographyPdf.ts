@@ -1406,14 +1406,15 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    // Top-right "Prepared for …" stamp on every page (incl. cover)
+
+    if (i === 1) continue; // cover already has its own white "Prepared for" overlay on the hero
+
+    // Top-right "Prepared for …" stamp on inner pages
     doc.setFont("helvetica", "italic");
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
     doc.text(preparedLine, pageWidth - marginX, 28, { align: "right" });
     doc.setFont("helvetica", "normal");
-
-    if (i === 1) continue; // skip footer on cover
 
     // Hairline above footer
     doc.setDrawColor(...rule);
