@@ -580,6 +580,101 @@ function CarouselDots({ count, selected, onSelect }: { count: number; selected: 
   );
 }
 
+// ─── Mobile Alphabet Accordion ───────────────────────────────────────────────
+function MobileLetterRow({
+  letter,
+  designers,
+  defaultOpen,
+  parentDesignerCountByName,
+  fallbackGalleryIndexByDesigner,
+  initialExpand,
+  designersWithIgPosts,
+  anchorId,
+}: {
+  letter: string;
+  designers: Designer[];
+  defaultOpen?: boolean;
+  parentDesignerCountByName: Record<string, number>;
+  fallbackGalleryIndexByDesigner: Record<string, number[]>;
+  initialExpand?: string;
+  designersWithIgPosts?: Set<string>;
+  anchorId: string;
+}) {
+  const matchesExpand = !!(initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand));
+  const [open, setOpen] = useState<boolean>(!!defaultOpen || matchesExpand);
+  const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
+
+  useEffect(() => {
+    if (defaultOpen) setOpen(true);
+  }, [defaultOpen]);
+
+  return (
+    <div id={anchorId} data-alpha-letter={letter} className="border-b border-border/40 scroll-mt-32">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 py-3.5 px-1 text-left"
+        aria-expanded={open}
+      >
+        <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
+        <span className="font-serif text-xl text-foreground flex-1">{letter}</span>
+        <span className="font-body text-[11px] text-muted-foreground/60 tracking-widest">{designers.length}</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pb-5 pt-1">
+              {/* Single-large-card horizontal swipe with peek */}
+              <div className="-mx-4 px-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+                <div className="flex gap-3 pr-6">
+                  {designers.map((item) => {
+                    const designerCount = parentDesignerCountByName[item.name] ?? 0;
+                    const isParentBrand = item.founder === item.name && designerCount > 0;
+                    return (
+                      <div key={item.slug} className="flex-none w-[78%] max-w-[320px] snap-start">
+                        {isParentBrand ? (
+                          <ParentBrandCard
+                            item={item}
+                            isOpen={openParent === item.name}
+                            onToggle={() => setOpenParent(openParent === item.name ? null : item.name)}
+                            designerCount={designerCount}
+                            hasIgPosts={designersWithIgPosts?.has(item.id)}
+                          />
+                        ) : (
+                          <SingleDesignerCard item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <AnimatePresence>
+                {openParent && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.25 }}
+                    className="mt-4"
+                  >
+                    <ParentSubGrid parentName={openParent} onClose={() => setOpenParent(null)} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Letter Group ────────────────────────────────────────────────────────────
 function LetterGroup({
   letter,
