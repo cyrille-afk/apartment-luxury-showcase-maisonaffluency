@@ -20,6 +20,10 @@ interface Props {
   onChange: (next: string) => void;
   /** Tailwind classes inherited from neighbouring filter selects. */
   selectClassName?: string;
+  /** Override the "All Designers & Makers (N)" label. */
+  allLabel?: string;
+  /** Hide the count suffix on the closed-state label. */
+  hideCount?: boolean;
 }
 
 const stripAccents = (s: string) =>
