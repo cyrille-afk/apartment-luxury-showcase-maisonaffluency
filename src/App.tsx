@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import TradeAxonometric from "./pages/TradeAxonometric";
@@ -134,6 +134,111 @@ const PageTracker = lazy(() => import("./hooks/usePageTracking").then(m => {
 }));
 
 const queryClient = new QueryClient();
+
+const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
+
+function isPreviewOrDev(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return false;
+
+  const host = window.location.hostname;
+  const isLovablePreview =
+    host.includes("lovableproject.com") ||
+    host.includes("lovable.app") ||
+    host.includes("id-preview--");
+
+  let isFramed = false;
+  try {
+    isFramed = window.self !== window.top;
+  } catch {
+    isFramed = true;
+  }
+
+  return isLovablePreview || isFramed;
+}
+
+function PreviewViewContinuity() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isPreviewOrDev()) return;
+
+    try {
+      const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
+      if (!raw) return;
+
+      const saved = JSON.parse(raw) as { path?: string; search?: string; scrollY?: number; ts?: number };
+      const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 30 * 60 * 1000;
+      const currentIsRoot = window.location.pathname === "/" && !window.location.search && !window.location.hash;
+      const savedPath = saved.path || "/";
+
+      if (isFresh && currentIsRoot && savedPath !== "/") {
+        window.history.replaceState(null, "", `${savedPath}${saved.search || ""}`);
+      }
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isPreviewOrDev()) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const save = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        try {
+          localStorage.setItem(
+            PREVIEW_VIEW_STATE_KEY,
+            JSON.stringify({
+              path: location.pathname,
+              search: location.search,
+              scrollY: window.scrollY,
+              ts: Date.now(),
+            }),
+          );
+        } catch {
+          /* noop */
+        }
+      }, 120);
+    };
+
+    save();
+    window.addEventListener("scroll", save, { passive: true });
+    window.addEventListener("pagehide", save);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("scroll", save);
+      window.removeEventListener("pagehide", save);
+    };
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!isPreviewOrDev()) return;
+    try {
+      const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { path?: string; search?: string; scrollY?: number };
+      if (saved.path !== location.pathname || (saved.search || "") !== location.search) return;
+      if (!saved.scrollY || saved.scrollY <= 0) return;
+
+      let attempts = 0;
+      const restore = () => {
+        if (document.documentElement.scrollHeight >= saved.scrollY! + window.innerHeight * 0.5 || attempts >= 20) {
+          window.scrollTo({ top: saved.scrollY, behavior: "instant" as ScrollBehavior });
+          return;
+        }
+        attempts += 1;
+        window.setTimeout(restore, 150);
+      };
+      window.setTimeout(restore, 80);
+    } catch {
+      /* noop */
+    }
+  }, [location.pathname, location.search]);
+
+  return null;
+}
 
 const App = () => {
   const [showDeferredUi, setShowDeferredUi] = useState(false);
