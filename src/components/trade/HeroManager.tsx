@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "./CloudUpload";
@@ -118,7 +119,7 @@ const HeroManager = () => {
   if (loading) {
     return (
       <div className="flex items-center gap-2 py-8 justify-center">
-        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+        <DotCircleLoader size="sm" className="text-muted-foreground" />
         <span className="font-body text-sm text-muted-foreground">Loading heroes…</span>
       </div>
     );
@@ -160,7 +161,7 @@ const HeroManager = () => {
               </div>
               {saving === section.key && (
                 <div className="absolute top-3 right-3">
-                  <Loader2 className="w-4 h-4 animate-spin text-background" />
+                  <DotCircleLoader size="sm" className="text-background" />
                 </div>
               )}
             </div>

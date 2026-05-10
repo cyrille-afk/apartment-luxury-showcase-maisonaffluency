@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Package, Plus, Trash2, Search, MapPin } from "lucide-react";
@@ -149,7 +150,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
             className="flex items-center gap-1.5 px-3 py-2 rounded-md border border-primary/20 text-primary font-body text-xs hover:bg-primary/5 transition-colors disabled:opacity-40 whitespace-nowrap"
           >
             {mappingBrand ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
             ) : (
               <MapPin className="h-3.5 w-3.5" />
             )}

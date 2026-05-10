@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -615,7 +616,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
             title="Procurement-grade Excel with PO numbers, lead times, deposit schedule and cost codes"
           >
-            {exportingExcel ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
+            {exportingExcel ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
             <span className="hidden sm:inline">Export Excel</span>
             <span className="sm:hidden">Excel</span>
           </button>
@@ -890,7 +891,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     disabled={!pendingProductId || addingProduct}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
-                    {addingProduct ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    {addingProduct ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                     Add
                   </button>
                 </div>
@@ -1181,7 +1182,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     disabled={!pendingProductId || addingProduct}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
-                    {addingProduct ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    {addingProduct ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                     Add to quote
                   </button>
                 </div>
@@ -1533,7 +1534,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       disabled={payingStripe}
                       className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
                     >
-                      {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
+                      {payingStripe ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <CreditCard className="h-3.5 w-3.5" />}
                       {payingStripe ? "Redirecting…" : "Pay 60% Deposit"}
                     </button>
                   )}
@@ -1623,7 +1624,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     disabled={payingStripe}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
                   >
-                    {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
+                    {payingStripe ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <CreditCard className="h-3.5 w-3.5" />}
                     {payingStripe ? "Redirecting…" : paymentLabel}
                   </button>
                   {subtotalCents > 0 && (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link } from "react-router-dom";
 import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
@@ -128,7 +129,7 @@ export default function TradeProjects() {
                 <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City / region" />
               </div>
               <Button onClick={handleCreate} disabled={!name.trim() || creating} className="w-full">
-                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create project"}
+                {creating ? <DotCircleLoader size="sm" /> : "Create project"}
               </Button>
             </div>
           </DialogContent>
@@ -156,7 +157,7 @@ export default function TradeProjects() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <DotCircleLoader size="sm" className="text-muted-foreground" />
         </div>
       ) : filtered.length === 0 ? (
         projects.length === 0 && tab === "active" ? (

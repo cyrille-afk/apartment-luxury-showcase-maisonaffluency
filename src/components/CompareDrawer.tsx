@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Ruler, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useState } from "react";
@@ -147,7 +148,7 @@ const CompareDrawer = () => {
                     className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[hsl(var(--gold))] text-foreground hover:bg-[hsl(var(--gold))]/90 font-body text-xs uppercase tracking-[0.12em] transition-all disabled:opacity-60"
                   >
                     {addingAll ? (
-                      <Loader2 size={14} className="animate-spin" />
+                      <DotCircleLoader size="sm" />
                     ) : (
                       <ShoppingCart size={14} />
                     )}
@@ -292,7 +293,7 @@ const CompareDrawer = () => {
                             disabled={addingAll}
                             className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[hsl(var(--gold))] bg-white/5 text-white hover:bg-white/10 font-body text-[10px] uppercase tracking-[0.12em] transition-all w-full justify-center disabled:opacity-60"
                           >
-                            {addingAll ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={14} />}
+                            {addingAll ? <DotCircleLoader size="sm" /> : <ShoppingCart size={14} />}
                             Add to Quote
                           </button>
                         ) : (

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -320,7 +321,7 @@ export default function TradeFavorites() {
                     disabled={removing === fav.favoriteId}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                   >
-                    {removing === fav.favoriteId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                   </button>
                 </div>
                 <div className="p-3 text-center space-y-1">
@@ -369,7 +370,7 @@ export default function TradeFavorites() {
                   disabled={removing === fav.favoriteId}
                   className="p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
                 >
-                  {removing === fav.favoriteId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  {removing === fav.favoriteId ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
                 </button>
               </Card>
             ))}

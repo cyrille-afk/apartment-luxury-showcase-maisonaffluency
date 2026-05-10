@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -190,7 +191,7 @@ export default function TradeMediaLibrary() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <DotCircleLoader size="sm" className="text-muted-foreground" />
         </div>
       ) : filtered.length === 0 ? (
         <p className="py-12 text-center font-body text-sm text-muted-foreground">No files found.</p>
@@ -257,7 +258,7 @@ export default function TradeMediaLibrary() {
                       disabled={deleting === file.fullPath}
                       onClick={() => setConfirmDelete(file)}
                     >
-                      {deleting === file.fullPath ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                      {deleting === file.fullPath ? <DotCircleLoader size="sm" /> : <Trash2 className="h-3 w-3" />}
                     </Button>
                   )}
                 </div>
@@ -322,7 +323,7 @@ export default function TradeMediaLibrary() {
                           disabled={deleting === file.fullPath}
                           onClick={() => setConfirmDelete(file)}
                         >
-                          {deleting === file.fullPath ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          {deleting === file.fullPath ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Trash2 className="h-3.5 w-3.5" />}
                         </Button>
                       )}
                     </div>

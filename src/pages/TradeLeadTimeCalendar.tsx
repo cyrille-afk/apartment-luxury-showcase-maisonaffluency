@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -70,7 +71,7 @@ export default function TradeLeadTimeCalendar() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          <div className="flex justify-center py-20"><DotCircleLoader size="sm" className="text-muted-foreground" /></div>
         ) : ranges.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-border rounded-lg">
             <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />

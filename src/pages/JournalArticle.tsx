@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
@@ -75,7 +76,7 @@ const JournalArticlePage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <DotCircleLoader size="md" />
       </div>
     );
   }
@@ -216,7 +217,7 @@ const JournalArticlePage = () => {
             </h2>
             <Suspense fallback={
               <div className="flex justify-center py-12">
-                <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <DotCircleLoader size="md" />
               </div>
             }>
               <PdfViewer url={article.pdf_url} title={article.title} />

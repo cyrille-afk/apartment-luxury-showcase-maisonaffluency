@@ -1,4 +1,5 @@
 import { useParams, Navigate } from "react-router-dom";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { lazy, Suspense, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { GUIDE_LOADERS, GUIDE_SLUG_ALIASES } from "./guides/registry";
@@ -57,7 +58,7 @@ export default function TradeGuideDetail() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" aria-hidden="true" />
+          <DotCircleLoader size="sm" className="text-muted-foreground" />
         </div>
       }
     >

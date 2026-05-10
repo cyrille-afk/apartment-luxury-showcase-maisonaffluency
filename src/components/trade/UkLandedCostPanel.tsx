@@ -131,11 +131,11 @@ export const UkLandedCostPanel = ({
           {/* Breakdown */}
           {!ratesReady ? (
             <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
-              <Loader2 className="w-3 h-3 animate-spin" /> Loading FX rates…
+              <DotCircleLoader size="sm" /> Loading FX rates…
             </div>
           ) : loading ? (
             <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
-              <Loader2 className="w-3 h-3 animate-spin" /> Calculating…
+              <DotCircleLoader size="sm" /> Calculating…
             </div>
           ) : !breakdown?.available ? (
             <p className="font-body text-xs text-amber-700">

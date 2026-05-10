@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
@@ -1677,7 +1678,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             <div className="flex-1 min-w-0">
               {isLoading && (
                 <div className="flex items-center justify-center py-32">
-                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <DotCircleLoader size="md" />
                 </div>
               )}
               {!isLoading && filteredPicks ? (
@@ -1728,7 +1729,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             {/* Mobile A-Z jump bar removed per design — letter section headers (A, B, C…) remain in the list below. */}
             {isLoading && (
               <div className="flex items-center justify-center py-32">
-                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <DotCircleLoader size="md" />
               </div>
             )}
               {!isLoading && filteredPicks ? (

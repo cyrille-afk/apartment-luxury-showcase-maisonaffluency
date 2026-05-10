@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ChevronRight, Globe, Plus, Save, XCircle, RefreshCw } from "lucide-react";
@@ -284,7 +285,7 @@ const ScrapeProducts = () => {
           >
             {scraping ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
                 Scraping {brands.filter((b) => b.brand_name.trim()).length} brand(s)…
               </>
             ) : (

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -137,7 +138,7 @@ const TradeLayout = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <DotCircleLoader size="md" />
       </div>
     );
   }
@@ -225,7 +226,7 @@ const TradeLayout = () => {
             
             <Suspense fallback={
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                <DotCircleLoader size="sm" className="text-muted-foreground" />
               </div>
             }>
               <Outlet />

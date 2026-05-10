@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -120,7 +121,7 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
           aria-busy={loading}
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <DotCircleLoader size="sm" />
           ) : (
             <Download className="h-4 w-4 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
           )}

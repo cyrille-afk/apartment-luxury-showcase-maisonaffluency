@@ -220,7 +220,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                 disabled={submitting}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors disabled:opacity-50"
               >
-                {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                {submitting ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Wand2 className="h-3.5 w-3.5" />}
                 Submit Request
               </button>
             </div>

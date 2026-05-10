@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, X, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -164,7 +165,7 @@ export default function CsvBulkUpload({ designerId, designerName, currentCount, 
           <Upload className="w-3.5 h-3.5" /> CSV Import
         </Button>
         <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting} className="gap-1.5">
-          {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} CSV Export
+          {exporting ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />} CSV Export
         </Button>
       </div>
     );
@@ -243,7 +244,7 @@ export default function CsvBulkUpload({ designerId, designerName, currentCount, 
 
           <div className="flex gap-2">
             <Button size="sm" onClick={handleUpload} disabled={uploading || preview.length === 0} className="gap-1.5">
-              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+              {uploading ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Upload className="w-3.5 h-3.5" />}
               Import {preview.length} product{preview.length !== 1 ? "s" : ""}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => { setOpen(false); reset(); }}>Cancel</Button>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, RefreshCw, History, CalendarIcon, Download, Search } from "lucide-react";
 import { format } from "date-fns";
@@ -123,7 +124,7 @@ const ScrapeHistory = () => {
             disabled={loadingHistory}
             className="font-body text-[10px] text-primary hover:underline flex items-center gap-1"
           >
-            {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+            {loadingHistory ? <DotCircleLoader size="sm" /> : <RefreshCw className="h-3 w-3" />}
             Refresh
           </button>
           {filteredHistory.length > 0 && (

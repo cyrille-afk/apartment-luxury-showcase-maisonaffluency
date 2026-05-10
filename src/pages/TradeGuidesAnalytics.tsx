@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Check, Eye, Link2, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -314,7 +315,7 @@ export default function TradeGuidesAnalytics() {
 
       {!rows && !error && (
         <div className="flex items-center gap-2 text-muted-foreground py-8">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          <DotCircleLoader size="sm" />
           <span className="font-body text-sm">Loading…</span>
         </div>
       )}
@@ -562,7 +563,7 @@ export default function TradeGuidesAnalytics() {
           </DialogHeader>
           {!drillRows ? (
             <div className="flex items-center gap-2 text-muted-foreground py-8">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <DotCircleLoader size="sm" />
               <span className="font-body text-sm">Loading…</span>
             </div>
           ) : drillRows.length === 0 ? (

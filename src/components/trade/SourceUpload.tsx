@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -229,7 +230,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
 
         {loadingPreviews ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            <DotCircleLoader size="sm" className="text-muted-foreground" />
             <span className="ml-2 font-body text-xs text-muted-foreground">Loading pages…</span>
           </div>
         ) : (
@@ -263,7 +264,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
             </div>
             {uploading && (
               <div className="flex items-center justify-center gap-1.5 py-1">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+                <DotCircleLoader size="sm" className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="font-body text-xs text-muted-foreground">Preparing page {selectedPage}…</span>
               </div>
             )}
@@ -280,7 +281,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
       }`}
     >
       {uploading ? (
-        <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />
+        <DotCircleLoader size="sm" className="w-3.5 h-3.5 text-muted-foreground" />
       ) : (
         <Upload className="w-3.5 h-3.5 text-muted-foreground" />
       )}

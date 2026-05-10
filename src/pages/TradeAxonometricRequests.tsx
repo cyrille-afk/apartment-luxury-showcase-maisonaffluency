@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import SectionHero from "@/components/trade/SectionHero";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -635,7 +636,7 @@ const TradeAxonometricRequests = () => {
               className="w-full"
             >
               {submitting ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</>
+                <><DotCircleLoader size="sm" className="mr-2" />Submitting…</>
               ) : (
                 "Submit Creative Brief"
               )}
@@ -773,7 +774,7 @@ const TradeAxonometricRequests = () => {
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={3} className="font-body text-sm" />
             </div>
             <Button onClick={handleEditSave} disabled={submitting || !imageUrl || !projectName.trim()} className="w-full">
-              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : "Save Changes"}
+              {submitting ? <><DotCircleLoader size="sm" className="mr-2" />Saving…</> : "Save Changes"}
             </Button>
           </div>
         </DialogContent>

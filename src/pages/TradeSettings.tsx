@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -347,7 +348,7 @@ const TradeSettings = () => {
               className="absolute inset-0 rounded-full bg-foreground/0 group-hover:bg-foreground/40 flex items-center justify-center transition-colors cursor-pointer"
             >
               {uploadingAvatar ? (
-                <Loader2 className="h-5 w-5 text-background animate-spin" />
+                <DotCircleLoader size="sm" className="text-background" />
               ) : (
                 <Camera className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity" />
               )}

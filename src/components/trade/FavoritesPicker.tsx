@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Heart, Check, Loader2 } from "lucide-react";
@@ -60,7 +61,7 @@ export default function FavoritesPicker({ selectedIds, onSelectionChange, maxHei
   if (loading) {
     return (
       <div className="flex items-center justify-center py-6">
-        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+        <DotCircleLoader size="sm" className="text-muted-foreground" />
       </div>
     );
   }

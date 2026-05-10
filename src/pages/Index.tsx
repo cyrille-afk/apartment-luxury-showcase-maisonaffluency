@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
@@ -88,7 +89,7 @@ const hasAnyHash = () => isDeepLink() || hasSectionHash();
 /** Minimal loading placeholder for lazy sections */
 const SectionFallback = () => (
   <div className="w-full py-24 flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+    <DotCircleLoader size="md" />
   </div>
 );
 

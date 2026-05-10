@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -944,7 +945,7 @@ export function AIConcierge() {
             {showTypingDots && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  <DotCircleLoader size="sm" className="text-muted-foreground" />
                 </div>
               </div>
             )}

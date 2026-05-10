@@ -1189,7 +1189,7 @@ const TradeProductPage: React.FC = () => {
               )}
             >
               {adding ? (
-                <Loader2 size={14} className="animate-spin" />
+                <DotCircleLoader size="sm" />
               ) : added ? (
                 <Check size={14} />
               ) : (

@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useCallback, useEffect, useMemo, useState, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +42,7 @@ const PdfFrame = memo(function PdfFrame({
           className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted/20"
           aria-hidden="true"
         >
-          <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+          <DotCircleLoader size="sm" className="text-muted-foreground" />
           <p className="font-body text-xs text-muted-foreground tracking-wide">
             Loading spec sheet…
           </p>

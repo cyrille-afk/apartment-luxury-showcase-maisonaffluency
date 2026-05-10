@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Download, X, Loader2, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
@@ -147,7 +148,7 @@ export default function BiographyPdfPreviewDialog({
         <div className="relative flex-1 overflow-y-auto bg-muted/20">
           {(!blobUrl || rendering) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <DotCircleLoader size="sm" />
               <p className="text-xs">{blobUrl ? "Rendering pages…" : "Generating PDF…"}</p>
             </div>
           )}

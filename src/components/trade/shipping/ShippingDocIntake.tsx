@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -93,7 +94,7 @@ export default function ShippingDocIntake({ onExtracted }: Props) {
           disabled={busy || !text.trim()}
           size="sm"
         >
-          {busy ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+          {busy ? <DotCircleLoader size="sm" className="mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
           Extract from text
         </Button>
 

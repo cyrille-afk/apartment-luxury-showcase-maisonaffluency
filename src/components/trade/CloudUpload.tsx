@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Upload, X, FileUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -87,7 +88,7 @@ const CloudUpload = ({
       }`}
     >
       {uploading ? (
-        <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />
+        <DotCircleLoader size="sm" className="w-3.5 h-3.5 text-muted-foreground" />
       ) : (
         <Icon className="w-3.5 h-3.5 text-muted-foreground" />
       )}

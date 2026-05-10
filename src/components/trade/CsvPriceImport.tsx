@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Upload, Loader2, CheckCircle2, FileSpreadsheet, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -303,7 +304,7 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={handleImport} disabled={importing || !!result}>
-              {importing ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Upload className="h-4 w-4 mr-1.5" />}
+              {importing ? <DotCircleLoader size="sm" className="mr-1.5" /> : <Upload className="h-4 w-4 mr-1.5" />}
               {importing ? "Importing…" : result ? "Done" : `Import ${rows.length} prices`}
             </Button>
           </DialogFooter>

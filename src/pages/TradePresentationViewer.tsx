@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -300,7 +301,7 @@ const TradePresentationViewer = () => {
                   className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
                   title="Export as PDF"
                 >
-                  {exportingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                  {exportingPdf ? <DotCircleLoader size="sm" /> : <FileDown className="w-4 h-4" />}
                 </button>
               )}
               {actualSlide?.image_url && (

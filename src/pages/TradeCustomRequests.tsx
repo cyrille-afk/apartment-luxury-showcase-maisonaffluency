@@ -194,7 +194,7 @@ export default function TradeCustomRequests() {
 
         {authLoading || loading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <DotCircleLoader size="sm" className="text-muted-foreground" />
           </div>
         ) : !user ? (
           <div className="text-center py-20 border border-dashed border-border rounded-lg">
@@ -315,7 +315,7 @@ export default function TradeCustomRequests() {
                             className="inline-flex items-center gap-2 px-3 py-2 border border-foreground/20 bg-foreground text-background rounded-md font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                           >
                             {savingId === r.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
                             ) : (
                               <Save className="h-3.5 w-3.5" />
                             )}
@@ -351,7 +351,7 @@ export default function TradeCustomRequests() {
                       <div className="mt-3 space-y-2">
                         {loadingActivity[r.id] ? (
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
                             <span className="font-body text-xs">Loading…</span>
                           </div>
                         ) : activityError[r.id] ? (
