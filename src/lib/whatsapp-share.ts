@@ -112,23 +112,15 @@ const PIECE_OG_BRIDGE_OVERRIDES: Record<string, string> = {
  * Build a piece-specific OG bridge URL for a curator pick.
  * Falls back to the designer OG bridge if no piece-specific bridge exists.
  */
-/**
- * Dynamic edge function that resolves any product by (designer, product) slug
- * and serves correctly-tagged OG HTML. Used as the universal fallback so every
- * brand (not just hand-mapped ones) gets a piece-specific share preview.
- */
-const PRODUCT_OG_ENDPOINT =
-  "https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/product-og";
-
-export const buildPieceOgUrl = (designerName: string, pieceTitle: string) => {
+export const buildPieceOgUrl = (designerName: string, pieceTitle: string, pieceSubtitle?: string | null) => {
   const designerSlug = slugify(designerName);
-  const pieceSlug = slugify(pieceTitle);
-  const key = `${designerSlug}/${pieceSlug}`;
+  const fullPieceTitle = pieceSubtitle ? `${pieceTitle}-${pieceSubtitle}` : pieceTitle;
+  const pieceSlug = slugify(fullPieceTitle);
+  const titleOnlySlug = slugify(pieceTitle);
+  const key = `${designerSlug}/${titleOnlySlug}`;
   const override = PIECE_OG_BRIDGE_OVERRIDES[key];
   if (override) return withOgCacheBust(`${SITE_URL}${override}`);
-  return withOgCacheBust(
-    `${PRODUCT_OG_ENDPOINT}?designer=${encodeURIComponent(designerSlug)}&product=${encodeURIComponent(pieceSlug)}`
-  );
+  return withOgCacheBust(`${SITE_URL}/collectibles/${designerSlug}-${pieceSlug}-og.html`);
 };
 
 /**
