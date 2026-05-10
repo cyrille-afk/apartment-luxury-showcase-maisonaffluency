@@ -43,6 +43,8 @@ const AlphabetDesignerPicker = ({
   value,
   onChange,
   selectClassName,
+  allLabel,
+  hideCount,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [expandedLetter, setExpandedLetter] = useState<string>("");
