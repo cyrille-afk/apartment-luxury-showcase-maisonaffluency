@@ -1329,7 +1329,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       >
         <DialogContent
           hideClose
-          className="top-0 left-0 translate-x-0 translate-y-0 max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
+          className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
           aria-describedby={undefined}
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft") goToPrevious();
@@ -1341,7 +1341,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           </VisuallyHidden>
            {isMobile ? (
              /* ── Mobile: Embla Carousel lightbox ── */
-              <div className="relative w-full h-full flex flex-col items-center justify-center overflow-y-auto">
+              <div className="relative w-full h-full flex flex-col items-center justify-start overflow-y-auto pt-4 pb-6">
                 {/* Title */}
                 <h3 className="text-lg font-serif text-white mt-2 mb-1.5 text-center px-4 shrink-0">
                   {currentSectionItems[currentItemIndex]?.title}
@@ -1358,7 +1358,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                              src={item.image}
                              alt={item.title}
                              sizes="100vw"
-                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[65vh]"
+                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
                              loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
                              decoding="async"
                              draggable={false}
