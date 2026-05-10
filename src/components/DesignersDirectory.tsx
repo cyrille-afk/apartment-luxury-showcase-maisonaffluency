@@ -404,7 +404,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 
   return (
     <div className="col-span-2 md:col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[11/7]">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[3/4] md:aspect-[11/7]">
         {item.name === 'Apparatus' ? (
           <div className="absolute inset-0 bg-black" />
         ) : (
@@ -1446,7 +1446,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       <Share2 className="w-4 h-4" />
                     </button>
                   </div>
-                  <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-3 md:mb-4 text-justify">
+                  <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-1 md:mb-4 text-justify">
                     {hero
                       ? hero.summary
                       : "Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture."}
@@ -1472,7 +1472,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
         <div className="relative">
           {/* Mobile: Search above, Filter below */}
-          <div className="flex flex-col items-start gap-3 mb-5 md:mb-6 md:hidden">
+          <div className="flex flex-col items-start gap-2 mb-2 md:mb-6 md:hidden">
             <div className="relative w-[60%] max-w-[14rem]">
               <Input
                 type="text"
