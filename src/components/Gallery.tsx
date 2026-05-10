@@ -1000,31 +1000,22 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {section.subtitle}
                         </p>
                         <div className="flex-1 flex justify-end">
-                          <div className="flex items-center gap-1">
-                            {/* 3-column option */}
+                          <div className="flex items-center gap-2 relative z-30">
                             <button
-                              onClick={() => setGridCols(3)}
-                              className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols === 3 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
-                              aria-label="Switch to 3 columns"
+                              type="button"
+                              onClick={() => setGridCols(gridCols === 1 ? 3 : 1)}
+                              className="flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-background text-foreground transition-colors hover:bg-muted"
+                              aria-label={gridCols === 1 ? "Switch to 3 columns" : "Switch to 1 column"}
                             >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <rect x="2" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" />
-                                <rect x="9.25" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" />
-                                <rect x="16.5" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" />
-                              </svg>
+                              <GalleryGridIcon columns={gridCols === 1 ? 3 : 1} />
                             </button>
-                            {/* 4-column option */}
                             <button
-                              onClick={() => setGridCols(4)}
-                              className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols === 4 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
-                              aria-label="Switch to 4 columns"
+                              type="button"
+                              onClick={() => setGridCols(gridCols === 4 ? 3 : 4)}
+                              className="flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-background text-foreground transition-colors hover:bg-muted"
+                              aria-label={gridCols === 4 ? "Switch to 3 columns" : "Switch to 4 columns"}
                             >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <rect x="1.5" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                                <rect x="7" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                                <rect x="12.5" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                                <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                              </svg>
+                              <GalleryGridIcon columns={gridCols === 4 ? 3 : 4} />
                             </button>
                           </div>
                         </div>
