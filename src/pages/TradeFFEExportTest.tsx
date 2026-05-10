@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useState } from "react";
 import ExcelJS from "exceljs";
 import { Button } from "@/components/ui/button";
@@ -242,7 +243,7 @@ export default function TradeFFEExportTest() {
 
         <div className="flex gap-2">
           <Button onClick={run} disabled={running} size="sm">
-            {running ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+            {running ? <DotCircleLoader size="sm" className="mr-2" /> : <Play className="h-4 w-4 mr-2" />}
             Run test
           </Button>
           <Button onClick={download} disabled={!lastBlob} variant="outline" size="sm">

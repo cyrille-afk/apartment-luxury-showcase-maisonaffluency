@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -129,7 +130,7 @@ export default function AddToProjectPopover({ productId, productName, children }
         <div className="max-h-48 overflow-y-auto py-1">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <DotCircleLoader size="sm" className="text-muted-foreground" />
             </div>
           ) : boards.length === 0 ? (
             <p className="font-body text-[10px] text-muted-foreground text-center py-3 px-2">
@@ -151,7 +152,7 @@ export default function AddToProjectPopover({ productId, productName, children }
                   {done ? (
                     <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                   ) : adding === board.id ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground shrink-0" />
+                    <DotCircleLoader size="sm" className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   ) : (
                     <FolderOpen className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   )}
@@ -168,7 +169,7 @@ export default function AddToProjectPopover({ productId, productName, children }
             className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-muted/40 transition-colors rounded-sm"
           >
             {adding === "new" ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground shrink-0" />
+              <DotCircleLoader size="sm" className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             ) : (
               <Plus className="w-3.5 h-3.5 text-[hsl(var(--gold))] shrink-0" />
             )}

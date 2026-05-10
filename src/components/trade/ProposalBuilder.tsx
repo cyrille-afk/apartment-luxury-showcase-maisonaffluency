@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
@@ -986,7 +987,7 @@ export default function ProposalBuilder({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
-                  {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                  {saving ? <DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                   Save to…
                 </Button>
               </DropdownMenuTrigger>
@@ -1008,7 +1009,7 @@ export default function ProposalBuilder({
               disabled={creatingPresentation || saving || lockedIteration === null}
               className="gap-1.5"
             >
-              {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+              {creatingPresentation ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
               Create Presentation
             </Button>
             <label className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground cursor-pointer">
@@ -1175,7 +1176,7 @@ export default function ProposalBuilder({
               onClick={() => { refineProposal(); clearMarkers(); }}
               disabled={refining || !refinementPrompt.trim()}
             >
-              {refining ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+              {refining ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
             </Button>
             <Button
               size="sm"
@@ -1239,7 +1240,7 @@ export default function ProposalBuilder({
             disabled={generating || !emptyRoomUrl || selectedProducts.length === 0}
           >
             {generating ? (
-              <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating…</>
+              <><DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" />Generating…</>
             ) : (
               <><Wand2 className="w-3.5 h-3.5 mr-1.5" />Generate Proposal ({selectedProducts.length})</>
             )}
@@ -1273,7 +1274,7 @@ export default function ProposalBuilder({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
-                    {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                    {saving ? <DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                     Save to…
                   </Button>
                 </DropdownMenuTrigger>
@@ -1295,7 +1296,7 @@ export default function ProposalBuilder({
                 disabled={creatingPresentation || saving || lockedIteration === null}
                 className="gap-1.5"
               >
-                {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                {creatingPresentation ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
                 Create Presentation
               </Button>
               <label className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground cursor-pointer">
@@ -1364,7 +1365,7 @@ export default function ProposalBuilder({
                   onClick={refineProposal}
                   disabled={refining || !refinementPrompt.trim()}
                 >
-                  {refining ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  {refining ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
                 </Button>
                 <Button
                   size="sm"
@@ -1383,7 +1384,7 @@ export default function ProposalBuilder({
             </div>
           ) : emptyRoomGenerating ? (
             <div className="border border-dashed border-border rounded-lg flex flex-col items-center justify-center min-h-[300px] gap-3">
-              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              <DotCircleLoader size="sm" className="text-muted-foreground" />
               <p className="font-body text-xs text-muted-foreground">Generating empty room…</p>
             </div>
           ) : (
@@ -1551,7 +1552,7 @@ export default function ProposalBuilder({
                 onClick={handleExternalUrl}
               >
                 {externalUploading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <DotCircleLoader size="sm" className="w-3.5 h-3.5" />
                 ) : (
                   <><Link className="w-3.5 h-3.5 mr-1.5" />Import URL</>
                 )}

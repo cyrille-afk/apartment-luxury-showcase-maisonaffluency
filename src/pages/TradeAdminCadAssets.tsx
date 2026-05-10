@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
 import { ChevronLeft, Plus, Trash2, Loader2, Search, Save, FileBox, Eye, Download, X, ExternalLink, Copy } from "lucide-react";
@@ -519,7 +520,7 @@ const TradeAdminCadAssets = () => {
                   onClick={handleAdd}
                   className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground font-body text-xs disabled:opacity-50 disabled:pointer-events-none hover:bg-primary/90 transition-colors"
                 >
-                  {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                  {saving ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
                   Save asset
                 </button>
               </div>

@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Upload, Sparkles, Trash2, Save, FileText, Paintbrush, FileSpreadsheet, Scissors, RotateCw, Plus, Minus, Image as ImageIcon, Check, X, AlertCircle } from "lucide-react";
@@ -381,7 +382,7 @@ export default function TradeFloorPlanFFE() {
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             />
             <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full">
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {uploading ? <DotCircleLoader size="sm" /> : <Upload className="w-4 h-4" />}
               {uploading ? "Uploading…" : (planUrl ? "Replace plan" : "Upload floor plan (image or PDF)")}
             </Button>
             {planUrl && (
@@ -420,7 +421,7 @@ export default function TradeFloorPlanFFE() {
               />
             </div>
             <Button onClick={runSuggest} disabled={!planUrl || suggesting} className="w-full">
-              {suggesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {suggesting ? <DotCircleLoader size="sm" /> : <Sparkles className="w-4 h-4" />}
               {suggesting ? "Composing layout…" : "Suggest FF&E layout"}
             </Button>
             {suggesting && (
@@ -432,7 +433,7 @@ export default function TradeFloorPlanFFE() {
                   />
                 </div>
                 <div className="flex items-start gap-2">
-                  <Loader2 className="w-3.5 h-3.5 mt-0.5 animate-spin text-primary shrink-0" />
+                  <DotCircleLoader size="sm" className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-body text-sm text-foreground">{PROGRESS_STEPS[progressStep]}</p>
                     <p className="font-body text-xs text-muted-foreground mt-0.5">

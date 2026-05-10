@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -434,7 +435,7 @@ function DesignerIGCard({ row, onSave }: { row: DesignerIG; onSave: (row: Design
               disabled={saving}
               className="flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 transition-colors font-body text-[9px] uppercase tracking-[0.1em] disabled:opacity-50"
             >
-              {saving ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Save className="h-2.5 w-2.5" />}
+              {saving ? <DotCircleLoader size="sm" className="h-2.5 w-2.5" /> : <Save className="h-2.5 w-2.5" />}
               Save
             </button>
             <button

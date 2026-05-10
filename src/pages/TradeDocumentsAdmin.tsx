@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -470,7 +471,7 @@ const TradeDocumentsAdmin = () => {
                       title="Use cover as brand thumbnail"
                     >
                       {extractingThumbnailId === doc.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <DotCircleLoader size="sm" className="w-3.5 h-3.5" />
                       ) : (
                         <Image className="w-3.5 h-3.5" />
                       )}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Pencil, Loader2 } from "lucide-react";
@@ -154,7 +155,7 @@ export default function InlinePriceEditor({
           placeholder="0"
         />
         <button onClick={save} disabled={saving} className="p-0.5 text-emerald-600 hover:text-emerald-700 transition-colors">
-          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+          {saving ? <DotCircleLoader size="sm" /> : <Check className="h-3 w-3" />}
         </button>
         <button onClick={cancel} className="p-0.5 text-muted-foreground hover:text-foreground transition-colors">
           <X className="h-3 w-3" />

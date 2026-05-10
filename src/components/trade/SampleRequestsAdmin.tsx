@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -419,7 +420,7 @@ function SampleAdminRow({
                   disabled={uploading}
                   className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-[11px] text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
                 >
-                  {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus className="h-3 w-3" />}
+                  {uploading ? <DotCircleLoader size="sm" /> : <ImagePlus className="h-3 w-3" />}
                   Upload Photo
                 </button>
                 <button

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
@@ -1188,7 +1189,7 @@ const TradeAxonometric = () => {
                 className="w-full"
               >
                 {submitting3dModel ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</>
+                  <><DotCircleLoader size="sm" className="mr-2" />Submitting…</>
                 ) : (
                   <><Upload className="w-4 h-4 mr-2" />Submit 3D Model for Processing</>
                 )}
@@ -1558,7 +1559,7 @@ const TradeAxonometric = () => {
             >
               {generating ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <DotCircleLoader size="sm" className="mr-2" />
                   Generating…
                 </>
               ) : isCoolingDown ? (
@@ -1770,7 +1771,7 @@ const TradeAxonometric = () => {
                       }`}
                       title="Apply wallpaper / texture to a wall"
                     >
-                      {aiTextureUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5" />}
+                      {aiTextureUploading ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Paintbrush className="w-3.5 h-3.5" />}
                     </button>
                     <input
                       type="text"
@@ -1782,7 +1783,7 @@ const TradeAxonometric = () => {
                       className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
                     />
                     <Button size="sm" onClick={sendAiPrompt} disabled={aiSending || !aiPrompt.trim()}>
-                      {aiSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+                      {aiSending ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Wand2 className="w-3.5 h-3.5" />}
                     </Button>
                   </div>
                 </div>
@@ -1921,7 +1922,7 @@ const TradeAxonometric = () => {
                   >
                     <Layers className="w-3.5 h-3.5 mr-1.5" />
                     Proposal Builder
-                    {emptyRoomGenerating && <Loader2 className="w-3 h-3 ml-1.5 animate-spin" />}
+                    {emptyRoomGenerating && <DotCircleLoader size="sm" className="ml-1.5" />}
                   </Button>
                 </div>
 
@@ -1965,7 +1966,7 @@ const TradeAxonometric = () => {
                         await saveToGallery(true);
                       }}
                     >
-                      {savingToGallery ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-1.5" />}
+                      {savingToGallery ? <DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" /> : <Eye className="w-3.5 h-3.5 mr-1.5" />}
                       Save & Publish
                     </Button>
                   </div>
@@ -1994,7 +1995,7 @@ const TradeAxonometric = () => {
                     disabled={!result || savingRefStyle}
                     onClick={saveAsReferenceStyle}
                   >
-                    {savingRefStyle ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5 mr-1.5" />}
+                    {savingRefStyle ? <DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" /> : <Paintbrush className="w-3.5 h-3.5 mr-1.5" />}
                     {currentRefStyle ? "Update Reference Style" : "Save as Reference Style"}
                   </Button>
                 </div>

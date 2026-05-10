@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { FileText, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -335,7 +336,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
         disabled={busy || disabled || eligibleItems.length === 0}
         className="gap-1.5"
       >
-        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+        {busy ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
         Create Quote
       </Button>
 
@@ -378,7 +379,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
           <div className="flex-1 overflow-y-auto -mx-6 px-6 py-2 border-y border-border">
             {reviewLoading ? (
               <div className="flex items-center justify-center py-10 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading items…
+                <DotCircleLoader size="sm" className="mr-2" /> Loading items…
               </div>
             ) : (
               <ul className="divide-y divide-border">
@@ -417,7 +418,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
               Cancel
             </Button>
             <Button onClick={confirmReview} disabled={busy || reviewLoading || reviewRows.length === 0}>
-              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : null}
+              {busy ? <DotCircleLoader size="sm" className="h-3.5 w-3.5 mr-1.5" /> : null}
               Create quote
             </Button>
           </DialogFooter>
@@ -446,7 +447,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
               Create new quote
             </Button>
             <AlertDialogAction disabled={busy} onClick={mergeIntoExisting}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add to existing"}
+              {busy ? <DotCircleLoader size="sm" /> : "Add to existing"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

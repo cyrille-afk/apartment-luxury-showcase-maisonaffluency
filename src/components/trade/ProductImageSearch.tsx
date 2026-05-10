@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Search, Loader2, ChevronRight, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -112,7 +113,7 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
           className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading && results.length === 0 ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <DotCircleLoader size="sm" />
           ) : (
             "Search"
           )}
@@ -138,7 +139,7 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
             >
               {importing === idx && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/70">
-                  <Loader2 className="h-5 w-5 animate-spin text-foreground" />
+                  <DotCircleLoader size="sm" className="text-foreground" />
                 </div>
               )}
               <img
@@ -171,7 +172,7 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
             disabled={loading}
             className="flex items-center gap-1.5 px-4 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-md hover:border-foreground/30 transition-colors disabled:opacity-50"
           >
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            {loading ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
             Load more results
           </button>
         </div>

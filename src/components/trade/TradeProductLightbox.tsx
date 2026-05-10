@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen, Info } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
@@ -538,7 +539,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 )}
               >
                 {isAdding ? (
-                  <Loader2 size={14} className="animate-spin" />
+                  <DotCircleLoader size="sm" />
                 ) : isAdded ? (
                   <Check size={14} />
                 ) : (

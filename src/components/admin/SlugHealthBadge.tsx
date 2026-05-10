@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -240,7 +241,7 @@ const SlugHealthBadge = ({ designer, issue, allDesigners }: BadgeProps) => {
               disabled={fixDisabled}
             >
               {fixMutation.isPending ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <DotCircleLoader size="sm" />
               ) : curated ? (
                 "Force overwrite"
               ) : (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, Play, Search, Pencil, Check, X } from "lucide-react";
@@ -325,7 +326,7 @@ const ScrapeConfigCard = ({
         title="Discover new URLs"
       >
         {mappingConfig ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
         ) : (
           <Search className="h-3.5 w-3.5" />
         )}
@@ -359,7 +360,7 @@ const ScrapeConfigCard = ({
         title="Run now"
       >
         {runningConfigId === config.id ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
         ) : (
           <Play className="h-3.5 w-3.5" />
         )}

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
@@ -325,7 +326,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
             disabled={generating || (!hasMask && placedProducts.length === 0)}
           >
             {generating ? (
-              <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Rendering…</>
+              <><DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" />Rendering…</>
             ) : (
               <><Wand2 className="w-3.5 h-3.5 mr-1.5" />AI Render</>
             )}

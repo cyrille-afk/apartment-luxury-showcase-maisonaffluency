@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, type PointerEvent, type MouseEvent } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { ChevronLeft, ChevronRight, FolderOpen, Camera, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -113,7 +114,7 @@ const BrandTile = ({
         <div className="w-16 h-16 rounded-md bg-muted/20 overflow-hidden relative">
           {isUploading ? (
             <div className="w-full h-full flex items-center justify-center">
-              <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+              <DotCircleLoader size="sm" className="text-muted-foreground" />
             </div>
           ) : thumb ? (
             <img

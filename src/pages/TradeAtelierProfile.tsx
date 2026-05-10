@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
@@ -670,7 +671,7 @@ const TradeAtelierProfile = () => {
                               )}
                               title={isAdded ? "Added to quote" : "Add to quote"}
                             >
-                              {isAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> :
+                              {isAdding ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> :
                                isAdded ? <Check className="h-3.5 w-3.5" /> :
                                <ShoppingCart className="h-3.5 w-3.5" />}
                             </button>

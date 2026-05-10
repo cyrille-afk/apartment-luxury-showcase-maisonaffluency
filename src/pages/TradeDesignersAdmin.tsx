@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, Fragment, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { cn } from "@/lib/utils";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -1054,7 +1055,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           disabled={fetchingAll || posts.length === 0}
           className="text-xs gap-1.5"
         >
-          {fetchingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+          {fetchingAll ? <DotCircleLoader size="sm" /> : <Wand2 className="w-3 h-3" />}
           {fetchingAll
             ? "Refreshing\u2026"
             : posts.length === 0
@@ -1117,7 +1118,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
               className="h-9 shrink-0 gap-1.5 text-xs"
               title={needsHostedImage(post.image_url) ? "Fetch hosted image" : "Refresh hosted image"}
             >
-              {fetchingIds.has(post.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+              {fetchingIds.has(post.id) ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Wand2 className="w-3.5 h-3.5" />}
               {needsHostedImage(post.image_url) ? "Auto-fetch" : "Refresh"}
             </Button>
             <Input
@@ -1144,7 +1145,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
             />
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={handleBulkAdd} disabled={!bulkText.trim() || bulkImporting} className="text-xs h-8 gap-1.5">
-                {bulkImporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                {bulkImporting ? <DotCircleLoader size="sm" /> : <Plus className="w-3 h-3" />}
                 {bulkImporting ? "Importing & fetching images…" : "Import & Auto-fetch"}
               </Button>
               <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>

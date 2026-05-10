@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -493,7 +494,7 @@ export default function TradeMoodBoards() {
 
             <div className="max-h-[500px] overflow-y-auto space-y-1.5 pr-1">
               {sourceLoading ? (
-                <div className="flex justify-center py-10"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+                <div className="flex justify-center py-10"><DotCircleLoader size="sm" className="text-muted-foreground" /></div>
               ) : filtered.length === 0 ? (
                 <p className="font-body text-xs text-muted-foreground text-center py-8">
                   {filter === "favourites" ? "No favourited products yet." : filter === "board" ? (projectId ? "No products in this project's tearsheet yet." : "No products in your project boards.") : "No products found."}

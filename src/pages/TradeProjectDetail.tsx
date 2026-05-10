@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link, useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
@@ -224,7 +225,7 @@ export default function TradeProjectDetail() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>;
+    return <div className="flex items-center justify-center py-20"><DotCircleLoader size="sm" className="text-muted-foreground" /></div>;
   }
 
   if (!project) {
@@ -344,7 +345,7 @@ export default function TradeProjectDetail() {
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5">
-                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Save
+                {saving ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />} Save
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
             </div>
@@ -391,7 +392,7 @@ export default function TradeProjectDetail() {
       <div className="border border-border rounded-md p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">Project summary</h2>
-          {loadingLinks && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+          {loadingLinks && <DotCircleLoader size="sm" className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <Stat icon={FileText} label="Quotes" value={quotes.length} onClick={() => handleTabChange("quotes")} />

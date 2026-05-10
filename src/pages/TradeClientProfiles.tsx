@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -139,14 +140,14 @@ const TradeClientProfiles = () => {
           disabled={computing}
           className="gap-2"
         >
-          {computing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {computing ? <DotCircleLoader size="sm" /> : <Sparkles className="h-4 w-4" />}
           {computing ? "Analysing…" : "Recompute Profiles"}
         </Button>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <DotCircleLoader size="sm" className="text-muted-foreground" />
         </div>
       ) : profiles.length === 0 ? (
         <Card>

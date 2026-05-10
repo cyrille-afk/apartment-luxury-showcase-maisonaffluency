@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
@@ -473,7 +474,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
       {status === "committing" && (
         <div className="flex items-center justify-end gap-2 text-muted-foreground">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <DotCircleLoader size="sm" className="h-3.5 w-3.5" />
           <span className="font-body text-[11px]">
             {isAppend ? "Adding to tearsheet…" : "Creating tearsheet…"}
           </span>

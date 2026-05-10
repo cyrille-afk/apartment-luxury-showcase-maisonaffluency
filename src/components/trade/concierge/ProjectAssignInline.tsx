@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, FolderPlus } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -147,7 +148,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
 
       {loading ? (
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-3 w-3 animate-spin" />
+          <DotCircleLoader size="sm" />
           <span className="font-body text-[11px]">Loading your projects…</span>
         </div>
       ) : quick.length === 0 ? (
@@ -177,7 +178,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
                 )}
               >
                 {saving === p.id ? (
-                  <Loader2 className="h-3 w-3 animate-spin inline" />
+                  <DotCircleLoader size="sm" className="inline" />
                 ) : (
                   <>
                     <span

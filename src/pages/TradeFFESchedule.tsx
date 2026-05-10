@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -250,11 +251,11 @@ export default function TradeFFESchedule() {
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={handleSpecPackage} disabled={!items.length || packaging} variant="outline" size="sm">
-              {packaging ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Package className="h-4 w-4 mr-2" />}
+              {packaging ? <DotCircleLoader size="sm" className="mr-2" /> : <Package className="h-4 w-4 mr-2" />}
               Spec Package (.zip)
             </Button>
             <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
-              {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+              {exporting ? <DotCircleLoader size="sm" className="mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Export Excel (.xlsx)
             </Button>
           </div>
@@ -281,7 +282,7 @@ export default function TradeFFESchedule() {
         )}
 
         {isLoading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          <div className="flex justify-center py-20"><DotCircleLoader size="sm" className="text-muted-foreground" /></div>
         ) : items.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-border rounded-lg">
             <FileSpreadsheet className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
