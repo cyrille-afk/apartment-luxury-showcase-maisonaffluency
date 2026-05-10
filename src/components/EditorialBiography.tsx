@@ -330,7 +330,7 @@ function VideoBlock({
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
   const ytId = extractYouTubeId(url);
   const isYouTube = !!ytId;
-  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI", "0y69QUFEnX8", "RG2VhkWkQgw"]), []);
+  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI", "0y69QUFEnX8", "RG2VhkWkQgw", "Fa7f1xHOc-I"]), []);
   const startUnmuted = !!ytId && unmutedVideos.has(ytId);
   const useDirectYouTubeEmbed = false; // Always use YT IFrame API for reliable autoplay
 
@@ -395,7 +395,7 @@ function VideoBlock({
         videoId: ytId,
         playerVars: {
           autoplay: 1,
-          mute: 1,
+          mute: startUnmuted ? 0 : 1,
           playsinline: 1,
           rel: 0,
           modestbranding: 1,
@@ -433,7 +433,7 @@ function VideoBlock({
       try { ytPlayerRef.current?.destroy?.(); } catch {}
       ytPlayerRef.current = null;
     };
-  }, [playing, isYouTube, ytId, index, useDirectYouTubeEmbed]);
+  }, [playing, isYouTube, ytId, index, useDirectYouTubeEmbed, startUnmuted]);
 
   const toggleMute = useCallback(() => {
     const player = ytPlayerRef.current;
