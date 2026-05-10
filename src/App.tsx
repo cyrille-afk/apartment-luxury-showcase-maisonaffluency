@@ -138,6 +138,22 @@ const queryClient = new QueryClient();
 const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
 let previewLocationRestored = false;
 
+function getPreviewAnchorId(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const probeY = Math.min(Math.max(window.innerHeight * 0.35, 120), window.innerHeight - 80);
+  const elements = document.elementsFromPoint(window.innerWidth / 2, probeY);
+
+  for (const element of elements) {
+    const anchored = element.closest<HTMLElement>("section[id], main[id], article[id], [data-preview-anchor][id]");
+    if (anchored?.id && anchored.id !== "main-content") return anchored.id;
+  }
+
+  const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id], article[id], [data-preview-anchor][id]"));
+  return sections
+    .map((el) => ({ id: el.id, distance: Math.abs(el.getBoundingClientRect().top - probeY) }))
+    .sort((a, b) => a.distance - b.distance)[0]?.id;
+}
+
 function isPreviewOrDev(): boolean {
   if (import.meta.env.DEV) return true;
   if (typeof window === "undefined") return false;
@@ -160,6 +176,7 @@ function isPreviewOrDev(): boolean {
 
 function PreviewViewContinuity() {
   const location = useLocation();
+  const anchorIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!isPreviewOrDev()) return;
@@ -175,6 +192,7 @@ function PreviewViewContinuity() {
               path: location.pathname,
               search: location.search,
               scrollY: window.scrollY,
+              anchorId: anchorIdRef.current || getPreviewAnchorId(),
               ts: Date.now(),
             }),
           );
@@ -185,11 +203,26 @@ function PreviewViewContinuity() {
     };
 
     save();
+    const updateAnchor = () => {
+      anchorIdRef.current = getPreviewAnchorId() || anchorIdRef.current;
+      save();
+    };
+    const restoreAnchorAfterResize = () => {
+      const anchorId = anchorIdRef.current;
+      if (!anchorId) return;
+      window.setTimeout(() => {
+        document.getElementById(anchorId)?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior });
+      }, 80);
+    };
     window.addEventListener("scroll", save, { passive: true });
+    window.addEventListener("scrollend", updateAnchor);
+    window.addEventListener("resize", restoreAnchorAfterResize);
     window.addEventListener("pagehide", save);
     return () => {
       if (timer) window.clearTimeout(timer);
       window.removeEventListener("scroll", save);
+      window.removeEventListener("scrollend", updateAnchor);
+      window.removeEventListener("resize", restoreAnchorAfterResize);
       window.removeEventListener("pagehide", save);
     };
   }, [location.pathname, location.search]);
