@@ -1256,7 +1256,7 @@ const Collectibles = () => {
       {/* Curators' Picks Dialog - Full screen dark modal like FeaturedDesigners */}
       <Dialog modal={false} open={!!curatorPicksDesigner} onOpenChange={(open) => !open && closeCuratorPicks()}>
         <DialogContent 
-          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none [&>button.absolute]:hidden" 
+          className="top-0 left-0 translate-x-0 translate-y-0 max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 bg-black/95 border-none [&>button.absolute]:hidden" 
           onKeyDown={handleKeyDown}
           aria-describedby={undefined}
         >
@@ -1301,7 +1301,7 @@ const Collectibles = () => {
                   observer.observe(el, { childList: true, subtree: true });
                   setTimeout(checkScroll, 500);
                 }}
-                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
+                className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none ${isZoomed ? 'max-h-[95dvh] pb-4 pt-4' : 'max-h-[92dvh] pb-4 pt-4 md:max-h-[85vh]'}`}
                 style={{ WebkitUserSelect: 'none' }}>
                 <div 
                   className={`relative overflow-visible transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}

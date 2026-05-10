@@ -42,20 +42,22 @@ const CategoryRoute = () => {
     const start = performance.now();
     const tryScroll = () => {
       if (cancelled) return;
-      const target =
-        document.getElementById("product-grid") ||
-        document.getElementById("designers") ||
-        document.getElementById("featured-designers") ||
-        document.querySelector("[data-section='designers']");
+        const target =
+          document.getElementById("product-grid") ||
+          document.querySelector("[data-category-results]") ||
+          document.getElementById("designers") ||
+          document.getElementById("featured-designers") ||
+          document.querySelector("[data-section='designers']");
       if (target instanceof HTMLElement) {
         // Re-broadcast in case sections mounted after our first dispatch.
         window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
         // Offset by header (and Featured Read banner) so the hero isn't hidden behind the sticky nav.
-        const nav = document.querySelector("nav");
+        const nav = document.querySelector("nav[aria-label='Main navigation'], header, nav");
         const headerOffset = nav instanceof HTMLElement ? nav.getBoundingClientRect().height : 96;
         const banner = document.querySelector("[data-featured-read-banner]");
         const bannerOffset = banner instanceof HTMLElement ? banner.getBoundingClientRect().height : 0;
-        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset - bannerOffset - 8;
+        const mobileExtra = window.innerWidth < 768 ? 16 : 8;
+        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset - bannerOffset - mobileExtra;
         window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
         return;
       }

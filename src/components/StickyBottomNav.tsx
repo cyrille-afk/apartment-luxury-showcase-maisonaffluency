@@ -13,9 +13,6 @@ const sectionItems = [
   
 ];
 
-const SCROLL_THRESHOLD = 1400;
-const NAV_HEIGHT = 96;
-
 const StickyBottomNav = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -79,7 +76,7 @@ const StickyBottomNav = () => {
         >
           {/* Backdrop */}
           <div className="bg-card/90 backdrop-blur-xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
-            <div className="flex items-center justify-around px-1 pt-2 pb-[max(3.5rem,calc(env(safe-area-inset-bottom) + 2.75rem))]">
+            <div className="flex items-center justify-around px-1 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               {sectionItems.map(({ id, label, icon: Icon }, index) => {
                 const isActive = activeSection === id;
                 return (
@@ -89,7 +86,7 @@ const StickyBottomNav = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.06 * index, duration: 0.35, ease: "easeOut" }}
                     onClick={() => scrollTo(id)}
-                    className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
+                    className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
                       isActive
                         ? "text-[hsl(var(--accent))]"
                         : "text-foreground active:text-foreground"

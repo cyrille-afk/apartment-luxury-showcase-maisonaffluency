@@ -762,11 +762,9 @@ const PublicProductPage: React.FC = () => {
       })()}
 
       <div className="min-h-screen bg-background text-foreground">
-        <div className="hidden md:block">
-          <Navigation borderless />
-        </div>
+        <Navigation borderless />
 
-        <div className="pt-4 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-28 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Breadcrumbs
             items={buildProductBreadcrumbs({
               root: { label: "Home", to: "/" },
