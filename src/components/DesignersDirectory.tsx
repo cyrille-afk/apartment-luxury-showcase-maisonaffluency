@@ -487,7 +487,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         </div>
         {thumbs.length === 0 && (
           <>
-            <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
+            <button type="button" onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-20 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
               <Share2 className="h-3 w-3" />
               <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
             </button>
@@ -507,11 +507,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         )}
         {thumbs.length > 0 && (
           <>
-            <button onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
+            <button type="button" onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-20 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
               <Share2 className="h-3.5 w-3.5" />
               <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
             </button>
-            <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1.5">
+            <div className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-1.5">
               <div className="flex flex-col items-center gap-1.5">
                 <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
                 <div className="flex gap-1.5">
@@ -520,6 +520,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                     const resolvedGalleryIdx = mappedGalleryIdx ?? getPositionalFallbackIndex(i);
                     return (
                       <button
+                        type="button"
                         key={i}
                         onClick={(e) => {
                           e.preventDefault();
@@ -549,7 +550,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                             toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
                           }
                         }}
-                        className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
+                        className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer touch-manipulation"
                       >
                         <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
                         <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
@@ -571,7 +572,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
             </div>
           </>
         )}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
+        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
         </div>
       </div>
