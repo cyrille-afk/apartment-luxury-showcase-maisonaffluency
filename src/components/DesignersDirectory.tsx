@@ -467,12 +467,6 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
-      role="link"
-      tabIndex={0}
-      onClick={() => navigate(`/designers/${item.slug}`)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") navigate(`/designers/${item.slug}`);
-      }}
       className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
@@ -489,6 +483,12 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           <p className={`font-display text-white tracking-wide leading-tight drop-shadow-sm ${displayName.length > 20 ? "text-[11px] md:text-xs" : "text-xs md:text-sm"}`}>{displayName}</p>
           {parentLabel && <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">{parentLabel}</p>}
         </div>
+        <button
+          type="button"
+          className="absolute inset-0 z-[5] cursor-pointer"
+          aria-label={`View ${displayName} portrait`}
+          onClick={() => navigate(`/designers/${item.slug}`)}
+        />
         {thumbs.length === 0 && (
           <>
             <button type="button" onClick={(e) => handleDesignerShare(e, item, displayName)} className="absolute bottom-3 left-3 z-20 flex items-center gap-1 text-white/80 hover:text-white transition-opacity" aria-label={`Share ${displayName}`}>
