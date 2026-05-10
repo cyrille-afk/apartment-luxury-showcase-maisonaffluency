@@ -288,7 +288,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-stretch md:items-center justify-center md:p-8"
+        className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-stretch md:items-center justify-center md:p-8"
         onClick={onClose}
       >
         <motion.div
@@ -296,7 +296,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-          className="relative max-w-4xl w-full h-[100svh] max-h-[100svh] md:h-auto md:max-h-[90vh] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
+          className="relative max-w-4xl w-full h-dvh max-h-dvh md:h-auto md:max-h-[90vh] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
@@ -318,7 +318,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 h-[44svh] max-h-[360px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-0 md:min-h-[400px]"
+            className="relative w-full md:w-1/2 h-[42dvh] max-h-[340px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-0 md:min-h-[400px]"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
