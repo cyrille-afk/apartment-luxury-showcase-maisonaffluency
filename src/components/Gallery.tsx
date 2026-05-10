@@ -898,9 +898,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
             const isMobilePillActive = originalSectionIndex === activeMobilePill;
-            return <div key={section.experience} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''}`}>
-              {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[10rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
-              {/* Mobile accordion header */}
+            return <React.Fragment key={section.experience}>
+              {/* Mobile accordion header — always visible */}
               <button
                 type="button"
                 onClick={() => {
@@ -910,7 +909,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     requestAnimationFrame(() => {
                       const el = sectionRefs.current[originalSectionIndex];
                       if (el) {
-                        const top = el.getBoundingClientRect().top + window.scrollY - 120;
+                        const top = el.getBoundingClientRect().top + window.scrollY - 100;
                         window.scrollTo({ top, behavior: 'smooth' });
                       }
                     });
@@ -921,11 +920,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 aria-controls={`gallery-section-${originalSectionIndex}`}
               >
                 <span className="font-serif text-base text-foreground">{section.experience}</span>
-                <span className="shrink-0 w-7 h-7 rounded-full border border-foreground/30 flex items-center justify-center text-foreground">
+                <span className="shrink-0 w-7 h-7 rounded-full border border-foreground/40 flex items-center justify-center text-foreground">
                   {isMobilePillActive ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 </span>
               </button>
-              <div id={`gallery-section-${originalSectionIndex}`} className={!isMobilePillActive ? 'hidden md:block' : 'pt-3'}></div>
+              <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-3'}`}>
+              {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[10rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
             y: 20
