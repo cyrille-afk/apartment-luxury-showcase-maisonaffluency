@@ -142,14 +142,26 @@ export function BoardRecommendations() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-lg text-foreground flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          Suggested for <em className="not-italic text-primary">{projectName}</em>
+          Suggested complements for{" "}
+          <Link
+            to={`/trade/projects/${projectId}`}
+            className="not-italic text-primary hover:underline underline-offset-4"
+          >
+            {projectName}
+          </Link>
         </h2>
         <div className="flex items-center gap-2">
+          <Link
+            to={`/trade/projects/${projectId}`}
+            className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+          >
+            Open project
+          </Link>
           <Link
             to={`/trade/mood-boards?project=${projectId}`}
             className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
           >
-            Open mood board
+            Mood board
           </Link>
           <Button
             variant="ghost"
