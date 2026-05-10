@@ -1161,8 +1161,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       </div>
                     )}
                     {/* Photo title below carousel */}
-                    <div className="flex items-center justify-between mt-3 px-1">
-                      <h4 className="font-serif text-foreground text-base">
+                    <div className="flex items-center justify-center mt-3 px-1">
+                      <h4 className="font-serif text-foreground text-base text-center">
                         {section.items[activeIdx]?.title}
                       </h4>
                     </div>
