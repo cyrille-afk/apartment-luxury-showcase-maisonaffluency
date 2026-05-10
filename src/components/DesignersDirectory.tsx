@@ -12,6 +12,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
 import { trackCTA } from "@/lib/analytics";
@@ -575,6 +576,101 @@ function CarouselDots({ count, selected, onSelect }: { count: number; selected: 
       {Array.from({ length: count }).map((_, i) => (
         <button key={i} onClick={() => onSelect(i)} className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"}`} aria-label={`Go to page ${i + 1}`} />
       ))}
+    </div>
+  );
+}
+
+// ─── Mobile Alphabet Accordion ───────────────────────────────────────────────
+function MobileLetterRow({
+  letter,
+  designers,
+  defaultOpen,
+  parentDesignerCountByName,
+  fallbackGalleryIndexByDesigner,
+  initialExpand,
+  designersWithIgPosts,
+  anchorId,
+}: {
+  letter: string;
+  designers: Designer[];
+  defaultOpen?: boolean;
+  parentDesignerCountByName: Record<string, number>;
+  fallbackGalleryIndexByDesigner: Record<string, number[]>;
+  initialExpand?: string;
+  designersWithIgPosts?: Set<string>;
+  anchorId: string;
+}) {
+  const matchesExpand = !!(initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand));
+  const [open, setOpen] = useState<boolean>(!!defaultOpen || matchesExpand);
+  const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
+
+  useEffect(() => {
+    if (defaultOpen) setOpen(true);
+  }, [defaultOpen]);
+
+  return (
+    <div id={anchorId} data-alpha-letter={letter} className="border-b border-border/40 scroll-mt-32">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 py-3.5 px-1 text-left"
+        aria-expanded={open}
+      >
+        <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
+        <span className="font-serif text-xl text-foreground flex-1">{letter}</span>
+        <span className="font-body text-[11px] text-muted-foreground/60 tracking-widest">{designers.length}</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pb-5 pt-1">
+              {/* Single-large-card horizontal swipe with peek */}
+              <div className="-mx-4 px-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+                <div className="flex gap-3 pr-6">
+                  {designers.map((item) => {
+                    const designerCount = parentDesignerCountByName[item.name] ?? 0;
+                    const isParentBrand = item.founder === item.name && designerCount > 0;
+                    return (
+                      <div key={item.slug} className="flex-none w-[78%] max-w-[320px] snap-start">
+                        {isParentBrand ? (
+                          <ParentBrandCard
+                            item={item}
+                            isOpen={openParent === item.name}
+                            onToggle={() => setOpenParent(openParent === item.name ? null : item.name)}
+                            designerCount={designerCount}
+                            hasIgPosts={designersWithIgPosts?.has(item.id)}
+                          />
+                        ) : (
+                          <SingleDesignerCard item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <AnimatePresence>
+                {openParent && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.25 }}
+                    className="mt-4"
+                  >
+                    <ParentSubGrid parentName={openParent} onClose={() => setOpenParent(null)} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1320,7 +1416,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="mb-12 md:mb-16 text-left"
+              className="mb-6 md:mb-16 text-left"
             >
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
                 <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
@@ -1331,13 +1427,25 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     loading="lazy"
                   />
                 </div>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
+                <div className="flex-1 w-full">
+                  <div className="flex items-start justify-between gap-3 mb-1.5 md:mb-2">
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-serif text-foreground leading-tight">
                       {hero ? hero.title : "Designers & Makers"}
                     </h2>
+                    <button
+                      onClick={() => {
+                        const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
+                        const text = `${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency\n${shareUrl}`;
+                        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                        window.open(wa, "_blank", "noopener");
+                      }}
+                      className="md:hidden flex-shrink-0 mt-1 p-1.5 -mr-1 text-foreground/70 hover:text-primary transition-colors"
+                      aria-label="Share section"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+                  <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-3 md:mb-4 text-justify line-clamp-3 md:line-clamp-none">
                     {hero
                       ? hero.summary
                       : "Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture."}
@@ -1349,7 +1457,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
                       window.open(wa, "_blank", "noopener");
                     }}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
+                    className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
                     aria-label="Share section"
                   >
                     <Share2 className="w-3.5 h-3.5" />
@@ -1366,11 +1474,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           <div className="flex flex-col gap-4 mb-5 md:mb-6 md:hidden">
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className="order-first">
-                <Popover open={filterOpen} onOpenChange={(open) => {
+                <Sheet open={filterOpen} onOpenChange={(open) => {
                   setFilterOpen(open);
                   if (!open && selectedCategory) broadcastFilter(selectedCategory, selectedSubcategory);
                 }}>
-                  <PopoverTrigger asChild>
+                  <SheetTrigger asChild>
                     <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
                       <SlidersHorizontal className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
@@ -1378,56 +1486,66 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                         <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
                       )}
                     </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
-                      <div className="flex items-center gap-2">
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0 flex flex-col">
+                    <SheetHeader className="px-5 pt-4 pb-3 border-b border-border/40 flex-shrink-0">
+                      <div className="mx-auto w-10 h-1 bg-border rounded-full mb-3" />
+                      <div className="flex items-center justify-between">
+                        <SheetTitle className="font-serif text-base text-foreground flex items-center gap-2 text-left">
+                          <SlidersHorizontal className="h-4 w-4" /> Filter
+                        </SheetTitle>
                         {selectedCategory && (
                           <button onClick={() => setSelectedCategory(null)} className="px-3 py-1 rounded-full border border-[hsl(var(--gold))] bg-white text-xs font-body font-medium text-foreground shadow-sm hover:shadow-md transition-all duration-200">Clear</button>
                         )}
-                        <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-full bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors" aria-label="Close filter">
-                          <X className="h-4 w-4" />
-                        </button>
+                      </div>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto px-5 py-4 pb-[env(safe-area-inset-bottom)]">
+                      <div className="space-y-1">
+                        {categories.map((category) => (
+                          <div key={category}>
+                            <label className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                              <Checkbox
+                                checked={selectedCategory === category}
+                                onCheckedChange={() => {
+                                  if (selectedCategory === category) setSelectedCategory(null, true);
+                                  else setSelectedCategory(category, true);
+                                }}
+                              />
+                              <span className="text-sm text-foreground font-body">{category}</span>
+                            </label>
+                            {selectedCategory === category && SUBCATEGORY_MAP[category]?.length > 0 && (
+                              <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                                <button
+                                  onClick={() => setSelectedSubcategory(null)}
+                                  className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1.5 ${!selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'}`}
+                                >
+                                  All {category}
+                                </button>
+                                {SUBCATEGORY_MAP[category].map(sub => (
+                                  <button
+                                    key={sub}
+                                    onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
+                                    className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1.5 ${selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'}`}
+                                  >
+                                    {sub}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      {categories.map((category) => (
-                        <div key={category}>
-                          <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
-                            <Checkbox
-                              checked={selectedCategory === category}
-                              onCheckedChange={() => {
-                                if (selectedCategory === category) setSelectedCategory(null, true);
-                                else setSelectedCategory(category, true);
-                              }}
-                            />
-                            <span className="text-sm text-foreground font-body">{category}</span>
-                          </label>
-                          {selectedCategory === category && SUBCATEGORY_MAP[category]?.length > 0 && (
-                            <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
-                              <button
-                                onClick={() => setSelectedSubcategory(null)}
-                                className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${!selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'}`}
-                              >
-                                All {category}
-                              </button>
-                              {SUBCATEGORY_MAP[category].map(sub => (
-                                <button
-                                  key={sub}
-                                  onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
-                                  className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'}`}
-                                >
-                                  {sub}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                    <div className="px-5 py-3 border-t border-border/40 flex-shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                      <button
+                        onClick={() => setFilterOpen(false)}
+                        className="w-full h-11 rounded-full bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] hover:opacity-90 transition-opacity"
+                      >
+                        Apply
+                      </button>
                     </div>
-                  </PopoverContent>
-                </Popover>
+                  </SheetContent>
+                </Sheet>
               </div>
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -1606,14 +1724,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   </div>
                 )}
                 {!isLoading && alphaGroups.length > 0 && (
-                  <div>
+                  <div className="border-t border-border/40">
                     {alphaGroups.map(([letter, designers]) => (
-                      <LetterGroup
+                      <MobileLetterRow
                         key={letter}
                         letter={letter}
                         anchorId={getDesignersDirectoryAnchorId(letter, "mobile")}
                         designers={designers}
-                        forceOpen={forcedLetters.has(letter)}
+                        defaultOpen={forcedLetters.has(letter) || !!searchQuery.trim()}
                         parentDesignerCountByName={parentDesignerCountByName}
                         fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                         initialExpand={initialExpand}
