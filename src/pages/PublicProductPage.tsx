@@ -346,15 +346,9 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
-          {defaultPair && !isAtDefault && baseOptions.length > 1 && topOptions.length > 1 && (
-            <button
-              type="button"
-              onClick={handleResetDefault}
-              className="self-start mt-1 ml-[26px] font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
-            >
-              Reset to default pairing
-            </button>
-          )}
+          {/* Reset-to-default link intentionally omitted: defaultPair is only
+              set when there is a single fixed pairing (1 base × 1 top), in
+              which case there is nothing to reset to. */}
           {selTop && /customer'?s own material|^com\b|\(com\)/i.test(selTop) && (
             <p className="self-start mt-1 ml-[26px] font-body text-[11px] italic text-muted-foreground leading-snug max-w-md">
               Photography shows the piece in a representative upholstery — your COM fabric will be applied in production.
