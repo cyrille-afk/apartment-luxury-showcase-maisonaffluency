@@ -1168,7 +1168,12 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
         }
 
         const figureH = drawH + 10 + captionH + linkH;
-        const blockH = Math.max(figureH, rightTextH) + 18;
+        // Right column is clamped to figureH + 2 lines; anything beyond
+        // spills full-width below with its own ensureSpace. So the block
+        // we must guarantee fits on this page is the figure plus the
+        // CLAMPED right-column height — not the entire paired text.
+        const clampedRightH = Math.min(rightTextH, figureH + bodyLineH * 2);
+        const blockH = Math.max(figureH, clampedRightH) + 18;
         ensureSpace(blockH);
 
         const startY = cursorY + 6;
