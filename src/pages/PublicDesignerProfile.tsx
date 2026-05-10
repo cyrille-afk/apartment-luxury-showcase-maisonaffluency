@@ -771,13 +771,29 @@ const PublicDesignerProfile = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => { setGridColsTouched(true); setGridCols((prev) => (prev === 3 ? 4 : 3)); }}
+                  onClick={() => {
+                    if (isMobile) {
+                      setMobileCols((prev) => (prev === 2 ? 1 : 2));
+                    } else {
+                      setGridColsTouched(true);
+                      setGridCols((prev) => (prev === 3 ? 4 : 3));
+                    }
+                  }}
                   className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
-                  aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-                  title={gridCols === 3 ? "Display 4" : "Display 3"}
+                  aria-label={isMobile ? `Switch to ${mobileCols === 2 ? 1 : 2} column grid` : `Switch to ${gridCols === 3 ? 4 : 3} column grid`}
+                  title={isMobile ? (mobileCols === 2 ? "Display 1" : "Display 2") : (gridCols === 3 ? "Display 4" : "Display 3")}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    {gridCols === 3 ? (
+                    {isMobile ? (
+                      mobileCols === 2 ? (
+                        <>
+                          <rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" />
+                          <rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" />
+                        </>
+                      ) : (
+                        <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />
+                      )
+                    ) : gridCols === 3 ? (
                       <>
                         <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
                         <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
@@ -794,6 +810,8 @@ const PublicDesignerProfile = () => {
                   </svg>
                 </button>
               </div>
+
+              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
 
               <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
                 {picks.map((pick) => {
