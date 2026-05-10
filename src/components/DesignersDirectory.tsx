@@ -1321,7 +1321,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="mb-12 md:mb-16 text-left"
+              className="mb-6 md:mb-16 text-left"
             >
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
                 <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
@@ -1332,13 +1332,25 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     loading="lazy"
                   />
                 </div>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
+                <div className="flex-1 w-full">
+                  <div className="flex items-start justify-between gap-3 mb-1.5 md:mb-2">
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-serif text-foreground leading-tight">
                       {hero ? hero.title : "Designers & Makers"}
                     </h2>
+                    <button
+                      onClick={() => {
+                        const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
+                        const text = `${hero ? hero.title : "Designers & Makers On View"} — Maison Affluency\n${shareUrl}`;
+                        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                        window.open(wa, "_blank", "noopener");
+                      }}
+                      className="md:hidden flex-shrink-0 mt-1 p-1.5 -mr-1 text-foreground/70 hover:text-primary transition-colors"
+                      aria-label="Share section"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+                  <p className="text-[12px] md:text-base text-muted-foreground font-body max-w-3xl leading-snug md:leading-relaxed mb-3 md:mb-4 text-justify line-clamp-3 md:line-clamp-none">
                     {hero
                       ? hero.summary
                       : "Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture."}
@@ -1350,7 +1362,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
                       window.open(wa, "_blank", "noopener");
                     }}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
+                    className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
                     aria-label="Share section"
                   >
                     <Share2 className="w-3.5 h-3.5" />
