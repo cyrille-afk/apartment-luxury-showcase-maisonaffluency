@@ -1228,30 +1228,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              {/* Mobile section selector — dropdown rendered after first section's pictures */}
-              {originalSectionIndex === 0 && (
-                <div className="md:hidden mt-6 mb-2 px-1">
-                  <label className="block text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-body mb-1.5">
-                    Explore other rooms
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={activeMobilePill}
-                      onChange={(e) => setActiveMobilePill(Number(e.target.value))}
-                      className="w-full appearance-none rounded-md border border-foreground/20 bg-background py-2.5 pl-3 pr-9 font-serif text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/30"
-                      aria-label="Select gallery room"
-                    >
-                      {galleryExperiences.map((exp, idx) => (
-                        <option key={exp.experience} value={idx}>
-                          {exp.experience}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronRight className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/60 rotate-90" />
-                  </div>
-                </div>
-              )}
-
               {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid */}
               {gridCols === 1 ? (
                 <DesktopCarouselStrip
