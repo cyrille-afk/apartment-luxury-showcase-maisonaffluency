@@ -1256,7 +1256,7 @@ const Collectibles = () => {
       {/* Curators' Picks Dialog - Full screen dark modal like FeaturedDesigners */}
       <Dialog modal={false} open={!!curatorPicksDesigner} onOpenChange={(open) => !open && closeCuratorPicks()}>
         <DialogContent 
-          className="top-0 left-0 translate-x-0 translate-y-0 max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 bg-black/95 border-none [&>button.absolute]:hidden" 
+          className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 bg-black/95 border-none overflow-hidden [&>button.absolute]:hidden" 
           onKeyDown={handleKeyDown}
           aria-describedby={undefined}
         >
@@ -1269,7 +1269,7 @@ const Collectibles = () => {
           {curatorPicksDesigner?.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 && (
             <div 
               ref={picksSwipeRef}
-              className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
+              className="relative w-full h-full flex items-start justify-start md:items-center md:justify-center overflow-hidden overscroll-contain"
             >
               {/* Desktop Close button moved inside image container below */}
 
@@ -1301,7 +1301,7 @@ const Collectibles = () => {
                   observer.observe(el, { childList: true, subtree: true });
                   setTimeout(checkScroll, 500);
                 }}
-                className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none ${isZoomed ? 'max-h-[95dvh] pb-4 pt-4' : 'max-h-[92dvh] pb-4 pt-4 md:max-h-[85vh]'}`}
+                className={`flex h-full w-full flex-col items-center justify-start md:h-auto md:w-auto md:justify-center px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none ${isZoomed ? 'max-h-full md:max-h-[95vh] pb-4 pt-4' : 'max-h-full md:max-h-[85vh] pb-4 pt-4'}`}
                 style={{ WebkitUserSelect: 'none' }}>
                 <div 
                   className={`relative overflow-visible transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}

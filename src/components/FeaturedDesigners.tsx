@@ -2842,7 +2842,7 @@ const FeaturedDesigners = () => {
           }}
         >
           <DialogContent
-            className="top-0 left-0 translate-x-0 translate-y-0 max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
+            className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
             hideClose
             onKeyDown={(e) => {
               if (!curatorPicksDesigner?.curatorPicks?.length) return;
@@ -2863,7 +2863,7 @@ const FeaturedDesigners = () => {
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
                   ref={picksSwipeRef}
-                  className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
+                  className="relative w-full h-full flex items-start justify-start md:items-center md:justify-center overflow-hidden overscroll-contain"
                 >
                   <div
                     ref={(el) => {
@@ -2882,7 +2882,7 @@ const FeaturedDesigners = () => {
                       // Recheck after images load
                       setTimeout(checkScroll, 500);
                     }}
-                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+                    className={`flex h-full w-full flex-col items-center justify-start md:h-auto md:w-auto md:justify-center px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible ${isZoomed ? 'max-h-full md:max-h-[95vh] pb-4 pt-4' : 'max-h-full md:max-h-[85vh] pb-4 pt-4'}`}>
                     <div className="relative inline-flex flex-col items-center overflow-visible"
                       onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
                       onMouseLeave={() => setPicksHovered(false)}
