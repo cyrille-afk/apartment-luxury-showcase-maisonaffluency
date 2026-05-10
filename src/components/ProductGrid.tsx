@@ -615,7 +615,7 @@ function singularizeSub(s: string): string {
       <Dialog modal={false} open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
         <DialogContent
           hideClose
-          className="top-0 left-0 translate-x-0 translate-y-0 max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
+          className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
           aria-describedby={undefined}
           onKeyDown={(e) => {
             if (!filtered.length) return;
@@ -627,7 +627,7 @@ function singularizeSub(s: string): string {
           {lightboxOpen && filtered[lightboxIndex] && (() => {
             const currentItem = filtered[lightboxIndex];
             return (
-            <div className="relative w-full h-full flex items-center justify-center touch-pan-y select-none" style={{ WebkitUserSelect: 'none' }}>
+            <div className="relative w-full h-full flex items-start justify-start md:items-center md:justify-center touch-pan-y select-none" style={{ WebkitUserSelect: 'none' }}>
               <div
                 onTouchStart={(e) => { if (isZoomed) return; touchStartRef.current = e.targetTouches[0].clientX; touchEndRef.current = null; }}
                 onTouchMove={(e) => { if (isZoomed) return; touchEndRef.current = e.targetTouches[0].clientX; }}
@@ -641,7 +641,7 @@ function singularizeSub(s: string): string {
                   touchStartRef.current = null;
                   touchEndRef.current = null;
                 }}
-                className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
+                className={`flex h-full w-full flex-col items-center justify-start md:h-auto md:w-auto md:justify-center px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-full md:max-h-[95vh] pb-4 pt-4' : 'max-h-full md:max-h-[85vh] pb-4 pt-4'}`}
                 style={{ WebkitUserSelect: 'none' }}
               >
                 <div className="relative inline-flex flex-col items-center">
