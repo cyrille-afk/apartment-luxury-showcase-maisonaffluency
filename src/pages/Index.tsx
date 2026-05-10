@@ -104,11 +104,16 @@ const scheduleWhenIdle = (callback: () => void, timeout: number) => {
   return () => window.clearTimeout(timeoutId);
 };
 
-const Index = () => {
+type IndexProps = {
+  categoryMode?: boolean;
+};
+
+const Index = ({ categoryMode = false }: IndexProps = {}) => {
+  const routeIsCategory = categoryMode || isCategoryRoute();
   const [showBanner, setShowBanner] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showScrollProgress, setShowScrollProgress] = useState(false);
-  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
+  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => categoryMode || isDeepLink());
   const needsScrollRestore = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
 
@@ -133,7 +138,7 @@ const Index = () => {
 
     // Deep-links and scroll restore both need sections immediately
     const hasRestore = Number(sessionStorage.getItem("__scroll_y") || 0) > 0;
-    if (isDeepLink() || hasRestore) {
+    if (routeIsCategory || isDeepLink() || hasRestore) {
       needsScrollRestore.current = hasRestore;
       setShowNavigation(true);
       setShowScrollProgress(true);
@@ -223,7 +228,7 @@ const Index = () => {
     // Category deep-links manage their own landing/scroll behavior.
     // Restoring an old homepage scroll position here can wrongly dump mobile
     // users back at the landing page after choosing a category/subcategory.
-    if (isCategoryRoute()) {
+    if (routeIsCategory) {
       sessionStorage.removeItem("__scroll_y");
       return;
     }
@@ -382,7 +387,7 @@ const Index = () => {
       <main id="main-content" className="min-h-screen overflow-x-hidden">
         {/* Hero, gallery, interludes are skipped on /products-category/* so the
             page feels like a real PLP — user lands directly on the filtered grid. */}
-        {!isCategoryRoute() && (
+        {!routeIsCategory && (
           <section id="home">
             <Hero />
           </section>
@@ -390,7 +395,7 @@ const Index = () => {
 
         {showBelowFoldSections ? (
           <>
-            {!isCategoryRoute() && (
+            {!routeIsCategory && (
               <>
                 <div className="bg-white">
                   <section id="overview" className="scroll-header-offset">
@@ -429,7 +434,7 @@ const Index = () => {
               </Suspense>
             </section>
 
-            {!isCategoryRoute() && (
+            {!routeIsCategory && (
               <>
                 {/* Interlude 2: After Designers → Before Collectibles */}
                 <Suspense fallback={null}>
