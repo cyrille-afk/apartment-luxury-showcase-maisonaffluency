@@ -1183,17 +1183,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       };
                       const clamped = Math.max(0, Math.min(section.items.length - 1, activeIdx));
                       return (
-                        <div className="flex items-center gap-1 mt-3">
+                        <div className="relative mt-3">
                           <button
                             type="button"
                             onClick={() => goToPhoto(clamped - 1)}
                             disabled={clamped === 0}
                             aria-label="Previous photo"
-                            className={`shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity ${clamped === 0 ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
+                            className={`absolute left-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity ${clamped === 0 ? 'opacity-35 pointer-events-none' : 'opacity-100'}`}
                           >
-                            <ChevronLeft className="w-4 h-4 text-foreground" />
+                            <ChevronLeft className="w-5 h-5 text-foreground drop-shadow-sm" strokeWidth={1.75} />
                           </button>
-                          <div className="flex-1 -mx-1 px-1 overflow-x-auto scrollbar-hide">
+                          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                             <div className="flex gap-2 justify-center min-w-full">
                               {section.items.map((item, i) => (
                                 <button
@@ -1219,14 +1219,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                               ))}
                             </div>
                           </div>
+                          <div className="pointer-events-none absolute inset-y-0 left-[-1rem] z-10 w-12 bg-gradient-to-r from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
+                          <div className="pointer-events-none absolute inset-y-0 right-[-1rem] z-10 w-12 bg-gradient-to-l from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
                           <button
                             type="button"
                             onClick={() => goToPhoto(clamped + 1)}
                             disabled={clamped === section.items.length - 1}
                             aria-label="Next photo"
-                            className={`shrink-0 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity ${clamped === section.items.length - 1 ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
+                            className={`absolute right-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity ${clamped === section.items.length - 1 ? 'opacity-35 pointer-events-none' : 'opacity-100'}`}
                           >
-                            <ChevronRight className="w-4 h-4 text-foreground" />
+                            <ChevronRight className="w-5 h-5 text-foreground drop-shadow-sm" strokeWidth={1.75} />
                           </button>
                         </div>
                       );
