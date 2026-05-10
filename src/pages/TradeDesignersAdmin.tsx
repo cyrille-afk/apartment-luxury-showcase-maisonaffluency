@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -239,6 +239,23 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     await supabase.from("designer_curator_picks").update({ [field]: value } as any).eq("id", id);
   };
 
+  const movePick = async (id: string, direction: -1 | 1) => {
+    const idx = picks.findIndex((p) => p.id === id);
+    if (idx < 0) return;
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= picks.length) return;
+    const reordered = [...picks];
+    [reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]];
+    const renumbered = reordered.map((p, i) => ({ ...p, sort_order: i }));
+    setPicks(renumbered);
+    await Promise.all(
+      renumbered.map((p) =>
+        supabase.from("designer_curator_picks").update({ sort_order: p.sort_order }).eq("id", p.id)
+      )
+    );
+    queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+  };
+
   if (!loaded) return null;
 
   return (
@@ -264,6 +281,29 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </Badge>
               )}
               {pick.category && <Badge variant="outline" className="text-[10px]">{pick.category}</Badge>}
+              {(() => {
+                const idx = picks.findIndex((p) => p.id === pick.id);
+                return (
+                  <>
+                    <button
+                      onClick={() => movePick(pick.id, -1)}
+                      disabled={idx <= 0}
+                      title="Move up"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => movePick(pick.id, 1)}
+                      disabled={idx >= picks.length - 1}
+                      title="Move down"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                );
+              })()}
               <button
                 onClick={() => updateField(pick.id, "is_hidden", !(pick as any).is_hidden)}
                 title={(pick as any).is_hidden ? "Show on galleries" : "Hide from galleries"}
