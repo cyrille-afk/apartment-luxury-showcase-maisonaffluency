@@ -322,18 +322,21 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </div>
           </div>
 
-          {/* Floating prev/next arrows overlaid on the edges */}
+          <div className="pointer-events-none absolute inset-y-0 left-[-1rem] z-10 w-12 bg-gradient-to-r from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
+          <div className="pointer-events-none absolute inset-y-0 right-[-1rem] z-10 w-12 bg-gradient-to-l from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
+
+          {/* Bare edge chevrons — no circular button chrome */}
           <button
             type="button"
             onClick={() => goTo(activeIndex - 1)}
             disabled={activeIndex === 0}
             aria-label="Previous image"
             className={cn(
-              "absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/85 backdrop-blur-sm border border-border/60 flex items-center justify-center shadow-sm transition-opacity",
-              activeIndex === 0 ? "opacity-30 pointer-events-none" : "opacity-100"
+              "absolute left-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity",
+              activeIndex === 0 ? "opacity-35 pointer-events-none" : "opacity-100"
             )}
           >
-            <ChevronLeft size={16} className="text-foreground" />
+            <ChevronLeft size={22} strokeWidth={1.75} className="text-foreground drop-shadow-sm" />
           </button>
           <button
             type="button"
@@ -341,11 +344,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             disabled={activeIndex === images.length - 1}
             aria-label="Next image"
             className={cn(
-              "absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/85 backdrop-blur-sm border border-border/60 flex items-center justify-center shadow-sm transition-opacity",
-              activeIndex === images.length - 1 ? "opacity-30 pointer-events-none" : "opacity-100"
+              "absolute right-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity",
+              activeIndex === images.length - 1 ? "opacity-35 pointer-events-none" : "opacity-100"
             )}
           >
-            <ChevronRight size={16} className="text-foreground" />
+            <ChevronRight size={22} strokeWidth={1.75} className="text-foreground drop-shadow-sm" />
           </button>
         </div>
       )}
