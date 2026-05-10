@@ -1,4 +1,5 @@
 import { scrollToSection } from "@/lib/scrollToSection";
+import InstallAppDialog from "@/components/InstallAppDialog";
 
 const Footer = () => {
   return (
@@ -25,7 +26,7 @@ const Footer = () => {
       <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
-          <div className="flex gap-10 items-center">
+          <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 items-center">
             <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
             </button>
@@ -35,6 +36,7 @@ const Footer = () => {
             <button onClick={() => scrollToSection("contact")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               Contact
             </button>
+            <InstallAppDialog />
           </div>
         </div>
         
