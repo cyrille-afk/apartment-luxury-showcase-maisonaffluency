@@ -538,7 +538,9 @@ function VideoBlock({
                 src={optimizeImageUrl(currentPosterUrl)}
                 alt={caption || `${designerName} — video cover`}
                 className="w-full h-full object-cover"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 onError={handlePosterError}
               />
               {playOverlay}
