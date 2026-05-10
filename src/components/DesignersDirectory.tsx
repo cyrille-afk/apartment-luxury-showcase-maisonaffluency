@@ -873,6 +873,10 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
 
   const handleClickCapture = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!didDragRef.current) return;
+    if ((e.target as HTMLElement).closest("a,button,input,textarea,select,[role='button']")) {
+      didDragRef.current = false;
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     didDragRef.current = false;
