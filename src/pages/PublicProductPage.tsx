@@ -346,7 +346,7 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
-          {defaultPair && !isAtDefault && (
+          {defaultPair && !isAtDefault && baseOptions.length > 1 && topOptions.length > 1 && (
             <button
               type="button"
               onClick={handleResetDefault}
