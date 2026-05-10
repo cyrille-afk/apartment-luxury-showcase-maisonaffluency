@@ -142,14 +142,26 @@ export function BoardRecommendations() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-lg text-foreground flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          Suggested for <em className="not-italic text-primary">{projectName}</em>
+          Suggested complements for{" "}
+          <Link
+            to={`/trade/projects/${projectId}`}
+            className="not-italic text-primary hover:underline underline-offset-4"
+          >
+            {projectName}
+          </Link>
         </h2>
         <div className="flex items-center gap-2">
+          <Link
+            to={`/trade/projects/${projectId}`}
+            className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+          >
+            Open project
+          </Link>
           <Link
             to={`/trade/mood-boards?project=${projectId}`}
             className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
           >
-            Open mood board
+            Mood board
           </Link>
           <Button
             variant="ghost"
@@ -164,14 +176,14 @@ export function BoardRecommendations() {
         </div>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {recommendations.slice(0, 6).map((rec) => (
           <Link
             key={rec.product_id}
-            to={`/trade/mood-boards?project=${projectId}`}
-            className="group w-44 shrink-0"
+            to={`/trade/projects/${projectId}`}
+            className="group flex gap-3"
           >
-            <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-2 border border-border group-hover:border-primary/30 transition-colors">
+            <div className="aspect-square w-28 shrink-0 rounded-lg overflow-hidden bg-muted border border-border group-hover:border-primary/30 transition-colors">
               {rec.image_url ? (
                 <img
                   src={rec.image_url}
@@ -185,20 +197,19 @@ export function BoardRecommendations() {
                 </div>
               )}
             </div>
-            <p className="text-xs font-medium text-foreground truncate">{rec.title}</p>
-            <p className="text-[11px] text-muted-foreground truncate">{rec.brand}</p>
-            <p className="text-[10px] text-primary/70 mt-0.5 line-clamp-2 leading-tight">
-              {rec.reason}
-            </p>
-            {rec.anchors && rec.anchors.length > 0 && (
-              <p
-                className="text-[10px] text-muted-foreground/80 mt-1 leading-tight line-clamp-2"
-                title={`Why these picks: driven by ${rec.anchors.map((a) => `${a.name} (${a.category || a.brand})`).join(", ")}`}
-              >
-                <span className="uppercase tracking-wider text-[9px] text-muted-foreground/60 mr-1">Why</span>
-                {rec.anchors.slice(0, 3).map((a) => a.name).join(" · ")}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-foreground truncate">{rec.title}</p>
+              <p className="text-[11px] text-muted-foreground truncate mb-1">{rec.brand}</p>
+              <p className="text-[11px] text-foreground/80 leading-snug">
+                {rec.reason}
               </p>
-            )}
+              {rec.anchors && rec.anchors.length > 0 && (
+                <p className="text-[10px] text-muted-foreground/80 mt-1.5 leading-tight">
+                  <span className="uppercase tracking-wider text-[9px] text-muted-foreground/60 mr-1">Why</span>
+                  {rec.anchors.slice(0, 3).map((a) => a.name).join(" · ")}
+                </p>
+              )}
+            </div>
           </Link>
         ))}
       </div>
