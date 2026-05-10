@@ -1485,7 +1485,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 }
                 onChange={(v) => setSearchQuery(v === "all" ? "" : v)}
                 allLabel="Search a Designer"
-                hideCount
                 selectClassName="px-4 h-8 text-[12px] bg-background border border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
               />
             </div>
