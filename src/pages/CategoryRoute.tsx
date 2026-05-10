@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import Index from "./Index";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import DesignersDirectory from "@/components/DesignersDirectory";
 import CategorySeo from "@/components/seo/CategorySeo";
 import { categoryFromSlug, subcategoryFromSlugs } from "@/lib/categorySlugs";
 import {
@@ -31,42 +33,16 @@ const CategoryRoute = () => {
     const detail = { category, subcategory, source: "url" };
     window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
 
-    // 3. Reset scroll immediately so we don't retain prior page's position
-    // (e.g. scrolled-to-bottom product page) while waiting for the target.
+    // 3. Reset scroll immediately so category pages start from their own header.
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
-    // 4. Poll for the scroll target — Suspense chunks may mount late on mobile.
-    // On category routes the DesignersDirectory header contains the category
-    // title/intro. Scrolling directly to [data-category-results] hides that
-    // text behind the fixed mobile header, so land on the section wrapper.
-    let cancelled = false;
-    const start = performance.now();
-    const tryScroll = () => {
-      if (cancelled) return;
-        const target =
-          document.getElementById("designers") ||
-          document.querySelector("[data-section='designers']");
-      if (target instanceof HTMLElement) {
-        // Re-broadcast in case sections mounted after our first dispatch.
-        window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
-        // Offset by header (and Featured Read banner) so the hero isn't hidden behind the sticky nav.
-        const nav = document.querySelector("nav[aria-label='Main navigation'], header, nav");
-        const headerOffset = nav instanceof HTMLElement ? nav.getBoundingClientRect().height : 96;
-        const banner = document.querySelector("[data-featured-read-banner]");
-        const bannerOffset = banner instanceof HTMLElement ? banner.getBoundingClientRect().height : 0;
-        const mobileExtra = window.innerWidth < 768 ? 16 : 8;
-        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset - bannerOffset - mobileExtra;
-        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-        return;
-      }
-      if (performance.now() - start < 4000) {
-        window.setTimeout(tryScroll, 100);
-      }
-    };
-    window.setTimeout(tryScroll, 50);
+    // 4. Re-broadcast shortly after mount for the directory component.
+    const syncTimer = window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("syncCategoryFilter", { detail }));
+    }, 150);
 
     return () => {
-      cancelled = true;
+      window.clearTimeout(syncTimer);
       // Clear once we leave the route so other pages aren't affected.
       clearPendingCategoryFilter();
     };
@@ -83,7 +59,15 @@ const CategoryRoute = () => {
         categorySlug={categorySlug!}
         subcategorySlug={subcategorySlug ?? null}
       />
-      <Index categoryMode />
+      <div className="min-h-screen bg-background text-foreground">
+        <Navigation />
+        <main id="main-content" className="min-h-screen overflow-x-hidden pt-24 md:pt-36">
+          <section id="designers" className="scroll-header-offset">
+            <DesignersDirectory mode="products" showTradeCTA={false} />
+          </section>
+          <Footer />
+        </main>
+      </div>
     </>
   );
 };
