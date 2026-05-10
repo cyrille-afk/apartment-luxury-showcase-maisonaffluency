@@ -158,7 +158,7 @@ const AlphabetDesignerPicker = ({
               value === "all" && "text-foreground font-medium"
             )}
           >
-            <span>All Designers &amp; Makers ({totalCount})</span>
+            <span>{defaultAllLabel} ({totalCount})</span>
             {value === "all" && <Check size={14} className="text-[hsl(var(--gold))]" />}
           </button>
 
