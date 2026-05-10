@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen, Tag } from "lucide-react";
@@ -581,7 +582,7 @@ const TradeGallery = () => {
                       } disabled:opacity-60`}
                     >
                       {isAdding ? (
-                        <div className="w-3 h-3 border border-background/30 border-t-background rounded-full animate-spin" />
+                        <DotCircleLoader size="sm" />
                       ) : isAdded ? (
                         <Check className="h-3 w-3" />
                       ) : (
@@ -677,7 +678,7 @@ const TradeGallery = () => {
                   } disabled:opacity-60`}
                 >
                   {isAdding ? (
-                    <div className="w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin" />
+                    <DotCircleLoader size="sm" />
                   ) : isAdded ? (
                     <Check className="h-3 w-3" />
                   ) : (

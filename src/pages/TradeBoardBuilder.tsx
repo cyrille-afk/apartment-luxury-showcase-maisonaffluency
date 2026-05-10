@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette } from "lucide-react";
@@ -382,7 +383,7 @@ const TradeBoardBuilder = () => {
     navigate("/trade/quotes");
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><DotCircleLoader size="sm" /></div>;
   if (!board) return <div className="text-center py-20 text-muted-foreground">Board not found</div>;
 
   const approvedCount = items.filter(i => i.approval_status === "approved").length;

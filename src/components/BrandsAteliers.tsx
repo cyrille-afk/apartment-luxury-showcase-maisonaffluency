@@ -1,4 +1,5 @@
 import React from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { useParentBrandDesignerCountsFiltered } from "@/hooks/useParentBrandDesignerCounts";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -3446,7 +3447,7 @@ const BrandsAteliers = () => {
                             {!picksImageLoaded && (
                               <div className={`flex items-center justify-center ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} w-64 h-64 animate-pulse`}>
                                 <div className="w-full h-full bg-white/5 rounded-lg flex items-center justify-center">
-                                  <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                                  <DotCircleLoader size="md" />
                                 </div>
                               </div>
                             )}

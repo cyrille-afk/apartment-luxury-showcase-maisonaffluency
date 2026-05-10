@@ -756,7 +756,7 @@ const ShowroomGridView = ({
                       } disabled:opacity-60`}
                     >
                       {isAdding ? (
-                        <div className="w-3 h-3 border border-background/30 border-t-background rounded-full animate-spin" />
+                        <DotCircleLoader size="sm" />
                       ) : isAdded ? (
                         <Check className="h-3 w-3" />
                       ) : (
@@ -850,7 +850,7 @@ const ShowroomGridView = ({
                   } disabled:opacity-60`}
                 >
                   {isAdding ? (
-                    <div className="w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin" />
+                    <DotCircleLoader size="sm" />
                   ) : isAdded ? (
                     <Check className="h-3 w-3" />
                   ) : (

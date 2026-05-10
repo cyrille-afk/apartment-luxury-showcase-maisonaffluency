@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { FileText } from "lucide-react";
 
 interface PdfThumbnailProps {
@@ -136,7 +137,7 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
           <div className="w-3/4 h-3 rounded bg-muted-foreground/10 animate-pulse" />
           <div className="w-1/2 h-3 rounded bg-muted-foreground/10 animate-pulse" />
           <div className="w-2/3 h-3 rounded bg-muted-foreground/10 animate-pulse" />
-          <div className="w-5 h-5 mt-2 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <DotCircleLoader size="sm" />
         </div>
       )}
       <canvas

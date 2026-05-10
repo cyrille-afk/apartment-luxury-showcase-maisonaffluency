@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { ChevronLeft, ChevronRight, Download, ZoomIn, ZoomOut } from "lucide-react";
 
 interface PdfViewerProps {
@@ -74,7 +75,7 @@ const PdfViewer = ({ url, title = "PDF Document" }: PdfViewerProps) => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <DotCircleLoader size="md" />
         <span className="font-body text-xs text-muted-foreground">Loading PDF…</span>
       </div>
     );

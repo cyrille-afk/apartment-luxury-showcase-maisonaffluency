@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -304,7 +305,7 @@ const TradeDocuments = () => {
                           <Suspense
                             fallback={
                               <div className="w-full h-full flex items-center justify-center">
-                                <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                <DotCircleLoader size="sm" />
                               </div>
                             }
                           >
