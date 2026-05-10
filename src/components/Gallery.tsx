@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin, Plus, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin, Plus, Minus, Share2 } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
@@ -898,7 +898,33 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
             const isMobilePillActive = originalSectionIndex === activeMobilePill;
-            return <div key={section.experience} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : ''}`}>
+            return <React.Fragment key={section.experience}>
+              {/* Mobile accordion header — always visible */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = isMobilePillActive ? -1 : originalSectionIndex;
+                  setActiveMobilePill(next);
+                  if (next !== -1) {
+                    requestAnimationFrame(() => {
+                      const el = sectionRefs.current[originalSectionIndex];
+                      if (el) {
+                        const top = el.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                      }
+                    });
+                  }
+                }}
+                className="md:hidden w-full flex items-center justify-between gap-3 py-4 border-b border-border/60 text-left"
+                aria-expanded={isMobilePillActive}
+                aria-controls={`gallery-section-${originalSectionIndex}`}
+              >
+                <span className="font-serif text-base text-foreground">{section.experience}</span>
+                <span className="shrink-0 w-7 h-7 rounded-full border border-foreground/40 flex items-center justify-center text-foreground">
+                  {isMobilePillActive ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                </span>
+              </button>
+              <div id={`gallery-section-${originalSectionIndex}`} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : 'pt-3'}`}>
               {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[10rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
@@ -1202,30 +1228,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              {/* Mobile section selector — dropdown rendered after first section's pictures */}
-              {originalSectionIndex === 0 && (
-                <div className="md:hidden mt-6 mb-2 px-1">
-                  <label className="block text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-body mb-1.5">
-                    Explore other rooms
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={activeMobilePill}
-                      onChange={(e) => setActiveMobilePill(Number(e.target.value))}
-                      className="w-full appearance-none rounded-md border border-foreground/20 bg-background py-2.5 pl-3 pr-9 font-serif text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/30"
-                      aria-label="Select gallery room"
-                    >
-                      {galleryExperiences.map((exp, idx) => (
-                        <option key={exp.experience} value={idx}>
-                          {exp.experience}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronRight className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/60 rotate-90" />
-                  </div>
-                </div>
-              )}
-
               {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid */}
               {gridCols === 1 ? (
                 <DesktopCarouselStrip
@@ -1304,7 +1306,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 })}
               </div>
               )}
-            </div>;
+            </div>
+            </React.Fragment>;
           });
           })()}
         </div>
