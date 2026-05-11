@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
-import { trackCTA } from "@/lib/analytics";
+import { trackCTA, trackMagazine } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
@@ -133,6 +133,36 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const { doc: featuredDoc } = useFeaturedPublicDocument();
+  const magazineBadgeRef = useRef<HTMLDivElement>(null);
+  const magazineImpressionFiredRef = useRef(false);
+
+  // Fire one impression event per session when the persistent magazine
+  // badge enters the viewport. Lets us measure the badge's reach against
+  // its click-through and download conversion rate.
+  useEffect(() => {
+    magazineImpressionFiredRef.current = false;
+  }, [featuredDoc?.id]);
+
+  useEffect(() => {
+    if (!featuredDoc || magazineImpressionFiredRef.current) return;
+    const node = magazineBadgeRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !magazineImpressionFiredRef.current) {
+            magazineImpressionFiredRef.current = true;
+            trackMagazine.badgeImpression(featuredDoc.id, featuredDoc.title, "nav_badge");
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [featuredDoc]);
 
   useEffect(() => {
     // All page section IDs in order
@@ -756,18 +786,35 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {rightNavItems.map((item) => (
                 <div key={item.href} className="relative group/trade">
                   <button
-                    onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
+                    onClick={() => {
+                      setMegaMenuOpen(false);
+                      if (featuredDoc) {
+                        trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, "nav_trade_button");
+                      }
+                      handleNavClick(item.href);
+                    }}
                     className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
                   >
                     {item.label}
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
                   </button>
                   {/* Persistent badge — always visible to test conversion lift */}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 pointer-events-none">
-                    <div className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
+                  <div ref={magazineBadgeRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (featuredDoc) {
+                          trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, "nav_badge");
+                        }
+                        setMegaMenuOpen(false);
+                        navigate("/trade/landing");
+                      }}
+                      className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap text-left hover:bg-foreground/90 transition-colors cursor-pointer"
+                      aria-label={featuredDoc ? `Download ${featuredDoc.title} — free` : "Download featured catalogue"}
+                    >
                       <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredDoc?.title ?? "Featured Catalogue"}</p>
                       <p className="font-body text-[9px] text-background/60">Free download</p>
-                    </div>
+                    </button>
                   </div>
                 </div>
               ))}
