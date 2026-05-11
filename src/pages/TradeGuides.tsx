@@ -49,9 +49,9 @@ const guides: Guide[] = [
   {
     slug: "pwa-preview-checklist",
     eyebrow: "Mobile essentials",
-    title: "PWA Preview Checklist",
+    title: "Installing Maison Affluency on Your Phone",
     description:
-      "Verify the Maison Affluency app on iPhone and Android home screens — reinstall steps, screenshot checks, and safe-area / bottom-bar overlap troubleshooting.",
+      "How to add Maison Affluency to your iPhone or Android home screen so it opens like a native app — with a short visual checklist to make sure nothing overlaps the notch, status bar or bottom gesture bar.",
     audience: "Designers & architects on mobile",
     pdfUrl: "/guides/studio-pwa-preview-checklist.pdf",
     icon: Smartphone,

@@ -178,15 +178,16 @@ TEARSHEETS = {
 
 PWA_CHECKLIST = {
     "filename": "public/guides/studio-pwa-preview-checklist.pdf",
-    "title": "PWA Preview Checklist",
-    "subtitle": "Verify the Maison Affluency app on iPhone and Android home screens — no overlap, no clipping, no surprises.",
-    "running": "Studio Guide — PWA Preview Checklist",
+    "title": "Installing Maison Affluency on Your Phone",
+    "subtitle": "A short visual checklist for designers and architects who use Maison Affluency as an app on their iPhone or Android home screen.",
+    "running": "Studio Guide — Installing Maison Affluency on Your Phone",
     "sections": [
         {"title": "What this guide is for", "blocks": [
-            ("p", "When the Maison Affluency site is added to the home screen on iOS or Android, it runs in <b>standalone mode</b> — no browser chrome, full-bleed layout. That's great for designers and architects on site visits, but it also means the app must respect the device's <b>safe areas</b>: the status bar, notch / Dynamic Island, punch-hole camera, and the bottom home indicator or gesture bar."),
-            ("p", "Use this checklist after any change to the navigation, footer, cookie banner, sticky CTAs, or anything pinned to the top or bottom of the screen. Both iOS and Android <b>cache the manifest at install time</b>, so you must reinstall the app to validate manifest, theme-color and display-mode changes."),
+            ("p", "Maison Affluency can be added to your phone's home screen and opened like any other app — no App Store, no download. This is what's called a <b>PWA</b> (Progressive Web App): a website that, once \"Added to Home Screen\", runs full-screen with its own icon, exactly like a native app."),
+            ("p", "This guide walks you through <b>how to install it</b> on iPhone and Android, and gives you a short <b>visual checklist</b> to make sure everything looks right on your device — no overlapping menus, no text hidden behind the notch or the bottom gesture bar, no clipped buttons."),
+            ("p", "It's particularly useful for designers and architects who consult the Maison Affluency catalogue on site visits, in showrooms or in client meetings, where the app needs to look polished and behave like a real app — not a browser tab."),
             ("callout", "Share this with your team",
-                "This document is intentionally short. Print it, send it to your design partners, or pin it in the studio handbook so anyone reviewing the app on a phone knows what \"good\" looks like."),
+                "Print it, forward it to your design partners, or pin it in the studio handbook so anyone reviewing the app on a phone knows what \"good\" looks like — and how to flag anything that isn't."),
         ]},
         {"title": "iPhone — reinstall the app", "blocks": [
             ("p", "Always test on the live <i>maisonaffluency.com</i> domain. Staging or preview environments may run inside an iframe and won't reflect manifest, theme-color or display-mode changes."),
