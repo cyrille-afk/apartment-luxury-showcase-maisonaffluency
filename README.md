@@ -47,6 +47,47 @@ Note the exact page + screenshot, then ask Lovable to patch the affected compone
 with `pt-[env(safe-area-inset-top)]` (top) or `pb-[env(safe-area-inset-bottom)]` (bottom).
 
 
+## Android Standalone (Add to Home Screen) Preview Checklist
+
+Android Chrome also pins the manifest at install time, so **you must reinstall**
+to see theme-color, display mode, or icon changes.
+
+### 1. Reinstall on Android
+
+1. Long-press the **Maison Affluency** icon on the home screen → **Remove** (or drag to "Uninstall").
+2. Open **Chrome** and go to `https://maisonaffluency.com`.
+   - The Lovable preview URL won't reflect manifest changes — only the live domain does.
+3. Pull down to refresh, or tap the **⋮ menu** → **Reload**.
+4. Tap **⋮ menu** → **Add to Home screen** → **Add** (or **Install** if Chrome shows an app install prompt).
+5. Launch from the **home screen icon** (not from Chrome).
+
+### 2. Screenshots to capture
+
+Take a screenshot (Power + Volume Down) on each of the following:
+
+- [ ] **Home — portrait**, scrolled to top. Check: the status bar (clock, battery, notifications) sits above the logo; nothing overlaps the burger menu or brand text.
+- [ ] **Home — portrait**, burger menu / navigation drawer open. Check: the drawer header and first items aren't hidden behind the status bar or cut off by rounded screen corners.
+- [ ] **Home — landscape**. Check: no nav icons or logo are lost in display cutouts (punch-hole or top-left notch).
+- [ ] **Designers Directory — portrait**, scrolled mid-page. Check: sticky filter bars or chips clear the status bar.
+- [ ] **A product page — portrait**, scrolled to bottom. Check: the Android gesture / 3-button navigation bar at the bottom doesn't sit on top of sticky CTAs, cookie banner, or footer links.
+- [ ] **Trade login / any modal** — portrait. Check: dialog close button and top margin aren't hidden behind the status bar or display cutout.
+- [ ] **Cookie consent banner visible** (clear cookies via footer → Cookie Settings, then reload). Check: banner sits above the gesture bar with breathing room.
+
+### 3. What to look for in each screenshot
+
+- **Top overlap**: status bar icons must NOT sit on top of the logo, burger, or any text. The nav should start below the status bar.
+- **Display cutouts**: on devices with a punch-hole camera or top notch, no critical UI (logo, back button, close icon) should be obscured.
+- **Bottom gesture / button bar**: the system navigation bar must NOT cover sticky bars, primary action buttons, or footer links. Use `pb-[env(safe-area-inset-bottom)]` on bottom-sticky elements if needed.
+- **Color seam**: the status bar background should match the page header (white). No dark band or mismatched color strip.
+- **Overscroll glow**: in the installed app, pulling down should NOT reveal Chrome's address bar or a blue overscroll glow — if it does, the shortcut is still opening in a browser tab.
+
+### 4. If something overlaps
+
+Note the exact page + screenshot, then ask Lovable to patch the affected component
+with `pt-[env(safe-area-inset-top)]` (top) or `pb-[env(safe-area-inset-bottom)]` (bottom).
+
+
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
