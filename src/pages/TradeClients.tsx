@@ -400,6 +400,12 @@ export default function TradeClients() {
                       {c.billing_country && (
                         <span className="font-body text-xs text-muted-foreground">{c.billing_country}</span>
                       )}
+                      {(docCountsByClient[c.id] || 0) > 0 && (
+                        <Badge variant="outline" className="gap-1">
+                          <FileText className="h-3 w-3" />
+                          {docCountsByClient[c.id]} doc{docCountsByClient[c.id] > 1 ? "s" : ""}
+                        </Badge>
+                      )}
                     </div>
                     {primary && (
                       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-body text-muted-foreground">
