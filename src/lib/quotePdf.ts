@@ -47,6 +47,22 @@ export interface QuotePdfArgs {
   createdAt: Date;
   expiryAt: Date;
   clientName?: string | null;
+  /** Optional structured client billing — used when a client_id is linked. Falls back to clientName. */
+  clientCompany?: string | null;
+  clientBilling?: {
+    line1?: string | null;
+    line2?: string | null;
+    city?: string | null;
+    region?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+  } | null;
+  clientContact?: {
+    name?: string | null;
+    role?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
   projectName?: string | null;
   currency: string;                  // SGD | USD | EUR | GBP
   lines: QuotePdfLine[];
@@ -433,11 +449,19 @@ function drawCompanyAndMeta(
   const splitClient = (raw: string | null | undefined): string[] => {
     const v = String(raw ?? "").trim();
     if (!v) return ["—"];
-    // Try em-dash, en-dash, hyphen with spaces, slash, pipe, or comma
     const m = v.split(/\s+[—–\-/|]\s+|\s*,\s*/);
     return m.filter(Boolean).slice(0, 2);
   };
-  const clientLines = splitClient(args.clientName);
+  // Prefer structured client info from clients/client_contacts when available.
+  const contactFullName = [args.clientContact?.name].filter(Boolean).join(" ").trim();
+  const company = (args.clientCompany ?? "").trim();
+  let clientLines: string[];
+  if (contactFullName || company) {
+    clientLines = [contactFullName, company].filter(Boolean);
+    if (clientLines.length === 0) clientLines = splitClient(args.clientName);
+  } else {
+    clientLines = splitClient(args.clientName);
+  }
   const metaRows = [
     [["DATE", fmtDate(args.createdAt)], ["EXPIRY", fmtDate(args.expiryAt)]],
     [["CLIENT", clientLines], ["PROJECT", [args.projectName || "—"]]],
@@ -465,7 +489,73 @@ function drawCompanyAndMeta(
     });
   });
 
-  return y + 70;
+  let yEnd = y + 70;
+
+  // ---- Optional BILL TO panel: full billing address (left) + contact details (right)
+  const b = args.clientBilling || {};
+  const c = args.clientContact || {};
+  const addr: string[] = [];
+  if (b.line1) addr.push(b.line1);
+  if (b.line2) addr.push(b.line2);
+  const cityRegion = [b.city, b.region].filter(Boolean).join(", ");
+  const cityLine = [cityRegion, b.postalCode].filter(Boolean).join(" ");
+  if (cityLine) addr.push(cityLine);
+  if (b.country) addr.push(b.country);
+
+  const contactDetails: string[] = [];
+  const cName = [c.name].filter(Boolean).join(" ").trim();
+  if (cName) contactDetails.push(c.role ? `${cName} — ${c.role}` : cName);
+  if (c.email) contactDetails.push(c.email);
+  if (c.phone) contactDetails.push(c.phone);
+
+  if (addr.length > 0 || contactDetails.length > 0) {
+    const py = yEnd + 4;
+    doc.setDrawColor(230, 228, 222);
+    doc.setLineWidth(0.4);
+    doc.line(M, py, M + contentW, py);
+    const pyt = py + 14;
+    // Left: bill to
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text("BILL TO", M, pyt);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    const billHeader = company || (clientLines[clientLines.length - 1] ?? "");
+    let lyL = pyt + 12;
+    if (billHeader) {
+      doc.setFont("helvetica", "bold");
+      doc.text(doc.splitTextToSize(billHeader, colW - 8), M, lyL);
+      lyL += 11;
+      doc.setFont("helvetica", "normal");
+    }
+    addr.forEach((ln) => {
+      const w = doc.splitTextToSize(ln, colW - 8);
+      doc.text(w, M, lyL);
+      lyL += w.length * 11;
+    });
+    // Right: contact
+    if (contactDetails.length > 0) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text("CONTACT", metaX, pyt);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      let lyR = pyt + 12;
+      contactDetails.forEach((ln) => {
+        const w = doc.splitTextToSize(ln, colW - 8);
+        doc.text(w, metaX, lyR);
+        lyR += w.length * 11;
+      });
+      lyL = Math.max(lyL, lyR);
+    }
+    yEnd = lyL + 6;
+  }
+
+  return yEnd;
 }
 
 // -------- Items table ---------------------------------------------------

@@ -445,6 +445,53 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     });
     const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
     const insLabel = INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label ?? null;
+
+    // Pull structured billing + primary contact from the linked client (if any)
+    let clientCompanyName: string | null = null;
+    let clientBilling: any = null;
+    let clientContact: any = null;
+    if (clientId) {
+      try {
+        const [{ data: cli }, { data: contacts }] = await Promise.all([
+          supabase
+            .from("clients" as any)
+            .select("name, billing_address_line1, billing_address_line2, billing_city, billing_region, billing_postal_code, billing_country")
+            .eq("id", clientId)
+            .maybeSingle(),
+          supabase
+            .from("client_contacts" as any)
+            .select("first_name, last_name, role_title, email, phone, is_primary")
+            .eq("client_id", clientId)
+            .order("is_primary", { ascending: false })
+            .limit(1),
+        ]);
+        if (cli) {
+          const c = cli as any;
+          clientCompanyName = c.name ?? null;
+          clientBilling = {
+            line1: c.billing_address_line1,
+            line2: c.billing_address_line2,
+            city: c.billing_city,
+            region: c.billing_region,
+            postalCode: c.billing_postal_code,
+            country: c.billing_country,
+          };
+        }
+        const primary = (contacts as any[])?.[0];
+        if (primary) {
+          const fullName = [primary.first_name, primary.last_name].filter(Boolean).join(" ").trim();
+          clientContact = {
+            name: fullName || null,
+            role: primary.role_title || null,
+            email: primary.email || null,
+            phone: primary.phone || null,
+          };
+        }
+      } catch {
+        /* non-fatal — fallback to clientName text */
+      }
+    }
+
     try {
       await downloadQuotePdf({
         quoteNumber,
@@ -453,6 +500,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         createdAt: createdDate,
         expiryAt: expiryDate,
         clientName: clientName || null,
+        clientCompany: clientCompanyName,
+        clientBilling,
+        clientContact,
         projectName: projectName || null,
         currency,
         lines,
