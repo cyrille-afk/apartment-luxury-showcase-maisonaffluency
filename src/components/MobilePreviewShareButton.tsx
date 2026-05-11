@@ -96,6 +96,16 @@ const MobilePreviewShareButton = () => {
   // Hide on real mobile devices — preview is a desktop QA aid.
   if (isMobileViewport) return null;
 
+  // QA-only tool: never render on the published/production site. Allow it in
+  // local dev (Vite dev server) and on Lovable preview hosts (id-preview--*,
+  // *.lovableproject.com), but not on the user-facing apex / .lovable.app build.
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    const isDev = import.meta.env.DEV;
+    const isLovablePreview = /(^|\.)lovableproject\.com$/.test(host) || host.startsWith("id-preview--");
+    if (!isDev && !isLovablePreview) return null;
+  }
+
   const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
