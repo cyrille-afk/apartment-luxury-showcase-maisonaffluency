@@ -331,7 +331,11 @@ export default function TradeProjectDetail() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Client</Label>
-                <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} />
+                <ClientPicker
+                  value={form.client_id}
+                  onChange={(c) => setForm({ ...form, client_id: c?.id ?? null, client_name: c?.name ?? "" })}
+                  size="sm"
+                />
               </div>
               <div>
                 <Label className="text-xs">Location</Label>
