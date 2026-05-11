@@ -65,6 +65,14 @@ const MobilePreviewShareButton = () => {
     if (open) setSide(pathname.startsWith("/trade") ? "trade" : "public");
   }, [open, pathname]);
 
+  // Listen for an external trigger so the dashboard header button can open us
+  // without rendering its own duplicate floating button.
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-mobile-preview", handler);
+    return () => window.removeEventListener("open-mobile-preview", handler);
+  }, []);
+
   // Lock body scroll while preview is open
   useEffect(() => {
     if (!open) return;
@@ -92,20 +100,25 @@ const MobilePreviewShareButton = () => {
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
 
+  // On the trade dashboard, the dashboard header renders its own inline
+  // "Mobile" button next to the Felix pill (and dispatches `open-mobile-preview`),
+  // so we suppress the floating trigger there to avoid a duplicate.
+  const hideFloatingTrigger = pathname === "/trade" || pathname === "/trade/dashboard";
+
   return (
     <>
-      {/* Bottom-right trigger — sits immediately to the left of the AI Concierge bubble,
-          well clear of the preview iframe chrome (notification badges, share/publish bar). */}
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-24 z-[100] flex items-center gap-2 px-3 h-9 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
-        aria-label="Preview this page in mobile size"
-      >
-        <Smartphone className="w-3.5 h-3.5" />
-        <span className="font-body text-[10px] uppercase tracking-[0.15em]">
-          Mobile preview
-        </span>
-      </button>
+      {!hideFloatingTrigger && (
+        <button
+          onClick={() => setOpen(true)}
+          className="fixed bottom-6 right-24 z-[100] flex items-center gap-2 px-3 h-9 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
+          aria-label="Preview this page in mobile size"
+        >
+          <Smartphone className="w-3.5 h-3.5" />
+          <span className="font-body text-[10px] uppercase tracking-[0.15em]">
+            Mobile preview
+          </span>
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4 print:hidden">
