@@ -4,6 +4,7 @@ import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type Device = "se" | "pro_max" | "pixel";
+type Side = "trade" | "public";
 
 const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
   se:      { label: "iPhone SE",        w: 375, h: 667 },
@@ -12,9 +13,42 @@ const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
 };
 
 /**
- * Floating button that opens the current trade page in a phone-sized
- * preview frame on desktop. Hidden on real mobile devices and on all
- * public (non-trade) routes.
+ * Map a trade route to its closest public counterpart (and vice-versa) so the
+ * "Public ↔ Trade" toggle in the mobile-preview toolbar lands the user on
+ * something meaningful instead of a 404.
+ */
+const PUBLIC_FOR_TRADE: Record<string, string> = {
+  "/trade": "/",
+  "/trade/dashboard": "/",
+  "/trade/designers": "/designers",
+  "/trade/gallery": "/gallery",
+  "/trade/journal": "/journal",
+  "/trade/showroom": "/",
+  "/trade/guides": "/",
+};
+
+const toPublicPath = (pathname: string): string => {
+  if (PUBLIC_FOR_TRADE[pathname]) return PUBLIC_FOR_TRADE[pathname];
+  // Generic fall-backs: /trade/designers/<slug> → /designers/<slug>, etc.
+  if (pathname.startsWith("/trade/designers/")) return pathname.replace("/trade/designers/", "/designers/");
+  if (pathname.startsWith("/trade/journal/")) return pathname.replace("/trade/journal/", "/journal/");
+  if (pathname.startsWith("/trade/gallery")) return pathname.replace("/trade/gallery", "/gallery");
+  // Default: drop the /trade prefix, fall back to home if that yields nothing.
+  const stripped = pathname.replace(/^\/trade/, "");
+  return stripped || "/";
+};
+
+const toTradePath = (pathname: string): string => {
+  if (pathname === "/" || pathname === "") return "/trade";
+  if (pathname.startsWith("/trade")) return pathname;
+  return `/trade${pathname}`;
+};
+
+/**
+ * Floating button that opens a phone-sized preview of the current page.
+ * - Available on every route (trade and public) for desktop reviewers.
+ * - Anchored top-right so it never collides with the bottom-right AI Concierge panel.
+ * - Toolbar toggle lets the reviewer flip between Trade and Public views without leaving.
  */
 const MobilePreviewShareButton = () => {
   const { pathname } = useLocation();
@@ -22,8 +56,16 @@ const MobilePreviewShareButton = () => {
   const [open, setOpen] = useState(false);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [device, setDevice] = useState<Device>("pro_max");
+  const [side, setSide] = useState<Side>(() =>
+    typeof window !== "undefined" && window.location.pathname.startsWith("/trade") ? "trade" : "public"
+  );
 
-  // Lock body scroll while preview is open — must run before any early return
+  // Reset side to match the current page each time the preview opens.
+  useEffect(() => {
+    if (open) setSide(pathname.startsWith("/trade") ? "trade" : "public");
+  }, [open, pathname]);
+
+  // Lock body scroll while preview is open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -31,16 +73,16 @@ const MobilePreviewShareButton = () => {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
-  const currentUrl = useMemo(() => {
+  const previewSrc = useMemo(() => {
     if (typeof window === "undefined") return "";
-    const url = new URL(window.location.href);
+    const targetPath = side === "trade" ? toTradePath(pathname) : toPublicPath(pathname);
+    const url = new URL(targetPath, window.location.origin);
     url.searchParams.set("mobile_preview", "1");
     return `${url.pathname}${url.search}${url.hash}`;
-  }, [pathname]);
+  }, [pathname, side]);
 
-  // Only show on trade routes and only on desktop viewports
-  const isTradeRoute = pathname.startsWith("/trade");
-  if (!isTradeRoute || isMobileViewport) return null;
+  // Hide on real mobile devices — preview is a desktop QA aid.
+  if (isMobileViewport) return null;
 
   const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
@@ -48,12 +90,13 @@ const MobilePreviewShareButton = () => {
 
   return (
     <>
+      {/* Top-right trigger — sits next to the dashboard Concierge pill, clear of the chat panel */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-[14rem] z-[100] flex items-center gap-2 px-3 h-10 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
+        className="fixed top-4 right-4 z-[100] flex items-center gap-2 px-3 h-9 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
         aria-label="Preview this page in mobile size"
       >
-        <Smartphone className="w-4 h-4" />
+        <Smartphone className="w-3.5 h-3.5" />
         <span className="font-body text-[10px] uppercase tracking-[0.15em]">
           Mobile preview
         </span>
@@ -62,7 +105,25 @@ const MobilePreviewShareButton = () => {
       {open && (
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4 print:hidden">
           {/* Toolbar */}
-          <div className="flex items-center gap-2 mb-3 bg-background border border-border rounded-full px-3 py-1.5 shadow-lg">
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-3 bg-background border border-border rounded-full px-3 py-1.5 shadow-lg">
+            {/* Side toggle */}
+            <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
+              {(["trade", "public"] as Side[]).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSide(s)}
+                  className={`px-2.5 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider transition ${
+                    side === s
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  aria-pressed={side === s}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
             <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mr-1">
               {frameW}×{frameH}
             </span>
@@ -108,8 +169,9 @@ const MobilePreviewShareButton = () => {
             }}
           >
             <iframe
-              src={currentUrl}
-              title="Mobile preview"
+              key={previewSrc}
+              src={previewSrc}
+              title={`Mobile preview · ${side}`}
               className="bg-background rounded-[1.75rem] block transition-all"
               style={{
                 width: frameW,
