@@ -188,16 +188,18 @@ export default function TradeClients() {
 
   const openNew = () => {
     if (!user || !currentStudio) return;
+    setAttemptedSave(false);
     setEditing(emptyClient(currentStudio.id, user.id));
     setEditingContacts([emptyContact("")]);
   };
 
   const openEdit = (c: Client) => {
+    setAttemptedSave(false);
     setEditing({ ...c });
     setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
   };
 
-  const closeEdit = () => { setEditing(null); setEditingContacts([]); };
+  const closeEdit = () => { setEditing(null); setEditingContacts([]); setAttemptedSave(false); };
 
   const addContactRow = () => setEditingContacts((arr) => [...arr, emptyContact(editing?.id || "")]);
   const removeContactRow = (i: number) =>
