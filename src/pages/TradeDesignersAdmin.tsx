@@ -1646,17 +1646,55 @@ const TradeDesignersAdmin = () => {
                       </div>
 
                       {/* Hero Image Override */}
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          Hero Image URL <span className="normal-case font-normal">(optional — overrides card image for the profile hero)</span>
-                        </label>
-                        <Input
-                          value={(editBuffer[d.id]?.hero_image_url ?? d.hero_image_url) || ""}
-                          onChange={(e) => setField(d.id, "hero_image_url" as keyof DesignerRow, e.target.value || null)}
-                          placeholder="Leave empty to use card image"
-                          className="mt-1 font-mono text-xs"
-                        />
-                      </div>
+                      {(() => {
+                        const currentHero = (editBuffer[d.id]?.hero_image_url ?? d.hero_image_url) || "";
+                        return (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                              Hero Image <span className="normal-case font-normal">(optional — overrides card image for the profile hero)</span>
+                            </label>
+                            <div className="mt-2 flex items-start gap-3">
+                              <div className="w-32 h-20 rounded border border-border bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+                                {currentHero ? (
+                                  <img src={currentHero} alt="Hero preview" className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground text-center px-2">No hero set — card image will be used</span>
+                                )}
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <CloudUpload
+                                    folder={`designers/${d.slug || d.id}/hero`}
+                                    accept="image/*"
+                                    label="Upload Hero"
+                                    onUpload={(urls) => {
+                                      if (urls[0]) setField(d.id, "hero_image_url" as keyof DesignerRow, urls[0] as any);
+                                    }}
+                                  />
+                                  {currentHero && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setField(d.id, "hero_image_url" as keyof DesignerRow, null as any)}
+                                      className="text-xs font-body text-destructive hover:text-destructive/80 transition-colors px-2 py-1"
+                                    >
+                                      Clear hero
+                                    </button>
+                                  )}
+                                </div>
+                                <Input
+                                  value={currentHero}
+                                  onChange={(e) => setField(d.id, "hero_image_url" as keyof DesignerRow, e.target.value || null)}
+                                  placeholder="Or paste an absolute Cloudinary/Supabase URL…"
+                                  className="font-mono text-xs"
+                                />
+                                <p className="text-[10px] text-muted-foreground">
+                                  Remember to click <span className="font-medium">Save</span> at the top of the row to persist changes.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* Editorial Media */}
                       <div>
