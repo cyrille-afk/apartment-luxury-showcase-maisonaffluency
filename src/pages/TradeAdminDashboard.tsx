@@ -36,6 +36,7 @@ const commerceGroup: AdminCard[] = [
   { title: "Trade Applications", description: "Review and approve new trade registrations", url: "/trade/admin", icon: Shield },
   { title: "Registered Users", description: "View all sign-ups, roles, and application status", url: "/trade/registered-users", icon: Users },
   { title: "Custom Requests", description: "Concierge inbox — reply to bespoke requests inline", url: "/trade/custom-requests", icon: Inbox },
+  { title: "Client Directory", description: "Studio address book — companies, billing addresses, and staff contacts", url: "/trade/clients", icon: Users },
 ];
 
 const analyticsGroup: AdminCard[] = [
