@@ -39,7 +39,10 @@ const toPublicPath = (pathname: string): string => {
 };
 
 const toTradePath = (pathname: string): string => {
-  if (pathname === "/" || pathname === "") return "/trade";
+  if (pathname === "/" || pathname === "") return "/trade/dashboard";
+  if (pathname === "/gallery") return "/trade/gallery";
+  if (pathname === "/designers") return "/trade/designers";
+  if (pathname === "/journal") return "/trade/journal";
   if (pathname.startsWith("/trade")) return pathname;
   return `/trade${pathname}`;
 };
@@ -78,13 +81,27 @@ const MobilePreviewShareButton = () => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    document.documentElement.dataset.mobilePreviewOpen = "1";
+    window.dispatchEvent(new CustomEvent("mobile-preview-open-change"));
+    return () => {
+      document.body.style.overflow = prev;
+      delete document.documentElement.dataset.mobilePreviewOpen;
+      window.dispatchEvent(new CustomEvent("mobile-preview-open-change"));
+    };
   }, [open]);
 
   const buildSrc = (target: "trade" | "public") => {
     if (typeof window === "undefined") return "";
-    const targetPath = target === "trade" ? toTradePath(pathname) : toPublicPath(pathname);
+    // `/trade` and `/trade/dashboard` are the same app route, but in the
+    // Lovable test iframe `/trade` can be restored/rewritten back to `/` by
+    // preview continuity. Use the concrete dashboard route for the iframe so
+    // the Trade tab cannot show the public homepage.
+    const currentPath = pathname === "/trade" ? "/trade/dashboard" : pathname;
+    const targetPath = target === "trade" ? toTradePath(currentPath) : toPublicPath(currentPath);
     const url = new URL(targetPath, window.location.origin);
+    const currentSearch = new URLSearchParams(window.location.search);
+    const lovableToken = currentSearch.get("__lovable_token");
+    if (lovableToken) url.searchParams.set("__lovable_token", lovableToken);
     url.searchParams.set("mobile_preview", "1");
     return `${url.pathname}${url.search}${url.hash}`;
   };

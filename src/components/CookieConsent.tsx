@@ -11,12 +11,23 @@ const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
+
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
       // Small delay so it doesn't flash during hero load
       const timer = setTimeout(() => setVisible(true), 2000);
       return () => clearTimeout(timer);
     }
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      if (document.documentElement.dataset.mobilePreviewOpen === "1") setVisible(false);
+    };
+    window.addEventListener("mobile-preview-open-change", sync);
+    sync();
+    return () => window.removeEventListener("mobile-preview-open-change", sync);
   }, []);
 
   const accept = () => {
