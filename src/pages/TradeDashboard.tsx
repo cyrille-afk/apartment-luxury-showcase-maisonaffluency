@@ -80,6 +80,18 @@ const TradeDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
+  const [conciergeName, setConciergeName] = useState<string>(() => loadName() || DEFAULT_NAME);
+
+  // Keep the dashboard pill in sync if the user renames the concierge from the chat.
+  useEffect(() => {
+    const sync = () => setConciergeName(loadName() || DEFAULT_NAME);
+    window.addEventListener("storage", sync);
+    window.addEventListener("concierge:name-changed", sync as EventListener);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("concierge:name-changed", sync as EventListener);
+    };
+  }, []);
 
   // First-session welcome: auto-open the AI Concierge with a personalised greeting
   // and a prompt to rename it. Gated by profiles.has_seen_trade_intro so it only fires once.
