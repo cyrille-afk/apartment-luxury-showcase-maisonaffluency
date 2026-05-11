@@ -107,6 +107,7 @@ export default function TradeProjectDetail() {
     if (project) {
       setForm({
         name: project.name,
+        client_id: (project as any).client_id ?? null,
         client_name: project.client_name,
         location: project.location,
         notes: project.notes || "",
