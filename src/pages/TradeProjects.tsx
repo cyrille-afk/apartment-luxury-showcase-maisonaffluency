@@ -62,13 +62,14 @@ export default function TradeProjects() {
       user_id: user.id,
       studio_id: currentStudio?.id ?? null,
       name: name.trim(),
-      client_name: clientName.trim(),
+      client_id: client?.id ?? null,
+      client_name: client?.name ?? "",
       location: location.trim(),
     } as any);
     setCreating(false);
     if (error) { toast.error("Could not create project"); return; }
     toast.success("Project created");
-    setName(""); setClientName(""); setLocation("");
+    setName(""); setClient(null); setLocation("");
     setDialogOpen(false);
     refresh();
   };
