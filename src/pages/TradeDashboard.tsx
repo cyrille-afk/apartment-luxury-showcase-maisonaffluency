@@ -4,7 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
   Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box, Users, Sparkles,
+  Smartphone, Download,
 } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
