@@ -806,6 +806,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         .eq("id", quoteId);
                     }}
                   />
+                  {clientId && (
+                    <Link
+                      to={`/trade/clients?edit=${clientId}`}
+                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-body text-muted-foreground hover:text-foreground"
+                    >
+                      Edit client & contacts <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  )}
                 </div>
               ) : (
                 clientName && (
