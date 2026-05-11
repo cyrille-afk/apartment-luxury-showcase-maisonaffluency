@@ -762,8 +762,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     {item.label}
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
                   </button>
-                  {/* Hover tooltip */}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover/trade:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                  {/* Persistent badge — always visible to test conversion lift */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 pointer-events-none">
                     <div className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
                       <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredDoc?.title ?? "Featured Catalogue"}</p>
                       <p className="font-body text-[9px] text-background/60">Free download</p>
