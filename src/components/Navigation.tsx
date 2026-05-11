@@ -133,6 +133,36 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const { doc: featuredDoc } = useFeaturedPublicDocument();
+  const magazineBadgeRef = useRef<HTMLDivElement>(null);
+  const magazineImpressionFiredRef = useRef(false);
+
+  // Fire one impression event per session when the persistent magazine
+  // badge enters the viewport. Lets us measure the badge's reach against
+  // its click-through and download conversion rate.
+  useEffect(() => {
+    magazineImpressionFiredRef.current = false;
+  }, [featuredDoc?.id]);
+
+  useEffect(() => {
+    if (!featuredDoc || magazineImpressionFiredRef.current) return;
+    const node = magazineBadgeRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !magazineImpressionFiredRef.current) {
+            magazineImpressionFiredRef.current = true;
+            trackMagazine.badgeImpression(featuredDoc.id, featuredDoc.title, "nav_badge");
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [featuredDoc]);
 
   useEffect(() => {
     // All page section IDs in order
