@@ -226,8 +226,17 @@
     <!-- Fallback: ensure css-ready is added even if JS fails to load -->
     <script>
       // Apply FOUC guard only on homepage where hero skeleton provides a visual placeholder
-      if (window.location.pathname === '/' || window.location.pathname === '') {
+      var __isHome = (window.location.pathname === '/' || window.location.pathname === '');
+      if (__isHome) {
         document.documentElement.classList.add('home-fouc');
+      } else {
+        // On subpages the hero-skeleton + #seo-content are irrelevant and would
+        // flash as unstyled content before React mounts. Hide them immediately;
+        // crawlers that execute JS will still index the React-rendered content,
+        // and the <noscript> block below remains for non-JS crawlers.
+        var __css = document.createElement('style');
+        __css.textContent = '.hero-skeleton,#seo-content{display:none !important;}';
+        document.head.appendChild(__css);
       }
       setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
     </script>
