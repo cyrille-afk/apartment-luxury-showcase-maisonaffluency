@@ -21,6 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import ClientDocumentsSection from "@/components/trade/ClientDocumentsSection";
 
 type ClientType = "company" | "studio" | "individual";
 
