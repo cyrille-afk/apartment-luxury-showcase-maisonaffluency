@@ -189,7 +189,7 @@ PWA_CHECKLIST = {
                 "This document is intentionally short. Print it, send it to your design partners, or pin it in the studio handbook so anyone reviewing the app on a phone knows what \"good\" looks like."),
         ]},
         {"title": "iPhone — reinstall the app", "blocks": [
-            ("p", "Always test on the live <i>maisonaffluency.com</i> domain. Lovable preview URLs run inside an iframe and don't reflect manifest changes."),
+            ("p", "Always test on the live <i>maisonaffluency.com</i> domain. Staging or preview environments may run inside an iframe and won't reflect manifest, theme-color or display-mode changes."),
             ("table", [
                 ("1.  Remove the existing icon", "Long-press the Maison Affluency icon on the Home Screen → <b>Remove App</b> → <b>Delete from Home Screen</b>."),
                 ("2.  Open Safari", "Not Chrome. Navigate to <i>https://maisonaffluency.com</i>."),
