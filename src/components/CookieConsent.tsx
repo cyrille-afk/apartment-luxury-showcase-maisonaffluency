@@ -11,6 +11,8 @@ const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
+
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
       // Small delay so it doesn't flash during hero load
