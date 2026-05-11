@@ -1416,6 +1416,47 @@ export type Database = {
           },
         ]
       }
+      magazine_badge_events: {
+        Row: {
+          country: string | null
+          created_at: string
+          document_id: string | null
+          document_label: string | null
+          event_type: string
+          id: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          document_id?: string | null
+          document_label?: string | null
+          event_type: string
+          id?: string
+          source?: string
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          document_id?: string | null
+          document_label?: string | null
+          event_type?: string
+          id?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "magazine_badge_events_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "trade_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markup_annotations: {
         Row: {
           created_at: string
