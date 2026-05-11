@@ -292,6 +292,9 @@ export function AIConcierge() {
     const previous = loadName();
     const saved = saveName(value);
     setName(saved);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("concierge:name-changed", { detail: saved }));
+    }
     if (saved !== previous) {
       const message = saved === DEFAULT_NAME
         ? `Noted — I'll go back to ${DEFAULT_NAME} from now on.`
