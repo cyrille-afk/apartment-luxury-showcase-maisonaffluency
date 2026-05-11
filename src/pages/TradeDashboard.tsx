@@ -273,10 +273,9 @@ const TradeDashboard = () => {
             {(() => {
               if (typeof window === "undefined") return null;
               const host = window.location.hostname;
-              const isPreviewOnly = import.meta.env.DEV
-                || /(^|\.)lovableproject\.com$/.test(host)
-                || host.startsWith("id-preview--");
-              if (!isPreviewOnly) return null;
+              const isLocalDev = import.meta.env.DEV && (host === "localhost" || host === "127.0.0.1");
+              const isEditorSandbox = /(^|\.)lovableproject\.com$/.test(host);
+              if (!isLocalDev && !isEditorSandbox) return null;
               return (
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent("open-mobile-preview"))}
