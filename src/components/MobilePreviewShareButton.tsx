@@ -112,7 +112,7 @@ const MobilePreviewShareButton = () => {
           <div className="flex flex-wrap items-center justify-center gap-2 mb-3 bg-background border border-border rounded-full px-3 py-1.5 shadow-lg">
             {/* Side toggle */}
             <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
-              {(["trade", "public"] as Side[]).map((s) => (
+              {(["trade", "public", "split"] as Side[]).map((s) => (
                 <button
                   key={s}
                   onClick={() => setSide(s)}
@@ -123,7 +123,7 @@ const MobilePreviewShareButton = () => {
                   }`}
                   aria-pressed={side === s}
                 >
-                  {s}
+                  {s === "split" ? "Split" : s}
                 </button>
               ))}
             </div>
