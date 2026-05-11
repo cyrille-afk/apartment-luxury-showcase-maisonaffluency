@@ -62,6 +62,7 @@ const TradeAdminOgPipeline = lazy(() => import("./pages/TradeAdminOgPipeline"));
 const TradeAdminOnboarding = lazy(() => import("./pages/TradeAdminOnboarding"));
 const TradeMoodBoards = lazy(() => import("./pages/TradeMoodBoards"));
 const TradeBudgetTracker = lazy(() => import("./pages/TradeBudgetTracker"));
+const TradeClients = lazy(() => import("./pages/TradeClients"));
 const TradeLeadTimeCalendar = lazy(() => import("./pages/TradeLeadTimeCalendar"));
 const TradeReorder = lazy(() => import("./pages/TradeReorder"));
 const TradeCurrencyConverter = lazy(() => import("./pages/TradeCurrencyConverter"));
