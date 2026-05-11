@@ -502,13 +502,13 @@ function drawCompanyAndMeta(
   if (cityLine) addr.push(cityLine);
   if (b.country) addr.push(b.country);
 
-  const contactDetails: string[] = [];
-  const cName = [c.name].filter(Boolean).join(" ").trim();
-  if (cName) contactDetails.push(c.role ? `${cName} — ${c.role}` : cName);
-  if (c.email) contactDetails.push(c.email);
-  if (c.phone) contactDetails.push(c.phone);
+  const cName = (c.name || "").trim();
+  const cRole = (c.role || "").trim();
+  const cEmail = (c.email || "").trim();
+  const cPhone = (c.phone || "").trim();
+  const hasContact = !!(cName || cRole || cEmail || cPhone);
 
-  if (addr.length > 0 || contactDetails.length > 0) {
+  if (addr.length > 0 || hasContact) {
     const py = yEnd + 4;
     doc.setDrawColor(230, 228, 222);
     doc.setLineWidth(0.4);
@@ -535,21 +535,44 @@ function drawCompanyAndMeta(
       doc.text(w, M, lyL);
       lyL += w.length * 11;
     });
-    // Right: contact
-    if (contactDetails.length > 0) {
+    // Right: contact — each field on its own line, name bold, role muted
+    if (hasContact) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       doc.text("CONTACT", metaX, pyt);
+      let lyR = pyt + 12;
+      const colWR = colW - 8;
+      if (cName) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(FG[0], FG[1], FG[2]);
+        const w = doc.splitTextToSize(cName, colWR);
+        doc.text(w, metaX, lyR);
+        lyR += w.length * 12;
+      }
+      if (cRole) {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8.5);
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        const w = doc.splitTextToSize(cRole, colWR);
+        doc.text(w, metaX, lyR);
+        lyR += w.length * 11;
+      }
+      if (cEmail || cPhone) lyR += 3;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(FG[0], FG[1], FG[2]);
-      let lyR = pyt + 12;
-      contactDetails.forEach((ln) => {
-        const w = doc.splitTextToSize(ln, colW - 8);
+      if (cEmail) {
+        const w = doc.splitTextToSize(cEmail, colWR);
         doc.text(w, metaX, lyR);
         lyR += w.length * 11;
-      });
+      }
+      if (cPhone) {
+        const w = doc.splitTextToSize(cPhone, colWR);
+        doc.text(w, metaX, lyR);
+        lyR += w.length * 11;
+      }
       lyL = Math.max(lyL, lyR);
     }
     yEnd = lyL + 6;
