@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { Plus, Search, Pencil, Trash2, Star, Building2, User, Mail, Phone, Loader2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Star, Building2, User, Mail, Phone, Loader2, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
