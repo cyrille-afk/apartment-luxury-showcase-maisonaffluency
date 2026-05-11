@@ -4,6 +4,49 @@
 
 **URL**: https://lovable.dev/projects/02208d51-b513-401f-a97f-9e38a2a4260f
 
+## iPhone Standalone (PWA) Preview Checklist
+
+Use this checklist after any change to viewport meta, `manifest.json`,
+`theme-color`, safe-area padding, or fixed/sticky bars (top nav, cookie
+banner, mobile bottom bar). iOS caches the manifest at install time, so
+**you must reinstall the app** to see manifest/theme-color changes.
+
+### 1. Reinstall the app on iPhone
+
+1. Long-press the **Maison Affluency** icon on the Home Screen → **Remove App** → **Delete from Home Screen**.
+2. Open **Safari** (not Chrome) and go to `https://maisonaffluency.com`.
+   - Important: the Lovable preview URL won't reflect manifest changes — only the live domain does.
+3. Fully reload: tap the address bar → pull down to refresh, or close and reopen the Safari tab.
+4. Tap the **Share** icon (square with arrow ↑) at the bottom.
+5. Scroll down → **Add to Home Screen** → **Add**.
+6. Launch the app from the **Home Screen icon** (not from Safari).
+
+### 2. Screenshots to capture
+
+Take a screenshot (Side button + Volume Up) on each of the following and save them for review:
+
+- [ ] **Home — portrait**, scrolled to top. Check: status bar (clock, battery) sits in a clean white strip above the logo; nothing overlaps the burger menu or logo.
+- [ ] **Home — portrait**, burger menu open. Check: menu items aren't clipped by the notch / Dynamic Island.
+- [ ] **Home — landscape**. Check: notch on the left doesn't overlap the logo or nav icons.
+- [ ] **Designers Directory — portrait**, scrolled mid-page. Check: sticky filters (if any) clear the status bar.
+- [ ] **A product page — portrait**, scrolled to bottom. Check: the iPhone home indicator bar at the bottom doesn't sit on top of the cookie banner, sticky CTA, or footer links.
+- [ ] **Trade login / any modal** — portrait. Check: dialog close button isn't hidden behind the notch.
+- [ ] **Cookie consent banner visible** (clear cookies via footer → Cookie Settings, then reload). Check: banner sits above the home indicator with breathing room.
+
+### 3. What to look for in each screenshot
+
+- **Top overlap**: status bar icons must NOT sit on top of the logo, burger, or any text. There should be a solid white strip above the nav.
+- **Notch / Dynamic Island**: in landscape, no content should disappear behind the left-side notch.
+- **Bottom home indicator**: the thin black/white bar at the bottom must NOT cover sticky bars, buttons, or footer links.
+- **Color seam**: the status bar background should match the page header (white). No dark band or mismatched color strip.
+- **Scroll behaviour**: pull-to-refresh should NOT reveal Safari chrome — if it does, the app launched from Safari, not the Home Screen icon.
+
+### 4. If something overlaps
+
+Note the exact page + screenshot, then ask Lovable to patch the affected component
+with `pt-[env(safe-area-inset-top)]` (top) or `pb-[env(safe-area-inset-bottom)]` (bottom).
+
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
