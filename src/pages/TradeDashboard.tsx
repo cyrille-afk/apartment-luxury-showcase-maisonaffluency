@@ -80,6 +80,18 @@ const TradeDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
+  const [conciergeName, setConciergeName] = useState<string>(() => loadName() || DEFAULT_NAME);
+
+  // Keep the dashboard pill in sync if the user renames the concierge from the chat.
+  useEffect(() => {
+    const sync = () => setConciergeName(loadName() || DEFAULT_NAME);
+    window.addEventListener("storage", sync);
+    window.addEventListener("concierge:name-changed", sync as EventListener);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("concierge:name-changed", sync as EventListener);
+    };
+  }, []);
 
   // First-session welcome: auto-open the AI Concierge with a personalised greeting
   // and a prompt to rename it. Gated by profiles.has_seen_trade_intro so it only fires once.
@@ -267,7 +279,7 @@ const TradeDashboard = () => {
               className="flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 shadow-sm hover:opacity-90 transition-all"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span className="font-body text-[11px] uppercase tracking-[0.15em]">Concierge</span>
+              <span className="font-body text-[11px] uppercase tracking-[0.15em]">{conciergeName}</span>
             </button>
           </div>
         </div>
