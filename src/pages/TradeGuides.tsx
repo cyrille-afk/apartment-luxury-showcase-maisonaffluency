@@ -89,6 +89,38 @@ export default function TradeGuides() {
         )}
       </header>
 
+      <a
+        href="/guides/studio-pwa-preview-checklist.pdf"
+        download
+        onClick={() =>
+          trackEvent("guide_pdf_download", {
+            event_category: "Trade Guides",
+            event_label: "pwa-preview-checklist",
+            source: "guides_top_banner",
+          })
+        }
+        className="group flex items-center gap-4 rounded-md border border-[hsl(var(--pdf-red))]/30 bg-[hsl(var(--pdf-red))]/5 p-4 hover:bg-[hsl(var(--pdf-red))]/10 transition-colors"
+      >
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))]">
+          <Smartphone className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            Latest update · Mobile essentials
+          </p>
+          <h2 className="font-display text-base md:text-lg text-foreground leading-snug mt-0.5">
+            Installing Maison Affluency on Your Phone
+          </h2>
+          <p className="font-body text-xs text-muted-foreground mt-0.5">
+            Get the updated PDF — share with designers and architects on your team.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-[hsl(var(--pdf-red))] px-3 py-2 font-body text-xs text-white group-hover:opacity-90 transition-opacity">
+          <Download className="h-3.5 w-3.5" aria-hidden="true" />
+          Download PDF
+        </span>
+      </a>
+
       <div className="grid gap-4 md:grid-cols-2">
         {guides.map((g) => {
           const Icon = g.icon;
