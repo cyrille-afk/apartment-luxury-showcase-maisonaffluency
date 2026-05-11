@@ -6,6 +6,7 @@ import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackDownload } from "@/lib/trackDownload";
+import { trackMagazine } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
@@ -127,8 +128,11 @@ const TradeLanding = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const { doc: featuredDoc } = useFeaturedPublicDocument();
 
-  const handleTrackedCatalogueDownload = useCallback(async (label: string) => {
+  const handleTrackedCatalogueDownload = useCallback(async (label: string, source: string) => {
     if (!featuredDoc) return;
+    // Tie this CTA click to the same document_id used by the nav badge so the
+    // funnel (impression → click → download) can be analysed end-to-end.
+    trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, source);
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session?.user) {
@@ -556,7 +560,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 {/* Catalogue cover thumbnail */}
                 <button
                   type="button"
-                  onClick={() => void handleTrackedCatalogueDownload(`${featuredDoc.title} — Landing`)}
+                  onClick={() => void handleTrackedCatalogueDownload(`${featuredDoc.title} — Landing`, "trade_landing_cover")}
                   className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
                 >
                   {featuredDoc.cover_image_url && (
@@ -584,7 +588,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   </p>
                   <button
                     type="button"
-                    onClick={() => void handleTrackedCatalogueDownload(`${featuredDoc.title} — Landing CTA`)}
+                    onClick={() => void handleTrackedCatalogueDownload(`${featuredDoc.title} — Landing CTA`, "trade_landing_cta")}
                     className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
                   >
                     <FileDown className="h-3.5 w-3.5" />
