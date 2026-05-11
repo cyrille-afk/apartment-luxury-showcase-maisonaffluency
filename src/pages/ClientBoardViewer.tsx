@@ -189,7 +189,7 @@ const ClientBoardViewer = () => {
       <Helmet><title>{board?.title}{studioName ? ` — ${studioName}` : whiteLabel ? "" : " — Maison Affluency"}</title></Helmet>
       <div className="min-h-screen bg-background">
         {/* Branded header — swaps to studio branding when hide_maison_branding is on */}
-        <header className="border-b border-border bg-background sticky top-0 z-10">
+        <header className="border-b border-border bg-background sticky top-0 z-10 pt-[env(safe-area-inset-top)]">
           <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               {studioLogo ? (
