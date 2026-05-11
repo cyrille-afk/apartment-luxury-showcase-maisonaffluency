@@ -370,6 +370,7 @@ const App = () => {
                   <Route path="/trade/spec-sheet" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSpecSheet /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
+                    <Route path="dashboard" element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
                     <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
