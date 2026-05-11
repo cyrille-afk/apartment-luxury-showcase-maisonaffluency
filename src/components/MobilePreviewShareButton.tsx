@@ -4,7 +4,7 @@ import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type Device = "se" | "pro_max" | "pixel";
-type Side = "trade" | "public";
+type Side = "trade" | "public" | "split";
 
 const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
   se:      { label: "iPhone SE",        w: 375, h: 667 },
