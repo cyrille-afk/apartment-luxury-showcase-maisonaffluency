@@ -62,6 +62,7 @@ const TradeAdminOgPipeline = lazy(() => import("./pages/TradeAdminOgPipeline"));
 const TradeAdminOnboarding = lazy(() => import("./pages/TradeAdminOnboarding"));
 const TradeMoodBoards = lazy(() => import("./pages/TradeMoodBoards"));
 const TradeBudgetTracker = lazy(() => import("./pages/TradeBudgetTracker"));
+const TradeClients = lazy(() => import("./pages/TradeClients"));
 const TradeLeadTimeCalendar = lazy(() => import("./pages/TradeLeadTimeCalendar"));
 const TradeReorder = lazy(() => import("./pages/TradeReorder"));
 const TradeCurrencyConverter = lazy(() => import("./pages/TradeCurrencyConverter"));
@@ -429,6 +430,7 @@ const App = () => {
                     <Route path="admin/onboarding" element={<TradeAdminOnboarding />} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
                     <Route path="budget" element={<TradeBudgetTracker />} />
+                    <Route path="clients" element={<TradeClients />} />
                     <Route path="lead-time-calendar" element={<TradeLeadTimeCalendar />} />
                     <Route path="reorder" element={<TradeReorder />} />
                     <Route path="currency-converter" element={<TradeCurrencyConverter />} />

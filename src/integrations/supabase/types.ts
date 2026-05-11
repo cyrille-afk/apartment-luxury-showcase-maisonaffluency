@@ -467,6 +467,56 @@ export type Database = {
           },
         ]
       }
+      client_contacts: {
+        Row: {
+          client_id: string
+          created_at: string
+          email: string | null
+          first_name: string
+          id: string
+          is_primary: boolean
+          last_name: string
+          notes: string | null
+          phone: string | null
+          role_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          is_primary?: boolean
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          role_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          is_primary?: boolean
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          role_title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_taste_profiles: {
         Row: {
           cluster_description: string | null
@@ -526,6 +576,74 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      clients: {
+        Row: {
+          billing_address_line1: string | null
+          billing_address_line2: string | null
+          billing_city: string | null
+          billing_country: string | null
+          billing_postal_code: string | null
+          billing_region: string | null
+          created_at: string
+          created_by: string
+          default_currency: string | null
+          id: string
+          name: string
+          notes: string | null
+          studio_id: string
+          tax_id: string | null
+          type: Database["public"]["Enums"]["client_type"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          billing_address_line1?: string | null
+          billing_address_line2?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_postal_code?: string | null
+          billing_region?: string | null
+          created_at?: string
+          created_by: string
+          default_currency?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          studio_id: string
+          tax_id?: string | null
+          type?: Database["public"]["Enums"]["client_type"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          billing_address_line1?: string | null
+          billing_address_line2?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_postal_code?: string | null
+          billing_region?: string | null
+          created_at?: string
+          created_by?: string
+          default_currency?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          studio_id?: string
+          tax_id?: string | null
+          type?: Database["public"]["Enums"]["client_type"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       competitor_designers: {
         Row: {
@@ -2072,6 +2190,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_id: string | null
           client_name: string
           color: string
           cover_image_url: string | null
@@ -2087,6 +2206,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          client_id?: string | null
           client_name?: string
           color?: string
           cover_image_url?: string | null
@@ -2102,6 +2222,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          client_id?: string | null
           client_name?: string
           color?: string
           cover_image_url?: string | null
@@ -2117,6 +2238,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_studio_id_fkey"
             columns: ["studio_id"]
@@ -3796,6 +3924,7 @@ export type Database = {
       trade_quotes: {
         Row: {
           admin_notes: string | null
+          client_id: string | null
           client_name: string | null
           confirmed_at: string | null
           created_at: string
@@ -3816,6 +3945,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          client_id?: string | null
           client_name?: string | null
           confirmed_at?: string | null
           created_at?: string
@@ -3836,6 +3966,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          client_id?: string | null
           client_name?: string | null
           confirmed_at?: string | null
           created_at?: string
@@ -3855,6 +3986,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trade_quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trade_quotes_project_id_fkey"
             columns: ["project_id"]
@@ -4393,6 +4531,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      client_type: "company" | "studio" | "individual"
       journal_category:
         | "designer_interview"
         | "collection_story"
@@ -4551,6 +4690,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      client_type: ["company", "studio", "individual"],
       journal_category: [
         "designer_interview",
         "collection_story",
