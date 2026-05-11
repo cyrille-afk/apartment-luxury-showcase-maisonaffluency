@@ -452,13 +452,13 @@ function drawCompanyAndMeta(
     const m = v.split(/\s+[—–\-/|]\s+|\s*,\s*/);
     return m.filter(Boolean).slice(0, 2);
   };
-  // Prefer structured client info from clients/client_contacts when available.
-  const contactFullName = [args.clientContact?.name].filter(Boolean).join(" ").trim();
+  // When we have structured company info, the CLIENT field shows ONLY the
+  // company (the contact is rendered in its own CONTACT panel below to avoid
+  // duplication). Falls back to legacy clientName parsing otherwise.
   const company = (args.clientCompany ?? "").trim();
   let clientLines: string[];
-  if (contactFullName || company) {
-    clientLines = [contactFullName, company].filter(Boolean);
-    if (clientLines.length === 0) clientLines = splitClient(args.clientName);
+  if (company) {
+    clientLines = [company];
   } else {
     clientLines = splitClient(args.clientName);
   }
@@ -1074,3 +1074,14 @@ export async function downloadQuotePdf(args: QuotePdfArgs) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/**
+ * Build the PDF and return a blob URL suitable for previewing in an iframe
+ * (or `window.open`). Caller is responsible for revoking the URL when done.
+ */
+export async function previewQuotePdfUrl(args: QuotePdfArgs): Promise<string> {
+  const doc = await buildQuotePdf(args);
+  const blob = doc.output("blob");
+  return URL.createObjectURL(blob);
+}
+

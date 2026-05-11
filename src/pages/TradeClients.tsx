@@ -119,6 +119,22 @@ export default function TradeClients() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  // Auto-open edit dialog when navigated with ?edit=<clientId>
+  const [autoEditedFor, setAutoEditedFor] = useState<string | null>(null);
+  useEffect(() => {
+    if (loading || !clients.length) return;
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get("edit");
+    if (!editId || autoEditedFor === editId) return;
+    const found = clients.find((c) => c.id === editId);
+    if (found) {
+      setEditing({ ...found });
+      setEditingContacts((contactsByClient[found.id] || []).map((ct) => ({ ...ct })));
+      setAutoEditedFor(editId);
+    }
+  }, [loading, clients, contactsByClient, autoEditedFor]);
+
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return clients;

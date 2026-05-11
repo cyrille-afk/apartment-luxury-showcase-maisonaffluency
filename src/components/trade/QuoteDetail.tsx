@@ -4,14 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import ClientPicker from "@/components/trade/ClientPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
-import { downloadQuotePdf, type QuotePdfLine } from "@/lib/quotePdf";
+import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
@@ -422,7 +424,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return sum + converted * item.quantity;
   }, 0);
 
-  const handleDownloadPdf = async () => {
+  const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
       const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
@@ -492,57 +494,82 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       }
     }
 
+    return {
+      quoteNumber,
+      status: quoteStatus,
+      statusLabel: statusEntry.label,
+      createdAt: createdDate,
+      expiryAt: expiryDate,
+      clientName: clientName || null,
+      clientCompany: clientCompanyName,
+      clientBilling,
+      clientContact,
+      projectName: projectName || null,
+      currency,
+      lines,
+      subtotalCents,
+      tradeDiscountPct,
+      tradeDiscountApplied: tradeDiscount,
+      tierLabel,
+      tierBreakdown: tierConfig
+        ? (["silver", "gold", "platinum"] as const).map((t) => ({
+            label: tierConfig[t].label,
+            pct: tierConfig[t].discount_pct,
+            minSpendCents: tierConfig[t].min_spend_cents,
+            active: t === currentTier,
+          }))
+        : undefined,
+      gstEnabled,
+      gstRate,
+      insurancePremiumCents: insurancePremiumCents || 0,
+      insuranceLabel: insuranceEnabled ? insLabel : null,
+      insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
+      insuranceEnabled,
+      notes: notes || null,
+      gbpLanded: gbp.ready
+        ? {
+            ready: gbp.ready,
+            fxEurGbp: gbp.fxEurGbp,
+            fxIsFallback: gbp.fxIsFallback,
+            goodsGbpCents: gbp.goodsGbpCents,
+            shippingGbpCents: gbp.shippingGbpCents,
+            dutyGbpCents: gbp.dutyGbpCents,
+            vatGbpCents: gbp.vatGbpCents,
+            totalGbpCents: gbp.totalGbpCents,
+          }
+        : null,
+    };
+  };
+
+  const handleDownloadPdf = async () => {
     try {
-      await downloadQuotePdf({
-        quoteNumber,
-        status: quoteStatus,
-        statusLabel: statusEntry.label,
-        createdAt: createdDate,
-        expiryAt: expiryDate,
-        clientName: clientName || null,
-        clientCompany: clientCompanyName,
-        clientBilling,
-        clientContact,
-        projectName: projectName || null,
-        currency,
-        lines,
-        subtotalCents,
-        tradeDiscountPct,
-        tradeDiscountApplied: tradeDiscount,
-        tierLabel,
-        tierBreakdown: tierConfig
-          ? (["silver", "gold", "platinum"] as const).map((t) => ({
-              label: tierConfig[t].label,
-              pct: tierConfig[t].discount_pct,
-              minSpendCents: tierConfig[t].min_spend_cents,
-              active: t === currentTier,
-            }))
-          : undefined,
-        gstEnabled,
-        gstRate,
-        insurancePremiumCents: insurancePremiumCents || 0,
-        insuranceLabel: insuranceEnabled ? insLabel : null,
-        insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
-        insuranceEnabled,
-        notes: notes || null,
-        gbpLanded: gbp.ready
-          ? {
-              ready: gbp.ready,
-              fxEurGbp: gbp.fxEurGbp,
-              fxIsFallback: gbp.fxIsFallback,
-              goodsGbpCents: gbp.goodsGbpCents,
-              shippingGbpCents: gbp.shippingGbpCents,
-              dutyGbpCents: gbp.dutyGbpCents,
-              vatGbpCents: gbp.vatGbpCents,
-              totalGbpCents: gbp.totalGbpCents,
-            }
-          : null,
-      });
+      const args = await buildPdfArgs();
+      await downloadQuotePdf(args);
       toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
     } catch (err: any) {
       toast({ title: "PDF failed", description: err?.message || "Could not generate PDF.", variant: "destructive" });
     }
   };
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const handlePreviewPdf = async () => {
+    setPreviewLoading(true);
+    try {
+      const args = await buildPdfArgs();
+      const url = await previewQuotePdfUrl(args);
+      setPreviewUrl(url);
+    } catch (err: any) {
+      toast({ title: "Preview failed", description: err?.message || "Could not generate preview.", variant: "destructive" });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+  const closePreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+  };
+
 
   /** Persist insurance fields. Optimistic — caller already updated local state. */
   const persistInsurance = async (patch: Partial<{ insurance_enabled: boolean; insurance_tier: InsuranceTier; insurance_rate_bps: number; insurance_notes: string | null }>) => {
@@ -674,6 +701,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="sm:hidden">Excel</span>
           </button>
           <button
+            onClick={handlePreviewPdf}
+            disabled={items.length === 0 || previewLoading}
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            title="Preview the branded PDF before downloading"
+          >
+            {previewLoading ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">Preview PDF</span>
+            <span className="sm:hidden">Preview</span>
+          </button>
+          <button
             onClick={handleDownloadPdf}
             disabled={items.length === 0}
             className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
@@ -769,6 +806,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         .eq("id", quoteId);
                     }}
                   />
+                  {clientId && (
+                    <Link
+                      to={`/trade/clients?edit=${clientId}`}
+                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-body text-muted-foreground hover:text-foreground"
+                    >
+                      Edit client & contacts <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  )}
                 </div>
               ) : (
                 clientName && (
@@ -1747,6 +1792,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
       </div>
+
+      {/* PDF preview dialog */}
+      <Dialog open={!!previewUrl} onOpenChange={(o) => { if (!o) closePreview(); }}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col">
+          <DialogHeader className="px-4 py-3 border-b border-border">
+            <DialogTitle className="font-body text-sm">PDF preview · {quoteNumber}</DialogTitle>
+          </DialogHeader>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              title="Quote PDF preview"
+              className="flex-1 w-full bg-muted"
+            />
+          )}
+          <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
+            <button
+              onClick={closePreview}
+              className="px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted"
+            >
+              Close
+            </button>
+            <button
+              onClick={async () => { await handleDownloadPdf(); }}
+              className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90"
+            >
+              Download
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
