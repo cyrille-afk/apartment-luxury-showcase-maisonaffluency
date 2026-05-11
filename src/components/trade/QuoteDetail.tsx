@@ -1897,13 +1897,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           <DialogHeader className="px-4 py-3 border-b border-border">
             <DialogTitle className="font-body text-sm">PDF preview · {quoteNumber}</DialogTitle>
           </DialogHeader>
-          {previewUrl && (
-            <iframe
-              src={previewUrl}
-              title="Quote PDF preview"
-              className="flex-1 w-full bg-muted"
-            />
-          )}
+          <QuotePdfPreviewPages blobUrl={previewUrl} />
           <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
             <button
               onClick={closePreview}
