@@ -422,7 +422,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return sum + converted * item.quantity;
   }, 0);
 
-  const handleDownloadPdf = async () => {
+  const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
       const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
@@ -492,57 +492,82 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       }
     }
 
+    return {
+      quoteNumber,
+      status: quoteStatus,
+      statusLabel: statusEntry.label,
+      createdAt: createdDate,
+      expiryAt: expiryDate,
+      clientName: clientName || null,
+      clientCompany: clientCompanyName,
+      clientBilling,
+      clientContact,
+      projectName: projectName || null,
+      currency,
+      lines,
+      subtotalCents,
+      tradeDiscountPct,
+      tradeDiscountApplied: tradeDiscount,
+      tierLabel,
+      tierBreakdown: tierConfig
+        ? (["silver", "gold", "platinum"] as const).map((t) => ({
+            label: tierConfig[t].label,
+            pct: tierConfig[t].discount_pct,
+            minSpendCents: tierConfig[t].min_spend_cents,
+            active: t === currentTier,
+          }))
+        : undefined,
+      gstEnabled,
+      gstRate,
+      insurancePremiumCents: insurancePremiumCents || 0,
+      insuranceLabel: insuranceEnabled ? insLabel : null,
+      insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
+      insuranceEnabled,
+      notes: notes || null,
+      gbpLanded: gbp.ready
+        ? {
+            ready: gbp.ready,
+            fxEurGbp: gbp.fxEurGbp,
+            fxIsFallback: gbp.fxIsFallback,
+            goodsGbpCents: gbp.goodsGbpCents,
+            shippingGbpCents: gbp.shippingGbpCents,
+            dutyGbpCents: gbp.dutyGbpCents,
+            vatGbpCents: gbp.vatGbpCents,
+            totalGbpCents: gbp.totalGbpCents,
+          }
+        : null,
+    };
+  };
+
+  const handleDownloadPdf = async () => {
     try {
-      await downloadQuotePdf({
-        quoteNumber,
-        status: quoteStatus,
-        statusLabel: statusEntry.label,
-        createdAt: createdDate,
-        expiryAt: expiryDate,
-        clientName: clientName || null,
-        clientCompany: clientCompanyName,
-        clientBilling,
-        clientContact,
-        projectName: projectName || null,
-        currency,
-        lines,
-        subtotalCents,
-        tradeDiscountPct,
-        tradeDiscountApplied: tradeDiscount,
-        tierLabel,
-        tierBreakdown: tierConfig
-          ? (["silver", "gold", "platinum"] as const).map((t) => ({
-              label: tierConfig[t].label,
-              pct: tierConfig[t].discount_pct,
-              minSpendCents: tierConfig[t].min_spend_cents,
-              active: t === currentTier,
-            }))
-          : undefined,
-        gstEnabled,
-        gstRate,
-        insurancePremiumCents: insurancePremiumCents || 0,
-        insuranceLabel: insuranceEnabled ? insLabel : null,
-        insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
-        insuranceEnabled,
-        notes: notes || null,
-        gbpLanded: gbp.ready
-          ? {
-              ready: gbp.ready,
-              fxEurGbp: gbp.fxEurGbp,
-              fxIsFallback: gbp.fxIsFallback,
-              goodsGbpCents: gbp.goodsGbpCents,
-              shippingGbpCents: gbp.shippingGbpCents,
-              dutyGbpCents: gbp.dutyGbpCents,
-              vatGbpCents: gbp.vatGbpCents,
-              totalGbpCents: gbp.totalGbpCents,
-            }
-          : null,
-      });
+      const args = await buildPdfArgs();
+      await downloadQuotePdf(args);
       toast({ title: "PDF downloaded", description: "Branded quote PDF saved to your device." });
     } catch (err: any) {
       toast({ title: "PDF failed", description: err?.message || "Could not generate PDF.", variant: "destructive" });
     }
   };
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const handlePreviewPdf = async () => {
+    setPreviewLoading(true);
+    try {
+      const args = await buildPdfArgs();
+      const url = await previewQuotePdfUrl(args);
+      setPreviewUrl(url);
+    } catch (err: any) {
+      toast({ title: "Preview failed", description: err?.message || "Could not generate preview.", variant: "destructive" });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+  const closePreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+  };
+
 
   /** Persist insurance fields. Optimistic — caller already updated local state. */
   const persistInsurance = async (patch: Partial<{ insurance_enabled: boolean; insurance_tier: InsuranceTier; insurance_rate_bps: number; insurance_notes: string | null }>) => {
