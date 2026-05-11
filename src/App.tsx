@@ -396,6 +396,7 @@ const App = () => {
                     <Route path="favorites" element={<TradeFavorites />} />
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="downloads-by-country" element={<TradeDownloadsByCountry />} />
+                    <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
