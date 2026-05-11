@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
 
 const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[] = [
@@ -25,7 +26,7 @@ export default function TradeProjects() {
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
-  const [clientName, setClientName] = useState("");
+  const [client, setClient] = useState<PickedClient | null>(null);
   const [location, setLocation] = useState("");
   const [creating, setCreating] = useState(false);
   const [hiddenForMeCount, setHiddenForMeCount] = useState(0);
@@ -61,13 +62,14 @@ export default function TradeProjects() {
       user_id: user.id,
       studio_id: currentStudio?.id ?? null,
       name: name.trim(),
-      client_name: clientName.trim(),
+      client_id: client?.id ?? null,
+      client_name: client?.name ?? "",
       location: location.trim(),
     } as any);
     setCreating(false);
     if (error) { toast.error("Could not create project"); return; }
     toast.success("Project created");
-    setName(""); setClientName(""); setLocation("");
+    setName(""); setClient(null); setLocation("");
     setDialogOpen(false);
     refresh();
   };
@@ -121,8 +123,8 @@ export default function TradeProjects() {
                 />
               </div>
               <div>
-                <Label className="text-xs">Client name</Label>
-                <Input value={clientName} onChange={(e) => setClientName(e.target.value)} />
+                <Label className="text-xs">Client</Label>
+                <ClientPicker value={client?.id ?? null} onChange={setClient} size="sm" />
               </div>
               <div>
                 <Label className="text-xs">Location</Label>

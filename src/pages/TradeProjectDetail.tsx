@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import ClientPicker from "@/components/trade/ClientPicker";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
@@ -62,7 +63,7 @@ export default function TradeProjectDetail() {
   const canManage = !accessDenied;
 
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: "", client_name: "", location: "", notes: "", target_completion_date: "" });
+  const [form, setForm] = useState<{ name: string; client_id: string | null; client_name: string; location: string; notes: string; target_completion_date: string }>({ name: "", client_id: null, client_name: "", location: "", notes: "", target_completion_date: "" });
   const [saving, setSaving] = useState(false);
 
   const [quotes, setQuotes] = useState<LinkedQuote[]>([]);
@@ -106,6 +107,7 @@ export default function TradeProjectDetail() {
     if (project) {
       setForm({
         name: project.name,
+        client_id: (project as any).client_id ?? null,
         client_name: project.client_name,
         location: project.location,
         notes: project.notes || "",
@@ -196,6 +198,7 @@ export default function TradeProjectDetail() {
     setSaving(true);
     const { error } = await supabase.from("projects" as any).update({
       name: form.name.trim() || "Untitled Project",
+      client_id: form.client_id,
       client_name: form.client_name.trim(),
       location: form.location.trim(),
       notes: form.notes.trim(),
@@ -328,7 +331,11 @@ export default function TradeProjectDetail() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Client</Label>
-                <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} />
+                <ClientPicker
+                  value={form.client_id}
+                  onChange={(c) => setForm({ ...form, client_id: c?.id ?? null, client_name: c?.name ?? "" })}
+                  size="sm"
+                />
               </div>
               <div>
                 <Label className="text-xs">Location</Label>

@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import ClientPicker from "@/components/trade/ClientPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
@@ -80,6 +81,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currency, setCurrency] = useState<Currency>("SGD");
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
+  const [clientId, setClientId] = useState<string | null>(null);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
@@ -200,7 +202,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -246,6 +248,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
+      if ((quoteRes.data as any)?.client_id) setClientId((quoteRes.data as any).client_id as string);
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
       if ((quoteRes.data as any)?.project_id !== undefined) setProjectId((quoteRes.data as any).project_id);
       const q = quoteRes.data as any;
@@ -699,17 +702,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
               )}
               {isDraft ? (
-                <>
+                <div className="w-full max-w-[320px]">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Client</span>
-                  <input
-                    type="text"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
-                    placeholder="Client / Project Name"
-                    className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none text-[16px] sm:text-sm"
+                  <ClientPicker
+                    value={clientId}
+                    size="sm"
+                    showManageLink={false}
+                    placeholder="Select or create a client…"
+                    onChange={(c) => {
+                      const newId = c?.id ?? null;
+                      const newName = c?.name ?? "";
+                      setClientId(newId);
+                      setClientName(newName);
+                      supabase.from("trade_quotes")
+                        .update({ client_id: newId, client_name: newName } as any)
+                        .eq("id", quoteId);
+                    }}
                   />
-                </>
+                </div>
               ) : (
                 clientName && (
                   <div>
