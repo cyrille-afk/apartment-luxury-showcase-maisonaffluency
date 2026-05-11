@@ -81,6 +81,45 @@ export default function TradeClients() {
   const [editingContacts, setEditingContacts] = useState<Partial<Contact>[]>([]);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Client | null>(null);
+  const [attemptedSave, setAttemptedSave] = useState(false);
+
+  // ---------- Validation ----------
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Allow digits, spaces, +, -, (), min 6 digits
+  const PHONE_RE = /^[+()\-\s\d]{6,}$/;
+
+  const clientErrors = useMemo(() => {
+    const errs: { name?: string; website?: string; default_currency?: string } = {};
+    if (!editing) return errs;
+    if (!editing.name?.trim()) errs.name = "Name is required.";
+    else if (editing.name.trim().length > 120) errs.name = "Keep under 120 characters.";
+    if (editing.website && editing.website.trim()) {
+      try { new URL(editing.website.trim().startsWith("http") ? editing.website.trim() : `https://${editing.website.trim()}`); }
+      catch { errs.website = "Enter a valid URL."; }
+    }
+    if (editing.default_currency && !/^[A-Z]{3}$/.test(editing.default_currency.trim()))
+      errs.default_currency = "Use a 3-letter code (e.g. EUR).";
+    return errs;
+  }, [editing]);
+
+  const contactErrors = useMemo(() => {
+    return editingContacts.map((ct) => {
+      const errs: { name?: string; email?: string; phone?: string } = {};
+      const hasAny = !!(ct.first_name?.trim() || ct.last_name?.trim() || ct.email?.trim() || ct.phone?.trim() || ct.role_title?.trim());
+      if (hasAny && !ct.first_name?.trim() && !ct.last_name?.trim())
+        errs.name = "Add a first or last name.";
+      if (ct.email && ct.email.trim() && !EMAIL_RE.test(ct.email.trim()))
+        errs.email = "Enter a valid email.";
+      if (ct.phone && ct.phone.trim() && !PHONE_RE.test(ct.phone.trim()))
+        errs.phone = "Enter a valid phone number.";
+      return errs;
+    });
+  }, [editingContacts]);
+
+  const hasErrors = useMemo(() => {
+    return Object.keys(clientErrors).length > 0
+      || contactErrors.some((e) => Object.keys(e).length > 0);
+  }, [clientErrors, contactErrors]);
 
   const refresh = useCallback(async () => {
     if (!currentStudio) { setClients([]); setContactsByClient({}); setLoading(false); return; }
