@@ -73,13 +73,17 @@ const MobilePreviewShareButton = () => {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
-  const previewSrc = useMemo(() => {
+  const buildSrc = (target: "trade" | "public") => {
     if (typeof window === "undefined") return "";
-    const targetPath = side === "trade" ? toTradePath(pathname) : toPublicPath(pathname);
+    const targetPath = target === "trade" ? toTradePath(pathname) : toPublicPath(pathname);
     const url = new URL(targetPath, window.location.origin);
     url.searchParams.set("mobile_preview", "1");
     return `${url.pathname}${url.search}${url.hash}`;
-  }, [pathname, side]);
+  };
+
+  const tradeSrc = useMemo(() => buildSrc("trade"), [pathname]);
+  const publicSrc = useMemo(() => buildSrc("public"), [pathname]);
+  const previewSrc = side === "trade" ? tradeSrc : side === "public" ? publicSrc : "";
 
   // Hide on real mobile devices — preview is a desktop QA aid.
   if (isMobileViewport) return null;
