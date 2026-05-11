@@ -123,8 +123,8 @@ export default function TradeProjects() {
                 />
               </div>
               <div>
-                <Label className="text-xs">Client name</Label>
-                <Input value={clientName} onChange={(e) => setClientName(e.target.value)} />
+                <Label className="text-xs">Client</Label>
+                <ClientPicker value={client?.id ?? null} onChange={setClient} size="sm" />
               </div>
               <div>
                 <Label className="text-xs">Location</Label>
