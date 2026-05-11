@@ -4,7 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
   Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box, Users, Sparkles,
+  Smartphone, Download,
 } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
@@ -270,6 +272,43 @@ const TradeDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Install on phone — pinned guide */}
+      <Link
+        to="/trade/guides/pwa-preview-checklist"
+        className="group mb-6 flex items-center gap-3 md:gap-4 rounded-lg border border-border bg-muted/20 p-3 md:p-4 hover:border-foreground/20 hover:bg-muted/40 transition-colors"
+      >
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground">
+          <Smartphone className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            New · Mobile essentials
+          </p>
+          <h3 className="font-display text-sm md:text-base text-foreground leading-snug mt-0.5">
+            Install Maison Affluency on your phone
+          </h3>
+          <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
+            Add it to your iPhone or Android home screen so it opens like a native app.
+          </p>
+        </div>
+        <a
+          href="/guides/studio-pwa-preview-checklist.pdf"
+          download
+          onClick={(e) => {
+            e.stopPropagation();
+            trackEvent("guide_pdf_download", {
+              event_category: "Trade Guides",
+              event_label: "pwa-preview-checklist",
+              source: "dashboard_pin",
+            });
+          }}
+          className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-md bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 px-2.5 py-1.5 font-body text-xs text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/20 transition-colors"
+        >
+          <Download className="h-3 w-3" aria-hidden="true" />
+          PDF
+        </a>
+      </Link>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {DASH_CARDS.map((card) => (
