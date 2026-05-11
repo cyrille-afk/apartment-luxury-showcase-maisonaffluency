@@ -25,6 +25,7 @@ const categories: ToolCategory[] = [
     label: "Specification",
     tools: [
       { title: "Quote Builder", description: "Build and submit project quotes", url: "/trade/quotes", icon: FileText },
+      { title: "Clients", description: "Shared address book of clients & contacts", url: "/trade/clients", icon: ContactIcon },
       { title: "FF&E Schedule", description: "Auto-generate furniture schedules", url: "/trade/ffe-schedule", icon: FileSpreadsheet },
       { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
