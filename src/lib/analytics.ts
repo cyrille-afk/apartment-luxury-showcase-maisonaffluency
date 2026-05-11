@@ -138,3 +138,103 @@ export const trackForm = {
     }
   },
 };
+
+/** Lightweight environment fingerprint for richer engagement analytics. */
+const getDeviceContext = () => {
+  if (typeof window === "undefined") {
+    return {
+      device_type: "ssr",
+      viewport: "0x0",
+      referrer_host: "(none)",
+      referrer_path: "(none)",
+      pwa_standalone: false,
+      language: "unknown",
+      pixel_ratio: 1,
+    };
+  }
+  const ua = navigator.userAgent || "";
+  const w = window.innerWidth;
+  const isTablet = /iPad|Tablet/i.test(ua) || (w >= 768 && w < 1024 && /Mobi/i.test(ua));
+  const isMobile = !isTablet && (/Mobi|Android|iPhone/i.test(ua) || w < 768);
+  const device_type = isTablet ? "tablet" : isMobile ? "mobile" : "desktop";
+  const platform = /iPhone|iPad|iPod/i.test(ua)
+    ? "ios"
+    : /Android/i.test(ua)
+    ? "android"
+    : /Mac/i.test(ua)
+    ? "macos"
+    : /Windows/i.test(ua)
+    ? "windows"
+    : "other";
+
+  let referrer_host = "(direct)";
+  let referrer_path = "(direct)";
+  try {
+    if (document.referrer) {
+      const r = new URL(document.referrer);
+      referrer_host = r.hostname || "(unknown)";
+      referrer_path = r.pathname || "/";
+    }
+  } catch {
+    /* ignore */
+  }
+
+  const standalone =
+    (typeof window.matchMedia === "function" &&
+      window.matchMedia("(display-mode: standalone)").matches) ||
+    (navigator as any).standalone === true;
+
+  return {
+    device_type,
+    platform,
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    pixel_ratio: window.devicePixelRatio || 1,
+    referrer_host,
+    referrer_path,
+    page_path: window.location.pathname + window.location.search,
+    pwa_standalone: !!standalone,
+    language: navigator.language || "unknown",
+    connection_type:
+      ((navigator as any).connection && (navigator as any).connection.effectiveType) || "unknown",
+  };
+};
+
+/**
+ * Trade Guides analytics — banner impressions, banner clicks, and PDF
+ * downloads. All events ride along with device/referrer context so we can
+ * segment engagement by mobile vs desktop, source surface, and entry point.
+ */
+export const trackGuide = {
+  bannerImpression: (slug: string, source: string) =>
+    trackEvent("guide_banner_impression", {
+      event_category: "Trade Guides",
+      event_label: slug,
+      guide_slug: slug,
+      source,
+      ...getDeviceContext(),
+    }),
+
+  bannerClick: (slug: string, source: string) =>
+    trackEvent("guide_banner_click", {
+      event_category: "Trade Guides",
+      event_label: slug,
+      guide_slug: slug,
+      source,
+      ...getDeviceContext(),
+    }),
+
+  pdfDownload: (
+    slug: string,
+    source: string,
+    extra?: GAEventParams
+  ) =>
+    trackEvent("guide_pdf_download", {
+      event_category: "Trade Guides",
+      event_label: slug,
+      guide_slug: slug,
+      source,
+      pdf_url: `/guides/${slug}.pdf`,
+      ...getDeviceContext(),
+      ...(extra ?? {}),
+    }),
+};
