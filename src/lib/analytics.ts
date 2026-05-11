@@ -238,3 +238,29 @@ export const trackGuide = {
       ...(extra ?? {}),
     }),
 };
+
+/**
+ * Featured free magazine analytics — measure whether the persistent
+ * "Free download" badge under Trade Program (and other surfaces) drives
+ * downloads. `source` identifies the surface (e.g. "nav_badge",
+ * "trade_landing_cta", "trade_landing_cover").
+ */
+export const trackMagazine = {
+  badgeImpression: (documentId: string, title: string, source: string) =>
+    trackEvent("magazine_badge_impression", {
+      event_category: "Magazine",
+      event_label: title,
+      document_id: documentId,
+      source,
+      ...getDeviceContext(),
+    }),
+
+  badgeClick: (documentId: string, title: string, source: string) =>
+    trackEvent("magazine_badge_click", {
+      event_category: "Magazine",
+      event_label: title,
+      document_id: documentId,
+      source,
+      ...getDeviceContext(),
+    }),
+};
