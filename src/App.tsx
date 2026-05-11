@@ -39,6 +39,7 @@ const TradeRegisteredUsers = lazy(() => import("./pages/TradeRegisteredUsers"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
 const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeDownloadsByCountry = lazy(() => import("./pages/TradeDownloadsByCountry"));
+const TradeMagazineAnalytics = lazy(() => import("./pages/TradeMagazineAnalytics"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeStudioSettings = lazy(() => import("./pages/TradeStudioSettings"));
