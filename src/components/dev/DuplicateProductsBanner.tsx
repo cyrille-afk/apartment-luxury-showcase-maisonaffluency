@@ -69,7 +69,7 @@ export default function DuplicateProductsBanner({
   // restore previously-hidden items).
   if (dismissed || !hasVisibleGroups) {
     return (
-      <div className="fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-md border border-border bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-md border border-border bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur">
         <button
           type="button"
           onClick={() => {
