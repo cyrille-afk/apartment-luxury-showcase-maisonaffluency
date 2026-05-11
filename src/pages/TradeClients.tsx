@@ -211,8 +211,10 @@ export default function TradeClients() {
 
   const handleSave = async () => {
     if (!editing || !user || !currentStudio) return;
-    if (!editing.name?.trim()) {
-      toast({ title: "Name required", variant: "destructive" }); return;
+    setAttemptedSave(true);
+    if (hasErrors) {
+      toast({ title: "Please fix the highlighted fields.", variant: "destructive" });
+      return;
     }
     setSaving(true);
     try {
