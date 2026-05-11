@@ -81,6 +81,45 @@ export default function TradeClients() {
   const [editingContacts, setEditingContacts] = useState<Partial<Contact>[]>([]);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Client | null>(null);
+  const [attemptedSave, setAttemptedSave] = useState(false);
+
+  // ---------- Validation ----------
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Allow digits, spaces, +, -, (), min 6 digits
+  const PHONE_RE = /^[+()\-\s\d]{6,}$/;
+
+  const clientErrors = useMemo(() => {
+    const errs: { name?: string; website?: string; default_currency?: string } = {};
+    if (!editing) return errs;
+    if (!editing.name?.trim()) errs.name = "Name is required.";
+    else if (editing.name.trim().length > 120) errs.name = "Keep under 120 characters.";
+    if (editing.website && editing.website.trim()) {
+      try { new URL(editing.website.trim().startsWith("http") ? editing.website.trim() : `https://${editing.website.trim()}`); }
+      catch { errs.website = "Enter a valid URL."; }
+    }
+    if (editing.default_currency && !/^[A-Z]{3}$/.test(editing.default_currency.trim()))
+      errs.default_currency = "Use a 3-letter code (e.g. EUR).";
+    return errs;
+  }, [editing]);
+
+  const contactErrors = useMemo(() => {
+    return editingContacts.map((ct) => {
+      const errs: { name?: string; email?: string; phone?: string } = {};
+      const hasAny = !!(ct.first_name?.trim() || ct.last_name?.trim() || ct.email?.trim() || ct.phone?.trim() || ct.role_title?.trim());
+      if (hasAny && !ct.first_name?.trim() && !ct.last_name?.trim())
+        errs.name = "Add a first or last name.";
+      if (ct.email && ct.email.trim() && !EMAIL_RE.test(ct.email.trim()))
+        errs.email = "Enter a valid email.";
+      if (ct.phone && ct.phone.trim() && !PHONE_RE.test(ct.phone.trim()))
+        errs.phone = "Enter a valid phone number.";
+      return errs;
+    });
+  }, [editingContacts]);
+
+  const hasErrors = useMemo(() => {
+    return Object.keys(clientErrors).length > 0
+      || contactErrors.some((e) => Object.keys(e).length > 0);
+  }, [clientErrors, contactErrors]);
 
   const refresh = useCallback(async () => {
     if (!currentStudio) { setClients([]); setContactsByClient({}); setLoading(false); return; }
@@ -149,16 +188,18 @@ export default function TradeClients() {
 
   const openNew = () => {
     if (!user || !currentStudio) return;
+    setAttemptedSave(false);
     setEditing(emptyClient(currentStudio.id, user.id));
     setEditingContacts([emptyContact("")]);
   };
 
   const openEdit = (c: Client) => {
+    setAttemptedSave(false);
     setEditing({ ...c });
     setEditingContacts((contactsByClient[c.id] || []).map((ct) => ({ ...ct })));
   };
 
-  const closeEdit = () => { setEditing(null); setEditingContacts([]); };
+  const closeEdit = () => { setEditing(null); setEditingContacts([]); setAttemptedSave(false); };
 
   const addContactRow = () => setEditingContacts((arr) => [...arr, emptyContact(editing?.id || "")]);
   const removeContactRow = (i: number) =>
@@ -170,8 +211,10 @@ export default function TradeClients() {
 
   const handleSave = async () => {
     if (!editing || !user || !currentStudio) return;
-    if (!editing.name?.trim()) {
-      toast({ title: "Name required", variant: "destructive" }); return;
+    setAttemptedSave(true);
+    if (hasErrors) {
+      toast({ title: "Please fix the highlighted fields.", variant: "destructive" });
+      return;
     }
     setSaving(true);
     try {
@@ -407,7 +450,12 @@ export default function TradeClients() {
                       value={editing.name || ""}
                       onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                       placeholder="Studio Volpe"
+                      aria-invalid={attemptedSave && !!clientErrors.name}
+                      className={attemptedSave && clientErrors.name ? "border-destructive" : ""}
                     />
+                    {attemptedSave && clientErrors.name && (
+                      <p className="text-xs text-destructive mt-1">{clientErrors.name}</p>
+                    )}
                   </div>
                   <div>
                     <Label>Type</Label>
@@ -429,7 +477,12 @@ export default function TradeClients() {
                       value={editing.website || ""}
                       onChange={(e) => setEditing({ ...editing, website: e.target.value })}
                       placeholder="https://…"
+                      aria-invalid={attemptedSave && !!clientErrors.website}
+                      className={attemptedSave && clientErrors.website ? "border-destructive" : ""}
                     />
+                    {attemptedSave && clientErrors.website && (
+                      <p className="text-xs text-destructive mt-1">{clientErrors.website}</p>
+                    )}
                   </div>
                   <div>
                     <Label>Default currency</Label>
@@ -438,7 +491,12 @@ export default function TradeClients() {
                       onChange={(e) => setEditing({ ...editing, default_currency: e.target.value.toUpperCase() })}
                       placeholder="EUR"
                       maxLength={3}
+                      aria-invalid={attemptedSave && !!clientErrors.default_currency}
+                      className={attemptedSave && clientErrors.default_currency ? "border-destructive" : ""}
                     />
+                    {attemptedSave && clientErrors.default_currency && (
+                      <p className="text-xs text-destructive mt-1">{clientErrors.default_currency}</p>
+                    )}
                   </div>
                   <div className="md:col-span-2">
                     <Label>Tax ID / VAT</Label>
@@ -539,13 +597,20 @@ export default function TradeClients() {
                       <div>
                         <Label className="text-xs">First name</Label>
                         <Input value={ct.first_name || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.name}
+                          className={attemptedSave && contactErrors[i]?.name ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { first_name: e.target.value })} />
                       </div>
                       <div>
                         <Label className="text-xs">Last name</Label>
                         <Input value={ct.last_name || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.name}
+                          className={attemptedSave && contactErrors[i]?.name ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { last_name: e.target.value })} />
                       </div>
+                      {attemptedSave && contactErrors[i]?.name && (
+                        <p className="md:col-span-2 -mt-2 text-xs text-destructive">{contactErrors[i].name}</p>
+                      )}
                       <div className="md:col-span-2">
                         <Label className="text-xs">Role / Title</Label>
                         <Input value={ct.role_title || ""}
@@ -555,12 +620,22 @@ export default function TradeClients() {
                       <div>
                         <Label className="text-xs">Email</Label>
                         <Input type="email" value={ct.email || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.email}
+                          className={attemptedSave && contactErrors[i]?.email ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { email: e.target.value })} />
+                        {attemptedSave && contactErrors[i]?.email && (
+                          <p className="text-xs text-destructive mt-1">{contactErrors[i].email}</p>
+                        )}
                       </div>
                       <div>
                         <Label className="text-xs">Phone</Label>
                         <Input type="tel" value={ct.phone || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.phone}
+                          className={attemptedSave && contactErrors[i]?.phone ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { phone: e.target.value })} />
+                        {attemptedSave && contactErrors[i]?.phone && (
+                          <p className="text-xs text-destructive mt-1">{contactErrors[i].phone}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -581,7 +656,7 @@ export default function TradeClients() {
 
           <DialogFooter>
             <Button variant="ghost" onClick={closeEdit} disabled={saving}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving || (attemptedSave && hasErrors)}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editing?.id ? "Save changes" : "Create client"}
             </Button>
