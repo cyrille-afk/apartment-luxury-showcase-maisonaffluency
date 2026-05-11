@@ -245,22 +245,42 @@ export const trackGuide = {
  * downloads. `source` identifies the surface (e.g. "nav_badge",
  * "trade_landing_cta", "trade_landing_cover").
  */
+const persistMagazineEvent = (
+  documentId: string,
+  title: string,
+  source: string,
+  eventType: "impression" | "click",
+) => {
+  // Lazy import to avoid circular deps; fire-and-forget.
+  import("@/integrations/supabase/client")
+    .then(({ supabase }) => {
+      void supabase.functions.invoke("log-magazine-event", {
+        body: { documentId, label: title, source, eventType },
+      });
+    })
+    .catch(() => {});
+};
+
 export const trackMagazine = {
-  badgeImpression: (documentId: string, title: string, source: string) =>
+  badgeImpression: (documentId: string, title: string, source: string) => {
     trackEvent("magazine_badge_impression", {
       event_category: "Magazine",
       event_label: title,
       document_id: documentId,
       source,
       ...getDeviceContext(),
-    }),
+    });
+    persistMagazineEvent(documentId, title, source, "impression");
+  },
 
-  badgeClick: (documentId: string, title: string, source: string) =>
+  badgeClick: (documentId: string, title: string, source: string) => {
     trackEvent("magazine_badge_click", {
       event_category: "Magazine",
       event_label: title,
       document_id: documentId,
       source,
       ...getDeviceContext(),
-    }),
+    });
+    persistMagazineEvent(documentId, title, source, "click");
+  },
 };
