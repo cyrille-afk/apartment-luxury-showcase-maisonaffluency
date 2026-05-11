@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
-import { Plus, Search, Pencil, Trash2, Star, Building2, User, Mail, Phone, Loader2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Star, Building2, User, Mail, Phone, Loader2, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -77,6 +77,7 @@ export default function TradeClients() {
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
   const [contactsByClient, setContactsByClient] = useState<Record<string, Contact[]>>({});
+  const [docCountsByClient, setDocCountsByClient] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Partial<Client> | null>(null);
   const [editingContacts, setEditingContacts] = useState<Partial<Contact>[]>([]);
@@ -151,8 +152,19 @@ export default function TradeClients() {
         arr.sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
       );
       setContactsByClient(grouped);
+
+      const { data: docs } = await supabase
+        .from("client_documents" as any)
+        .select("client_id")
+        .in("client_id", ids);
+      const counts: Record<string, number> = {};
+      ((docs || []) as unknown as { client_id: string }[]).forEach((d) => {
+        counts[d.client_id] = (counts[d.client_id] || 0) + 1;
+      });
+      setDocCountsByClient(counts);
     } else {
       setContactsByClient({});
+      setDocCountsByClient({});
     }
     setLoading(false);
   }, [currentStudio, toast]);
@@ -387,6 +399,12 @@ export default function TradeClients() {
                       <Badge variant="secondary" className="capitalize">{c.type}</Badge>
                       {c.billing_country && (
                         <span className="font-body text-xs text-muted-foreground">{c.billing_country}</span>
+                      )}
+                      {(docCountsByClient[c.id] || 0) > 0 && (
+                        <Badge variant="outline" className="gap-1">
+                          <FileText className="h-3 w-3" />
+                          {docCountsByClient[c.id]} doc{docCountsByClient[c.id] > 1 ? "s" : ""}
+                        </Badge>
                       )}
                     </div>
                     {primary && (
