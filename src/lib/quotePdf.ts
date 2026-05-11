@@ -47,6 +47,22 @@ export interface QuotePdfArgs {
   createdAt: Date;
   expiryAt: Date;
   clientName?: string | null;
+  /** Optional structured client billing — used when a client_id is linked. Falls back to clientName. */
+  clientCompany?: string | null;
+  clientBilling?: {
+    line1?: string | null;
+    line2?: string | null;
+    city?: string | null;
+    region?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+  } | null;
+  clientContact?: {
+    name?: string | null;
+    role?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
   projectName?: string | null;
   currency: string;                  // SGD | USD | EUR | GBP
   lines: QuotePdfLine[];
