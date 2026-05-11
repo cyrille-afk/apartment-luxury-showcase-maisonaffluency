@@ -517,6 +517,81 @@ export type Database = {
           },
         ]
       }
+      client_documents: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          doc_type: Database["public"]["Enums"]["client_document_type"]
+          expires_at: string | null
+          external_url: string | null
+          file_name: string | null
+          file_size_bytes: number | null
+          id: string
+          label: string
+          mime_type: string | null
+          notes: string | null
+          signed_at: string | null
+          storage_kind: Database["public"]["Enums"]["client_document_storage"]
+          storage_path: string | null
+          studio_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          doc_type?: Database["public"]["Enums"]["client_document_type"]
+          expires_at?: string | null
+          external_url?: string | null
+          file_name?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          label: string
+          mime_type?: string | null
+          notes?: string | null
+          signed_at?: string | null
+          storage_kind?: Database["public"]["Enums"]["client_document_storage"]
+          storage_path?: string | null
+          studio_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          doc_type?: Database["public"]["Enums"]["client_document_type"]
+          expires_at?: string | null
+          external_url?: string | null
+          file_name?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          label?: string
+          mime_type?: string | null
+          notes?: string | null
+          signed_at?: string | null
+          storage_kind?: Database["public"]["Enums"]["client_document_storage"]
+          storage_path?: string | null
+          studio_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_documents_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_taste_profiles: {
         Row: {
           cluster_description: string | null
@@ -4531,6 +4606,14 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      client_document_storage: "link" | "upload"
+      client_document_type:
+        | "nda"
+        | "terms"
+        | "counterparty"
+        | "kyc"
+        | "contract"
+        | "other"
       client_type: "company" | "studio" | "individual"
       journal_category:
         | "designer_interview"
@@ -4689,6 +4772,15 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+      ],
+      client_document_storage: ["link", "upload"],
+      client_document_type: [
+        "nda",
+        "terms",
+        "counterparty",
+        "kyc",
+        "contract",
+        "other",
       ],
       client_type: ["company", "studio", "individual"],
       journal_category: [

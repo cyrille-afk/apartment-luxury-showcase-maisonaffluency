@@ -21,6 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import ClientDocumentsSection from "@/components/trade/ClientDocumentsSection";
 
 type ClientType = "company" | "studio" | "individual";
 
@@ -641,6 +642,20 @@ export default function TradeClients() {
                   </div>
                 ))}
               </section>
+
+              {editing.id && user && (
+                <ClientDocumentsSection
+                  clientId={editing.id}
+                  studioId={editing.studio_id || currentStudio.id}
+                  userId={user.id}
+                  canEdit={canEdit}
+                />
+              )}
+              {!editing.id && (
+                <section className="border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground font-body">
+                  Save the client first to attach documents (NDA, T&Cs, counterparty form…).
+                </section>
+              )}
 
               <section>
                 <Label>Notes</Label>
