@@ -9,6 +9,10 @@ import DuplicateProductsBanner from "./DuplicateProductsBanner";
  * skip mounting this entirely.
  */
 export default function DuplicateProductsBannerHost() {
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mobile_preview") === "1") {
+    return null;
+  }
+
   const { duplicateGroups } = useTradeProducts();
   return <DuplicateProductsBanner groups={duplicateGroups} />;
 }
