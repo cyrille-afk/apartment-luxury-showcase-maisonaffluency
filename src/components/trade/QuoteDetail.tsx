@@ -1792,6 +1792,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
       </div>
+
+      {/* PDF preview dialog */}
+      <Dialog open={!!previewUrl} onOpenChange={(o) => { if (!o) closePreview(); }}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col">
+          <DialogHeader className="px-4 py-3 border-b border-border">
+            <DialogTitle className="font-body text-sm">PDF preview · {quoteNumber}</DialogTitle>
+          </DialogHeader>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              title="Quote PDF preview"
+              className="flex-1 w-full bg-muted"
+            />
+          )}
+          <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
+            <button
+              onClick={closePreview}
+              className="px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted"
+            >
+              Close
+            </button>
+            <button
+              onClick={async () => { await handleDownloadPdf(); }}
+              className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90"
+            >
+              Download
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
