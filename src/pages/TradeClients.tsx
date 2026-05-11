@@ -656,7 +656,7 @@ export default function TradeClients() {
 
           <DialogFooter>
             <Button variant="ghost" onClick={closeEdit} disabled={saving}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving || (attemptedSave && hasErrors)}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editing?.id ? "Save changes" : "Create client"}
             </Button>
