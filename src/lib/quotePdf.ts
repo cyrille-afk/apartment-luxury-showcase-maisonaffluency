@@ -502,11 +502,11 @@ function drawCompanyAndMeta(
   if (cityLine) addr.push(cityLine);
   if (b.country) addr.push(b.country);
 
-  const contactDetails: string[] = [];
-  const cName = [c.name].filter(Boolean).join(" ").trim();
-  if (cName) contactDetails.push(c.role ? `${cName} — ${c.role}` : cName);
-  if (c.email) contactDetails.push(c.email);
-  if (c.phone) contactDetails.push(c.phone);
+  const cName = (c.name || "").trim();
+  const cRole = (c.role || "").trim();
+  const cEmail = (c.email || "").trim();
+  const cPhone = (c.phone || "").trim();
+  const hasContact = !!(cName || cRole || cEmail || cPhone);
 
   if (addr.length > 0 || contactDetails.length > 0) {
     const py = yEnd + 4;
