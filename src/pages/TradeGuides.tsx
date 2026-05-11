@@ -114,15 +114,15 @@ export default function TradeGuides() {
       </header>
 
       <a
+        ref={bannerRef}
         href="/guides/studio-pwa-preview-checklist.pdf"
         download
-        onClick={() =>
-          trackEvent("guide_pdf_download", {
-            event_category: "Trade Guides",
-            event_label: "pwa-preview-checklist",
-            source: "guides_top_banner",
-          })
-        }
+        onClick={() => {
+          trackGuide.bannerClick("pwa-preview-checklist", "guides_top_banner");
+          trackGuide.pdfDownload("pwa-preview-checklist", "guides_top_banner", {
+            file_name: "studio-pwa-preview-checklist.pdf",
+          });
+        }}
         className="group flex items-center gap-4 rounded-md border border-[hsl(var(--pdf-red))]/30 bg-[hsl(var(--pdf-red))]/5 p-4 hover:bg-[hsl(var(--pdf-red))]/10 transition-colors"
       >
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))]">
