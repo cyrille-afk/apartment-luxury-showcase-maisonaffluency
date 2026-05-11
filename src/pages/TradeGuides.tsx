@@ -60,8 +60,32 @@ const guides: Guide[] = [
 
 export default function TradeGuides() {
   const { isAdmin } = useAuth();
+  const bannerRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     trackEvent("trade_guides_list_open", { event_category: "Trade Guides" });
+  }, []);
+
+  // Fire one impression event per page-load when the pinned banner enters the viewport.
+  useEffect(() => {
+    const el = bannerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      trackGuide.bannerImpression("pwa-preview-checklist", "guides_top_banner");
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            trackGuide.bannerImpression("pwa-preview-checklist", "guides_top_banner");
+            obs.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
   return (
     <div className="max-w-5xl mx-auto space-y-10">
