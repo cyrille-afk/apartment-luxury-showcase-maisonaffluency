@@ -63,7 +63,7 @@ export default function TradeProjectDetail() {
   const canManage = !accessDenied;
 
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: "", client_name: "", location: "", notes: "", target_completion_date: "" });
+  const [form, setForm] = useState<{ name: string; client_id: string | null; client_name: string; location: string; notes: string; target_completion_date: string }>({ name: "", client_id: null, client_name: "", location: "", notes: "", target_completion_date: "" });
   const [saving, setSaving] = useState(false);
 
   const [quotes, setQuotes] = useState<LinkedQuote[]>([]);
