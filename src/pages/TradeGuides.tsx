@@ -231,9 +231,8 @@ function GuideCard({ guide: g, Icon }: { guide: Guide; Icon: any }) {
               download
               onClick={(e) => {
                 e.stopPropagation();
-                trackEvent("guide_pdf_download", {
-                  event_category: "Trade Guides",
-                  event_label: g.slug,
+                trackGuide.pdfDownload(g.slug, "guides_list_card", {
+                  file_name: g.pdfUrl!.split("/").pop() || g.pdfUrl!,
                 });
               }}
               className="inline-flex items-center gap-1.5 rounded-md bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 px-2.5 py-1.5 font-body text-xs text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/20 transition-colors"
