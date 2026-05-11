@@ -152,8 +152,19 @@ export default function TradeClients() {
         arr.sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
       );
       setContactsByClient(grouped);
+
+      const { data: docs } = await supabase
+        .from("client_documents" as any)
+        .select("client_id")
+        .in("client_id", ids);
+      const counts: Record<string, number> = {};
+      ((docs || []) as unknown as { client_id: string }[]).forEach((d) => {
+        counts[d.client_id] = (counts[d.client_id] || 0) + 1;
+      });
+      setDocCountsByClient(counts);
     } else {
       setContactsByClient({});
+      setDocCountsByClient({});
     }
     setLoading(false);
   }, [currentStudio, toast]);
