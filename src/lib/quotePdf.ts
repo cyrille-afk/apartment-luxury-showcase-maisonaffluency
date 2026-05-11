@@ -1074,3 +1074,14 @@ export async function downloadQuotePdf(args: QuotePdfArgs) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/**
+ * Build the PDF and return a blob URL suitable for previewing in an iframe
+ * (or `window.open`). Caller is responsible for revoking the URL when done.
+ */
+export async function previewQuotePdfUrl(args: QuotePdfArgs): Promise<string> {
+  const doc = await buildQuotePdf(args);
+  const blob = doc.output("blob");
+  return URL.createObjectURL(blob);
+}
+
