@@ -5,6 +5,7 @@ export const GUIDE_LOADERS: Record<string, () => Promise<unknown>> = {
   "multi-user-studio-shared-filters": () => import("../TradeGuideSharedFilters"),
   "ffe-schedule": () => import("../TradeGuideFFE"),
   "tearsheets": () => import("../TradeGuideTearsheets"),
+  "pwa-preview-checklist": () => import("../TradeGuidePwaPreview"),
 };
 
 // Legacy slug -> canonical slug. Keeps old links/bookmarks working.
