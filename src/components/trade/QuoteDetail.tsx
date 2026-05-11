@@ -702,17 +702,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
               )}
               {isDraft ? (
-                <>
+                <div className="w-full max-w-[320px]">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Client</span>
-                  <input
-                    type="text"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
-                    placeholder="Client / Project Name"
-                    className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none text-[16px] sm:text-sm"
+                  <ClientPicker
+                    value={clientId}
+                    size="sm"
+                    showManageLink={false}
+                    placeholder="Select or create a client…"
+                    onChange={(c) => {
+                      const newId = c?.id ?? null;
+                      const newName = c?.name ?? "";
+                      setClientId(newId);
+                      setClientName(newName);
+                      supabase.from("trade_quotes")
+                        .update({ client_id: newId, client_name: newName } as any)
+                        .eq("id", quoteId);
+                    }}
                   />
-                </>
+                </div>
               ) : (
                 clientName && (
                   <div>
