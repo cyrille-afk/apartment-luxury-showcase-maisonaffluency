@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -70,6 +70,104 @@ const formatPriceRaw = (cents: number | null, currency: string = "SGD") => {
 const currencySymbol = (c: string) => {
   const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£" };
   return map[c] || c;
+};
+
+const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const renderTokenRef = useRef(0);
+  const [rendering, setRendering] = useState(false);
+  const [renderError, setRenderError] = useState(false);
+
+  useEffect(() => {
+    if (!blobUrl) {
+      if (hostRef.current) hostRef.current.innerHTML = "";
+      setRendering(false);
+      setRenderError(false);
+      return;
+    }
+
+    let cancelled = false;
+    const token = renderTokenRef.current + 1;
+    renderTokenRef.current = token;
+
+    const renderPages = async () => {
+      const host = hostRef.current;
+      if (!host) return;
+      host.innerHTML = "";
+      setRendering(true);
+      setRenderError(false);
+
+      try {
+        const pdfjsLib = await import("pdfjs-dist");
+        try {
+          const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+          pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
+        } catch {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        }
+
+        const pdf = await pdfjsLib.getDocument({ url: blobUrl }).promise;
+        if (cancelled || renderTokenRef.current !== token) return;
+
+        for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+          const page = await pdf.getPage(pageNo);
+          if (cancelled || renderTokenRef.current !== token) return;
+
+          const baseViewport = page.getViewport({ scale: 1 });
+          const availableWidth = Math.min(980, Math.max(320, host.clientWidth - 48));
+          const scale = Math.max(1, Math.min(2.1, availableWidth / baseViewport.width));
+          const viewport = page.getViewport({ scale });
+
+          const wrapper = document.createElement("section");
+          wrapper.className = "flex flex-col items-center gap-2";
+
+          const label = document.createElement("div");
+          label.className = "font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground";
+          label.textContent = `Page ${pageNo} / ${pdf.numPages}`;
+
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          canvas.className = "block max-w-full h-auto bg-background shadow-[0_14px_42px_rgba(0,0,0,0.18)]";
+
+          wrapper.appendChild(label);
+          wrapper.appendChild(canvas);
+          host.appendChild(wrapper);
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("Canvas context unavailable");
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        }
+      } catch (error) {
+        console.error("[QuotePdfPreviewPages] render failed", error);
+        if (!cancelled) setRenderError(true);
+      } finally {
+        if (!cancelled) setRendering(false);
+      }
+    };
+
+    void renderPages();
+    return () => {
+      cancelled = true;
+    };
+  }, [blobUrl]);
+
+  return (
+    <div className="relative flex-1 overflow-y-auto bg-muted/20">
+      {(!blobUrl || rendering) && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+          <DotCircleLoader size="sm" />
+          <p className="font-body text-xs">{blobUrl ? "Rendering pages…" : "Generating PDF…"}</p>
+        </div>
+      )}
+      {renderError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center font-body text-xs text-muted-foreground">
+          Preview could not render here. Use Download to open the PDF.
+        </div>
+      )}
+      <div ref={hostRef} className="flex flex-col items-center gap-8 px-4 py-8" />
+    </div>
+  );
 };
 
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
