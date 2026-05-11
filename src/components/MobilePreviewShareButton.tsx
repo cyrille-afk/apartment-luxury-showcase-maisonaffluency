@@ -65,6 +65,14 @@ const MobilePreviewShareButton = () => {
     if (open) setSide(pathname.startsWith("/trade") ? "trade" : "public");
   }, [open, pathname]);
 
+  // Listen for an external trigger so the dashboard header button can open us
+  // without rendering its own duplicate floating button.
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-mobile-preview", handler);
+    return () => window.removeEventListener("open-mobile-preview", handler);
+  }, []);
+
   // Lock body scroll while preview is open
   useEffect(() => {
     if (!open) return;
