@@ -249,7 +249,67 @@ PWA_CHECKLIST = {
 GUIDES = (SHARED_FILTERS, FFE, TEARSHEETS, PWA_CHECKLIST)
 
 
+# Words that must never appear in a published trade-facing guide.
+# Case-insensitive substring match. Add to this list as the catalog evolves.
+FORBIDDEN_TERMS = (
+    "lovable",
+    "lovable.app",
+    "lovable.dev",
+    "lovableproject.com",
+    "id-preview",
+    "gpt engineer",
+    "supabase",  # internal infra name — users see "Lovable Cloud" / "the backend"
+)
+
+# Allow-list: substrings that are OK even if they contain a forbidden token.
+# (e.g. the word "preview" is fine; we only ban it when paired with branded terms.)
+ALLOWED_SUBSTRINGS: tuple[str, ...] = ()
+
+
+def _walk_strings(obj):
+    """Yield every string contained in nested dicts / lists / tuples."""
+    if isinstance(obj, str):
+        yield obj
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from _walk_strings(v)
+    elif isinstance(obj, (list, tuple)):
+        for v in obj:
+            yield from _walk_strings(v)
+
+
+def lint_guide(cfg: dict) -> list[str]:
+    """Return a list of human-readable violations found in a guide config."""
+    violations: list[str] = []
+    for text in _walk_strings(cfg):
+        haystack = text.lower()
+        if any(allow in haystack for allow in ALLOWED_SUBSTRINGS):
+            continue
+        for term in FORBIDDEN_TERMS:
+            if term in haystack:
+                snippet = text.strip().replace("\n", " ")
+                if len(snippet) > 140:
+                    snippet = snippet[:137] + "…"
+                violations.append(f"[{cfg.get('filename', '?')}] forbidden term '{term}': {snippet}")
+    return violations
+
+
+def lint_all(guides) -> list[str]:
+    issues: list[str] = []
+    for cfg in guides:
+        issues.extend(lint_guide(cfg))
+    return issues
+
+
 if __name__ == "__main__":
+    issues = lint_all(GUIDES)
+    if issues:
+        print("✘ Guide lint failed — refusing to build:", file=sys.stderr)
+        for line in issues:
+            print("  -", line, file=sys.stderr)
+        sys.exit(1)
+
+    print("✓ Guide lint passed (no forbidden terms)")
     for cfg in GUIDES:
         path = build_guide(**cfg)
         print("built", path)
