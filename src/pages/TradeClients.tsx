@@ -450,7 +450,12 @@ export default function TradeClients() {
                       value={editing.name || ""}
                       onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                       placeholder="Studio Volpe"
+                      aria-invalid={attemptedSave && !!clientErrors.name}
+                      className={attemptedSave && clientErrors.name ? "border-destructive" : ""}
                     />
+                    {attemptedSave && clientErrors.name && (
+                      <p className="text-xs text-destructive mt-1">{clientErrors.name}</p>
+                    )}
                   </div>
                   <div>
                     <Label>Type</Label>
@@ -472,7 +477,12 @@ export default function TradeClients() {
                       value={editing.website || ""}
                       onChange={(e) => setEditing({ ...editing, website: e.target.value })}
                       placeholder="https://…"
+                      aria-invalid={attemptedSave && !!clientErrors.website}
+                      className={attemptedSave && clientErrors.website ? "border-destructive" : ""}
                     />
+                    {attemptedSave && clientErrors.website && (
+                      <p className="text-xs text-destructive mt-1">{clientErrors.website}</p>
+                    )}
                   </div>
                   <div>
                     <Label>Default currency</Label>
@@ -481,7 +491,12 @@ export default function TradeClients() {
                       onChange={(e) => setEditing({ ...editing, default_currency: e.target.value.toUpperCase() })}
                       placeholder="EUR"
                       maxLength={3}
+                      aria-invalid={attemptedSave && !!clientErrors.default_currency}
+                      className={attemptedSave && clientErrors.default_currency ? "border-destructive" : ""}
                     />
+                    {attemptedSave && clientErrors.default_currency && (
+                      <p className="text-xs text-destructive mt-1">{clientErrors.default_currency}</p>
+                    )}
                   </div>
                   <div className="md:col-span-2">
                     <Label>Tax ID / VAT</Label>
