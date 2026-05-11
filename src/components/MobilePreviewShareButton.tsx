@@ -81,7 +81,13 @@ const MobilePreviewShareButton = () => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    document.documentElement.dataset.mobilePreviewOpen = "1";
+    window.dispatchEvent(new CustomEvent("mobile-preview-open-change"));
+    return () => {
+      document.body.style.overflow = prev;
+      delete document.documentElement.dataset.mobilePreviewOpen;
+      window.dispatchEvent(new CustomEvent("mobile-preview-open-change"));
+    };
   }, [open]);
 
   const buildSrc = (target: "trade" | "public") => {
