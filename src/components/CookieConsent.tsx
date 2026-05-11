@@ -21,6 +21,15 @@ const CookieConsent = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const sync = () => {
+      if (document.documentElement.dataset.mobilePreviewOpen === "1") setVisible(false);
+    };
+    window.addEventListener("mobile-preview-open-change", sync);
+    sync();
+    return () => window.removeEventListener("mobile-preview-open-change", sync);
+  }, []);
+
   const accept = () => {
     localStorage.setItem("cookie_consent", "accepted");
     setVisible(false);
