@@ -176,10 +176,80 @@ TEARSHEETS = {
 }
 
 
-GUIDES = (SHARED_FILTERS, FFE, TEARSHEETS)
+PWA_CHECKLIST = {
+    "filename": "public/guides/studio-pwa-preview-checklist.pdf",
+    "title": "PWA Preview Checklist",
+    "subtitle": "Verify the Maison Affluency app on iPhone and Android home screens — no overlap, no clipping, no surprises.",
+    "running": "Studio Guide — PWA Preview Checklist",
+    "sections": [
+        {"title": "What this guide is for", "blocks": [
+            ("p", "When the Maison Affluency site is added to the home screen on iOS or Android, it runs in <b>standalone mode</b> — no browser chrome, full-bleed layout. That's great for designers and architects on site visits, but it also means the app must respect the device's <b>safe areas</b>: the status bar, notch / Dynamic Island, punch-hole camera, and the bottom home indicator or gesture bar."),
+            ("p", "Use this checklist after any change to the navigation, footer, cookie banner, sticky CTAs, or anything pinned to the top or bottom of the screen. Both iOS and Android <b>cache the manifest at install time</b>, so you must reinstall the app to validate manifest, theme-color and display-mode changes."),
+            ("callout", "Share this with your team",
+                "This document is intentionally short. Print it, send it to your design partners, or pin it in the studio handbook so anyone reviewing the app on a phone knows what \"good\" looks like."),
+        ]},
+        {"title": "iPhone — reinstall the app", "blocks": [
+            ("p", "Always test on the live <i>maisonaffluency.com</i> domain. Lovable preview URLs run inside an iframe and don't reflect manifest changes."),
+            ("table", [
+                ("1.  Remove the existing icon", "Long-press the Maison Affluency icon on the Home Screen → <b>Remove App</b> → <b>Delete from Home Screen</b>."),
+                ("2.  Open Safari", "Not Chrome. Navigate to <i>https://maisonaffluency.com</i>."),
+                ("3.  Force a fresh load", "Pull down to refresh, or close and reopen the Safari tab."),
+                ("4.  Add to Home Screen", "Tap the <b>Share</b> icon (square with arrow ↑) → scroll to <b>Add to Home Screen</b> → <b>Add</b>."),
+                ("5.  Launch from the icon", "Open the app from the Home Screen icon, not from Safari, otherwise you'll see browser chrome."),
+            ]),
+        ]},
+        {"title": "iPhone — screenshots to capture", "blocks": [
+            ("p", "Take a screenshot (Side button + Volume Up) on each of the following and save them for review."),
+            ("table", [
+                ("Home — portrait, top",       "Status bar (clock, battery) sits in a clean white strip above the logo; nothing overlaps the burger menu."),
+                ("Home — burger menu open",    "Drawer items aren't clipped by the notch / Dynamic Island."),
+                ("Home — landscape",           "Notch on the left doesn't overlap the logo or nav icons."),
+                ("Designers Directory",        "Sticky filters clear the status bar; chips remain readable."),
+                ("Product page — bottom",      "iPhone home indicator does not cover the cookie banner, sticky CTA or footer links."),
+                ("Trade login / modal",        "Dialog close button isn't hidden behind the notch."),
+                ("Cookie consent visible",     "Banner sits above the home indicator with breathing room."),
+            ]),
+            ("callout", "What to look for",
+                "Top: a solid white strip above the nav, no overlap. Notch: nothing disappears behind the left-side cutout in landscape. Bottom: the thin indicator bar must not cover any sticky element. Pull-to-refresh must <b>not</b> reveal Safari chrome — if it does, the app launched from Safari, not from the icon."),
+        ]},
+        {"title": "Android — reinstall the app", "blocks": [
+            ("p", "Android Chrome also pins the manifest at install time, so reinstall to see theme-color, display-mode or icon updates."),
+            ("table", [
+                ("1.  Remove the existing icon", "Long-press the Maison Affluency icon → <b>Remove</b> (or drag to <i>Uninstall</i>)."),
+                ("2.  Open Chrome",              "Navigate to <i>https://maisonaffluency.com</i>."),
+                ("3.  Force a fresh load",       "Pull down to refresh, or tap the <b>⋮ menu</b> → <b>Reload</b>."),
+                ("4.  Add to Home screen",       "Tap <b>⋮ menu</b> → <b>Add to Home screen</b> → <b>Add</b> (or <b>Install</b> if the app install prompt appears)."),
+                ("5.  Launch from the icon",     "Open the app from the home screen icon, not from a Chrome tab."),
+            ]),
+        ]},
+        {"title": "Android — screenshots to capture", "blocks": [
+            ("p", "Take a screenshot (Power + Volume Down) on each of the following."),
+            ("table", [
+                ("Home — portrait, top",       "Status bar (clock, battery, notifications) sits above the logo; nothing overlaps the burger or brand text."),
+                ("Home — drawer open",         "Drawer header and first items aren't hidden behind the status bar or cut off by rounded corners."),
+                ("Home — landscape",           "No nav icon or logo lost in display cutouts (punch-hole or top-left notch)."),
+                ("Designers Directory",        "Sticky filter bars clear the status bar; chips stay tappable."),
+                ("Product page — bottom",      "Gesture / 3-button navigation bar does not cover sticky CTAs, cookie banner or footer links."),
+                ("Trade login / modal",        "Dialog close button and top margin aren't hidden behind a display cutout."),
+                ("Cookie consent visible",     "Banner sits above the gesture bar with breathing room."),
+            ]),
+            ("callout", "What to look for",
+                "Top: nav must start <b>below</b> the status bar — no overlap. Cutouts: no critical UI behind a punch-hole or notch. Bottom: the system bar must not cover sticky elements. Pulling down should <b>not</b> reveal Chrome's address bar or a blue overscroll glow — if it does, the shortcut is opening as a browser tab, not standalone."),
+        ]},
+        {"title": "If something overlaps", "blocks": [
+            ("p", "Note the exact page and attach the screenshot, then ask Maison Affluency to patch the affected component using the iOS / Android <b>safe-area</b> CSS environment variables — <i>env(safe-area-inset-top)</i> for top overlap, <i>env(safe-area-inset-bottom)</i> for bottom overlap. These resolve to <b>0px</b> on devices without cutouts, so they never harm desktop or older devices."),
+            ("callout", "One last sanity check",
+                "Before signing off, rotate the device to landscape. That's where notches and cutouts most often overlap content — and where the iPhone home indicator becomes most disruptive over fixed CTAs."),
+        ]},
+    ],
+}
+
+
+GUIDES = (SHARED_FILTERS, FFE, TEARSHEETS, PWA_CHECKLIST)
 
 
 if __name__ == "__main__":
     for cfg in GUIDES:
         path = build_guide(**cfg)
         print("built", path)
+

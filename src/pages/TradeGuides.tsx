@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
-import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet, FileText } from "lucide-react";
+import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet, FileText, Smartphone } from "lucide-react";
 import { prefetchGuide } from "./guides/registry";
 import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/lib/analytics";
@@ -45,6 +45,16 @@ const guides: Guide[] = [
     audience: "Designers & client-facing leads",
     pdfUrl: "/guides/studio-tearsheets.pdf",
     icon: FileText,
+  },
+  {
+    slug: "pwa-preview-checklist",
+    eyebrow: "Mobile essentials",
+    title: "PWA Preview Checklist",
+    description:
+      "Verify the Maison Affluency app on iPhone and Android home screens — reinstall steps, screenshot checks, and safe-area / bottom-bar overlap troubleshooting.",
+    audience: "Designers & architects on mobile",
+    pdfUrl: "/guides/studio-pwa-preview-checklist.pdf",
+    icon: Smartphone,
   },
 ];
 
