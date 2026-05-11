@@ -198,6 +198,7 @@ export default function TradeProjectDetail() {
     setSaving(true);
     const { error } = await supabase.from("projects" as any).update({
       name: form.name.trim() || "Untitled Project",
+      client_id: form.client_id,
       client_name: form.client_name.trim(),
       location: form.location.trim(),
       notes: form.notes.trim(),
