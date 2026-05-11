@@ -597,13 +597,20 @@ export default function TradeClients() {
                       <div>
                         <Label className="text-xs">First name</Label>
                         <Input value={ct.first_name || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.name}
+                          className={attemptedSave && contactErrors[i]?.name ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { first_name: e.target.value })} />
                       </div>
                       <div>
                         <Label className="text-xs">Last name</Label>
                         <Input value={ct.last_name || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.name}
+                          className={attemptedSave && contactErrors[i]?.name ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { last_name: e.target.value })} />
                       </div>
+                      {attemptedSave && contactErrors[i]?.name && (
+                        <p className="md:col-span-2 -mt-2 text-xs text-destructive">{contactErrors[i].name}</p>
+                      )}
                       <div className="md:col-span-2">
                         <Label className="text-xs">Role / Title</Label>
                         <Input value={ct.role_title || ""}
@@ -613,12 +620,22 @@ export default function TradeClients() {
                       <div>
                         <Label className="text-xs">Email</Label>
                         <Input type="email" value={ct.email || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.email}
+                          className={attemptedSave && contactErrors[i]?.email ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { email: e.target.value })} />
+                        {attemptedSave && contactErrors[i]?.email && (
+                          <p className="text-xs text-destructive mt-1">{contactErrors[i].email}</p>
+                        )}
                       </div>
                       <div>
                         <Label className="text-xs">Phone</Label>
                         <Input type="tel" value={ct.phone || ""}
+                          aria-invalid={attemptedSave && !!contactErrors[i]?.phone}
+                          className={attemptedSave && contactErrors[i]?.phone ? "border-destructive" : ""}
                           onChange={(e) => updateContact(i, { phone: e.target.value })} />
+                        {attemptedSave && contactErrors[i]?.phone && (
+                          <p className="text-xs text-destructive mt-1">{contactErrors[i].phone}</p>
+                        )}
                       </div>
                     </div>
                   </div>
