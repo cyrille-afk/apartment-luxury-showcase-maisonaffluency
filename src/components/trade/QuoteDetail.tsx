@@ -701,6 +701,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="sm:hidden">Excel</span>
           </button>
           <button
+            onClick={handlePreviewPdf}
+            disabled={items.length === 0 || previewLoading}
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            title="Preview the branded PDF before downloading"
+          >
+            {previewLoading ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">Preview PDF</span>
+            <span className="sm:hidden">Preview</span>
+          </button>
+          <button
             onClick={handleDownloadPdf}
             disabled={items.length === 0}
             className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
