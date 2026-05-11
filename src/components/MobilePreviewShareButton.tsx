@@ -94,10 +94,11 @@ const MobilePreviewShareButton = () => {
 
   return (
     <>
-      {/* Top-right trigger — sits next to the dashboard Concierge pill, clear of the chat panel */}
+      {/* Bottom-right trigger — sits immediately to the left of the AI Concierge bubble,
+          well clear of the preview iframe chrome (notification badges, share/publish bar). */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 right-4 z-[100] flex items-center gap-2 px-3 h-9 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
+        className="fixed bottom-6 right-24 z-[100] flex items-center gap-2 px-3 h-9 rounded-full bg-foreground text-background shadow-lg hover:opacity-90 transition-opacity print:hidden"
         aria-label="Preview this page in mobile size"
       >
         <Smartphone className="w-3.5 h-3.5" />
