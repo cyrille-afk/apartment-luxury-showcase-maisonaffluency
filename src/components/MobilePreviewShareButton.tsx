@@ -4,7 +4,7 @@ import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type Device = "se" | "pro_max" | "pixel";
-type Side = "trade" | "public";
+type Side = "trade" | "public" | "split";
 
 const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
   se:      { label: "iPhone SE",        w: 375, h: 667 },
@@ -73,13 +73,17 @@ const MobilePreviewShareButton = () => {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
-  const previewSrc = useMemo(() => {
+  const buildSrc = (target: "trade" | "public") => {
     if (typeof window === "undefined") return "";
-    const targetPath = side === "trade" ? toTradePath(pathname) : toPublicPath(pathname);
+    const targetPath = target === "trade" ? toTradePath(pathname) : toPublicPath(pathname);
     const url = new URL(targetPath, window.location.origin);
     url.searchParams.set("mobile_preview", "1");
     return `${url.pathname}${url.search}${url.hash}`;
-  }, [pathname, side]);
+  };
+
+  const tradeSrc = useMemo(() => buildSrc("trade"), [pathname]);
+  const publicSrc = useMemo(() => buildSrc("public"), [pathname]);
+  const previewSrc = side === "trade" ? tradeSrc : side === "public" ? publicSrc : "";
 
   // Hide on real mobile devices — preview is a desktop QA aid.
   if (isMobileViewport) return null;
@@ -108,7 +112,7 @@ const MobilePreviewShareButton = () => {
           <div className="flex flex-wrap items-center justify-center gap-2 mb-3 bg-background border border-border rounded-full px-3 py-1.5 shadow-lg">
             {/* Side toggle */}
             <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
-              {(["trade", "public"] as Side[]).map((s) => (
+              {(["trade", "public", "split"] as Side[]).map((s) => (
                 <button
                   key={s}
                   onClick={() => setSide(s)}
@@ -119,7 +123,7 @@ const MobilePreviewShareButton = () => {
                   }`}
                   aria-pressed={side === s}
                 >
-                  {s}
+                  {s === "split" ? "Split" : s}
                 </button>
               ))}
             </div>
@@ -160,27 +164,59 @@ const MobilePreviewShareButton = () => {
             </button>
           </div>
 
-          {/* Phone frame */}
-          <div
-            className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
-            style={{
-              maxHeight: "calc(100vh - 6rem)",
-              maxWidth: "calc(100vw - 2rem)",
-            }}
-          >
-            <iframe
-              key={previewSrc}
-              src={previewSrc}
-              title={`Mobile preview · ${side}`}
-              className="bg-background rounded-[1.75rem] block transition-all"
+          {/* Phone frame(s) */}
+          {side === "split" ? (
+            <div className="flex items-start gap-4" style={{ maxWidth: "calc(100vw - 2rem)" }}>
+              {([
+                { label: "Trade", src: tradeSrc },
+                { label: "Public", src: publicSrc },
+              ] as const).map((pane) => (
+                <div key={pane.label} className="flex flex-col items-center">
+                  <span className="font-body text-[10px] uppercase tracking-[0.15em] text-background/80 mb-2">
+                    {pane.label}
+                  </span>
+                  <div
+                    className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
+                    style={{ maxHeight: "calc(100vh - 8rem)" }}
+                  >
+                    <iframe
+                      key={pane.src}
+                      src={pane.src}
+                      title={`Mobile preview · ${pane.label}`}
+                      className="bg-background rounded-[1.75rem] block transition-all"
+                      style={{
+                        width: frameW,
+                        height: frameH,
+                        maxHeight: "calc(100vh - 9rem)",
+                        maxWidth: "calc((100vw - 5rem) / 2)",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
               style={{
-                width: frameW,
-                height: frameH,
-                maxHeight: "calc(100vh - 7rem)",
-                maxWidth: "calc(100vw - 3rem)",
+                maxHeight: "calc(100vh - 6rem)",
+                maxWidth: "calc(100vw - 2rem)",
               }}
-            />
-          </div>
+            >
+              <iframe
+                key={previewSrc}
+                src={previewSrc}
+                title={`Mobile preview · ${side}`}
+                className="bg-background rounded-[1.75rem] block transition-all"
+                style={{
+                  width: frameW,
+                  height: frameH,
+                  maxHeight: "calc(100vh - 7rem)",
+                  maxWidth: "calc(100vw - 3rem)",
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
     </>
