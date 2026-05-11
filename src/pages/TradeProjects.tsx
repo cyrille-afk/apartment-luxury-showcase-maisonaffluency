@@ -26,7 +26,7 @@ export default function TradeProjects() {
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
-  const [clientName, setClientName] = useState("");
+  const [client, setClient] = useState<PickedClient | null>(null);
   const [location, setLocation] = useState("");
   const [creating, setCreating] = useState(false);
   const [hiddenForMeCount, setHiddenForMeCount] = useState(0);
