@@ -8,7 +8,7 @@ import {
   Tags,
   Workflow,
 } from "lucide-react";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackGuide } from "@/lib/analytics";
 
 const PDF_URL = "/guides/studio-ffe-schedule.pdf";
 const SLUG = "ffe-schedule";
@@ -47,13 +47,7 @@ export default function TradeGuideFFE() {
         <a
           href={PDF_URL}
           download
-          onClick={() =>
-            trackEvent("trade_guide_pdf_download", {
-              event_category: "Trade Guides",
-              event_label: SLUG,
-              guide_slug: SLUG,
-            })
-          }
+          onClick={() => trackGuide.pdfDownload(SLUG, "guide_detail_page", { file_name: PDF_URL.split("/").pop() || PDF_URL })}
           className="inline-flex items-center gap-2 rounded-md border border-border bg-foreground px-4 py-2 font-body text-xs uppercase tracking-wider text-background hover:bg-foreground/90 transition-colors"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />

@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet, FileText, Smartphone, Download } from "lucide-react";
 import { prefetchGuide } from "./guides/registry";
 import { useAuth } from "@/hooks/useAuth";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackGuide } from "@/lib/analytics";
 
 type Guide = {
   slug: string;
@@ -60,8 +60,32 @@ const guides: Guide[] = [
 
 export default function TradeGuides() {
   const { isAdmin } = useAuth();
+  const bannerRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     trackEvent("trade_guides_list_open", { event_category: "Trade Guides" });
+  }, []);
+
+  // Fire one impression event per page-load when the pinned banner enters the viewport.
+  useEffect(() => {
+    const el = bannerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      trackGuide.bannerImpression("pwa-preview-checklist", "guides_top_banner");
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            trackGuide.bannerImpression("pwa-preview-checklist", "guides_top_banner");
+            obs.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
   return (
     <div className="max-w-5xl mx-auto space-y-10">
@@ -90,15 +114,15 @@ export default function TradeGuides() {
       </header>
 
       <a
+        ref={bannerRef}
         href="/guides/studio-pwa-preview-checklist.pdf"
         download
-        onClick={() =>
-          trackEvent("guide_pdf_download", {
-            event_category: "Trade Guides",
-            event_label: "pwa-preview-checklist",
-            source: "guides_top_banner",
-          })
-        }
+        onClick={() => {
+          trackGuide.bannerClick("pwa-preview-checklist", "guides_top_banner");
+          trackGuide.pdfDownload("pwa-preview-checklist", "guides_top_banner", {
+            file_name: "studio-pwa-preview-checklist.pdf",
+          });
+        }}
         className="group flex items-center gap-4 rounded-md border border-[hsl(var(--pdf-red))]/30 bg-[hsl(var(--pdf-red))]/5 p-4 hover:bg-[hsl(var(--pdf-red))]/10 transition-colors"
       >
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))]">
@@ -207,9 +231,8 @@ function GuideCard({ guide: g, Icon }: { guide: Guide; Icon: any }) {
               download
               onClick={(e) => {
                 e.stopPropagation();
-                trackEvent("guide_pdf_download", {
-                  event_category: "Trade Guides",
-                  event_label: g.slug,
+                trackGuide.pdfDownload(g.slug, "guides_list_card", {
+                  file_name: g.pdfUrl!.split("/").pop() || g.pdfUrl!,
                 });
               }}
               className="inline-flex items-center gap-1.5 rounded-md bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 px-2.5 py-1.5 font-body text-xs text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/20 transition-colors"

@@ -1,6 +1,6 @@
 import { Link, useParams, Navigate } from "react-router-dom";
 import { ArrowLeft, Download, Keyboard, Users, Link2, ShieldCheck, CheckCircle2 } from "lucide-react";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackGuide } from "@/lib/analytics";
 
 const SLUG = "multi-user-studio-shared-filters";
 const PDF_URL = "/guides/multi-user-studio-shared-filters.pdf";
@@ -50,13 +50,7 @@ export default function TradeGuideSharedFilters() {
         <a
           href={PDF_URL}
           download
-          onClick={() =>
-            trackEvent("trade_guide_pdf_download", {
-              event_category: "Trade Guides",
-              event_label: SLUG,
-              guide_slug: SLUG,
-            })
-          }
+          onClick={() => trackGuide.pdfDownload(SLUG, "guide_detail_page", { file_name: PDF_URL.split("/").pop() || PDF_URL })}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 font-body text-xs uppercase tracking-[0.18em] text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md transition-all"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
