@@ -211,6 +211,26 @@ const TradeDocumentsAdmin = () => {
       return;
     }
     toast({ title: "Featured Read updated", description: `"${doc.title}" is now the public featured catalogue.` });
+
+    // Notify all trade members in-app + via email (fire-and-forget)
+    supabase.functions
+      .invoke("notify-featured-magazine", { body: { documentId: doc.id } })
+      .then(({ data, error }) => {
+        if (error) {
+          toast({
+            title: "Notifications could not be sent",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        const sent = (data as any)?.emails_sent ?? 0;
+        const recipients = (data as any)?.recipients ?? 0;
+        toast({
+          title: "Trade members notified",
+          description: `${recipients} member${recipients === 1 ? "" : "s"} alerted (${sent} email${sent === 1 ? "" : "s"} queued).`,
+        });
+      });
   }, [toast]);
 
   const handleSetAsBrandThumbnail = useCallback(async (doc: TradeDocument) => {
