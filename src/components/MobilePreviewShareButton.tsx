@@ -118,9 +118,9 @@ const MobilePreviewShareButton = () => {
   // *.lovableproject.com), but not on the user-facing apex / .lovable.app build.
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
-    const isDev = import.meta.env.DEV;
-    const isLovablePreview = /(^|\.)lovableproject\.com$/.test(host) || host.startsWith("id-preview--");
-    if (!isDev && !isLovablePreview) return null;
+    const isLocalDev = import.meta.env.DEV && (host === "localhost" || host === "127.0.0.1");
+    const isEditorSandbox = /(^|\.)lovableproject\.com$/.test(host);
+    if (!isLocalDev && !isEditorSandbox) return null;
   }
 
   const dims = DEVICES[device];
