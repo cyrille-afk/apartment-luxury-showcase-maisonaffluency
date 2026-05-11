@@ -94,7 +94,15 @@ const TradeLayout = () => {
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
 
-  
+  // Strip a bare trailing "#" left in the URL by in-page anchor scrolls.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "" && window.location.href.endsWith("#")) {
+      const clean = window.location.pathname + window.location.search;
+      window.history.replaceState(null, "", clean);
+    }
+  }, [location.pathname, location.search, location.hash]);
+
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
