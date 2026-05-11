@@ -248,6 +248,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
+      if ((quoteRes.data as any)?.client_id) setClientId((quoteRes.data as any).client_id as string);
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
       if ((quoteRes.data as any)?.project_id !== undefined) setProjectId((quoteRes.data as any).project_id);
       const q = quoteRes.data as any;
