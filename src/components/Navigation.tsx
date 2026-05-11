@@ -786,18 +786,35 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {rightNavItems.map((item) => (
                 <div key={item.href} className="relative group/trade">
                   <button
-                    onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
+                    onClick={() => {
+                      setMegaMenuOpen(false);
+                      if (featuredDoc) {
+                        trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, "nav_trade_button");
+                      }
+                      handleNavClick(item.href);
+                    }}
                     className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
                   >
                     {item.label}
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
                   </button>
                   {/* Persistent badge — always visible to test conversion lift */}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 pointer-events-none">
-                    <div className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
+                  <div ref={magazineBadgeRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (featuredDoc) {
+                          trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, "nav_badge");
+                        }
+                        setMegaMenuOpen(false);
+                        navigate("/trade/landing");
+                      }}
+                      className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap text-left hover:bg-foreground/90 transition-colors cursor-pointer"
+                      aria-label={featuredDoc ? `Download ${featuredDoc.title} — free` : "Download featured catalogue"}
+                    >
                       <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredDoc?.title ?? "Featured Catalogue"}</p>
                       <p className="font-body text-[9px] text-background/60">Free download</p>
-                    </div>
+                    </button>
                   </div>
                 </div>
               ))}
