@@ -77,6 +77,7 @@ export default function TradeClients() {
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
   const [contactsByClient, setContactsByClient] = useState<Record<string, Contact[]>>({});
+  const [docCountsByClient, setDocCountsByClient] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Partial<Client> | null>(null);
   const [editingContacts, setEditingContacts] = useState<Partial<Contact>[]>([]);
