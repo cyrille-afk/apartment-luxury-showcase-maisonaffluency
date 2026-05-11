@@ -117,7 +117,8 @@ const MobilePreviewShareButton = () => {
           <span className="font-body text-[10px] uppercase tracking-[0.15em]">
             Mobile preview
           </span>
-      </button>
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4 print:hidden">
