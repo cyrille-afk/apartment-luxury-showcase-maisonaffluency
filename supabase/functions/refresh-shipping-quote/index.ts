@@ -133,8 +133,8 @@ Deno.serve(async (req) => {
       fuel_cents: fuel, insurance_cents: insurance, duty_cents: duty, vat_cents: vat,
       customs_cents: customs, handling_cents: handling, last_mile_cents: lastMile,
       total_cents: Math.round(total),
-      status: mark_confirmed ? "confirmed" : "estimate",
-      confirmed_at: mark_confirmed ? new Date().toISOString() : null,
+      status: safeMarkConfirmed ? "confirmed" : "estimate",
+      confirmed_at: safeMarkConfirmed ? new Date().toISOString() : null,
       valid_until: validUntil.toISOString().slice(0, 10),
     }).eq("id", shipping_quote_id);
     if (uErr) throw uErr;
