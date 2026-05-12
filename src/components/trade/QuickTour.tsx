@@ -263,20 +263,30 @@ export function QuickTour() {
                 </div>
                 {step.links && step.links.length > 0 && (
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {step.links.map((l) => (
-                      <button
-                        key={l.path}
-                        onClick={() => {
-                          const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
-                          trackTour.subStepClick(step.id, subId, l.label, l.path);
-                          navigate(l.path);
-                        }}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground transition-colors"
-                      >
-                        {l.label}
-                        <ArrowRight className="h-2.5 w-2.5" />
-                      </button>
-                    ))}
+                    {step.links.map((l) => {
+                      const done = doneSubsteps.includes(l.path);
+                      return (
+                        <button
+                          key={l.path}
+                          onClick={() => {
+                            const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
+                            trackTour.subStepClick(step.id, subId, l.label, l.path);
+                            markSubstepDone(step.id, l.path);
+                            navigate(l.path);
+                          }}
+                          aria-label={`${l.label}${done ? " (completed)" : ""}`}
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] transition-colors",
+                            done
+                              ? "border-accent/60 bg-accent/15 text-foreground"
+                              : "border-border bg-background hover:bg-muted text-foreground",
+                          )}
+                        >
+                          {l.label}
+                          {done ? <Check className="h-2.5 w-2.5 text-accent" /> : <ArrowRight className="h-2.5 w-2.5" />}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
                 <div className="mt-3 flex items-center justify-between gap-2">
