@@ -231,6 +231,7 @@ const TradeLayout = () => {
                 <TradePriceToggle />
               </div>
               <NotificationBell />
+              <MobilePreviewHeaderButton />
               <ConciergeHeaderButton />
             </div>
           </header>
