@@ -213,9 +213,9 @@ export function QuickTour() {
   const onStepRoute = location.pathname === step.path || location.pathname.startsWith(step.path + "/");
   const doneSubsteps = completedSubsteps[step.id] ?? [];
   const isLastStep = stepIdx === STEPS.length - 1;
-  const requiresSubsteps = (step.links?.length ?? 0) > 0;
-  const allSubstepsDone = !requiresSubsteps || step.links!.every((l) => doneSubsteps.includes(l.path));
-  const advanceDisabled = requiresSubsteps && !allSubstepsDone;
+  const requiresSubsteps = false;
+  const allSubstepsDone = true;
+  const advanceDisabled = false;
 
   return (
     <>
