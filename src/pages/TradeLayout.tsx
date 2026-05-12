@@ -17,6 +17,7 @@ import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher"
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { TierBadge } from "@/components/trade/TierBadge";
+import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -229,6 +230,7 @@ const TradeLayout = () => {
                 <TradePriceToggle />
               </div>
               <NotificationBell />
+              <ConciergeHeaderButton />
             </div>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-6 lg:pb-8">

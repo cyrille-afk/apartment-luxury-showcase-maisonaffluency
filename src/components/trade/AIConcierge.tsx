@@ -513,25 +513,14 @@ export function AIConcierge() {
 
   return (
     <>
-      {/* Hidden trigger for dashboard inline button */}
-      {!open && isDashboard && (
+      {/* Hidden trigger — clicked by the global ConciergeHeaderButton in TradeLayout.
+          Rendered on every trade page so Felix is always reachable from the header. */}
+      {!open && (
         <button
           onClick={() => setOpen(true)}
           className="sr-only"
           aria-label="Open AI Concierge"
         />
-      )}
-
-      {/* Floating trigger on all non-dashboard pages */}
-      {!open && !isDashboard && (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-4 z-[100] flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2.5 shadow-lg hover:opacity-90 transition-opacity print:hidden"
-          aria-label="Open AI Concierge"
-        >
-          <Sparkles className="h-3.5 w-3.5" />
-          <span className="font-body text-[11px] uppercase tracking-widest hidden sm:inline">{name}</span>
-        </button>
       )}
 
       {/* Chat panel */}
