@@ -11,7 +11,6 @@ type StepLink = { label: string; path: string };
 type Step = {
   id: string;
   path: string;
-  tourTarget?: string;
   title: string;
   body: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -22,13 +21,6 @@ type Step = {
 const TOUR_ROUTE_OVERRIDES: Record<string, string> = {
   tools: "/trade/tools",
   procurement: "/trade/tools",
-};
-
-const TOUR_TARGETS: Record<string, string> = {
-  designers: "designers",
-  brief: "brief",
-  tools: "tools",
-  procurement: "procurement",
 };
 
 // Maps DB icon name → lucide component. Unknown names fall back to MapPin.
@@ -110,7 +102,6 @@ export function QuickTour() {
       setSteps(data.map((r: any) => ({
         id: r.step_key,
         path: TOUR_ROUTE_OVERRIDES[r.step_key] ?? r.path,
-        tourTarget: TOUR_TARGETS[r.step_key] ?? r.step_key,
         title: r.title,
         body: r.body,
         icon: ICONS[r.icon] || MapPin,
@@ -119,7 +110,7 @@ export function QuickTour() {
       })));
     })();
     return () => { cancelled = true; };
-  }, [STEPS.length]);
+  }, []);
 
   // Listen for the start event
   useEffect(() => {
