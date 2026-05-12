@@ -231,7 +231,11 @@ export function QuickTour() {
                     {step.links.map((l) => (
                       <button
                         key={l.path}
-                        onClick={() => navigate(l.path)}
+                        onClick={() => {
+                          const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
+                          trackTour.subStepClick(step.id, subId, l.label, l.path);
+                          navigate(l.path);
+                        }}
                         className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground transition-colors"
                       >
                         {l.label}
