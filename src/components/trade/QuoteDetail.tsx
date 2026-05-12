@@ -201,6 +201,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [pendingProductId, setPendingProductId] = useState<string>("");
   const [addingProduct, setAddingProduct] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [issueDate, setIssueDate] = useState<string | null>(null);
 
   // Insurance bundling
   type InsuranceTier = "standard" | "premium" | "all_risk";
@@ -242,7 +243,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     );
   };
 
-  const createdDate = new Date(quoteCreatedAt);
+  const createdDate = issueDate ? new Date(`${issueDate}T00:00:00`) : new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
   expiryDate.setMonth(expiryDate.getMonth() + 1);
 
@@ -302,7 +303,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -356,6 +357,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (q?.insurance_tier) setInsuranceTier(q.insurance_tier as InsuranceTier);
       if (q?.insurance_rate_bps != null) setInsuranceRateBps(q.insurance_rate_bps);
       if (q?.insurance_notes) setInsuranceNotes(q.insurance_notes);
+      if (q?.issue_date !== undefined) setIssueDate(q.issue_date ?? null);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
@@ -929,7 +931,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Date</span>
-                <span className="text-foreground">{formatDate(createdDate)}</span>
+                {isDraft ? (
+                  <input
+                    type="date"
+                    value={issueDate ?? new Date(quoteCreatedAt).toISOString().slice(0, 10)}
+                    onChange={(e) => setIssueDate(e.target.value || null)}
+                    onBlur={async (e) => {
+                      const v = e.target.value || null;
+                      await supabase.from("trade_quotes").update({ issue_date: v } as any).eq("id", quoteId);
+                    }}
+                    className="bg-transparent border-b border-border focus:outline-none focus:border-primary text-foreground text-sm font-body py-0.5"
+                  />
+                ) : (
+                  <span className="text-foreground">{formatDate(createdDate)}</span>
+                )}
               </div>
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Expiry</span>
@@ -1625,6 +1640,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
+                onBlur={handleSaveNotes}
                 placeholder="Add any special requirements…"
                 rows={3}
                 className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors text-[16px] sm:text-sm"
