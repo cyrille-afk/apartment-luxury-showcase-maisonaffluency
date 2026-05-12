@@ -907,7 +907,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-muted-foreground hover:bg-muted transition-colors"
               title="View email send history"
             >
-              <History className="h-3.5 w-3.5" />
+              <HistoryIcon className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Email log ({emailLog.length})</span>
               <span className="sm:hidden">{emailLog.length}</span>
             </button>
