@@ -258,7 +258,7 @@ const TradeDashboard = () => {
   return (
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="max-w-4xl">
+    <div className="max-w-6xl mx-auto">
       <div className="mb-6 md:mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
