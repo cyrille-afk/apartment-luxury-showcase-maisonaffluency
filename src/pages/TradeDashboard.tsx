@@ -287,17 +287,6 @@ const TradeDashboard = () => {
                 </button>
               );
             })()}
-            <button
-              onClick={() => {
-                // Find and click the floating concierge button
-                const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
-                if (btn) btn.click();
-              }}
-              className="flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 shadow-sm hover:opacity-90 transition-all"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span className="font-body text-[11px] uppercase tracking-[0.15em]">{conciergeName}</span>
-            </button>
           </div>
         </div>
       </div>
