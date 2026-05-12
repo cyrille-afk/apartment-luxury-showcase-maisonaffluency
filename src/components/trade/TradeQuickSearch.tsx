@@ -149,18 +149,15 @@ export function TradeQuickSearch() {
 
   const go = (item: ResultItem) => {
     setOpen(false);
-    if (item.to.includes("#")) {
-      // Navigate then scroll to hash anchor
-      const [path, hash] = item.to.split("#");
-      navigate(path);
+    const anchor = item.type === "section" ? item.anchor : undefined;
+    navigate(item.to);
+    if (anchor) {
       setTimeout(() => {
-        const el = document.getElementById(hash);
+        const el = document.getElementById(anchor);
         el?.scrollIntoView({ behavior: "smooth", block: "center" });
         el?.classList.add("ring-2", "ring-foreground/40");
         setTimeout(() => el?.classList.remove("ring-2", "ring-foreground/40"), 1600);
       }, 200);
-    } else {
-      navigate(item.to);
     }
   };
 
