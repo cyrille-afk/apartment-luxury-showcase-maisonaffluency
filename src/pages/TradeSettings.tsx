@@ -4,10 +4,11 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, TrendingUp, Compass } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2, Award, TrendingUp, Compass, RotateCcw } from "lucide-react";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { replayWelcome } from "@/lib/replayWelcome";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -523,23 +524,38 @@ const TradeSettings = () => {
       </form>
 
       {/* Onboarding / Quick Tour */}
-      <div className="mt-12 pt-8 border-t border-border">
+      <div id="replay-welcome" className="mt-12 pt-8 border-t border-border scroll-mt-24">
         <div className="flex items-center gap-2 mb-3">
           <Compass className="h-4 w-4 text-muted-foreground" />
           <h2 className="font-display text-base text-foreground">Onboarding</h2>
         </div>
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <p className="font-body text-xs text-muted-foreground max-w-md leading-relaxed">
-            Replay the guided Quick Tour of the Trade portal. Useful for a refresher or to walk a teammate through the workspace.
-          </p>
-          <button
-            type="button"
-            onClick={handleResetTour}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors"
-          >
-            <Compass className="h-3.5 w-3.5" />
-            Reset quick tour
-          </button>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <p className="font-body text-xs text-muted-foreground max-w-md leading-relaxed">
+              Replay the guided Quick Tour of the Trade portal. Useful for a refresher or to walk a teammate through the workspace.
+            </p>
+            <button
+              type="button"
+              onClick={handleResetTour}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors"
+            >
+              <Compass className="h-3.5 w-3.5" />
+              Reset quick tour
+            </button>
+          </div>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <p className="font-body text-xs text-muted-foreground max-w-md leading-relaxed">
+              Replay the first-login welcome flow with the personalised greeting and concierge introduction.
+            </p>
+            <button
+              type="button"
+              onClick={() => replayWelcome({ userId: user?.id, firstName: profile?.first_name })}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Replay welcome
+            </button>
+          </div>
         </div>
       </div>
     </div>
