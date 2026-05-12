@@ -2,7 +2,6 @@ import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -19,7 +18,6 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
-import { TradeQuickSearch } from "@/components/trade/TradeQuickSearch";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -223,7 +221,6 @@ const TradeLayout = () => {
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4">
-              <TradeQuickSearch />
               <StudioSwitcher />
               <GlobalProjectSwitcher />
               <div className="hidden sm:block">
