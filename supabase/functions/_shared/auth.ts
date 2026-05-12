@@ -1,7 +1,7 @@
 // Shared auth helpers for edge functions.
 // All Lovable Cloud edge functions deploy with verify_jwt = false,
 // so we MUST validate JWTs in code via supabase.auth.getClaims(token).
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
 export type AuthOk = {
   ok: true;
