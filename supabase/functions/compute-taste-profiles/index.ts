@@ -27,6 +27,15 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Admin-only: reads PII across all trade users + burns AI credits
+  const auth = await requireAdmin(req);
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
     return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not set" }), {
