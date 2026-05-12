@@ -931,7 +931,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Date</span>
-                <span className="text-foreground">{formatDate(createdDate)}</span>
+                {isDraft ? (
+                  <input
+                    type="date"
+                    value={issueDate ?? new Date(quoteCreatedAt).toISOString().slice(0, 10)}
+                    onChange={(e) => setIssueDate(e.target.value || null)}
+                    onBlur={async (e) => {
+                      const v = e.target.value || null;
+                      await supabase.from("trade_quotes").update({ issue_date: v } as any).eq("id", quoteId);
+                    }}
+                    className="bg-transparent border-b border-border focus:outline-none focus:border-primary text-foreground text-sm font-body py-0.5"
+                  />
+                ) : (
+                  <span className="text-foreground">{formatDate(createdDate)}</span>
+                )}
               </div>
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Expiry</span>
