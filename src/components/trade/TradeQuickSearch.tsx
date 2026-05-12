@@ -40,7 +40,7 @@ const SECTIONS: SectionItem[] = [
   { type: "section", label: "Clients", description: "Address book", to: "/trade/clients", keywords: "clients contacts address book", icon: Users },
   { type: "section", label: "Journal", description: "Editorial articles", to: "/trade/journal", keywords: "journal editorial articles", icon: BookOpen },
   { type: "section", label: "Settings", description: "Account & preferences", to: "/trade/settings", keywords: "settings account preferences password tier", icon: Settings },
-  { type: "section", label: "Replay welcome", description: "Re-run the first-login flow", to: "/trade/settings#replay-welcome", keywords: "replay welcome onboarding tour", icon: Compass },
+  { type: "section", label: "Replay welcome", description: "Re-run the first-login flow", to: "/trade/settings", anchor: "replay-welcome", keywords: "replay welcome onboarding tour", icon: Compass },
 ];
 
 export function TradeQuickSearch() {
