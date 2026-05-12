@@ -15,22 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { loadOnboardingWelcome } from "@/lib/onboardingWelcome";
-import dashboard3dStudioImage from "@/assets/dashboard-3d-studio.jpg";
-import dashboard3dStyleHamptons from "@/assets/dashboard-3d-style-hamptons.jpg";
-import dashboard3dStyleJade from "@/assets/dashboard-3d-style-jade.jpg";
-import dashboard3dStyleNeutrals from "@/assets/dashboard-3d-style-neutrals.jpg";
-
-/**
- * 3D Studio tile preview styles. Selection persists per-user in localStorage so
- * the brand-aligned hero on the dashboard tile reflects their preferred mood.
- */
-const STUDIO_STYLES = [
-  { id: "hamptons", label: "Hamptons", image: dashboard3dStyleHamptons },
-  { id: "jade", label: "Jade", image: dashboard3dStyleJade },
-  { id: "neutrals", label: "Neutrals", image: dashboard3dStyleNeutrals },
-] as const;
-type StudioStyleId = typeof STUDIO_STYLES[number]["id"];
-const STUDIO_STYLE_KEY = "trade:dashboard-3d-studio-style";
+import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
   brand_name: string;
