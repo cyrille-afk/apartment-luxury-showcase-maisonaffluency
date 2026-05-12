@@ -4,7 +4,7 @@ import { Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { ArrowLeft, BarChart3, Smartphone, Monitor, Tablet, Globe } from "lucide-react";
+import { ArrowLeft, BarChart3, Smartphone, Monitor, Tablet, Globe, X, ExternalLink } from "lucide-react";
 
 type EventType = "tour_step_view" | "tour_substep_click" | "tour_complete" | "tour_skip";
 type DeviceFilter = "all" | "desktop" | "mobile" | "tablet";
