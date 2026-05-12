@@ -242,10 +242,8 @@ const TradeDashboard = () => {
   const getCardImage = (card: typeof DASH_CARDS[number]) => {
     const override = heroOverrides[card.key];
     if (override) return override.image_url;
-    // 3D Studio: use the user's selected style preview for visual consistency
-    // with the editorial brand. The latest render is surfaced inside the 3D
-    // Studio page itself, not as the dashboard tile hero.
-    if (card.key === "dash-3d-studio") return studioStyleImage;
+    // 3D Studio: editorial brand fallback. Latest render surfaced inside the page.
+    if (card.key === "dash-3d-studio") return dashboard3dStudioImage;
     if (card.fallbackImage) return card.fallbackImage;
     if (card.fallbackId) return thumb(card.fallbackId);
     return "";
