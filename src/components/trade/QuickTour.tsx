@@ -112,14 +112,23 @@ export function QuickTour() {
     } catch {}
   }, []);
 
+  // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
+  const viewedStepsRef = useRef<Set<string>>(new Set());
+
   const finish = useCallback(() => {
+    const lastId = STEPS[stepIdx]?.id ?? "unknown";
+    if (stepIdx >= STEPS.length - 1) {
+      trackTour.complete(lastId, STEPS.length);
+    } else {
+      trackTour.skip(lastId, stepIdx, STEPS.length);
+    }
     setActive(false);
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(TOUR_DONE_KEY, String(Date.now()));
     } catch {}
     window.dispatchEvent(new CustomEvent("trade-tour:done"));
-  }, []);
+  }, [stepIdx, STEPS]);
 
   const next = useCallback(() => {
     const nextIdx = stepIdx + 1;
