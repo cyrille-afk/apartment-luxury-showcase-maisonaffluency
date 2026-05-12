@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireUser, rateLimit } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,13 +14,36 @@ const LANG_NAME: Record<string, string> = {
   zh: "Simplified Chinese",
 };
 
+const MAX_TEXT_LEN = 5000;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await requireUser(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const rl = rateLimit(`translate:${auth.userId}`, 60, 60_000);
+    if (!rl.ok) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(rl.retryInSec) },
+      });
+    }
+
     const { text, lang } = await req.json();
     if (!text || typeof text !== "string") {
       return new Response(JSON.stringify({ error: "text required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (text.length > MAX_TEXT_LEN) {
+      return new Response(JSON.stringify({ error: `text too long (max ${MAX_TEXT_LEN})` }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
