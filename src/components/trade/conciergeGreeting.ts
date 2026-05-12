@@ -250,7 +250,7 @@ const LANG_NAMES: Record<Lang, string> = {
 // match the user's selected tone AND language (not just the opener).
 // Custom concierge name — trade users can personalise how they address the
 // assistant (e.g. "Margaux", "Atelier"). Persisted per-device in localStorage.
-export const DEFAULT_NAME = "Concierge";
+export const DEFAULT_NAME = "Felix";
 const NAME_KEY = "concierge:name";
 const MAX_NAME_LEN = 32;
 
