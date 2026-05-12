@@ -18,6 +18,7 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { TierBadge } from "@/components/trade/TierBadge";
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
+import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
