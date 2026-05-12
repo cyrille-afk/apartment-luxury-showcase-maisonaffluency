@@ -17,6 +17,7 @@ import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher"
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { TierBadge } from "@/components/trade/TierBadge";
+import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
