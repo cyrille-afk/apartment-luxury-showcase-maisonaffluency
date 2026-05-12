@@ -1640,6 +1640,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
+                onBlur={handleSaveNotes}
                 placeholder="Add any special requirements…"
                 rows={3}
                 className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors text-[16px] sm:text-sm"
