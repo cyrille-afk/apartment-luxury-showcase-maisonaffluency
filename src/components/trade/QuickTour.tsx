@@ -155,7 +155,13 @@ export function QuickTour() {
       document.body.removeAttribute("data-tour-step");
       return;
     }
-    document.body.setAttribute("data-tour-step", STEPS[stepIdx]?.id ?? "");
+    const id = STEPS[stepIdx]?.id ?? "";
+    document.body.setAttribute("data-tour-step", id);
+    // Fire one tour_step_view per step per session (when the step actually mounts).
+    if (id && !viewedStepsRef.current.has(id)) {
+      viewedStepsRef.current.add(id);
+      trackTour.stepView(id, stepIdx, STEPS.length);
+    }
     return () => { document.body.removeAttribute("data-tour-step"); };
   }, [active, stepIdx, STEPS]);
 
