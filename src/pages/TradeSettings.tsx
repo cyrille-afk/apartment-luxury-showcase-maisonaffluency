@@ -553,29 +553,26 @@ const TradeSettings = () => {
           <div>
             <p className="text-foreground font-medium mb-1">Getting kicked out every ~15 minutes?</p>
             <p>
-              The session JWT expiry is set too low (default 900s). Raise it to <span className="text-foreground">3600s</span> (1 hour) or up to <span className="text-foreground">604800s</span> (1 week) in Cloud → Users → Auth Settings.
+              This usually means the app is not refreshing the current session before the access token expires. The app now proactively refreshes the session before expiry and again when the tab becomes active.
             </p>
           </div>
           <div>
             <p className="text-foreground font-medium mb-1">Don't see a "JWT" field on the Auth Settings page?</p>
             <p>
-              The setting moved. It's no longer at the top of the page next to the Sign-in methods — it now lives at the bottom under the <span className="text-foreground">Advanced</span> section. Scroll to the bottom and click <span className="text-foreground">Advanced &gt;</span> to expand it. Inside you'll find <span className="text-foreground">JWT expiry</span> (in seconds).
+              That field is not currently exposed in Lovable Cloud Auth Settings. It is not in Advanced, and there is no visible "JWT expiry" control to change from this screen.
             </p>
           </div>
           <div>
-            <p className="text-foreground font-medium mb-1">Where to find the page</p>
-            <ol className="list-decimal pl-5 space-y-1">
-              <li>Open the Cloud panel (the cloud icon in the Lovable navigation bar).</li>
-              <li>Go to <span className="text-foreground">Users</span>.</li>
-              <li>Click the <span className="text-foreground">gear icon</span> (Auth Settings) at the top right.</li>
-              <li>Scroll all the way down and expand <span className="text-foreground">Advanced</span>.</li>
-              <li>Set <span className="text-foreground">JWT expiry</span> to <span className="text-foreground">3600</span> (or higher) and Save.</li>
-            </ol>
+            <p className="text-foreground font-medium mb-1">What to check instead</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Confirm Email, Google, or Apple sign-in settings are enabled as expected.</li>
+              <li>Keep this tab open long enough to confirm the session refreshes without redirecting to login.</li>
+              <li>If sign-out still happens at the same interval, treat it as a session-refresh issue rather than a missing Auth Settings field.</li>
+            </ul>
           </div>
           <div>
             <p className="text-foreground font-medium mb-1">Still being signed out?</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Confirm the hosted backend Auth settings actually saved the new expiry value.</li>
               <li>Check whether the app receives a token refresh event before the previous token expires.</li>
               <li>Check that your browser is not blocking storage for the app domain.</li>
             </ul>
