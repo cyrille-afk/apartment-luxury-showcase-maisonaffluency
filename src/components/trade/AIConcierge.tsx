@@ -578,10 +578,10 @@ export function AIConcierge() {
                 : { width: PANEL_W }
           }
           className={cn(
-            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border bg-background shadow-2xl print:hidden animate-fade-in",
+            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden animate-fade-in overflow-hidden",
             modalMode
-              ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-accent/40 ring-1 ring-accent/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.45)]"
-              : "border-border",
+              ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]"
+              : "bg-background border-border",
             !modalMode && !pos && "bottom-20 md:bottom-6 right-4",
             minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
           )}
