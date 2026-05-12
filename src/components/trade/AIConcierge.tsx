@@ -556,12 +556,33 @@ export function AIConcierge() {
 
       {/* Chat panel */}
       {open && (
+        <>
+          {modalMode && (
+            <div
+              className="fixed inset-0 z-[99] bg-foreground/40 backdrop-blur-sm animate-fade-in print:hidden"
+              aria-hidden="true"
+              onClick={() => {
+                setOpen(false);
+                try { localStorage.removeItem("ma:welcome-pending"); } catch {}
+                window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
+              }}
+            />
+          )}
         <div
           data-concierge-panel
-          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W } : { width: PANEL_W }}
+          style={
+            modalMode
+              ? { width: PANEL_W }
+              : pos
+                ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
+                : { width: PANEL_W }
+          }
           className={cn(
-            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
-            !pos && "bottom-20 md:bottom-6 right-4",
+            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border bg-background shadow-2xl print:hidden animate-fade-in",
+            modalMode
+              ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-accent/40 ring-1 ring-accent/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.45)]"
+              : "border-border",
+            !modalMode && !pos && "bottom-20 md:bottom-6 right-4",
             minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
           )}
         >
