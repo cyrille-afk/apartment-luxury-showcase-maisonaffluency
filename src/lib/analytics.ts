@@ -284,3 +284,49 @@ export const trackMagazine = {
     persistMagazineEvent(documentId, title, source, "click");
   },
 };
+
+/**
+ * Quick Tour analytics — measure progression through the first-login flow,
+ * including sub-step pill clicks (e.g. Procurement & delivery → Order Timeline)
+ * so we can see which procurement tools new trade users adopt first.
+ */
+export const trackTour = {
+  stepView: (stepId: string, stepIndex: number, totalSteps: number) =>
+    trackEvent("tour_step_view", {
+      event_category: "Onboarding",
+      event_label: stepId,
+      step_id: stepId,
+      step_index: stepIndex,
+      total_steps: totalSteps,
+      ...getDeviceContext(),
+    }),
+
+  subStepClick: (parentStepId: string, subStepId: string, label: string, path: string) =>
+    trackEvent("tour_substep_click", {
+      event_category: "Onboarding",
+      event_label: `${parentStepId}/${subStepId}`,
+      parent_step_id: parentStepId,
+      sub_step_id: subStepId,
+      sub_step_label: label,
+      target_path: path,
+      ...getDeviceContext(),
+    }),
+
+  complete: (lastStepId: string, totalSteps: number) =>
+    trackEvent("tour_complete", {
+      event_category: "Onboarding",
+      event_label: lastStepId,
+      total_steps: totalSteps,
+      ...getDeviceContext(),
+    }),
+
+  skip: (atStepId: string, atIndex: number, totalSteps: number) =>
+    trackEvent("tour_skip", {
+      event_category: "Onboarding",
+      event_label: atStepId,
+      step_id: atStepId,
+      step_index: atIndex,
+      total_steps: totalSteps,
+      ...getDeviceContext(),
+    }),
+};
