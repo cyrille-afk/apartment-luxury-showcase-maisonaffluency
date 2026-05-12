@@ -17,7 +17,7 @@ type Step = {
 
 // Maps DB icon name → lucide component. Unknown names fall back to MapPin.
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  MapPin, Users, FileText, Sparkles, Image: ImageIcon, Box, Compass, BookOpen, FolderOpen,
+  MapPin, Users, FileText, Sparkles, Image: ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone,
 };
 
 const DEFAULT_STEPS: Step[] = [
