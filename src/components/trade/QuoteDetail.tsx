@@ -426,6 +426,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     });
   }, [projectId]);
 
+  // Check whether the linked client's primary contact is an approved trade applicant
+  useEffect(() => {
+    if (!clientId) { setClientApproval({ approved: false, email: null, status: null }); return; }
+    (supabase.rpc as any)("is_client_trade_approved", { _client_id: clientId }).then(({ data }: any) => {
+      const row = Array.isArray(data) ? data[0] : data;
+      setClientApproval({
+        approved: !!row?.approved,
+        email: row?.contact_email ?? null,
+        status: row?.application_status ?? null,
+      });
+    });
+  }, [clientId]);
+
   // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
   useEffect(() => {
     if (!gstUserTouched) setGstEnabled(currency === "SGD");
