@@ -2,7 +2,6 @@ import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
