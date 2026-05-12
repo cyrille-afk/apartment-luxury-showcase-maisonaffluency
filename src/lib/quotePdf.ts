@@ -999,7 +999,7 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
 
   y += 10;
   // Bank box
-  const boxH = 78;
+  const boxH = 130;
   doc.setFillColor(250, 249, 246);
   doc.rect(M, y, contentW, boxH, "F");
   doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
@@ -1014,19 +1014,38 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text("AFFLUENCY ETC PTE LTD", M + 12, y + 30);
+  doc.text("AFFLUENCY ETC PTE LTD", M + 12, y + 28);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text("1 Grange Garden, #16-05, Singapore, 249631", M + 12, y + 44);
+  doc.setFontSize(8.5);
+  doc.text("1 Grange Garden, #16-05, Singapore, 249631, Singapore", M + 12, y + 40);
 
-  // right column: bank IBAN
-  const rightX = M + contentW / 2 + 20;
+  // Two columns: EUR (SEPA) | Global SWIFT
+  const colW = (contentW - 24) / 2;
+  const leftX = M + 12;
+  const rightX = M + 12 + colW;
+  const colY = y + 56;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("MAIN · EUR (SEPA)", leftX, colY);
+  doc.text("GLOBAL · SWIFT (OUTSIDE EEA)", rightX, colY);
+
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text("IBAN: LT73 3250 0692 1856 8740", rightX, y + 30);
-  doc.text("BIC: REVOLT21", rightX, y + 44);
-  doc.text("Bank: Revolut Bank UAB", rightX, y + 58);
+  doc.text("IBAN: LT73 3250 0692 1856 8740", leftX, colY + 12);
+  doc.text("BIC: REVOLT21", leftX, colY + 24);
+  doc.text("Bank: Revolut Bank UAB", leftX, colY + 36);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("Konstitucijos ave. 21B, Vilnius, Lithuania", leftX, colY + 48);
+
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text("Account: 885111609218375", rightX, colY + 12);
+  doc.text("SWIFT/BIC: REVOSGS2  ·  Intermediary: BARCDEFF", rightX, colY + 24);
+  doc.text("Bank: Revolut Technologies Singapore Pte. Ltd", rightX, colY + 36);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("6 Battery Road, Floor 6-01, 049909, Singapore", rightX, colY + 48);
 
   return y + boxH;
 }
