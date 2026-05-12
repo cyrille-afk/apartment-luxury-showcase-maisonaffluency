@@ -411,6 +411,9 @@ const TradeAdminOnboardingFunnel = () => {
                       </table>
                     </div>
 
+                    {/* Per-user journey timeline */}
+                    <JourneyTimeline events={drillEvents} userLabel={userLabel} />
+
                     {/* Raw events */}
                     <div className="overflow-x-auto border border-border rounded-md">
                       <table className="w-full text-sm font-body">
