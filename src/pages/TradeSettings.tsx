@@ -558,6 +558,46 @@ const TradeSettings = () => {
           </div>
         </div>
       </div>
+
+      {/* Cloud Auth Troubleshooting */}
+      <div id="auth-troubleshooting" className="mt-12 pt-8 border-t border-border scroll-mt-24">
+        <div className="flex items-center gap-2 mb-3">
+          <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-base text-foreground">Cloud Auth Troubleshooting</h2>
+        </div>
+        <div className="space-y-5 font-body text-xs text-muted-foreground leading-relaxed max-w-2xl">
+          <div>
+            <p className="text-foreground font-medium mb-1">Getting kicked out every ~15 minutes?</p>
+            <p>
+              The session JWT expiry is set too low (default 900s). Raise it to <span className="text-foreground">3600s</span> (1 hour) or up to <span className="text-foreground">604800s</span> (1 week) in Cloud → Users → Auth Settings.
+            </p>
+          </div>
+          <div>
+            <p className="text-foreground font-medium mb-1">Don't see a "JWT" field on the Auth Settings page?</p>
+            <p>
+              The setting moved. It's no longer at the top of the page next to the Sign-in methods — it now lives at the bottom under the <span className="text-foreground">Advanced</span> section. Scroll to the bottom and click <span className="text-foreground">Advanced &gt;</span> to expand it. Inside you'll find <span className="text-foreground">JWT expiry</span> (in seconds).
+            </p>
+          </div>
+          <div>
+            <p className="text-foreground font-medium mb-1">Where to find the page</p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Open the Cloud panel (the cloud icon in the Lovable navigation bar).</li>
+              <li>Go to <span className="text-foreground">Users</span>.</li>
+              <li>Click the <span className="text-foreground">gear icon</span> (Auth Settings) at the top right.</li>
+              <li>Scroll all the way down and expand <span className="text-foreground">Advanced</span>.</li>
+              <li>Set <span className="text-foreground">JWT expiry</span> to <span className="text-foreground">3600</span> (or higher) and Save.</li>
+            </ol>
+          </div>
+          <div>
+            <p className="text-foreground font-medium mb-1">Still being signed out?</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Hard refresh after changing the expiry so a new token is issued.</li>
+              <li>Check that your browser isn't blocking third-party cookies / localStorage for the app domain.</li>
+              <li>If the tab was asleep for a long time, the auto-refresh on focus will renew the session — give it a second before clicking.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
     </>
   );
