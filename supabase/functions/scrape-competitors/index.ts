@@ -37,6 +37,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Admin-only: this function consumes paid Firecrawl credits
+    const _adminCheck = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data: roles } = await _adminCheck
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", claimsData.claims.sub)
+      .in("role", ["admin", "super_admin"]);
+    if (!roles || roles.length === 0) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
     if (!apiKey) {
       return new Response(

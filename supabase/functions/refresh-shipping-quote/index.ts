@@ -12,6 +12,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const token = authHeader.slice(7);
+
     const { shipping_quote_id, mark_confirmed = true } = await req.json();
     if (!shipping_quote_id) {
       return new Response(JSON.stringify({ error: "shipping_quote_id required" }), {
@@ -24,9 +32,34 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Verify caller and authorize
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const { data: claimsData, error: claimsErr } = await anonClient.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const callerId = String(claimsData.claims.sub);
+    const { data: roles } = await supabase
+      .from("user_roles").select("role").eq("user_id", callerId)
+      .in("role", ["admin", "super_admin"]);
+    const isAdmin = (roles?.length ?? 0) > 0;
+
     const { data: quote, error: qErr } = await supabase
       .from("shipping_quotes").select("*").eq("id", shipping_quote_id).single();
     if (qErr || !quote) throw new Error("Shipping quote not found");
+
+    // Only owner or admin can refresh; only admin can mark confirmed
+    if (!isAdmin && quote.user_id !== callerId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const safeMarkConfirmed = isAdmin ? mark_confirmed : false;
 
     // Re-run estimator inline (server-side equivalent of src/lib/shippingEstimator.ts)
     const { data: lanes } = await supabase
@@ -100,8 +133,8 @@ Deno.serve(async (req) => {
       fuel_cents: fuel, insurance_cents: insurance, duty_cents: duty, vat_cents: vat,
       customs_cents: customs, handling_cents: handling, last_mile_cents: lastMile,
       total_cents: Math.round(total),
-      status: mark_confirmed ? "confirmed" : "estimate",
-      confirmed_at: mark_confirmed ? new Date().toISOString() : null,
+      status: safeMarkConfirmed ? "confirmed" : "estimate",
+      confirmed_at: safeMarkConfirmed ? new Date().toISOString() : null,
       valid_until: validUntil.toISOString().slice(0, 10),
     }).eq("id", shipping_quote_id);
     if (uErr) throw uErr;
