@@ -299,7 +299,7 @@ const persistTourEvent = (row: Record<string, unknown>) => {
         const { data } = await supabase.auth.getSession();
         user_id = data.session?.user?.id ?? null;
       } catch { /* ignore */ }
-      void supabase.from("tour_events").insert({ ...row, user_id });
+      void supabase.from("tour_events").insert({ ...row, user_id } as any);
     })
     .catch(() => {});
 };
