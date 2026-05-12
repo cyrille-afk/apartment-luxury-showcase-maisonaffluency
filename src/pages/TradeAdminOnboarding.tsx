@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 /** Mirrors the icon map used by QuickTour so admins can pick a valid name. */
-const ICON_OPTIONS = ["MapPin", "Users", "FileText", "Sparkles", "Image", "Box", "Compass", "BookOpen", "FolderOpen"] as const;
+const ICON_OPTIONS = ["MapPin", "Users", "FileText", "Sparkles", "Image", "Box", "Compass", "BookOpen", "FolderOpen", "Smartphone"] as const;
 
 interface Step {
   id?: string;
