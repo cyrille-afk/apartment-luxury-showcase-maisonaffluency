@@ -263,51 +263,68 @@ const TradeAdminOnboardingFunnel = () => {
           <div className="py-20 flex items-center justify-center text-muted-foreground"><DotCircleLoader size="sm" /></div>
         ) : (
           <>
-            {/* KPI cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-              <Kpi label="Step views" value={counts.tour_step_view} />
-              <Kpi label="Sub-step clicks" value={counts.tour_substep_click} />
-              <Kpi label="Completes" value={counts.tour_complete} accent />
-              <Kpi label="Skips" value={counts.tour_skip} />
+            {/* KPI cards (clickable) */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+              <Kpi label="Step views" value={counts.tour_step_view} onClick={() => setDrill({ kind: "type", event_type: "tour_step_view" })} />
+              <Kpi label="Sub-step clicks" value={counts.tour_substep_click} onClick={() => setDrill({ kind: "type", event_type: "tour_substep_click" })} />
+              <Kpi label="Completes" value={counts.tour_complete} accent onClick={() => setDrill({ kind: "type", event_type: "tour_complete" })} />
+              <Kpi label="Skips" value={counts.tour_skip} onClick={() => setDrill({ kind: "type", event_type: "tour_skip" })} />
               <Kpi label="Unique users" value={uniqueUsers} />
             </div>
 
-            {completionRate !== null && (
-              <p className="font-body text-xs text-muted-foreground mb-6">
-                Estimated completion rate (completes ÷ step-0 views):{" "}
-                <span className="text-foreground font-medium">{completionRate}%</span>
-              </p>
-            )}
+            {/* Time-window quick drills */}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Drill window:</span>
+              {[
+                ["Last hour", 3600_000],
+                ["Last 24 h", 86400_000],
+                ["Last 7 days", 7 * 86400_000],
+              ].map(([label, ms]) => (
+                <button
+                  key={label as string}
+                  onClick={() => setDrill({ kind: "window", from: Date.now() - (ms as number), label: label as string })}
+                  className="px-2.5 py-1 text-[11px] uppercase tracking-widest border border-border rounded hover:bg-muted"
+                >
+                  {label}
+                </button>
+              ))}
+              {completionRate !== null && (
+                <span className="ml-auto font-body text-xs text-muted-foreground">
+                  Completion rate: <span className="text-foreground font-medium">{completionRate}%</span>
+                </span>
+              )}
+            </div>
 
             {/* Step funnel */}
-            <Section title="Step funnel — unique users reaching each step">
+            <Section title="Step funnel — unique users reaching each step (click a row to drill)">
               {stepFunnel.length === 0 ? (
                 <Empty />
               ) : (
                 <div className="space-y-2">
                   {stepFunnel.map((s) => (
-                    <div key={s.step_id} className="flex items-center gap-3">
+                    <button
+                      key={s.step_id}
+                      onClick={() => setDrill({ kind: "step", step_id: s.step_id })}
+                      className="w-full flex items-center gap-3 text-left rounded hover:bg-muted/40 px-1 py-1 transition-colors"
+                    >
                       <div className="w-48 truncate font-mono text-[11px] text-muted-foreground">
                         {s.step_index}. {s.step_id}
                       </div>
                       <div className="flex-1 h-6 bg-muted rounded relative overflow-hidden">
-                        <div
-                          className="h-full bg-accent/70"
-                          style={{ width: `${s.pct}%` }}
-                        />
+                        <div className="h-full bg-accent/70" style={{ width: `${s.pct}%` }} />
                       </div>
                       <div className="w-28 text-right font-body text-xs">
                         <span className="text-foreground font-medium">{s.unique_users}</span>{" "}
                         <span className="text-muted-foreground">({s.pct}%)</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
             </Section>
 
             {/* Sub-step pill clicks */}
-            <Section title="Sub-step clicks (procurement & deeper pills)">
+            <Section title="Sub-step clicks (click a row to drill)">
               {subStepBreakdown.length === 0 ? (
                 <Empty />
               ) : (
@@ -322,7 +339,11 @@ const TradeAdminOnboardingFunnel = () => {
                     </thead>
                     <tbody>
                       {subStepBreakdown.map((r) => (
-                        <tr key={r.label} className="border-b border-border/50">
+                        <tr
+                          key={r.label}
+                          onClick={() => setDrill({ kind: "substep", step_id: r.step_id, sub_step_id: r.sub_step_id, label: r.label })}
+                          className="border-b border-border/50 cursor-pointer hover:bg-muted/40"
+                        >
                           <td className="py-2 text-foreground">{r.label}</td>
                           <td className="py-2 text-right">{r.clicks}</td>
                           <td className="py-2 text-right text-muted-foreground">{r.unique_users}</td>
@@ -333,6 +354,100 @@ const TradeAdminOnboardingFunnel = () => {
                 </div>
               )}
             </Section>
+
+            {/* Drill-down panel */}
+            {drill && (
+              <Section title={`Drill-down — ${drillTitle(drill)} · ${drillEvents.length} events · ${drillUserSummary.length} users`}>
+                <div className="flex justify-end mb-2">
+                  <button
+                    onClick={() => setDrill(null)}
+                    className="inline-flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3 w-3" /> Clear
+                  </button>
+                </div>
+
+                {drillEvents.length === 0 ? (
+                  <Empty />
+                ) : (
+                  <>
+                    {/* Per-user summary */}
+                    <div className="overflow-x-auto mb-6 border border-border rounded-md">
+                      <table className="w-full text-sm font-body">
+                        <thead className="bg-muted/40">
+                          <tr className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            <th className="text-left px-3 py-2">User</th>
+                            <th className="text-left px-3 py-2">Company</th>
+                            <th className="text-left px-3 py-2">Event types</th>
+                            <th className="text-right px-3 py-2 w-20">Events</th>
+                            <th className="text-left px-3 py-2 w-44">First → last</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {drillUserSummary.map((u, i) => {
+                            const p = u.user_id ? profiles[u.user_id] : null;
+                            return (
+                              <tr key={(u.user_id ?? "anon") + i} className="border-t border-border/50">
+                                <td className="px-3 py-2 text-foreground">{userLabel(u.user_id)}</td>
+                                <td className="px-3 py-2 text-muted-foreground">{p?.company || "—"}</td>
+                                <td className="px-3 py-2 text-[11px] text-muted-foreground">{Array.from(u.types).join(", ")}</td>
+                                <td className="px-3 py-2 text-right">{u.events}</td>
+                                <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                                  {fmt(u.first)} → {fmt(u.last)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Raw events */}
+                    <div className="overflow-x-auto border border-border rounded-md">
+                      <table className="w-full text-sm font-body">
+                        <thead className="bg-muted/40">
+                          <tr className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            <th className="text-left px-3 py-2 w-44">When</th>
+                            <th className="text-left px-3 py-2">Event</th>
+                            <th className="text-left px-3 py-2">Step / sub-step</th>
+                            <th className="text-left px-3 py-2">User</th>
+                            <th className="text-left px-3 py-2">Device</th>
+                            <th className="text-left px-3 py-2">Page</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {drillEvents.slice(0, 500).map((e) => (
+                            <tr key={e.id} className="border-t border-border/50 align-top">
+                              <td className="px-3 py-2 text-[11px] text-muted-foreground whitespace-nowrap">{fmt(e.created_at)}</td>
+                              <td className="px-3 py-2 text-[11px]">{e.event_type.replace("tour_", "")}</td>
+                              <td className="px-3 py-2 text-[11px] text-foreground">
+                                {e.step_id}
+                                {e.sub_step_label ? ` → ${e.sub_step_label}` : ""}
+                                {typeof e.step_index === "number" ? ` (#${e.step_index})` : ""}
+                              </td>
+                              <td className="px-3 py-2 text-[11px]">{userLabel(e.user_id)}</td>
+                              <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                                {e.device_type ?? "?"}{e.platform ? ` · ${e.platform}` : ""}{e.viewport ? ` · ${e.viewport}` : ""}
+                              </td>
+                              <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                                {e.target_path ? (
+                                  <span className="inline-flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" /> {e.target_path}
+                                  </span>
+                                ) : (e.page_path ?? "—")}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {drillEvents.length > 500 && (
+                        <p className="px-3 py-2 text-[11px] text-muted-foreground italic">Showing first 500 of {drillEvents.length} events.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </Section>
+            )}
 
             {/* Device mix (always all-events, regardless of filter) */}
             <Section title="Device mix (all events in range)">
