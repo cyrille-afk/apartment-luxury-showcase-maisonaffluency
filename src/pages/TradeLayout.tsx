@@ -223,6 +223,7 @@ const TradeLayout = () => {
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4">
+              <TradeQuickSearch />
               <StudioSwitcher />
               <GlobalProjectSwitcher />
               <div className="hidden sm:block">
