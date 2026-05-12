@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { loadOnboardingWelcome } from "@/lib/onboardingWelcome";
+import dashboard3dStudioImage from "@/assets/dashboard-3d-studio.jpg";
 
 interface BrandFolder {
   brand_name: string;
