@@ -201,6 +201,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [pendingProductId, setPendingProductId] = useState<string>("");
   const [addingProduct, setAddingProduct] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [issueDate, setIssueDate] = useState<string | null>(null);
 
   // Insurance bundling
   type InsuranceTier = "standard" | "premium" | "all_risk";
