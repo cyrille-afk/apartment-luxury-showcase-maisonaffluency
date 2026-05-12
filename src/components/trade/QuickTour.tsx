@@ -49,7 +49,7 @@ const DEFAULT_STEPS: Step[] = [
   { id: "designers", path: "/trade", title: "2. Discover Designers & Ateliers",  body: "From your dashboard, open the Designers & Ateliers Library tile (highlighted) to filter 274 designers across 32 ateliers by category, country or material — and shop their pieces.", icon: Users,    ctaLabel: "Next: Brief setup" },
   { id: "brief",       path: "/trade/quotes",         title: "4. Set up a brief",                body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.", icon: FileText, ctaLabel: "Next: Tools" },
   { id: "tools",       path: "/trade/tools",          title: "5. Your specification toolkit",    body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Next: Procurement", links: STEP_LINKS.tools },
-  { id: "procurement", path: "/trade/order-timeline", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour", links: STEP_LINKS.procurement },
+  { id: "procurement", path: "/trade/tools", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour", links: STEP_LINKS.procurement },
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
@@ -96,7 +96,7 @@ export function QuickTour() {
       if (cancelled || !data || data.length === 0) return;
       setSteps(data.map((r: any) => ({
         id: r.step_key,
-        path: r.path,
+        path: r.step_key === "procurement" ? "/trade/tools" : r.path,
         title: r.title,
         body: r.body,
         icon: ICONS[r.icon] || MapPin,
