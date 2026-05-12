@@ -116,17 +116,26 @@ const TradeAdminOnboardingFunnel = () => {
   }, [filtered]);
 
   const subStepBreakdown = useMemo(() => {
-    const map = new Map<string, { label: string; clicks: number; users: Set<string> }>();
+    const map = new Map<string, { label: string; step_id: string; sub_step_id: string; clicks: number; users: Set<string> }>();
     for (const e of filtered) {
       if (e.event_type !== "tour_substep_click" || !e.sub_step_id) continue;
-      const key = `${e.step_id ?? "?"} → ${e.sub_step_label ?? e.sub_step_id}`;
-      if (!map.has(key)) map.set(key, { label: key, clicks: 0, users: new Set() });
+      const step_id = e.step_id ?? "?";
+      const key = `${step_id}::${e.sub_step_id}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          label: `${step_id} → ${e.sub_step_label ?? e.sub_step_id}`,
+          step_id,
+          sub_step_id: e.sub_step_id,
+          clicks: 0,
+          users: new Set(),
+        });
+      }
       const row = map.get(key)!;
       row.clicks++;
       if (e.user_id) row.users.add(e.user_id);
     }
     return Array.from(map.values())
-      .map((r) => ({ label: r.label, clicks: r.clicks, unique_users: r.users.size }))
+      .map((r) => ({ label: r.label, step_id: r.step_id, sub_step_id: r.sub_step_id, clicks: r.clicks, unique_users: r.users.size }))
       .sort((a, b) => b.clicks - a.clicks);
   }, [filtered]);
 
