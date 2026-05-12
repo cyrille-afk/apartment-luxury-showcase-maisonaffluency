@@ -224,11 +224,8 @@ const TradeLayout = () => {
             <div className="ml-auto flex items-center gap-2 md:gap-4">
               <StudioSwitcher />
               <GlobalProjectSwitcher />
-              <div className="hidden md:block">
-                <TierBadge showDiscount />
-              </div>
               <div className="hidden sm:block">
-                <TradePriceToggle />
+                <PriceModeSelector />
               </div>
               <NotificationBell />
               <MobilePreviewHeaderButton />
