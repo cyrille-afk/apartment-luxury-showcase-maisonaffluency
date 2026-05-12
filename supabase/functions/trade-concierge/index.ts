@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { requireUser, rateLimit } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -602,6 +603,19 @@ serve(async (req) => {
   }
 
   try {
+    const auth = await requireUser(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const rl = rateLimit(`concierge:${auth.userId}`, 20, 60_000);
+    if (!rl.ok) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: rl.retryInSec }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -618,14 +632,8 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Try to extract a user from the bearer token (optional — function is anon-callable).
-    let userId: string | null = null;
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (token) {
-      const { data: u } = await supabase.auth.getUser(token);
-      userId = u?.user?.id || null;
-    }
+    const userId: string = auth.userId;
+
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 

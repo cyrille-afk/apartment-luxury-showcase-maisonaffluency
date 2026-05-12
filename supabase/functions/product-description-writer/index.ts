@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { requireUser, rateLimit } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -154,6 +155,30 @@ serve(async (req) => {
   }
 
   try {
+    const auth = await requireUser(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Verify caller is admin or trade_user (private product context)
+    {
+      const svc = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const { data: roles } = await svc.from("user_roles").select("role").eq("user_id", auth.userId);
+      const allowed = (roles ?? []).some((r: { role: string }) => ["admin", "super_admin", "trade_user"].includes(r.role));
+      if (!allowed) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+    const rl = rateLimit(`pdw:${auth.userId}`, 30, 60_000);
+    if (!rl.ok) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: rl.retryInSec }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { product_id, source, tone } = await req.json();
 
     if (!product_id || !source || !tone) {

@@ -1,6 +1,7 @@
 // Phase 3 — AI document intake for the shipping estimator.
 // Accepts a PDF/image data URL or pasted email text and returns
 // structured shipment fields the estimator can pre-fill.
+import { requireUser, rateLimit, clientIp } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,6 +52,19 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await requireUser(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const rl = rateLimit(`parse-ship:${auth.userId}`, 20, 60_000);
+    if (!rl.ok) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: rl.retryInSec }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "AI gateway not configured" }), {
@@ -61,7 +75,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { text, image_data_url } = body as {
       text?: string;
-      image_data_url?: string; // data:image/...;base64,xxxx OR data:application/pdf;base64,xxxx
+      image_data_url?: string;
     };
 
     if (!text && !image_data_url) {
@@ -69,6 +83,18 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (text && text.length > 50_000) {
+      return new Response(JSON.stringify({ error: "Text too long (max 50k chars)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (image_data_url && image_data_url.length > 14_000_000) {
+      return new Response(JSON.stringify({ error: "Document too large (max ~10MB)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    void clientIp;
+
 
     const userContent: any[] = [];
     if (text) userContent.push({ type: "text", text: `Email / document text:\n\n${text}` });
