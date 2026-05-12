@@ -357,6 +357,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (q?.insurance_tier) setInsuranceTier(q.insurance_tier as InsuranceTier);
       if (q?.insurance_rate_bps != null) setInsuranceRateBps(q.insurance_rate_bps);
       if (q?.insurance_notes) setInsuranceNotes(q.insurance_notes);
+      if (q?.issue_date !== undefined) setIssueDate(q.issue_date ?? null);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
