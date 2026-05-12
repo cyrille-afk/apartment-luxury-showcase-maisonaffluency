@@ -243,7 +243,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     );
   };
 
-  const createdDate = new Date(quoteCreatedAt);
+  const createdDate = issueDate ? new Date(`${issueDate}T00:00:00`) : new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
   expiryDate.setMonth(expiryDate.getMonth() + 1);
 
