@@ -91,6 +91,25 @@ export function AIConcierge() {
   });
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
 
+  // First-login welcome: render as a centered modal with a soft backdrop so
+  // the entry point is unmistakable instead of a small bottom-right widget.
+  const [welcomePending, setWelcomePending] = useState<boolean>(() => {
+    try { return localStorage.getItem("ma:welcome-pending") === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    const onPending = () => setWelcomePending(true);
+    const onDismissed = () => setWelcomePending(false);
+    window.addEventListener("ma:welcome-pending", onPending);
+    window.addEventListener("ma:welcome-dismissed", onDismissed);
+    return () => {
+      window.removeEventListener("ma:welcome-pending", onPending);
+      window.removeEventListener("ma:welcome-dismissed", onDismissed);
+    };
+  }, []);
+  // Modal mode is active only while the welcome is pending AND the user
+  // hasn't manually dragged or expanded the panel yet.
+  const modalMode = welcomePending && !pos;
+
   const clampPos = useCallback((x: number, y: number) => {
     const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
     const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
@@ -537,12 +556,33 @@ export function AIConcierge() {
 
       {/* Chat panel */}
       {open && (
+        <>
+          {modalMode && (
+            <div
+              className="fixed inset-0 z-[99] bg-foreground/40 backdrop-blur-sm animate-fade-in print:hidden"
+              aria-hidden="true"
+              onClick={() => {
+                setOpen(false);
+                try { localStorage.removeItem("ma:welcome-pending"); } catch {}
+                window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
+              }}
+            />
+          )}
         <div
           data-concierge-panel
-          style={pos ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W } : { width: PANEL_W }}
+          style={
+            modalMode
+              ? { width: PANEL_W }
+              : pos
+                ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
+                : { width: PANEL_W }
+          }
           className={cn(
-            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl print:hidden animate-fade-in",
-            !pos && "bottom-20 md:bottom-6 right-4",
+            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border bg-background shadow-2xl print:hidden animate-fade-in",
+            modalMode
+              ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-accent/40 ring-1 ring-accent/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.45)]"
+              : "border-border",
+            !modalMode && !pos && "bottom-20 md:bottom-6 right-4",
             minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
           )}
         >
@@ -982,6 +1022,7 @@ export function AIConcierge() {
           </div>
           </>)}
         </div>
+        </>
       )}
     </>
   );
