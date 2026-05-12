@@ -97,7 +97,7 @@ export default function DesignerCompletenessAudit() {
       const hasPhilosophy = !!(d.philosophy && d.philosophy.trim());
       const isParentBrand = !!(d.founder && d.founder === d.name);
       const relatedDesigners = isParentBrand ? relatedByParent.get(d.name) || [d] : [d];
-      const hasHero = !!((d.hero_image_url && d.hero_image_url.trim()) || (isParentBrand && d.image_url && d.image_url.trim()));
+      const hasHero = !!((d.hero_image_url && d.hero_image_url.trim()) || (d.image_url && d.image_url.trim()));
 
       const picksCount = relatedDesigners.reduce((sum, related) => sum + (pickCounts[related.id] || 0), 0);
       const hasPicks = picksCount > 0;
