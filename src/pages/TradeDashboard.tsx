@@ -124,6 +124,15 @@ const TradeDashboard = () => {
         return;
       }
 
+      // Respect persisted dismissal: if the user has already closed the
+      // welcome modal during this first-login session, do not re-open on refresh.
+      let dismissed = false;
+      try { dismissed = localStorage.getItem("ma:welcome-dismissed") === "1"; } catch {}
+      if (dismissed) {
+        await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
+        return;
+      }
+
       try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
       window.dispatchEvent(new CustomEvent("ma:welcome-pending"));
 
