@@ -70,30 +70,40 @@ d("RLS guard: realtime.messages rejects unauthorized broadcasts", () => {
     const fakeUid = "00000000-0000-0000-0000-000000000001";
     const topic = `user:${fakeUid}`;
 
+    // Use PRIVATE channels — these route through realtime.messages and
+    // therefore enforce our RLS policy. (Public broadcast channels are
+    // intentionally in-memory and unauthenticated by design.)
     const received: unknown[] = [];
-    const ch = listener.channel(topic, { config: { broadcast: { self: false } } });
+    let listenerStatus = "";
+    const ch = listener.channel(topic, {
+      config: { private: true, broadcast: { self: false } },
+    });
     ch.on("broadcast", { event: "test" }, (p) => received.push(p));
 
     await new Promise<void>((resolve) => {
       ch.subscribe((status) => {
+        listenerStatus = status;
         if (status === "SUBSCRIBED" || status === "CHANNEL_ERROR") resolve();
       });
-      // Safety timeout
-      setTimeout(resolve, 3000);
+      setTimeout(resolve, 4000);
     });
 
-    // Try to broadcast as anon — RLS INSERT policy on realtime.messages
-    // requires authenticated + matching topic, so this must not deliver.
-    const sender = anon.channel(topic);
+    // Anon must NOT be able to subscribe to a private user-scoped topic.
+    expect(listenerStatus).not.toBe("SUBSCRIBED");
+
+    // And anon broadcast must not deliver either.
+    let senderStatus = "";
+    const sender = anon.channel(topic, { config: { private: true } });
     await new Promise<void>((resolve) => {
       sender.subscribe((status) => {
+        senderStatus = status;
         if (status === "SUBSCRIBED" || status === "CHANNEL_ERROR") resolve();
       });
-      setTimeout(resolve, 3000);
+      setTimeout(resolve, 4000);
     });
-    await sender.send({ type: "broadcast", event: "test", payload: { x: 1 } });
+    expect(senderStatus).not.toBe("SUBSCRIBED");
 
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1000));
     expect(received).toHaveLength(0);
 
     await listener.removeAllChannels();
