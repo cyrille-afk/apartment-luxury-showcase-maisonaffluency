@@ -36,12 +36,23 @@ const RANGES = [
   { id: "all", label: "All time", days: 3650 },
 ] as const;
 
+type Drill =
+  | { kind: "step"; step_id: string }
+  | { kind: "substep"; step_id: string; sub_step_id: string; label: string }
+  | { kind: "type"; event_type: EventType }
+  | { kind: "window"; from: number; label: string }
+  | null;
+
+interface ProfileLite { id: string; email: string | null; first_name: string | null; last_name: string | null; company: string | null; }
+
 const TradeAdminOnboardingFunnel = () => {
   const { isAdmin, loading: authLoading } = useAuth();
   const [events, setEvents] = useState<TourEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<(typeof RANGES)[number]["id"]>("30");
   const [device, setDevice] = useState<DeviceFilter>("all");
+  const [drill, setDrill] = useState<Drill>(null);
+  const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
 
   useEffect(() => {
     if (!isAdmin) return;
