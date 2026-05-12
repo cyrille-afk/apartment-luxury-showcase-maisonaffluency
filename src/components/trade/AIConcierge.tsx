@@ -126,6 +126,24 @@ export function AIConcierge() {
   // hasn't manually dragged or expanded the panel yet.
   const modalMode = welcomePending && !pos;
 
+  // Brief exit-animation gate: when the welcome modal is dismissed we keep
+  // the backdrop + panel mounted for ~280ms so they can fade/scale out
+  // smoothly before unmounting.
+  const [welcomeClosing, setWelcomeClosing] = useState(false);
+  const closeWelcomeModal = useCallback(() => {
+    if (welcomeClosing) return;
+    setWelcomeClosing(true);
+    window.setTimeout(() => {
+      setOpen(false);
+      setWelcomeClosing(false);
+      try {
+        localStorage.setItem("ma:welcome-dismissed", "1");
+        localStorage.removeItem("ma:welcome-pending");
+      } catch {}
+      window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
+    }, 280);
+  }, [welcomeClosing]);
+
   const clampPos = useCallback((x: number, y: number) => {
     const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
     const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
