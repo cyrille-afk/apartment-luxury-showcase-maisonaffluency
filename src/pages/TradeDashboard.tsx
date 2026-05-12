@@ -15,22 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { loadOnboardingWelcome } from "@/lib/onboardingWelcome";
-import dashboard3dStudioImage from "@/assets/dashboard-3d-studio.jpg";
-import dashboard3dStyleHamptons from "@/assets/dashboard-3d-style-hamptons.jpg";
-import dashboard3dStyleJade from "@/assets/dashboard-3d-style-jade.jpg";
-import dashboard3dStyleNeutrals from "@/assets/dashboard-3d-style-neutrals.jpg";
-
-/**
- * 3D Studio tile preview styles. Selection persists per-user in localStorage so
- * the brand-aligned hero on the dashboard tile reflects their preferred mood.
- */
-const STUDIO_STYLES = [
-  { id: "hamptons", label: "Hamptons", image: dashboard3dStyleHamptons },
-  { id: "jade", label: "Jade", image: dashboard3dStyleJade },
-  { id: "neutrals", label: "Neutrals", image: dashboard3dStyleNeutrals },
-] as const;
-type StudioStyleId = typeof STUDIO_STYLES[number]["id"];
-const STUDIO_STYLE_KEY = "trade:dashboard-3d-studio-style";
+import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
   brand_name: string;
@@ -97,17 +82,6 @@ const TradeDashboard = () => {
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
   const [conciergeName, setConciergeName] = useState<string>(() => loadName() || DEFAULT_NAME);
-  const [studioStyle, setStudioStyle] = useState<StudioStyleId>(() => {
-    if (typeof window === "undefined") return "neutrals";
-    const stored = window.localStorage.getItem(STUDIO_STYLE_KEY) as StudioStyleId | null;
-    return STUDIO_STYLES.some((s) => s.id === stored) ? (stored as StudioStyleId) : "neutrals";
-  });
-  const studioStyleImage =
-    STUDIO_STYLES.find((s) => s.id === studioStyle)?.image || dashboard3dStudioImage;
-  const handleStudioStyleSelect = (id: StudioStyleId) => {
-    setStudioStyle(id);
-    if (typeof window !== "undefined") window.localStorage.setItem(STUDIO_STYLE_KEY, id);
-  };
 
   // Keep the dashboard pill in sync if the user renames the concierge from the chat.
   useEffect(() => {
@@ -268,10 +242,8 @@ const TradeDashboard = () => {
   const getCardImage = (card: typeof DASH_CARDS[number]) => {
     const override = heroOverrides[card.key];
     if (override) return override.image_url;
-    // 3D Studio: use the user's selected style preview for visual consistency
-    // with the editorial brand. The latest render is surfaced inside the 3D
-    // Studio page itself, not as the dashboard tile hero.
-    if (card.key === "dash-3d-studio") return studioStyleImage;
+    // 3D Studio: editorial brand fallback. Latest render surfaced inside the page.
+    if (card.key === "dash-3d-studio") return dashboard3dStudioImage;
     if (card.fallbackImage) return card.fallbackImage;
     if (card.fallbackId) return thumb(card.fallbackId);
     return "";
@@ -366,45 +338,6 @@ const TradeDashboard = () => {
                 <span className="absolute top-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm font-body text-[10px] text-foreground border border-border">
                   {studioStats.count} render{studioStats.count !== 1 ? "s" : ""}
                 </span>
-              )}
-              {card.key === "dash-3d-studio" && (
-                <div
-                  className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5 z-10"
-                  role="radiogroup"
-                  aria-label="3D Studio preview style"
-                  onClick={(e) => {
-                    // Prevent the surrounding <Link> from navigating when the
-                    // user picks a style swatch.
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  {STUDIO_STYLES.map((s) => {
-                    const active = s.id === studioStyle;
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        aria-label={`${s.label} preview`}
-                        title={`${s.label} preview`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleStudioStyleSelect(s.id);
-                        }}
-                        className={`px-2 py-1 rounded-full font-body text-[10px] tracking-wide backdrop-blur-sm border transition-colors ${
-                          active
-                            ? "bg-background text-foreground border-background shadow-sm"
-                            : "bg-background/40 text-background border-background/30 hover:bg-background/60"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    );
-                  })}
-                </div>
               )}
             </div>
             <div className={`p-3 md:p-4 ${card.key === "dash-3d-studio" ? "bg-foreground" : ""}`}>
