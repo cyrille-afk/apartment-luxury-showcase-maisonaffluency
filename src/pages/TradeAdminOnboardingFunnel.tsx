@@ -476,12 +476,30 @@ const TradeAdminOnboardingFunnel = () => {
   );
 };
 
-const Kpi = ({ label, value, accent }: { label: string; value: number; accent?: boolean }) => (
-  <div className={`rounded-lg border p-4 ${accent ? "border-accent/50 bg-accent/5" : "border-border bg-card"}`}>
-    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-    <div className="font-display text-2xl text-foreground">{value.toLocaleString()}</div>
-  </div>
-);
+const Kpi = ({ label, value, accent, onClick }: { label: string; value: number; accent?: boolean; onClick?: () => void }) => {
+  const cls = `rounded-lg border p-4 text-left w-full transition-colors ${accent ? "border-accent/50 bg-accent/5" : "border-border bg-card"} ${onClick ? "hover:border-foreground/40 cursor-pointer" : ""}`;
+  const inner = (
+    <>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="font-display text-2xl text-foreground">{value.toLocaleString()}</div>
+    </>
+  );
+  return onClick ? <button onClick={onClick} className={cls}>{inner}</button> : <div className={cls}>{inner}</div>;
+};
+
+const fmt = (iso: string) => {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch { return iso; }
+};
+
+const drillTitle = (d: NonNullable<Drill>) => {
+  if (d.kind === "type") return d.event_type.replace("tour_", "");
+  if (d.kind === "step") return `Step "${d.step_id}"`;
+  if (d.kind === "substep") return d.label;
+  return d.label;
+};
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="mb-8">
