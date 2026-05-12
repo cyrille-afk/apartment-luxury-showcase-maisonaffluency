@@ -46,6 +46,16 @@ const DEFAULT_STEPS: Step[] = [
 
 const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
+const SUBSTEPS_KEY = (stepId: string) => `trade_quick_tour_substeps:${stepId}`;
+
+const loadCompletedSubsteps = (stepId: string): string[] => {
+  try {
+    const raw = localStorage.getItem(SUBSTEPS_KEY(stepId));
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
+  } catch { return []; }
+};
 
 export function QuickTour() {
   const navigate = useNavigate();
@@ -54,6 +64,7 @@ export function QuickTour() {
   const [stepIdx, setStepIdx] = useState(0);
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
   const [lang, setLang] = useState(() => loadLang());
+  const [completedSubsteps, setCompletedSubsteps] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const onLang = () => setLang(loadLang());
