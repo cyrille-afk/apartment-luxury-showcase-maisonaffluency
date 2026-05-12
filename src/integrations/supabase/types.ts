@@ -4553,6 +4553,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_client_trade_approved: {
+        Args: { _client_id: string }
+        Returns: {
+          application_status: string
+          approved: boolean
+          contact_email: string
+        }[]
+      }
       is_studio_owner: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
