@@ -251,6 +251,18 @@ export function AIConcierge() {
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
   }, []);
 
+  // Auto-close Felix while the Quick Tour is running so its panel never
+  // overlaps the page being highlighted (especially the Tools step).
+  useEffect(() => {
+    const close = () => { setOpen(false); setMinimized(false); };
+    window.addEventListener("trade-tour:start", close);
+    window.addEventListener("concierge:close", close);
+    return () => {
+      window.removeEventListener("trade-tour:start", close);
+      window.removeEventListener("concierge:close", close);
+    };
+  }, []);
+
   // Sync concierge name with the user's profile so it follows them across devices.
   useEffect(() => {
     let cancelled = false;
