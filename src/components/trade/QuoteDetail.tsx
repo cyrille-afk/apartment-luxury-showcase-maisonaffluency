@@ -1669,11 +1669,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
             <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
               <p className="font-medium text-foreground">AFFLUENCY ETC PTE LTD</p>
-              <p>1 Grange Garden, #16-05, Singapore, 249631</p>
-              <p className="mt-1">IBAN: LT73 3250 0692 1856 8740</p>
-              <p>BIC: REVOLT21</p>
-              <p>Bank: Revolut Bank UAB</p>
+              <p>1 Grange Garden, #16-05, Singapore, 249631, Singapore</p>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+              <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
+                <p className="font-medium text-foreground uppercase tracking-wider text-[9px] md:text-[10px]">Main · EUR (SEPA)</p>
+                <p>IBAN: LT73 3250 0692 1856 8740</p>
+                <p>BIC: REVOLT21</p>
+                <p>Bank: Revolut Bank UAB</p>
+                <p className="text-muted-foreground">Konstitucijos ave. 21B, 08130, Vilnius, Lithuania</p>
+              </div>
+              <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
+                <p className="font-medium text-foreground uppercase tracking-wider text-[9px] md:text-[10px]">Global · SWIFT (outside EEA)</p>
+                <p>Account: 885111609218375</p>
+                <p>SWIFT/BIC: REVOSGS2</p>
+                <p>Intermediary BIC: BARCDEFF</p>
+                <p>Bank: Revolut Technologies Singapore Pte. Ltd</p>
+                <p className="text-muted-foreground">6 Battery Road, Floor 6-01, 049909, Singapore</p>
+              </div>
+            </div>
+            <p className="font-body text-[9px] md:text-[10px] text-muted-foreground italic mt-2">
+              Please reference the quote number on your transfer. EUR transfers preferred to avoid FX conversion.
+            </p>
           </div>
 
           <div className="border-t border-border pt-4">
