@@ -339,45 +339,6 @@ const TradeDashboard = () => {
                   {studioStats.count} render{studioStats.count !== 1 ? "s" : ""}
                 </span>
               )}
-              {card.key === "dash-3d-studio" && (
-                <div
-                  className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5 z-10"
-                  role="radiogroup"
-                  aria-label="3D Studio preview style"
-                  onClick={(e) => {
-                    // Prevent the surrounding <Link> from navigating when the
-                    // user picks a style swatch.
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  {STUDIO_STYLES.map((s) => {
-                    const active = s.id === studioStyle;
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        aria-label={`${s.label} preview`}
-                        title={`${s.label} preview`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleStudioStyleSelect(s.id);
-                        }}
-                        className={`px-2 py-1 rounded-full font-body text-[10px] tracking-wide backdrop-blur-sm border transition-colors ${
-                          active
-                            ? "bg-background text-foreground border-background shadow-sm"
-                            : "bg-background/40 text-background border-background/30 hover:bg-background/60"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
             <div className={`p-3 md:p-4 ${card.key === "dash-3d-studio" ? "bg-foreground" : ""}`}>
               <h3 className={`font-display text-sm md:text-base mb-0.5 md:mb-1 ${card.key === "dash-3d-studio" ? "text-background" : "text-foreground"}`}>{card.title}</h3>
