@@ -81,6 +81,7 @@ export function QuickTour() {
         body: r.body,
         icon: ICONS[r.icon] || MapPin,
         ctaLabel: r.cta_label,
+        links: STEP_LINKS[r.step_key],
       })));
     })();
     return () => { cancelled = true; };
