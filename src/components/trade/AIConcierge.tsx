@@ -592,7 +592,12 @@ export function AIConcierge() {
             onPointerUp={onDragEnd}
             onPointerCancel={onDragEnd}
             onDoubleClick={() => setMinimized((m) => !m)}
-            className="flex flex-col gap-1.5 px-4 py-3 border-b border-border cursor-grab active:cursor-grabbing select-none touch-none"
+            className={cn(
+              "flex flex-col gap-1.5 px-4 py-3 border-b cursor-grab active:cursor-grabbing select-none touch-none",
+              modalMode
+                ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
+                : "border-border"
+            )}
             title="Drag to move · double-click to collapse"
           >
             <div className="flex items-center justify-between gap-2">
