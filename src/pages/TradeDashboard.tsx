@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { loadOnboardingWelcome } from "@/lib/onboardingWelcome";
+import dashboard3dStudioImage from "@/assets/dashboard-3d-studio.jpg";
 
 interface BrandFolder {
   brand_name: string;
@@ -40,7 +41,7 @@ const DASH_CARDS = [
   { key: "dash-library", title: "Resources", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_400,c_fill,g_auto,q_auto,f_auto/v1774172614/2.-Digital-Resources_qbsqxs.jpg", defaultGravity: "auto" },
   { key: "dash-designers", title: "Designers & Ateliers Library", description: "Discover 32 ateliers and 274 designers", icon: Users, to: "/trade/designers", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_400,c_fill,g_auto,q_auto,f_auto/v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93.jpg", defaultGravity: "auto" },
   { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
-  { key: "dash-3d-studio", title: "3D Studio", description: "Submit drawings for 3D renders & browse gallery", icon: Box, to: "/trade/axonometric-requests", fallbackId: null as string | null, fallbackImage: null as string | null, defaultGravity: "auto" },
+  { key: "dash-3d-studio", title: "3D Studio", description: "Submit drawings for 3D renders & browse gallery", icon: Box, to: "/trade/axonometric-requests", fallbackId: null as string | null, fallbackImage: dashboard3dStudioImage as string | null, defaultGravity: "auto" },
 ];
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
@@ -241,8 +242,8 @@ const TradeDashboard = () => {
   const getCardImage = (card: typeof DASH_CARDS[number]) => {
     const override = heroOverrides[card.key];
     if (override) return override.image_url;
-    // 3D Studio: use latest gallery render as dynamic thumbnail
-    if (card.key === "dash-3d-studio" && studioStats.latestImage) return studioStats.latestImage;
+    // 3D Studio: prefer the editorial brand fallback for visual consistency.
+    // The latest gallery render is surfaced inside the 3D Studio page itself.
     if (card.fallbackImage) return card.fallbackImage;
     if (card.fallbackId) return thumb(card.fallbackId);
     return "";
