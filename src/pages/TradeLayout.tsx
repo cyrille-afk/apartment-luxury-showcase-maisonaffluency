@@ -19,7 +19,6 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
-import { TradeQuickSearch } from "@/components/trade/TradeQuickSearch";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -223,7 +222,6 @@ const TradeLayout = () => {
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4">
-              <TradeQuickSearch />
               <StudioSwitcher />
               <GlobalProjectSwitcher />
               <div className="hidden sm:block">
