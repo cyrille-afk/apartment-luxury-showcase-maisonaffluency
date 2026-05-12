@@ -2075,7 +2075,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <span className="uppercase tracking-[0.12em] text-muted-foreground">From</span>
               <span className="text-foreground">Maison Affluency &lt;notify@maisonaffluency.com&gt;</span>
               <span className="uppercase tracking-[0.12em] text-muted-foreground">To</span>
-              <span className="text-foreground">{clientName ? `${clientName} <${clientApproval.email}>` : clientApproval.email}</span>
+              <div>
+                <span className="text-foreground">{clientName ? `${clientName} <${clientApproval.email ?? "—"}>` : (clientApproval.email ?? "—")}</span>
+                {(() => {
+                  const email = (clientApproval.email ?? "").trim();
+                  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+                  if (!email) return <p className="mt-1 text-destructive text-[11px]">No recipient email on file for this client.</p>;
+                  if (!ok) return <p className="mt-1 text-destructive text-[11px]">Recipient email is not a valid address.</p>;
+                  return null;
+                })()}
+              </div>
               <span className="uppercase tracking-[0.12em] text-muted-foreground">Subject</span>
               <input
                 value={emailSubject}
