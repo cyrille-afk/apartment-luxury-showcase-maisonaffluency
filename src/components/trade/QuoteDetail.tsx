@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -183,6 +183,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [clientName, setClientName] = useState("");
   const [clientId, setClientId] = useState<string | null>(null);
   const [clientApproval, setClientApproval] = useState<{ approved: boolean; email: string | null; status: string | null }>({ approved: false, email: null, status: null });
+  const [emailLog, setEmailLog] = useState<Array<{ id: string; recipient_email: string; sent_by_email: string | null; created_at: string; note: string | null }>>([]);
+  const [emailLogOpen, setEmailLogOpen] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
@@ -438,6 +441,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       });
     });
   }, [clientId]);
+
+  // Load email audit log for this quote
+  const loadEmailLog = useCallback(async () => {
+    const { data } = await (supabase as any)
+      .from("quote_email_log")
+      .select("id, recipient_email, sent_by_email, created_at, note")
+      .eq("quote_id", quoteId)
+      .order("created_at", { ascending: false });
+    setEmailLog(data ?? []);
+  }, [quoteId]);
+
+  useEffect(() => { loadEmailLog(); }, [loadEmailLog]);
 
   // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
   useEffect(() => {
@@ -848,14 +863,35 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               : `Email this quote to ${clientApproval.email}`;
             return (
               <button
-                onClick={() => {
-                  if (disabled) return;
-                  toast({
-                    title: "Email to client",
-                    description: `Would send QU-${quoteId.slice(0, 6).toUpperCase()} to ${clientApproval.email}. Sending pipeline coming soon.`,
-                  });
+                onClick={async () => {
+                  if (disabled || sendingEmail) return;
+                  setSendingEmail(true);
+                  try {
+                    const { data: u } = await supabase.auth.getUser();
+                    const uid = u?.user?.id;
+                    const uemail = u?.user?.email ?? null;
+                    if (!uid) throw new Error("Not authenticated");
+                    const { error } = await (supabase as any).from("quote_email_log").insert({
+                      quote_id: quoteId,
+                      sent_by: uid,
+                      sent_by_email: uemail,
+                      recipient_email: clientApproval.email,
+                      client_id: clientId,
+                      note: "Email to client (sending pipeline pending)",
+                    });
+                    if (error) throw error;
+                    await loadEmailLog();
+                    toast({
+                      title: "Logged email send",
+                      description: `Recorded send of QU-${quoteId.slice(0, 6).toUpperCase()} to ${clientApproval.email}.`,
+                    });
+                  } catch (err: any) {
+                    toast({ title: "Could not log email", description: err?.message ?? "Unknown error", variant: "destructive" });
+                  } finally {
+                    setSendingEmail(false);
+                  }
                 }}
-                disabled={disabled}
+                disabled={disabled || sendingEmail}
                 className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 title={title}
               >
@@ -865,8 +901,35 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </button>
             );
           })()}
+          {emailLog.length > 0 && (
+            <button
+              onClick={() => setEmailLogOpen((v) => !v)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-muted-foreground hover:bg-muted transition-colors"
+              title="View email send history"
+            >
+              <HistoryIcon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Email log ({emailLog.length})</span>
+              <span className="sm:hidden">{emailLog.length}</span>
+            </button>
+          )}
         </div>
       </div>
+
+      {emailLogOpen && emailLog.length > 0 && (
+        <div className="mb-4 md:mb-6 rounded-md border border-border bg-muted/30 px-4 py-3 print:hidden">
+          <p className="font-body text-xs uppercase tracking-[0.12em] text-foreground mb-2">Email send history</p>
+          <ul className="space-y-1.5">
+            {emailLog.map((row) => (
+              <li key={row.id} className="font-body text-xs text-muted-foreground flex flex-wrap gap-x-2">
+                <span className="text-foreground">{new Date(row.created_at).toLocaleString()}</span>
+                <span>→ {row.recipient_email}</span>
+                <span>· by {row.sent_by_email ?? "unknown admin"}</span>
+                {row.note && <span className="italic">— {row.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Read-only mode banner */}
       {isReadOnly && (

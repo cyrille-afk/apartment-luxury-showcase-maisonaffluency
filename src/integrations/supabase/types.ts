@@ -2462,6 +2462,47 @@ export type Database = {
           },
         ]
       }
+      quote_email_log: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          note: string | null
+          quote_id: string
+          recipient_email: string
+          sent_by: string
+          sent_by_email: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          quote_id: string
+          recipient_email: string
+          sent_by: string
+          sent_by_email?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          quote_id?: string
+          recipient_email?: string
+          sent_by?: string
+          sent_by_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_email_log_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reference_styles: {
         Row: {
           created_at: string
