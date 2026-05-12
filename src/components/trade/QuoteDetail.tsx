@@ -442,6 +442,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     });
   }, [clientId]);
 
+  // Load email audit log for this quote
+  const loadEmailLog = useCallback(async () => {
+    const { data } = await (supabase as any)
+      .from("quote_email_log")
+      .select("id, recipient_email, sent_by_email, created_at, note")
+      .eq("quote_id", quoteId)
+      .order("created_at", { ascending: false });
+    setEmailLog(data ?? []);
+  }, [quoteId]);
+
+  useEffect(() => { loadEmailLog(); }, [loadEmailLog]);
+
   // Auto-default GST on/off when currency changes, unless the user has manually toggled it.
   useEffect(() => {
     if (!gstUserTouched) setGstEnabled(currency === "SGD");
