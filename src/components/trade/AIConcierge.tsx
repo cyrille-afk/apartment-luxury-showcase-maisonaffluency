@@ -1022,6 +1022,7 @@ export function AIConcierge() {
           </div>
           </>)}
         </div>
+        </>
       )}
     </>
   );
