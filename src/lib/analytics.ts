@@ -290,18 +290,48 @@ export const trackMagazine = {
  * including sub-step pill clicks (e.g. Procurement & delivery → Order Timeline)
  * so we can see which procurement tools new trade users adopt first.
  */
+/** Persist a tour event to Supabase for the admin funnel dashboard. */
+const persistTourEvent = (row: Record<string, unknown>) => {
+  import("@/integrations/supabase/client")
+    .then(async ({ supabase }) => {
+      let user_id: string | null = null;
+      try {
+        const { data } = await supabase.auth.getSession();
+        user_id = data.session?.user?.id ?? null;
+      } catch { /* ignore */ }
+      void supabase.from("tour_events").insert({ ...row, user_id } as any);
+    })
+    .catch(() => {});
+};
+
 export const trackTour = {
-  stepView: (stepId: string, stepIndex: number, totalSteps: number) =>
+  stepView: (stepId: string, stepIndex: number, totalSteps: number) => {
+    const ctx = getDeviceContext();
     trackEvent("tour_step_view", {
       event_category: "Onboarding",
       event_label: stepId,
       step_id: stepId,
       step_index: stepIndex,
       total_steps: totalSteps,
-      ...getDeviceContext(),
-    }),
+      ...ctx,
+    });
+    persistTourEvent({
+      event_type: "tour_step_view",
+      step_id: stepId,
+      step_index: stepIndex,
+      total_steps: totalSteps,
+      device_type: ctx.device_type,
+      platform: (ctx as any).platform,
+      viewport: ctx.viewport,
+      pwa_standalone: ctx.pwa_standalone,
+      language: ctx.language,
+      page_path: (ctx as any).page_path,
+      referrer_host: ctx.referrer_host,
+    });
+  },
 
-  subStepClick: (parentStepId: string, subStepId: string, label: string, path: string) =>
+  subStepClick: (parentStepId: string, subStepId: string, label: string, path: string) => {
+    const ctx = getDeviceContext();
     trackEvent("tour_substep_click", {
       event_category: "Onboarding",
       event_label: `${parentStepId}/${subStepId}`,
@@ -309,24 +339,68 @@ export const trackTour = {
       sub_step_id: subStepId,
       sub_step_label: label,
       target_path: path,
-      ...getDeviceContext(),
-    }),
+      ...ctx,
+    });
+    persistTourEvent({
+      event_type: "tour_substep_click",
+      step_id: parentStepId,
+      sub_step_id: subStepId,
+      sub_step_label: label,
+      target_path: path,
+      device_type: ctx.device_type,
+      platform: (ctx as any).platform,
+      viewport: ctx.viewport,
+      pwa_standalone: ctx.pwa_standalone,
+      language: ctx.language,
+      page_path: (ctx as any).page_path,
+      referrer_host: ctx.referrer_host,
+    });
+  },
 
-  complete: (lastStepId: string, totalSteps: number) =>
+  complete: (lastStepId: string, totalSteps: number) => {
+    const ctx = getDeviceContext();
     trackEvent("tour_complete", {
       event_category: "Onboarding",
       event_label: lastStepId,
       total_steps: totalSteps,
-      ...getDeviceContext(),
-    }),
+      ...ctx,
+    });
+    persistTourEvent({
+      event_type: "tour_complete",
+      step_id: lastStepId,
+      total_steps: totalSteps,
+      device_type: ctx.device_type,
+      platform: (ctx as any).platform,
+      viewport: ctx.viewport,
+      pwa_standalone: ctx.pwa_standalone,
+      language: ctx.language,
+      page_path: (ctx as any).page_path,
+      referrer_host: ctx.referrer_host,
+    });
+  },
 
-  skip: (atStepId: string, atIndex: number, totalSteps: number) =>
+  skip: (atStepId: string, atIndex: number, totalSteps: number) => {
+    const ctx = getDeviceContext();
     trackEvent("tour_skip", {
       event_category: "Onboarding",
       event_label: atStepId,
       step_id: atStepId,
       step_index: atIndex,
       total_steps: totalSteps,
-      ...getDeviceContext(),
-    }),
+      ...ctx,
+    });
+    persistTourEvent({
+      event_type: "tour_skip",
+      step_id: atStepId,
+      step_index: atIndex,
+      total_steps: totalSteps,
+      device_type: ctx.device_type,
+      platform: (ctx as any).platform,
+      viewport: ctx.viewport,
+      pwa_standalone: ctx.pwa_standalone,
+      language: ctx.language,
+      page_path: (ctx as any).page_path,
+      referrer_host: ctx.referrer_host,
+    });
+  },
 };

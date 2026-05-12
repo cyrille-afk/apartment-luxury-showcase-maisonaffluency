@@ -3433,6 +3433,66 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_events: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          event_type: string
+          id: string
+          language: string | null
+          page_path: string | null
+          platform: string | null
+          pwa_standalone: boolean | null
+          referrer_host: string | null
+          step_id: string | null
+          step_index: number | null
+          sub_step_id: string | null
+          sub_step_label: string | null
+          target_path: string | null
+          total_steps: number | null
+          user_id: string | null
+          viewport: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          event_type: string
+          id?: string
+          language?: string | null
+          page_path?: string | null
+          platform?: string | null
+          pwa_standalone?: boolean | null
+          referrer_host?: string | null
+          step_id?: string | null
+          step_index?: number | null
+          sub_step_id?: string | null
+          sub_step_label?: string | null
+          target_path?: string | null
+          total_steps?: number | null
+          user_id?: string | null
+          viewport?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          event_type?: string
+          id?: string
+          language?: string | null
+          page_path?: string | null
+          platform?: string | null
+          pwa_standalone?: boolean | null
+          referrer_host?: string | null
+          step_id?: string | null
+          step_index?: number | null
+          sub_step_id?: string | null
+          sub_step_label?: string | null
+          target_path?: string | null
+          total_steps?: number | null
+          user_id?: string | null
+          viewport?: string | null
+        }
+        Relationships: []
+      }
       trade_applications: {
         Row: {
           certification_details: string | null
