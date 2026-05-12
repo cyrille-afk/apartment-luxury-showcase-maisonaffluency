@@ -210,6 +210,20 @@ export function QuickTour() {
                 <div key={`b-${stepIdx}`} className="mt-3 bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5 animate-fade-in">
                   <p className="font-body text-xs text-foreground leading-relaxed">{localizedStep.body}</p>
                 </div>
+                {step.links && step.links.length > 0 && (
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {step.links.map((l) => (
+                      <button
+                        key={l.path}
+                        onClick={() => navigate(l.path)}
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground transition-colors"
+                      >
+                        {l.label}
+                        <ArrowRight className="h-2.5 w-2.5" />
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (
