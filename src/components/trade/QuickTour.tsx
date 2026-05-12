@@ -7,7 +7,6 @@ import { loadLang } from "@/components/trade/conciergeGreeting";
 import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
 import { trackTour } from "@/lib/analytics";
 
-type StepLink = { label: string; path: string };
 type Step = {
   id: string;
   path: string;
@@ -15,7 +14,6 @@ type Step = {
   body: string;
   icon: React.ComponentType<{ className?: string }>;
   ctaLabel: string;
-  links?: StepLink[];
 };
 
 const TOUR_ROUTE_OVERRIDES: Record<string, string> = {
@@ -28,47 +26,16 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   MapPin, Users, FileText, Sparkles, Image: ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone,
 };
 
-// Quick-jump links exposed inside specific tour steps so users can pivot
-// between sub-tools without leaving the tour card.
-const STEP_LINKS: Record<string, StepLink[]> = {
-  tools: [
-    { label: "Mood Board", path: "/trade/mood-boards" },
-    { label: "Tearsheet Builder", path: "/trade/tearsheets" },
-    { label: "FF&E Schedule", path: "/trade/ffe-schedule" },
-    { label: "Product Comparator", path: "/trade/comparator" },
-    { label: "Floor Plan → FF&E", path: "/trade/floor-plan-ffe" },
-    { label: "All Tools", path: "/trade/tools" },
-  ],
-  procurement: [
-    { label: "Quotes", path: "/trade/quotes" },
-    { label: "Order Timeline", path: "/trade/order-timeline" },
-    { label: "Shipping Tracker", path: "/trade/shipping-tracker" },
-    { label: "Lead Time Calendar", path: "/trade/lead-time-calendar" },
-    { label: "Budget Tracker", path: "/trade/budget" },
-    { label: "Reorder", path: "/trade/reorder" },
-  ],
-};
-
 const DEFAULT_STEPS: Step[] = [
   { id: "showroom",  path: "/trade/showroom",  title: "1. Browse the Showroom",            body: "Start here to explore curated rooms in situ. Click any hotspot on a photo to open the piece, see specs, trade pricing and add it to a tearsheet.", icon: MapPin,   ctaLabel: "Next: Designers" },
   { id: "designers", path: "/trade", title: "2. Discover Designers & Ateliers",  body: "From your dashboard, open the Designers & Ateliers Library tile (highlighted) to filter 274 designers across 32 ateliers by category, country or material — and shop their pieces.", icon: Users,    ctaLabel: "Next: Brief setup" },
   { id: "brief",       path: "/trade/quotes",         title: "4. Set up a brief",                body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.", icon: FileText, ctaLabel: "Next: Tools" },
-  { id: "tools",       path: "/trade/tools",          title: "5. Your specification toolkit",    body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Next: Procurement", links: STEP_LINKS.tools },
-  { id: "procurement", path: "/trade/tools", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour", links: STEP_LINKS.procurement },
+  { id: "tools",       path: "/trade/tools",          title: "5. Your specification toolkit",    body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Next: Procurement" },
+  { id: "procurement", path: "/trade/tools", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour" },
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
-const SUBSTEPS_KEY = (stepId: string) => `trade_quick_tour_substeps:${stepId}`;
-
-const loadCompletedSubsteps = (stepId: string): string[] => {
-  try {
-    const raw = localStorage.getItem(SUBSTEPS_KEY(stepId));
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
-  } catch { return []; }
-};
 
 export function QuickTour() {
   const navigate = useNavigate();
@@ -77,7 +44,6 @@ export function QuickTour() {
   const [stepIdx, setStepIdx] = useState(0);
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
   const [lang, setLang] = useState(() => loadLang());
-  const [completedSubsteps, setCompletedSubsteps] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const onLang = () => setLang(loadLang());
@@ -106,7 +72,6 @@ export function QuickTour() {
         body: r.body,
         icon: ICONS[r.icon] || MapPin,
         ctaLabel: r.cta_label,
-        links: STEP_LINKS[r.step_key],
       })));
     })();
     return () => { cancelled = true; };
@@ -136,25 +101,6 @@ export function QuickTour() {
       setActive(true);
     } catch {}
   }, [STEPS.length]);
-
-  // Hydrate completed substeps for any step that has links once STEPS load.
-  useEffect(() => {
-    const next: Record<string, string[]> = {};
-    for (const s of STEPS) {
-      if (s.links && s.links.length > 0) next[s.id] = loadCompletedSubsteps(s.id);
-    }
-    setCompletedSubsteps(next);
-  }, [STEPS]);
-
-  const markSubstepDone = useCallback((stepId: string, path: string) => {
-    setCompletedSubsteps((prev) => {
-      const cur = prev[stepId] ?? [];
-      if (cur.includes(path)) return prev;
-      const updated = [...cur, path];
-      try { localStorage.setItem(SUBSTEPS_KEY(stepId), JSON.stringify(updated)); } catch {}
-      return { ...prev, [stepId]: updated };
-    });
-  }, []);
 
   // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
   const viewedStepsRef = useRef<Set<string>>(new Set());
@@ -217,11 +163,7 @@ export function QuickTour() {
   // Only show the overlay when the user is actually on the matching route.
   // Otherwise the overlay would obscure navigation between steps.
   const onStepRoute = location.pathname === step.path || location.pathname.startsWith(step.path + "/");
-  const doneSubsteps = completedSubsteps[step.id] ?? [];
   const isLastStep = stepIdx === STEPS.length - 1;
-  const requiresSubsteps = false;
-  const allSubstepsDone = true;
-  const advanceDisabled = false;
 
   return (
     <>
@@ -275,34 +217,6 @@ export function QuickTour() {
                 <div key={`b-${stepIdx}`} className="mt-3 bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5 animate-fade-in">
                   <p className="font-body text-xs text-foreground leading-relaxed">{localizedStep.body}</p>
                 </div>
-                {step.links && step.links.length > 0 && (
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {step.links.map((l) => {
-                      const done = doneSubsteps.includes(l.path);
-                      return (
-                        <button
-                          key={l.path}
-                          onClick={() => {
-                            const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
-                            trackTour.subStepClick(step.id, subId, l.label, l.path);
-                            markSubstepDone(step.id, l.path);
-                            navigate(l.path);
-                          }}
-                          aria-label={`${l.label}${done ? " (completed)" : ""}`}
-                          className={cn(
-                            "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] transition-colors",
-                            done
-                              ? "border-accent/60 bg-accent/15 text-foreground"
-                              : "border-border bg-background hover:bg-muted text-foreground",
-                          )}
-                        >
-                          {l.label}
-                          {done ? <Check className="h-2.5 w-2.5 text-accent" /> : <ArrowRight className="h-2.5 w-2.5" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     {STEPS.map((_, i) => (
@@ -332,18 +246,11 @@ export function QuickTour() {
                     </button>
                     <button
                       onClick={next}
-                      disabled={advanceDisabled}
-                      title={advanceDisabled ? `Visit all ${step.links!.length} tools to continue` : undefined}
                       className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       {isLastStep ? chrome.finish : chrome.next}
                       {isLastStep ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                     </button>
-                    {requiresSubsteps && !allSubstepsDone && (
-                      <span className="font-body text-[10px] text-muted-foreground ml-1 whitespace-nowrap">
-                        {doneSubsteps.length}/{step.links!.length}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
