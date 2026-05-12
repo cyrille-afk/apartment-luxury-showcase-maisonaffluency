@@ -19,6 +19,7 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
+import { TradeQuickSearch } from "@/components/trade/TradeQuickSearch";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
