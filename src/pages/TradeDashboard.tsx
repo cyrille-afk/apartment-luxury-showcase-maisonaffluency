@@ -82,17 +82,6 @@ const TradeDashboard = () => {
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
   const [conciergeName, setConciergeName] = useState<string>(() => loadName() || DEFAULT_NAME);
-  const [studioStyle, setStudioStyle] = useState<StudioStyleId>(() => {
-    if (typeof window === "undefined") return "neutrals";
-    const stored = window.localStorage.getItem(STUDIO_STYLE_KEY) as StudioStyleId | null;
-    return STUDIO_STYLES.some((s) => s.id === stored) ? (stored as StudioStyleId) : "neutrals";
-  });
-  const studioStyleImage =
-    STUDIO_STYLES.find((s) => s.id === studioStyle)?.image || dashboard3dStudioImage;
-  const handleStudioStyleSelect = (id: StudioStyleId) => {
-    setStudioStyle(id);
-    if (typeof window !== "undefined") window.localStorage.setItem(STUDIO_STYLE_KEY, id);
-  };
 
   // Keep the dashboard pill in sync if the user renames the concierge from the chat.
   useEffect(() => {
