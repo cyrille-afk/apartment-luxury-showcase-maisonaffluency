@@ -12,9 +12,16 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const expected = Deno.env.get("CRON_SECRET");
+  // Auth: accept either CRON_SECRET header (manual triggers) or
+  // a Bearer token equal to the SERVICE_ROLE_KEY (pg_cron calls).
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const auth = req.headers.get("Authorization") ?? "";
   const provided = req.headers.get("x-cron-secret");
-  if (!expected || provided !== expected) {
+  const ok =
+    (cronSecret && provided === cronSecret) ||
+    (serviceKey && auth === `Bearer ${serviceKey}`);
+  if (!ok) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
