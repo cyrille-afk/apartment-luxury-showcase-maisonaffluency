@@ -46,6 +46,16 @@ const DEFAULT_STEPS: Step[] = [
 
 const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
+const SUBSTEPS_KEY = (stepId: string) => `trade_quick_tour_substeps:${stepId}`;
+
+const loadCompletedSubsteps = (stepId: string): string[] => {
+  try {
+    const raw = localStorage.getItem(SUBSTEPS_KEY(stepId));
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
+  } catch { return []; }
+};
 
 export function QuickTour() {
   const navigate = useNavigate();
@@ -54,6 +64,7 @@ export function QuickTour() {
   const [stepIdx, setStepIdx] = useState(0);
   const [STEPS, setSteps] = useState<Step[]>(DEFAULT_STEPS);
   const [lang, setLang] = useState(() => loadLang());
+  const [completedSubsteps, setCompletedSubsteps] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const onLang = () => setLang(loadLang());
@@ -110,6 +121,25 @@ export function QuickTour() {
       setStepIdx(idx);
       setActive(true);
     } catch {}
+  }, []);
+
+  // Hydrate completed substeps for any step that has links once STEPS load.
+  useEffect(() => {
+    const next: Record<string, string[]> = {};
+    for (const s of STEPS) {
+      if (s.links && s.links.length > 0) next[s.id] = loadCompletedSubsteps(s.id);
+    }
+    setCompletedSubsteps(next);
+  }, [STEPS]);
+
+  const markSubstepDone = useCallback((stepId: string, path: string) => {
+    setCompletedSubsteps((prev) => {
+      const cur = prev[stepId] ?? [];
+      if (cur.includes(path)) return prev;
+      const updated = [...cur, path];
+      try { localStorage.setItem(SUBSTEPS_KEY(stepId), JSON.stringify(updated)); } catch {}
+      return { ...prev, [stepId]: updated };
+    });
   }, []);
 
   // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
@@ -173,6 +203,11 @@ export function QuickTour() {
   // Only show the overlay when the user is actually on the matching route.
   // Otherwise the overlay would obscure navigation between steps.
   const onStepRoute = location.pathname === step.path || location.pathname.startsWith(step.path + "/");
+  const doneSubsteps = completedSubsteps[step.id] ?? [];
+  const isLastStep = stepIdx === STEPS.length - 1;
+  const requiresSubsteps = (step.links?.length ?? 0) > 0;
+  const allSubstepsDone = !requiresSubsteps || step.links!.every((l) => doneSubsteps.includes(l.path));
+  const advanceDisabled = requiresSubsteps && !allSubstepsDone;
 
   return (
     <>
@@ -228,20 +263,30 @@ export function QuickTour() {
                 </div>
                 {step.links && step.links.length > 0 && (
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {step.links.map((l) => (
-                      <button
-                        key={l.path}
-                        onClick={() => {
-                          const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
-                          trackTour.subStepClick(step.id, subId, l.label, l.path);
-                          navigate(l.path);
-                        }}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground transition-colors"
-                      >
-                        {l.label}
-                        <ArrowRight className="h-2.5 w-2.5" />
-                      </button>
-                    ))}
+                    {step.links.map((l) => {
+                      const done = doneSubsteps.includes(l.path);
+                      return (
+                        <button
+                          key={l.path}
+                          onClick={() => {
+                            const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
+                            trackTour.subStepClick(step.id, subId, l.label, l.path);
+                            markSubstepDone(step.id, l.path);
+                            navigate(l.path);
+                          }}
+                          aria-label={`${l.label}${done ? " (completed)" : ""}`}
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] transition-colors",
+                            done
+                              ? "border-accent/60 bg-accent/15 text-foreground"
+                              : "border-border bg-background hover:bg-muted text-foreground",
+                          )}
+                        >
+                          {l.label}
+                          {done ? <Check className="h-2.5 w-2.5 text-accent" /> : <ArrowRight className="h-2.5 w-2.5" />}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
                 <div className="mt-3 flex items-center justify-between gap-2">
@@ -273,11 +318,18 @@ export function QuickTour() {
                     </button>
                     <button
                       onClick={next}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90"
+                      disabled={advanceDisabled}
+                      title={advanceDisabled ? `Visit all ${step.links!.length} tools to continue` : undefined}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      {stepIdx === STEPS.length - 1 ? chrome.finish : chrome.next}
-                      {stepIdx === STEPS.length - 1 ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
+                      {isLastStep ? chrome.finish : chrome.next}
+                      {isLastStep ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                     </button>
+                    {requiresSubsteps && !allSubstepsDone && (
+                      <span className="font-body text-[10px] text-muted-foreground ml-1 whitespace-nowrap">
+                        {doneSubsteps.length}/{step.links!.length}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
