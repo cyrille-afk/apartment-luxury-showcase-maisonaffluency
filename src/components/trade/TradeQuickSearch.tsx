@@ -9,6 +9,7 @@ type SectionItem = {
   label: string;
   description?: string;
   to: string;
+  anchor?: string;
   keywords: string;
   icon: React.ComponentType<{ className?: string }>;
 };
