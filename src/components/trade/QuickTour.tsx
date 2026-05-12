@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadLang } from "@/components/trade/conciergeGreeting";
 import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
 
+type StepLink = { label: string; path: string };
 type Step = {
   id: string;
   path: string;
@@ -13,6 +14,7 @@ type Step = {
   body: string;
   icon: React.ComponentType<{ className?: string }>;
   ctaLabel: string;
+  links?: StepLink[];
 };
 
 // Maps DB icon name → lucide component. Unknown names fall back to MapPin.
@@ -20,12 +22,25 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   MapPin, Users, FileText, Sparkles, Image: ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone,
 };
 
+// Quick-jump links exposed inside specific tour steps so users can pivot
+// between sub-tools without leaving the tour card.
+const STEP_LINKS: Record<string, StepLink[]> = {
+  procurement: [
+    { label: "Quotes", path: "/trade/quotes" },
+    { label: "Order Timeline", path: "/trade/order-timeline" },
+    { label: "Shipping Tracker", path: "/trade/shipping-tracker" },
+    { label: "Lead Time Calendar", path: "/trade/lead-time-calendar" },
+    { label: "Budget Tracker", path: "/trade/budget" },
+    { label: "Reorder", path: "/trade/reorder" },
+  ],
+};
+
 const DEFAULT_STEPS: Step[] = [
   { id: "showroom",  path: "/trade/showroom",  title: "1. Browse the Showroom",            body: "Start here to explore curated rooms in situ. Click any hotspot on a photo to open the piece, see specs, trade pricing and add it to a tearsheet.", icon: MapPin,   ctaLabel: "Next: Designers" },
   { id: "designers", path: "/trade", title: "2. Discover Designers & Ateliers",  body: "From your dashboard, open the Designers & Ateliers Library tile (highlighted) to filter 274 designers across 32 ateliers by category, country or material — and shop their pieces.", icon: Users,    ctaLabel: "Next: Brief setup" },
   { id: "brief",       path: "/trade/quotes",         title: "4. Set up a brief",                body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.", icon: FileText, ctaLabel: "Next: Tools" },
   { id: "tools",       path: "/trade/tools",          title: "5. Your specification toolkit",    body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Next: Procurement" },
-  { id: "procurement", path: "/trade/order-timeline", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour" },
+  { id: "procurement", path: "/trade/order-timeline", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour", links: STEP_LINKS.procurement },
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
