@@ -318,11 +318,18 @@ export function QuickTour() {
                     </button>
                     <button
                       onClick={next}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90"
+                      disabled={advanceDisabled}
+                      title={advanceDisabled ? `Visit all ${step.links!.length} tools to continue` : undefined}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      {stepIdx === STEPS.length - 1 ? chrome.finish : chrome.next}
-                      {stepIdx === STEPS.length - 1 ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
+                      {isLastStep ? chrome.finish : chrome.next}
+                      {isLastStep ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                     </button>
+                    {requiresSubsteps && !allSubstepsDone && (
+                      <span className="font-body text-[10px] text-muted-foreground ml-1 whitespace-nowrap">
+                        {doneSubsteps.length}/{step.links!.length}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
