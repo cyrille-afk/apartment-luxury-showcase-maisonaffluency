@@ -124,7 +124,8 @@ export function QuickTour() {
     return () => window.removeEventListener("trade-tour:start", onStart);
   }, [navigate, STEPS]);
 
-  // Resume across reloads / route changes if a tour was in progress
+  // Resume across reloads / route changes if a tour was in progress. Re-run
+  // after DB steps load so saved step 6/6 is not rejected against defaults.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -134,7 +135,7 @@ export function QuickTour() {
       setStepIdx(idx);
       setActive(true);
     } catch {}
-  }, []);
+  }, [STEPS.length]);
 
   // Hydrate completed substeps for any step that has links once STEPS load.
   useEffect(() => {
