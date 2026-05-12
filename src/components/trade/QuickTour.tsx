@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check, Sparkles, Image as ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { loadLang } from "@/components/trade/conciergeGreeting";
 import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
+import { trackTour } from "@/lib/analytics";
 
 type StepLink = { label: string; path: string };
 type Step = {
@@ -111,14 +112,23 @@ export function QuickTour() {
     } catch {}
   }, []);
 
+  // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
+  const viewedStepsRef = useRef<Set<string>>(new Set());
+
   const finish = useCallback(() => {
+    const lastId = STEPS[stepIdx]?.id ?? "unknown";
+    if (stepIdx >= STEPS.length - 1) {
+      trackTour.complete(lastId, STEPS.length);
+    } else {
+      trackTour.skip(lastId, stepIdx, STEPS.length);
+    }
     setActive(false);
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.setItem(TOUR_DONE_KEY, String(Date.now()));
     } catch {}
     window.dispatchEvent(new CustomEvent("trade-tour:done"));
-  }, []);
+  }, [stepIdx, STEPS]);
 
   const next = useCallback(() => {
     const nextIdx = stepIdx + 1;
@@ -145,7 +155,13 @@ export function QuickTour() {
       document.body.removeAttribute("data-tour-step");
       return;
     }
-    document.body.setAttribute("data-tour-step", STEPS[stepIdx]?.id ?? "");
+    const id = STEPS[stepIdx]?.id ?? "";
+    document.body.setAttribute("data-tour-step", id);
+    // Fire one tour_step_view per step per session (when the step actually mounts).
+    if (id && !viewedStepsRef.current.has(id)) {
+      viewedStepsRef.current.add(id);
+      trackTour.stepView(id, stepIdx, STEPS.length);
+    }
     return () => { document.body.removeAttribute("data-tour-step"); };
   }, [active, stepIdx, STEPS]);
 
@@ -215,7 +231,11 @@ export function QuickTour() {
                     {step.links.map((l) => (
                       <button
                         key={l.path}
-                        onClick={() => navigate(l.path)}
+                        onClick={() => {
+                          const subId = l.path.replace(/^\/trade\//, "").replace(/\//g, "-") || "root";
+                          trackTour.subStepClick(step.id, subId, l.label, l.path);
+                          navigate(l.path);
+                        }}
                         className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted px-2.5 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground transition-colors"
                       >
                         {l.label}
