@@ -12,11 +12,11 @@ import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-import TradePriceToggle from "@/components/trade/TradePriceToggle";
+import PriceModeSelector from "@/components/trade/PriceModeSelector";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
-import { TierBadge } from "@/components/trade/TierBadge";
+
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
 
@@ -224,11 +224,8 @@ const TradeLayout = () => {
             <div className="ml-auto flex items-center gap-2 md:gap-4">
               <StudioSwitcher />
               <GlobalProjectSwitcher />
-              <div className="hidden md:block">
-                <TierBadge showDiscount />
-              </div>
               <div className="hidden sm:block">
-                <TradePriceToggle />
+                <PriceModeSelector />
               </div>
               <NotificationBell />
               <MobilePreviewHeaderButton />
