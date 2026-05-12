@@ -3,6 +3,47 @@
 // so we MUST validate JWTs in code via supabase.auth.getClaims(token).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
+/** Fire-and-forget audit log for unauthorized/forbidden attempts. */
+export function recordAuthFailure(
+  req: Request,
+  source: string,
+  kind: "edge_unauthorized" | "edge_forbidden",
+  userId?: string | null,
+): void {
+  try {
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !key) return;
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("cf-connecting-ip") ||
+      "unknown";
+    const payload = {
+      _event_type: kind,
+      _source: source,
+      _user_id: userId ?? null,
+      _ip: ip,
+      _details: {
+        path: new URL(req.url).pathname,
+        method: req.method,
+        ua: req.headers.get("user-agent") ?? null,
+      },
+    };
+    // Fire-and-forget — do not await
+    fetch(`${url}/rest/v1/rpc/record_security_event`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  } catch {
+    /* swallow */
+  }
+}
+
 export type AuthOk = {
   ok: true;
   userId: string;
@@ -12,9 +53,13 @@ export type AuthOk = {
 export type AuthErr = { ok: false; status: number; body: { error: string } };
 
 /** Require a valid JWT. Returns userId or a 401 response payload. */
-export async function requireUser(req: Request): Promise<AuthOk | AuthErr> {
+export async function requireUser(
+  req: Request,
+  source = "unknown",
+): Promise<AuthOk | AuthErr> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
+    recordAuthFailure(req, source, "edge_unauthorized", null);
     return { ok: false, status: 401, body: { error: "Unauthorized" } };
   }
   const token = authHeader.slice(7);
@@ -24,6 +69,7 @@ export async function requireUser(req: Request): Promise<AuthOk | AuthErr> {
   );
   const { data, error } = await supabase.auth.getClaims(token);
   if (error || !data?.claims?.sub) {
+    recordAuthFailure(req, source, "edge_unauthorized", null);
     return { ok: false, status: 401, body: { error: "Unauthorized" } };
   }
   return {
@@ -35,8 +81,11 @@ export async function requireUser(req: Request): Promise<AuthOk | AuthErr> {
 }
 
 /** Require an admin or super_admin role. */
-export async function requireAdmin(req: Request): Promise<AuthOk | AuthErr> {
-  const auth = await requireUser(req);
+export async function requireAdmin(
+  req: Request,
+  source = "unknown",
+): Promise<AuthOk | AuthErr> {
+  const auth = await requireUser(req, source);
   if (!auth.ok) return auth;
   const svc = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -48,6 +97,7 @@ export async function requireAdmin(req: Request): Promise<AuthOk | AuthErr> {
     .eq("user_id", auth.userId)
     .in("role", ["admin", "super_admin"]);
   if (error || !data || data.length === 0) {
+    recordAuthFailure(req, source, "edge_forbidden", auth.userId);
     return { ok: false, status: 403, body: { error: "Forbidden" } };
   }
   return auth;

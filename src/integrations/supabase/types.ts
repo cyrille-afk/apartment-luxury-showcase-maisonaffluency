@@ -2739,6 +2739,54 @@ export type Database = {
         }
         Relationships: []
       }
+      security_alert_state: {
+        Row: {
+          id: string
+          last_alerted_at: string | null
+          payload: Json | null
+        }
+        Insert: {
+          id: string
+          last_alerted_at?: string | null
+          payload?: Json | null
+        }
+        Update: {
+          id?: string
+          last_alerted_at?: string | null
+          payload?: Json | null
+        }
+        Relationships: []
+      }
+      security_audit_events: {
+        Row: {
+          details: Json
+          event_type: string
+          id: string
+          ip: string | null
+          occurred_at: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          details?: Json
+          event_type: string
+          id?: string
+          ip?: string | null
+          occurred_at?: string
+          source: string
+          user_id?: string | null
+        }
+        Update: {
+          details?: Json
+          event_type?: string
+          id?: string
+          ip?: string | null
+          occurred_at?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       shipping_duty_rates: {
         Row: {
           active: boolean
@@ -4641,6 +4689,16 @@ export type Database = {
         }[]
       }
       recompute_trade_tier_suggestions: { Args: never; Returns: number }
+      record_security_event: {
+        Args: {
+          _details?: Json
+          _event_type: string
+          _ip?: string
+          _source: string
+          _user_id?: string
+        }
+        Returns: string
+      }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
