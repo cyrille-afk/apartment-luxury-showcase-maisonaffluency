@@ -65,10 +65,10 @@ Deno.serve(async (req) => {
         }
 
         const jsonContent = JSON.stringify(allRows, null, 2);
-        const filePath = `backups/${timestamp}/${table}.json`;
+        const filePath = `${timestamp}/${table}.json`;
 
         const { error: uploadError } = await supabase.storage
-          .from("assets")
+          .from("backups")
           .upload(filePath, new Blob([jsonContent], { type: "application/json" }), {
             contentType: "application/json",
             upsert: true,
@@ -88,9 +88,9 @@ Deno.serve(async (req) => {
       tables: results,
     };
     await supabase.storage
-      .from("assets")
+      .from("backups")
       .upload(
-        `backups/${timestamp}/manifest.json`,
+        `${timestamp}/manifest.json`,
         new Blob([JSON.stringify(manifest, null, 2)], { type: "application/json" }),
         { contentType: "application/json", upsert: true }
       );

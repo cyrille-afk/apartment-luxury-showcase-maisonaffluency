@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
 
     // 1. List backup folders
     const { data: folders, error: listErr } = await supabase.storage
-      .from("assets")
+      .from("backups")
       .list("backups", { limit: 1000, sortBy: { column: "name", order: "desc" } });
     if (listErr) throw listErr;
 
@@ -71,15 +71,15 @@ Deno.serve(async (req) => {
     for (const folder of toDelete) {
       try {
         const { data: files, error: lErr } = await supabase.storage
-          .from("assets")
-          .list(`backups/${folder}`, { limit: 100 });
+          .from("backups")
+          .list(`${folder}`, { limit: 100 });
         if (lErr) throw lErr;
-        const paths = (files || []).map((f) => `backups/${folder}/${f.name}`);
+        const paths = (files || []).map((f) => `${folder}/${f.name}`);
         if (paths.length === 0) {
           deleted[folder] = { files: 0, status: "empty" };
           continue;
         }
-        const { error: dErr } = await supabase.storage.from("assets").remove(paths);
+        const { error: dErr } = await supabase.storage.from("backups").remove(paths);
         if (dErr) throw dErr;
         deleted[folder] = { files: paths.length, status: "ok" };
       } catch (err: any) {
@@ -102,9 +102,9 @@ Deno.serve(async (req) => {
     // Write a prune log alongside the most recent backup (for traceability)
     if (kept[0]) {
       await supabase.storage
-        .from("assets")
+        .from("backups")
         .upload(
-          `backups/${kept[0]}/prune-log-${Date.now()}.json`,
+          `${kept[0]}/prune-log-${Date.now()}.json`,
           new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }),
           { contentType: "application/json", upsert: true }
         );
