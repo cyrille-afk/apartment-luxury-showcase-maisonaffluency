@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_quotes ADD COLUMN IF NOT EXISTS issue_date date;

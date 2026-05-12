@@ -4009,6 +4009,7 @@ export type Database = {
           insurance_notes: string | null
           insurance_rate_bps: number
           insurance_tier: string
+          issue_date: string | null
           notes: string | null
           project_id: string | null
           responded_at: string | null
@@ -4030,6 +4031,7 @@ export type Database = {
           insurance_notes?: string | null
           insurance_rate_bps?: number
           insurance_tier?: string
+          issue_date?: string | null
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
@@ -4051,6 +4053,7 @@ export type Database = {
           insurance_notes?: string | null
           insurance_rate_bps?: number
           insurance_tier?: string
+          issue_date?: string | null
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
