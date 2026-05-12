@@ -34,10 +34,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 1. List backup folders
+    // 1. List backup folders (root of private bucket)
     const { data: folders, error: listErr } = await supabase.storage
       .from("backups")
-      .list("backups", { limit: 1000, sortBy: { column: "name", order: "desc" } });
+      .list("", { limit: 1000, sortBy: { column: "name", order: "desc" } });
     if (listErr) throw listErr;
 
     const dated = (folders || [])
