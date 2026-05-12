@@ -186,6 +186,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [emailLog, setEmailLog] = useState<Array<{ id: string; recipient_email: string; sent_by_email: string | null; created_at: string; note: string | null }>>([]);
   const [emailLogOpen, setEmailLogOpen] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailPreviewOpen, setEmailPreviewOpen] = useState(false);
+  const [emailPreviewUrl, setEmailPreviewUrl] = useState<string | null>(null);
+  const [emailPreviewLoading, setEmailPreviewLoading] = useState(false);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
@@ -861,37 +866,31 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               : !isApproved
               ? `Client's trade application is ${clientApproval.status ?? "not submitted"} — approve it before emailing`
               : `Email this quote to ${clientApproval.email}`;
+            const openPreview = async () => {
+              if (disabled || emailPreviewLoading) return;
+              setEmailPreviewLoading(true);
+              try {
+                const args = await buildPdfArgs();
+                const url = await previewQuotePdfUrl(args);
+                setEmailPreviewUrl(url);
+                setEmailSubject(`Quote ${quoteNumber} from Maison Affluency${projectName ? ` — ${projectName}` : ""}`);
+                setEmailBody(
+                  `Dear ${(clientName || "Client").split(" ")[0]},\n\n` +
+                  `Please find attached your quote ${quoteNumber}${projectName ? ` for ${projectName}` : ""}.\n\n` +
+                  `Do let us know if you have any questions or would like to proceed.\n\n` +
+                  `With kind regards,\nMaison Affluency`
+                );
+                setEmailPreviewOpen(true);
+              } catch (err: any) {
+                toast({ title: "Preview failed", description: err?.message || "Could not build preview.", variant: "destructive" });
+              } finally {
+                setEmailPreviewLoading(false);
+              }
+            };
             return (
               <button
-                onClick={async () => {
-                  if (disabled || sendingEmail) return;
-                  setSendingEmail(true);
-                  try {
-                    const { data: u } = await supabase.auth.getUser();
-                    const uid = u?.user?.id;
-                    const uemail = u?.user?.email ?? null;
-                    if (!uid) throw new Error("Not authenticated");
-                    const { error } = await (supabase as any).from("quote_email_log").insert({
-                      quote_id: quoteId,
-                      sent_by: uid,
-                      sent_by_email: uemail,
-                      recipient_email: clientApproval.email,
-                      client_id: clientId,
-                      note: "Email to client (sending pipeline pending)",
-                    });
-                    if (error) throw error;
-                    await loadEmailLog();
-                    toast({
-                      title: "Logged email send",
-                      description: `Recorded send of QU-${quoteId.slice(0, 6).toUpperCase()} to ${clientApproval.email}.`,
-                    });
-                  } catch (err: any) {
-                    toast({ title: "Could not log email", description: err?.message ?? "Unknown error", variant: "destructive" });
-                  } finally {
-                    setSendingEmail(false);
-                  }
-                }}
-                disabled={disabled || sendingEmail}
+                onClick={openPreview}
+                disabled={disabled || sendingEmail || emailPreviewLoading}
                 className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 title={title}
               >
@@ -2051,6 +2050,111 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90"
             >
               Download
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email preview & confirm dialog */}
+      <Dialog
+        open={emailPreviewOpen}
+        onOpenChange={(o) => {
+          if (!o) {
+            setEmailPreviewOpen(false);
+            if (emailPreviewUrl) URL.revokeObjectURL(emailPreviewUrl);
+            setEmailPreviewUrl(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] p-0 flex flex-col">
+          <DialogHeader className="px-4 py-3 border-b border-border">
+            <DialogTitle className="font-body text-sm">Send quote · {quoteNumber}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            <div className="grid grid-cols-[80px_1fr] gap-y-2 gap-x-3 items-baseline font-body text-xs">
+              <span className="uppercase tracking-[0.12em] text-muted-foreground">From</span>
+              <span className="text-foreground">Maison Affluency &lt;notify@maisonaffluency.com&gt;</span>
+              <span className="uppercase tracking-[0.12em] text-muted-foreground">To</span>
+              <span className="text-foreground">{clientName ? `${clientName} <${clientApproval.email}>` : clientApproval.email}</span>
+              <span className="uppercase tracking-[0.12em] text-muted-foreground">Subject</span>
+              <input
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                className="w-full border border-border rounded-md px-2 py-1.5 text-foreground bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <span className="uppercase tracking-[0.12em] text-muted-foreground pt-1">Message</span>
+              <textarea
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                rows={7}
+                className="w-full border border-border rounded-md px-2 py-1.5 text-foreground bg-background focus:outline-none focus:ring-1 focus:ring-ring font-body text-xs leading-relaxed resize-y"
+              />
+              <span className="uppercase tracking-[0.12em] text-muted-foreground">Attachment</span>
+              <a
+                href={emailPreviewUrl ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground underline underline-offset-2 hover:opacity-80 inline-flex items-center gap-1"
+              >
+                <Printer className="h-3.5 w-3.5" /> {quoteNumber}.pdf
+              </a>
+            </div>
+            <div className="border border-border rounded-md overflow-hidden bg-muted/20" style={{ height: "45vh" }}>
+              {emailPreviewUrl ? (
+                <iframe src={emailPreviewUrl} title="Quote PDF preview" className="w-full h-full" />
+              ) : (
+                <div className="flex items-center justify-center h-full text-xs text-muted-foreground">Loading preview…</div>
+              )}
+            </div>
+          </div>
+          <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
+            <button
+              onClick={() => {
+                setEmailPreviewOpen(false);
+                if (emailPreviewUrl) URL.revokeObjectURL(emailPreviewUrl);
+                setEmailPreviewUrl(null);
+              }}
+              className="px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              disabled={sendingEmail || !clientApproval.email || !emailSubject.trim()}
+              onClick={async () => {
+                if (sendingEmail) return;
+                setSendingEmail(true);
+                try {
+                  const { data: u } = await supabase.auth.getUser();
+                  const uid = u?.user?.id;
+                  const uemail = u?.user?.email ?? null;
+                  if (!uid) throw new Error("Not authenticated");
+                  const { error } = await (supabase as any).from("quote_email_log").insert({
+                    quote_id: quoteId,
+                    sent_by: uid,
+                    sent_by_email: uemail,
+                    recipient_email: clientApproval.email,
+                    client_id: clientId,
+                    note: `Subject: ${emailSubject}`,
+                  });
+                  if (error) throw error;
+                  await loadEmailLog();
+                  toast({
+                    title: "Logged email send",
+                    description: `Recorded send of ${quoteNumber} to ${clientApproval.email}.`,
+                  });
+                  setEmailPreviewOpen(false);
+                  if (emailPreviewUrl) URL.revokeObjectURL(emailPreviewUrl);
+                  setEmailPreviewUrl(null);
+                } catch (err: any) {
+                  toast({ title: "Could not log email", description: err?.message ?? "Unknown error", variant: "destructive" });
+                } finally {
+                  setSendingEmail(false);
+                }
+              }}
+              className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            >
+              {sendingEmail ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              Send
             </button>
           </div>
         </DialogContent>
