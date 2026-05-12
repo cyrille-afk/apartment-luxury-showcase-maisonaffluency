@@ -123,6 +123,25 @@ export function QuickTour() {
     } catch {}
   }, []);
 
+  // Hydrate completed substeps for any step that has links once STEPS load.
+  useEffect(() => {
+    const next: Record<string, string[]> = {};
+    for (const s of STEPS) {
+      if (s.links && s.links.length > 0) next[s.id] = loadCompletedSubsteps(s.id);
+    }
+    setCompletedSubsteps(next);
+  }, [STEPS]);
+
+  const markSubstepDone = useCallback((stepId: string, path: string) => {
+    setCompletedSubsteps((prev) => {
+      const cur = prev[stepId] ?? [];
+      if (cur.includes(path)) return prev;
+      const updated = [...cur, path];
+      try { localStorage.setItem(SUBSTEPS_KEY(stepId), JSON.stringify(updated)); } catch {}
+      return { ...prev, [stepId]: updated };
+    });
+  }, []);
+
   // Dedup tour_step_view fires per session so refresh/back navigation don't double-count.
   const viewedStepsRef = useRef<Set<string>>(new Set());
 
