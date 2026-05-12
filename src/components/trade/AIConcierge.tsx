@@ -866,6 +866,10 @@ export function AIConcierge() {
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
+                  if (modalMode) {
+                    closeWelcomeModal();
+                    return;
+                  }
                   setOpen(false);
                   try { localStorage.removeItem("ma:welcome-pending"); } catch {}
                   window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
