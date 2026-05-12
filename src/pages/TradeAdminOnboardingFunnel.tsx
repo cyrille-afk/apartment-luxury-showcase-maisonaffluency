@@ -411,6 +411,9 @@ const TradeAdminOnboardingFunnel = () => {
                       </table>
                     </div>
 
+                    {/* Per-user journey timeline */}
+                    <JourneyTimeline events={drillEvents} userLabel={userLabel} />
+
                     {/* Raw events */}
                     <div className="overflow-x-auto border border-border rounded-md">
                       <table className="w-full text-sm font-body">
@@ -511,5 +514,127 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 const Empty = () => (
   <p className="font-body text-xs text-muted-foreground italic py-4">No events for this filter yet.</p>
 );
+
+const EVENT_COLOR: Record<EventType, string> = {
+  tour_step_view: "hsl(var(--muted-foreground))",
+  tour_substep_click: "hsl(var(--accent))",
+  tour_complete: "hsl(var(--primary))",
+  tour_skip: "hsl(var(--destructive))",
+};
+
+const JourneyTimeline = ({
+  events,
+  userLabel,
+}: {
+  events: TourEvent[];
+  userLabel: (uid: string | null) => string;
+}) => {
+  const [hover, setHover] = useState<{ x: number; y: number; e: TourEvent } | null>(null);
+
+  const { byUser, min, max } = useMemo(() => {
+    const groups = new Map<string, TourEvent[]>();
+    let min = Infinity, max = -Infinity;
+    for (const e of events) {
+      const t = new Date(e.created_at).getTime();
+      if (!Number.isFinite(t)) continue;
+      if (t < min) min = t;
+      if (t > max) max = t;
+      const key = e.user_id ?? `__anon_${e.id}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(e);
+    }
+    const arr = Array.from(groups.entries())
+      .map(([k, evs]) => ({ key: k, user_id: evs[0].user_id, events: evs.sort((a, b) => a.created_at.localeCompare(b.created_at)) }))
+      .sort((a, b) => b.events.length - a.events.length)
+      .slice(0, 30);
+    return { byUser: arr, min, max };
+  }, [events]);
+
+  if (byUser.length === 0 || !Number.isFinite(min)) return null;
+
+  const span = Math.max(max - min, 60_000); // floor to avoid div-by-zero & cramped layout
+  const pct = (t: number) => ((t - min) / span) * 100;
+
+  return (
+    <div className="mt-6 mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-display text-sm text-foreground">Per-user journey timeline</h3>
+        <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
+          {(["tour_step_view", "tour_substep_click", "tour_complete", "tour_skip"] as EventType[]).map((t) => (
+            <span key={t} className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: EVENT_COLOR[t] }} />
+              {t.replace("tour_", "")}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="border border-border rounded-md p-3 bg-card relative">
+        {/* X-axis labels */}
+        <div className="ml-44 flex justify-between text-[10px] text-muted-foreground mb-2">
+          <span>{fmt(new Date(min).toISOString())}</span>
+          <span>{fmt(new Date(max).toISOString())}</span>
+        </div>
+
+        <div className="space-y-1.5">
+          {byUser.map((u) => (
+            <div key={u.key} className="flex items-center gap-3">
+              <div className="w-40 truncate text-[11px] text-foreground">
+                {userLabel(u.user_id)}
+                <span className="ml-1 text-muted-foreground">· {u.events.length}</span>
+              </div>
+              <div className="flex-1 h-5 relative bg-muted/40 rounded">
+                {/* connector line through the dots */}
+                {u.events.length > 1 && (
+                  <div
+                    className="absolute top-1/2 h-px bg-border -translate-y-1/2"
+                    style={{
+                      left: `${pct(new Date(u.events[0].created_at).getTime())}%`,
+                      width: `${pct(new Date(u.events.at(-1)!.created_at).getTime()) - pct(new Date(u.events[0].created_at).getTime())}%`,
+                    }}
+                  />
+                )}
+                {u.events.map((e) => {
+                  const t = new Date(e.created_at).getTime();
+                  return (
+                    <div
+                      key={e.id}
+                      onMouseEnter={(ev) => setHover({ x: ev.clientX, y: ev.clientY, e })}
+                      onMouseLeave={() => setHover(null)}
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-2.5 w-2.5 rounded-full ring-1 ring-background cursor-pointer hover:scale-150 transition-transform"
+                      style={{ left: `${pct(t)}%`, background: EVENT_COLOR[e.event_type] }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {hover && (
+          <div
+            className="fixed z-50 pointer-events-none rounded-md border border-border bg-popover text-popover-foreground shadow-lg px-3 py-2 text-[11px] font-body max-w-xs"
+            style={{ left: hover.x + 12, top: hover.y + 12 }}
+          >
+            <div className="font-medium text-foreground mb-0.5">{hover.e.event_type.replace("tour_", "")}</div>
+            <div className="text-muted-foreground">{fmt(hover.e.created_at)}</div>
+            <div className="text-foreground mt-1">
+              {hover.e.step_id}
+              {hover.e.sub_step_label ? ` → ${hover.e.sub_step_label}` : ""}
+            </div>
+            {hover.e.target_path && <div className="text-muted-foreground mt-0.5">{hover.e.target_path}</div>}
+            <div className="text-muted-foreground mt-1">
+              {hover.e.device_type ?? "?"}{hover.e.platform ? ` · ${hover.e.platform}` : ""}
+            </div>
+          </div>
+        )}
+
+        {events.length > 0 && byUser.length === 30 && (
+          <p className="text-[10px] text-muted-foreground italic mt-3">Showing top 30 users by event count.</p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default TradeAdminOnboardingFunnel;
