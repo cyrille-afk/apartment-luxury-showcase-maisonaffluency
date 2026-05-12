@@ -4,7 +4,7 @@ import { Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { ArrowLeft, BarChart3, Smartphone, Monitor, Tablet, Globe } from "lucide-react";
+import { ArrowLeft, BarChart3, Smartphone, Monitor, Tablet, Globe, X, ExternalLink } from "lucide-react";
 
 type EventType = "tour_step_view" | "tour_substep_click" | "tour_complete" | "tour_skip";
 type DeviceFilter = "all" | "desktop" | "mobile" | "tablet";
@@ -36,12 +36,23 @@ const RANGES = [
   { id: "all", label: "All time", days: 3650 },
 ] as const;
 
+type Drill =
+  | { kind: "step"; step_id: string }
+  | { kind: "substep"; step_id: string; sub_step_id: string; label: string }
+  | { kind: "type"; event_type: EventType }
+  | { kind: "window"; from: number; label: string }
+  | null;
+
+interface ProfileLite { id: string; email: string | null; first_name: string | null; last_name: string | null; company: string | null; }
+
 const TradeAdminOnboardingFunnel = () => {
   const { isAdmin, loading: authLoading } = useAuth();
   const [events, setEvents] = useState<TourEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<(typeof RANGES)[number]["id"]>("30");
   const [device, setDevice] = useState<DeviceFilter>("all");
+  const [drill, setDrill] = useState<Drill>(null);
+  const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -105,17 +116,26 @@ const TradeAdminOnboardingFunnel = () => {
   }, [filtered]);
 
   const subStepBreakdown = useMemo(() => {
-    const map = new Map<string, { label: string; clicks: number; users: Set<string> }>();
+    const map = new Map<string, { label: string; step_id: string; sub_step_id: string; clicks: number; users: Set<string> }>();
     for (const e of filtered) {
       if (e.event_type !== "tour_substep_click" || !e.sub_step_id) continue;
-      const key = `${e.step_id ?? "?"} → ${e.sub_step_label ?? e.sub_step_id}`;
-      if (!map.has(key)) map.set(key, { label: key, clicks: 0, users: new Set() });
+      const step_id = e.step_id ?? "?";
+      const key = `${step_id}::${e.sub_step_id}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          label: `${step_id} → ${e.sub_step_label ?? e.sub_step_id}`,
+          step_id,
+          sub_step_id: e.sub_step_id,
+          clicks: 0,
+          users: new Set(),
+        });
+      }
       const row = map.get(key)!;
       row.clicks++;
       if (e.user_id) row.users.add(e.user_id);
     }
     return Array.from(map.values())
-      .map((r) => ({ label: r.label, clicks: r.clicks, unique_users: r.users.size }))
+      .map((r) => ({ label: r.label, step_id: r.step_id, sub_step_id: r.sub_step_id, clicks: r.clicks, unique_users: r.users.size }))
       .sort((a, b) => b.clicks - a.clicks);
   }, [filtered]);
 
@@ -134,8 +154,68 @@ const TradeAdminOnboardingFunnel = () => {
     return Math.round((counts.tour_complete / starts) * 100);
   }, [filtered, counts]);
 
+  // ---- drill-down ---------------------------------------------------------
+  const drillEvents = useMemo(() => {
+    if (!drill) return [] as TourEvent[];
+    return filtered.filter((e) => {
+      if (drill.kind === "type") return e.event_type === drill.event_type;
+      if (drill.kind === "step") return e.step_id === drill.step_id;
+      if (drill.kind === "substep")
+        return e.event_type === "tour_substep_click"
+          && e.step_id === drill.step_id
+          && e.sub_step_id === drill.sub_step_id;
+      if (drill.kind === "window")
+        return new Date(e.created_at).getTime() >= drill.from;
+      return false;
+    });
+  }, [drill, filtered]);
+
+  const drillUserSummary = useMemo(() => {
+    const map = new Map<string, { user_id: string | null; events: number; first: string; last: string; types: Set<EventType> }>();
+    for (const e of drillEvents) {
+      const key = e.user_id ?? `__anon_${e.id}`;
+      if (!map.has(key)) map.set(key, { user_id: e.user_id, events: 0, first: e.created_at, last: e.created_at, types: new Set() });
+      const r = map.get(key)!;
+      r.events++;
+      r.types.add(e.event_type);
+      if (e.created_at < r.first) r.first = e.created_at;
+      if (e.created_at > r.last) r.last = e.created_at;
+    }
+    return Array.from(map.values()).sort((a, b) => b.events - a.events);
+  }, [drillEvents]);
+
+  // Hydrate profile info for the user_ids appearing in the current drill.
+  useEffect(() => {
+    if (!drill) return;
+    const ids = Array.from(new Set(drillEvents.map((e) => e.user_id).filter(Boolean))) as string[];
+    const missing = ids.filter((id) => !profiles[id]);
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email, first_name, last_name, company")
+        .in("id", missing);
+      if (cancelled || !data) return;
+      setProfiles((prev) => {
+        const next = { ...prev };
+        for (const p of data as ProfileLite[]) next[p.id] = p;
+        return next;
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [drill, drillEvents, profiles]);
+
   if (authLoading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
+
+  const userLabel = (uid: string | null) => {
+    if (!uid) return "(anonymous)";
+    const p = profiles[uid];
+    if (!p) return uid.slice(0, 8) + "…";
+    const name = [p.first_name, p.last_name].filter(Boolean).join(" ");
+    return p.email || name || uid.slice(0, 8) + "…";
+  };
 
   return (
     <>
@@ -192,51 +272,68 @@ const TradeAdminOnboardingFunnel = () => {
           <div className="py-20 flex items-center justify-center text-muted-foreground"><DotCircleLoader size="sm" /></div>
         ) : (
           <>
-            {/* KPI cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-              <Kpi label="Step views" value={counts.tour_step_view} />
-              <Kpi label="Sub-step clicks" value={counts.tour_substep_click} />
-              <Kpi label="Completes" value={counts.tour_complete} accent />
-              <Kpi label="Skips" value={counts.tour_skip} />
+            {/* KPI cards (clickable) */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+              <Kpi label="Step views" value={counts.tour_step_view} onClick={() => setDrill({ kind: "type", event_type: "tour_step_view" })} />
+              <Kpi label="Sub-step clicks" value={counts.tour_substep_click} onClick={() => setDrill({ kind: "type", event_type: "tour_substep_click" })} />
+              <Kpi label="Completes" value={counts.tour_complete} accent onClick={() => setDrill({ kind: "type", event_type: "tour_complete" })} />
+              <Kpi label="Skips" value={counts.tour_skip} onClick={() => setDrill({ kind: "type", event_type: "tour_skip" })} />
               <Kpi label="Unique users" value={uniqueUsers} />
             </div>
 
-            {completionRate !== null && (
-              <p className="font-body text-xs text-muted-foreground mb-6">
-                Estimated completion rate (completes ÷ step-0 views):{" "}
-                <span className="text-foreground font-medium">{completionRate}%</span>
-              </p>
-            )}
+            {/* Time-window quick drills */}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Drill window:</span>
+              {[
+                ["Last hour", 3600_000],
+                ["Last 24 h", 86400_000],
+                ["Last 7 days", 7 * 86400_000],
+              ].map(([label, ms]) => (
+                <button
+                  key={label as string}
+                  onClick={() => setDrill({ kind: "window", from: Date.now() - (ms as number), label: label as string })}
+                  className="px-2.5 py-1 text-[11px] uppercase tracking-widest border border-border rounded hover:bg-muted"
+                >
+                  {label}
+                </button>
+              ))}
+              {completionRate !== null && (
+                <span className="ml-auto font-body text-xs text-muted-foreground">
+                  Completion rate: <span className="text-foreground font-medium">{completionRate}%</span>
+                </span>
+              )}
+            </div>
 
             {/* Step funnel */}
-            <Section title="Step funnel — unique users reaching each step">
+            <Section title="Step funnel — unique users reaching each step (click a row to drill)">
               {stepFunnel.length === 0 ? (
                 <Empty />
               ) : (
                 <div className="space-y-2">
                   {stepFunnel.map((s) => (
-                    <div key={s.step_id} className="flex items-center gap-3">
+                    <button
+                      key={s.step_id}
+                      onClick={() => setDrill({ kind: "step", step_id: s.step_id })}
+                      className="w-full flex items-center gap-3 text-left rounded hover:bg-muted/40 px-1 py-1 transition-colors"
+                    >
                       <div className="w-48 truncate font-mono text-[11px] text-muted-foreground">
                         {s.step_index}. {s.step_id}
                       </div>
                       <div className="flex-1 h-6 bg-muted rounded relative overflow-hidden">
-                        <div
-                          className="h-full bg-accent/70"
-                          style={{ width: `${s.pct}%` }}
-                        />
+                        <div className="h-full bg-accent/70" style={{ width: `${s.pct}%` }} />
                       </div>
                       <div className="w-28 text-right font-body text-xs">
                         <span className="text-foreground font-medium">{s.unique_users}</span>{" "}
                         <span className="text-muted-foreground">({s.pct}%)</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
             </Section>
 
             {/* Sub-step pill clicks */}
-            <Section title="Sub-step clicks (procurement & deeper pills)">
+            <Section title="Sub-step clicks (click a row to drill)">
               {subStepBreakdown.length === 0 ? (
                 <Empty />
               ) : (
@@ -251,7 +348,11 @@ const TradeAdminOnboardingFunnel = () => {
                     </thead>
                     <tbody>
                       {subStepBreakdown.map((r) => (
-                        <tr key={r.label} className="border-b border-border/50">
+                        <tr
+                          key={r.label}
+                          onClick={() => setDrill({ kind: "substep", step_id: r.step_id, sub_step_id: r.sub_step_id, label: r.label })}
+                          className="border-b border-border/50 cursor-pointer hover:bg-muted/40"
+                        >
                           <td className="py-2 text-foreground">{r.label}</td>
                           <td className="py-2 text-right">{r.clicks}</td>
                           <td className="py-2 text-right text-muted-foreground">{r.unique_users}</td>
@@ -262,6 +363,100 @@ const TradeAdminOnboardingFunnel = () => {
                 </div>
               )}
             </Section>
+
+            {/* Drill-down panel */}
+            {drill && (
+              <Section title={`Drill-down — ${drillTitle(drill)} · ${drillEvents.length} events · ${drillUserSummary.length} users`}>
+                <div className="flex justify-end mb-2">
+                  <button
+                    onClick={() => setDrill(null)}
+                    className="inline-flex items-center gap-1 text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3 w-3" /> Clear
+                  </button>
+                </div>
+
+                {drillEvents.length === 0 ? (
+                  <Empty />
+                ) : (
+                  <>
+                    {/* Per-user summary */}
+                    <div className="overflow-x-auto mb-6 border border-border rounded-md">
+                      <table className="w-full text-sm font-body">
+                        <thead className="bg-muted/40">
+                          <tr className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            <th className="text-left px-3 py-2">User</th>
+                            <th className="text-left px-3 py-2">Company</th>
+                            <th className="text-left px-3 py-2">Event types</th>
+                            <th className="text-right px-3 py-2 w-20">Events</th>
+                            <th className="text-left px-3 py-2 w-44">First → last</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {drillUserSummary.map((u, i) => {
+                            const p = u.user_id ? profiles[u.user_id] : null;
+                            return (
+                              <tr key={(u.user_id ?? "anon") + i} className="border-t border-border/50">
+                                <td className="px-3 py-2 text-foreground">{userLabel(u.user_id)}</td>
+                                <td className="px-3 py-2 text-muted-foreground">{p?.company || "—"}</td>
+                                <td className="px-3 py-2 text-[11px] text-muted-foreground">{Array.from(u.types).join(", ")}</td>
+                                <td className="px-3 py-2 text-right">{u.events}</td>
+                                <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                                  {fmt(u.first)} → {fmt(u.last)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Raw events */}
+                    <div className="overflow-x-auto border border-border rounded-md">
+                      <table className="w-full text-sm font-body">
+                        <thead className="bg-muted/40">
+                          <tr className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            <th className="text-left px-3 py-2 w-44">When</th>
+                            <th className="text-left px-3 py-2">Event</th>
+                            <th className="text-left px-3 py-2">Step / sub-step</th>
+                            <th className="text-left px-3 py-2">User</th>
+                            <th className="text-left px-3 py-2">Device</th>
+                            <th className="text-left px-3 py-2">Page</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {drillEvents.slice(0, 500).map((e) => (
+                            <tr key={e.id} className="border-t border-border/50 align-top">
+                              <td className="px-3 py-2 text-[11px] text-muted-foreground whitespace-nowrap">{fmt(e.created_at)}</td>
+                              <td className="px-3 py-2 text-[11px]">{e.event_type.replace("tour_", "")}</td>
+                              <td className="px-3 py-2 text-[11px] text-foreground">
+                                {e.step_id}
+                                {e.sub_step_label ? ` → ${e.sub_step_label}` : ""}
+                                {typeof e.step_index === "number" ? ` (#${e.step_index})` : ""}
+                              </td>
+                              <td className="px-3 py-2 text-[11px]">{userLabel(e.user_id)}</td>
+                              <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                                {e.device_type ?? "?"}{e.platform ? ` · ${e.platform}` : ""}{e.viewport ? ` · ${e.viewport}` : ""}
+                              </td>
+                              <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                                {e.target_path ? (
+                                  <span className="inline-flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" /> {e.target_path}
+                                  </span>
+                                ) : (e.page_path ?? "—")}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {drillEvents.length > 500 && (
+                        <p className="px-3 py-2 text-[11px] text-muted-foreground italic">Showing first 500 of {drillEvents.length} events.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </Section>
+            )}
 
             {/* Device mix (always all-events, regardless of filter) */}
             <Section title="Device mix (all events in range)">
@@ -281,12 +476,30 @@ const TradeAdminOnboardingFunnel = () => {
   );
 };
 
-const Kpi = ({ label, value, accent }: { label: string; value: number; accent?: boolean }) => (
-  <div className={`rounded-lg border p-4 ${accent ? "border-accent/50 bg-accent/5" : "border-border bg-card"}`}>
-    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-    <div className="font-display text-2xl text-foreground">{value.toLocaleString()}</div>
-  </div>
-);
+const Kpi = ({ label, value, accent, onClick }: { label: string; value: number; accent?: boolean; onClick?: () => void }) => {
+  const cls = `rounded-lg border p-4 text-left w-full transition-colors ${accent ? "border-accent/50 bg-accent/5" : "border-border bg-card"} ${onClick ? "hover:border-foreground/40 cursor-pointer" : ""}`;
+  const inner = (
+    <>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="font-display text-2xl text-foreground">{value.toLocaleString()}</div>
+    </>
+  );
+  return onClick ? <button onClick={onClick} className={cls}>{inner}</button> : <div className={cls}>{inner}</div>;
+};
+
+const fmt = (iso: string) => {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch { return iso; }
+};
+
+const drillTitle = (d: NonNullable<Drill>) => {
+  if (d.kind === "type") return d.event_type.replace("tour_", "");
+  if (d.kind === "step") return `Step "${d.step_id}"`;
+  if (d.kind === "substep") return d.label;
+  return d.label;
+};
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="mb-8">
