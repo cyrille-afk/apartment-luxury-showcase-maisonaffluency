@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, ShieldAlert } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass } from "lucide-react";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -543,42 +543,6 @@ const TradeSettings = () => {
         </div>
       </div>
 
-      {/* Cloud Auth Troubleshooting */}
-      <div id="auth-troubleshooting" className="mt-12 pt-8 border-t border-border scroll-mt-24">
-        <div className="flex items-center gap-2 mb-3">
-          <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-display text-base text-foreground">Cloud Auth Troubleshooting</h2>
-        </div>
-        <div className="space-y-5 font-body text-xs text-muted-foreground leading-relaxed max-w-2xl">
-          <div>
-            <p className="text-foreground font-medium mb-1">Getting kicked out every ~15 minutes?</p>
-            <p>
-              This usually means the app is not refreshing the current session before the access token expires. The app now proactively refreshes the session before expiry and again when the tab becomes active.
-            </p>
-          </div>
-          <div>
-            <p className="text-foreground font-medium mb-1">Don't see a "JWT" field on the Auth Settings page?</p>
-            <p>
-              That field is not currently exposed in Lovable Cloud Auth Settings. It is not in Advanced, and there is no visible "JWT expiry" control to change from this screen.
-            </p>
-          </div>
-          <div>
-            <p className="text-foreground font-medium mb-1">What to check instead</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Confirm Email, Google, or Apple sign-in settings are enabled as expected.</li>
-              <li>Keep this tab open long enough to confirm the session refreshes without redirecting to login.</li>
-              <li>If sign-out still happens at the same interval, treat it as a session-refresh issue rather than a missing Auth Settings field.</li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-foreground font-medium mb-1">Still being signed out?</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Check whether the app receives a token refresh event before the previous token expires.</li>
-              <li>Check that your browser is not blocking storage for the app domain.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
     </>
   );
