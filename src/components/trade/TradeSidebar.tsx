@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, RotateCcw,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench,
 } from "lucide-react";
-import { replayWelcome } from "@/lib/replayWelcome";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
