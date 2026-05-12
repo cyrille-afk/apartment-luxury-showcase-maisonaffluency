@@ -145,8 +145,68 @@ const TradeAdminOnboardingFunnel = () => {
     return Math.round((counts.tour_complete / starts) * 100);
   }, [filtered, counts]);
 
+  // ---- drill-down ---------------------------------------------------------
+  const drillEvents = useMemo(() => {
+    if (!drill) return [] as TourEvent[];
+    return filtered.filter((e) => {
+      if (drill.kind === "type") return e.event_type === drill.event_type;
+      if (drill.kind === "step") return e.step_id === drill.step_id;
+      if (drill.kind === "substep")
+        return e.event_type === "tour_substep_click"
+          && e.step_id === drill.step_id
+          && e.sub_step_id === drill.sub_step_id;
+      if (drill.kind === "window")
+        return new Date(e.created_at).getTime() >= drill.from;
+      return false;
+    });
+  }, [drill, filtered]);
+
+  const drillUserSummary = useMemo(() => {
+    const map = new Map<string, { user_id: string | null; events: number; first: string; last: string; types: Set<EventType> }>();
+    for (const e of drillEvents) {
+      const key = e.user_id ?? `__anon_${e.id}`;
+      if (!map.has(key)) map.set(key, { user_id: e.user_id, events: 0, first: e.created_at, last: e.created_at, types: new Set() });
+      const r = map.get(key)!;
+      r.events++;
+      r.types.add(e.event_type);
+      if (e.created_at < r.first) r.first = e.created_at;
+      if (e.created_at > r.last) r.last = e.created_at;
+    }
+    return Array.from(map.values()).sort((a, b) => b.events - a.events);
+  }, [drillEvents]);
+
+  // Hydrate profile info for the user_ids appearing in the current drill.
+  useEffect(() => {
+    if (!drill) return;
+    const ids = Array.from(new Set(drillEvents.map((e) => e.user_id).filter(Boolean))) as string[];
+    const missing = ids.filter((id) => !profiles[id]);
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email, first_name, last_name, company")
+        .in("id", missing);
+      if (cancelled || !data) return;
+      setProfiles((prev) => {
+        const next = { ...prev };
+        for (const p of data as ProfileLite[]) next[p.id] = p;
+        return next;
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [drill, drillEvents, profiles]);
+
   if (authLoading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
+
+  const userLabel = (uid: string | null) => {
+    if (!uid) return "(anonymous)";
+    const p = profiles[uid];
+    if (!p) return uid.slice(0, 8) + "…";
+    const name = [p.first_name, p.last_name].filter(Boolean).join(" ");
+    return p.email || name || uid.slice(0, 8) + "…";
+  };
 
   return (
     <>
