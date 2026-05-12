@@ -94,14 +94,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 1. Restore session from storage FIRST — this prevents the race where
     //    onAuthStateChange fires INITIAL_SESSION with null before the token
     //    is read from localStorage.
-    sbClient.auth.getSession().then(({ data: { session: sess } }: any) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) {
-        fetchUserData(sess.user.id, sbClient);
+    let refreshTimer: number | null = null;
+
+    const scheduleTokenRefresh = (sess: Session | null) => {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      refreshTimer = null;
+      if (!sess?.expires_at) return;
+
+      const refreshInMs = Math.max((sess.expires_at * 1000) - Date.now() - 120_000, 30_000);
+      refreshTimer = window.setTimeout(() => {
+        sbClient.auth.refreshSession().catch(() => {
+          // Keep the current session state intact; auth events will handle any real sign-out.
+        });
+      }, refreshInMs);
+    };
+
+    const restoreSession = async () => {
+      const { data: { session: sess } }: any = await sbClient.auth.getSession();
+      const resolved = sess || (await sbClient.auth.refreshSession()).data?.session || null;
+      setSession(resolved);
+      setUser(resolved?.user ?? null);
+      scheduleTokenRefresh(resolved);
+      if (resolved?.user) {
+        fetchUserData(resolved.user.id, sbClient);
       }
       setLoading(false);
-    });
+    };
+
+    restoreSession();
 
     // 2. THEN subscribe to future changes (sign-in, sign-out, token refresh).
     //    We deliberately skip the INITIAL_SESSION event since getSession above
@@ -111,6 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       setSession(sess);
       setUser(sess?.user ?? null);
+      scheduleTokenRefresh(sess);
       if (sess?.user) {
         setTimeout(() => fetchUserData(sess.user.id, sbClient), 0);
       } else {
@@ -130,7 +151,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    const refreshOnFocus = () => {
+      if (document.visibilityState !== "visible") return;
+      sbClient.auth.getSession().then(({ data: { session: current } }: any) => {
+        const expiresInMs = current?.expires_at ? current.expires_at * 1000 - Date.now() : Number.POSITIVE_INFINITY;
+        if (expiresInMs < 180_000) sbClient.auth.refreshSession();
+      });
+    };
+
+    document.addEventListener("visibilitychange", refreshOnFocus);
+
+    return () => {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      document.removeEventListener("visibilitychange", refreshOnFocus);
+      subscription.unsubscribe();
+    };
   }, [sbClient, fetchUserData]);
 
   const signOut = async () => {
