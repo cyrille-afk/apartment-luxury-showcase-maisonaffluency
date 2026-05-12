@@ -834,6 +834,37 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="hidden sm:inline">Download PDF</span>
             <span className="sm:hidden">PDF</span>
           </button>
+          {(() => {
+            const hasClient = !!clientId;
+            const hasEmail = !!clientApproval.email;
+            const isApproved = clientApproval.approved;
+            const disabled = items.length === 0 || !hasClient || !hasEmail || !isApproved;
+            const title = !hasClient
+              ? "Link a client first"
+              : !hasEmail
+              ? "No contact email on file for this client"
+              : !isApproved
+              ? `Client's trade application is ${clientApproval.status ?? "not submitted"} — approve it before emailing`
+              : `Email this quote to ${clientApproval.email}`;
+            return (
+              <button
+                onClick={() => {
+                  if (disabled) return;
+                  toast({
+                    title: "Email to client",
+                    description: `Would send QU-${quoteId.slice(0, 6).toUpperCase()} to ${clientApproval.email}. Sending pipeline coming soon.`,
+                  });
+                }}
+                disabled={disabled}
+                className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                title={title}
+              >
+                {disabled && !isApproved && hasClient ? <Lock className="h-3.5 w-3.5" /> : <Mail className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline">Email to Client</span>
+                <span className="sm:hidden">Email</span>
+              </button>
+            );
+          })()}
         </div>
       </div>
 
