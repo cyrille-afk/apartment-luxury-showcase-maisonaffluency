@@ -163,11 +163,7 @@ export function QuickTour() {
   // Only show the overlay when the user is actually on the matching route.
   // Otherwise the overlay would obscure navigation between steps.
   const onStepRoute = location.pathname === step.path || location.pathname.startsWith(step.path + "/");
-  const doneSubsteps = completedSubsteps[step.id] ?? [];
   const isLastStep = stepIdx === STEPS.length - 1;
-  const requiresSubsteps = false;
-  const allSubstepsDone = true;
-  const advanceDisabled = false;
 
   return (
     <>
@@ -250,18 +246,11 @@ export function QuickTour() {
                     </button>
                     <button
                       onClick={next}
-                      disabled={advanceDisabled}
-                      title={advanceDisabled ? `Visit all ${step.links!.length} tools to continue` : undefined}
                       className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       {isLastStep ? chrome.finish : chrome.next}
                       {isLastStep ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                     </button>
-                    {requiresSubsteps && !allSubstepsDone && (
-                      <span className="font-body text-[10px] text-muted-foreground ml-1 whitespace-nowrap">
-                        {doneSubsteps.length}/{step.links!.length}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
