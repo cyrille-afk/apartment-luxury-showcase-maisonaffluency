@@ -242,8 +242,8 @@ const TradeDashboard = () => {
   const getCardImage = (card: typeof DASH_CARDS[number]) => {
     const override = heroOverrides[card.key];
     if (override) return override.image_url;
-    // 3D Studio: use latest gallery render as dynamic thumbnail
-    if (card.key === "dash-3d-studio" && studioStats.latestImage) return studioStats.latestImage;
+    // 3D Studio: prefer the editorial brand fallback for visual consistency.
+    // The latest gallery render is surfaced inside the 3D Studio page itself.
     if (card.fallbackImage) return card.fallbackImage;
     if (card.fallbackId) return thumb(card.fallbackId);
     return "";
