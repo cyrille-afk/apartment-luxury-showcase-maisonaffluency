@@ -91,6 +91,25 @@ export function AIConcierge() {
   });
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
 
+  // First-login welcome: render as a centered modal with a soft backdrop so
+  // the entry point is unmistakable instead of a small bottom-right widget.
+  const [welcomePending, setWelcomePending] = useState<boolean>(() => {
+    try { return localStorage.getItem("ma:welcome-pending") === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    const onPending = () => setWelcomePending(true);
+    const onDismissed = () => setWelcomePending(false);
+    window.addEventListener("ma:welcome-pending", onPending);
+    window.addEventListener("ma:welcome-dismissed", onDismissed);
+    return () => {
+      window.removeEventListener("ma:welcome-pending", onPending);
+      window.removeEventListener("ma:welcome-dismissed", onDismissed);
+    };
+  }, []);
+  // Modal mode is active only while the welcome is pending AND the user
+  // hasn't manually dragged or expanded the panel yet.
+  const modalMode = welcomePending && !pos;
+
   const clampPos = useCallback((x: number, y: number) => {
     const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
     const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
