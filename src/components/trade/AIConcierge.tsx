@@ -93,12 +93,28 @@ export function AIConcierge() {
 
   // First-login welcome: render as a centered modal with a soft backdrop so
   // the entry point is unmistakable instead of a small bottom-right widget.
+  // Dismissal is persisted in localStorage (`ma:welcome-dismissed`) so a page
+  // refresh during the same first-login session never re-opens the modal.
   const [welcomePending, setWelcomePending] = useState<boolean>(() => {
-    try { return localStorage.getItem("ma:welcome-pending") === "1"; } catch { return false; }
+    try {
+      if (localStorage.getItem("ma:welcome-dismissed") === "1") return false;
+      return localStorage.getItem("ma:welcome-pending") === "1";
+    } catch { return false; }
   });
   useEffect(() => {
-    const onPending = () => setWelcomePending(true);
-    const onDismissed = () => setWelcomePending(false);
+    const onPending = () => {
+      try {
+        if (localStorage.getItem("ma:welcome-dismissed") === "1") return;
+      } catch {}
+      setWelcomePending(true);
+    };
+    const onDismissed = () => {
+      try {
+        localStorage.setItem("ma:welcome-dismissed", "1");
+        localStorage.removeItem("ma:welcome-pending");
+      } catch {}
+      setWelcomePending(false);
+    };
     window.addEventListener("ma:welcome-pending", onPending);
     window.addEventListener("ma:welcome-dismissed", onDismissed);
     return () => {
