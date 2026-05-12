@@ -1,4 +1,44 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireUser } from "../_shared/auth.ts";
+
+// Allowlist of trusted hostnames we will fetch from. Anything else is rejected.
+const ALLOWED_HOST_SUFFIXES = [
+  "cloudinary.com",
+  "res.cloudinary.com",
+  "supabase.co",
+  "supabase.in",
+  "amazonaws.com",
+  "googleusercontent.com",
+  "cdn.shopify.com",
+  "images.squarespace-cdn.com",
+  "wp.com",
+  "wordpress.com",
+];
+
+function isUrlAllowed(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+    const host = u.hostname.toLowerCase();
+    // Block private / link-local / loopback ranges to prevent SSRF
+    if (
+      host === "localhost" ||
+      host.startsWith("127.") ||
+      host.startsWith("10.") ||
+      host.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+      host.startsWith("169.254.") ||
+      host.startsWith("0.") ||
+      host === "::1" ||
+      host.startsWith("fc") ||
+      host.startsWith("fd") ||
+      host.startsWith("fe80")
+    ) return false;
+    return ALLOWED_HOST_SUFFIXES.some((s) => host === s || host.endsWith("." + s));
+  } catch {
+    return false;
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
