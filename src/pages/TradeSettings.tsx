@@ -191,6 +191,8 @@ const TradeSettings = () => {
     try {
       localStorage.removeItem("trade_quick_tour_done");
       localStorage.removeItem("trade_quick_tour_step");
+      localStorage.removeItem("ma:welcome-dismissed");
+      localStorage.removeItem("ma:welcome-pending");
     } catch { /* ignore */ }
     if (user) {
       await supabase.from("profiles").update({ has_seen_trade_intro: false } as any).eq("id", user.id);

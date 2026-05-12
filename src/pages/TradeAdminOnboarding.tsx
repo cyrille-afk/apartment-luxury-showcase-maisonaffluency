@@ -213,6 +213,8 @@ const TradeAdminOnboarding = () => {
     try {
       localStorage.removeItem("trade_quick_tour_done");
       localStorage.removeItem("trade_quick_tour_step");
+      localStorage.removeItem("ma:welcome-dismissed");
+      localStorage.removeItem("ma:welcome-pending");
     } catch {}
     toast({ title: "Reset for you", description: "Visit /trade to see the welcome flow." });
   };
