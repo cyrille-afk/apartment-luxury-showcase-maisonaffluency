@@ -16,20 +16,29 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Admin-only: this permanently deletes backups
+  const auth = await requireAdmin(req);
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
     let retentionDays = DEFAULT_RETENTION_DAYS;
-    let minKeep = DEFAULT_MIN_KEEP;
+    // min_keep is server-controlled and NOT overridable from the request body
+    // to prevent a "wipe everything" scenario.
+    const minKeep = DEFAULT_MIN_KEEP;
     if (req.method === "POST") {
       try {
         const body = await req.json();
         if (typeof body?.retention_days === "number" && body.retention_days > 0)
-          retentionDays = Math.floor(body.retention_days);
-        if (typeof body?.min_keep === "number" && body.min_keep >= 0)
-          minKeep = Math.floor(body.min_keep);
+          retentionDays = Math.max(7, Math.floor(body.retention_days));
       } catch {
         /* no body, use defaults */
       }
