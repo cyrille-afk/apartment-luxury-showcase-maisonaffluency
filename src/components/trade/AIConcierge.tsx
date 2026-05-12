@@ -126,6 +126,24 @@ export function AIConcierge() {
   // hasn't manually dragged or expanded the panel yet.
   const modalMode = welcomePending && !pos;
 
+  // Brief exit-animation gate: when the welcome modal is dismissed we keep
+  // the backdrop + panel mounted for ~280ms so they can fade/scale out
+  // smoothly before unmounting.
+  const [welcomeClosing, setWelcomeClosing] = useState(false);
+  const closeWelcomeModal = useCallback(() => {
+    if (welcomeClosing) return;
+    setWelcomeClosing(true);
+    window.setTimeout(() => {
+      setOpen(false);
+      setWelcomeClosing(false);
+      try {
+        localStorage.setItem("ma:welcome-dismissed", "1");
+        localStorage.removeItem("ma:welcome-pending");
+      } catch {}
+      window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
+    }, 280);
+  }, [welcomeClosing]);
+
   const clampPos = useCallback((x: number, y: number) => {
     const h = minimized ? PANEL_H_MIN : PANEL_H_OPEN;
     const maxX = Math.max(8, window.innerWidth - PANEL_W - 8);
@@ -575,13 +593,12 @@ export function AIConcierge() {
         <>
           {modalMode && (
             <div
-              className="fixed inset-0 z-[99] bg-foreground/40 backdrop-blur-sm animate-fade-in print:hidden"
+              className={cn(
+                "fixed inset-0 z-[99] bg-foreground/40 backdrop-blur-sm print:hidden transition-[opacity,backdrop-filter] duration-300 ease-out",
+                welcomeClosing ? "animate-fade-out opacity-0 backdrop-blur-0" : "animate-fade-in"
+              )}
               aria-hidden="true"
-              onClick={() => {
-                setOpen(false);
-                try { localStorage.removeItem("ma:welcome-pending"); } catch {}
-                window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
-              }}
+              onClick={closeWelcomeModal}
             />
           )}
         <div
@@ -594,10 +611,13 @@ export function AIConcierge() {
                 : { width: PANEL_W }
           }
           className={cn(
-            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden animate-fade-in overflow-hidden",
+            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
             modalMode
-              ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]"
-              : "bg-background border-border",
+              ? cn(
+                  "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
+                  welcomeClosing ? "animate-scale-out" : "animate-scale-in"
+                )
+              : "bg-background border-border animate-fade-in",
             !modalMode && !pos && "bottom-20 md:bottom-6 right-4",
             minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
           )}
@@ -846,6 +866,10 @@ export function AIConcierge() {
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
+                  if (modalMode) {
+                    closeWelcomeModal();
+                    return;
+                  }
                   setOpen(false);
                   try { localStorage.removeItem("ma:welcome-pending"); } catch {}
                   window.dispatchEvent(new CustomEvent("ma:welcome-dismissed"));
