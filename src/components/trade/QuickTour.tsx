@@ -7,7 +7,6 @@ import { loadLang } from "@/components/trade/conciergeGreeting";
 import { localizeTourStep, tourChromeCopy } from "@/lib/conciergeI18n";
 import { trackTour } from "@/lib/analytics";
 
-type StepLink = { label: string; path: string };
 type Step = {
   id: string;
   path: string;
@@ -15,7 +14,6 @@ type Step = {
   body: string;
   icon: React.ComponentType<{ className?: string }>;
   ctaLabel: string;
-  links?: StepLink[];
 };
 
 const TOUR_ROUTE_OVERRIDES: Record<string, string> = {
@@ -28,47 +26,16 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   MapPin, Users, FileText, Sparkles, Image: ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone,
 };
 
-// Quick-jump links exposed inside specific tour steps so users can pivot
-// between sub-tools without leaving the tour card.
-const STEP_LINKS: Record<string, StepLink[]> = {
-  tools: [
-    { label: "Mood Board", path: "/trade/mood-boards" },
-    { label: "Tearsheet Builder", path: "/trade/tearsheets" },
-    { label: "FF&E Schedule", path: "/trade/ffe-schedule" },
-    { label: "Product Comparator", path: "/trade/comparator" },
-    { label: "Floor Plan → FF&E", path: "/trade/floor-plan-ffe" },
-    { label: "All Tools", path: "/trade/tools" },
-  ],
-  procurement: [
-    { label: "Quotes", path: "/trade/quotes" },
-    { label: "Order Timeline", path: "/trade/order-timeline" },
-    { label: "Shipping Tracker", path: "/trade/shipping-tracker" },
-    { label: "Lead Time Calendar", path: "/trade/lead-time-calendar" },
-    { label: "Budget Tracker", path: "/trade/budget" },
-    { label: "Reorder", path: "/trade/reorder" },
-  ],
-};
-
 const DEFAULT_STEPS: Step[] = [
   { id: "showroom",  path: "/trade/showroom",  title: "1. Browse the Showroom",            body: "Start here to explore curated rooms in situ. Click any hotspot on a photo to open the piece, see specs, trade pricing and add it to a tearsheet.", icon: MapPin,   ctaLabel: "Next: Designers" },
   { id: "designers", path: "/trade", title: "2. Discover Designers & Ateliers",  body: "From your dashboard, open the Designers & Ateliers Library tile (highlighted) to filter 274 designers across 32 ateliers by category, country or material — and shop their pieces.", icon: Users,    ctaLabel: "Next: Brief setup" },
   { id: "brief",       path: "/trade/quotes",         title: "4. Set up a brief",                body: "Build a tearsheet or quote for your client. You can also ask the AI Concierge to start from a brief — it will scope your project and propose pieces automatically.", icon: FileText, ctaLabel: "Next: Tools" },
-  { id: "tools",       path: "/trade/tools",          title: "5. Your specification toolkit",    body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Next: Procurement", links: STEP_LINKS.tools },
-  { id: "procurement", path: "/trade/tools", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour", links: STEP_LINKS.procurement },
+  { id: "tools",       path: "/trade/tools",          title: "5. Your specification toolkit",    body: "Everything you need to take a quote from idea to delivery lives here: Mood Board for client presentations, Tearsheet Builder for printable specs, Markup & Annotation for drawings, FF&E Schedule, Product Comparator, Floor Plan → FF&E and more. Bookmark this page — you'll come back often.", icon: Sparkles, ctaLabel: "Next: Procurement" },
+  { id: "procurement", path: "/trade/tools", title: "6. Procurement & delivery",        body: "Once a quote is approved, this is where you run the project: track every order on the Order Timeline, monitor shipments on the Shipping Tracker, plan installs with the Lead Time Calendar, keep budgets on the Budget Tracker, and one-click reorders from past projects on Reorder. Everything stays linked to the originating quote and project.", icon: Compass, ctaLabel: "Finish tour" },
 ];
 
 const STORAGE_KEY = "trade_quick_tour_step";
 export const TOUR_DONE_KEY = "trade_quick_tour_done";
-const SUBSTEPS_KEY = (stepId: string) => `trade_quick_tour_substeps:${stepId}`;
-
-const loadCompletedSubsteps = (stepId: string): string[] => {
-  try {
-    const raw = localStorage.getItem(SUBSTEPS_KEY(stepId));
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
-  } catch { return []; }
-};
 
 export function QuickTour() {
   const navigate = useNavigate();
