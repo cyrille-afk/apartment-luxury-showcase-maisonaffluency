@@ -26,6 +26,14 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 // Quick-jump links exposed inside specific tour steps so users can pivot
 // between sub-tools without leaving the tour card.
 const STEP_LINKS: Record<string, StepLink[]> = {
+  tools: [
+    { label: "Mood Board", path: "/trade/mood-boards" },
+    { label: "Tearsheet Builder", path: "/trade/tearsheets" },
+    { label: "FF&E Schedule", path: "/trade/ffe-schedule" },
+    { label: "Product Comparator", path: "/trade/comparator" },
+    { label: "Floor Plan → FF&E", path: "/trade/floor-plan-ffe" },
+    { label: "All Tools", path: "/trade/tools" },
+  ],
   procurement: [
     { label: "Quotes", path: "/trade/quotes" },
     { label: "Order Timeline", path: "/trade/order-timeline" },
