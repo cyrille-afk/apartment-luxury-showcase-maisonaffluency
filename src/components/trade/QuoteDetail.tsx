@@ -2128,7 +2128,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               Cancel
             </button>
             <button
-              disabled={sendingEmail || !clientApproval.email || !emailSubject.trim()}
+              disabled={(() => {
+                const email = (clientApproval.email ?? "").trim();
+                const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+                return sendingEmail || !validEmail || !emailSubject.trim();
+              })()}
               onClick={async () => {
                 if (sendingEmail) return;
                 setSendingEmail(true);
