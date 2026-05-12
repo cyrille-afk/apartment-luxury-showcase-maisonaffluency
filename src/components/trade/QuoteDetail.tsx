@@ -866,37 +866,31 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               : !isApproved
               ? `Client's trade application is ${clientApproval.status ?? "not submitted"} — approve it before emailing`
               : `Email this quote to ${clientApproval.email}`;
+            const openPreview = async () => {
+              if (disabled || emailPreviewLoading) return;
+              setEmailPreviewLoading(true);
+              try {
+                const args = await buildPdfArgs();
+                const url = await previewQuotePdfUrl(args);
+                setEmailPreviewUrl(url);
+                setEmailSubject(`Quote ${quoteNumber} from Maison Affluency${projectName ? ` — ${projectName}` : ""}`);
+                setEmailBody(
+                  `Dear ${(clientName || "Client").split(" ")[0]},\n\n` +
+                  `Please find attached your quote ${quoteNumber}${projectName ? ` for ${projectName}` : ""}.\n\n` +
+                  `Do let us know if you have any questions or would like to proceed.\n\n` +
+                  `With kind regards,\nMaison Affluency`
+                );
+                setEmailPreviewOpen(true);
+              } catch (err: any) {
+                toast({ title: "Preview failed", description: err?.message || "Could not build preview.", variant: "destructive" });
+              } finally {
+                setEmailPreviewLoading(false);
+              }
+            };
             return (
               <button
-                onClick={async () => {
-                  if (disabled || sendingEmail) return;
-                  setSendingEmail(true);
-                  try {
-                    const { data: u } = await supabase.auth.getUser();
-                    const uid = u?.user?.id;
-                    const uemail = u?.user?.email ?? null;
-                    if (!uid) throw new Error("Not authenticated");
-                    const { error } = await (supabase as any).from("quote_email_log").insert({
-                      quote_id: quoteId,
-                      sent_by: uid,
-                      sent_by_email: uemail,
-                      recipient_email: clientApproval.email,
-                      client_id: clientId,
-                      note: "Email to client (sending pipeline pending)",
-                    });
-                    if (error) throw error;
-                    await loadEmailLog();
-                    toast({
-                      title: "Logged email send",
-                      description: `Recorded send of QU-${quoteId.slice(0, 6).toUpperCase()} to ${clientApproval.email}.`,
-                    });
-                  } catch (err: any) {
-                    toast({ title: "Could not log email", description: err?.message ?? "Unknown error", variant: "destructive" });
-                  } finally {
-                    setSendingEmail(false);
-                  }
-                }}
-                disabled={disabled || sendingEmail}
+                onClick={openPreview}
+                disabled={disabled || sendingEmail || emailPreviewLoading}
                 className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 title={title}
               >
