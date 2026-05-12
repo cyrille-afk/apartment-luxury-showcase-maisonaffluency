@@ -1,6 +1,7 @@
 // Phase 3 — AI document intake for the shipping estimator.
 // Accepts a PDF/image data URL or pasted email text and returns
 // structured shipment fields the estimator can pre-fill.
+import { requireUser, rateLimit, clientIp } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
