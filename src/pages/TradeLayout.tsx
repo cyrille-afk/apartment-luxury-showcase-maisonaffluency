@@ -12,7 +12,7 @@ import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-import TradePriceToggle from "@/components/trade/TradePriceToggle";
+import PriceModeSelector from "@/components/trade/PriceModeSelector";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
