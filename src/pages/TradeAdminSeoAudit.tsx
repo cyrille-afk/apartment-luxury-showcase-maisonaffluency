@@ -46,8 +46,10 @@ const ISSUE_LABELS: Record<string, string> = {
   canonical_mismatch: "Canonical mismatch",
 };
 
+const DEFAULT_AUDIT_BASE = "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
+
 const TradeAdminSeoAudit = () => {
-  const [base, setBase] = useState("https://maisonaffluency.com");
+  const [base, setBase] = useState(DEFAULT_AUDIT_BASE);
   const [includeProducts, setIncludeProducts] = useState(false);
   const [filter, setFilter] = useState<"all" | "issues">("issues");
   const [search, setSearch] = useState("");
