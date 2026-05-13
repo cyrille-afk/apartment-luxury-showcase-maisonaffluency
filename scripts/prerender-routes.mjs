@@ -222,6 +222,7 @@ const STATIC_ROUTES = [
   {
     path: "/designers",
     title: "Designers & Ateliers | Maison Affluency Singapore",
+    h1: "Designers & Ateliers",
     description:
       "Browse the full roster of designers, ateliers and makers represented by Maison Affluency Singapore — sculptural lighting, bespoke furniture, hand-knotted rugs and more.",
   },
@@ -553,7 +554,11 @@ async function main() {
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      const routeWithLinks = { ...route, primaryNavHtml, designerLinksHtml };
+      const routeWithLinks = {
+        ...route,
+        primaryNavHtml,
+        designerLinksHtml: route.path === "/designers" ? "" : designerLinksHtml,
+      };
       await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
     } catch (err) {
