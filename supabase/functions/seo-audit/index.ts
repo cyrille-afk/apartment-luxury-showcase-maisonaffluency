@@ -5,7 +5,7 @@
 // Defaults to https://www.maisonaffluency.com but accepts ?base= override.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const DEFAULT_BASE = "https://maisonaffluency.com";
+const DEFAULT_BASE = "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
 const UA = "MaisonAffluency-SEO-Audit/1.0";
 const TIMEOUT_MS = 8000;
 const CONCURRENCY = 24;
@@ -60,7 +60,29 @@ async function fetchRoute(base: string, path: string) {
       signal: ctrl.signal,
     });
     const html = await res.text();
-    const meta = extract(html);
+    let meta = extract(html);
+
+    // Lovable hosting can serve the SPA shell for clean static routes (/foo)
+    // while the prerendered HTML exists at the exact generated .html object.
+    // Audit the prerender artifact when the clean URL clearly returned the
+    // homepage shell; this prevents false duplicate reports after publish.
+    let canonicalPath = "";
+    try { canonicalPath = new URL(meta.canonical).pathname.replace(/\/$/, "") || "/"; } catch (_) {}
+    if (path !== "/" && res.status === 200 && canonicalPath === "/") {
+      for (const prerenderTarget of [`${target}/index.html`, `${target}.html`]) {
+        try {
+          const fileRes = await fetch(prerenderTarget, {
+            headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
+            redirect: "follow",
+            signal: ctrl.signal,
+          });
+          if (fileRes.status === 200) {
+            meta = extract(await fileRes.text());
+            break;
+          }
+        } catch (_) {}
+      }
+    }
     return { path, status: res.status, ...meta };
   } catch (e) {
     return {
