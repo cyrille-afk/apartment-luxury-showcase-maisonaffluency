@@ -26,7 +26,7 @@
  * Safe to re-run; never touches dist/ files that already exist (so the OG
  * bridges in public/ate liers/, public/collectibles/, etc. are untouched).
  */
-import { readFile, writeFile, mkdir, access } from "node:fs/promises";
+import { readFile, writeFile, mkdir, access, rm } from "node:fs/promises";
 import { constants as FS } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -86,6 +86,14 @@ function patchTemplate(template, meta) {
   const image = meta.image || DEFAULT_OG_IMAGE;
 
   let html = template;
+
+  // Make the generator idempotent: if the template already came from a prior
+  // prerender pass, remove stale route canonicals/og:url before injecting the
+  // current route. Otherwise rerunning the script can preserve the homepage
+  // canonical ahead of the route-specific one.
+  html = html
+    .replace(/\s*<link\s+rel="canonical"[^>]*data-prerender="true"[^>]*>\s*/gi, "\n    ")
+    .replace(/\s*<meta\s+property="og:url"[^>]*data-prerender="true"[^>]*>\s*/gi, "\n    ");
 
   // <title>
   html = html.replace(
@@ -335,12 +343,22 @@ async function exists(p) {
 async function writeRoute(template, route) {
   const html = patchTemplate(template, route);
   // "/" -> dist/index.html (overwrite the template itself with the patched
-  // homepage version). Other routes -> dist/<path>/index.html.
+  // homepage version). Other routes -> dist/<path>/index.html, except leaf
+  // dynamic pages where Lovable hosting matches the clean URL to an exact
+  // extensionless file before it considers a nested directory index.
+  // Without this, /designers/foo can fall through to the SPA homepage shell
+  // even though /designers/foo/index.html contains the correct prerender.
+  const isLeafDynamicRoute = /^\/(designers|journal)\/[^/]+$/.test(route.path);
   const target =
     route.path === "/"
       ? path.join(DIST, "index.html")
+      : isLeafDynamicRoute
+        ? path.join(DIST, route.path.replace(/^\//, ""))
       : path.join(DIST, route.path.replace(/^\//, ""), "index.html");
 
+  if (isLeafDynamicRoute) {
+    await rm(target, { recursive: true, force: true });
+  }
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, html, "utf8");
   return target;
