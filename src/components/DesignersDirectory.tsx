@@ -451,7 +451,6 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
-  const navigate = useNavigate();
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
@@ -489,11 +488,10 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           <p className={`font-display text-white tracking-wide leading-tight drop-shadow-sm ${displayName.length > 20 ? "text-[11px] md:text-xs" : "text-xs md:text-sm"}`}>{displayName}</p>
           {parentLabel && <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">{parentLabel}</p>}
         </div>
-        <button
-          type="button"
+        <Link
+          to={`/designers/${item.slug}`}
           className="absolute inset-0 z-[5] cursor-pointer"
           aria-label={`View ${displayName} portrait`}
-          onClick={() => navigate(`/designers/${item.slug}`)}
         />
         {thumbs.length === 0 && (
           <>
