@@ -167,6 +167,15 @@ function patchTemplate(template, meta) {
       `${open}\n        <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">${title}</h1>\n        <p>${desc}</p>`
   );
 
+  // Optional: inject a static, server-visible A–Z designer link block before
+  // </body>. Used on /, /journal, /designers (and per-article journal shells)
+  // so crawlers without JS see internal links to every /designers/:slug,
+  // flattening crawl depth and resolving "URLs in sitemap not found in crawl"
+  // for orphan profiles.
+  if (meta.designerLinksHtml) {
+    html = html.replace(/<\/body>/i, `${meta.designerLinksHtml}\n  </body>`);
+  }
+
   return html;
 }
 
@@ -244,12 +253,14 @@ const STATIC_ROUTES = [
 
 async function fetchDynamicRoutes() {
   const routes = [];
+  const designerLinks = []; // [{slug, name}] for static A–Z block injection
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.warn(
       "[prerender] Supabase env vars missing — skipping dynamic routes."
     );
-    return routes;
+    return { routes, designerLinks };
   }
+
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: false },
@@ -300,6 +311,7 @@ async function fetchDynamicRoutes() {
         title: `${titleHead} — Designer Profile | Maison Affluency`,
         description: desc,
       });
+      designerLinks.push({ slug: d.slug, name: d.name });
     }
     console.log(`[prerender] designers: ${data?.length ?? 0}`);
   } catch (err) {
@@ -388,7 +400,28 @@ async function fetchDynamicRoutes() {
     console.warn("[prerender] products query failed:", err?.message ?? err);
   }
 
-  return routes;
+  return { routes, designerLinks };
+}
+
+// Build a static, server-visible block of A–Z designer links. Injected before
+// </body> on hub pages (/, /journal, /designers, per-article shells) so JS-less
+// crawlers (lovablehtml.com, Bingbot text mode, etc.) discover every profile.
+function buildDesignerLinksHtml(designerLinks) {
+  if (!designerLinks?.length) return "";
+  const sorted = [...designerLinks].sort((a, b) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+  );
+  const items = sorted
+    .map(
+      (d) =>
+        `<li><a href="/designers/${escapeAttr(d.slug)}">${escapeHtml(d.name)}</a></li>`
+    )
+    .join("");
+  return `<nav aria-label="All designers index" style="max-width:1200px;margin:0 auto;padding:32px 20px;border-top:1px solid #e5e5e5;font-family:'Lora',Georgia,serif;color:#444;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.25rem;margin:0 0 6px;">Designers A–Z</h2>
+      <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.18em;color:#888;margin:0 0 16px;">${sorted.length} profiles</p>
+      <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 16px;font-size:0.85rem;">${items}</ul>
+    </nav>`;
 }
 
 // ----- Writer ---------------------------------------------------------------
@@ -435,8 +468,12 @@ async function main() {
   }
   const template = await readFile(TEMPLATE_PATH, "utf8");
 
-  const dynamic = await fetchDynamicRoutes();
+  const { routes: dynamic, designerLinks } = await fetchDynamicRoutes();
   const all = [...STATIC_ROUTES, ...dynamic];
+
+  // Static A–Z block, injected only on hub/discovery pages.
+  const designerLinksHtml = buildDesignerLinksHtml(designerLinks);
+  const HUB_PATHS = new Set(["/", "/journal", "/designers"]);
 
   // Deduplicate by path (last wins)
   const seen = new Map();
@@ -452,7 +489,13 @@ async function main() {
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      await writeRoute(template, route, parentPaths.has(route.path));
+      // Inject the link block on hub pages and every per-article journal shell.
+      const wantsLinks =
+        HUB_PATHS.has(route.path) || route.path.startsWith("/journal/");
+      const routeWithLinks = wantsLinks
+        ? { ...route, designerLinksHtml }
+        : route;
+      await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
     } catch (err) {
       failed++;
