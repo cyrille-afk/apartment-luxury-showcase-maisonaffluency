@@ -79,6 +79,13 @@ const truncate = (s, n) => {
   return t.slice(0, n - 1).trimEnd() + "…";
 };
 
+const titleizeSlug = (slug) =>
+  String(slug ?? "")
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
 function patchTemplate(template, meta) {
   const title = escapeHtml(meta.title);
   const desc = escapeAttr(meta.description);
