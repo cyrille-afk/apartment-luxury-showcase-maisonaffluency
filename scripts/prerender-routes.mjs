@@ -500,9 +500,11 @@ async function main() {
   const { routes: dynamic, designerLinks } = await fetchDynamicRoutes();
   const all = [...STATIC_ROUTES, ...dynamic];
 
-  // Static A–Z block, injected only on hub/discovery pages.
+  // Static A–Z block + primary nav, injected on every shell so JS-less crawlers
+  // can discover both core pages (/collectibles, /gallery, /trade/login, …) and
+  // every /designers/:slug from anywhere they land.
   const designerLinksHtml = buildDesignerLinksHtml(designerLinks);
-  const HUB_PATHS = new Set(["/", "/journal", "/designers"]);
+  const primaryNavHtml = buildPrimaryNavHtml();
 
   // Deduplicate by path (last wins)
   const seen = new Map();
@@ -518,12 +520,7 @@ async function main() {
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      // Inject the link block on hub pages and every per-article journal shell.
-      const wantsLinks =
-        HUB_PATHS.has(route.path) || route.path.startsWith("/journal/");
-      const routeWithLinks = wantsLinks
-        ? { ...route, designerLinksHtml }
-        : route;
+      const routeWithLinks = { ...route, primaryNavHtml, designerLinksHtml };
       await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
     } catch (err) {
