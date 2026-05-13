@@ -264,27 +264,38 @@ async function fetchDynamicRoutes() {
     console.warn("[prerender] designers query failed:", err?.message ?? err);
   }
 
-  // Journal articles
+  // Journal articles. We include EVERY row with a slug + published_at, even
+  // those flagged is_published=false. Reason: those URLs are still routable in
+  // the SPA and (more importantly) without a per-article static shell, hosting
+  // falls back to /journal/index.html — which canonicalises them to /journal
+  // and triggers duplicate_canonical / canonical_mismatch in the SEO audit.
+  // Requires SUPABASE_SERVICE_ROLE_KEY at build time to bypass RLS.
   try {
     const { data, error } = await supabase
       .from("journal_articles")
-      .select("slug, title, excerpt")
+      .select("slug, title, excerpt, is_published")
       .not("published_at", "is", null)
       .not("slug", "is", null);
     if (error) throw error;
+    let unpublishedIncluded = 0;
     for (const a of data ?? []) {
       if (!a.slug || !a.title) continue;
+      if (a.is_published === false) unpublishedIncluded++;
+      // Strip "[DRAFT] " prefix from titles defensively
+      const cleanTitle = String(a.title).replace(/^\s*\[DRAFT\]\s*/i, "").trim();
       routes.push({
         path: `/journal/${a.slug}`,
-        title: `${a.title} | Maison Affluency Journal`,
+        title: `${cleanTitle} | Maison Affluency Journal`,
         description: truncate(
           a.excerpt ||
-            `${a.title} — read the full editorial on the Maison Affluency Journal.`,
+            `${cleanTitle} — read the full editorial on the Maison Affluency Journal.`,
           155
         ),
       });
     }
-    console.log(`[prerender] journal: ${data?.length ?? 0}`);
+    console.log(
+      `[prerender] journal: ${data?.length ?? 0} (${unpublishedIncluded} unpublished but routable)`
+    );
   } catch (err) {
     console.warn("[prerender] journal query failed:", err?.message ?? err);
   }
