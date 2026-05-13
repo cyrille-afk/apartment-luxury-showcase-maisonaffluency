@@ -8,7 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 const DEFAULT_BASE = "https://maisonaffluency.com";
 const UA = "MaisonAffluency-SEO-Audit/1.0";
 const TIMEOUT_MS = 12000;
-const CONCURRENCY = 32;
+const CONCURRENCY = 8;
 
 const STATIC_ROUTES = [
   "/",
@@ -53,8 +53,10 @@ async function fetchRoute(base: string, path: string) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(`${base}${path}`, {
-      headers: { "user-agent": UA, accept: "text/html" },
+    const target = new URL(`${base}${path}`);
+    target.searchParams.set("seo_audit_cache_bust", String(Date.now()));
+    const res = await fetch(target.toString(), {
+      headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache" },
       redirect: "follow",
       signal: ctrl.signal,
     });
@@ -120,6 +122,7 @@ Deno.serve(async (req) => {
     const { data } = await supabase
       .from("journal_articles")
       .select("slug")
+      .eq("is_published", true)
       .not("published_at", "is", null)
       .not("slug", "is", null);
     for (const a of data ?? []) if (a.slug) paths.push(`/journal/${a.slug}`);

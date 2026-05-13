@@ -264,16 +264,14 @@ async function fetchDynamicRoutes() {
     console.warn("[prerender] designers query failed:", err?.message ?? err);
   }
 
-  // Journal articles. We include EVERY row with a slug + published_at, even
-  // those flagged is_published=false. Reason: those URLs are still routable in
-  // the SPA and (more importantly) without a per-article static shell, hosting
-  // falls back to /journal/index.html — which canonicalises them to /journal
-  // and triggers duplicate_canonical / canonical_mismatch in the SEO audit.
-  // Requires SUPABASE_SERVICE_ROLE_KEY at build time to bypass RLS.
+  // Journal articles. Only published articles should be generated as public
+  // SEO routes; drafts redirect/fall back to /journal in the SPA and should not
+  // appear in the audit or sitemap until they are republished.
   try {
     const { data, error } = await supabase
       .from("journal_articles")
       .select("slug, title, excerpt, is_published")
+      .eq("is_published", true)
       .not("published_at", "is", null)
       .not("slug", "is", null);
     if (error) throw error;

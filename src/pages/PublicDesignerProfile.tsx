@@ -502,9 +502,11 @@ const PublicDesignerProfile = () => {
         // Use ONLY the designer's own biography for meta description.
         // Never fall back to the parent brand's bio — that creates duplicate descriptions
         // across all sub-designers of the same parent (bad for SEO).
-        const ownBio = designer?.biography
+        const rawOwnBio = designer?.biography
           ? designer.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
           : "";
+        const genericAffiliationBio = /^designer\s+for\s+.+\.?$/i.test(rawOwnBio);
+        const ownBio = genericAffiliationBio ? "" : rawOwnBio;
         const subDesignerFallback = isChildDesigner && designer.founder
           ? `${displayName(name)} — designer for ${designer.founder}. Discover their collectible pieces at Maison Affluency Singapore.`
           : "";

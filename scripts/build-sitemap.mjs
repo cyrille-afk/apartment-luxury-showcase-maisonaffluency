@@ -114,6 +114,7 @@ async function loadDynamicRoutes() {
     const { data, error } = await supabase
       .from("journal_articles")
       .select("slug, updated_at")
+      .eq("is_published", true)
       .not("published_at", "is", null)
       .not("slug", "is", null);
     if (error) throw error;
