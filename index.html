@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <!-- SEO: static content in #seo-content + noscript provides full indexability without JS redirects -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>Maison Affluency Singapore | Luxury Furniture &amp; Collectible Design</title>
     <meta name="description" content="Maison Affluency Singapore — discover curated contemporary furniture and exceptional collectible design by world-renowned designers and makers in District 9.">
     <meta name="author" content="Maison Affluency" />
@@ -65,9 +65,12 @@
     <!-- iOS PWA: open in standalone (no Safari UI) when launched from Home Screen -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Maison Affluency" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="color-scheme" content="light" />
     <script>if(!/lovableproject\.com$/.test(location.hostname)){var m=document.createElement('link');m.rel='manifest';m.href='/manifest.json';document.head.appendChild(m);}</script>
 
     <!-- JSON-LD Structured Data -->
