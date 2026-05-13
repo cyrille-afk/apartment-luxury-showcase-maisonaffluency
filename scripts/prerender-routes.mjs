@@ -400,7 +400,28 @@ async function fetchDynamicRoutes() {
     console.warn("[prerender] products query failed:", err?.message ?? err);
   }
 
-  return routes;
+  return { routes, designerLinks };
+}
+
+// Build a static, server-visible block of A–Z designer links. Injected before
+// </body> on hub pages (/, /journal, /designers, per-article shells) so JS-less
+// crawlers (lovablehtml.com, Bingbot text mode, etc.) discover every profile.
+function buildDesignerLinksHtml(designerLinks) {
+  if (!designerLinks?.length) return "";
+  const sorted = [...designerLinks].sort((a, b) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+  );
+  const items = sorted
+    .map(
+      (d) =>
+        `<li><a href="/designers/${escapeAttr(d.slug)}">${escapeHtml(d.name)}</a></li>`
+    )
+    .join("");
+  return `<nav aria-label="All designers index" style="max-width:1200px;margin:0 auto;padding:32px 20px;border-top:1px solid #e5e5e5;font-family:'Lora',Georgia,serif;color:#444;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.25rem;margin:0 0 6px;">Designers A–Z</h2>
+      <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.18em;color:#888;margin:0 0 16px;">${sorted.length} profiles</p>
+      <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 16px;font-size:0.85rem;">${items}</ul>
+    </nav>`;
 }
 
 // ----- Writer ---------------------------------------------------------------
