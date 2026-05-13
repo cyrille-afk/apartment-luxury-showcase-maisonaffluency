@@ -288,12 +288,12 @@ async function fetchDynamicRoutes() {
       } else {
         desc = truncate(`${prefix} — collectible furniture, lighting and objets at Maison Affluency Singapore. Provenance, materials and signature pieces.`, 155);
       }
-      const titlePrefix = founder && founder.toLowerCase() !== d.name.toLowerCase()
-        ? `${d.name} for ${founder}`
-        : d.name;
+      const titleContext = founder && founder.toLowerCase() !== d.name.toLowerCase()
+        ? `for ${founder}`
+        : titleizeSlug(d.slug);
       routes.push({
         path: `/designers/${d.slug}`,
-        title: `${titlePrefix} — Designer Profile | Maison Affluency`,
+        title: `${d.name} ${titleContext} — Designer Profile | Maison Affluency`,
         description: desc,
       });
     }
