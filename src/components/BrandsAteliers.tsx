@@ -3307,7 +3307,7 @@ const BrandsAteliers = () => {
           })()}
 
         {(searchQuery || selectedCategory) && (
-          <p className="text-left text-[10px] text-muted-foreground/50 mb-6 font-body tracking-wider">
+          <p className="text-left text-[10px] text-muted-foreground mb-6 font-body tracking-wider">
             {totalBrands} brand{totalBrands !== 1 ? "s" : ""} found
             {selectedSubcategory && <span> · {selectedSubcategory}</span>}
             {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
