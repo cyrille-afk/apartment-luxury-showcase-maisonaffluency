@@ -66,11 +66,9 @@ async function fetchRoute(base: string, path: string) {
     // while the prerendered HTML exists at the exact generated .html object.
     // Audit the prerender artifact when the clean URL clearly returned the
     // homepage shell; this prevents false duplicate reports after publish.
-    if (
-      path !== "/" &&
-      res.status === 200 &&
-      meta.canonical.replace(/\/$/, "") === `${base}/`.replace(/\/$/, "")
-    ) {
+    let canonicalPath = "";
+    try { canonicalPath = new URL(meta.canonical).pathname.replace(/\/$/, "") || "/"; } catch (_) {}
+    if (path !== "/" && res.status === 200 && canonicalPath === "/") {
       for (const prerenderTarget of [`${target}/index.html`, `${target}.html`]) {
         try {
           const fileRes = await fetch(prerenderTarget, {
