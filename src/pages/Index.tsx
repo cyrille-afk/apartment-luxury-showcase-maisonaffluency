@@ -487,6 +487,9 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
               </>
             )}
             <Suspense fallback={null}>
+              <DesignerIndexLinks />
+            </Suspense>
+            <Suspense fallback={null}>
               <Footer />
             </Suspense>
           </>
