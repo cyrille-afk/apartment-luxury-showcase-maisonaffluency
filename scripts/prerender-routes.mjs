@@ -311,6 +311,7 @@ async function fetchDynamicRoutes() {
         title: `${titleHead} — Designer Profile | Maison Affluency`,
         description: desc,
       });
+      designerLinks.push({ slug: d.slug, name: d.name });
     }
     console.log(`[prerender] designers: ${data?.length ?? 0}`);
   } catch (err) {
