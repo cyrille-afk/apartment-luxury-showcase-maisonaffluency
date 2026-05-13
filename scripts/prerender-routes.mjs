@@ -26,7 +26,7 @@
  * Safe to re-run; never touches dist/ files that already exist (so the OG
  * bridges in public/ate liers/, public/collectibles/, etc. are untouched).
  */
-import { readFile, writeFile, mkdir, access } from "node:fs/promises";
+import { readFile, writeFile, mkdir, access, rm } from "node:fs/promises";
 import { constants as FS } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -348,6 +348,9 @@ async function writeRoute(template, route) {
         ? path.join(DIST, route.path.replace(/^\//, ""))
       : path.join(DIST, route.path.replace(/^\//, ""), "index.html");
 
+  if (isLeafDynamicRoute) {
+    await rm(target, { recursive: true, force: true });
+  }
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, html, "utf8");
   return target;
