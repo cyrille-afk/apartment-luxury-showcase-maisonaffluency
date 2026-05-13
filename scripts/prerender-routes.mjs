@@ -157,9 +157,9 @@ function patchTemplate(template, meta) {
 
   // Replace the H1 + first <p> inside the visible #seo-content block.
   html = html.replace(
-    /(<div id="seo-content"[\s\S]*?>)\s*<h1[^>]*>[\s\S]*?<\/h1>\s*<p>[\s\S]*?<\/p>/,
-    (_, open) =>
-      `${open}\n        <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">${title}</h1>\n        <p>${desc}</p>`
+    /(<div id="seo-content"[\s\S]*?>\s*<h1[^>]*>)[\s\S]*?(<\/h1>\s*<p>)[\s\S]*?(<\/p>)/,
+    (_, open, mid, close) =>
+      `${open}${h1}${mid}${desc}${close}`
   );
 
   // Same for the <noscript> clone (Bing/Yandex/no-JS crawlers).
