@@ -281,9 +281,12 @@ async function fetchDynamicRoutes() {
       } else {
         desc = truncate(`${prefix} — collectible furniture, lighting and objets at Maison Affluency Singapore. Provenance, materials and signature pieces.`, 155);
       }
+      const titlePrefix = founder && founder.toLowerCase() !== d.name.toLowerCase()
+        ? `${d.name} for ${founder}`
+        : d.name;
       routes.push({
         path: `/designers/${d.slug}`,
-        title: `${d.name} — Designer Profile | Maison Affluency`,
+        title: `${titlePrefix} — Designer Profile | Maison Affluency`,
         description: desc,
       });
     }
