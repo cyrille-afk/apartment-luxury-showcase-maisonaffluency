@@ -7,8 +7,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const DEFAULT_BASE = "https://www.maisonaffluency.com";
 const UA = "MaisonAffluency-SEO-Audit/1.0";
-const TIMEOUT_MS = 15000;
-const CONCURRENCY = 8;
+const TIMEOUT_MS = 8000;
+const CONCURRENCY = 32;
 
 const STATIC_ROUTES = [
   "/",
