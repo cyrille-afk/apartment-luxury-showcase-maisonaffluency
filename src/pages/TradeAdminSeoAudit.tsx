@@ -47,7 +47,7 @@ const ISSUE_LABELS: Record<string, string> = {
 };
 
 const TradeAdminSeoAudit = () => {
-  const [base, setBase] = useState("https://www.maisonaffluency.com");
+  const [base, setBase] = useState("https://maisonaffluency.com");
   const [includeProducts, setIncludeProducts] = useState(false);
   const [filter, setFilter] = useState<"all" | "issues">("issues");
   const [search, setSearch] = useState("");
@@ -103,7 +103,7 @@ const TradeAdminSeoAudit = () => {
                 id="base"
                 value={base}
                 onChange={(e) => setBase(e.target.value)}
-                placeholder="https://www.maisonaffluency.com"
+                placeholder="https://maisonaffluency.com"
               />
             </div>
             <label className="flex items-center gap-2 pb-2">
