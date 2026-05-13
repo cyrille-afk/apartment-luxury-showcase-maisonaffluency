@@ -244,19 +244,30 @@ async function fetchDynamicRoutes() {
   try {
     const { data, error } = await supabase
       .from("designers")
-      .select("slug, name")
+      .select("slug, name, biography, specialty, founder")
       .eq("is_published", true)
       .not("slug", "is", null);
     if (error) throw error;
     for (const d of data ?? []) {
       if (!d.slug || !d.name) continue;
+      const cleanBio = (d.biography ?? "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      let desc = "";
+      if (cleanBio.length >= 60) {
+        desc = truncate(cleanBio, 155);
+      } else if (d.specialty && d.specialty.trim().length >= 20) {
+        desc = truncate(`${d.name} — ${d.specialty.trim()}. Collectible design at Maison Affluency Singapore.`, 155);
+      } else if (d.founder && d.founder.trim()) {
+        desc = truncate(`${d.name} — designer for ${d.founder.trim()}. Discover their collectible pieces at Maison Affluency Singapore.`, 155);
+      } else {
+        desc = truncate(`${d.name} — collectible furniture, lighting and objets at Maison Affluency Singapore. Provenance, materials and signature pieces.`, 155);
+      }
       routes.push({
         path: `/designers/${d.slug}`,
         title: `${d.name} — Designer Profile | Maison Affluency`,
-        description: truncate(
-          `Discover ${d.name}'s collectible furniture, lighting and objets at Maison Affluency Singapore. View signature pieces, materials and provenance.`,
-          155
-        ),
+        description: desc,
       });
     }
     console.log(`[prerender] designers: ${data?.length ?? 0}`);
