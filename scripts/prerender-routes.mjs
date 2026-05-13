@@ -52,7 +52,11 @@ try {
 }
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+// Prefer the service-role key so the prerender sees all published rows
+// regardless of RLS (e.g. journal articles flagged is_published=false but
+// already linked from the sitemap/SPA). Fall back to the anon key locally.
 const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   process.env.SUPABASE_PUBLISHABLE_KEY ||
   process.env.SUPABASE_ANON_KEY;
