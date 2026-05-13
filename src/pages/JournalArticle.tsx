@@ -419,6 +419,8 @@ const JournalArticlePage = () => {
         </div>
       </div>
 
+      <DesignerIndexLinks />
+
       {/* Lightbox */}
       <AnimatePresence>
         {lightboxIndex !== null && hasGallery && (
