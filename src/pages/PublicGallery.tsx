@@ -50,11 +50,11 @@ const PublicGallery = () => {
           name="description"
           content="Step inside our curated apartment gallery in Singapore — explore room-by-room interiors featuring collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers."
         />
-        <link rel="canonical" href="https://www.maisonaffluency.com/gallery" />
+        <link rel="canonical" href="https://maisonaffluency.com/gallery" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="Maison Affluency" />
-        <meta property="og:url" content="https://www.maisonaffluency.com/gallery" />
+        <meta property="og:url" content="https://maisonaffluency.com/gallery" />
         <meta property="og:title" content="Interactive Gallery — Maison Affluency" />
         <meta property="og:description" content="Step inside our curated apartment gallery in Singapore — explore room-by-room interiors featuring collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers." />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
@@ -68,6 +68,7 @@ const PublicGallery = () => {
 
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
+        <h1 className="sr-only">Maison Affluency Gallery</h1>
 
         <div className="pt-28">
           <ApartmentTourInterlude compact />
