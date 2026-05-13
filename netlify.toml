@@ -1,0 +1,55 @@
+# Netlify build & hosting config for Maison Affluency.
+#
+# Why this file exists:
+#   `npm run build` runs `vite build` AND `node scripts/prerender-routes.mjs`,
+#   which writes per-route static shells to `dist/<path>/index.html` (e.g.
+#   dist/designers/jean-michel-frank/index.html). Netlify serves those nested
+#   files automatically as long as:
+#     1. The build command runs the full `npm run build` (not just vite).
+#     2. The SPA fallback below uses `force = false` so real files win first.
+#     3. `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` are set in
+#        Netlify → Site settings → Environment variables (Build), so the
+#        prerender script can fetch designer + journal slugs from Supabase.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Build secrets (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY) must be
+  # added in the Netlify dashboard, not committed here.
+
+# Pretty URLs: serve `/designers/jean-michel-frank/index.html` for the URL
+# `/designers/jean-michel-frank` automatically. Netlify does this by default,
+# but we make it explicit so it can't be turned off accidentally.
+[build.processing.html]
+  pretty_urls = true
+
+# Long cache for hashed assets (Vite emits content-hashed filenames).
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML must always revalidate so newly-deployed prerendered shells (and the
+# build-id cache-buster) reach users immediately.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+# SPA fallback for client-routed pages that have NO prerendered shell.
+# `force = false` (the default) means Netlify only applies this rewrite when
+# no real file matches — so dist/designers/jean-michel-frank/index.html is
+# served as-is, and only unknown paths fall through to the SPA shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
