@@ -260,12 +260,7 @@ async function fetchDynamicRoutes() {
     );
     return { routes, designerLinks };
   }
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.warn(
-      "[prerender] Supabase env vars missing — skipping dynamic routes."
-    );
-    return routes;
-  }
+
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: false },
