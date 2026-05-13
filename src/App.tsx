@@ -431,6 +431,7 @@ const App = () => {
                     <Route path="admin/og-pipeline" element={<TradeAdminOgPipeline />} />
                     <Route path="admin/onboarding" element={<TradeAdminOnboarding />} />
                     <Route path="admin/onboarding-funnel" element={<TradeAdminOnboardingFunnel />} />
+                    <Route path="admin/seo-audit" element={<TradeAdminSeoAudit />} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
                     <Route path="budget" element={<TradeBudgetTracker />} />
                     <Route path="clients" element={<TradeClients />} />
