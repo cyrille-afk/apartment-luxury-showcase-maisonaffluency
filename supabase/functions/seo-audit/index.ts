@@ -5,9 +5,9 @@
 // Defaults to https://www.maisonaffluency.com but accepts ?base= override.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const DEFAULT_BASE = "https://www.maisonaffluency.com";
+const DEFAULT_BASE = "https://maisonaffluency.com";
 const UA = "MaisonAffluency-SEO-Audit/1.0";
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 12000;
 const CONCURRENCY = 32;
 
 const STATIC_ROUTES = [
