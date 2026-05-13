@@ -60,11 +60,11 @@ const PublicDesigners = () => {
           name="description"
           content="Discover our curated selection of ateliers and designers — from historical masters to contemporary creators of collectible furniture and lighting."
         />
-        <link rel="canonical" href="https://www.maisonaffluency.com/designers" />
+        <link rel="canonical" href="https://maisonaffluency.com/designers" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="Maison Affluency" />
-        <meta property="og:url" content="https://www.maisonaffluency.com/designers" />
+        <meta property="og:url" content="https://maisonaffluency.com/designers" />
         <meta property="og:title" content="Designers & Ateliers — Maison Affluency" />
         <meta property="og:description" content="Discover our curated selection of ateliers and designers — from historical masters to contemporary creators of collectible furniture and lighting." />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
