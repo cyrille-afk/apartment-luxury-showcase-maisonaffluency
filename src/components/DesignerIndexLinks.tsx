@@ -10,16 +10,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import designersSeed from "@/data/designersIndex.json";
 
 interface DesignerLink {
   slug: string;
   name: string;
 }
 
+const SEED = designersSeed as DesignerLink[];
+
 function useAllPublishedDesigners() {
   return useQuery({
     queryKey: ["all-published-designers-index"],
     staleTime: 1000 * 60 * 60, // 1h
+    initialData: SEED,
     queryFn: async () => {
       // Lift Supabase's default 1000-row cap explicitly; catalog has ~700 designers.
       const { data, error } = await supabase
