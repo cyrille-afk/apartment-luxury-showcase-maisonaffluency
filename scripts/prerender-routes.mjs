@@ -278,7 +278,39 @@ const STATIC_ROUTES = [
     description:
       "Your saved designers, ateliers and collectible pieces from the Maison Affluency catalogue.",
   },
+  // Trade portal shells (public-facing login/register landing for crawlers)
+  {
+    path: "/trade",
+    title: "Trade Portal Dashboard | Maison Affluency",
+    description:
+      "The Maison Affluency trade portal for interior designers and architects — project folders, spec sheets, quoting tools and white-label documentation.",
+  },
+  {
+    path: "/trade/designers",
+    title: "Trade Designers Directory | Maison Affluency",
+    description:
+      "Browse the full designer and atelier directory in the Maison Affluency trade portal — filter by category, view spec sheets and add pieces to project folders.",
+  },
+  {
+    path: "/trade/login",
+    title: "Trade Account Sign In | Maison Affluency",
+    description:
+      "Sign in to the Maison Affluency trade portal to access project folders, spec sheets, FF&E schedules and exclusive trade pricing.",
+  },
+  {
+    path: "/trade/register",
+    title: "Trade Account Registration | Maison Affluency",
+    description:
+      "Apply for a Maison Affluency trade account — exclusive pricing, sample library, FF&E tools and white-label documentation for interior professionals.",
+  },
+  {
+    path: "/trade/spec-sheet",
+    title: "Product Spec Sheet Viewer | Maison Affluency",
+    description:
+      "View and download detailed product spec sheets — dimensions, materials, finishes and lead times — for pieces in the Maison Affluency trade catalogue.",
+  },
 ];
+
 
 async function fetchDynamicRoutes() {
   const routes = [];
