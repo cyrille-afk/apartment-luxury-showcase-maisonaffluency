@@ -253,6 +253,13 @@ const STATIC_ROUTES = [
 
 async function fetchDynamicRoutes() {
   const routes = [];
+  const designerLinks = []; // [{slug, name}] for static A–Z block injection
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.warn(
+      "[prerender] Supabase env vars missing — skipping dynamic routes."
+    );
+    return { routes, designerLinks };
+  }
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.warn(
       "[prerender] Supabase env vars missing — skipping dynamic routes."
