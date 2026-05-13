@@ -377,3 +377,25 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
 .scroll-header-offset {
   scroll-margin-top: var(--header-h);
 }
+
+/* ─────────────────────────────────────────────
+   iOS standalone (PWA) safe-area handling.
+   When the app runs from the Home Screen, the
+   status-bar inset (env(safe-area-inset-top))
+   is non-zero and the fixed nav grows by that
+   amount. Page content uses pt-24/28/32 to
+   clear the nav — extend those on mobile to
+   include the safe-area inset so headlines and
+   intro copy are no longer hidden behind the
+   notch / dynamic island.
+   ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .pt-24 { padding-top: calc(6rem + env(safe-area-inset-top)); }
+  .pt-28 { padding-top: calc(7rem + env(safe-area-inset-top)); }
+  .pt-32 { padding-top: calc(8rem + env(safe-area-inset-top)); }
+}
+
+/* Extend scroll anchor offset to include safe-area inset on mobile. */
+@media (max-width: 767px) {
+  :root { --header-h: calc(6.5rem + env(safe-area-inset-top)); }
+}
