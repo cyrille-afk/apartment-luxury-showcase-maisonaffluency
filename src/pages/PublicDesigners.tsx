@@ -80,6 +80,11 @@ const PublicDesigners = () => {
         <Navigation />
 
         <div className="pt-28 pb-20">
+          <div className="max-w-6xl mx-auto px-4 md:px-12 lg:px-20 mb-4 md:mb-0">
+            <h1 className="font-display text-3xl md:text-5xl text-foreground tracking-wide">
+              Designers &amp; Ateliers
+            </h1>
+          </div>
           <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} />
         </div>
 

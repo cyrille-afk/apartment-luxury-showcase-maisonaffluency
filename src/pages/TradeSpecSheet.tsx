@@ -81,9 +81,12 @@ export default function TradeSpecSheet() {
   const [gateOpen, setGateOpen] = useState(false);
 
   const pageTitle = useMemo(
-    () => (product ? `${brand} — ${product} Spec Sheet` : `${brand} Spec Sheet`),
+    () => (product ? `${brand} — ${product} Spec Sheet` : "Trade Product Spec Sheet Viewer"),
     [brand, product]
   );
+  const pageDescription = product
+    ? `View the ${product} spec sheet from ${brand}: dimensions, finishes, materials and downloadable product documentation.`
+    : "View Maison Affluency trade product spec sheets, including dimensions, materials, finishes and downloadable documentation for registered users.";
 
   useEffect(() => {
     if (!product || !user) { setLoading(false); return; }
@@ -178,7 +181,9 @@ export default function TradeSpecSheet() {
     return (
       <>
         <Helmet>
-          <title>{pageTitle} | Maison & Ateliers</title>
+          <title>{pageTitle} | Maison Affluency</title>
+          <meta name="description" content={pageDescription} />
+          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
         </Helmet>
         <div className="flex flex-col items-center justify-center h-[60vh] gap-6 px-4 text-center">
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
@@ -216,7 +221,9 @@ export default function TradeSpecSheet() {
     return (
       <>
         <Helmet>
-          <title>{pageTitle} | Maison & Ateliers</title>
+          <title>{pageTitle} | Maison Affluency</title>
+          <meta name="description" content={pageDescription} />
+          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
         </Helmet>
 
         <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -249,9 +256,12 @@ export default function TradeSpecSheet() {
   return (
     <>
       <Helmet>
-        <title>{pageTitle} | Maison & Ateliers</title>
+        <title>{pageTitle} | Maison Affluency</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
       </Helmet>
       <div className="w-full h-[calc(100vh-4rem)]">
+        <h1 className="sr-only">{pageTitle}</h1>
         <PdfFrame src={pdfUrl} title={pageTitle} />
       </div>
     </>
