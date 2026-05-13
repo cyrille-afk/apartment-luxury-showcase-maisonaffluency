@@ -61,6 +61,7 @@ const TradeAdminCadAssets = lazy(() => import("./pages/TradeAdminCadAssets"));
 const TradeAdminOgPipeline = lazy(() => import("./pages/TradeAdminOgPipeline"));
 const TradeAdminOnboarding = lazy(() => import("./pages/TradeAdminOnboarding"));
 const TradeAdminOnboardingFunnel = lazy(() => import("./pages/TradeAdminOnboardingFunnel"));
+const TradeAdminSeoAudit = lazy(() => import("./pages/TradeAdminSeoAudit"));
 const TradeMoodBoards = lazy(() => import("./pages/TradeMoodBoards"));
 const TradeBudgetTracker = lazy(() => import("./pages/TradeBudgetTracker"));
 const TradeClients = lazy(() => import("./pages/TradeClients"));
@@ -430,6 +431,7 @@ const App = () => {
                     <Route path="admin/og-pipeline" element={<TradeAdminOgPipeline />} />
                     <Route path="admin/onboarding" element={<TradeAdminOnboarding />} />
                     <Route path="admin/onboarding-funnel" element={<TradeAdminOnboardingFunnel />} />
+                    <Route path="admin/seo-audit" element={<TradeAdminSeoAudit />} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
                     <Route path="budget" element={<TradeBudgetTracker />} />
                     <Route path="clients" element={<TradeClients />} />
