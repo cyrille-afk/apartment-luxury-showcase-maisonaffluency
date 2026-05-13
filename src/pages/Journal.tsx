@@ -311,6 +311,7 @@ const Journal = () => {
           )}
         </div>
       </div>
+      <DesignerIndexLinks />
     </>
   );
 };
