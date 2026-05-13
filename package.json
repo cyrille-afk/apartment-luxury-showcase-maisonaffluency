@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:mobile-parallax": "playwright test e2e/parallax-interlude-mobile.spec.ts",
+    "test:e2e:mobile-pwa": "playwright test e2e/mobile-pwa-a11y.spec.ts",
+    "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "audit:og": "python3 scripts/audit-og-bridges.py --warnings",
     "check:product-images": "python3 scripts/check-product-image-parity.py"
   },
