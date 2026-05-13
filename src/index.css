@@ -490,6 +490,48 @@ body {
 input, select, textarea {
   font-size: max(16px, 1rem);
 }
+
+/* ─────────────────────────────────────────────
+   Cross-browser focus ring (Safari iOS friendly).
+   - :focus-visible only — mouse/touch taps don't
+     leave a permanent ring, keyboard / a11y do.
+   - Implemented as box-shadow (not outline width
+     or border width) so the element's box never
+     reflows — zero layout shift on focus.
+   - Strips Safari's fuzzy default outline + the
+     iOS tap highlight to avoid double rings.
+   - Font-size is already locked ≥16px, so the
+     ring can't trigger Safari's focus-zoom.
+   ───────────────────────────────────────────── */
+:where(input, select, textarea, button, a, summary, [role="button"],
+       [role="textbox"], [role="combobox"], [role="searchbox"],
+       [role="spinbutton"], [contenteditable="true"], [contenteditable=""]) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(input, select, textarea, button, a, summary, [role="button"],
+       [role="textbox"], [role="combobox"], [role="searchbox"],
+       [role="spinbutton"], [contenteditable="true"], [contenteditable=""]):focus {
+  outline: none;
+}
+:where(input, select, textarea, button, a, summary, [role="button"],
+       [role="textbox"], [role="combobox"], [role="searchbox"],
+       [role="spinbutton"], [contenteditable="true"], [contenteditable=""]):focus-visible {
+  outline: 2px solid transparent; /* visible in forced-colors mode */
+  outline-offset: 2px;
+  /* Two-layer shadow: 1px contrast halo + 3px ring. No layout impact. */
+  box-shadow:
+    0 0 0 1px hsl(var(--background)),
+    0 0 0 3px hsl(var(--ring) / 0.65);
+  border-radius: inherit;
+  transition: box-shadow 120ms ease-out;
+}
+@media (forced-colors: active) {
+  :where(input, select, textarea, button, a, summary,
+         [role="button"], [role="textbox"], [role="combobox"]):focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+}
 @media (display-mode: standalone) {
   html, body {
     min-height: 100vh;
