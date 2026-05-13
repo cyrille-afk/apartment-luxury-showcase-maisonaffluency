@@ -8,7 +8,7 @@
  * prerendered, because it runs immediately after prerender-routes.mjs and
  * derives routes from the same source-of-truth queries.
  *
- * The sitemap points to canonical URLs on https://www.maisonaffluency.com.
+ * The sitemap points to canonical URLs on https://maisonaffluency.com.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
@@ -29,7 +29,7 @@ try {
   // .env not present in some environments — fall back to process.env
 }
 const DIST = path.join(ROOT, "dist");
-const CANONICAL_HOST = "https://www.maisonaffluency.com";
+const CANONICAL_HOST = "https://maisonaffluency.com";
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_KEY =
