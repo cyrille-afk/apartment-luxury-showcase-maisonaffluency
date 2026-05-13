@@ -87,6 +87,14 @@ function patchTemplate(template, meta) {
 
   let html = template;
 
+  // Make the generator idempotent: if the template already came from a prior
+  // prerender pass, remove stale route canonicals/og:url before injecting the
+  // current route. Otherwise rerunning the script can preserve the homepage
+  // canonical ahead of the route-specific one.
+  html = html
+    .replace(/\s*<link\s+rel="canonical"[^>]*data-prerender="true"[^>]*>\s*/gi, "\n    ")
+    .replace(/\s*<meta\s+property="og:url"[^>]*data-prerender="true"[^>]*>\s*/gi, "\n    ");
+
   // <title>
   html = html.replace(
     /<title>[\s\S]*?<\/title>/,
