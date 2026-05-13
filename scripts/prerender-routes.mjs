@@ -88,6 +88,7 @@ const titleizeSlug = (slug) =>
 
 function patchTemplate(template, meta) {
   const title = escapeHtml(meta.title);
+  const h1 = escapeHtml(meta.h1 || meta.title);
   const desc = escapeAttr(meta.description);
   const url = `${CANONICAL_HOST}${meta.path}`;
   const image = meta.image || DEFAULT_OG_IMAGE;
