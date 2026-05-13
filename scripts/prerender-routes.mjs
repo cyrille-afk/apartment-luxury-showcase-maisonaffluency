@@ -288,12 +288,16 @@ async function fetchDynamicRoutes() {
       } else {
         desc = truncate(`${prefix} — collectible furniture, lighting and objets at Maison Affluency Singapore. Provenance, materials and signature pieces.`, 155);
       }
-      const titleContext = founder && founder.toLowerCase() !== d.name.toLowerCase()
-        ? `for ${founder}`
-        : titleizeSlug(d.slug);
+      // Title mirrors description prefix so parent + sub-designer pages never collide.
+      // If `prefix` equals just the name (no founder context), fall back to the slug
+      // titleized so siblings like /ozone vs /ozone-light still produce unique titles.
+      const slugSuffix = titleizeSlug(d.slug);
+      const titleHead = prefix !== d.name
+        ? prefix
+        : (slugSuffix.toLowerCase() !== d.name.toLowerCase() ? `${d.name} (${slugSuffix})` : d.name);
       routes.push({
         path: `/designers/${d.slug}`,
-        title: `${d.name} ${titleContext} — Designer Profile | Maison Affluency`,
+        title: `${titleHead} — Designer Profile | Maison Affluency`,
         description: desc,
       });
     }
