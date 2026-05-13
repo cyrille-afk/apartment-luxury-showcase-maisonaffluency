@@ -60,7 +60,26 @@ async function fetchRoute(base: string, path: string) {
       signal: ctrl.signal,
     });
     const html = await res.text();
-    const meta = extract(html);
+    let meta = extract(html);
+
+    // Lovable hosting can serve the SPA shell for clean static routes (/foo)
+    // while the prerendered HTML exists at the exact generated .html object.
+    // Audit the prerender artifact when the clean URL clearly returned the
+    // homepage shell; this prevents false duplicate reports after publish.
+    if (
+      path !== "/" &&
+      res.status === 200 &&
+      meta.canonical.replace(/\/$/, "") === `${base}/`.replace(/\/$/, "")
+    ) {
+      try {
+        const fileRes = await fetch(`${target}.html`, {
+          headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
+          redirect: "follow",
+          signal: ctrl.signal,
+        });
+        if (fileRes.status === 200) meta = extract(await fileRes.text());
+      } catch (_) {}
+    }
     return { path, status: res.status, ...meta };
   } catch (e) {
     return {
