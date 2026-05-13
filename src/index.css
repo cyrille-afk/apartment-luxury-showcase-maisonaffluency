@@ -443,7 +443,50 @@ body {
   font-size: max(16px, 1rem);
   line-height: 1.5;
 }
-/* Always prevent iOS focus-zoom on form fields (not just standalone). */
+/* ─────────────────────────────────────────────
+   Safari iOS focus-zoom guard.
+   Mobile Safari auto-zooms (and won't zoom back)
+   when a form control's *computed* font-size is
+   below 16px. Tailwind utilities like text-xs /
+   text-sm on inputs trigger this. Enforce a 16px
+   floor on every editable surface — including
+   contenteditable, date/time pickers, and our
+   custom select triggers — at @media (max-width:
+   768px) so desktop typography is unaffected.
+   ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea,
+  button,
+  [contenteditable="true"],
+  [contenteditable=""],
+  [role="textbox"],
+  [role="combobox"],
+  [role="searchbox"],
+  [role="spinbutton"],
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"] {
+    font-size: max(16px, 1rem) !important;
+    line-height: 1.4 !important;
+  }
+  /* shadcn / Radix select trigger surface its inner span — cover both. */
+  [data-radix-select-trigger],
+  [data-radix-select-trigger] > span {
+    font-size: max(16px, 1rem) !important;
+  }
+}
+/* Always-on (desktop + mobile) baseline so JS-driven focus calls don't zoom. */
 input, select, textarea {
   font-size: max(16px, 1rem);
 }
