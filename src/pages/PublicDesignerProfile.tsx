@@ -52,6 +52,27 @@ function displayName(name: string): string {
   return name;
 }
 
+function designerSeoTitle(name: string, founder?: string | null, isChildDesigner?: boolean): string {
+  const cleanName = displayName(name);
+  const cleanFounder = founder?.trim();
+  if (isChildDesigner && cleanFounder && cleanFounder !== cleanName && !cleanName.toLowerCase().includes(cleanFounder.toLowerCase())) {
+    return `${cleanName} for ${cleanFounder} — Maison Affluency`;
+  }
+  return `${cleanName} — Maison Affluency`;
+}
+
+function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean }) {
+  const cleanName = displayName(args.name);
+  const cleanFounder = args.founder?.trim();
+  const rawBio = args.biography ? args.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
+  const genericAffiliation = /^designer\s+for\s+.+\.?$/i.test(rawBio);
+  const childFallback = args.isChildDesigner && cleanFounder
+    ? `${cleanName} for ${cleanFounder} — collectible design, furniture and limited editions curated by Maison Affluency Singapore.`
+    : "";
+  if (childFallback && (genericAffiliation || rawBio.toLowerCase().includes(cleanFounder.toLowerCase()))) return childFallback;
+  return (rawBio && !genericAffiliation ? rawBio.slice(0, 155) : "") || childFallback || args.specialty || `${cleanName} — collectible design at Maison Affluency Singapore.`;
+}
+
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
   const [sp] = useSearchParams();
   const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
