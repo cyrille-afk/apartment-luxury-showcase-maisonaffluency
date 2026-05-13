@@ -10,11 +10,24 @@
  *
  * The sitemap points to canonical URLs on https://www.maisonaffluency.com.
  */
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
 const ROOT = process.cwd();
+
+// Load .env manually (Node doesn't do this automatically; Vite does for client bundle only)
+try {
+  const envText = await readFile(path.join(ROOT, ".env"), "utf8");
+  for (const line of envText.split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+    if (m && !process.env[m[1]]) {
+      process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    }
+  }
+} catch {
+  // .env not present in some environments — fall back to process.env
+}
 const DIST = path.join(ROOT, "dist");
 const CANONICAL_HOST = "https://www.maisonaffluency.com";
 

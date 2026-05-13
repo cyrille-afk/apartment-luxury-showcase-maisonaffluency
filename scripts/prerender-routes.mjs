@@ -38,6 +38,19 @@ const CANONICAL_HOST = "https://www.maisonaffluency.com";
 const DEFAULT_OG_IMAGE =
   "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg";
 
+// Load .env manually (Node doesn't do this automatically; Vite does for client bundle only)
+try {
+  const envText = await readFile(path.join(ROOT, ".env"), "utf8");
+  for (const line of envText.split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+    if (m && !process.env[m[1]]) {
+      process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    }
+  }
+} catch {
+  // .env not present in some environments — fall back to process.env
+}
+
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_KEY =
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
