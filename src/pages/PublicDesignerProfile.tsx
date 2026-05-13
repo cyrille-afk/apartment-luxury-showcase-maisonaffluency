@@ -499,10 +499,20 @@ const PublicDesignerProfile = () => {
       {(() => {
         const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}`;
         const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
+        // Use ONLY the designer's own biography for meta description.
+        // Never fall back to the parent brand's bio — that creates duplicate descriptions
+        // across all sub-designers of the same parent (bad for SEO).
+        const ownBio = designer?.biography
+          ? designer.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+          : "";
+        const subDesignerFallback = isChildDesigner && designer.founder
+          ? `${displayName(name)} — designer for ${designer.founder}. Discover their collectible pieces at Maison Affluency Singapore.`
+          : "";
         const desc =
-          (displayBiography?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 155)) ||
+          (ownBio ? ownBio.slice(0, 155) : "") ||
+          subDesignerFallback ||
           designer.specialty ||
-          `${name} — collectible design at Maison Affluency.`;
+          `${displayName(name)} — collectible design at Maison Affluency Singapore.`;
         const personLd = {
           "@context": "https://schema.org",
           "@type": isParentBrand ? "Organization" : "Person",
