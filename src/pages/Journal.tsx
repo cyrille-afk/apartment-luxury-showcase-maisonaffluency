@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle, type JournalCategory } from "@/lib/journal";
 import FeaturedReadBanner from "@/components/FeaturedReadBanner";
+import DesignerIndexLinks from "@/components/DesignerIndexLinks";
 
 const ALL_CATEGORIES: JournalCategory[] = [
   "designer_interview",
@@ -310,6 +311,7 @@ const Journal = () => {
           )}
         </div>
       </div>
+      <DesignerIndexLinks />
     </>
   );
 };

@@ -7,6 +7,7 @@ import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
 import JournalMarkdown from "@/components/journal/JournalMarkdown";
+import DesignerIndexLinks from "@/components/DesignerIndexLinks";
 
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 import { useAuth } from "@/hooks/useAuth";
@@ -417,6 +418,8 @@ const JournalArticlePage = () => {
           </Link>
         </div>
       </div>
+
+      <DesignerIndexLinks />
 
       {/* Lightbox */}
       <AnimatePresence>
