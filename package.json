@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/prerender-routes.mjs",
-    "build:dev": "vite build --mode development && node scripts/prerender-routes.mjs",
+    "build": "vite build && node scripts/prerender-routes.mjs && node scripts/build-sitemap.mjs",
+    "build:dev": "vite build --mode development && node scripts/prerender-routes.mjs && node scripts/build-sitemap.mjs",
     "prerender": "node scripts/prerender-routes.mjs",
     "verify:prerender": "node scripts/verify-prerender.mjs",
     "lint": "eslint .",
