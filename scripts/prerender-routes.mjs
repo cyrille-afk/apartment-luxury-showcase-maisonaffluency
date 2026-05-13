@@ -88,6 +88,7 @@ const titleizeSlug = (slug) =>
 
 function patchTemplate(template, meta) {
   const title = escapeHtml(meta.title);
+  const h1 = escapeHtml(meta.h1 || meta.title);
   const desc = escapeAttr(meta.description);
   const url = `${CANONICAL_HOST}${meta.path}`;
   const image = meta.image || DEFAULT_OG_IMAGE;
@@ -155,16 +156,16 @@ function patchTemplate(template, meta) {
 
   // Replace the H1 + first <p> inside the visible #seo-content block.
   html = html.replace(
-    /(<div id="seo-content"[\s\S]*?>)\s*<h1[^>]*>[\s\S]*?<\/h1>\s*<p>[\s\S]*?<\/p>/,
-    (_, open) =>
-      `${open}\n        <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">${title}</h1>\n        <p>${desc}</p>`
+    /(<div id="seo-content"[\s\S]*?>\s*<h1[^>]*>)[\s\S]*?(<\/h1>\s*<p>)[\s\S]*?(<\/p>)/,
+    (_, open, mid, close) =>
+      `${open}${h1}${mid}${desc}${close}`
   );
 
   // Same for the <noscript> clone (Bing/Yandex/no-JS crawlers).
   html = html.replace(
-    /(<noscript>\s*<div[^>]*>)\s*<h1[^>]*>[\s\S]*?<\/h1>\s*<p>[\s\S]*?<\/p>/,
-    (_, open) =>
-      `${open}\n        <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">${title}</h1>\n        <p>${desc}</p>`
+    /(<noscript>\s*<div[^>]*>\s*<h1[^>]*>)[\s\S]*?(<\/h1>\s*<p>)[\s\S]*?(<\/p>)/,
+    (_, open, mid, close) =>
+      `${open}${h1}${mid}${desc}${close}`
   );
 
   // Optional: inject a static, server-visible A–Z designer link block before
@@ -221,6 +222,7 @@ const STATIC_ROUTES = [
   {
     path: "/designers",
     title: "Designers & Ateliers | Maison Affluency Singapore",
+    h1: "Designers & Ateliers",
     description:
       "Browse the full roster of designers, ateliers and makers represented by Maison Affluency Singapore — sculptural lighting, bespoke furniture, hand-knotted rugs and more.",
   },
@@ -552,7 +554,11 @@ async function main() {
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      const routeWithLinks = { ...route, primaryNavHtml, designerLinksHtml };
+      const routeWithLinks = {
+        ...route,
+        primaryNavHtml,
+        designerLinksHtml: route.path === "/designers" ? "" : designerLinksHtml,
+      };
       await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
     } catch (err) {
