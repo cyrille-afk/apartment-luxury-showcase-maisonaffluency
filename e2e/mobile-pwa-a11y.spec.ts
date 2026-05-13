@@ -15,10 +15,8 @@ import { test, expect, devices } from "@playwright/test";
 
 const ROUTES = ["/", "/trade/login"];
 
-// Use a Chromium-based mobile device so CI only needs `playwright install chromium`.
-// Switching to WebKit (e.g. iPhone 13) requires `npx playwright install webkit`,
-// which the mobile-checks workflow does NOT do — every test would fail with
-// "Executable doesn't exist at /webkit-XXXX/pw_run.sh".
+// Keep this aligned with playwright.config.ts; CI runs inside the official
+// Playwright image so Chromium and its Linux shared libraries are present.
 test.use({ ...devices["Pixel 5"] });
 
 test.describe("Mobile PWA & accessibility", () => {
