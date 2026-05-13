@@ -163,9 +163,9 @@ function patchTemplate(template, meta) {
 
   // Same for the <noscript> clone (Bing/Yandex/no-JS crawlers).
   html = html.replace(
-    /(<noscript>\s*<div[^>]*>)\s*<h1[^>]*>[\s\S]*?<\/h1>\s*<p>[\s\S]*?<\/p>/,
-    (_, open) =>
-      `${open}\n        <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">${title}</h1>\n        <p>${desc}</p>`
+    /(<noscript>\s*<div[^>]*>\s*<h1[^>]*>)[\s\S]*?(<\/h1>\s*<p>)[\s\S]*?(<\/p>)/,
+    (_, open, mid, close) =>
+      `${open}${h1}${mid}${desc}${close}`
   );
 
   // Optional: inject a static, server-visible A–Z designer link block before
