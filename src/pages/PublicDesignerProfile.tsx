@@ -518,7 +518,7 @@ const PublicDesignerProfile = () => {
   return (
     <>
       {(() => {
-        const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}`;
+        const canonical = `https://maisonaffluency.com/designers/${designer.slug}`;
         const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
         const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner);
         const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner });
@@ -535,8 +535,8 @@ const PublicDesignerProfile = () => {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://www.maisonaffluency.com" },
-            { "@type": "ListItem", position: 2, name: "Designers", item: "https://www.maisonaffluency.com/designers" },
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://maisonaffluency.com" },
+            { "@type": "ListItem", position: 2, name: "Designers", item: "https://maisonaffluency.com/designers" },
             { "@type": "ListItem", position: 3, name: displayName(name), item: canonical },
           ],
         };
