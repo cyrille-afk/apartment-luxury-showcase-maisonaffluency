@@ -404,23 +404,20 @@ async function exists(p) {
 
 async function writeRoute(template, route, hasChildRoutes = false) {
   const html = patchTemplate(template, route);
-  // "/" -> dist/index.html. Leaf clean URLs are emitted as extensionless files
-  // because Lovable hosting resolves /foo before /foo/index.html. Routes that
-  // are parents of deeper paths (e.g. /designers before /designers/:slug) must
-  // remain directories, otherwise the parent file blocks all child shells.
+  // "/" -> dist/index.html. Every clean URL is emitted as a directory index
+  // so the host serves it as text/html instead of application/octet-stream.
   const isCleanRoute = route.path !== "/";
   const target =
     route.path === "/"
       ? path.join(DIST, "index.html")
-      : isCleanRoute && !hasChildRoutes
-        ? path.join(DIST, route.path.replace(/^\//, ""))
       : path.join(DIST, route.path.replace(/^\//, ""), "index.html");
 
   if (isCleanRoute) {
+    // Remove stale extensionless shells from earlier builds; if present they
+    // win over /index.html on the clean URL and are served with the wrong MIME.
+    const legacyExtensionless = path.join(DIST, route.path.replace(/^\//, ""));
+    if (!hasChildRoutes) await rm(legacyExtensionless, { force: true });
     await rm(target, { recursive: true, force: true });
-    if (hasChildRoutes) {
-      await rm(path.join(DIST, route.path.replace(/^\//, "")), { force: true });
-    }
   }
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, html, "utf8");
