@@ -2357,7 +2357,7 @@ const FeaturedDesigners = () => {
 
 
         {(searchQuery || (selectedCategory && !selectedSubcategory)) && (
-          <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
+          <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
             {filteredPicks
               ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
               : `${filteredDesigners.length} designer${filteredDesigners.length !== 1 ? 's' : ''} found`}
