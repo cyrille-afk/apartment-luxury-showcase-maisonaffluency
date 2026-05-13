@@ -42,6 +42,7 @@ const ExitIntentBanner = lazyRetry(() => import("@/components/ExitIntentBanner")
 const StickyBottomNav = lazyRetry(() => import("@/components/StickyBottomNav"));
 const JournalTeaser = lazyRetry(() => import("@/components/JournalTeaser"));
 const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
+const DesignerIndexLinks = lazyRetry(() => import("@/components/DesignerIndexLinks"));
 const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
