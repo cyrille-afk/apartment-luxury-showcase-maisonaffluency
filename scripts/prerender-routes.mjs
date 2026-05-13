@@ -468,8 +468,12 @@ async function main() {
   }
   const template = await readFile(TEMPLATE_PATH, "utf8");
 
-  const dynamic = await fetchDynamicRoutes();
+  const { routes: dynamic, designerLinks } = await fetchDynamicRoutes();
   const all = [...STATIC_ROUTES, ...dynamic];
+
+  // Static A–Z block, injected only on hub/discovery pages.
+  const designerLinksHtml = buildDesignerLinksHtml(designerLinks);
+  const HUB_PATHS = new Set(["/", "/journal", "/designers"]);
 
   // Deduplicate by path (last wins)
   const seen = new Map();
@@ -485,7 +489,13 @@ async function main() {
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      await writeRoute(template, route, parentPaths.has(route.path));
+      // Inject the link block on hub pages and every per-article journal shell.
+      const wantsLinks =
+        HUB_PATHS.has(route.path) || route.path.startsWith("/journal/");
+      const routeWithLinks = wantsLinks
+        ? { ...route, designerLinksHtml }
+        : route;
+      await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
     } catch (err) {
       failed++;
