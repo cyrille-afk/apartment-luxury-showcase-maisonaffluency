@@ -236,14 +236,16 @@ const NewIn = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <link rel="canonical" href="https://maisonaffluency.com/new-in" />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         {ogImage && <meta property="og:image" content={ogImage} />}
-        <meta property="og:url" content="https://www.maisonaffluency.com/new-in" />
-        <meta property="og:type" content="article" />
+        <meta property="og:url" content="https://maisonaffluency.com/new-in" />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <Navigation />
+      <h1 className="sr-only">New In at Maison Affluency</h1>
 
       <div className="mt-[96px]">
         {/* Mobile: swipeable carousel with dots */}

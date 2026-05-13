@@ -45,11 +45,11 @@ const PublicCollectibles = () => {
           name="description"
           content="Explore our curated selection of collectible design — sculptural furniture, rare lighting, and limited-edition objets d'art from world-renowned ateliers."
         />
-        <link rel="canonical" href="https://www.maisonaffluency.com/collectibles" />
+        <link rel="canonical" href="https://maisonaffluency.com/collectibles" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="Maison Affluency" />
-        <meta property="og:url" content="https://www.maisonaffluency.com/collectibles" />
+        <meta property="og:url" content="https://maisonaffluency.com/collectibles" />
         <meta property="og:title" content="Collectible Design On View — Maison Affluency" />
         <meta property="og:description" content="Explore our curated selection of collectible design — sculptural furniture, rare lighting, and limited-edition objets d'art from world-renowned ateliers." />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
@@ -63,6 +63,7 @@ const PublicCollectibles = () => {
 
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
+        <h1 className="sr-only">Collectible Design On View</h1>
 
         <div className="pt-28 pb-20">
           <Collectibles />

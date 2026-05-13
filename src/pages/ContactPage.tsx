@@ -17,11 +17,11 @@ const ContactPage = () => {
           name="description"
           content="Visit Maison Affluency by appointment at 1 Grange Garden, Singapore 249631. Contact our concierge team for professional inquiries, custom specifications, and collaborative opportunities."
         />
-        <link rel="canonical" href="https://www.maisonaffluency.com/contact" />
+        <link rel="canonical" href="https://maisonaffluency.com/contact" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="Maison Affluency" />
-        <meta property="og:url" content="https://www.maisonaffluency.com/contact" />
+        <meta property="og:url" content="https://maisonaffluency.com/contact" />
         <meta property="og:title" content="Contact — Maison Affluency" />
         <meta property="og:description" content="Visit Maison Affluency by appointment at 1 Grange Garden, Singapore 249631. Professional inquiries for architects, interior designers, and design connoisseurs." />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
@@ -35,6 +35,7 @@ const ContactPage = () => {
 
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
+        <h1 className="sr-only">Contact Maison Affluency</h1>
 
         <div className="pt-28">
           <ContactInquiry />
