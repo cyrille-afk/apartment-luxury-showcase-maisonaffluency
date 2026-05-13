@@ -402,22 +402,25 @@ async function exists(p) {
   }
 }
 
-async function writeRoute(template, route) {
+async function writeRoute(template, route, hasChildRoutes = false) {
   const html = patchTemplate(template, route);
-  // "/" -> dist/index.html. Every clean URL route also needs an exact
-  // extensionless file because Lovable hosting resolves /foo before
-  // /foo/index.html; nested-only shells were causing static pages to serve the
-  // homepage metadata while designer leaf pages worked.
+  // "/" -> dist/index.html. Leaf clean URLs are emitted as extensionless files
+  // because Lovable hosting resolves /foo before /foo/index.html. Routes that
+  // are parents of deeper paths (e.g. /designers before /designers/:slug) must
+  // remain directories, otherwise the parent file blocks all child shells.
   const isCleanRoute = route.path !== "/";
   const target =
     route.path === "/"
       ? path.join(DIST, "index.html")
-      : isCleanRoute
+      : isCleanRoute && !hasChildRoutes
         ? path.join(DIST, route.path.replace(/^\//, ""))
       : path.join(DIST, route.path.replace(/^\//, ""), "index.html");
 
   if (isCleanRoute) {
     await rm(target, { recursive: true, force: true });
+    if (hasChildRoutes) {
+      await rm(path.join(DIST, route.path.replace(/^\//, "")), { force: true });
+    }
   }
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, html, "utf8");
@@ -441,12 +444,18 @@ async function main() {
   // Deduplicate by path (last wins)
   const seen = new Map();
   for (const r of all) seen.set(r.path, r);
+  const paths = [...seen.keys()];
+  const parentPaths = new Set(
+    paths.filter((candidate) =>
+      candidate !== "/" && paths.some((p) => p.startsWith(`${candidate}/`))
+    )
+  );
 
   let written = 0;
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      await writeRoute(template, route);
+      await writeRoute(template, route, parentPaths.has(route.path));
       written++;
     } catch (err) {
       failed++;
