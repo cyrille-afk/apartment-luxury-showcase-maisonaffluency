@@ -52,6 +52,27 @@ function displayName(name: string): string {
   return name;
 }
 
+function designerSeoTitle(name: string, founder?: string | null, isChildDesigner?: boolean): string {
+  const cleanName = displayName(name);
+  const cleanFounder = founder?.trim();
+  if (isChildDesigner && cleanFounder && cleanFounder !== cleanName && !cleanName.toLowerCase().includes(cleanFounder.toLowerCase())) {
+    return `${cleanName} for ${cleanFounder} — Maison Affluency`;
+  }
+  return `${cleanName} — Maison Affluency`;
+}
+
+function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean }) {
+  const cleanName = displayName(args.name);
+  const cleanFounder = args.founder?.trim();
+  const rawBio = args.biography ? args.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
+  const genericAffiliation = /^designer\s+for\s+.+\.?$/i.test(rawBio);
+  const childFallback = args.isChildDesigner && cleanFounder
+    ? `${cleanName} for ${cleanFounder} — collectible design, furniture and limited editions curated by Maison Affluency Singapore.`
+    : "";
+  if (childFallback && (genericAffiliation || rawBio.toLowerCase().includes(cleanFounder.toLowerCase()))) return childFallback;
+  return (rawBio && !genericAffiliation ? rawBio.slice(0, 155) : "") || childFallback || args.specialty || `${cleanName} — collectible design at Maison Affluency Singapore.`;
+}
+
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
   const [sp] = useSearchParams();
   const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
@@ -499,22 +520,8 @@ const PublicDesignerProfile = () => {
       {(() => {
         const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}`;
         const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
-        // Use ONLY the designer's own biography for meta description.
-        // Never fall back to the parent brand's bio — that creates duplicate descriptions
-        // across all sub-designers of the same parent (bad for SEO).
-        const rawOwnBio = designer?.biography
-          ? designer.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-          : "";
-        const genericAffiliationBio = /^designer\s+for\s+.+\.?$/i.test(rawOwnBio);
-        const ownBio = genericAffiliationBio ? "" : rawOwnBio;
-        const subDesignerFallback = isChildDesigner && designer.founder
-          ? `${displayName(name)} — designer for ${designer.founder}. Discover their collectible pieces at Maison Affluency Singapore.`
-          : "";
-        const desc =
-          (ownBio ? ownBio.slice(0, 155) : "") ||
-          subDesignerFallback ||
-          designer.specialty ||
-          `${displayName(name)} — collectible design at Maison Affluency Singapore.`;
+        const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner);
+        const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner });
         const personLd = {
           "@context": "https://schema.org",
           "@type": isParentBrand ? "Organization" : "Person",
@@ -535,12 +542,12 @@ const PublicDesignerProfile = () => {
         };
         return (
           <Helmet>
-            <title>{displayName(name)} — Maison Affluency</title>
+            <title>{seoTitle}</title>
             <meta name="description" content={desc} />
             <link rel="canonical" href={canonical} />
             <meta property="og:type" content="profile" />
             <meta property="og:site_name" content="Maison Affluency" />
-            <meta property="og:title" content={`${displayName(name)} — Maison Affluency`} />
+            <meta property="og:title" content={seoTitle} />
             <meta property="og:description" content={desc} />
             <meta property="og:url" content={canonical} />
             <meta property="og:image" content={ogImg} />
@@ -548,7 +555,7 @@ const PublicDesignerProfile = () => {
             <meta property="og:image:height" content="630" />
             <meta property="og:image:alt" content={displayName(name)} />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={`${displayName(name)} — Maison Affluency`} />
+            <meta name="twitter:title" content={seoTitle} />
             <meta name="twitter:description" content={desc} />
             <meta name="twitter:image" content={ogImg} />
             <script type="application/ld+json">{JSON.stringify(personLd)}</script>
