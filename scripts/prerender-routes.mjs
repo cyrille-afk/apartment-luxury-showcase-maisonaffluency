@@ -335,10 +335,17 @@ async function exists(p) {
 async function writeRoute(template, route) {
   const html = patchTemplate(template, route);
   // "/" -> dist/index.html (overwrite the template itself with the patched
-  // homepage version). Other routes -> dist/<path>/index.html.
+  // homepage version). Other routes -> dist/<path>/index.html, except leaf
+  // dynamic pages where Lovable hosting matches the clean URL to an exact
+  // extensionless file before it considers a nested directory index.
+  // Without this, /designers/foo can fall through to the SPA homepage shell
+  // even though /designers/foo/index.html contains the correct prerender.
+  const isLeafDynamicRoute = /^\/(designers|journal)\/[^/]+$/.test(route.path);
   const target =
     route.path === "/"
       ? path.join(DIST, "index.html")
+      : isLeafDynamicRoute
+        ? path.join(DIST, route.path.replace(/^\//, ""))
       : path.join(DIST, route.path.replace(/^\//, ""), "index.html");
 
   await mkdir(path.dirname(target), { recursive: true });
