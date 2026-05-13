@@ -172,11 +172,40 @@ function patchTemplate(template, meta) {
   // so crawlers without JS see internal links to every /designers/:slug,
   // flattening crawl depth and resolving "URLs in sitemap not found in crawl"
   // for orphan profiles.
+  if (meta.primaryNavHtml) {
+    html = html.replace(/<\/body>/i, `${meta.primaryNavHtml}\n  </body>`);
+  }
   if (meta.designerLinksHtml) {
     html = html.replace(/<\/body>/i, `${meta.designerLinksHtml}\n  </body>`);
   }
 
   return html;
+}
+
+const PRIMARY_NAV_LINKS = [
+  { path: "/", label: "Home" },
+  { path: "/collectibles", label: "Collectibles" },
+  { path: "/gallery", label: "Gallery" },
+  { path: "/journal", label: "Journal" },
+  { path: "/designers", label: "Designers" },
+  { path: "/new-in", label: "New In" },
+  { path: "/apartment-tour", label: "Apartment Tour" },
+  { path: "/studios", label: "Studios" },
+  { path: "/favorites", label: "Favorites" },
+  { path: "/trade-program", label: "Trade Program" },
+  { path: "/trade/register", label: "Trade Register" },
+  { path: "/trade/login", label: "Trade Login" },
+  { path: "/contact", label: "Contact" },
+];
+
+function buildPrimaryNavHtml() {
+  const items = PRIMARY_NAV_LINKS.map(
+    (l) => `<li><a href="${l.path}">${l.label}</a></li>`
+  ).join("");
+  return `<nav aria-label="Primary site navigation" style="max-width:1200px;margin:0 auto;padding:24px 20px 8px;font-family:'Lora',Georgia,serif;color:#444;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin:0 0 12px;">Explore Maison Affluency</h2>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:0.85rem;">${items}</ul>
+    </nav>`;
 }
 
 // ----- Routes ---------------------------------------------------------------
@@ -471,9 +500,11 @@ async function main() {
   const { routes: dynamic, designerLinks } = await fetchDynamicRoutes();
   const all = [...STATIC_ROUTES, ...dynamic];
 
-  // Static A–Z block, injected only on hub/discovery pages.
+  // Static A–Z block + primary nav, injected on every shell so JS-less crawlers
+  // can discover both core pages (/collectibles, /gallery, /trade/login, …) and
+  // every /designers/:slug from anywhere they land.
   const designerLinksHtml = buildDesignerLinksHtml(designerLinks);
-  const HUB_PATHS = new Set(["/", "/journal", "/designers"]);
+  const primaryNavHtml = buildPrimaryNavHtml();
 
   // Deduplicate by path (last wins)
   const seen = new Map();
@@ -489,12 +520,7 @@ async function main() {
   let failed = 0;
   for (const route of seen.values()) {
     try {
-      // Inject the link block on hub pages and every per-article journal shell.
-      const wantsLinks =
-        HUB_PATHS.has(route.path) || route.path.startsWith("/journal/");
-      const routeWithLinks = wantsLinks
-        ? { ...route, designerLinksHtml }
-        : route;
+      const routeWithLinks = { ...route, primaryNavHtml, designerLinksHtml };
       await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
     } catch (err) {
