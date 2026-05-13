@@ -254,15 +254,24 @@ async function fetchDynamicRoutes() {
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
+      const specialty = (d.specialty ?? "").trim();
+      const founder = (d.founder ?? "").trim();
+      // Always lead with the designer name + founder context so child/sub-designers
+      // sharing a parent (e.g. CC-Tapis collaborators) never share the same description.
+      // Bio is appended last as differentiating long-form content when available.
       let desc = "";
+      const prefix = founder && founder.toLowerCase() !== d.name.toLowerCase()
+        ? `${d.name} for ${founder}`
+        : d.name;
       if (cleanBio.length >= 60) {
-        desc = truncate(cleanBio, 155);
-      } else if (d.specialty && d.specialty.trim().length >= 20) {
-        desc = truncate(`${d.name} — ${d.specialty.trim()}. Collectible design at Maison Affluency Singapore.`, 155);
-      } else if (d.founder && d.founder.trim()) {
-        desc = truncate(`${d.name} — designer for ${d.founder.trim()}. Discover their collectible pieces at Maison Affluency Singapore.`, 155);
+        // Prefix with name+founder, then append the bio so each shell is unique.
+        desc = truncate(`${prefix} — ${cleanBio}`, 155);
+      } else if (specialty.length > 0) {
+        desc = truncate(`${prefix} — ${specialty}. Collectible design at Maison Affluency Singapore.`, 155);
+      } else if (cleanBio.length > 0) {
+        desc = truncate(`${prefix} — ${cleanBio}`, 155);
       } else {
-        desc = truncate(`${d.name} — collectible furniture, lighting and objets at Maison Affluency Singapore. Provenance, materials and signature pieces.`, 155);
+        desc = truncate(`${prefix} — collectible furniture, lighting and objets at Maison Affluency Singapore. Provenance, materials and signature pieces.`, 155);
       }
       routes.push({
         path: `/designers/${d.slug}`,
