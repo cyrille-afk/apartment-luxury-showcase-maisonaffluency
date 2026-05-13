@@ -1,7 +1,8 @@
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
-import { Outlet, Navigate, useLocation } from "react-router-dom";
+import { Outlet, Navigate, useLocation, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -61,6 +62,55 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/comparator": "Product Comparator",
   "/trade/tools": "Tools",
 };
+
+const TRADE_GATE_COPY: Record<string, { title: string; description: string; h1: string }> = {
+  "/trade": {
+    title: "Trade Portal Dashboard | Maison Affluency",
+    h1: "Maison Affluency Trade Portal",
+    description: "Access project folders, trade pricing, spec sheets, quoting tools, FF&E schedules and white-label client documentation for interior design professionals.",
+  },
+  "/trade/designers": {
+    title: "Trade Designers Directory | Maison Affluency",
+    h1: "Trade Designers Directory",
+    description: "Browse Maison Affluency designers and ateliers for trade projects, with materials, collections, spec sheets and project-folder tools available after sign-in.",
+  },
+};
+
+function TradePublicGate({ path }: { path: string }) {
+  const copy = TRADE_GATE_COPY[path] ?? TRADE_GATE_COPY["/trade"];
+  const canonical = `https://maisonaffluency.com${path}`;
+
+  return (
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-16">
+      <Helmet>
+        <title>{copy.title}</title>
+        <meta name="description" content={copy.description} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={copy.title} />
+        <meta property="og:description" content={copy.description} />
+        <meta property="og:url" content={canonical} />
+      </Helmet>
+      <main className="w-full max-w-2xl text-center space-y-6">
+        <Link to="/" className="font-display text-sm uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors">
+          Maison Affluency
+        </Link>
+        <div className="space-y-3">
+          <p className="font-body text-xs uppercase tracking-[0.18em] text-muted-foreground">Trade Access</p>
+          <h1 className="font-display text-3xl md:text-5xl text-foreground tracking-wide">{copy.h1}</h1>
+          <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto">{copy.description}</p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <Link to="/trade/login" className="w-full sm:w-auto px-7 py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.16em] rounded-full hover:opacity-90 transition-opacity">
+            Sign in
+          </Link>
+          <Link to="/trade/register" className="w-full sm:w-auto px-7 py-3 border border-border font-body text-xs uppercase tracking-[0.16em] rounded-full hover:bg-muted transition-colors">
+            Apply for access
+          </Link>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -153,9 +203,7 @@ const TradeLayout = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/trade/login" replace />;
-  }
+  if (!user) return <TradePublicGate path={location.pathname.replace(/\/$/, "") || "/trade"} />;
 
   // Admins bypass application status checks
   if (!isAdmin && applicationStatus === "pending") {
