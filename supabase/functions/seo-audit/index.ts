@@ -71,14 +71,19 @@ async function fetchRoute(base: string, path: string) {
       res.status === 200 &&
       meta.canonical.replace(/\/$/, "") === `${base}/`.replace(/\/$/, "")
     ) {
-      try {
-        const fileRes = await fetch(`${target}.html`, {
-          headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
-          redirect: "follow",
-          signal: ctrl.signal,
-        });
-        if (fileRes.status === 200) meta = extract(await fileRes.text());
-      } catch (_) {}
+      for (const prerenderTarget of [`${target}/index.html`, `${target}.html`]) {
+        try {
+          const fileRes = await fetch(prerenderTarget, {
+            headers: { "user-agent": UA, accept: "text/html", "cache-control": "no-cache", pragma: "no-cache" },
+            redirect: "follow",
+            signal: ctrl.signal,
+          });
+          if (fileRes.status === 200) {
+            meta = extract(await fileRes.text());
+            break;
+          }
+        } catch (_) {}
+      }
     }
     return { path, status: res.status, ...meta };
   } catch (e) {
