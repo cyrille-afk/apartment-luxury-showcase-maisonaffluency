@@ -34,7 +34,7 @@ import { createClient } from "@supabase/supabase-js";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 const TEMPLATE_PATH = path.join(DIST, "index.html");
-const CANONICAL_HOST = "https://www.maisonaffluency.com";
+const CANONICAL_HOST = "https://maisonaffluency.com";
 const DEFAULT_OG_IMAGE =
   "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg";
 

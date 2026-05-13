@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SITE = "https://www.maisonaffluency.com";
+const SITE = "https://maisonaffluency.com";
 
 const STATIC_URLS = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },

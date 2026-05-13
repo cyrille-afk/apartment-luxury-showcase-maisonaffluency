@@ -8,7 +8,7 @@
  * Usage:
  *   node scripts/verify-prerender.mjs                     # default: live site
  *   node scripts/verify-prerender.mjs https://example.com # explicit
- *   BASE_URL=https://www.maisonaffluency.com node ...     # explicit
+ *   BASE_URL=https://maisonaffluency.com node ...         # explicit
  *   BASE_URL=http://localhost:4173 node ...               # against `vite preview`
  *   SAMPLE=20 node ...                                    # cap dynamic samples
  *
@@ -18,7 +18,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-const BASE_URL = (process.argv[2] || process.env.BASE_URL || "https://www.maisonaffluency.com").replace(/\/$/, "");
+const BASE_URL = (process.argv[2] || process.env.BASE_URL || "https://maisonaffluency.com").replace(/\/$/, "");
 const SAMPLE = Math.max(1, parseInt(process.env.SAMPLE || "15", 10));
 const TIMEOUT_MS = parseInt(process.env.TIMEOUT_MS || "15000", 10);
 const UA = "MaisonAffluency-Prerender-Verifier/1.0 (+https://www.maisonaffluency.com)";
