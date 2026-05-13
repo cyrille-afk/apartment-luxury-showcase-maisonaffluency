@@ -213,6 +213,38 @@ async function main() {
     }
   }
 
+  // 3. Crawlable-link check: /designers index must contain real <a href="/designers/<slug>">
+  //    for every published designer. Googlebot follows <a href> on first crawl;
+  //    JS-only navigate() handlers (div+button overlays) are invisible to it.
+  try {
+    const idx = await fetchHtml(`${BASE_URL}/designers`);
+    if (idx.status !== 200) {
+      failures.push({ path: "/designers", reason: `link-check HTTP ${idx.status}` });
+    } else {
+      const hrefs = new Set();
+      const re = /<a\b[^>]*\bhref=["']\/designers\/([a-z0-9-]+)["']/gi;
+      let m;
+      while ((m = re.exec(idx.html)) !== null) hrefs.add(m[1].toLowerCase());
+
+      const designerSlugs = dynamic
+        .filter((p) => p.startsWith("/designers/"))
+        .map((p) => p.slice("/designers/".length).toLowerCase());
+
+      const missing = designerSlugs.filter((s) => !hrefs.has(s));
+      console.log(
+        `[verify] /designers contains ${hrefs.size} crawlable designer links (expected ${designerSlugs.length})`
+      );
+      if (missing.length) {
+        failures.push({
+          path: "/designers",
+          reason: `missing crawlable <a href> for ${missing.length} designer(s): ${missing.slice(0, 10).join(", ")}${missing.length > 10 ? "…" : ""}`,
+        });
+      }
+    }
+  } catch (e) {
+    failures.push({ path: "/designers", reason: `link-check error: ${e?.message ?? e}` });
+  }
+
   console.log(`\n[verify] ${ok}/${paths.length} routes passed.`);
   if (failures.length) {
     console.error(`\n[verify] ${failures.length} FAILURES:`);
