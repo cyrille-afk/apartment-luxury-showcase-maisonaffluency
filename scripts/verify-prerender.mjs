@@ -155,11 +155,19 @@ async function main() {
   const dynamic = await loadDynamicPaths();
   const sampledDynamic = pickRandom(dynamic, SAMPLE);
   const paths = [...STATIC_PATHS, ...sampledDynamic];
+  for (const mustCheck of [
+    "/designers/cc-tapis",
+    "/designers/formafantasma-cc-tapis",
+    "/designers/massimo-giorgetti-cc-tapis",
+  ]) {
+    if (!paths.includes(mustCheck)) paths.push(mustCheck);
+  }
   console.log(
     `[verify] checking ${paths.length} routes (${STATIC_PATHS.length} static + ${sampledDynamic.length} dynamic of ${dynamic.length})`
   );
 
   const failures = [];
+  const seenDescriptions = new Map();
   let ok = 0;
 
   for (const p of paths) {
@@ -184,6 +192,9 @@ async function main() {
     if (!meta.description) reasons.push("missing <meta description>");
     else if (meta.description === homeMeta.description)
       reasons.push("description duplicates homepage");
+    else if (seenDescriptions.has(meta.description))
+      reasons.push(`description duplicates ${seenDescriptions.get(meta.description)}`);
+    else seenDescriptions.set(meta.description, p);
 
     if (!meta.canonical) reasons.push("missing <link rel=canonical>");
     else if (meta.canonical === homeMeta.canonical)
