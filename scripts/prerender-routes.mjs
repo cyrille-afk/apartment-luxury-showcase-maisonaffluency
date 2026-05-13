@@ -340,6 +340,54 @@ async function fetchDynamicRoutes() {
     console.warn("[prerender] journal query failed:", err?.message ?? err);
   }
 
+  // Trade products. Public product pages live at /product/:id and were
+  // previously served as the bare SPA shell, so every product URL inherited
+  // the homepage <title>/<meta>/<canonical>. Emit a per-product static shell
+  // so each page ships unique SEO tags on first byte.
+  try {
+    const { data, error } = await supabase
+      .from("trade_products")
+      .select("id, brand_name, product_name, description, category, subcategory, materials, origin, image_url")
+      .eq("is_active", true)
+      .eq("is_hidden", false);
+    if (error) throw error;
+    for (const p of data ?? []) {
+      if (!p.id || !p.product_name) continue;
+      const brand = (p.brand_name ?? "").trim();
+      const name = String(p.product_name).trim();
+      const cleanDesc = (p.description ?? "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const subcat = (p.subcategory ?? "").trim();
+      const cat = (p.category ?? "").trim();
+      const materials = (p.materials ?? "").trim();
+      const origin = (p.origin ?? "").trim();
+      const titleHead = brand ? `${name} by ${brand}` : name;
+      let desc = "";
+      if (cleanDesc.length >= 60) {
+        desc = truncate(`${titleHead} — ${cleanDesc}`, 155);
+      } else {
+        const bits = [subcat || cat, materials && `in ${materials}`, origin && `from ${origin}`]
+          .filter(Boolean)
+          .join(", ");
+        desc = truncate(
+          `${titleHead}${bits ? ` — ${bits}` : ""}. Collectible design at Maison Affluency Singapore.`,
+          155
+        );
+      }
+      routes.push({
+        path: `/product/${p.id}`,
+        title: `${titleHead} | Maison Affluency`,
+        description: desc,
+        image: p.image_url || undefined,
+      });
+    }
+    console.log(`[prerender] products: ${data?.length ?? 0}`);
+  } catch (err) {
+    console.warn("[prerender] products query failed:", err?.message ?? err);
+  }
+
   return routes;
 }
 
