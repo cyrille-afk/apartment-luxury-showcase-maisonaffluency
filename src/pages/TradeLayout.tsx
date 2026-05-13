@@ -203,7 +203,11 @@ const TradeLayout = () => {
     );
   }
 
-  if (!user) return <TradePublicGate path={location.pathname.replace(/\/$/, "") || "/trade"} />;
+  if (!user) {
+    const publicGatePath = location.pathname.replace(/\/$/, "") || "/trade";
+    if (TRADE_GATE_COPY[publicGatePath]) return <TradePublicGate path={publicGatePath} />;
+    return <Navigate to="/trade/login" replace />;
+  }
 
   // Admins bypass application status checks
   if (!isAdmin && applicationStatus === "pending") {
