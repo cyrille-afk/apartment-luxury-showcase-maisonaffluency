@@ -167,6 +167,15 @@ function patchTemplate(template, meta) {
       `${open}\n        <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">${title}</h1>\n        <p>${desc}</p>`
   );
 
+  // Optional: inject a static, server-visible A–Z designer link block before
+  // </body>. Used on /, /journal, /designers (and per-article journal shells)
+  // so crawlers without JS see internal links to every /designers/:slug,
+  // flattening crawl depth and resolving "URLs in sitemap not found in crawl"
+  // for orphan profiles.
+  if (meta.designerLinksHtml) {
+    html = html.replace(/<\/body>/i, `${meta.designerLinksHtml}\n  </body>`);
+  }
+
   return html;
 }
 
