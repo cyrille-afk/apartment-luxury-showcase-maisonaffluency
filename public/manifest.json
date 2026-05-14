@@ -2,7 +2,7 @@
   "name": "Maison Affluency Singapore",
   "short_name": "Maison Affluency",
   "description": "Curated luxury design & collectible furniture showcase",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "id": "/",
   "display": "standalone",
@@ -10,18 +10,33 @@
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
+  "lang": "en-SG",
+  "dir": "ltr",
+  "categories": ["lifestyle", "shopping", "design"],
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
