@@ -19,7 +19,19 @@
 
 # Manifest & favicon
 /manifest.json
-  Cache-Control: public, max-age=86400
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+# Service-worker cleanup endpoints — keep fresh so old installed PWAs can unregister stale workers
+/sw.js
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+/service-worker.js
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
 
 # Build version manifest — must always be fresh so the auto-update watcher works
 /version.json
