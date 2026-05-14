@@ -517,19 +517,6 @@ async function writeRoute(template, route, hasChildRoutes = false) {
   }
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, html, "utf8");
-
-  // EXPERIMENT (one route): also emit dist/<path>.html alongside the
-  // dist/<path>/index.html shell. Hypothesis: Lovable hosting serves clean
-  // URLs from sibling .html files but does NOT do directory-index lookups,
-  // so /apartment-tour currently falls through to the SPA homepage shell.
-  // If that's right, the .html sibling will be served at the clean URL on
-  // the next deploy. If wrong, the directory shell remains as fallback and
-  // there's no regression.
-  if (isCleanRoute && route.path === "/apartment-tour" && !hasChildRoutes) {
-    const siblingHtml = path.join(DIST, `${route.path.replace(/^\//, "")}.html`);
-    await writeFile(siblingHtml, html, "utf8");
-  }
-
   return target;
 }
 
