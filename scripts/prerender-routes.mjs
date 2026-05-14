@@ -513,8 +513,8 @@ async function main() {
   const all = [...STATIC_ROUTES, ...dynamic];
 
   // Static A–Z block + primary nav, injected on every shell so JS-less crawlers
-  // can discover both core pages (/collectibles, /gallery, /trade/login, …) and
-  // every /designers/:slug from anywhere they land.
+  // can discover core pages from every shell. Full designer discovery belongs
+  // only on /designers to avoid unrelated cross-page referrers.
   const designerLinksHtml = buildDesignerLinksHtml(designerLinks);
   const primaryNavHtml = buildPrimaryNavHtml();
 
