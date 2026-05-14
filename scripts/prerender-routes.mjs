@@ -192,10 +192,7 @@ const PRIMARY_NAV_LINKS = [
   { path: "/new-in", label: "New In" },
   { path: "/apartment-tour", label: "Apartment Tour" },
   { path: "/studios", label: "Studios" },
-  { path: "/favorites", label: "Favorites" },
   { path: "/trade-program", label: "Trade Program" },
-  { path: "/trade/register", label: "Trade Register" },
-  { path: "/trade/login", label: "Trade Login" },
   { path: "/contact", label: "Contact" },
 ];
 
@@ -274,12 +271,6 @@ const STATIC_ROUTES = [
     description:
       "Discover the interior design studios partnered with Maison Affluency — view their projects, signature style and collectible pieces they specify.",
   },
-  {
-    path: "/favorites",
-    title: "My Favorites | Maison Affluency",
-    description:
-      "Your saved designers, ateliers and collectible pieces from the Maison Affluency catalogue.",
-  },
   // Trade portal shells (public-facing login/register landing for crawlers)
   {
     path: "/trade",
@@ -292,18 +283,6 @@ const STATIC_ROUTES = [
     title: "Trade Designers Directory | Maison Affluency",
     description:
       "Browse the full designer and atelier directory in the Maison Affluency trade portal — filter by category, view spec sheets and add pieces to project folders.",
-  },
-  {
-    path: "/trade/login",
-    title: "Trade Account Sign In | Maison Affluency",
-    description:
-      "Sign in to the Maison Affluency trade portal to access project folders, spec sheets, FF&E schedules and exclusive trade pricing.",
-  },
-  {
-    path: "/trade/register",
-    title: "Trade Account Registration | Maison Affluency",
-    description:
-      "Apply for a Maison Affluency trade account — exclusive pricing, sample library, FF&E tools and white-label documentation for interior professionals.",
   },
   {
     path: "/trade/spec-sheet",
