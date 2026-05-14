@@ -14,9 +14,6 @@ const STATIC_URLS = [
   { loc: "/new-in", changefreq: "weekly", priority: "0.9" },
   { loc: "/apartment-tour", changefreq: "monthly", priority: "0.8" },
   { loc: "/studios", changefreq: "weekly", priority: "0.8" },
-  { loc: "/favorites", changefreq: "monthly", priority: "0.5" },
-  { loc: "/trade/register", changefreq: "monthly", priority: "0.6" },
-  { loc: "/trade/login", changefreq: "monthly", priority: "0.5" },
 ];
 
 const escapeXml = (s: string) =>
