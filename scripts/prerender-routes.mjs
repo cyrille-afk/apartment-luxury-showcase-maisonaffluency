@@ -26,7 +26,7 @@
  * Safe to re-run; never touches dist/ files that already exist (so the OG
  * bridges in public/ate liers/, public/collectibles/, etc. are untouched).
  */
-import { readFile, writeFile, mkdir, access, rm } from "node:fs/promises";
+import { readFile, writeFile, mkdir, access, rm, stat } from "node:fs/promises";
 import { constants as FS } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -476,22 +476,35 @@ async function exists(p) {
   }
 }
 
+async function removeIfFile(p) {
+  try {
+    const s = await stat(p);
+    if (s.isFile()) await rm(p, { force: true });
+  } catch {
+    // Path does not exist — nothing to remove.
+  }
+}
+
 async function writeRoute(template, route, hasChildRoutes = false) {
   const html = patchTemplate(template, route);
-  // "/" -> dist/index.html. Every clean URL is emitted as a directory index
-  // so the host serves it as text/html instead of application/octet-stream.
+  // "/" -> dist/index.html. Leaf routes are emitted as extensionless files
+  // because Lovable hosting serves /designers/foo as a real file, but does not
+  // resolve /designers/foo to /designers/foo/index.html before the SPA fallback.
   const isCleanRoute = route.path !== "/";
-  const target =
-    route.path === "/"
-      ? path.join(DIST, "index.html")
-      : path.join(DIST, route.path.replace(/^\//, ""), "index.html");
+  const routeFile = path.join(DIST, route.path.replace(/^\//, ""));
+  const target = route.path === "/"
+    ? path.join(DIST, "index.html")
+    : hasChildRoutes
+      ? path.join(routeFile, "index.html")
+      : routeFile;
 
   if (isCleanRoute) {
-    // Remove stale extensionless shells from earlier builds; if present they
-    // win over /index.html on the clean URL and are served with the wrong MIME.
-    const legacyExtensionless = path.join(DIST, route.path.replace(/^\//, ""));
-    if (!hasChildRoutes) await rm(legacyExtensionless, { force: true });
-    await rm(target, { recursive: true, force: true });
+    if (hasChildRoutes) {
+      await removeIfFile(routeFile);
+      await rm(target, { recursive: true, force: true });
+    } else {
+      await rm(routeFile, { recursive: true, force: true });
+    }
   }
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, html, "utf8");
