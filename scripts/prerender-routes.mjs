@@ -487,28 +487,38 @@ async function removeIfFile(p) {
 
 async function writeRoute(template, route, hasChildRoutes = false) {
   const html = patchTemplate(template, route);
-  // "/" -> dist/index.html. Leaf routes are emitted as extensionless files
-  // because Lovable hosting serves /designers/foo as a real file, but does not
-  // resolve /designers/foo to /designers/foo/index.html before the SPA fallback.
-  const isCleanRoute = route.path !== "/";
-  const routeFile = path.join(DIST, route.path.replace(/^\//, ""));
-  const target = route.path === "/"
-    ? path.join(DIST, "index.html")
-    : hasChildRoutes
-      ? path.join(routeFile, "index.html")
-      : routeFile;
 
-  if (isCleanRoute) {
-    if (hasChildRoutes) {
-      await removeIfFile(routeFile);
-      await rm(target, { recursive: true, force: true });
-    } else {
-      await rm(routeFile, { recursive: true, force: true });
-    }
+  // Root: just dist/index.html
+  if (route.path === "/") {
+    const target = path.join(DIST, "index.html");
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, html, "utf8");
+    return target;
   }
-  await mkdir(path.dirname(target), { recursive: true });
-  await writeFile(target, html, "utf8");
-  return target;
+
+  // For every other route, write dist/<route>/index.html.
+  // This is the universally-supported convention: hosting resolves
+  // /designers/foo  -> /designers/foo/index.html
+  // /designers/foo/ -> /designers/foo/index.html
+  const routePath = route.path.replace(/^\//, "");
+  const dirTarget = path.join(DIST, routePath, "index.html");
+
+  // Clean any stale extensionless file at the same path (legacy artifact).
+  await removeIfFile(path.join(DIST, routePath));
+
+  await mkdir(path.dirname(dirTarget), { recursive: true });
+  await writeFile(dirTarget, html, "utf8");
+
+  // Belt-and-suspenders: also write a sibling .html shell so hosts that
+  // don't auto-resolve directory index for extensionless URLs still match.
+  // (e.g. /designers/foo.html). Skip for parent routes to avoid clobbering.
+  if (!hasChildRoutes) {
+    const htmlSibling = path.join(DIST, `${routePath}.html`);
+    await mkdir(path.dirname(htmlSibling), { recursive: true });
+    await writeFile(htmlSibling, html, "utf8");
+  }
+
+  return dirTarget;
 }
 
 // ----- Main -----------------------------------------------------------------
