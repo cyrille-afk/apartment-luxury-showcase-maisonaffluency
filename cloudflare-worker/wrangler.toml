@@ -1,0 +1,30 @@
+name = "maison-affluency-prerender"
+main = "src/worker.js"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Routes — attach to the maisonaffluency.com zone (and www if you serve it).
+# After deploy, ALL traffic to these hosts hits this Worker first; it
+# transparently forwards real users to ORIGIN_HOST and only renders for crawlers.
+routes = [
+  { pattern = "maisonaffluency.com/*", zone_name = "maisonaffluency.com" },
+  { pattern = "www.maisonaffluency.com/*", zone_name = "maisonaffluency.com" },
+]
+
+[vars]
+# Lovable hosting hostname (the real origin behind the worker).
+ORIGIN_HOST = "apartment-luxury-showcase-maisonaffluency.lovable.app"
+CACHE_TTL_SEC = "86400"      # 24h snapshot TTL
+RENDER_TIMEOUT = "12000"     # Browser Rendering max wait per page (ms)
+
+# Cloudflare Browser Rendering binding (Workers Paid plan required).
+# Enable in Cloudflare dashboard: Workers & Pages → Browser Rendering.
+[browser]
+binding = "BROWSER"
+
+# KV namespace for snapshot cache.
+# Create it once with: npx wrangler kv namespace create PRERENDER_CACHE
+# Then paste the returned id below.
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
