@@ -168,11 +168,10 @@ function patchTemplate(template, meta) {
       `${open}${h1}${mid}${desc}${close}`
   );
 
-  // Optional: inject a static, server-visible A–Z designer link block before
-  // </body>. Used on /, /journal, /designers (and per-article journal shells)
-  // so crawlers without JS see internal links to every /designers/:slug,
-  // flattening crawl depth and resolving "URLs in sitemap not found in crawl"
-  // for orphan profiles.
+  // Optional: inject static, server-visible navigation before </body>. Keep the
+  // full A–Z designer block restricted to the /designers index; injecting every
+  // designer link into every shell makes Search Console report irrelevant
+  // cross-page referrers (e.g. Serge Mouille → Alexander Lamont).
   if (meta.primaryNavHtml) {
     html = html.replace(/<\/body>/i, `${meta.primaryNavHtml}\n  </body>`);
   }
@@ -536,7 +535,7 @@ async function main() {
       const routeWithLinks = {
         ...route,
         primaryNavHtml,
-        designerLinksHtml: route.path === "/designers" ? "" : designerLinksHtml,
+        designerLinksHtml: route.path === "/designers" ? designerLinksHtml : "",
       };
       await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;
