@@ -168,11 +168,10 @@ function patchTemplate(template, meta) {
       `${open}${h1}${mid}${desc}${close}`
   );
 
-  // Optional: inject a static, server-visible A–Z designer link block before
-  // </body>. Used on /, /journal, /designers (and per-article journal shells)
-  // so crawlers without JS see internal links to every /designers/:slug,
-  // flattening crawl depth and resolving "URLs in sitemap not found in crawl"
-  // for orphan profiles.
+  // Optional: inject static, server-visible navigation before </body>. Keep the
+  // full A–Z designer block restricted to the /designers index; injecting every
+  // designer link into every shell makes Search Console report irrelevant
+  // cross-page referrers (e.g. Serge Mouille → Alexander Lamont).
   if (meta.primaryNavHtml) {
     html = html.replace(/<\/body>/i, `${meta.primaryNavHtml}\n  </body>`);
   }
@@ -192,10 +191,7 @@ const PRIMARY_NAV_LINKS = [
   { path: "/new-in", label: "New In" },
   { path: "/apartment-tour", label: "Apartment Tour" },
   { path: "/studios", label: "Studios" },
-  { path: "/favorites", label: "Favorites" },
   { path: "/trade-program", label: "Trade Program" },
-  { path: "/trade/register", label: "Trade Register" },
-  { path: "/trade/login", label: "Trade Login" },
   { path: "/contact", label: "Contact" },
 ];
 
@@ -274,12 +270,6 @@ const STATIC_ROUTES = [
     description:
       "Discover the interior design studios partnered with Maison Affluency — view their projects, signature style and collectible pieces they specify.",
   },
-  {
-    path: "/favorites",
-    title: "My Favorites | Maison Affluency",
-    description:
-      "Your saved designers, ateliers and collectible pieces from the Maison Affluency catalogue.",
-  },
   // Trade portal shells (public-facing login/register landing for crawlers)
   {
     path: "/trade",
@@ -292,18 +282,6 @@ const STATIC_ROUTES = [
     title: "Trade Designers Directory | Maison Affluency",
     description:
       "Browse the full designer and atelier directory in the Maison Affluency trade portal — filter by category, view spec sheets and add pieces to project folders.",
-  },
-  {
-    path: "/trade/login",
-    title: "Trade Account Sign In | Maison Affluency",
-    description:
-      "Sign in to the Maison Affluency trade portal to access project folders, spec sheets, FF&E schedules and exclusive trade pricing.",
-  },
-  {
-    path: "/trade/register",
-    title: "Trade Account Registration | Maison Affluency",
-    description:
-      "Apply for a Maison Affluency trade account — exclusive pricing, sample library, FF&E tools and white-label documentation for interior professionals.",
   },
   {
     path: "/trade/spec-sheet",
@@ -535,8 +513,8 @@ async function main() {
   const all = [...STATIC_ROUTES, ...dynamic];
 
   // Static A–Z block + primary nav, injected on every shell so JS-less crawlers
-  // can discover both core pages (/collectibles, /gallery, /trade/login, …) and
-  // every /designers/:slug from anywhere they land.
+  // can discover core pages from every shell. Full designer discovery belongs
+  // only on /designers to avoid unrelated cross-page referrers.
   const designerLinksHtml = buildDesignerLinksHtml(designerLinks);
   const primaryNavHtml = buildPrimaryNavHtml();
 
@@ -557,7 +535,7 @@ async function main() {
       const routeWithLinks = {
         ...route,
         primaryNavHtml,
-        designerLinksHtml: route.path === "/designers" ? "" : designerLinksHtml,
+        designerLinksHtml: route.path === "/designers" ? designerLinksHtml : "",
       };
       await writeRoute(template, routeWithLinks, parentPaths.has(route.path));
       written++;

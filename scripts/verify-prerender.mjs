@@ -39,7 +39,6 @@ const STATIC_PATHS = [
   "/new-in",
   "/apartment-tour",
   "/studios",
-  "/favorites",
 ];
 
 // ---------- helpers ----------
@@ -243,6 +242,20 @@ async function main() {
     }
   } catch (e) {
     failures.push({ path: "/designers", reason: `link-check error: ${e?.message ?? e}` });
+  }
+
+  // 4. Per-designer pages should not contain the full A–Z crawl scaffold. It
+  // creates noisy Search Console referrers between unrelated designer pages.
+  for (const p of ["/designers/serge-mouille", "/designers/alexander-lamont"]) {
+    try {
+      const result = await fetchHtml(`${BASE_URL}${p}`);
+      const otherSlug = p.endsWith("serge-mouille") ? "alexander-lamont" : "serge-mouille";
+      if (result.html.match(new RegExp(`href=["']/designers/${otherSlug}["']`, "i"))) {
+        failures.push({ path: p, reason: `contains unrelated designer link /designers/${otherSlug}` });
+      }
+    } catch (e) {
+      failures.push({ path: p, reason: `cross-link check error: ${e?.message ?? e}` });
+    }
   }
 
   console.log(`\n[verify] ${ok}/${paths.length} routes passed.`);
