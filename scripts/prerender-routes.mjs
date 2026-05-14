@@ -146,13 +146,21 @@ function patchTemplate(template, meta) {
   // Inject canonical + og:url BEFORE the runtime canonical-injector script,
   // so crawlers see the right value without executing JS. The injector skips
   // re-adding when it sees an existing default link.
-  const canonicalBlock =
-    `<link rel="canonical" href="${escapeAttr(url)}" data-prerender="true" />\n` +
-    `    <meta property="og:url" content="${escapeAttr(url)}" data-prerender="true" />\n    `;
-  html = html.replace(
-    /(<!--\s*Pre-hydration canonical injector[\s\S]*?-->)/,
-    `${canonicalBlock}$1`
-  );
+  //
+  // EXCEPTION: skip for the root shell. Lovable hosting SPA-falls-back unknown
+  // routes to dist/index.html, so a hardcoded root canonical there would ship
+  // canonical=https://maisonaffluency.com/ for every misrouted page. By
+  // omitting it on root, the runtime JS injector writes the correct
+  // path-based canonical for whatever URL the shell ends up serving.
+  if (meta.path !== "/") {
+    const canonicalBlock =
+      `<link rel="canonical" href="${escapeAttr(url)}" data-prerender="true" />\n` +
+      `    <meta property="og:url" content="${escapeAttr(url)}" data-prerender="true" />\n    `;
+    html = html.replace(
+      /(<!--\s*Pre-hydration canonical injector[\s\S]*?-->)/,
+      `${canonicalBlock}$1`
+    );
+  }
 
   // Replace the H1 + first <p> inside the visible #seo-content block.
   html = html.replace(
