@@ -9,10 +9,14 @@ const CHROMIUM_EXECUTABLE_PATH =
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
-  reporter: [["list"]],
+  reporter: process.env.CI
+    ? [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]]
+    : [["list"]],
   use: {
     baseURL: BASE_URL,
-    trace: "off",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   projects: [
     {
