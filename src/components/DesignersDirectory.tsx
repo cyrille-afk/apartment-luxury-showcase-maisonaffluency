@@ -640,9 +640,9 @@ function MobileLetterRow({
         className="w-full flex items-center gap-3 py-3.5 px-1 text-left"
         aria-expanded={open}
       >
-        <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
+        <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
         <span className="font-serif text-xl text-foreground flex-1">{letter}</span>
-        <span className="font-body text-[11px] text-muted-foreground/60 tracking-widest">{designers.length}</span>
+        <span className="font-body text-[11px] text-muted-foreground tracking-widest">{designers.length}</span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
