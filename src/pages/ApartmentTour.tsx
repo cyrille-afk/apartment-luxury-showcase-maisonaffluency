@@ -1,8 +1,11 @@
 import { useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 import ShareMenu from "@/components/ShareMenu";
+
+const CANONICAL_URL = "https://www.maisonaffluency.com/apartment-tour";
 
 const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
 const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto,f_jpg/bespoke-sofa_gxidtx.jpg";
@@ -41,9 +44,11 @@ const ApartmentTour = () => {
     <>
       <Helmet>
         <title>A Private Apartment Tour — Maison Affluency Singapore</title>
-        <meta name="description" content="An exclusive cinematic tour of a bespoke Singapore apartment curated by Maison Affluency — collectible furniture, artisan craftsmanship, and panoramic cityscape views." />
+        <meta name="description" content="A cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craftsmanship, panoramic skyline views." />
+        <link rel="canonical" href={CANONICAL_URL} />
         <meta property="og:title" content="A Private Apartment Tour — Maison Affluency" />
-        <meta property="og:description" content="An exclusive cinematic tour of a bespoke Singapore apartment curated by Maison Affluency." />
+        <meta property="og:description" content="A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency." />
+        <meta property="og:url" content={CANONICAL_URL} />
         <meta property="og:image" content={OG_IMAGE} />
         <meta property="og:type" content="video.other" />
         <meta property="og:video" content={VIDEO_URL} />
@@ -57,9 +62,23 @@ const ApartmentTour = () => {
         <meta name="twitter:player" content={VIDEO_URL} />
         <meta name="twitter:player:width" content="1920" />
         <meta name="twitter:player:height" content="1080" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "VideoObject",
+          name: "A Private Apartment Tour — Maison Affluency",
+          description: "A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency, showcasing collectible furniture, artisan craftsmanship and panoramic skyline views.",
+          thumbnailUrl: [OG_IMAGE],
+          contentUrl: VIDEO_URL,
+          uploadDate: "2025-01-01",
+          publisher: {
+            "@type": "Organization",
+            name: "Maison Affluency",
+            url: "https://www.maisonaffluency.com",
+          },
+        })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-[#0d0c0a] flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-[#0d0c0a] flex flex-col items-center px-4 py-16 md:py-24">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
           <p className="text-[11px] md:text-[13px] tracking-[0.3em] uppercase text-[#d4bea0]/60 mb-3 font-light">
@@ -101,13 +120,92 @@ const ApartmentTour = () => {
           Collectible Furniture · Artisan Craftsmanship · Bespoke Interiors
         </p>
 
+        {/* Editorial body */}
+        <section className="w-full max-w-3xl mt-16 md:mt-24 text-[#e8ddcf]/85 font-light leading-relaxed space-y-6 text-[15px] md:text-[16px]">
+          <h2 className="font-display text-xl md:text-2xl text-[#f5f0eb] tracking-wide">
+            Inside a bespoke Singapore residence
+          </h2>
+          <p>
+            This private film follows a fully realised Maison Affluency commission in
+            Singapore — a high-floor apartment shaped over many months around its owners,
+            its skyline and a tightly edited cast of collectible pieces. The camera moves
+            slowly through entry, living, dining and primary suite, pausing on the
+            materials, joinery and proportions that anchor the project: hand-rubbed
+            lacquer, woven shagreen, blackened bronze, raw silk, hand-tufted wool.
+          </p>
+          <p>
+            Every object on screen is a curated choice, not a catalogue pick. The
+            sofas are bespoke; the lighting is sculptural; the case goods are signed
+            works by independent ateliers we represent. The result is an interior that
+            reads as a private collection — quiet, layered, deeply personal — rather
+            than a showroom.
+          </p>
+          <h3 className="font-display text-lg md:text-xl text-[#f5f0eb] tracking-wide pt-4">
+            How Maison Affluency works
+          </h3>
+          <p>
+            We act as the editorial layer between collectors, interior designers and a
+            roster of European, Japanese and American makers. Every commission begins
+            with a brief, a budget and a site; from there we propose a focused edit of
+            pieces — often one of one — and manage production, freight, white-glove
+            delivery and installation. The apartment in this film is one example of
+            that process applied end to end.
+          </p>
+          <p>
+            If you are designing a residence, a yacht or a hospitality project and
+            want to work this way, our{" "}
+            <Link to="/trade-program" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+              trade programme
+            </Link>{" "}
+            opens net pricing, technical drawings and bespoke quoting. Private
+            collectors can browse the same catalogue through our{" "}
+            <Link to="/collectibles" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+              collectibles edit
+            </Link>{" "}
+            and our{" "}
+            <Link to="/designers" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+              represented designers
+            </Link>
+            .
+          </p>
+          <h3 className="font-display text-lg md:text-xl text-[#f5f0eb] tracking-wide pt-4">
+            Continue exploring
+          </h3>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[14px] md:text-[15px]">
+            <li>
+              <Link to="/gallery" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+                The showroom gallery
+              </Link>
+              <span className="text-[#d4bea0]/50"> — pieces in situ.</span>
+            </li>
+            <li>
+              <Link to="/journal" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+                Journal
+              </Link>
+              <span className="text-[#d4bea0]/50"> — essays on craft and provenance.</span>
+            </li>
+            <li>
+              <Link to="/new-in" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+                New arrivals
+              </Link>
+              <span className="text-[#d4bea0]/50"> — latest pieces in the edit.</span>
+            </li>
+            <li>
+              <Link to="/contact" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+                Contact
+              </Link>
+              <span className="text-[#d4bea0]/50"> — start a private commission.</span>
+            </li>
+          </ul>
+        </section>
+
         {/* Back link */}
-        <a
-          href="/"
-          className="mt-10 md:mt-14 text-[11px] tracking-[0.25em] uppercase text-[#d4bea0]/40 hover:text-[#d4bea0]/70 transition-colors font-light"
+        <Link
+          to="/"
+          className="mt-16 md:mt-20 text-[11px] tracking-[0.25em] uppercase text-[#d4bea0]/40 hover:text-[#d4bea0]/70 transition-colors font-light"
         >
           ← maisonaffluency.com
-        </a>
+        </Link>
       </div>
     </>
   );
