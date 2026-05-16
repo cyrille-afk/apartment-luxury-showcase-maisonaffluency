@@ -99,7 +99,8 @@ const JournalArticlePage = () => {
 
   if (!article) return null;
 
-  // SEO clamps: title 10–60, description 50–160
+  // SEO bands (per scanner): title 40–60 (keywords first, brand last),
+  // description 140–160 (Google desktop/mobile truncation).
   const clamp = (s: string, max: number) => {
     if (!s) return s;
     if (s.length <= max) return s;
@@ -107,15 +108,38 @@ const JournalArticlePage = () => {
     const lastSpace = cut.lastIndexOf(" ");
     return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
   };
-  const SUFFIX = " — Maison Affluency";
-  const titleBase = article.title || "Journal";
-  const seoTitle = (titleBase + SUFFIX).length <= 60
-    ? titleBase + SUFFIX
-    : clamp(titleBase, 60);
+  const BRAND = "Maison Affluency";
+  const titleBase = (article.title || "Journal").trim();
+  // Try full brand suffix, then short separator, then bare title, then padded.
+  const candidates = [
+    `${titleBase} — ${BRAND}`,
+    `${titleBase} | ${BRAND}`,
+    titleBase,
+  ];
+  let seoTitle = candidates.find((c) => c.length >= 40 && c.length <= 60) || "";
+  if (!seoTitle) {
+    if (titleBase.length > 60) {
+      seoTitle = clamp(titleBase, 60);
+    } else if (titleBase.length < 40) {
+      // pad with brand fragment until ≥40
+      seoTitle = clamp(`${titleBase} — ${BRAND} Journal`, 60);
+    } else {
+      seoTitle = titleBase;
+    }
+  }
+
   const rawDesc = (article.excerpt || "").trim();
-  const seoDesc = rawDesc.length >= 50
-    ? clamp(rawDesc, 160)
-    : clamp((rawDesc + (rawDesc ? " — " : "") + `Read ${titleBase} on the Maison Affluency Journal.`).trim(), 160);
+  const padTail = ` Read the full feature on the ${BRAND} Journal.`;
+  let seoDesc = rawDesc;
+  if (seoDesc.length > 160) seoDesc = clamp(seoDesc, 160);
+  if (seoDesc.length < 140) {
+    const combined = (seoDesc + (seoDesc.endsWith(".") ? "" : ".") + padTail).trim();
+    seoDesc = clamp(combined, 160);
+    // final pad if still short
+    if (seoDesc.length < 140) {
+      seoDesc = clamp((seoDesc + " Curated collectible design from Singapore.").trim(), 160);
+    }
+  }
 
   return (
     <>
