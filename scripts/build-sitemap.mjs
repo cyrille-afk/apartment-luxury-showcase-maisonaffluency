@@ -198,12 +198,10 @@ ${[...staticEntries, ...dynamicEntries].join("\n")}
 </urlset>`;
 
   const outPath = path.join(DIST, "sitemap.xml");
-  const dynamicOutPath = path.join(DIST, "sitemap-dynamic.xml");
   await writeFile(outPath, xml, "utf8");
-  await writeFile(dynamicOutPath, xml, "utf8");
 
   const total = STATIC_ROUTES.length + dynamic.length;
-  console.log(`[sitemap] wrote ${total} URLs to ${outPath} and ${dynamicOutPath}`);
+  console.log(`[sitemap] wrote ${total} URLs to ${outPath}`);
 }
 
 main().catch((err) => {
