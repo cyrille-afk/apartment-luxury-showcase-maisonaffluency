@@ -54,7 +54,17 @@ async function startPreviewIfNeeded() {
   throw new Error("Preview server did not start in time");
 }
 
-function audit(url, outBase) {
+function killProcessTree(child) {
+  if (!child.pid) return;
+  try {
+    // Detached below gives Lighthouse/Chrome their own process group on Linux.
+    process.kill(-child.pid, "SIGKILL");
+  } catch (_) {
+    try { child.kill("SIGKILL"); } catch (_) {}
+  }
+}
+
+async function audit(url, outBase) {
   const args = [
     "lighthouse",
     url,
@@ -73,16 +83,29 @@ function audit(url, outBase) {
     "--only-categories=performance,accessibility,best-practices,seo",
   ];
   const startedAt = Date.now();
-  const res = spawnSync("npx", ["--no-install", ...args], {
+  const child = spawn("npx", ["--no-install", ...args], {
     stdio: "inherit",
-    timeout: AUDIT_TIMEOUT_MS,
-    killSignal: "SIGKILL",
+    detached: true,
+  });
+  const result = await new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      killProcessTree(child);
+      resolve({ timedOut: true, status: null, signal: "SIGKILL" });
+    }, AUDIT_TIMEOUT_MS);
+
+    child.once("error", (error) => {
+      clearTimeout(timer);
+      resolve({ error, status: null, signal: null, timedOut: false });
+    });
+    child.once("exit", (status, signal) => {
+      clearTimeout(timer);
+      resolve({ status, signal, timedOut: false });
+    });
   });
   const seconds = ((Date.now() - startedAt) / 1000).toFixed(1);
-  if (res.error?.code === "ETIMEDOUT") {
-    throw new Error(`Lighthouse timed out after ${seconds}s for ${url}`);
-  }
-  if (res.status !== 0) throw new Error(`Lighthouse failed after ${seconds}s for ${url}`);
+  if (result.timedOut) throw new Error(`Lighthouse hard-timed-out after ${seconds}s for ${url}`);
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`Lighthouse failed after ${seconds}s for ${url} (status ${result.status}, signal ${result.signal ?? "none"})`);
 }
 
 function assertScores(reportPath, url) {
@@ -115,7 +138,7 @@ try {
     const url = `${BASE}${route.startsWith("/") ? route : `/${route}`}`;
     const outBase = join(outDir, `report-${route.replace(/\W+/g, "_") || "root"}`);
     console.log(`\n▸ Lighthouse mobile: ${url}`);
-    audit(url, outBase);
+    await audit(url, outBase);
     assertScores(`${outBase}.report.json`, url);
   }
 } catch (error) {
