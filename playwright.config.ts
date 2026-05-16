@@ -2,6 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.PW_PORT ?? 4173);
 const BASE_URL = process.env.PW_BASE_URL ?? `http://localhost:${PORT}`;
+const CHROMIUM_EXECUTABLE_PATH =
+  process.env.PW_CHROMIUM_EXECUTABLE_PATH ||
+  process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -14,7 +17,12 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-chrome",
-      use: { ...devices["Pixel 5"] },
+      use: {
+        ...devices["Pixel 5"],
+        ...(CHROMIUM_EXECUTABLE_PATH
+          ? { launchOptions: { executablePath: CHROMIUM_EXECUTABLE_PATH } }
+          : {}),
+      },
     },
   ],
   webServer: process.env.PW_BASE_URL

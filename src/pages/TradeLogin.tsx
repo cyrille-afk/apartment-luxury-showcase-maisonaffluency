@@ -243,7 +243,7 @@ const TradeLogin = () => {
               Create a free account
             </Link>
           </p>
-          <p className="font-body text-[10px] text-muted-foreground/60 leading-relaxed max-w-xs mx-auto">
+          <p className="font-body text-[10px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
             Browse curators' picks, save favourites, download spec sheets, and request quotes.
           </p>
           <p className="font-body text-sm md:text-xs text-muted-foreground mt-2">
