@@ -119,9 +119,9 @@ test.describe("Mobile PWA & accessibility", () => {
                   html { padding-top: 0; }
                 }`,
     });
-    // Look at the public sticky/fixed header. /trade/login intentionally has no header.
+    // Look at the public sticky/fixed top chrome. /trade/login intentionally has no header.
     const hasSafePad = await page.evaluate(() => {
-      const headers = Array.from(document.querySelectorAll("header"));
+      const headers = Array.from(document.querySelectorAll("header, nav"));
       return headers.some((h) => {
         const cs = getComputedStyle(h);
         // Either explicit env() padding, or pt-[env(...)] resolved to >0.
