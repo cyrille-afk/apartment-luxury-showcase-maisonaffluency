@@ -84,14 +84,32 @@ const JournalArticlePage = () => {
 
   if (!article) return null;
 
+  // SEO clamps: title 10–60, description 50–160
+  const clamp = (s: string, max: number) => {
+    if (!s) return s;
+    if (s.length <= max) return s;
+    const cut = s.slice(0, max - 1);
+    const lastSpace = cut.lastIndexOf(" ");
+    return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
+  };
+  const SUFFIX = " — Maison Affluency";
+  const titleBase = article.title || "Journal";
+  const seoTitle = (titleBase + SUFFIX).length <= 60
+    ? titleBase + SUFFIX
+    : clamp(titleBase, 60);
+  const rawDesc = (article.excerpt || "").trim();
+  const seoDesc = rawDesc.length >= 50
+    ? clamp(rawDesc, 160)
+    : clamp((rawDesc + (rawDesc ? " — " : "") + `Read ${titleBase} on the Maison Affluency Journal.`).trim(), 160);
+
   return (
     <>
       <Helmet>
-        <title>{article.title} — Journal — Maison Affluency</title>
-        <meta name="description" content={article.excerpt} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
         <link rel="canonical" href={`https://maisonaffluency.com/journal/${article.slug}`} />
-        <meta property="og:title" content={`${article.title} — Maison Affluency`} />
-        <meta property="og:description" content={article.excerpt} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDesc} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://maisonaffluency.com/journal/${article.slug}`} />
         {article.cover_image_url && <meta property="og:image" content={article.cover_image_url} />}
