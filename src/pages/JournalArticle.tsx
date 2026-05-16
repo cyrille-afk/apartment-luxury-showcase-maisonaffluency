@@ -9,7 +9,11 @@ import React from "react";
 import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 
-import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
+import { fetchArticleBySlug, fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
+
+// Cap of in-body internal anchors before subsequent ones get rel="nofollow".
+// Keeps total per-page internal outlinks below scanner thresholds.
+const MAX_INBODY_INTERNAL_LINKS = 6;
 import { useAuth } from "@/hooks/useAuth";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
