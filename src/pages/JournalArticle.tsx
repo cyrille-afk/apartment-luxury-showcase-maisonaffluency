@@ -9,11 +9,7 @@ import React from "react";
 import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 
-import { fetchArticleBySlug, fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
-
-// Cap of in-body internal anchors before subsequent ones get rel="nofollow".
-// Keeps total per-page internal outlinks below scanner thresholds.
-const MAX_INBODY_INTERNAL_LINKS = 6;
+import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 import { useAuth } from "@/hooks/useAuth";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
@@ -38,7 +34,6 @@ const JournalArticlePage = () => {
   const { loading: authLoading, user } = useAuth();
   const isPreview = searchParams.get("preview") === "true";
   const [article, setArticle] = useState<Article | null>(null);
-  const [related, setRelated] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -68,16 +63,6 @@ const JournalArticlePage = () => {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-
-    // Related reading (3 most recent other articles) — adds a stable,
-    // bounded set of internal outlinks to satisfy scanner link-count rules.
-    fetchPublishedArticles(6)
-      .then((rows) => {
-        if (cancelled) return;
-        const others = (rows || []).filter((r) => r.slug !== slug).slice(0, 3);
-        setRelated(others);
-      })
-      .catch(() => {});
 
     return () => {
       cancelled = true;
@@ -300,10 +285,6 @@ const JournalArticlePage = () => {
                   return { url: parts[0].trim(), caption: parts[1]?.trim() || null };
                 });
 
-                // Bounded in-body internal link counter (per render). After the
-                // cap, additional internal links get rel="nofollow" so per-page
-                // outlink totals stay under scanner thresholds.
-                const linkCounter = { internal: 0 };
                 const buildAnchor = (children: any, props: any) => {
                   let href = props.href || "";
                   const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
@@ -315,14 +296,8 @@ const JournalArticlePage = () => {
                   const isExternal = href.startsWith("http");
                   const isInternal = !isExternal && href.startsWith("/");
                   if (isInternal) {
-                    linkCounter.internal += 1;
-                    const overCap = linkCounter.internal > MAX_INBODY_INTERNAL_LINKS;
                     return (
-                      <Link
-                        to={href}
-                        className="text-primary underline underline-offset-4"
-                        rel={overCap ? "nofollow" : undefined}
-                      >
+                      <Link to={href} className="text-primary underline underline-offset-4">
                         {children}
                       </Link>
                     );
@@ -446,43 +421,6 @@ const JournalArticlePage = () => {
         )}
 
 
-        {/* Related reading — stable, bounded internal outlinks for SEO */}
-        {related.length > 0 && (
-          <section className="max-w-5xl mx-auto px-6 pb-16 md:pb-20" aria-labelledby="related-reading">
-            <h2
-              id="related-reading"
-              className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-14 mb-8"
-            >
-              Related reading
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-              {related.map((r) => (
-                <Link
-                  key={r.slug}
-                  to={`/journal/${r.slug}`}
-                  className="group block"
-                >
-                  {r.cover_image_url && (
-                    <div className="aspect-[4/3] overflow-hidden bg-muted/10 mb-3">
-                      <img
-                        src={r.cover_image_url}
-                        alt={r.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                      />
-                    </div>
-                  )}
-                  <div className="font-body text-[10px] uppercase tracking-[0.15em] text-primary mb-1.5">
-                    {CATEGORY_LABELS[r.category]}
-                  </div>
-                  <h3 className="font-display text-base md:text-lg leading-snug text-foreground group-hover:text-primary transition-colors">
-                    {r.title}
-                  </h3>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Back link */}
         <div className="max-w-3xl mx-auto px-6 pb-20 text-center">
