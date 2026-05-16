@@ -109,13 +109,14 @@ export default function Studios() {
   const projectTypeLabel = projectType ? labelOf(PROJECT_TYPES, projectType) : null;
 
   const seoTitle = (() => {
+    // Hard cap 60 chars
     if (disciplineLabel && projectTypeLabel)
-      return `${disciplineLabel} Studios for ${projectTypeLabel} Projects | Maison Affluency`;
+      return `${disciplineLabel} Studios for ${projectTypeLabel} | Maison Affluency`.slice(0, 60);
     if (disciplineLabel)
-      return `${disciplineLabel} Studios — Featured Directory | Maison Affluency`;
+      return `${disciplineLabel} Studios — Maison Affluency`.slice(0, 60);
     if (projectTypeLabel)
-      return `Studios Specialising in ${projectTypeLabel} | Maison Affluency`;
-    return "Featured Studios | Architects & Interior Designers — Maison Affluency";
+      return `${projectTypeLabel} Studios — Maison Affluency`.slice(0, 60);
+    return "Featured Architects & Designers — Maison Affluency";
   })();
 
   const seoDescription = (() => {
