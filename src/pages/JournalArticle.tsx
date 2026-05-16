@@ -69,6 +69,16 @@ const JournalArticlePage = () => {
         if (!cancelled) setLoading(false);
       });
 
+    // Related reading (3 most recent other articles) — adds a stable,
+    // bounded set of internal outlinks to satisfy scanner link-count rules.
+    fetchPublishedArticles(6)
+      .then((rows) => {
+        if (cancelled) return;
+        const others = (rows || []).filter((r) => r.slug !== slug).slice(0, 3);
+        setRelated(others);
+      })
+      .catch(() => {});
+
     return () => {
       cancelled = true;
     };
