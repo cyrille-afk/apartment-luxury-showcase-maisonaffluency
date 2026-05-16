@@ -201,7 +201,7 @@ ${[...staticEntries, ...dynamicEntries].join("\n")}
   await writeFile(outPath, xml, "utf8");
 
   const total = STATIC_ROUTES.length + dynamic.length;
-  console.log(`[sitemap] wrote ${total} URLs to ${outPath} and ${dynamicOutPath}`);
+  console.log(`[sitemap] wrote ${total} URLs to ${outPath}`);
 }
 
 main().catch((err) => {
