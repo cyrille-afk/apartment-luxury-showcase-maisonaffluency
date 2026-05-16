@@ -14,7 +14,14 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci
+      # Manual npm cache — actions/setup-node's cache doesn't apply inside a container job.
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+      - run: npm ci --prefer-offline --no-audit --no-fund
       - run: npm run test:e2e:mobile-pwa
         timeout-minutes: 10
       - name: Upload Playwright report
@@ -31,7 +38,8 @@ jobs:
   lighthouse-mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: playwright-mobile
+    # Decoupled from playwright-mobile so a flaky e2e run doesn't mask
+    # the real Lighthouse signal. Both jobs report independently.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
