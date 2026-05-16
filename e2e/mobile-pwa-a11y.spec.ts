@@ -110,7 +110,8 @@ test.describe("Mobile PWA & accessibility", () => {
   });
 
   test("header respects safe-area-inset-top", async ({ page }) => {
-    await page.goto("/trade/login");
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
     // Force a non-zero safe-area inset to simulate notch devices.
     await page.addStyleTag({
       content: `:root { --sat: 47px; } 
@@ -118,9 +119,9 @@ test.describe("Mobile PWA & accessibility", () => {
                   html { padding-top: 0; }
                 }`,
     });
-    // Look at any sticky/fixed header on the page.
+    // Look at the public sticky/fixed top chrome. /trade/login intentionally has no header.
     const hasSafePad = await page.evaluate(() => {
-      const headers = Array.from(document.querySelectorAll("header"));
+      const headers = Array.from(document.querySelectorAll("header, nav"));
       return headers.some((h) => {
         const cs = getComputedStyle(h);
         // Either explicit env() padding, or pt-[env(...)] resolved to >0.
