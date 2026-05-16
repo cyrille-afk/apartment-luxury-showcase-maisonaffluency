@@ -38,6 +38,7 @@ const JournalArticlePage = () => {
   const { loading: authLoading, user } = useAuth();
   const isPreview = searchParams.get("preview") === "true";
   const [article, setArticle] = useState<Article | null>(null);
+  const [related, setRelated] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
