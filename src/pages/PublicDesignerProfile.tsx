@@ -52,13 +52,29 @@ function displayName(name: string): string {
   return name;
 }
 
+// Target Google's display bands: title 40-60 chars, description 140-160 chars.
 function designerSeoTitle(name: string, founder?: string | null, isChildDesigner?: boolean): string {
   const cleanName = displayName(name);
   const cleanFounder = founder?.trim();
+  const candidates: string[] = [];
   if (isChildDesigner && cleanFounder && cleanFounder !== cleanName && !cleanName.toLowerCase().includes(cleanFounder.toLowerCase())) {
-    return `${cleanName} for ${cleanFounder} — Maison Affluency`;
+    candidates.push(
+      `${cleanName} for ${cleanFounder} — Designer | Maison Affluency Singapore`,
+      `${cleanName} for ${cleanFounder} — Maison Affluency Singapore`,
+      `${cleanName} for ${cleanFounder} — Maison Affluency`,
+    );
   }
-  return `${cleanName} — Maison Affluency`;
+  candidates.push(
+    `${cleanName} — Collectible Designer | Maison Affluency Singapore`,
+    `${cleanName} — Designer | Maison Affluency Singapore`,
+    `${cleanName} — Designer | Maison Affluency`,
+    `${cleanName} — Maison Affluency Singapore`,
+    `${cleanName} — Maison Affluency`,
+  );
+  // Prefer the longest candidate that fits 40-60. Otherwise the one closest to the band.
+  const inBand = candidates.filter((c) => c.length >= 40 && c.length <= 60);
+  if (inBand.length) return inBand.sort((a, b) => b.length - a.length)[0];
+  return candidates.sort((a, b) => Math.abs(50 - a.length) - Math.abs(50 - b.length))[0];
 }
 
 function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean }) {
@@ -66,11 +82,59 @@ function designerSeoDescription(args: { name: string; founder?: string | null; s
   const cleanFounder = args.founder?.trim();
   const rawBio = args.biography ? args.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
   const genericAffiliation = /^designer\s+for\s+.+\.?$/i.test(rawBio);
-  const childFallback = args.isChildDesigner && cleanFounder
-    ? `${cleanName} for ${cleanFounder} — collectible design, furniture and limited editions curated by Maison Affluency Singapore.`
-    : "";
-  if (childFallback && (genericAffiliation || rawBio.toLowerCase().includes(cleanFounder.toLowerCase()))) return childFallback;
-  return (rawBio && !genericAffiliation ? rawBio.slice(0, 155) : "") || childFallback || args.specialty || `${cleanName} — collectible design at Maison Affluency Singapore.`;
+  const usableBio = rawBio && !genericAffiliation ? rawBio : "";
+
+  const suffixChild = cleanFounder ? ` Curated by Maison Affluency Singapore — collectible design, furniture and limited editions for ${cleanFounder}.` : "";
+  const suffixSolo = ` Discover collectible furniture, lighting and limited editions curated by Maison Affluency Singapore.`;
+  const suffix = (args.isChildDesigner && suffixChild) || suffixSolo;
+
+  let base = usableBio || (args.specialty ? `${cleanName} — ${args.specialty}.` : `${cleanName}.`);
+  // Compose: base + suffix, then clamp to 160 at a word boundary.
+  let composed = `${base} ${suffix}`.replace(/\s+/g, " ").trim();
+  if (composed.length > 160) {
+    // Trim base so the whole string lands ≤ 160, preferably ≥ 140.
+    const room = 160 - suffix.length - 1;
+    if (room > 40) {
+      const cut = base.slice(0, room);
+      const lastSpace = cut.lastIndexOf(" ");
+      base = (lastSpace > 40 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:\s]+$/, "") + "…";
+      composed = `${base} ${suffix}`.trim();
+    } else {
+      composed = composed.slice(0, 157).replace(/\s+\S*$/, "") + "…";
+    }
+  }
+  // Pad short descriptions toward 140 by appending the alt suffix when distinct.
+  if (composed.length < 140) {
+    const padding = suffix === suffixSolo ? ` Personally curated for designers, architects and collectors.` : suffixSolo;
+    const tryComposed = `${composed} ${padding.trim()}`.replace(/\s+/g, " ").trim();
+    composed = tryComposed.length <= 160 ? tryComposed : composed;
+  }
+  if (composed.length < 140) {
+    composed = `${composed} Maison Affluency Singapore.`.trim();
+  }
+  return composed.slice(0, 160);
+}
+
+// Visible fallback paragraph to lift designer pages out of "thin content" when
+// the source biography is brief. Rendered only when the user-visible biography
+// has fewer than ~60 words; never overrides existing rich biographies.
+function buildThinContentFallback(args: {
+  name: string;
+  founder?: string | null;
+  specialty?: string | null;
+  isChildDesigner?: boolean;
+}): string {
+  const cleanName = displayName(args.name);
+  const cleanFounder = args.founder?.trim();
+  const specialty = args.specialty?.trim();
+  const lead = args.isChildDesigner && cleanFounder
+    ? `${cleanName} designs for ${cleanFounder}, a maison championed by Maison Affluency Singapore for its collectible vision.`
+    : `${cleanName} is featured by Maison Affluency Singapore for a body of work that resonates with our curatorial vision.`;
+  const middle = specialty
+    ? `Their practice spans ${specialty.toLowerCase().replace(/\.$/, "")}, conceived as collectible pieces for interiors that reward attention.`
+    : `Their practice favours collectible pieces — furniture, lighting and decorative objects conceived for interiors that reward attention.`;
+  const close = `Each work is selected for material integrity, authorship and the way it ages — qualities we present in person at the Maison Affluency apartment-showroom in Singapore and to trade clients worldwide.`;
+  return `${lead} ${middle} ${close}`;
 }
 
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
@@ -413,7 +477,13 @@ const PublicDesignerProfile = () => {
   const editorialBio = editorialBlocks.join("\n\n");
   const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
 
-  const biographySection = displayBiography ? (
+  const bioWordCount = (displayBiography || "").replace(/<[^>]+>/g, " ").replace(/https?:\S+/g, "").trim().split(/\s+/).filter(Boolean).length;
+  const showThinContentFallback = bioWordCount < 60;
+  const thinContentFallback = showThinContentFallback
+    ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner })
+    : "";
+
+  const biographySection = (displayBiography || thinContentFallback) ? (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -479,11 +549,17 @@ const PublicDesignerProfile = () => {
                     allowCollapse={false}
                     startImageIndex={0}
                   />
-                ) : (
+                ) : heroParagraphs.length > 0 ? (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
                     {heroParagraphs.map((p: string, i: number) => (
                       <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                     ))}
+                  </div>
+                ) : null}
+
+                {thinContentFallback && (
+                  <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85 mt-4">
+                    <p>{thinContentFallback}</p>
                   </div>
                 )}
             </div>
