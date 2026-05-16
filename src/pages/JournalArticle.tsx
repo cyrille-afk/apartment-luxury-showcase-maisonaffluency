@@ -421,43 +421,6 @@ const JournalArticlePage = () => {
         )}
 
 
-        {/* Related reading — stable, bounded internal outlinks for SEO */}
-        {related.length > 0 && (
-          <section className="max-w-5xl mx-auto px-6 pb-16 md:pb-20" aria-labelledby="related-reading">
-            <h2
-              id="related-reading"
-              className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-14 mb-8"
-            >
-              Related reading
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-              {related.map((r) => (
-                <Link
-                  key={r.slug}
-                  to={`/journal/${r.slug}`}
-                  className="group block"
-                >
-                  {r.cover_image_url && (
-                    <div className="aspect-[4/3] overflow-hidden bg-muted/10 mb-3">
-                      <img
-                        src={r.cover_image_url}
-                        alt={r.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                      />
-                    </div>
-                  )}
-                  <div className="font-body text-[10px] uppercase tracking-[0.15em] text-primary mb-1.5">
-                    {CATEGORY_LABELS[r.category]}
-                  </div>
-                  <h3 className="font-display text-base md:text-lg leading-snug text-foreground group-hover:text-primary transition-colors">
-                    {r.title}
-                  </h3>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Back link */}
         <div className="max-w-3xl mx-auto px-6 pb-20 text-center">
