@@ -44,9 +44,11 @@ const ApartmentTour = () => {
     <>
       <Helmet>
         <title>A Private Apartment Tour — Maison Affluency Singapore</title>
-        <meta name="description" content="An exclusive cinematic tour of a bespoke Singapore apartment curated by Maison Affluency — collectible furniture, artisan craftsmanship, and panoramic cityscape views." />
+        <meta name="description" content="A cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craftsmanship, panoramic skyline views." />
+        <link rel="canonical" href={CANONICAL_URL} />
         <meta property="og:title" content="A Private Apartment Tour — Maison Affluency" />
-        <meta property="og:description" content="An exclusive cinematic tour of a bespoke Singapore apartment curated by Maison Affluency." />
+        <meta property="og:description" content="A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency." />
+        <meta property="og:url" content={CANONICAL_URL} />
         <meta property="og:image" content={OG_IMAGE} />
         <meta property="og:type" content="video.other" />
         <meta property="og:video" content={VIDEO_URL} />
@@ -60,9 +62,23 @@ const ApartmentTour = () => {
         <meta name="twitter:player" content={VIDEO_URL} />
         <meta name="twitter:player:width" content="1920" />
         <meta name="twitter:player:height" content="1080" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "VideoObject",
+          name: "A Private Apartment Tour — Maison Affluency",
+          description: "A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency, showcasing collectible furniture, artisan craftsmanship and panoramic skyline views.",
+          thumbnailUrl: [OG_IMAGE],
+          contentUrl: VIDEO_URL,
+          uploadDate: "2025-01-01",
+          publisher: {
+            "@type": "Organization",
+            name: "Maison Affluency",
+            url: "https://www.maisonaffluency.com",
+          },
+        })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-[#0d0c0a] flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-[#0d0c0a] flex flex-col items-center px-4 py-16 md:py-24">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
           <p className="text-[11px] md:text-[13px] tracking-[0.3em] uppercase text-[#d4bea0]/60 mb-3 font-light">
