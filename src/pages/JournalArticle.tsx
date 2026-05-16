@@ -419,7 +419,7 @@ const JournalArticlePage = () => {
         </div>
       </div>
 
-      <DesignerIndexLinks />
+
 
       {/* Lightbox */}
       <AnimatePresence>
