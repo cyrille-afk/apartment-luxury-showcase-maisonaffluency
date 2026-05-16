@@ -4,8 +4,8 @@
  *
  * Runs Lighthouse against a built preview (or PW_BASE_URL) and asserts
  * minimum scores for performance, accessibility, best-practices, SEO,
- * plus PWA-installability checks. No persistent dependency — uses
- * `npx lighthouse` so CI installs on demand.
+ * plus PWA-installability checks. Reports are written to ./lighthouse-report
+ * so CI can upload them when the job fails.
  *
  * Usage:
  *   npm run lighthouse:mobile               # builds + previews + audits "/"
@@ -13,8 +13,7 @@
  *   ROUTES="/, /trade/login" npm run lighthouse:mobile
  */
 import { spawn, spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as wait } from "node:timers/promises";
 
@@ -29,10 +28,12 @@ const THRESHOLDS = {
   seo: 0.85,
 };
 
-const outDir = join(tmpdir(), `lh-${Date.now()}`);
+const outDir = join(process.cwd(), "lighthouse-report");
+rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
 let preview;
+let failed = false;
 async function startPreviewIfNeeded() {
   if (process.env.PW_BASE_URL) return;
   console.log("→ Building & starting preview…");
@@ -52,7 +53,7 @@ async function startPreviewIfNeeded() {
   throw new Error("Preview server did not start in time");
 }
 
-function audit(url, outPath) {
+function audit(url, outBase) {
   const args = [
     "lighthouse",
     url,
@@ -66,10 +67,11 @@ function audit(url, outPath) {
     "--screenEmulation.deviceScaleFactor=3",
     "--throttling-method=simulate",
     "--output=json",
-    `--output-path=${outPath}`,
+    "--output=html",
+    `--output-path=${outBase}`,
     "--only-categories=performance,accessibility,best-practices,seo",
   ];
-  const res = spawnSync("npx", ["--yes", ...args], { stdio: "inherit" });
+  const res = spawnSync("npx", ["--no-install", ...args], { stdio: "inherit" });
   if (res.status !== 0) throw new Error(`Lighthouse failed for ${url}`);
 }
 
@@ -101,15 +103,19 @@ try {
   await startPreviewIfNeeded();
   for (const route of ROUTES) {
     const url = `${BASE}${route.startsWith("/") ? route : `/${route}`}`;
-    const out = join(outDir, `report-${route.replace(/\W+/g, "_") || "root"}.json`);
+    const outBase = join(outDir, `report-${route.replace(/\W+/g, "_") || "root"}`);
     console.log(`\n▸ Lighthouse mobile: ${url}`);
-    audit(url, out);
-    assertScores(out, url);
+    audit(url, outBase);
+    assertScores(`${outBase}.report.json`, url);
   }
+} catch (error) {
+  failed = true;
+  console.error(error);
+  process.exitCode = 1;
 } finally {
   if (preview) preview.kill("SIGTERM");
   // Keep reports on failure for inspection.
-  if (process.exitCode === 1) {
+  if (failed || process.exitCode === 1) {
     console.log(`\nReports kept at: ${outDir}`);
   } else {
     rmSync(outDir, { recursive: true, force: true });
