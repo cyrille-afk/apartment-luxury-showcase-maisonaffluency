@@ -82,4 +82,4 @@ Disallow: /
 User-agent: cohere-ai
 Disallow: /
 
-Sitemap: https://maisonaffluency.com/sitemap-index.xml
+Sitemap: https://maisonaffluency.com/sitemap.xml
