@@ -109,13 +109,14 @@ export default function Studios() {
   const projectTypeLabel = projectType ? labelOf(PROJECT_TYPES, projectType) : null;
 
   const seoTitle = (() => {
+    // Hard cap 60 chars
     if (disciplineLabel && projectTypeLabel)
-      return `${disciplineLabel} Studios for ${projectTypeLabel} Projects | Maison Affluency`;
+      return `${disciplineLabel} Studios for ${projectTypeLabel} | Maison Affluency`.slice(0, 60);
     if (disciplineLabel)
-      return `${disciplineLabel} Studios — Featured Directory | Maison Affluency`;
+      return `${disciplineLabel} Studios — Maison Affluency`.slice(0, 60);
     if (projectTypeLabel)
-      return `Studios Specialising in ${projectTypeLabel} | Maison Affluency`;
-    return "Featured Studios | Architects & Interior Designers — Maison Affluency";
+      return `${projectTypeLabel} Studios — Maison Affluency`.slice(0, 60);
+    return "Featured Architects & Designers — Maison Affluency";
   })();
 
   const seoDescription = (() => {
@@ -268,6 +269,29 @@ export default function Studios() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Explore the rest of Maison Affluency — internal link equity */}
+      <section className="border-t border-border bg-card/30">
+        <div className="mx-auto max-w-6xl px-6 py-14">
+          <p className="mb-3 text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            Explore further
+          </p>
+          <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
+            Beyond the studios directory
+          </h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-sm">
+            <li><Link to="/designers" className="text-foreground hover:underline">Represented designers A–Z</Link> <span className="text-muted-foreground">— atelier-level makers we represent.</span></li>
+            <li><Link to="/collectibles" className="text-foreground hover:underline">Collectible furniture</Link> <span className="text-muted-foreground">— curated edit of signed pieces.</span></li>
+            <li><Link to="/new-in" className="text-foreground hover:underline">New arrivals</Link> <span className="text-muted-foreground">— latest additions to the catalogue.</span></li>
+            <li><Link to="/gallery" className="text-foreground hover:underline">Showroom gallery</Link> <span className="text-muted-foreground">— pieces in situ.</span></li>
+            <li><Link to="/journal" className="text-foreground hover:underline">Journal</Link> <span className="text-muted-foreground">— essays on craft and provenance.</span></li>
+            <li><Link to="/apartment-tour" className="text-foreground hover:underline">Private apartment tour</Link> <span className="text-muted-foreground">— a realised Singapore commission.</span></li>
+            <li><Link to="/trade-program" className="text-foreground hover:underline">Trade programme</Link> <span className="text-muted-foreground">— net pricing for studios.</span></li>
+            <li><Link to="/studios/submit" className="text-foreground hover:underline">Submit your studio</Link> <span className="text-muted-foreground">— join the directory.</span></li>
+            <li><Link to="/contact" className="text-foreground hover:underline">Contact</Link> <span className="text-muted-foreground">— start a private commission.</span></li>
+          </ul>
+        </div>
       </section>
     </main>
   );
