@@ -285,10 +285,6 @@ const JournalArticlePage = () => {
                   return { url: parts[0].trim(), caption: parts[1]?.trim() || null };
                 });
 
-                // Bounded in-body internal link counter (per render). After the
-                // cap, additional internal links get rel="nofollow" so per-page
-                // outlink totals stay under scanner thresholds.
-                const linkCounter = { internal: 0 };
                 const buildAnchor = (children: any, props: any) => {
                   let href = props.href || "";
                   const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
@@ -300,14 +296,8 @@ const JournalArticlePage = () => {
                   const isExternal = href.startsWith("http");
                   const isInternal = !isExternal && href.startsWith("/");
                   if (isInternal) {
-                    linkCounter.internal += 1;
-                    const overCap = linkCounter.internal > MAX_INBODY_INTERNAL_LINKS;
                     return (
-                      <Link
-                        to={href}
-                        className="text-primary underline underline-offset-4"
-                        rel={overCap ? "nofollow" : undefined}
-                      >
+                      <Link to={href} className="text-primary underline underline-offset-4">
                         {children}
                       </Link>
                     );
