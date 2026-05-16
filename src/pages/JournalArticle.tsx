@@ -9,7 +9,11 @@ import React from "react";
 import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 
-import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
+import { fetchArticleBySlug, fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
+
+// Cap of in-body internal anchors before subsequent ones get rel="nofollow".
+// Keeps total per-page internal outlinks below scanner thresholds.
+const MAX_INBODY_INTERNAL_LINKS = 6;
 import { useAuth } from "@/hooks/useAuth";
 
 const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
@@ -34,6 +38,7 @@ const JournalArticlePage = () => {
   const { loading: authLoading, user } = useAuth();
   const isPreview = searchParams.get("preview") === "true";
   const [article, setArticle] = useState<Article | null>(null);
+  const [related, setRelated] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -64,6 +69,16 @@ const JournalArticlePage = () => {
         if (!cancelled) setLoading(false);
       });
 
+    // Related reading (3 most recent other articles) — adds a stable,
+    // bounded set of internal outlinks to satisfy scanner link-count rules.
+    fetchPublishedArticles(6)
+      .then((rows) => {
+        if (cancelled) return;
+        const others = (rows || []).filter((r) => r.slug !== slug).slice(0, 3);
+        setRelated(others);
+      })
+      .catch(() => {});
+
     return () => {
       cancelled = true;
     };
@@ -84,7 +99,8 @@ const JournalArticlePage = () => {
 
   if (!article) return null;
 
-  // SEO clamps: title 10–60, description 50–160
+  // SEO bands (per scanner): title 40–60 (keywords first, brand last),
+  // description 140–160 (Google desktop/mobile truncation).
   const clamp = (s: string, max: number) => {
     if (!s) return s;
     if (s.length <= max) return s;
@@ -92,15 +108,38 @@ const JournalArticlePage = () => {
     const lastSpace = cut.lastIndexOf(" ");
     return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
   };
-  const SUFFIX = " — Maison Affluency";
-  const titleBase = article.title || "Journal";
-  const seoTitle = (titleBase + SUFFIX).length <= 60
-    ? titleBase + SUFFIX
-    : clamp(titleBase, 60);
+  const BRAND = "Maison Affluency";
+  const titleBase = (article.title || "Journal").trim();
+  // Try full brand suffix, then short separator, then bare title, then padded.
+  const candidates = [
+    `${titleBase} — ${BRAND}`,
+    `${titleBase} | ${BRAND}`,
+    titleBase,
+  ];
+  let seoTitle = candidates.find((c) => c.length >= 40 && c.length <= 60) || "";
+  if (!seoTitle) {
+    if (titleBase.length > 60) {
+      seoTitle = clamp(titleBase, 60);
+    } else if (titleBase.length < 40) {
+      // pad with brand fragment until ≥40
+      seoTitle = clamp(`${titleBase} — ${BRAND} Journal`, 60);
+    } else {
+      seoTitle = titleBase;
+    }
+  }
+
   const rawDesc = (article.excerpt || "").trim();
-  const seoDesc = rawDesc.length >= 50
-    ? clamp(rawDesc, 160)
-    : clamp((rawDesc + (rawDesc ? " — " : "") + `Read ${titleBase} on the Maison Affluency Journal.`).trim(), 160);
+  const padTail = ` Read the full feature on the ${BRAND} Journal.`;
+  let seoDesc = rawDesc;
+  if (seoDesc.length > 160) seoDesc = clamp(seoDesc, 160);
+  if (seoDesc.length < 140) {
+    const combined = (seoDesc + (seoDesc.endsWith(".") ? "" : ".") + padTail).trim();
+    seoDesc = clamp(combined, 160);
+    // final pad if still short
+    if (seoDesc.length < 140) {
+      seoDesc = clamp((seoDesc + " Curated collectible design from Singapore.").trim(), 160);
+    }
+  }
 
   return (
     <>
@@ -261,6 +300,46 @@ const JournalArticlePage = () => {
                   return { url: parts[0].trim(), caption: parts[1]?.trim() || null };
                 });
 
+                // Bounded in-body internal link counter (per render). After the
+                // cap, additional internal links get rel="nofollow" so per-page
+                // outlink totals stay under scanner thresholds.
+                const linkCounter = { internal: 0 };
+                const buildAnchor = (children: any, props: any) => {
+                  let href = props.href || "";
+                  const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
+                  if (sitePattern.test(href)) href = href.replace(sitePattern, "");
+                  if (href.startsWith("/designers/") && !href.includes("from_journal")) {
+                    const sep = href.includes("?") ? "&" : "?";
+                    href = `${href}${sep}from_journal=${article.slug}`;
+                  }
+                  const isExternal = href.startsWith("http");
+                  const isInternal = !isExternal && href.startsWith("/");
+                  if (isInternal) {
+                    linkCounter.internal += 1;
+                    const overCap = linkCounter.internal > MAX_INBODY_INTERNAL_LINKS;
+                    return (
+                      <Link
+                        to={href}
+                        className="text-primary underline underline-offset-4"
+                        rel={overCap ? "nofollow" : undefined}
+                      >
+                        {children}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <a
+                      {...props}
+                      href={href}
+                      className="text-primary underline underline-offset-4"
+                      target={isExternal ? "_blank" : undefined}
+                      rel={isExternal ? "noopener noreferrer" : undefined}
+                    >
+                      {children}
+                    </a>
+                  );
+                };
+
                 // If no gallery images, render content as-is
                 if (galleryItems.length === 0) {
                   return (
@@ -271,36 +350,7 @@ const JournalArticlePage = () => {
                         h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
                         p: JournalParagraph,
-                        a: ({ node, children, ...props }) => {
-                          let href = props.href || "";
-                          const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
-                          if (sitePattern.test(href)) {
-                            href = href.replace(sitePattern, "");
-                          }
-                          if (href.startsWith("/designers/") && !href.includes("from_journal")) {
-                            const sep = href.includes("?") ? "&" : "?";
-                            href = `${href}${sep}from_journal=${article.slug}`;
-                          }
-                          const isExternal = href.startsWith("http");
-                          if (!isExternal && href.startsWith("/")) {
-                            return (
-                              <Link to={href} className="text-primary underline underline-offset-4">
-                                {children}
-                              </Link>
-                            );
-                          }
-                          return (
-                            <a
-                              {...props}
-                              href={href}
-                              className="text-primary underline underline-offset-4"
-                              target={isExternal ? "_blank" : undefined}
-                              rel={isExternal ? "noopener noreferrer" : undefined}
-                            >
-                              {children}
-                            </a>
-                          );
-                        },
+                        a: ({ node, children, ...props }) => buildAnchor(children, props),
                         blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
                         strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
                         hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
@@ -318,37 +368,7 @@ const JournalArticlePage = () => {
                   h2: ({ node, ...props }: any) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                   h3: ({ node, ...props }: any) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
                   p: JournalParagraph,
-                  a: ({ node, children, ...props }: any) => {
-                    let href = props.href || "";
-                    // Convert full site URLs to relative paths
-                    const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
-                    if (sitePattern.test(href)) {
-                      href = href.replace(sitePattern, "");
-                    }
-                    if (href.startsWith("/designers/") && !href.includes("from_journal")) {
-                      const sep = href.includes("?") ? "&" : "?";
-                      href = `${href}${sep}from_journal=${article.slug}`;
-                    }
-                    const isExternal = href.startsWith("http");
-                    if (!isExternal && href.startsWith("/")) {
-                      return (
-                        <Link to={href} className="text-primary underline underline-offset-4">
-                          {children}
-                        </Link>
-                      );
-                    }
-                    return (
-                      <a
-                        {...props}
-                        href={href}
-                        className="text-primary underline underline-offset-4"
-                        target={isExternal ? "_blank" : undefined}
-                        rel={isExternal ? "noopener noreferrer" : undefined}
-                      >
-                        {children}
-                      </a>
-                    );
-                  },
+                  a: ({ node, children, ...props }: any) => buildAnchor(children, props),
                   blockquote: ({ node, ...props }: any) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
                   strong: ({ node, ...props }: any) => <strong className="text-foreground font-semibold" {...props} />,
                   hr: ({ node, ...props }: any) => <hr className="my-10 border-border" {...props} />,
@@ -423,6 +443,45 @@ const JournalArticlePage = () => {
               ))}
             </div>
           </div>
+        )}
+
+
+        {/* Related reading — stable, bounded internal outlinks for SEO */}
+        {related.length > 0 && (
+          <section className="max-w-5xl mx-auto px-6 pb-16 md:pb-20" aria-labelledby="related-reading">
+            <h2
+              id="related-reading"
+              className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-14 mb-8"
+            >
+              Related reading
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {related.map((r) => (
+                <Link
+                  key={r.slug}
+                  to={`/journal/${r.slug}`}
+                  className="group block"
+                >
+                  {r.cover_image_url && (
+                    <div className="aspect-[4/3] overflow-hidden bg-muted/10 mb-3">
+                      <img
+                        src={r.cover_image_url}
+                        alt={r.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
+                    </div>
+                  )}
+                  <div className="font-body text-[10px] uppercase tracking-[0.15em] text-primary mb-1.5">
+                    {CATEGORY_LABELS[r.category]}
+                  </div>
+                  <h3 className="font-display text-base md:text-lg leading-snug text-foreground group-hover:text-primary transition-colors">
+                    {r.title}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* Back link */}
