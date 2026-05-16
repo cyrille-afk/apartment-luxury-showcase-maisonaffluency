@@ -170,6 +170,24 @@ const ApartmentTour = () => {
             .
           </p>
           <h3 className="font-display text-lg md:text-xl text-[#f5f0eb] tracking-wide pt-4">
+            About this Singapore commission
+          </h3>
+          <p>
+            The residence sits on a high floor of a residential tower with uninterrupted
+            views over the Marina Bay skyline. The brief asked for an interior that felt
+            collected rather than decorated — pieces that would age, patinate and earn
+            their place over the next decade. We worked with the architect on built-in
+            joinery in fumed oak and bronze, then layered seating, lighting and case
+            goods sourced from ateliers in Paris, Milan, Kyoto and New York. Several
+            pieces are unique commissions made specifically for this apartment;
+            others are limited editions from designers featured in our{" "}
+            <Link to="/journal" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
+              journal
+            </Link>
+            . The result is a quiet, considered home that doubles as a working
+            example of our curatorial approach.
+          </p>
+          <h3 className="font-display text-lg md:text-xl text-[#f5f0eb] tracking-wide pt-4">
             Continue exploring
           </h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[14px] md:text-[15px]">
