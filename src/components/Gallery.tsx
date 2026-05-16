@@ -1024,7 +1024,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     {/* Mobile: title + subtitle centred with share */}
                     <div className="md:hidden flex flex-col items-center text-center mb-2">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
+                        <p className="text-xl font-serif text-foreground" aria-hidden="true">{section.experience}</p>
                         <button
                           onClick={() => {
                             const firstItem = galleryExperiences[originalSectionIndex].items[0];
@@ -1049,7 +1049,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     {/* Mobile: title + subtitle centred with share */}
                     <div className="md:hidden flex flex-col items-center text-center mb-2">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
+                        <p className="text-xl font-serif text-foreground" aria-hidden="true">{section.experience}</p>
                         <button
                           onClick={() => {
                             const firstItem = galleryExperiences[originalSectionIndex].items[0];
