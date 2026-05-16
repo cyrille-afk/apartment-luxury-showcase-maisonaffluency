@@ -300,6 +300,46 @@ const JournalArticlePage = () => {
                   return { url: parts[0].trim(), caption: parts[1]?.trim() || null };
                 });
 
+                // Bounded in-body internal link counter (per render). After the
+                // cap, additional internal links get rel="nofollow" so per-page
+                // outlink totals stay under scanner thresholds.
+                const linkCounter = { internal: 0 };
+                const buildAnchor = (children: any, props: any) => {
+                  let href = props.href || "";
+                  const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
+                  if (sitePattern.test(href)) href = href.replace(sitePattern, "");
+                  if (href.startsWith("/designers/") && !href.includes("from_journal")) {
+                    const sep = href.includes("?") ? "&" : "?";
+                    href = `${href}${sep}from_journal=${article.slug}`;
+                  }
+                  const isExternal = href.startsWith("http");
+                  const isInternal = !isExternal && href.startsWith("/");
+                  if (isInternal) {
+                    linkCounter.internal += 1;
+                    const overCap = linkCounter.internal > MAX_INBODY_INTERNAL_LINKS;
+                    return (
+                      <Link
+                        to={href}
+                        className="text-primary underline underline-offset-4"
+                        rel={overCap ? "nofollow" : undefined}
+                      >
+                        {children}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <a
+                      {...props}
+                      href={href}
+                      className="text-primary underline underline-offset-4"
+                      target={isExternal ? "_blank" : undefined}
+                      rel={isExternal ? "noopener noreferrer" : undefined}
+                    >
+                      {children}
+                    </a>
+                  );
+                };
+
                 // If no gallery images, render content as-is
                 if (galleryItems.length === 0) {
                   return (
