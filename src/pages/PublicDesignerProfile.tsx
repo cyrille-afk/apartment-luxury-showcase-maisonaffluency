@@ -477,7 +477,13 @@ const PublicDesignerProfile = () => {
   const editorialBio = editorialBlocks.join("\n\n");
   const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
 
-  const biographySection = displayBiography ? (
+  const bioWordCount = (displayBiography || "").replace(/<[^>]+>/g, " ").replace(/https?:\S+/g, "").trim().split(/\s+/).filter(Boolean).length;
+  const showThinContentFallback = bioWordCount < 60;
+  const thinContentFallback = showThinContentFallback
+    ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner })
+    : "";
+
+  const biographySection = (displayBiography || thinContentFallback) ? (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -543,11 +549,17 @@ const PublicDesignerProfile = () => {
                     allowCollapse={false}
                     startImageIndex={0}
                   />
-                ) : (
+                ) : heroParagraphs.length > 0 ? (
                   <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
                     {heroParagraphs.map((p: string, i: number) => (
                       <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                     ))}
+                  </div>
+                ) : null}
+
+                {thinContentFallback && (
+                  <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85 mt-4">
+                    <p>{thinContentFallback}</p>
                   </div>
                 )}
             </div>
