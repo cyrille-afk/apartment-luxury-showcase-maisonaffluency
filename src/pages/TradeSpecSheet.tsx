@@ -185,23 +185,79 @@ export default function TradeSpecSheet() {
           <meta name="description" content={pageDescription} />
           <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
         </Helmet>
-        <div className="flex flex-col items-center justify-center h-[60vh] gap-6 px-4 text-center">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-            <Lock className="w-7 h-7 text-muted-foreground" />
+        <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
+          <div className="flex flex-col items-center text-center gap-6">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+              <Lock className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <div>
+              <h1 className="font-display text-2xl md:text-3xl text-foreground mb-3">{pageTitle}</h1>
+              <p className="font-body text-sm text-muted-foreground max-w-md mx-auto">
+                Register or sign in to view and download this spec sheet.
+              </p>
+            </div>
+            <Button
+              className="gap-2 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white"
+              onClick={() => setGateOpen(true)}
+            >
+              <FileDown className="w-4 h-4" />
+              Sign in to view
+            </Button>
           </div>
-          <div>
-            <h1 className="font-display text-xl text-foreground mb-2">{pageTitle}</h1>
-            <p className="font-body text-sm text-muted-foreground max-w-md">
-              Register or sign in to view and download this spec sheet.
+
+          {/* Editorial copy — explains the spec sheet system to crawlers + visitors */}
+          <section className="mt-16 md:mt-20 font-body text-[15px] leading-relaxed text-muted-foreground space-y-5">
+            <h2 className="font-display text-xl text-foreground">About Maison Affluency spec sheets</h2>
+            <p>
+              Every piece in the Maison Affluency catalogue ships with a manufacturer
+              spec sheet — a single PDF that consolidates technical drawings, finish
+              and material options, lead times, packing dimensions, weight and care
+              instructions. Spec sheets are the working document interior designers,
+              architects and procurement teams hand to clients, installers and freight
+              forwarders when planning a commission.
             </p>
-          </div>
-          <Button
-            className="gap-2 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white"
-            onClick={() => setGateOpen(true)}
-          >
-            <FileDown className="w-4 h-4" />
-            Sign in to view
-          </Button>
+            <p>
+              Because most of the documentation we host is supplied directly by
+              European, Japanese and American ateliers under distribution agreements,
+              spec sheets are gated behind a trade or registered account. Registration
+              is free and takes under a minute. Once signed in you can preview the PDF
+              in the browser, download a clean white-labelled version, attach it to a
+              tearsheet, and route it straight to a client mood board.
+            </p>
+            <h3 className="font-display text-lg text-foreground pt-2">What's inside a typical sheet</h3>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Plan, elevation and section drawings with metric and imperial dimensions</li>
+              <li>Material, finish and upholstery options with COM/COL allowances</li>
+              <li>Standard lead times and packing details for freight planning</li>
+              <li>Care, cleaning and installation guidance</li>
+              <li>Maker, designer and provenance notes for the editorial record</li>
+            </ul>
+            <h3 className="font-display text-lg text-foreground pt-2">Working with the catalogue</h3>
+            <p>
+              Spec sheets are one piece of a wider trade workflow. From any product
+              page you can request quotes in multiple currencies, generate
+              white-labelled tearsheets and presentations, share mood boards via a
+              private client portal, and download CAD or 3D assets where the maker
+              supplies them. The same catalogue powers both the public website and
+              the trade portal — pricing and downloads simply unlock once you sign in.
+            </p>
+          </section>
+
+          {/* Internal links */}
+          <nav aria-label="Related" className="mt-12 pt-8 border-t border-border">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">Continue exploring</p>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <li><Link to="/trade-program" className="text-foreground hover:underline">Trade programme</Link></li>
+              <li><Link to="/trade/register" className="text-foreground hover:underline">Register for trade</Link></li>
+              <li><Link to="/trade/login" className="text-foreground hover:underline">Trade sign in</Link></li>
+              <li><Link to="/designers" className="text-foreground hover:underline">Designers A–Z</Link></li>
+              <li><Link to="/collectibles" className="text-foreground hover:underline">Collectibles</Link></li>
+              <li><Link to="/new-in" className="text-foreground hover:underline">New arrivals</Link></li>
+              <li><Link to="/gallery" className="text-foreground hover:underline">Showroom gallery</Link></li>
+              <li><Link to="/journal" className="text-foreground hover:underline">Journal</Link></li>
+              <li><Link to="/contact" className="text-foreground hover:underline">Contact</Link></li>
+            </ul>
+          </nav>
         </div>
         <AuthGateDialog open={gateOpen} onClose={() => setGateOpen(false)} action="view this spec sheet" />
       </>
