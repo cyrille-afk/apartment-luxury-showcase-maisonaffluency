@@ -33,6 +33,7 @@ rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
 let preview;
+let failed = false;
 async function startPreviewIfNeeded() {
   if (process.env.PW_BASE_URL) return;
   console.log("→ Building & starting preview…");
@@ -107,10 +108,14 @@ try {
     audit(url, outBase);
     assertScores(`${outBase}.report.json`, url);
   }
+} catch (error) {
+  failed = true;
+  console.error(error);
+  process.exitCode = 1;
 } finally {
   if (preview) preview.kill("SIGTERM");
   // Keep reports on failure for inspection.
-  if (process.exitCode === 1) {
+  if (failed || process.exitCode === 1) {
     console.log(`\nReports kept at: ${outDir}`);
   } else {
     rmSync(outDir, { recursive: true, force: true });
