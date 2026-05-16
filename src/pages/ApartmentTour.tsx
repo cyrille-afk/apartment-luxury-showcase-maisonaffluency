@@ -44,10 +44,8 @@ const ApartmentTour = () => {
     <>
       <Helmet>
         <title>A Private Apartment Tour — Maison Affluency Singapore</title>
-        <meta name="description" content="A cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craftsmanship, panoramic skyline views." />
-        <link rel="canonical" href={CANONICAL_URL} />
         <meta property="og:title" content="A Private Apartment Tour — Maison Affluency" />
-        <meta property="og:description" content="A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency." />
+        <meta property="og:description" content="A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency — collectible furniture, artisan craft, skyline views." />
         <meta property="og:url" content={CANONICAL_URL} />
         <meta property="og:image" content={OG_IMAGE} />
         <meta property="og:type" content="video.other" />
@@ -55,6 +53,9 @@ const ApartmentTour = () => {
         <meta property="og:video:type" content="video/mp4" />
         <meta property="og:video:width" content="1920" />
         <meta property="og:video:height" content="1080" />
+        <meta property="og:site_name" content="Maison Affluency" />
+        <meta name="description" content="Cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craft, panoramic skyline views." />
+        <link rel="canonical" href={CANONICAL_URL} />
         <meta name="twitter:card" content="player" />
         <meta name="twitter:title" content="A Private Apartment Tour — Maison Affluency" />
         <meta name="twitter:description" content="An exclusive cinematic tour of a bespoke Singapore apartment." />
