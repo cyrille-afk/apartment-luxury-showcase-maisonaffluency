@@ -350,36 +350,7 @@ const JournalArticlePage = () => {
                         h2: ({ node, ...props }) => <h2 className="font-display text-lg md:text-xl uppercase tracking-[0.08em] border-t border-border pt-10 md:pt-16 mt-10 md:mt-16" {...props} />,
                         h3: ({ node, ...props }) => <h3 className="font-display text-base md:text-lg tracking-wide mt-8 mb-4" {...props} />,
                         p: JournalParagraph,
-                        a: ({ node, children, ...props }) => {
-                          let href = props.href || "";
-                          const sitePattern = /^https?:\/\/(www\.)?maisonaffluency\.com/;
-                          if (sitePattern.test(href)) {
-                            href = href.replace(sitePattern, "");
-                          }
-                          if (href.startsWith("/designers/") && !href.includes("from_journal")) {
-                            const sep = href.includes("?") ? "&" : "?";
-                            href = `${href}${sep}from_journal=${article.slug}`;
-                          }
-                          const isExternal = href.startsWith("http");
-                          if (!isExternal && href.startsWith("/")) {
-                            return (
-                              <Link to={href} className="text-primary underline underline-offset-4">
-                                {children}
-                              </Link>
-                            );
-                          }
-                          return (
-                            <a
-                              {...props}
-                              href={href}
-                              className="text-primary underline underline-offset-4"
-                              target={isExternal ? "_blank" : undefined}
-                              rel={isExternal ? "noopener noreferrer" : undefined}
-                            >
-                              {children}
-                            </a>
-                          );
-                        },
+                        a: ({ node, children, ...props }) => buildAnchor(children, props),
                         blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-primary pl-6 italic font-serif my-6" {...props} />,
                         strong: ({ node, ...props }) => <strong className="text-foreground font-semibold" {...props} />,
                         hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
