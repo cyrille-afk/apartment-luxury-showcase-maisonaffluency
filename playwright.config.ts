@@ -20,7 +20,7 @@ export default defineConfig({
       use: {
         ...devices["Pixel 5"],
         ...(CHROMIUM_EXECUTABLE_PATH
-          ? { executablePath: CHROMIUM_EXECUTABLE_PATH }
+          ? { launchOptions: { executablePath: CHROMIUM_EXECUTABLE_PATH } }
           : {}),
       },
     },
