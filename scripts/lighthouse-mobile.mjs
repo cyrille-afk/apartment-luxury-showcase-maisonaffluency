@@ -19,6 +19,7 @@ import { setTimeout as wait } from "node:timers/promises";
 
 const BASE = process.env.PW_BASE_URL?.replace(/\/$/, "") || "http://localhost:4173";
 const ROUTES = (process.env.ROUTES || "/").split(",").map((s) => s.trim()).filter(Boolean);
+const AUDIT_TIMEOUT_MS = Number(process.env.LH_AUDIT_TIMEOUT_MS || 240_000);
 
 // Minimum scores (0-1).
 const THRESHOLDS = {
@@ -59,20 +60,29 @@ function audit(url, outBase) {
     url,
     "--quiet",
     "--chrome-flags=--headless=new --no-sandbox",
-    "--preset=desktop",
     "--form-factor=mobile",
     "--screenEmulation.mobile=true",
     "--screenEmulation.width=390",
     "--screenEmulation.height=844",
     "--screenEmulation.deviceScaleFactor=3",
     "--throttling-method=simulate",
+    "--max-wait-for-load=45000",
     "--output=json",
     "--output=html",
     `--output-path=${outBase}`,
     "--only-categories=performance,accessibility,best-practices,seo",
   ];
-  const res = spawnSync("npx", ["--no-install", ...args], { stdio: "inherit" });
-  if (res.status !== 0) throw new Error(`Lighthouse failed for ${url}`);
+  const startedAt = Date.now();
+  const res = spawnSync("npx", ["--no-install", ...args], {
+    stdio: "inherit",
+    timeout: AUDIT_TIMEOUT_MS,
+    killSignal: "SIGKILL",
+  });
+  const seconds = ((Date.now() - startedAt) / 1000).toFixed(1);
+  if (res.error?.code === "ETIMEDOUT") {
+    throw new Error(`Lighthouse timed out after ${seconds}s for ${url}`);
+  }
+  if (res.status !== 0) throw new Error(`Lighthouse failed after ${seconds}s for ${url}`);
 }
 
 function assertScores(reportPath, url) {
