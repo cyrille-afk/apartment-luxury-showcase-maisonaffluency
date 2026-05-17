@@ -111,9 +111,10 @@ function designerSeoTitle(
   if (fromFor) return fromFor;
   const fromSolo = pickInBand(soloCandidates);
   if (fromSolo) return fromSolo;
-  // Closest-to-50 across the full set as last resort.
-  const all = [...forCandidates, ...soloCandidates];
-  return all.sort((a, b) => Math.abs(50 - a.length) - Math.abs(50 - b.length))[0];
+  // Last resort: closest-to-50, but still prefer for-candidates when present
+  // so child designers don't collapse to the same title as their parent.
+  const pool = forCandidates.length ? forCandidates : soloCandidates;
+  return pool.sort((a, b) => Math.abs(50 - a.length) - Math.abs(50 - b.length))[0];
 }
 
 function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean }) {
