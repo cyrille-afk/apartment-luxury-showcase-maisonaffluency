@@ -8,12 +8,16 @@ const CHROMIUM_EXECUTABLE_PATH =
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  // Run E2E in sequence under CI: parallel Playwright+Lighthouse routinely OOMs
+  // standard ubuntu-latest runners (see PWA CI fixes #3).
+  fullyParallel: !process.env.CI,
+  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI
     ? [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]]
     : [["list"]],
   use: {
     baseURL: BASE_URL,
+    // retain-on-failure keeps a downloadable trace of failed runs for Trace Viewer.
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -23,9 +27,11 @@ export default defineConfig({
       name: "mobile-chrome",
       use: {
         ...devices["Pixel 5"],
-        ...(CHROMIUM_EXECUTABLE_PATH
-          ? { launchOptions: { executablePath: CHROMIUM_EXECUTABLE_PATH } }
-          : {}),
+        launchOptions: {
+          // CI hardening: avoid sandbox/GPU issues on GitHub Actions headless runners.
+          args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+          ...(CHROMIUM_EXECUTABLE_PATH ? { executablePath: CHROMIUM_EXECUTABLE_PATH } : {}),
+        },
       },
     },
   ],
