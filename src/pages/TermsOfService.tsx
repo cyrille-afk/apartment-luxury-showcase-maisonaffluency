@@ -8,6 +8,7 @@ const TermsOfService = () => {
       <Helmet>
         <title>Terms of Service | Maison Affluency</title>
         <meta name="description" content="Terms of Service for Maison Affluency — the terms governing use of our website and trade portal." />
+        <link rel="canonical" href="https://maisonaffluency.com/terms" />
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground">

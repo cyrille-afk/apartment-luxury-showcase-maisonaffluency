@@ -133,7 +133,7 @@ export default function Studios() {
     return base;
   })();
 
-  const canonical = "https://www.maisonaffluency.com/studios";
+  const canonical = "https://maisonaffluency.com/studios";
   const ogImage =
     studios.find((s) => s.is_featured && s.hero_image_url)?.hero_image_url ||
     studios.find((s) => s.hero_image_url)?.hero_image_url ||
