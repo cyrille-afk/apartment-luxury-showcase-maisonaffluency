@@ -24,6 +24,10 @@ jobs:
       - run: npm ci --prefer-offline --no-audit --no-fund
       - run: npm run test:e2e:mobile-pwa
         timeout-minutes: 10
+        env:
+          # Verbose Playwright API logs surface in the GH Action output, making
+          # CDP-disconnect / timeout failures debuggable without re-running locally.
+          DEBUG: pw:api
       - name: Upload Playwright report
         if: failure() || cancelled()
         uses: actions/upload-artifact@v4

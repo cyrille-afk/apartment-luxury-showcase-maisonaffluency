@@ -69,13 +69,18 @@ async function audit(url, outBase) {
     "lighthouse",
     url,
     "--quiet",
-    "--chrome-flags=--headless=new --no-sandbox",
+    // --disable-gpu + --no-sandbox prevents FAILED_DOCUMENT_REQUEST timeouts on
+    // GitHub Actions headless runners (PWA CI fixes #1).
+    "--chrome-flags=--headless=new --no-sandbox --disable-setuid-sandbox --disable-gpu",
     "--form-factor=mobile",
     "--screenEmulation.mobile=true",
     "--screenEmulation.width=390",
     "--screenEmulation.height=844",
     "--screenEmulation.deviceScaleFactor=3",
-    "--throttling-method=simulate",
+    // 'provided' disables Lighthouse's CPU/network throttling so tests are
+    // less sensitive to variable CI runner specs (PWA CI fixes #2).
+    "--throttling-method=provided",
+    "--disable-storage-reset",
     "--max-wait-for-load=45000",
     "--output=json",
     "--output=html",
