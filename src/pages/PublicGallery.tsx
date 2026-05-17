@@ -48,7 +48,7 @@ const PublicGallery = () => {
         <title>Interactive Gallery — Maison Affluency</title>
         <meta
           name="description"
-          content="Step inside our curated apartment gallery in Singapore — explore room-by-room interiors featuring collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers."
+          content="Explore our curated Singapore gallery — room-by-room interiors with collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers."
         />
         <link rel="canonical" href="https://maisonaffluency.com/gallery" />
         <meta property="og:type" content="website" />
@@ -56,13 +56,13 @@ const PublicGallery = () => {
         <meta property="og:site_name" content="Maison Affluency" />
         <meta property="og:url" content="https://maisonaffluency.com/gallery" />
         <meta property="og:title" content="Interactive Gallery — Maison Affluency" />
-        <meta property="og:description" content="Step inside our curated apartment gallery in Singapore — explore room-by-room interiors featuring collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers." />
+        <meta property="og:description" content="Explore our curated Singapore gallery — room-by-room interiors with collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers." />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Interactive Gallery — Maison Affluency" />
-        <meta name="twitter:description" content="Step inside our curated apartment gallery in Singapore — explore room-by-room interiors featuring collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers." />
+        <meta name="twitter:description" content="Explore our curated Singapore gallery — room-by-room interiors with collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers." />
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
       </Helmet>
 
