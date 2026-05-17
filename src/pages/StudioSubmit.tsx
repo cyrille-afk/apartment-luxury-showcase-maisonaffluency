@@ -176,7 +176,7 @@ export default function StudioSubmit() {
           name="description"
           content="Apply to be featured in the Maison Affluency directory of architecture and interior design studios. Tell us about your practice and projects."
         />
-        <link rel="canonical" href="https://www.maisonaffluency.com/studios/submit" />
+        <link rel="canonical" href="https://maisonaffluency.com/studios/submit" />
       </Helmet>
 
       <section className="border-b border-border bg-card">

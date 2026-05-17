@@ -8,10 +8,10 @@ const PrivacyPolicy = () => {
       <Helmet>
         <title>Privacy Policy | Maison Affluency</title>
         <meta name="description" content="Privacy Policy for Maison Affluency — how we collect, use, and protect your personal data." />
-        <link rel="canonical" href="https://www.maisonaffluency.com/privacy" />
+        <link rel="canonical" href="https://maisonaffluency.com/privacy" />
         <meta property="og:title" content="Privacy Policy — Maison Affluency" />
         <meta property="og:description" content="How Maison Affluency collects, uses and protects your personal data." />
-        <meta property="og:url" content="https://www.maisonaffluency.com/privacy" />
+        <meta property="og:url" content="https://maisonaffluency.com/privacy" />
         <meta property="og:type" content="website" />
       </Helmet>
 
