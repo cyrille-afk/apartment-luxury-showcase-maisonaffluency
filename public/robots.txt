@@ -76,10 +76,10 @@ User-agent: Google-Extended
 Allow: /
 
 User-agent: anthropic-ai
-Disallow: /
+Allow: /
 
 User-agent: ClaudeBot
-Disallow: /
+Allow: /
 
 User-agent: cohere-ai
 Disallow: /
