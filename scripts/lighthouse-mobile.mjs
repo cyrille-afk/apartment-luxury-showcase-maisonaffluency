@@ -81,11 +81,17 @@ async function audit(url, outBase) {
     // less sensitive to variable CI runner specs (PWA CI fixes #2).
     "--throttling-method=provided",
     "--disable-storage-reset",
-    "--max-wait-for-load=45000",
+    // Tightened from 45s → 20s. Long-lived sockets (Supabase realtime,
+    // analytics beacons, version-watcher polling) keep `networkidle` from
+    // ever firing on this app, so LH would wait the full window every run.
+    "--max-wait-for-load=20000",
     "--output=json",
     "--output=html",
     `--output-path=${outBase}`,
-    "--only-categories=performance,accessibility,best-practices,seo",
+    // Dropped 'seo' and 'best-practices' from the CI pass — performance +
+    // accessibility are the signals that gate mobile UX. Run the full set
+    // locally when needed.
+    "--only-categories=performance,accessibility",
   ];
   const startedAt = Date.now();
   const child = spawn("npx", ["--no-install", ...args], {
