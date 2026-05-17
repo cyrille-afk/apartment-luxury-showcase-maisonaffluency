@@ -53,28 +53,68 @@ function displayName(name: string): string {
 }
 
 // Target Google's display bands: title 40-60 chars, description 140-160 chars.
-function designerSeoTitle(name: string, founder?: string | null, isChildDesigner?: boolean): string {
+function designerSeoTitle(
+  name: string,
+  founder?: string | null,
+  isChildDesigner?: boolean,
+  slug?: string | null,
+): string {
   const cleanName = displayName(name);
   const cleanFounder = founder?.trim();
-  const candidates: string[] = [];
-  if (isChildDesigner && cleanFounder && cleanFounder !== cleanName && !cleanName.toLowerCase().includes(cleanFounder.toLowerCase())) {
-    candidates.push(
-      `${cleanName} for ${cleanFounder} — Designer | Maison Affluency Singapore`,
-      `${cleanName} for ${cleanFounder} — Maison Affluency Singapore`,
-      `${cleanName} for ${cleanFounder} — Maison Affluency`,
+
+  // Extract slug tokens not already represented in name/founder so pages like
+  // /designers/ozone-light don't collide with /designers/ozone.
+  const tokenize = (s: string) =>
+    s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(/\s+/).filter(Boolean);
+  const knownTokens = new Set([
+    ...tokenize(cleanName),
+    ...(cleanFounder ? tokenize(cleanFounder) : []),
+  ]);
+  const slugExtras = slug
+    ? slug
+        .split("-")
+        .filter((t) => t && !knownTokens.has(t.toLowerCase()))
+        .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
+        .join(" ")
+    : "";
+  const displayedName = slugExtras ? `${cleanName} (${slugExtras})` : cleanName;
+
+  const forCandidates: string[] = [];
+  if (
+    isChildDesigner &&
+    cleanFounder &&
+    cleanFounder !== cleanName &&
+    !cleanName.toLowerCase().includes(cleanFounder.toLowerCase())
+  ) {
+    forCandidates.push(
+      `${displayedName} for ${cleanFounder} — Designer | Maison Affluency Singapore`,
+      `${displayedName} for ${cleanFounder} — Maison Affluency Singapore`,
+      `${displayedName} for ${cleanFounder} — Maison Affluency`,
     );
   }
-  candidates.push(
-    `${cleanName} — Collectible Designer | Maison Affluency Singapore`,
-    `${cleanName} — Designer | Maison Affluency Singapore`,
-    `${cleanName} — Designer | Maison Affluency`,
-    `${cleanName} — Maison Affluency Singapore`,
-    `${cleanName} — Maison Affluency`,
-  );
-  // Prefer the longest candidate that fits 40-60. Otherwise the one closest to the band.
-  const inBand = candidates.filter((c) => c.length >= 40 && c.length <= 60);
-  if (inBand.length) return inBand.sort((a, b) => b.length - a.length)[0];
-  return candidates.sort((a, b) => Math.abs(50 - a.length) - Math.abs(50 - b.length))[0];
+  const soloCandidates: string[] = [
+    `${displayedName} — Collectible Designer | Maison Affluency Singapore`,
+    `${displayedName} — Designer | Maison Affluency Singapore`,
+    `${displayedName} — Designer | Maison Affluency`,
+    `${displayedName} — Maison Affluency Singapore`,
+    `${displayedName} — Maison Affluency`,
+  ];
+
+  // Prefer disambiguating "for {founder}" titles when any fit the band; only
+  // fall back to solo titles when no for-candidate fits.
+  const pickInBand = (list: string[]) => {
+    const inBand = list.filter((c) => c.length >= 40 && c.length <= 60);
+    if (inBand.length) return inBand.sort((a, b) => b.length - a.length)[0];
+    return null;
+  };
+  const fromFor = pickInBand(forCandidates);
+  if (fromFor) return fromFor;
+  const fromSolo = pickInBand(soloCandidates);
+  if (fromSolo) return fromSolo;
+  // Last resort: closest-to-50, but still prefer for-candidates when present
+  // so child designers don't collapse to the same title as their parent.
+  const pool = forCandidates.length ? forCandidates : soloCandidates;
+  return pool.sort((a, b) => Math.abs(50 - a.length) - Math.abs(50 - b.length))[0];
 }
 
 function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean }) {
@@ -596,7 +636,7 @@ const PublicDesignerProfile = () => {
       {(() => {
         const canonical = `https://maisonaffluency.com/designers/${designer.slug}`;
         const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
-        const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner);
+        const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner, designer.slug);
         const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner });
         const personLd = {
           "@context": "https://schema.org",
