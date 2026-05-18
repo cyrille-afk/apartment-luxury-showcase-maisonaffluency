@@ -68,20 +68,28 @@ export function FfeUnlockTile({ userId, readOnly = false }: { userId?: string; r
               </span>
             </div>
             <Progress value={progress} className="h-1.5 mb-4" />
-            <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/trade/favorites")}>
-              Browse the catalogue
-            </Button>
+            {!readOnly && (
+              <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("/trade/favorites")}>
+                Browse the catalogue
+              </Button>
+            )}
           </>
         ) : unlocked ? (
-          <Button className="w-full bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold))]/90 text-background" onClick={() => navigate("/trade/tools/ffe")}>
-            <Layout className="h-4 w-4 mr-2" /> Open Floor Plan tool
+          <Button
+            className="w-full bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold))]/90 text-background"
+            onClick={() => navigate("/trade/tools/ffe")}
+            disabled={readOnly}
+          >
+            <Layout className="h-4 w-4 mr-2" /> {readOnly ? "Unlocked" : "Open Floor Plan tool"}
           </Button>
         ) : hasPendingEntitlement ? (
           <div className="text-center py-2">
             <p className="font-body text-xs text-muted-foreground mb-2">Payment processing…</p>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => window.location.reload()}>
-              Refresh
-            </Button>
+            {!readOnly && (
+              <Button variant="outline" size="sm" className="w-full" onClick={() => window.location.reload()}>
+                Refresh
+              </Button>
+            )}
           </div>
         ) : (
           <>
@@ -90,13 +98,15 @@ export function FfeUnlockTile({ userId, readOnly = false }: { userId?: string; r
                 <span className="font-medium">$100 unlock</span> — fully credited to your next trade quote.
               </p>
             </div>
-            <Button
-              className="w-full bg-foreground text-background hover:bg-foreground/90"
-              onClick={handleUnlock}
-              disabled={checkoutLoading || !hasPaidEntitlement && hasPendingEntitlement}
-            >
-              {checkoutLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirecting…</> : "Unlock for $100"}
-            </Button>
+            {!readOnly && (
+              <Button
+                className="w-full bg-foreground text-background hover:bg-foreground/90"
+                onClick={handleUnlock}
+                disabled={checkoutLoading || !hasPaidEntitlement && hasPendingEntitlement}
+              >
+                {checkoutLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirecting…</> : "Unlock for $100"}
+              </Button>
+            )}
           </>
         )}
       </div>
