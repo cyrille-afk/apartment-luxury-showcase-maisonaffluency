@@ -140,6 +140,37 @@ const TradeRegister = () => {
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const isPublicSignup = searchParams.get("type") === "public";
+  const [prefill, setPrefill] = useState({
+    email: prefillEmail,
+    firstName: searchParams.get("first_name") || "",
+    lastName: searchParams.get("last_name") || "",
+    company: searchParams.get("company") || "",
+    phone: searchParams.get("phone") || "",
+  });
+
+  useEffect(() => {
+    // Hydrate from the active session's user metadata / profile when available
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const meta = (user.user_metadata || {}) as Record<string, string>;
+      let profile: Record<string, string> | null = null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("first_name,last_name,company,phone,email")
+        .eq("id", user.id)
+        .maybeSingle();
+      profile = (data as any) || null;
+      setPrefill((p) => ({
+        email: p.email || profile?.email || user.email || "",
+        firstName: p.firstName || profile?.first_name || meta.first_name || "",
+        lastName: p.lastName || profile?.last_name || meta.last_name || "",
+        company: p.company || profile?.company || meta.company || meta.company_name || "",
+        phone: p.phone || profile?.phone || meta.phone || "",
+      }));
+    })();
+  }, []);
+
 
   return (
     <>
