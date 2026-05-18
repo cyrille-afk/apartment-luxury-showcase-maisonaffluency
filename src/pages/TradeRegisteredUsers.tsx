@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { ArrowLeft, UserCheck, UserX, Clock, Search } from "lucide-react";
+import { ArrowLeft, UserCheck, UserX, Clock, Search, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
