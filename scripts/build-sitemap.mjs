@@ -152,14 +152,24 @@ async function loadDynamicRoutes() {
   }
 
   // Trade products (public "Price on Request" pages)
+  // Read from a sitemap-only projection. The source trade_products table is
+  // intentionally protected by RLS, so public builds must not query it directly.
   try {
-    const { data, error } = await supabase
-      .from("trade_products")
-      .select("id, updated_at")
-      .eq("is_active", true)
-      .eq("is_hidden", false);
-    if (error) throw error;
-    for (const p of data ?? []) {
+    const products = [];
+    const pageSize = 1000;
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await supabase
+        .from("sitemap_products")
+        .select("id, updated_at")
+        .order("updated_at", { ascending: false, nullsFirst: false })
+        .order("id", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      products.push(...(data ?? []));
+      if (!data || data.length < pageSize) break;
+    }
+
+    for (const p of products) {
       if (!p.id) continue;
       routes.push({
         loc: `/product/${p.id}`,
@@ -168,7 +178,7 @@ async function loadDynamicRoutes() {
         priority: "0.6",
       });
     }
-    console.log(`[sitemap] products: ${data?.length ?? 0}`);
+    console.log(`[sitemap] products: ${products.length}`);
   } catch (err) {
     console.warn("[sitemap] products query failed:", err?.message ?? err);
   }

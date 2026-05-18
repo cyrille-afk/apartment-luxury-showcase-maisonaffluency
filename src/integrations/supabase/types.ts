@@ -3134,6 +3134,21 @@ export type Database = {
           },
         ]
       }
+      sitemap_products: {
+        Row: {
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       studio_invites: {
         Row: {
           accepted_at: string | null
