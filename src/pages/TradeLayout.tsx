@@ -140,7 +140,7 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
-  const { user, loading, applicationStatus, isAdmin, profile } = useAuth();
+  const { user, loading, applicationStatus, isAdmin, isTradeUser, profile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
@@ -243,6 +243,16 @@ const TradeLayout = () => {
         </div>
       </div>
     );
+  }
+
+  // Public registered users (no trade role, no admin, no application) are confined
+  // to their own dashboard at /trade/me. Block all other /trade/* routes.
+  if (!isAdmin && !isTradeUser && applicationStatus === "none") {
+    const path = location.pathname.replace(/\/$/, "");
+    const PUBLIC_ALLOWED = ["/trade/me", "/trade/settings"];
+    if (!PUBLIC_ALLOWED.includes(path)) {
+      return <Navigate to="/trade/me" replace />;
+    }
   }
 
   return (
