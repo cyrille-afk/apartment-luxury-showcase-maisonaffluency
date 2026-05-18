@@ -231,6 +231,7 @@ export default function TradeRegisteredUsers() {
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Suggested (12mo spend)</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Application</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Joined</th>
+                    <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Dashboard</th>
                   </tr>
                 </thead>
                 <tbody>
