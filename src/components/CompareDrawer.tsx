@@ -28,7 +28,6 @@ const CompareImage = ({ item }: { item: ReturnType<typeof useCompare>["items"][0
           "max-w-[85%] max-h-[85%] object-contain transition-opacity duration-300",
           hovered && hasHover ? "opacity-0" : "opacity-100"
         )}
-        style={{ filter: "brightness(1.02) contrast(1.03) saturate(1.02)" }}
       />
       {hasHover && (
         <img
