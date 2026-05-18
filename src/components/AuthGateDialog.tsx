@@ -78,7 +78,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
           templateName: 'welcome-registration',
           recipientEmail: email,
           idempotencyKey: `welcome-reg-${signUpData.user.id}`,
-          templateData: { firstName },
+          templateData: { firstName, recipientEmail: email },
         },
       }).catch(() => {});
     }
