@@ -90,7 +90,12 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
     });
     onClose();
     if (isDesigner) {
-      navigate(`/trade/register?email=${encodeURIComponent(email)}`);
+      const qs = new URLSearchParams({
+        email,
+        first_name: firstName,
+        last_name: lastName,
+      });
+      navigate(`/trade/register?${qs.toString()}`);
     }
   };
 
