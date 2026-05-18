@@ -119,13 +119,8 @@ const ContactInquiry = () => {
         description: "Thank you for your inquiry. We will be in touch shortly."
       });
 
-      setFormData({
-        name: "",
-        firm: "",
-        email: "",
-        phone: "",
-        message: ""
-      });
+      setFormData(EMPTY_FORM);
+      try { sessionStorage.removeItem(draftKey); } catch {/* ignore */}
     } catch (error: any) {
       console.error("Error sending inquiry:", error);
       toast({
