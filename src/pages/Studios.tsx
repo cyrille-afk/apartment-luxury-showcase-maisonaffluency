@@ -397,8 +397,8 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
         {!isAuthed && (
           <div className="absolute inset-0 flex items-end bg-gradient-to-t from-background/70 via-transparent to-transparent">
             <div className="w-full p-4 text-xs uppercase tracking-[0.2em] text-foreground inline-flex items-center gap-2">
-              <Lock className="h-3 w-3" />
-              Sign in to reveal
+              <Mail className="h-3 w-3" />
+              Introduction by concierge
             </div>
           </div>
         )}
