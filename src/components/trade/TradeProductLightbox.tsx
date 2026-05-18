@@ -194,11 +194,14 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   // Falls back to the product's primary image when no mapping applies.
   const galleryImages = Array.isArray(product.gallery_images) ? product.gallery_images.filter(Boolean) : [];
   const finishMap = buildProductFinishMap(product.variant_image_map);
+  const effectiveBase = selectedBase ?? (axes.isDualAxis && axes.baseOptions.length === 1 ? axes.baseOptions[0] : null);
+  const effectiveTop = selectedTop ?? (axes.isDualAxis && axes.topOptions.length === 1 ? axes.topOptions[0] : null);
+  const effectiveSize = selectedSize ?? (axes.isDualAxis && hasDualSize && axes.dualSizeOptions.length === 1 ? axes.dualSizeOptions[0] : null);
   const variantImageIdx = finishMap && galleryImages.length > 0
     ? resolveVariantImageIndex(finishMap, {
-        base: selectedBase,
-        top: selectedTop,
-        size: selectedSize,
+        base: effectiveBase,
+        top: effectiveTop,
+        size: effectiveSize,
         variants: variantsList,
         imageCount: galleryImages.length,
         requireCompletePair: axes.isDualAxis,
@@ -286,6 +289,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   </div>
                 )}
                 <img
+                  key={activeImageUrl}
                   src={activeImageUrl}
                   alt={product.product_name}
                   onLoad={() => {

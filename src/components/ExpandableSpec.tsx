@@ -162,7 +162,7 @@ export default function ExpandableSpec({
               {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
             </span>
           </SelectTrigger>
-          <SelectContent className="z-[130] bg-background border-border">
+          <SelectContent className="z-[10050] bg-background border-border">
             {hasSelection && (
               <SelectItem
                 value="__clear__"

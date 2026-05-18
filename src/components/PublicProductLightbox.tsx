@@ -239,6 +239,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
       finishImageIdx = resolveVariantImageIndex(finishMap, {
         base: baseLabel,
         top: topLabel,
+        variants: sv,
         imageCount: galleryImages.length,
         requireCompletePair: true,
       });
