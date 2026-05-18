@@ -41,9 +41,19 @@ type FieldErrors = Partial<Record<string, string>>;
 
 interface TradeRegistrationFormProps {
   prefillEmail?: string;
+  prefillFirstName?: string;
+  prefillLastName?: string;
+  prefillCompany?: string;
+  prefillPhone?: string;
 }
 
-const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps) => {
+const TradeRegistrationForm = ({
+  prefillEmail = "",
+  prefillFirstName = "",
+  prefillLastName = "",
+  prefillCompany = "",
+  prefillPhone = "",
+}: TradeRegistrationFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -53,10 +63,10 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     email: prefillEmail,
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    companyName: "",
+    firstName: prefillFirstName,
+    lastName: prefillLastName,
+    phone: prefillPhone,
+    companyName: prefillCompany,
     companyWebsite: "",
     jobTitle: "",
     country: "",
@@ -67,10 +77,15 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
   });
 
   useEffect(() => {
-    if (prefillEmail && !form.email) {
-      setForm((prev) => ({ ...prev, email: prefillEmail }));
-    }
-  }, [prefillEmail]);
+    setForm((prev) => ({
+      ...prev,
+      email: prev.email || prefillEmail,
+      firstName: prev.firstName || prefillFirstName,
+      lastName: prev.lastName || prefillLastName,
+      companyName: prev.companyName || prefillCompany,
+      phone: prev.phone || prefillPhone,
+    }));
+  }, [prefillEmail, prefillFirstName, prefillLastName, prefillCompany, prefillPhone]);
 
   const update = (field: string, value: string | boolean) => {
     if (field === "country" && typeof value === "string") {
