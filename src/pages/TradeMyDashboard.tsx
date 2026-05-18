@@ -220,33 +220,49 @@ export default function TradeMyDashboard() {
 
           {/* Right rail */}
           <div className="space-y-6">
-            <FfeUnlockTile userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
-
-            <Link to="/trade/showroom" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-foreground" />
+            {hasTradeApplication ? (
+              <div className="border border-border rounded-lg p-5 bg-muted/20">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
+                    {effStatus === "approved"
+                      ? <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      : <Clock className="h-5 w-5 text-amber-600" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-base text-foreground">
+                      {effStatus === "approved" ? "Trade access approved" : "Trade application pending"}
+                    </h3>
+                    <p className="font-body text-xs text-muted-foreground mt-0.5">
+                      {effStatus === "approved"
+                        ? "Full trade portal is available — pricing, spec sheets, project folders, FF&E and quoting tools."
+                        : "We review applications within 1–2 business days. Once approved, the full trade portal unlocks automatically — no need to purchase the FF&E tool separately."}
+                    </p>
+                    {effStatus === "approved" && !isImpersonating && (
+                      <Button asChild size="sm" className="mt-3 h-7 text-xs">
+                        <Link to="/trade/dashboard">Open trade portal</Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-display text-base text-foreground">Studios Showroom</h3>
-                  <p className="font-body text-xs text-muted-foreground mt-0.5">Explore featured ateliers and studios</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
-            </Link>
+            ) : (
+              <>
+                <FfeUnlockTile userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
 
-            <Link to="/trade/boards" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
-                  <FolderArchive className="h-5 w-5 text-foreground" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-display text-base text-foreground">Project Folders</h3>
-                  <p className="font-body text-xs text-muted-foreground mt-0.5">Curate boards to share with clients</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              </div>
-            </Link>
+                <Link to="/showroom" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
+                      <MapPin className="h-5 w-5 text-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-display text-base text-foreground">Studios Showroom</h3>
+                      <p className="font-body text-xs text-muted-foreground mt-0.5">Explore featured ateliers and studios</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </div>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
