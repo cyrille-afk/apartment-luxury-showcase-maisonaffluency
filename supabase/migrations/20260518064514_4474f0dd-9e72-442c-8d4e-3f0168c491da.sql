@@ -1,0 +1,2 @@
+CREATE POLICY "admins read folders" ON public.favorite_folders FOR SELECT USING (has_role(auth.uid(), 'admin'::app_role));
+CREATE POLICY "admins read folder items" ON public.favorite_folder_items FOR SELECT USING (has_role(auth.uid(), 'admin'::app_role));
