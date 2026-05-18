@@ -324,6 +324,18 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     )}
                   />
                 )}
+                <img
+                  src={product.image_url || ""}
+                  alt=""
+                  aria-hidden="true"
+                  className="sr-only"
+                  onLoad={() => {
+                    if (activeImageUrl === product.image_url) {
+                      setImageLoaded(true);
+                      setImageFailed(false);
+                    }
+                  }}
+                />
               </>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
