@@ -116,7 +116,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(resolved?.user ?? null);
       scheduleTokenRefresh(resolved);
       if (resolved?.user) {
-        fetchUserData(resolved.user.id, sbClient);
+        // Await so role/profile/application state is populated BEFORE
+        // gates like TradeLayout flip on `loading=false`. Otherwise a
+        // super_admin briefly looks like a public user and gets bounced
+        // to /trade/me?restricted=1.
+        await fetchUserData(resolved.user.id, sbClient);
       }
       setLoading(false);
     };
