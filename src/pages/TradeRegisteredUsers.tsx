@@ -297,11 +297,20 @@ export default function TradeRegisteredUsers() {
                       <td className="px-4 py-3 font-body text-[11px] text-muted-foreground whitespace-nowrap">
                         {format(new Date(u.created_at), "d MMM yyyy")}
                       </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/trade/me?as=${u.id}`}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-[11px] uppercase tracking-wider font-body rounded-md border border-border bg-background hover:bg-muted transition-colors text-foreground"
+                          title="View this user's dashboard"
+                        >
+                          <Eye className="h-3 w-3" /> View
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      <td colSpan={8} className="px-4 py-8 text-center text-sm text-muted-foreground">
                         No users match "{search}"
                       </td>
                     </tr>
