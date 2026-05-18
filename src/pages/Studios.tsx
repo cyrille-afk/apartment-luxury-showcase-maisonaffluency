@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock, MapPin } from "lucide-react";
 import { logStudioEvent } from "@/lib/leadTracking";
+import { useAuth } from "@/hooks/useAuth";
 
 type Studio = {
   id: string;
