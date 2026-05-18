@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
 import { logStudioEvent } from "@/lib/leadTracking";
 
 type Studio = {
@@ -198,6 +198,13 @@ export default function Studios() {
       {/* Hero */}
       <section className="border-b border-border bg-card">
         <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+          <Link
+            to="/"
+            className="mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Maison Affluency
+          </Link>
           <p className="mb-4 text-xs uppercase tracking-[0.25em] text-muted-foreground">
             The Directory
           </p>
