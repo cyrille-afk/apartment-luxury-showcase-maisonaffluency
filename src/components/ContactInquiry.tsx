@@ -29,33 +29,54 @@ const ContactInquiry = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formData, setFormData] = useState({
-    name: "",
-    firm: "",
-    email: "",
-    phone: "",
-    message: ""
-  });
+  const EMPTY_FORM = { name: "", firm: "", email: "", phone: "", message: "" };
+  const [formData, setFormData] = useState(EMPTY_FORM);
   // Phone placeholder reflects the visitor's likely region (e.g. "+44 …" for UK)
   // so the form doesn't read as Singapore-only. Falls back to a multi-region hint.
   const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferCountryFromBrowser()));
 
-  // Prefill the message field from URL params (e.g. /contact?subject=Bespoke%20inquiry&message=...)
-  // Used by product pages to seed a "Bespoke inquiry" referencing the specific item.
+  // Stable draft key per inquiry context — keyed by `studio` param when present
+  // so different studio introductions don't share a draft, otherwise by the
+  // subject/message combo so a "Bespoke inquiry" draft persists too.
   const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const urlSubject = params.get("subject");
+  const urlMessage = params.get("message");
+  const urlStudio = params.get("studio");
+  const draftKey = `contactInquiryDraft:${urlStudio || urlSubject || urlMessage || "default"}`;
+  const composedPrefill = urlSubject && urlMessage
+    ? `${urlSubject}\n\n${urlMessage}`
+    : (urlMessage || urlSubject || "");
+
+  // Restore a saved draft for this context, or fall back to URL-param prefill.
+  // Runs whenever the URL search changes (back/forward navigation, refresh).
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const message = params.get("message");
-    const subject = params.get("subject");
-    if (!message && !subject) return;
+    let restored: typeof EMPTY_FORM | null = null;
+    try {
+      const raw = sessionStorage.getItem(draftKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") restored = { ...EMPTY_FORM, ...parsed };
+      }
+    } catch {/* ignore corrupted draft */}
+
     setFormData((prev) => {
-      if (prev.message.trim()) return prev; // don't clobber if user already typed
-      const composed = subject && message
-        ? `${subject}\n\n${message}`
-        : (message || subject || "");
-      return { ...prev, message: composed };
+      if (restored) return restored;
+      if (!composedPrefill) return prev;
+      if (prev.message.trim()) return prev; // don't clobber active typing
+      return { ...prev, message: composedPrefill };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
+
+  // Persist on every edit so a refresh or back-navigation preserves the draft.
+  useEffect(() => {
+    const hasContent = Object.values(formData).some((v) => v.trim().length > 0);
+    try {
+      if (hasContent) sessionStorage.setItem(draftKey, JSON.stringify(formData));
+      else sessionStorage.removeItem(draftKey);
+    } catch {/* storage may be unavailable (private mode) */}
+  }, [formData, draftKey]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -98,13 +119,8 @@ const ContactInquiry = () => {
         description: "Thank you for your inquiry. We will be in touch shortly."
       });
 
-      setFormData({
-        name: "",
-        firm: "",
-        email: "",
-        phone: "",
-        message: ""
-      });
+      setFormData(EMPTY_FORM);
+      try { sessionStorage.removeItem(draftKey); } catch {/* ignore */}
     } catch (error: any) {
       console.error("Error sending inquiry:", error);
       toast({
