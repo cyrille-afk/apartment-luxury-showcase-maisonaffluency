@@ -9,6 +9,7 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
+import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { getBasePlaceholder, getMaterialPlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
@@ -38,6 +39,9 @@ export interface TradeProductLightboxItem {
   base_axis_label?: string | null;
   top_axis_label?: string | null;
   currency?: string | null;
+  /** Optional: full gallery + variant→image map so changing finish dropdowns swaps the displayed image. */
+  gallery_images?: string[] | null;
+  variant_image_map?: Record<string, number> | null;
 }
 
 interface TradeProductLightboxProps {
@@ -186,6 +190,24 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     ? `${currencySymbol}${(selectedVariant.price_cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
     : product.price;
 
+  // Resolve the gallery image to display based on the user's variant pick.
+  // Falls back to the product's primary image when no mapping applies.
+  const galleryImages = Array.isArray(product.gallery_images) ? product.gallery_images.filter(Boolean) : [];
+  const finishMap = buildProductFinishMap(product.variant_image_map);
+  const variantImageIdx = finishMap && galleryImages.length > 0
+    ? resolveVariantImageIndex(finishMap, {
+        base: selectedBase,
+        top: selectedTop,
+        size: selectedSize,
+        variants: variantsList,
+        imageCount: galleryImages.length,
+        requireCompletePair: axes.isDualAxis,
+      })
+    : undefined;
+  const activeImageUrl =
+    (variantImageIdx !== undefined ? galleryImages[variantImageIdx] : null) || product.image_url;
+
+
 
   const compareItem: CompareItem = {
     pick: {
@@ -251,7 +273,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
-            {product.image_url ? (
+            {activeImageUrl ? (
               <>
                 {!imageLoaded && !imageFailed && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -264,7 +286,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   </div>
                 )}
                 <img
-                  src={product.image_url}
+                  src={activeImageUrl}
                   alt={product.product_name}
                   onLoad={() => {
                     setImageLoaded(true);

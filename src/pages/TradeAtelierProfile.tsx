@@ -105,6 +105,8 @@ function pickToLightboxItem(
     base_axis_label: pick.base_axis_label ?? null,
     top_axis_label: pick.top_axis_label ?? null,
     currency,
+    gallery_images: pick.gallery_images ?? null,
+    variant_image_map: (pick as any).variant_image_map ?? null,
   };
 }
 
