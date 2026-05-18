@@ -1355,6 +1355,72 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_folder_items: {
+        Row: {
+          created_at: string
+          favorite_id: string
+          folder_id: string
+          id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          favorite_id: string
+          folder_id: string
+          id?: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          favorite_id?: string
+          folder_id?: string
+          id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorite_folder_items_favorite_id_fkey"
+            columns: ["favorite_id"]
+            isOneToOne: false
+            referencedRelation: "trade_favorites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorite_folder_items_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "favorite_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorite_folders: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       featured_studios: {
         Row: {
           bio: string | null
@@ -1433,6 +1499,39 @@ export type Database = {
           team_size?: string | null
           updated_at?: string
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      ffe_entitlements: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          paid_at: string | null
+          status: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -3640,6 +3739,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_credits: {
+        Row: {
+          amount_cents: number
+          applied_at: string | null
+          applied_to_quote_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          source: string
+          source_ref: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          applied_at?: string | null
+          applied_to_quote_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          source: string
+          source_ref?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          applied_at?: string | null
+          applied_to_quote_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          source?: string
+          source_ref?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trade_custom_request_activity: {
         Row: {
           action: string
@@ -4173,6 +4311,7 @@ export type Database = {
           client_name: string | null
           confirmed_at: string | null
           created_at: string
+          credit_applied_cents: number
           currency: string
           id: string
           insurance_enabled: boolean
@@ -4195,6 +4334,7 @@ export type Database = {
           client_name?: string | null
           confirmed_at?: string | null
           created_at?: string
+          credit_applied_cents?: number
           currency?: string
           id?: string
           insurance_enabled?: boolean
@@ -4217,6 +4357,7 @@ export type Database = {
           client_name?: string | null
           confirmed_at?: string | null
           created_at?: string
+          credit_applied_cents?: number
           currency?: string
           id?: string
           insurance_enabled?: boolean
@@ -4581,6 +4722,10 @@ export type Database = {
       admin_reset_onboarding_for_user: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      apply_available_credit_to_quote: {
+        Args: { _quote_id: string }
+        Returns: number
       }
       can_edit_project: {
         Args: { _project_id: string; _user_id: string }
