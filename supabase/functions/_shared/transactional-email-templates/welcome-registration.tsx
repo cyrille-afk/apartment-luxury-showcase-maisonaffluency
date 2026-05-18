@@ -52,9 +52,10 @@ const SHOWCASE_IMAGES = [
 
 interface WelcomeRegistrationProps {
   firstName?: string
+  recipientEmail?: string
 }
 
-const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
+const WelcomeRegistrationEmail = ({ firstName, recipientEmail }: WelcomeRegistrationProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Welcome to {SITE_NAME} — Unique by Design</Preview>
@@ -78,28 +79,28 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
           Thank you for creating your account with {SITE_NAME}. You now have access to our curated world of collectible design — from rare ateliers to contemporary masters.
         </Text>
 
-        {/* 2×2 image showcase grid — each tile links to the designer's biography */}
+        {/* 2×2 image showcase grid — each tile links via the click tracker to the designer's biography */}
         <Section style={imageGrid}>
           <Row>
             <Column style={imageCol}>
-              <a href={SHOWCASE_IMAGES[0].href} style={imageLink}>
+              <a href={tracked(SHOWCASE_IMAGES[0].href, SHOWCASE_IMAGES[0].linkId, recipientEmail)} style={imageLink}>
                 <Img src={SHOWCASE_IMAGES[0].src} alt={SHOWCASE_IMAGES[0].alt} width="265" height="265" style={gridImage} />
               </a>
             </Column>
             <Column style={imageColRight}>
-              <a href={SHOWCASE_IMAGES[1].href} style={imageLink}>
+              <a href={tracked(SHOWCASE_IMAGES[1].href, SHOWCASE_IMAGES[1].linkId, recipientEmail)} style={imageLink}>
                 <Img src={SHOWCASE_IMAGES[1].src} alt={SHOWCASE_IMAGES[1].alt} width="265" height="265" style={gridImage} />
               </a>
             </Column>
           </Row>
           <Row>
             <Column style={imageCol}>
-              <a href={SHOWCASE_IMAGES[2].href} style={imageLink}>
+              <a href={tracked(SHOWCASE_IMAGES[2].href, SHOWCASE_IMAGES[2].linkId, recipientEmail)} style={imageLink}>
                 <Img src={SHOWCASE_IMAGES[2].src} alt={SHOWCASE_IMAGES[2].alt} width="265" height="265" style={gridImage} />
               </a>
             </Column>
             <Column style={imageColRight}>
-              <a href={SHOWCASE_IMAGES[3].href} style={imageLink}>
+              <a href={tracked(SHOWCASE_IMAGES[3].href, SHOWCASE_IMAGES[3].linkId, recipientEmail)} style={imageLink}>
                 <Img src={SHOWCASE_IMAGES[3].src} alt={SHOWCASE_IMAGES[3].alt} width="265" height="265" style={gridImage} />
               </a>
             </Column>
@@ -115,7 +116,7 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
         </Text>
 
         <Section style={buttonSection}>
-          <Button style={button} href="https://maisonaffluency.com/designers">
+          <Button style={button} href={tracked(`${SITE_URL}/designers`, 'cta-explore-designers', recipientEmail)}>
             Explore Designers & Ateliers
           </Button>
         </Section>
