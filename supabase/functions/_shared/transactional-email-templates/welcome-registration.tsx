@@ -175,5 +175,6 @@ const imageGrid = { margin: '8px 0 16px', width: '100%' }
 const imageCol = { width: '50%', paddingRight: '4px', paddingBottom: '8px', verticalAlign: 'top' as const }
 const imageColRight = { width: '50%', paddingLeft: '4px', paddingBottom: '8px', verticalAlign: 'top' as const }
 const gridImage = { display: 'block', width: '100%', height: 'auto', borderRadius: '4px', objectFit: 'cover' as const }
+const imageLink = { display: 'block', textDecoration: 'none' as const, border: 'none' }
 const footer = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
 const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: "Georgia, 'Playfair Display', serif" }
