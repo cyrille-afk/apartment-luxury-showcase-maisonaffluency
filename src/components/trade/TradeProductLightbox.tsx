@@ -282,7 +282,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
-            {product.image_url ? (
+            {activeImageUrl ? (
               <>
                 {!imageLoaded && !imageFailed && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -295,7 +295,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   </div>
                 )}
                 <img
-                  src={product.image_url}
+                  src={activeImageUrl}
                   alt={product.product_name}
                   onLoad={() => {
                     setImageLoaded(true);
