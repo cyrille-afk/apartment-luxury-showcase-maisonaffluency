@@ -135,6 +135,7 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
+          edition: formatEditionLabel(d as any),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
