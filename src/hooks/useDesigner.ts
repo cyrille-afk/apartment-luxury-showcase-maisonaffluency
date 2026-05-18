@@ -229,6 +229,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
       return dedupePicks((data || []).map((d) => ({
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
+        edition: formatEditionLabel(d as any),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
         designer_name: nameMap[d.designer_id]?.name || designer.name,
