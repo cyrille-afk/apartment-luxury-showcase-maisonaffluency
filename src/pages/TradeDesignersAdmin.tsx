@@ -376,9 +376,19 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Edition</label>
-                    <Input value={pick.edition || ""} onChange={(e) => updateField(pick.id, "edition", e.target.value || null)} className="text-xs" />
+                    <label className="text-[10px] text-muted-foreground">Edition (manual override)</label>
+                    <Input value={pick.edition || ""} onChange={(e) => updateField(pick.id, "edition", e.target.value || null)} className="text-xs" placeholder="leave empty to auto-compose" />
                   </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Edition Number</label>
+                    <Input value={(pick as any).edition_number || ""} onChange={(e) => updateField(pick.id, "edition_number" as any, e.target.value || null)} className="text-xs" placeholder="e.g. 1/8" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Signing Details</label>
+                    <Input value={(pick as any).edition_signing || ""} onChange={(e) => updateField(pick.id, "edition_signing" as any, e.target.value || null)} className="text-xs" placeholder="e.g. Signed and dated by the artist" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Lead Time</label>
                     <Input value={(pick as any).lead_time || ""} onChange={(e) => updateField(pick.id, "lead_time", e.target.value || null)} className="text-xs" placeholder="e.g. 8–10 weeks" />

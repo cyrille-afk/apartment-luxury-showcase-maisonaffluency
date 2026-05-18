@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
+import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
@@ -87,7 +88,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, edition";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, edition, edition_number, edition_signing";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -784,11 +785,14 @@ const PublicProductPage: React.FC = () => {
                 activeIndexNonce={galleryJumpNonce}
                 onIndexChange={setGalleryActiveIndex}
                 firstImageBadge={
-                  (product as any).edition ? (
-                    <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
-                      {(product as any).edition}
-                    </span>
-                  ) : null
+                  (() => {
+                    const editionLabel = formatEditionLabel(product as any);
+                    return editionLabel ? (
+                      <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
+                        {editionLabel}
+                      </span>
+                    ) : null;
+                  })()
                 }
                 overlay={
                   product.description ? (

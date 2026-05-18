@@ -38,6 +38,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
@@ -78,6 +79,8 @@ interface ProductRow {
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   edition: string | null;
+  edition_number: string | null;
+  edition_signing: string | null;
 }
 
 interface TradePricing {
@@ -140,7 +143,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           curatorPick = (picks || []).find((p: any) => p.title === (tradeProduct as any).product_name) || null;
@@ -170,6 +173,8 @@ function useTradeProductBySlug(
           size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
+          edition_number: curatorPick?.edition_number || null,
+          edition_signing: curatorPick?.edition_signing || null,
         };
 
         const rawSizeVariants = Array.isArray(curatorPick?.size_variants)
@@ -217,7 +222,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -875,11 +880,14 @@ const TradeProductPage: React.FC = () => {
               activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
               firstImageBadge={
-                product.edition ? (
-                  <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
-                    {product.edition}
-                  </span>
-                ) : null
+                (() => {
+                  const editionLabel = formatEditionLabel(product);
+                  return editionLabel ? (
+                    <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
+                      {editionLabel}
+                    </span>
+                  ) : null;
+                })()
               }
               overlay={
                 product.description ? (

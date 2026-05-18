@@ -970,6 +970,8 @@ export type Database = {
           designer_id: string
           dimensions: string | null
           edition: string | null
+          edition_number: string | null
+          edition_signing: string | null
           gallery_images: string[] | null
           hover_image_url: string | null
           id: string
@@ -1003,6 +1005,8 @@ export type Database = {
           designer_id: string
           dimensions?: string | null
           edition?: string | null
+          edition_number?: string | null
+          edition_signing?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string
@@ -1036,6 +1040,8 @@ export type Database = {
           designer_id?: string
           dimensions?: string | null
           edition?: string | null
+          edition_number?: string | null
+          edition_signing?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string
@@ -4440,6 +4446,8 @@ export type Database = {
           designer_id: string | null
           dimensions: string | null
           edition: string | null
+          edition_number: string | null
+          edition_signing: string | null
           gallery_images: string[] | null
           hover_image_url: string | null
           id: string | null
@@ -4470,6 +4478,8 @@ export type Database = {
           designer_id?: string | null
           dimensions?: string | null
           edition?: string | null
+          edition_number?: string | null
+          edition_signing?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string | null
@@ -4500,6 +4510,8 @@ export type Database = {
           designer_id?: string | null
           dimensions?: string | null
           edition?: string | null
+          edition_number?: string | null
+          edition_signing?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string | null
