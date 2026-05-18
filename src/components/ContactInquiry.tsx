@@ -1,16 +1,41 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
 import { inferCountryFromBrowser } from "@/lib/inferCountry";
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { z } from "zod";
+
+type PickerStudio = {
+  id: string;
+  name: string;
+  tagline: string | null;
+  location: string | null;
+  country: string | null;
+};
+
+const buildStudioPrefill = (s: PickerStudio) => {
+  const locationLine = [s.location, s.country].filter(Boolean).join(", ");
+  const subject = `Introduction request — ${s.name}`;
+  const messageLines = [
+    `I would like to be introduced to ${s.name} via the Maison Affluency concierge.`,
+    "",
+    `Studio: ${s.name}`,
+    locationLine ? `Based in: ${locationLine}` : null,
+    s.tagline ? `Listing note: ${s.tagline}` : null,
+    "",
+    "Please share a little about my project below:",
+    "",
+  ].filter(Boolean) as string[];
+  return { subject, message: messageLines.join("\n") };
+};
 
 const inquirySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
