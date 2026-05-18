@@ -1,16 +1,41 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
 import { inferCountryFromBrowser } from "@/lib/inferCountry";
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { z } from "zod";
+
+type PickerStudio = {
+  id: string;
+  name: string;
+  tagline: string | null;
+  location: string | null;
+  country: string | null;
+};
+
+const buildStudioPrefill = (s: PickerStudio) => {
+  const locationLine = [s.location, s.country].filter(Boolean).join(", ");
+  const subject = `Introduction request — ${s.name}`;
+  const messageLines = [
+    `I would like to be introduced to ${s.name} via the Maison Affluency concierge.`,
+    "",
+    `Studio: ${s.name}`,
+    locationLine ? `Based in: ${locationLine}` : null,
+    s.tagline ? `Listing note: ${s.tagline}` : null,
+    "",
+    "Please share a little about my project below:",
+    "",
+  ].filter(Boolean) as string[];
+  return { subject, message: messageLines.join("\n") };
+};
 
 const inquirySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
@@ -77,6 +102,44 @@ const ContactInquiry = () => {
       else sessionStorage.removeItem(draftKey);
     } catch {/* storage may be unavailable (private mode) */}
   }, [formData, draftKey]);
+
+  // Studio picker — only loaded when this inquiry already references a studio
+  // (i.e. the visitor came from the studios directory). Lets them swap to a
+  // different featured studio without losing per-studio drafts.
+  const navigate = useNavigate();
+  const [studios, setStudios] = useState<PickerStudio[]>([]);
+  const showStudioPicker = !!urlStudio;
+  useEffect(() => {
+    if (!showStudioPicker) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("featured_studios")
+        .select("id, name, tagline, location, country")
+        .eq("is_published", true)
+        .order("is_featured", { ascending: false })
+        .order("name", { ascending: true });
+      if (!cancelled && !error && data) setStudios(data as PickerStudio[]);
+    })();
+    return () => { cancelled = true; };
+  }, [showStudioPicker]);
+
+  const handleStudioChange = (newStudioId: string) => {
+    if (newStudioId === urlStudio) return;
+    const studio = studios.find((s) => s.id === newStudioId);
+    const next = new URLSearchParams(location.search);
+    next.set("studio", newStudioId);
+    if (studio) {
+      const { subject, message } = buildStudioPrefill(studio);
+      next.set("subject", subject);
+      next.set("message", message);
+    }
+    // Replace so the back button still returns to /studios rather than
+    // accumulating one history entry per picker change. The location.search
+    // change triggers the restore-or-prefill effect above, which loads the
+    // saved draft for the new studio (or composes a fresh prefill).
+    navigate(`${location.pathname}?${next.toString()}`, { replace: true });
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -223,6 +286,33 @@ const ContactInquiry = () => {
               {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
             </div>
           </div>
+
+          {showStudioPicker && (
+            <div>
+              <label htmlFor="studio-picker" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                Studio
+              </label>
+              <Select value={urlStudio ?? undefined} onValueChange={handleStudioChange}>
+                <SelectTrigger
+                  id="studio-picker"
+                  className="border-border bg-background font-body rounded-lg"
+                >
+                  <SelectValue placeholder={studios.length ? "Choose a featured studio" : "Loading studios…"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {studios.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                      {s.location ? ` — ${s.location}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="font-body text-[11px] text-muted-foreground mt-1.5">
+                Switching studios swaps in a fresh introduction template. Drafts for each studio are saved separately.
+              </p>
+            </div>
+          )}
 
           <div>
             <label htmlFor="message" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
