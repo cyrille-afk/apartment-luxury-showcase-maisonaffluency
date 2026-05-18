@@ -41,9 +41,11 @@ export function FavoriteFoldersGrid({ userId, readOnly = false }: { userId?: str
         <div className="border border-dashed border-border rounded-lg p-8 text-center">
           <FolderOpen className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
           <p className="font-body text-sm text-muted-foreground mb-3">No folders yet</p>
-          <Button size="sm" variant="outline" onClick={() => setCreating(true)} className="h-8 text-xs">
-            Create your first folder
-          </Button>
+          {!readOnly && (
+            <Button size="sm" variant="outline" onClick={() => setCreating(true)} className="h-8 text-xs">
+              Create your first folder
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
