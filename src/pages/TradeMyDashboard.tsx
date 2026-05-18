@@ -30,6 +30,8 @@ export default function TradeMyDashboard() {
   const asUserId = searchParams.get("as");
   const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
   const effectiveUserId = isImpersonating ? asUserId! : user?.id;
+  const [restrictedDismissed, setRestrictedDismissed] = useState(false);
+  const showRestricted = searchParams.get("restricted") === "1" && !isImpersonating && !restrictedDismissed;
 
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
