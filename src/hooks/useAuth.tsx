@@ -117,8 +117,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const restoreSession = async () => {
-      const { data: { session: sess } }: any = await sbClient.auth.getSession();
-      const resolved = sess || (await sbClient.auth.refreshSession()).data?.session || null;
+      let resolved: Session | null = null;
+      try {
+        const { data: { session: sess } }: any = await sbClient.auth.getSession();
+        resolved = sess || (await sbClient.auth.refreshSession()).data?.session || null;
+      } catch (error) {
+        console.warn("Unable to refresh auth session; keeping current auth state.", error);
+        setLoading(false);
+        return;
+      }
       setSession(resolved);
       setUser(resolved?.user ?? null);
       scheduleTokenRefresh(resolved);
