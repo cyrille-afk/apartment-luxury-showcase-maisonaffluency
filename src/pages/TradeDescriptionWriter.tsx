@@ -57,13 +57,16 @@ export default function TradeDescriptionWriter() {
 
   const generateMutation = useMutation({
     mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/product-description-writer`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({ product_id: productId, source, tone }),
         }
