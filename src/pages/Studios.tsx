@@ -247,22 +247,17 @@ export default function Studios() {
         </div>
       </section>
 
-      {/* Sign-in gate banner (logged-out only) */}
+      {/* Concierge intro banner (logged-out only) */}
       {!authLoading && !isAuthed && (
         <section className="border-b border-border bg-muted/30">
           <div className="mx-auto max-w-6xl px-6 py-5 flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5" />
-              Studio names and profiles are visible to registered members.
+              <Mail className="h-3.5 w-3.5" />
+              Introductions to our featured studios are arranged privately through our concierge.
             </p>
-            <div className="flex gap-2">
-              <Button asChild size="sm" variant="outline">
-                <Link to={`/auth?redirect=${encodeURIComponent("/studios")}`}>Sign in</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}>Create free account</Link>
-              </Button>
-            </div>
+            <Button asChild size="sm">
+              <Link to="/contact?subject=studio-introduction">Request an introduction</Link>
+            </Button>
           </div>
         </section>
       )}
