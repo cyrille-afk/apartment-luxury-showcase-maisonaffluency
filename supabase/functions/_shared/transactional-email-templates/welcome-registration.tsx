@@ -79,6 +79,12 @@ const WelcomeRegistrationEmail = ({ firstName, recipientEmail }: WelcomeRegistra
           Thank you for creating your account with {SITE_NAME}. You now have access to our curated world of collectible design — from rare ateliers to contemporary masters.
         </Text>
 
+        <Text style={textMuted}>
+          If you are an architect, interior designer, or hospitality professional, consider applying to our{' '}
+          <a href="https://maisonaffluency.com/trade-program" style={link}>Trade Program</a>{' '}
+          for exclusive trade pricing and dedicated concierge support.
+        </Text>
+
         {/* 2×2 image showcase grid — each tile links via the click tracker to the designer's biography */}
         <Section style={imageGrid}>
           <Row>
@@ -123,12 +129,6 @@ const WelcomeRegistrationEmail = ({ firstName, recipientEmail }: WelcomeRegistra
 
         <Text style={text}>
           Stay tuned for regular updates on new collections, designer editorials, and exclusive event announcements.
-        </Text>
-
-        <Text style={textMuted}>
-          If you are an architect, interior designer, or hospitality professional, consider applying to our{' '}
-          <a href="https://maisonaffluency.com/trade-program" style={link}>Trade Program</a>{' '}
-          for exclusive trade pricing and dedicated concierge support.
         </Text>
 
         <Text style={footer}>
