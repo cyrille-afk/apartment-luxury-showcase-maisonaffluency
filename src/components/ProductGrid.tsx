@@ -567,7 +567,6 @@ function singularizeSub(s: string): string {
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
                   className={`max-w-[96%] max-h-[96%] object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
-                  style={{ filter: "brightness(1.02) contrast(1.03) saturate(1.02)" }}
                 />
                 {item.pick.hoverImage && (
                   <img
@@ -575,7 +574,6 @@ function singularizeSub(s: string): string {
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
                     className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
-                    style={{ filter: "brightness(1.02) contrast(1.03) saturate(1.02)" }}
                   />
                 )}
                 {/* Compare pin button */}
