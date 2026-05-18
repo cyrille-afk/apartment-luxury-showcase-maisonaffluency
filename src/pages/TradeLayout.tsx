@@ -140,7 +140,7 @@ function BackToTopButton() {
 }
 
 const TradeLayout = () => {
-  const { user, loading, applicationStatus, isAdmin, profile } = useAuth();
+  const { user, loading, applicationStatus, isAdmin, isTradeUser, profile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
