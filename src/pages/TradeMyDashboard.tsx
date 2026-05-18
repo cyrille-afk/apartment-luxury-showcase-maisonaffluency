@@ -82,20 +82,42 @@ export default function TradeMyDashboard() {
 
   return (
     <>
-      <Helmet><title>My Dashboard — Maison Affluency</title></Helmet>
+      <Helmet><title>{isImpersonating ? "Viewing user dashboard" : "My Dashboard"} — Maison Affluency</title></Helmet>
       <div className="container max-w-7xl mx-auto px-4 py-8">
+        {isImpersonating && (
+          <div className="mb-6 flex items-center justify-between gap-3 px-4 py-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <Eye className="h-4 w-4 text-amber-700 dark:text-amber-300 shrink-0" />
+              <p className="font-body text-xs text-amber-900 dark:text-amber-100 truncate">
+                Admin view — read-only dashboard for{" "}
+                <span className="font-medium">
+                  {impersonated
+                    ? `${impersonated.first_name || ""} ${impersonated.last_name || ""}`.trim() || impersonated.email || asUserId
+                    : asUserId}
+                </span>
+              </p>
+            </div>
+            <Button asChild size="sm" variant="outline" className="h-7 text-xs shrink-0">
+              <Link to="/trade/admin/registered-users">Back to users</Link>
+            </Button>
+          </div>
+        )}
         <header className="mb-8">
           <h1 className="font-display text-3xl text-foreground">
-            Welcome{profile?.first_name ? `, ${profile.first_name}` : ""}
+            {isImpersonating
+              ? `${impersonated?.first_name || ""} ${impersonated?.last_name || ""}`.trim() || impersonated?.email || "User dashboard"
+              : `Welcome${profile?.first_name ? `, ${profile.first_name}` : ""}`}
           </h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            Your favorites, folders and tools — all in one place.
+            {isImpersonating
+              ? "Read-only snapshot of this user's favorites, folders and tools."
+              : "Your favorites, folders and tools — all in one place."}
           </p>
           {availableCents > 0 && (
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(var(--gold))]/10 border border-[hsl(var(--gold))]/30">
               <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--gold))]" />
               <span className="font-body text-xs text-foreground">
-                ${(availableCents / 100).toLocaleString()} credit available — applied automatically to your next quote
+                ${(availableCents / 100).toLocaleString()} credit available{isImpersonating ? "" : " — applied automatically to your next quote"}
               </span>
             </div>
           )}
