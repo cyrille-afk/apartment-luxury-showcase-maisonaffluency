@@ -156,6 +156,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = sbClient.auth.onAuthStateChange((event: string, sess: Session | null) => {
       if (event === "INITIAL_SESSION") return; // already handled above
 
+      if (!sess && event !== "SIGNED_OUT") {
+        console.warn("Ignoring transient empty auth session event; keeping current auth state.", event);
+        setLoading(false);
+        return;
+      }
+
       setSession(sess);
       setUser(sess?.user ?? null);
       scheduleTokenRefresh(sess);
