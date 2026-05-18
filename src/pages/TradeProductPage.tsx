@@ -880,11 +880,14 @@ const TradeProductPage: React.FC = () => {
               activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
               firstImageBadge={
-                product.edition ? (
-                  <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
-                    {product.edition}
-                  </span>
-                ) : null
+                (() => {
+                  const editionLabel = formatEditionLabel(product);
+                  return editionLabel ? (
+                    <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
+                      {editionLabel}
+                    </span>
+                  ) : null;
+                })()
               }
               overlay={
                 product.description ? (
