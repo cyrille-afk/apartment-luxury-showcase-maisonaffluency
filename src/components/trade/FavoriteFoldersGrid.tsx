@@ -11,8 +11,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
-export function FavoriteFoldersGrid() {
-  const { folders, loading, createFolder, renameFolder, deleteFolder } = useFavoriteFolders();
+export function FavoriteFoldersGrid({ userId, readOnly = false }: { userId?: string; readOnly?: boolean } = {}) {
+  const { folders, loading, createFolder, renameFolder, deleteFolder } = useFavoriteFolders(userId);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
@@ -28,9 +28,11 @@ export function FavoriteFoldersGrid() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-lg text-foreground">Favorite Folders</h2>
-        <Button size="sm" variant="outline" onClick={() => setCreating(true)} className="h-8 text-xs">
-          <Plus className="h-3.5 w-3.5 mr-1.5" /> New folder
-        </Button>
+        {!readOnly && (
+          <Button size="sm" variant="outline" onClick={() => setCreating(true)} className="h-8 text-xs">
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> New folder
+          </Button>
+        )}
       </div>
 
       {loading ? (
