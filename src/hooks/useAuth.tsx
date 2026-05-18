@@ -34,11 +34,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [sbClient, setSbClient] = useState<any>(null);
 
   const fetchUserData = useCallback(async (userId: string, client: any) => {
-    const [rolesRes, profileRes, appRes] = await Promise.all([
-      client.from("user_roles").select("role").eq("user_id", userId),
-      client.from("profiles").select("first_name, last_name, company, email").eq("id", userId).single(),
-      client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
-    ]);
+    let rolesRes: any;
+    let profileRes: any;
+    let appRes: any;
+
+    try {
+      [rolesRes, profileRes, appRes] = await Promise.all([
+        client.from("user_roles").select("role").eq("user_id", userId),
+        client.from("profiles").select("first_name, last_name, company, email").eq("id", userId).single(),
+        client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
+      ]);
+    } catch (error) {
+      console.warn("Unable to refresh trade access state; keeping existing permissions.", error);
+      return false;
+    }
+
+    if (rolesRes.error || appRes.error) {
+      console.warn("Unable to refresh trade access state; keeping existing permissions.", rolesRes.error || appRes.error);
+      return false;
+    }
 
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
@@ -56,6 +70,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setApplicationStatus("none");
     }
+
+    return true;
   }, []);
 
   // Dynamically import Supabase client AFTER first paint
@@ -103,15 +119,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const refreshInMs = Math.max((sess.expires_at * 1000) - Date.now() - 120_000, 30_000);
       refreshTimer = window.setTimeout(() => {
-        sbClient.auth.refreshSession().catch(() => {
-          // Keep the current session state intact; auth events will handle any real sign-out.
+        sbClient.auth.refreshSession().catch((error: unknown) => {
+          console.warn("Unable to refresh auth session; keeping current auth state.", error);
         });
       }, refreshInMs);
     };
 
     const restoreSession = async () => {
-      const { data: { session: sess } }: any = await sbClient.auth.getSession();
-      const resolved = sess || (await sbClient.auth.refreshSession()).data?.session || null;
+      let resolved: Session | null = null;
+      try {
+        const { data: { session: sess } }: any = await sbClient.auth.getSession();
+        resolved = sess || (await sbClient.auth.refreshSession()).data?.session || null;
+      } catch (error) {
+        console.warn("Unable to refresh auth session; keeping current auth state.", error);
+        setLoading(false);
+        return;
+      }
       setSession(resolved);
       setUser(resolved?.user ?? null);
       scheduleTokenRefresh(resolved);
@@ -132,6 +155,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     //    already handled it.
     const { data: { subscription } } = sbClient.auth.onAuthStateChange((event: string, sess: Session | null) => {
       if (event === "INITIAL_SESSION") return; // already handled above
+
+      if (!sess && event !== "SIGNED_OUT") {
+        console.warn("Ignoring transient empty auth session event; keeping current auth state.", event);
+        setLoading(false);
+        return;
+      }
 
       setSession(sess);
       setUser(sess?.user ?? null);
@@ -159,7 +188,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (document.visibilityState !== "visible") return;
       sbClient.auth.getSession().then(({ data: { session: current } }: any) => {
         const expiresInMs = current?.expires_at ? current.expires_at * 1000 - Date.now() : Number.POSITIVE_INFINITY;
-        if (expiresInMs < 180_000) sbClient.auth.refreshSession();
+        if (expiresInMs < 180_000) {
+          sbClient.auth.refreshSession().catch((error: unknown) => {
+            console.warn("Unable to refresh auth session on focus; keeping current auth state.", error);
+          });
+        }
+      }).catch((error: unknown) => {
+        console.warn("Unable to read auth session on focus; keeping current auth state.", error);
       });
     };
 
