@@ -151,6 +151,7 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
       return dedupePicks((data || []).map((d) => ({
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
+        edition: formatEditionLabel(d as any),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
       })) as unknown as DesignerCuratorPick[]);
