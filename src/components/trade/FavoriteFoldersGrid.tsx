@@ -64,21 +64,23 @@ export function FavoriteFoldersGrid({ userId, readOnly = false }: { userId?: str
                   <p className="font-body text-[11px] text-muted-foreground">{f.item_count} item{f.item_count === 1 ? "" : "s"}</p>
                 </div>
               </Link>
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="icon" className="h-7 w-7"><MoreVertical className="h-3.5 w-3.5" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setRenameTarget({ id: f.id, name: f.name })}>
-                      <Pencil className="h-3.5 w-3.5 mr-2" /> Rename
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => deleteFolder(f.id)} className="text-destructive">
-                      <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              {!readOnly && (
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="icon" className="h-7 w-7"><MoreVertical className="h-3.5 w-3.5" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setRenameTarget({ id: f.id, name: f.name })}>
+                        <Pencil className="h-3.5 w-3.5 mr-2" /> Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => deleteFolder(f.id)} className="text-destructive">
+                        <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           ))}
         </div>
