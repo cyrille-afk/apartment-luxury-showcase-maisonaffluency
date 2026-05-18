@@ -287,6 +287,33 @@ const ContactInquiry = () => {
             </div>
           </div>
 
+          {showStudioPicker && (
+            <div>
+              <label htmlFor="studio-picker" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                Studio
+              </label>
+              <Select value={urlStudio ?? undefined} onValueChange={handleStudioChange}>
+                <SelectTrigger
+                  id="studio-picker"
+                  className="border-border bg-background font-body rounded-lg"
+                >
+                  <SelectValue placeholder={studios.length ? "Choose a featured studio" : "Loading studios…"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {studios.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                      {s.location ? ` — ${s.location}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="font-body text-[11px] text-muted-foreground mt-1.5">
+                Switching studios swaps in a fresh introduction template. Drafts for each studio are saved separately.
+              </p>
+            </div>
+          )}
+
           <div>
             <label htmlFor="message" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
               Message
