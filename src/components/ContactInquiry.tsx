@@ -103,6 +103,44 @@ const ContactInquiry = () => {
     } catch {/* storage may be unavailable (private mode) */}
   }, [formData, draftKey]);
 
+  // Studio picker — only loaded when this inquiry already references a studio
+  // (i.e. the visitor came from the studios directory). Lets them swap to a
+  // different featured studio without losing per-studio drafts.
+  const navigate = useNavigate();
+  const [studios, setStudios] = useState<PickerStudio[]>([]);
+  const showStudioPicker = !!urlStudio;
+  useEffect(() => {
+    if (!showStudioPicker) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("featured_studios")
+        .select("id, name, tagline, location, country")
+        .eq("is_published", true)
+        .order("is_featured", { ascending: false })
+        .order("name", { ascending: true });
+      if (!cancelled && !error && data) setStudios(data as PickerStudio[]);
+    })();
+    return () => { cancelled = true; };
+  }, [showStudioPicker]);
+
+  const handleStudioChange = (newStudioId: string) => {
+    if (newStudioId === urlStudio) return;
+    const studio = studios.find((s) => s.id === newStudioId);
+    const next = new URLSearchParams(location.search);
+    next.set("studio", newStudioId);
+    if (studio) {
+      const { subject, message } = buildStudioPrefill(studio);
+      next.set("subject", subject);
+      next.set("message", message);
+    }
+    // Replace so the back button still returns to /studios rather than
+    // accumulating one history entry per picker change. The location.search
+    // change triggers the restore-or-prefill effect above, which loads the
+    // saved draft for the new studio (or composes a fresh prefill).
+    navigate(`${location.pathname}?${next.toString()}`, { replace: true });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
