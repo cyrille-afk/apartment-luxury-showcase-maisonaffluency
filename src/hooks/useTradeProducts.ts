@@ -40,6 +40,8 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       dimensions,
       description,
       edition,
+      edition_number,
+      edition_signing,
       pdf_url,
       pdf_urls,
       category,
