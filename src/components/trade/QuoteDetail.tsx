@@ -489,6 +489,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       submitted_at: new Date().toISOString(),
     }).eq("id", quoteId);
 
+    // Auto-apply any available credit (e.g. FF&E unlock)
+    try {
+      const { data: applied } = await supabase.rpc("apply_available_credit_to_quote", { _quote_id: quoteId });
+      if (applied && (applied as number) > 0) {
+        toast({ title: "Credit applied", description: `$${((applied as number) / 100).toLocaleString()} credit applied to this quote.` });
+      }
+    } catch (err) { console.error("Credit apply failed:", err); }
+
     // Notify admin via email (fire-and-forget)
     supabase.functions.invoke("send-quote-submitted", {
       body: { quoteId },

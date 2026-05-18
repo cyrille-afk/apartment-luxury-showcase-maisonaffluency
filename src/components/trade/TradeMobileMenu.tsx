@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderArchive, FolderKanban, MapPin,
-  FileText, Settings, Shield, Wrench,
+  FileText, Settings, Shield, Wrench, UserCircle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
+  { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
