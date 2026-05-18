@@ -192,7 +192,7 @@ export default function Studios() {
         <meta name="twitter:image" content={ogImage} />
 
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
-        {!loading && filtered.length > 0 && (
+        {!loading && filtered.length > 0 && isAuthed && (
           <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
         )}
       </Helmet>
