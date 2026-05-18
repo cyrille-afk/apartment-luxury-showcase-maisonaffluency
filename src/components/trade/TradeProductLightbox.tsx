@@ -39,6 +39,9 @@ export interface TradeProductLightboxItem {
   base_axis_label?: string | null;
   top_axis_label?: string | null;
   currency?: string | null;
+  /** Optional: full gallery + variant→image map so changing finish dropdowns swaps the displayed image. */
+  gallery_images?: string[] | null;
+  variant_image_map?: Record<string, number> | null;
 }
 
 interface TradeProductLightboxProps {
