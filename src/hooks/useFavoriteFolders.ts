@@ -38,7 +38,7 @@ export function useFavoriteFolders(overrideUserId?: string) {
     }
     setFolders((foldersData || []).map((f: any) => ({ ...f, item_count: counts[f.id] || 0 })));
     setLoading(false);
-  }, [user]);
+  }, [effectiveUserId]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
