@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles } from "lucide-react";
+import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,24 @@ interface FavPreview {
   image_url: string | null;
 }
 
+interface ImpersonatedUser {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+
 export default function TradeMyDashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const asUserId = searchParams.get("as");
+  const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
+  const effectiveUserId = isImpersonating ? asUserId! : user?.id;
+
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
-  const { availableCents } = useTradeCredits();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [impersonated, setImpersonated] = useState<ImpersonatedUser | null>(null);
+  const { availableCents } = useTradeCredits(isImpersonating ? asUserId! : undefined);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,12 +51,12 @@ export default function TradeMyDashboard() {
   }, [searchParams, setSearchParams, toast]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
     const load = async () => {
       const { data } = await supabase
         .from("trade_favorites")
         .select("id, product_id, trade_products(product_name, image_url)")
-        .eq("user_id", user.id)
+        .eq("user_id", effectiveUserId)
         .order("created_at", { ascending: false })
         .limit(8);
       setFavs((data || []).map((d: any) => ({
@@ -56,7 +68,17 @@ export default function TradeMyDashboard() {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [effectiveUserId]);
+
+  useEffect(() => {
+    if (!isImpersonating) { setImpersonated(null); return; }
+    supabase
+      .from("profiles")
+      .select("id, first_name, last_name, email")
+      .eq("id", asUserId!)
+      .maybeSingle()
+      .then(({ data }) => setImpersonated(data as ImpersonatedUser | null));
+  }, [isImpersonating, asUserId]);
 
   return (
     <>
