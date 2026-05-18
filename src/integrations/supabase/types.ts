@@ -4740,6 +4740,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      public_sitemap_products: {
+        Args: never
+        Returns: {
+          id: string
+          updated_at: string
+        }[]
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
