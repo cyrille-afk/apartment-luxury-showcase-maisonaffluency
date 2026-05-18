@@ -311,7 +311,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                           ? "opacity-0"
                           : "opacity-100"
                   )}
-                  style={{ filter: "brightness(1.02) contrast(1.03) saturate(1.02)" }}
                 />
                 {canShowHoverImage && product.hover_image_url && (
                   <img
