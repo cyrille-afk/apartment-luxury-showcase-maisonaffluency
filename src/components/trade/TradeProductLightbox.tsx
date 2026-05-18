@@ -193,21 +193,17 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   // Resolve the gallery image to display based on the user's variant pick.
   // Falls back to the product's primary image when no mapping applies.
   const galleryImages = Array.isArray(product.gallery_images) ? product.gallery_images.filter(Boolean) : [];
-  const finishMap = useMemo(
-    () => buildProductFinishMap(product.variant_image_map),
-    [product.variant_image_map]
-  );
-  const variantImageIdx = useMemo(() => {
-    if (!finishMap || galleryImages.length === 0) return undefined;
-    return resolveVariantImageIndex(finishMap, {
-      base: selectedBase,
-      top: selectedTop,
-      size: selectedSize,
-      variants: variantsList,
-      imageCount: galleryImages.length,
-      requireCompletePair: axes.isDualAxis,
-    });
-  }, [finishMap, galleryImages.length, selectedBase, selectedTop, selectedSize, variantsList, axes.isDualAxis]);
+  const finishMap = buildProductFinishMap(product.variant_image_map);
+  const variantImageIdx = finishMap && galleryImages.length > 0
+    ? resolveVariantImageIndex(finishMap, {
+        base: selectedBase,
+        top: selectedTop,
+        size: selectedSize,
+        variants: variantsList,
+        imageCount: galleryImages.length,
+        requireCompletePair: axes.isDualAxis,
+      })
+    : undefined;
   const activeImageUrl =
     (variantImageIdx !== undefined ? galleryImages[variantImageIdx] : null) || product.image_url;
 
