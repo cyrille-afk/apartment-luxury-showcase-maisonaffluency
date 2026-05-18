@@ -247,6 +247,26 @@ export default function Studios() {
         </div>
       </section>
 
+      {/* Sign-in gate banner (logged-out only) */}
+      {!authLoading && !isAuthed && (
+        <section className="border-b border-border bg-muted/30">
+          <div className="mx-auto max-w-6xl px-6 py-5 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
+              <Lock className="h-3.5 w-3.5" />
+              Studio names and profiles are visible to registered members.
+            </p>
+            <div className="flex gap-2">
+              <Button asChild size="sm" variant="outline">
+                <Link to={`/auth?redirect=${encodeURIComponent("/studios")}`}>Sign in</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}>Create free account</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Grid */}
       <section className="mx-auto max-w-6xl px-6 py-12">
         {loading ? (
@@ -275,7 +295,7 @@ export default function Studios() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((s) => (
-              <StudioCard key={s.id} studio={s} />
+              <StudioCard key={s.id} studio={s} isAuthed={isAuthed} />
             ))}
           </div>
         )}
