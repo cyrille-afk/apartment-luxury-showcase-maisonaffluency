@@ -7,24 +7,29 @@ import {
 import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
+const SITE_URL = "https://maisonaffluency.com"
 
-// Curated showcase images — diverse pieces from the collection
+// Curated showcase images — each links to the designer's biography page
 const SHOWCASE_IMAGES = [
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773320943/Screen_Shot_2026-03-12_at_9.07.50_PM_jjbf3t.png',
     alt: 'Orion Pendant by Garnier & Linker',
+    href: `${SITE_URL}/designers/garnier-linker`,
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1774869657/Screen_Shot_2026-03-30_at_7.20.35_PM_hmegqy.png',
     alt: 'Ouranos I by Christopher Boots',
+    href: `${SITE_URL}/designers/christopher-boots`,
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773578050/Screen_Shot_2026-03-15_at_8.32.08_PM_leki9q.png',
     alt: 'Galea Lantern by Alexander Lamont',
+    href: `${SITE_URL}/designers/alexander-lamont`,
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/Screen_Shot_2026-03-05_at_8.23.37_PM_pj4gi9',
     alt: 'Mangala Coffee Table by Atelier Pendhapa',
+    href: `${SITE_URL}/designers/atelier-pendhapa`,
   },
 ]
 
