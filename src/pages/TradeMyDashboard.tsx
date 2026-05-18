@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles, Eye, Lock, X } from "lucide-react";
+import { Heart, ArrowRight, MapPin, Sparkles, Eye, Lock, X, Clock, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ interface ImpersonatedUser {
 }
 
 export default function TradeMyDashboard() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, applicationStatus: ownStatus } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const asUserId = searchParams.get("as");
   const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
@@ -36,8 +36,15 @@ export default function TradeMyDashboard() {
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [impersonated, setImpersonated] = useState<ImpersonatedUser | null>(null);
+  const [impersonatedStatus, setImpersonatedStatus] = useState<"none" | "pending" | "approved" | "rejected">("none");
+  const [impersonatedIsTrade, setImpersonatedIsTrade] = useState(false);
   const { availableCents } = useTradeCredits(isImpersonating ? asUserId! : undefined);
   const { toast } = useToast();
+
+  // Effective application status / trade flag for the dashboard being viewed
+  const effStatus = isImpersonating ? impersonatedStatus : ownStatus;
+  const hasTradeApplication = effStatus === "pending" || effStatus === "approved";
+  const isPublicOnly = !hasTradeApplication && !(isImpersonating ? impersonatedIsTrade : false);
 
   useEffect(() => {
     const ffe = searchParams.get("ffe");
@@ -73,13 +80,25 @@ export default function TradeMyDashboard() {
   }, [effectiveUserId]);
 
   useEffect(() => {
-    if (!isImpersonating) { setImpersonated(null); return; }
+    if (!isImpersonating) { setImpersonated(null); setImpersonatedStatus("none"); setImpersonatedIsTrade(false); return; }
     supabase
       .from("profiles")
       .select("id, first_name, last_name, email")
       .eq("id", asUserId!)
       .maybeSingle()
       .then(({ data }) => setImpersonated(data as ImpersonatedUser | null));
+    supabase
+      .from("trade_applications")
+      .select("status")
+      .eq("user_id", asUserId!)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(({ data }) => setImpersonatedStatus((data?.[0]?.status as any) || "none"));
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", asUserId!)
+      .then(({ data }) => setImpersonatedIsTrade(!!data?.some((r: any) => r.role === "trade_user")));
   }, [isImpersonating, asUserId]);
 
   return (
@@ -125,10 +144,13 @@ export default function TradeMyDashboard() {
                     ? `${impersonated.first_name || ""} ${impersonated.last_name || ""}`.trim() || impersonated.email || asUserId
                     : asUserId}
                 </span>
+                {hasTradeApplication && (
+                  <span className="ml-2 text-amber-800/80">· Trade application: {effStatus}</span>
+                )}
               </p>
             </div>
             <Button asChild size="sm" variant="outline" className="h-7 text-xs shrink-0">
-              <Link to="/trade/admin/registered-users">Back to users</Link>
+              <Link to="/trade/registered-users">Back to users</Link>
             </Button>
           </div>
         )}
@@ -198,33 +220,49 @@ export default function TradeMyDashboard() {
 
           {/* Right rail */}
           <div className="space-y-6">
-            <FfeUnlockTile userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
-
-            <Link to="/trade/showroom" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-foreground" />
+            {hasTradeApplication ? (
+              <div className="border border-border rounded-lg p-5 bg-muted/20">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
+                    {effStatus === "approved"
+                      ? <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      : <Clock className="h-5 w-5 text-amber-600" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-base text-foreground">
+                      {effStatus === "approved" ? "Trade access approved" : "Trade application pending"}
+                    </h3>
+                    <p className="font-body text-xs text-muted-foreground mt-0.5">
+                      {effStatus === "approved"
+                        ? "Full trade portal is available — pricing, spec sheets, project folders, FF&E and quoting tools."
+                        : "We review applications within 1–2 business days. Once approved, the full trade portal unlocks automatically — no need to purchase the FF&E tool separately."}
+                    </p>
+                    {effStatus === "approved" && !isImpersonating && (
+                      <Button asChild size="sm" className="mt-3 h-7 text-xs">
+                        <Link to="/trade/dashboard">Open trade portal</Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-display text-base text-foreground">Studios Showroom</h3>
-                  <p className="font-body text-xs text-muted-foreground mt-0.5">Explore featured ateliers and studios</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </div>
-            </Link>
+            ) : (
+              <>
+                <FfeUnlockTile userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
 
-            <Link to="/trade/boards" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
-                  <FolderArchive className="h-5 w-5 text-foreground" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-display text-base text-foreground">Project Folders</h3>
-                  <p className="font-body text-xs text-muted-foreground mt-0.5">Curate boards to share with clients</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              </div>
-            </Link>
+                <Link to="/showroom" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-md bg-foreground/5 flex items-center justify-center">
+                      <MapPin className="h-5 w-5 text-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-display text-base text-foreground">Studios Showroom</h3>
+                      <p className="font-body text-xs text-muted-foreground mt-0.5">Explore featured ateliers and studios</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </div>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
