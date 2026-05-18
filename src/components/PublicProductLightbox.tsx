@@ -348,7 +348,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         : showHoverImage && canShowHoverImage && hoverImageLoaded && !imageSwappedByFinish ? "opacity-0"
                           : "opacity-100"
                   )}
-                  style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+                  style={{ filter: "brightness(1.02) contrast(1.03) saturate(1.02)" }}
                 />
                 {canShowHoverImage && product.hover_image_url && !imageSwappedByFinish && (
                   <img
