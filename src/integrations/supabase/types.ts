@@ -3134,6 +3134,21 @@ export type Database = {
           },
         ]
       }
+      sitemap_products: {
+        Row: {
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       studio_invites: {
         Row: {
           accepted_at: string | null
@@ -4739,13 +4754,6 @@ export type Database = {
           _requester_name: string
         }
         Returns: undefined
-      }
-      public_sitemap_products: {
-        Args: never
-        Returns: {
-          id: string
-          updated_at: string
-        }[]
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
