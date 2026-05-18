@@ -131,12 +131,6 @@ const WelcomeRegistrationEmail = ({ firstName, recipientEmail }: WelcomeRegistra
           Stay tuned for regular updates on new collections, designer editorials, and exclusive event announcements.
         </Text>
 
-        <Text style={textMuted}>
-          If you are an architect, interior designer, or hospitality professional, consider applying to our{' '}
-          <a href="https://maisonaffluency.com/trade-program" style={link}>Trade Program</a>{' '}
-          for exclusive trade pricing and dedicated concierge support.
-        </Text>
-
         <Text style={footer}>
           Warm regards,<br />
           <strong>The {SITE_NAME} Team</strong>
