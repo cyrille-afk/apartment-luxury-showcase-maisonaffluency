@@ -34,11 +34,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [sbClient, setSbClient] = useState<any>(null);
 
   const fetchUserData = useCallback(async (userId: string, client: any) => {
-    const [rolesRes, profileRes, appRes] = await Promise.all([
-      client.from("user_roles").select("role").eq("user_id", userId),
-      client.from("profiles").select("first_name, last_name, company, email").eq("id", userId).single(),
-      client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
-    ]);
+    let rolesRes: any;
+    let profileRes: any;
+    let appRes: any;
+
+    try {
+      [rolesRes, profileRes, appRes] = await Promise.all([
+        client.from("user_roles").select("role").eq("user_id", userId),
+        client.from("profiles").select("first_name, last_name, company, email").eq("id", userId).single(),
+        client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
+      ]);
+    } catch (error) {
+      console.warn("Unable to refresh trade access state; keeping existing permissions.", error);
+      return false;
+    }
 
     if (rolesRes.error || appRes.error) {
       console.warn("Unable to refresh trade access state; keeping existing permissions.", rolesRes.error || appRes.error);
