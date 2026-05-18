@@ -110,8 +110,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const refreshInMs = Math.max((sess.expires_at * 1000) - Date.now() - 120_000, 30_000);
       refreshTimer = window.setTimeout(() => {
-        sbClient.auth.refreshSession().catch(() => {
-          // Keep the current session state intact; auth events will handle any real sign-out.
+        sbClient.auth.refreshSession().catch((error: unknown) => {
+          console.warn("Unable to refresh auth session; keeping current auth state.", error);
         });
       }, refreshInMs);
     };
@@ -173,7 +173,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (document.visibilityState !== "visible") return;
       sbClient.auth.getSession().then(({ data: { session: current } }: any) => {
         const expiresInMs = current?.expires_at ? current.expires_at * 1000 - Date.now() : Number.POSITIVE_INFINITY;
-        if (expiresInMs < 180_000) sbClient.auth.refreshSession();
+        if (expiresInMs < 180_000) {
+          sbClient.auth.refreshSession().catch((error: unknown) => {
+            console.warn("Unable to refresh auth session on focus; keeping current auth state.", error);
+          });
+        }
+      }).catch((error: unknown) => {
+        console.warn("Unable to read auth session on focus; keeping current auth state.", error);
       });
     };
 
