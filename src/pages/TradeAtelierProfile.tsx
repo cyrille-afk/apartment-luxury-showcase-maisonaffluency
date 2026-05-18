@@ -593,7 +593,11 @@ const TradeAtelierProfile = () => {
               </div>
             </div>
 
-                <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+                {(() => {
+                  const effectiveDesktopCols = picks.length <= 1 ? 1 : picks.length === 2 ? 2 : picks.length === 3 ? 3 : Math.min(gridCols, 4);
+                  const desktopColsClass = effectiveDesktopCols === 1 ? "md:grid-cols-1" : effectiveDesktopCols === 2 ? "md:grid-cols-2" : effectiveDesktopCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4";
+                  return (
+                <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-2", desktopColsClass)}>
                   {picks.map((pick) => {
                     const isAdding = addingProductId === pick.id;
                     const isAdded = addedProductIds.has(pick.id);
@@ -731,6 +735,8 @@ const TradeAtelierProfile = () => {
                     );
                   })}
                 </div>
+                  );
+                })()}
           </motion.div>
           );
         })()}
