@@ -251,7 +251,7 @@ const TradeLayout = () => {
     const path = location.pathname.replace(/\/$/, "");
     const PUBLIC_ALLOWED = ["/trade/me", "/trade/settings"];
     if (!PUBLIC_ALLOWED.includes(path)) {
-      return <Navigate to="/trade/me" replace />;
+      return <Navigate to="/trade/me?restricted=1" replace />;
     }
   }
 

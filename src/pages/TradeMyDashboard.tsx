@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles, Eye } from "lucide-react";
+import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles, Eye, Lock, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ export default function TradeMyDashboard() {
   const asUserId = searchParams.get("as");
   const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
   const effectiveUserId = isImpersonating ? asUserId! : user?.id;
+  const [restrictedDismissed, setRestrictedDismissed] = useState(false);
+  const showRestricted = searchParams.get("restricted") === "1" && !isImpersonating && !restrictedDismissed;
 
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,6 +86,34 @@ export default function TradeMyDashboard() {
     <>
       <Helmet><title>{isImpersonating ? "Viewing user dashboard" : "My Dashboard"} — Maison Affluency</title></Helmet>
       <div className="container max-w-7xl mx-auto px-4 py-8">
+        {showRestricted && (
+          <div className="mb-6 flex items-start justify-between gap-3 px-4 py-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+            <div className="flex items-start gap-2 min-w-0">
+              <Lock className="h-4 w-4 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="font-body text-sm font-medium text-amber-900 dark:text-amber-100">Access restricted</p>
+                <p className="font-body text-xs text-amber-900/80 dark:text-amber-100/80 mt-0.5">
+                  The Trade Portal is reserved for approved interior designers and architects. Your account has access to this personal dashboard only.{" "}
+                  <Link to="/trade/register" className="underline underline-offset-2 font-medium hover:opacity-80">
+                    Apply for trade access
+                  </Link>{" "}
+                  to unlock trade pricing, spec sheets, project folders and FF&amp;E tools.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setRestrictedDismissed(true);
+                searchParams.delete("restricted");
+                setSearchParams(searchParams, { replace: true });
+              }}
+              aria-label="Dismiss"
+              className="shrink-0 p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/30"
+            >
+              <X className="h-3.5 w-3.5 text-amber-900 dark:text-amber-100" />
+            </button>
+          </div>
+        )}
         {isImpersonating && (
           <div className="mb-6 flex items-center justify-between gap-3 px-4 py-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30">
             <div className="flex items-center gap-2 min-w-0">
