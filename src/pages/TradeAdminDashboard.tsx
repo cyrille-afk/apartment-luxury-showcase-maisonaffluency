@@ -61,7 +61,7 @@ const systemGroup: AdminCard[] = [
   { title: "CAD & 3D Assets", description: "Upload .dwg, .rfa, .skp files per product and per variant", url: "/trade/admin/cad-assets", icon: FileBox },
   { title: "First-login Flow", description: "Edit welcome panel, Quick Tour steps, and replay onboarding for any user", url: "/trade/admin/onboarding", icon: Sparkle },
   { title: "Onboarding Funnel", description: "Step views, sub-step clicks, completes and skips — filterable by device", url: "/trade/admin/onboarding-funnel", icon: BarChart3 },
-  { title: "SEO Audit", description: "Inspect title, description, and canonical for every public route — flag duplicates and missing tags", url: "/trade/admin/seo-audit", icon: Search },
+  { title: "OG Bridge Health", description: "Audit every public/*.html share bridge — validate og:* tags, bot guard, and HEAD-check og:image (size, type, 200)", url: "/trade/admin/og-audit", icon: Search },
 ];
 
 const shippingGroup: AdminCard[] = [
