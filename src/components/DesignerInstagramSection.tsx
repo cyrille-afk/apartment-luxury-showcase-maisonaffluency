@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { Instagram } from "lucide-react";
+import { memo, useState } from "react";
+import { Instagram, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import type { DesignerInstagramPost } from "@/hooks/useDesignerInstagramPosts";
 
