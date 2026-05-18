@@ -372,26 +372,21 @@ function FilterRow({
   );
 }
 
-function StudioCard({ studio }: { studio: Studio }) {
-  return (
-    <Link
-      to={`/studios/${studio.slug}`}
-      onClick={() =>
-        logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
-      }
-      className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
-    >
+function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean }) {
+  const displayName = isAuthed ? studio.name : "Featured Studio";
+  const inner = (
+    <>
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
         {studio.hero_image_url ? (
           <img
             src={studio.hero_image_url}
-            alt={studio.name}
+            alt={displayName}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-            {studio.name}
+            {displayName}
           </div>
         )}
         {studio.is_featured && (
@@ -399,10 +394,18 @@ function StudioCard({ studio }: { studio: Studio }) {
             Featured
           </Badge>
         )}
+        {!isAuthed && (
+          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-background/70 via-transparent to-transparent">
+            <div className="w-full p-4 text-xs uppercase tracking-[0.2em] text-foreground inline-flex items-center gap-2">
+              <Lock className="h-3 w-3" />
+              Sign in to reveal
+            </div>
+          </div>
+        )}
       </div>
       <div className="p-5">
-        <h2 className="font-display text-xl text-foreground">{studio.name}</h2>
-        {studio.tagline && (
+        <h2 className="font-display text-xl text-foreground">{displayName}</h2>
+        {isAuthed && studio.tagline && (
           <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{studio.tagline}</p>
         )}
         {(studio.location || studio.country) && (
@@ -424,10 +427,33 @@ function StudioCard({ studio }: { studio: Studio }) {
           </div>
         )}
         <div className="mt-5 flex items-center text-xs uppercase tracking-[0.2em] text-foreground">
-          View profile
+          {isAuthed ? "View profile" : "Sign in to view"}
           <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
+    </>
+  );
+
+  if (!isAuthed) {
+    return (
+      <Link
+        to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}
+        className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to={`/studios/${studio.slug}`}
+      onClick={() =>
+        logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
+      }
+      className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
+    >
+      {inner}
     </Link>
   );
 }
