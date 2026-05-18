@@ -13,22 +13,23 @@ export interface TradeCredit {
   applied_at: string | null;
 }
 
-export function useTradeCredits() {
+export function useTradeCredits(overrideUserId?: string) {
   const { user } = useAuth();
+  const effectiveUserId = overrideUserId ?? user?.id ?? null;
   const [credits, setCredits] = useState<TradeCredit[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    if (!user) { setLoading(false); return; }
+    if (!effectiveUserId) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from("trade_credits")
       .select("id, source, amount_cents, currency, status, created_at, applied_to_quote_id, applied_at")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveUserId)
       .order("created_at", { ascending: false });
     setCredits((data || []) as any);
     setLoading(false);
-  }, [user]);
+  }, [effectiveUserId]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
