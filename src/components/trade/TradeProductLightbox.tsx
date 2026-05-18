@@ -190,6 +190,33 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     ? `${currencySymbol}${(selectedVariant.price_cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
     : product.price;
 
+  // Resolve the gallery image to display based on the user's variant pick.
+  // Falls back to the product's primary image when no mapping applies.
+  const galleryImages = Array.isArray(product.gallery_images) ? product.gallery_images.filter(Boolean) : [];
+  const finishMap = useMemo(
+    () => buildProductFinishMap(product.variant_image_map),
+    [product.variant_image_map]
+  );
+  const variantImageIdx = useMemo(() => {
+    if (!finishMap || galleryImages.length === 0) return undefined;
+    return resolveVariantImageIndex(finishMap, {
+      base: selectedBase,
+      top: selectedTop,
+      size: selectedSize,
+      variants: variantsList,
+      imageCount: galleryImages.length,
+      requireCompletePair: axes.isDualAxis,
+    });
+  }, [finishMap, galleryImages.length, selectedBase, selectedTop, selectedSize, variantsList, axes.isDualAxis]);
+  const activeImageUrl =
+    (variantImageIdx !== undefined ? galleryImages[variantImageIdx] : null) || product.image_url;
+
+  // Reset image loading state when the displayed image changes (variant swap).
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(false);
+  }, [activeImageUrl]);
+
 
   const compareItem: CompareItem = {
     pick: {
