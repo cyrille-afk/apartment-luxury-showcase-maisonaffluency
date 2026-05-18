@@ -172,6 +172,8 @@ function useTradeProductBySlug(
           size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
+          edition_number: curatorPick?.edition_number || null,
+          edition_signing: curatorPick?.edition_signing || null,
         };
 
         const rawSizeVariants = Array.isArray(curatorPick?.size_variants)
