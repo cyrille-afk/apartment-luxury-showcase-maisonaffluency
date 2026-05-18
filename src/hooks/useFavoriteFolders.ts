@@ -10,18 +10,19 @@ export interface FavoriteFolder {
   created_at: string;
 }
 
-export function useFavoriteFolders() {
+export function useFavoriteFolders(overrideUserId?: string) {
   const { user } = useAuth();
+  const effectiveUserId = overrideUserId ?? user?.id ?? null;
   const [folders, setFolders] = useState<FavoriteFolder[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    if (!user) { setFolders([]); setLoading(false); return; }
+    if (!effectiveUserId) { setFolders([]); setLoading(false); return; }
     setLoading(true);
     const { data: foldersData } = await supabase
       .from("favorite_folders")
       .select("id, name, cover_image_url, created_at")
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveUserId)
       .order("created_at", { ascending: false });
 
     const ids = (foldersData || []).map((f: any) => f.id);
