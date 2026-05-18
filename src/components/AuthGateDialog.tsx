@@ -82,8 +82,16 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
         },
       }).catch(() => {});
     }
-    toast({ title: "Check your email", description: "We've sent you a confirmation link. Please verify your email to continue." });
+    toast({
+      title: "Check your email",
+      description: isDesigner
+        ? "We've sent a confirmation link. Next: complete your trade application."
+        : "We've sent you a confirmation link. Please verify your email to continue.",
+    });
     onClose();
+    if (isDesigner) {
+      navigate(`/trade/register?email=${encodeURIComponent(email)}`);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
