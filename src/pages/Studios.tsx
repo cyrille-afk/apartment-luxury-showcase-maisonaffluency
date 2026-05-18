@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ArrowRight, Lock, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, MapPin } from "lucide-react";
 import { logStudioEvent } from "@/lib/leadTracking";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -247,22 +247,17 @@ export default function Studios() {
         </div>
       </section>
 
-      {/* Sign-in gate banner (logged-out only) */}
+      {/* Concierge intro banner (logged-out only) */}
       {!authLoading && !isAuthed && (
         <section className="border-b border-border bg-muted/30">
           <div className="mx-auto max-w-6xl px-6 py-5 flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5" />
-              Studio names and profiles are visible to registered members.
+              <Mail className="h-3.5 w-3.5" />
+              Introductions to our featured studios are arranged privately through our concierge.
             </p>
-            <div className="flex gap-2">
-              <Button asChild size="sm" variant="outline">
-                <Link to={`/auth?redirect=${encodeURIComponent("/studios")}`}>Sign in</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}>Create free account</Link>
-              </Button>
-            </div>
+            <Button asChild size="sm">
+              <Link to="/contact?subject=studio-introduction">Request an introduction</Link>
+            </Button>
           </div>
         </section>
       )}
@@ -397,8 +392,8 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
         {!isAuthed && (
           <div className="absolute inset-0 flex items-end bg-gradient-to-t from-background/70 via-transparent to-transparent">
             <div className="w-full p-4 text-xs uppercase tracking-[0.2em] text-foreground inline-flex items-center gap-2">
-              <Lock className="h-3 w-3" />
-              Sign in to reveal
+              <Mail className="h-3 w-3" />
+              Introduction by concierge
             </div>
           </div>
         )}
@@ -427,7 +422,7 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
           </div>
         )}
         <div className="mt-5 flex items-center text-xs uppercase tracking-[0.2em] text-foreground">
-          {isAuthed ? "View profile" : "Sign in to view"}
+          {isAuthed ? "View profile" : "Request an introduction"}
           <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
@@ -437,7 +432,10 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
   if (!isAuthed) {
     return (
       <Link
-        to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}
+        to={`/contact?subject=studio-introduction&studio=${studio.id}`}
+        onClick={() =>
+          logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
+        }
         className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
       >
         {inner}
