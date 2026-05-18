@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles } from "lucide-react";
+import { Heart, ArrowRight, FolderArchive, MapPin, Sparkles, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,24 @@ interface FavPreview {
   image_url: string | null;
 }
 
+interface ImpersonatedUser {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+
 export default function TradeMyDashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const asUserId = searchParams.get("as");
+  const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
+  const effectiveUserId = isImpersonating ? asUserId! : user?.id;
+
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
-  const { availableCents } = useTradeCredits();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [impersonated, setImpersonated] = useState<ImpersonatedUser | null>(null);
+  const { availableCents } = useTradeCredits(isImpersonating ? asUserId! : undefined);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,12 +51,12 @@ export default function TradeMyDashboard() {
   }, [searchParams, setSearchParams, toast]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
     const load = async () => {
       const { data } = await supabase
         .from("trade_favorites")
         .select("id, product_id, trade_products(product_name, image_url)")
-        .eq("user_id", user.id)
+        .eq("user_id", effectiveUserId)
         .order("created_at", { ascending: false })
         .limit(8);
       setFavs((data || []).map((d: any) => ({
@@ -56,24 +68,56 @@ export default function TradeMyDashboard() {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [effectiveUserId]);
+
+  useEffect(() => {
+    if (!isImpersonating) { setImpersonated(null); return; }
+    supabase
+      .from("profiles")
+      .select("id, first_name, last_name, email")
+      .eq("id", asUserId!)
+      .maybeSingle()
+      .then(({ data }) => setImpersonated(data as ImpersonatedUser | null));
+  }, [isImpersonating, asUserId]);
 
   return (
     <>
-      <Helmet><title>My Dashboard — Maison Affluency</title></Helmet>
+      <Helmet><title>{isImpersonating ? "Viewing user dashboard" : "My Dashboard"} — Maison Affluency</title></Helmet>
       <div className="container max-w-7xl mx-auto px-4 py-8">
+        {isImpersonating && (
+          <div className="mb-6 flex items-center justify-between gap-3 px-4 py-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <Eye className="h-4 w-4 text-amber-700 dark:text-amber-300 shrink-0" />
+              <p className="font-body text-xs text-amber-900 dark:text-amber-100 truncate">
+                Admin view — read-only dashboard for{" "}
+                <span className="font-medium">
+                  {impersonated
+                    ? `${impersonated.first_name || ""} ${impersonated.last_name || ""}`.trim() || impersonated.email || asUserId
+                    : asUserId}
+                </span>
+              </p>
+            </div>
+            <Button asChild size="sm" variant="outline" className="h-7 text-xs shrink-0">
+              <Link to="/trade/admin/registered-users">Back to users</Link>
+            </Button>
+          </div>
+        )}
         <header className="mb-8">
           <h1 className="font-display text-3xl text-foreground">
-            Welcome{profile?.first_name ? `, ${profile.first_name}` : ""}
+            {isImpersonating
+              ? `${impersonated?.first_name || ""} ${impersonated?.last_name || ""}`.trim() || impersonated?.email || "User dashboard"
+              : `Welcome${profile?.first_name ? `, ${profile.first_name}` : ""}`}
           </h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            Your favorites, folders and tools — all in one place.
+            {isImpersonating
+              ? "Read-only snapshot of this user's favorites, folders and tools."
+              : "Your favorites, folders and tools — all in one place."}
           </p>
           {availableCents > 0 && (
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(var(--gold))]/10 border border-[hsl(var(--gold))]/30">
               <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--gold))]" />
               <span className="font-body text-xs text-foreground">
-                ${(availableCents / 100).toLocaleString()} credit available — applied automatically to your next quote
+                ${(availableCents / 100).toLocaleString()} credit available{isImpersonating ? "" : " — applied automatically to your next quote"}
               </span>
             </div>
           )}
@@ -118,13 +162,13 @@ export default function TradeMyDashboard() {
 
             {/* Folders */}
             <section>
-              <FavoriteFoldersGrid />
+              <FavoriteFoldersGrid userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
             </section>
           </div>
 
           {/* Right rail */}
           <div className="space-y-6">
-            <FfeUnlockTile />
+            <FfeUnlockTile userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
 
             <Link to="/trade/showroom" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
               <div className="flex items-start gap-3">

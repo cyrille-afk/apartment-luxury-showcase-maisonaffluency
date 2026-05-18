@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { ArrowLeft, UserCheck, UserX, Clock, Search } from "lucide-react";
+import { ArrowLeft, UserCheck, UserX, Clock, Search, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -231,6 +231,7 @@ export default function TradeRegisteredUsers() {
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Suggested (12mo spend)</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Application</th>
                     <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Joined</th>
+                    <th className="text-left font-body text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-2.5">Dashboard</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -296,11 +297,20 @@ export default function TradeRegisteredUsers() {
                       <td className="px-4 py-3 font-body text-[11px] text-muted-foreground whitespace-nowrap">
                         {format(new Date(u.created_at), "d MMM yyyy")}
                       </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/trade/me?as=${u.id}`}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-[11px] uppercase tracking-wider font-body rounded-md border border-border bg-background hover:bg-muted transition-colors text-foreground"
+                          title="View this user's dashboard"
+                        >
+                          <Eye className="h-3 w-3" /> View
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      <td colSpan={8} className="px-4 py-8 text-center text-sm text-muted-foreground">
                         No users match "{search}"
                       </td>
                     </tr>
