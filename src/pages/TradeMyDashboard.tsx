@@ -144,10 +144,13 @@ export default function TradeMyDashboard() {
                     ? `${impersonated.first_name || ""} ${impersonated.last_name || ""}`.trim() || impersonated.email || asUserId
                     : asUserId}
                 </span>
+                {hasTradeApplication && (
+                  <span className="ml-2 text-amber-800/80">· Trade application: {effStatus}</span>
+                )}
               </p>
             </div>
             <Button asChild size="sm" variant="outline" className="h-7 text-xs shrink-0">
-              <Link to="/trade/admin/registered-users">Back to users</Link>
+              <Link to="/trade/registered-users">Back to users</Link>
             </Button>
           </div>
         )}
