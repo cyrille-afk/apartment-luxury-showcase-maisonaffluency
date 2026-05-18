@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { Instagram } from "lucide-react";
+import { memo, useState } from "react";
+import { Instagram, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import type { DesignerInstagramPost } from "@/hooks/useDesignerInstagramPosts";
 
@@ -7,6 +7,45 @@ interface Props {
   posts: DesignerInstagramPost[];
   designerName: string;
 }
+
+const InstagramTile = ({
+  post,
+  designerName,
+  hiddenOnMobile,
+}: {
+  post: DesignerInstagramPost;
+  designerName: string;
+  hiddenOnMobile: boolean;
+}) => {
+  const [failed, setFailed] = useState(false);
+  const baseCls = `group relative block aspect-square overflow-hidden bg-muted ${hiddenOnMobile ? "hidden md:block" : ""}`;
+
+  return (
+    <a href={post.post_url} target="_blank" rel="noopener noreferrer" className={baseCls}>
+      {!failed && post.image_url ? (
+        <>
+          <img
+            src={post.image_url}
+            alt={post.caption || `${designerName} — Instagram`}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            loading="lazy"
+            onError={() => setFailed(true)}
+          />
+          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
+            <Instagram className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+        </>
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted text-center px-3 transition-colors group-hover:bg-foreground/5">
+          <Instagram className="h-5 w-5 text-foreground/70" />
+          <span className="font-display text-[10px] tracking-[0.15em] uppercase text-foreground/80 inline-flex items-center gap-1">
+            View post <ExternalLink className="h-3 w-3" />
+          </span>
+        </div>
+      )}
+    </a>
+  );
+};
 
 const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
   // Only show posts that have an image_url
@@ -36,23 +75,12 @@ const DesignerInstagramSection = memo(({ posts, designerName }: Props) => {
       {/* Grid — matches homepage Instagram feed layout */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-1 md:gap-1.5 px-4 md:px-12 lg:px-20">
           {postsWithImages.slice(0, 6).map((post, index) => (
-            <a
+            <InstagramTile
               key={post.id}
-              href={post.post_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`group relative block aspect-square overflow-hidden bg-muted ${index >= 3 ? "hidden md:block" : ""}`}
-            >
-              <img
-                src={post.image_url!}
-                alt={post.caption || `${designerName} — Instagram`}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                <Instagram className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-            </a>
+              post={post}
+              designerName={designerName}
+              hiddenOnMobile={index >= 3}
+            />
           ))}
       </div>
     </motion.section>
