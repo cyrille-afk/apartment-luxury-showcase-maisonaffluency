@@ -245,6 +245,16 @@ const TradeLayout = () => {
     );
   }
 
+  // Public registered users (no trade role, no admin, no application) are confined
+  // to their own dashboard at /trade/me. Block all other /trade/* routes.
+  if (!isAdmin && !isTradeUser && applicationStatus === "none") {
+    const path = location.pathname.replace(/\/$/, "");
+    const PUBLIC_ALLOWED = ["/trade/me", "/trade/settings"];
+    if (!PUBLIC_ALLOWED.includes(path)) {
+      return <Navigate to="/trade/me" replace />;
+    }
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
