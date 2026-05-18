@@ -64,7 +64,7 @@ const PublicSignupForm = () => {
           templateName: 'welcome-registration',
           recipientEmail: email,
           idempotencyKey: `welcome-reg-${signUpData.user.id}`,
-          templateData: { firstName },
+          templateData: { firstName, recipientEmail: email },
         },
       }).catch(() => {});
     }
