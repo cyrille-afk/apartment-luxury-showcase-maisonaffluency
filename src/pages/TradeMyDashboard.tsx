@@ -80,13 +80,25 @@ export default function TradeMyDashboard() {
   }, [effectiveUserId]);
 
   useEffect(() => {
-    if (!isImpersonating) { setImpersonated(null); return; }
+    if (!isImpersonating) { setImpersonated(null); setImpersonatedStatus("none"); setImpersonatedIsTrade(false); return; }
     supabase
       .from("profiles")
       .select("id, first_name, last_name, email")
       .eq("id", asUserId!)
       .maybeSingle()
       .then(({ data }) => setImpersonated(data as ImpersonatedUser | null));
+    supabase
+      .from("trade_applications")
+      .select("status")
+      .eq("user_id", asUserId!)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(({ data }) => setImpersonatedStatus((data?.[0]?.status as any) || "none"));
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", asUserId!)
+      .then(({ data }) => setImpersonatedIsTrade(!!data?.some((r: any) => r.role === "trade_user")));
   }, [isImpersonating, asUserId]);
 
   return (
