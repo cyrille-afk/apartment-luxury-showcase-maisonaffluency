@@ -20,6 +20,7 @@ import {
   normalizeCategory,
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { formatEditionLabel } from "@/lib/editionLabel";
 import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey, isTradeProductMarkedHidden } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
