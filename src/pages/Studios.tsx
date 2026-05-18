@@ -430,9 +430,32 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
   );
 
   if (!isAuthed) {
+    const locationLine = [studio.location, studio.country].filter(Boolean).join(", ");
+    const disciplineLine = studio.disciplines
+      .slice(0, 3)
+      .map((d) => labelOf(DISCIPLINES, d))
+      .filter(Boolean)
+      .join(", ");
+    const subject = `Introduction request — ${studio.name}`;
+    const messageLines = [
+      `I would like to be introduced to ${studio.name} via the Maison Affluency concierge.`,
+      "",
+      `Studio: ${studio.name}`,
+      locationLine ? `Based in: ${locationLine}` : null,
+      disciplineLine ? `Discipline: ${disciplineLine}` : null,
+      studio.tagline ? `Listing note: ${studio.tagline}` : null,
+      "",
+      "Please share a little about my project below:",
+      "",
+    ].filter(Boolean);
+    const params = new URLSearchParams({
+      subject,
+      message: messageLines.join("\n"),
+      studio: studio.id,
+    });
     return (
       <Link
-        to={`/contact?subject=studio-introduction&studio=${studio.id}`}
+        to={`/contact?${params.toString()}`}
         onClick={() =>
           logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
         }
