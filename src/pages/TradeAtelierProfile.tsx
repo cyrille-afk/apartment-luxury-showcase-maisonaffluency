@@ -735,6 +735,8 @@ const TradeAtelierProfile = () => {
                     );
                   })}
                 </div>
+                  );
+                })()}
           </motion.div>
           );
         })()}
