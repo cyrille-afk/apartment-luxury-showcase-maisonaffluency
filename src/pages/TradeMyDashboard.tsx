@@ -162,13 +162,13 @@ export default function TradeMyDashboard() {
 
             {/* Folders */}
             <section>
-              <FavoriteFoldersGrid />
+              <FavoriteFoldersGrid userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
             </section>
           </div>
 
           {/* Right rail */}
           <div className="space-y-6">
-            <FfeUnlockTile />
+            <FfeUnlockTile userId={isImpersonating ? asUserId! : undefined} readOnly={isImpersonating} />
 
             <Link to="/trade/showroom" className="block border border-border rounded-lg p-5 hover:border-foreground/30 transition-colors group">
               <div className="flex items-start gap-3">
