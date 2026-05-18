@@ -25,7 +25,7 @@ interface ImpersonatedUser {
 }
 
 export default function TradeMyDashboard() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, applicationStatus: ownStatus } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const asUserId = searchParams.get("as");
   const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
@@ -36,8 +36,15 @@ export default function TradeMyDashboard() {
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [impersonated, setImpersonated] = useState<ImpersonatedUser | null>(null);
+  const [impersonatedStatus, setImpersonatedStatus] = useState<"none" | "pending" | "approved" | "rejected">("none");
+  const [impersonatedIsTrade, setImpersonatedIsTrade] = useState(false);
   const { availableCents } = useTradeCredits(isImpersonating ? asUserId! : undefined);
   const { toast } = useToast();
+
+  // Effective application status / trade flag for the dashboard being viewed
+  const effStatus = isImpersonating ? impersonatedStatus : ownStatus;
+  const hasTradeApplication = effStatus === "pending" || effStatus === "approved";
+  const isPublicOnly = !hasTradeApplication && !(isImpersonating ? impersonatedIsTrade : false);
 
   useEffect(() => {
     const ffe = searchParams.get("ffe");
