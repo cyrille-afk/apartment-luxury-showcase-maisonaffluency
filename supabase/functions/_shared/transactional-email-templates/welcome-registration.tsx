@@ -7,24 +7,29 @@ import {
 import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
+const SITE_URL = "https://maisonaffluency.com"
 
-// Curated showcase images — diverse pieces from the collection
+// Curated showcase images — each links to the designer's biography page
 const SHOWCASE_IMAGES = [
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773320943/Screen_Shot_2026-03-12_at_9.07.50_PM_jjbf3t.png',
     alt: 'Orion Pendant by Garnier & Linker',
+    href: `${SITE_URL}/designers/garnier-linker`,
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1774869657/Screen_Shot_2026-03-30_at_7.20.35_PM_hmegqy.png',
     alt: 'Ouranos I by Christopher Boots',
+    href: `${SITE_URL}/designers/christopher-boots`,
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/v1773578050/Screen_Shot_2026-03-15_at_8.32.08_PM_leki9q.png',
     alt: 'Galea Lantern by Alexander Lamont',
+    href: `${SITE_URL}/designers/alexander-lamont`,
   },
   {
     src: 'https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_600,c_fill,q_auto,f_auto/Screen_Shot_2026-03-05_at_8.23.37_PM_pj4gi9',
     alt: 'Mangala Coffee Table by Atelier Pendhapa',
+    href: `${SITE_URL}/designers/atelier-pendhapa`,
   },
 ]
 
@@ -56,22 +61,30 @@ const WelcomeRegistrationEmail = ({ firstName }: WelcomeRegistrationProps) => (
           Thank you for creating your account with {SITE_NAME}. You now have access to our curated world of collectible design — from rare ateliers to contemporary masters.
         </Text>
 
-        {/* 2×2 image showcase grid */}
+        {/* 2×2 image showcase grid — each tile links to the designer's biography */}
         <Section style={imageGrid}>
           <Row>
             <Column style={imageCol}>
-              <Img src={SHOWCASE_IMAGES[0].src} alt={SHOWCASE_IMAGES[0].alt} width="265" height="265" style={gridImage} />
+              <a href={SHOWCASE_IMAGES[0].href} style={imageLink}>
+                <Img src={SHOWCASE_IMAGES[0].src} alt={SHOWCASE_IMAGES[0].alt} width="265" height="265" style={gridImage} />
+              </a>
             </Column>
             <Column style={imageColRight}>
-              <Img src={SHOWCASE_IMAGES[1].src} alt={SHOWCASE_IMAGES[1].alt} width="265" height="265" style={gridImage} />
+              <a href={SHOWCASE_IMAGES[1].href} style={imageLink}>
+                <Img src={SHOWCASE_IMAGES[1].src} alt={SHOWCASE_IMAGES[1].alt} width="265" height="265" style={gridImage} />
+              </a>
             </Column>
           </Row>
           <Row>
             <Column style={imageCol}>
-              <Img src={SHOWCASE_IMAGES[2].src} alt={SHOWCASE_IMAGES[2].alt} width="265" height="265" style={gridImage} />
+              <a href={SHOWCASE_IMAGES[2].href} style={imageLink}>
+                <Img src={SHOWCASE_IMAGES[2].src} alt={SHOWCASE_IMAGES[2].alt} width="265" height="265" style={gridImage} />
+              </a>
             </Column>
             <Column style={imageColRight}>
-              <Img src={SHOWCASE_IMAGES[3].src} alt={SHOWCASE_IMAGES[3].alt} width="265" height="265" style={gridImage} />
+              <a href={SHOWCASE_IMAGES[3].href} style={imageLink}>
+                <Img src={SHOWCASE_IMAGES[3].src} alt={SHOWCASE_IMAGES[3].alt} width="265" height="265" style={gridImage} />
+              </a>
             </Column>
           </Row>
         </Section>
@@ -162,5 +175,6 @@ const imageGrid = { margin: '8px 0 16px', width: '100%' }
 const imageCol = { width: '50%', paddingRight: '4px', paddingBottom: '8px', verticalAlign: 'top' as const }
 const imageColRight = { width: '50%', paddingLeft: '4px', paddingBottom: '8px', verticalAlign: 'top' as const }
 const gridImage = { display: 'block', width: '100%', height: 'auto', borderRadius: '4px', objectFit: 'cover' as const }
+const imageLink = { display: 'block', textDecoration: 'none' as const, border: 'none' }
 const footer = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
 const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: "Georgia, 'Playfair Display', serif" }
