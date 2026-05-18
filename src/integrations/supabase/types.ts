@@ -1268,6 +1268,42 @@ export type Database = {
           },
         ]
       }
+      email_click_log: {
+        Row: {
+          clicked_at: string
+          destination_url: string
+          id: string
+          ip_hash: string | null
+          link_id: string
+          recipient_email: string | null
+          referer: string | null
+          template_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          destination_url: string
+          id?: string
+          ip_hash?: string | null
+          link_id: string
+          recipient_email?: string | null
+          referer?: string | null
+          template_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          destination_url?: string
+          id?: string
+          ip_hash?: string | null
+          link_id?: string
+          recipient_email?: string | null
+          referer?: string | null
+          template_name?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
