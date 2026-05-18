@@ -32,6 +32,49 @@ serve(async (req) => {
     const session = event.data.object as Stripe.Checkout.Session;
     const quoteId = session.metadata?.quote_id;
     const paymentType = session.metadata?.payment_type || "deposit";
+    const userIdMeta = session.metadata?.user_id;
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // ===== FF&E unlock handler =====
+    if (paymentType === "ffe_unlock" && session.payment_status === "paid" && userIdMeta) {
+      console.log(`[STRIPE-WEBHOOK] FF&E unlock paid for user ${userIdMeta}, session ${session.id}`);
+      const { data: ent, error: entErr } = await supabase
+        .from("ffe_entitlements")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("stripe_session_id", session.id)
+        .select("id, user_id, amount_cents, currency")
+        .single();
+
+      if (entErr) {
+        console.error("[STRIPE-WEBHOOK] FF&E entitlement update failed:", entErr);
+      } else if (ent) {
+        // Insert matching credit (idempotent via source_ref)
+        const { data: existingCredit } = await supabase
+          .from("trade_credits")
+          .select("id")
+          .eq("source", "ffe_unlock")
+          .eq("source_ref", ent.id)
+          .maybeSingle();
+        if (!existingCredit) {
+          await supabase.from("trade_credits").insert({
+            user_id: ent.user_id,
+            source: "ffe_unlock",
+            source_ref: ent.id,
+            amount_cents: ent.amount_cents,
+            currency: ent.currency,
+            status: "available",
+          });
+          console.log(`[STRIPE-WEBHOOK] Credit created for user ${ent.user_id}: ${ent.amount_cents}c`);
+        }
+      }
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" }, status: 200,
+      });
+    }
 
     if (quoteId && session.payment_status === "paid") {
       console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}, type: ${paymentType}`);
