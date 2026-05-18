@@ -78,6 +78,8 @@ interface ProductRow {
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   edition: string | null;
+  edition_number: string | null;
+  edition_signing: string | null;
 }
 
 interface TradePricing {
