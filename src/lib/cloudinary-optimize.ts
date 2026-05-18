@@ -8,7 +8,9 @@
  */
 
 const CLOUD_NAME = "dif1oamtj";
-const DEFAULT_TRANSFORMS = "w_1280,q_auto,f_auto";
+// w_1600 + dpr_auto + c_limit: serves crisp images on retina without upscaling
+// past the source dimensions. c_limit prevents enlarging smaller originals.
+const DEFAULT_TRANSFORMS = "f_auto,q_auto,w_1600,dpr_auto,c_limit";
 
 const UPLOAD_RE = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/;
 const HAS_TRANSFORMS_RE = /^(w_|q_|f_|c_|h_|e_|ar_|g_|dpr_)/;
