@@ -422,7 +422,7 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
           </div>
         )}
         <div className="mt-5 flex items-center text-xs uppercase tracking-[0.2em] text-foreground">
-          {isAuthed ? "View profile" : "Sign in to view"}
+          {isAuthed ? "View profile" : "Request an introduction"}
           <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
@@ -432,7 +432,10 @@ function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean })
   if (!isAuthed) {
     return (
       <Link
-        to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}
+        to={`/contact?subject=studio-introduction&studio=${studio.id}`}
+        onClick={() =>
+          logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
+        }
         className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
       >
         {inner}
