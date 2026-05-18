@@ -90,7 +90,11 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         description: resolveCuratorPickDescription({ description: pick.description }) ?? undefined,
         image_url: pick.image_url || null,
         hover_image_url: pick.hover_image_url ?? undefined,
-        edition: pick.edition ?? undefined,
+        edition: formatEditionLabel({
+          edition: pick.edition,
+          edition_number: pick.edition_number,
+          edition_signing: pick.edition_signing,
+        }) ?? undefined,
         pdf_url: pick.pdf_url ?? undefined,
         pdf_urls: pick.pdf_urls ?? undefined,
         price_prefix: pick.price_prefix ?? undefined,
