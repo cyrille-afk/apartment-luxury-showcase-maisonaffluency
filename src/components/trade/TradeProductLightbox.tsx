@@ -289,6 +289,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   </div>
                 )}
                 <img
+                  key={activeImageUrl}
                   src={activeImageUrl}
                   alt={product.product_name}
                   onLoad={() => {
