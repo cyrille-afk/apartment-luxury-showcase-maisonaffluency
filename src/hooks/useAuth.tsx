@@ -40,6 +40,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
     ]);
 
+    if (rolesRes.error || appRes.error) {
+      console.warn("Unable to refresh trade access state; keeping existing permissions.", rolesRes.error || appRes.error);
+      return false;
+    }
+
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
       setIsTradeUser(roles.includes("trade_user"));
@@ -56,6 +61,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setApplicationStatus("none");
     }
+
+    return true;
   }, []);
 
   // Dynamically import Supabase client AFTER first paint
