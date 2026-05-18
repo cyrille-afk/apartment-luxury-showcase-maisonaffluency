@@ -25,13 +25,12 @@ interface ImpersonatedUser {
 }
 
 export default function TradeMyDashboard() {
-  const { user, profile, isAdmin, applicationStatus: ownStatus } = useAuth();
+  const { user, profile, isAdmin, isTradeUser, applicationStatus: ownStatus } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const asUserId = searchParams.get("as");
   const isImpersonating = isAdmin && !!asUserId && asUserId !== user?.id;
   const effectiveUserId = isImpersonating ? asUserId! : user?.id;
   const [restrictedDismissed, setRestrictedDismissed] = useState(false);
-  const showRestricted = searchParams.get("restricted") === "1" && !isImpersonating && !restrictedDismissed;
 
   const [favs, setFavs] = useState<FavPreview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +44,15 @@ export default function TradeMyDashboard() {
   const effStatus = isImpersonating ? impersonatedStatus : ownStatus;
   const hasTradeApplication = effStatus === "pending" || effStatus === "approved";
   const isPublicOnly = !hasTradeApplication && !(isImpersonating ? impersonatedIsTrade : false);
+  const hasOwnTradeAccess = isAdmin || isTradeUser || ownStatus === "approved";
+  const showRestricted = searchParams.get("restricted") === "1" && !hasOwnTradeAccess && !isImpersonating && !restrictedDismissed;
+
+  useEffect(() => {
+    if (searchParams.get("restricted") !== "1" || !hasOwnTradeAccess) return;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("restricted");
+    setSearchParams(nextParams, { replace: true });
+  }, [hasOwnTradeAccess, searchParams, setSearchParams]);
 
   useEffect(() => {
     const ffe = searchParams.get("ffe");
@@ -123,8 +131,9 @@ export default function TradeMyDashboard() {
             <button
               onClick={() => {
                 setRestrictedDismissed(true);
-                searchParams.delete("restricted");
-                setSearchParams(searchParams, { replace: true });
+                const nextParams = new URLSearchParams(searchParams);
+                nextParams.delete("restricted");
+                setSearchParams(nextParams, { replace: true });
               }}
               aria-label="Dismiss"
               className="shrink-0 p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/30"
