@@ -7,11 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-export function FfeUnlockTile() {
+export function FfeUnlockTile({ userId, readOnly = false }: { userId?: string; readOnly?: boolean } = {}) {
   const {
     favoritesCount, favoritesRequired, meetsFavoritesThreshold,
     hasPaidEntitlement, hasPendingEntitlement, unlocked, loading,
-  } = useFfeEntitlement();
+  } = useFfeEntitlement(userId);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
