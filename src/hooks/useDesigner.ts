@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
+import { formatEditionLabel } from "@/lib/editionLabel";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
@@ -134,6 +135,7 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
+          edition: formatEditionLabel(d as any),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
@@ -149,6 +151,7 @@ export function useDesignerPicks(designerId: string | undefined, { publicOnly = 
       return dedupePicks((data || []).map((d) => ({
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
+        edition: formatEditionLabel(d as any),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
       })) as unknown as DesignerCuratorPick[]);
@@ -205,6 +208,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
         return sortCuratorPicks(dedupePicks((data || []).map((d) => ({
           ...d,
           description: resolveCuratorPickDescription({ description: d.description }),
+          edition: formatEditionLabel(d as any),
           trade_price_cents: null,
           pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
           size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
@@ -225,6 +229,7 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
       return dedupePicks((data || []).map((d) => ({
         ...d,
         description: resolveCuratorPickDescription({ description: d.description }),
+        edition: formatEditionLabel(d as any),
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
         size_variants: (d as any).size_variants as DesignerCuratorPick["size_variants"],
         designer_name: nameMap[d.designer_id]?.name || designer.name,

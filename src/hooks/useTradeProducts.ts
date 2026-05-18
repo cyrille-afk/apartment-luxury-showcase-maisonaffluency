@@ -20,6 +20,7 @@ import {
   normalizeCategory,
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { formatEditionLabel } from "@/lib/editionLabel";
 import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey, isTradeProductMarkedHidden } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
@@ -40,6 +41,8 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       dimensions,
       description,
       edition,
+      edition_number,
+      edition_signing,
       pdf_url,
       pdf_urls,
       category,
@@ -87,7 +90,11 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
         description: resolveCuratorPickDescription({ description: pick.description }) ?? undefined,
         image_url: pick.image_url || null,
         hover_image_url: pick.hover_image_url ?? undefined,
-        edition: pick.edition ?? undefined,
+        edition: formatEditionLabel({
+          edition: pick.edition,
+          edition_number: pick.edition_number,
+          edition_signing: pick.edition_signing,
+        }) ?? undefined,
         pdf_url: pick.pdf_url ?? undefined,
         pdf_urls: pick.pdf_urls ?? undefined,
         price_prefix: pick.price_prefix ?? undefined,
