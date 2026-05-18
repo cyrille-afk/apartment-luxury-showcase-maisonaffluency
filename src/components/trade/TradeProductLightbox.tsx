@@ -207,11 +207,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const activeImageUrl =
     (variantImageIdx !== undefined ? galleryImages[variantImageIdx] : null) || product.image_url;
 
-  // Reset image loading state when the displayed image changes (variant swap).
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageFailed(false);
-  }, [activeImageUrl]);
 
 
   const compareItem: CompareItem = {
