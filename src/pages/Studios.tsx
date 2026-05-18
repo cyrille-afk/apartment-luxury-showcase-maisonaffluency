@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock, MapPin } from "lucide-react";
 import { logStudioEvent } from "@/lib/leadTracking";
+import { useAuth } from "@/hooks/useAuth";
 
 type Studio = {
   id: string;
@@ -43,6 +44,8 @@ const labelOf = (list: { value: string; label: string }[], v: string) =>
   list.find((x) => x.value === v)?.label ?? v;
 
 export default function Studios() {
+  const { user, loading: authLoading } = useAuth();
+  const isAuthed = !!user;
   const [studios, setStudios] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
   const [discipline, setDiscipline] = useState<string | null>(null);
@@ -189,7 +192,7 @@ export default function Studios() {
         <meta name="twitter:image" content={ogImage} />
 
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
-        {!loading && filtered.length > 0 && (
+        {!loading && filtered.length > 0 && isAuthed && (
           <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
         )}
       </Helmet>
@@ -244,6 +247,26 @@ export default function Studios() {
         </div>
       </section>
 
+      {/* Sign-in gate banner (logged-out only) */}
+      {!authLoading && !isAuthed && (
+        <section className="border-b border-border bg-muted/30">
+          <div className="mx-auto max-w-6xl px-6 py-5 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
+              <Lock className="h-3.5 w-3.5" />
+              Studio names and profiles are visible to registered members.
+            </p>
+            <div className="flex gap-2">
+              <Button asChild size="sm" variant="outline">
+                <Link to={`/auth?redirect=${encodeURIComponent("/studios")}`}>Sign in</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}>Create free account</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Grid */}
       <section className="mx-auto max-w-6xl px-6 py-12">
         {loading ? (
@@ -272,7 +295,7 @@ export default function Studios() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((s) => (
-              <StudioCard key={s.id} studio={s} />
+              <StudioCard key={s.id} studio={s} isAuthed={isAuthed} />
             ))}
           </div>
         )}
@@ -349,26 +372,21 @@ function FilterRow({
   );
 }
 
-function StudioCard({ studio }: { studio: Studio }) {
-  return (
-    <Link
-      to={`/studios/${studio.slug}`}
-      onClick={() =>
-        logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
-      }
-      className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
-    >
+function StudioCard({ studio, isAuthed }: { studio: Studio; isAuthed: boolean }) {
+  const displayName = isAuthed ? studio.name : "Featured Studio";
+  const inner = (
+    <>
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
         {studio.hero_image_url ? (
           <img
             src={studio.hero_image_url}
-            alt={studio.name}
+            alt={displayName}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-            {studio.name}
+            {displayName}
           </div>
         )}
         {studio.is_featured && (
@@ -376,10 +394,18 @@ function StudioCard({ studio }: { studio: Studio }) {
             Featured
           </Badge>
         )}
+        {!isAuthed && (
+          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-background/70 via-transparent to-transparent">
+            <div className="w-full p-4 text-xs uppercase tracking-[0.2em] text-foreground inline-flex items-center gap-2">
+              <Lock className="h-3 w-3" />
+              Sign in to reveal
+            </div>
+          </div>
+        )}
       </div>
       <div className="p-5">
-        <h2 className="font-display text-xl text-foreground">{studio.name}</h2>
-        {studio.tagline && (
+        <h2 className="font-display text-xl text-foreground">{displayName}</h2>
+        {isAuthed && studio.tagline && (
           <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{studio.tagline}</p>
         )}
         {(studio.location || studio.country) && (
@@ -401,10 +427,33 @@ function StudioCard({ studio }: { studio: Studio }) {
           </div>
         )}
         <div className="mt-5 flex items-center text-xs uppercase tracking-[0.2em] text-foreground">
-          View profile
+          {isAuthed ? "View profile" : "Sign in to view"}
           <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
+    </>
+  );
+
+  if (!isAuthed) {
+    return (
+      <Link
+        to={`/auth?mode=signup&redirect=${encodeURIComponent("/studios")}`}
+        className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to={`/studios/${studio.slug}`}
+      onClick={() =>
+        logStudioEvent({ studioId: studio.id, eventType: "directory_card_click" })
+      }
+      className="group block bg-card border border-border hover:border-foreground/30 transition-colors"
+    >
+      {inner}
     </Link>
   );
 }
