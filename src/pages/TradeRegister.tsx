@@ -248,7 +248,13 @@ const TradeRegister = () => {
                   </div>
                 ))}
               </div>
-              <TradeRegistrationForm prefillEmail={prefillEmail} />
+              <TradeRegistrationForm
+                prefillEmail={prefill.email}
+                prefillFirstName={prefill.firstName}
+                prefillLastName={prefill.lastName}
+                prefillCompany={prefill.company}
+                prefillPhone={prefill.phone}
+              />
             </>
           )}
         </div>
