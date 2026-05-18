@@ -79,11 +79,6 @@ serve(async (req) => {
     if (quoteId && session.payment_status === "paid") {
       console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}, type: ${paymentType}`);
 
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-      );
-
       if (paymentType === "deposit") {
         // Deposit paid → move to deposit_paid
         const { error } = await supabase
