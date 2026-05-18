@@ -1044,6 +1044,8 @@ const PublicDesignerProfile = () => {
                   );
                 })}
               </div>
+                );
+              })()}
             </motion.div>
           )}
 
