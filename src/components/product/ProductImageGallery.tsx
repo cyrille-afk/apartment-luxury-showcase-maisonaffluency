@@ -195,7 +195,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               src={images[activeIndex]}
               alt={alt}
               className="max-w-full max-h-full object-contain rounded-2xl"
-              style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+              style={{ filter: "brightness(1.02) contrast(1.03) saturate(1.02)" }}
             />
           </button>
           {/* Expand affordance */}
