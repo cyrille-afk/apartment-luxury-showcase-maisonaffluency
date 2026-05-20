@@ -84,7 +84,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     const doImport = () => {
       import("@/integrations/supabase/client").then(mod => {
-        if (!cancelled) setSbClient(mod.supabase);
+        if (!cancelled) {
+          (mod.supabase.auth as any).stopAutoRefresh?.();
+          setSbClient(mod.supabase);
+        }
       });
     };
 
@@ -196,25 +199,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    const refreshOnFocus = () => {
-      if (document.visibilityState !== "visible") return;
-      sbClient.auth.getSession().then(({ data: { session: current } }: any) => {
-        const expiresInMs = current?.expires_at ? current.expires_at * 1000 - Date.now() : Number.POSITIVE_INFINITY;
-        if (expiresInMs < 180_000) {
-          sbClient.auth.refreshSession().catch((error: unknown) => {
-            console.warn("Unable to refresh auth session on focus; keeping current auth state.", error);
-          });
-        }
-      }).catch((error: unknown) => {
-        console.warn("Unable to read auth session on focus; keeping current auth state.", error);
-      });
-    };
-
-    document.addEventListener("visibilitychange", refreshOnFocus);
-
     return () => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
-      document.removeEventListener("visibilitychange", refreshOnFocus);
       subscription.unsubscribe();
     };
   }, [sbClient, fetchUserData]);
