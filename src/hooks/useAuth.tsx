@@ -16,6 +16,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function isPreviewOrDev(): boolean {
+  if (import.meta.env.DEV) return true;
+  if (typeof window === "undefined") return true;
+  const host = window.location.hostname;
+  return host.includes("lovableproject.com") || host.includes("lovable.app") || host.includes("id-preview--");
+}
+
 /**
  * AuthProvider defers its Supabase SDK import so it doesn't add to the
  * critical-path bundle. On first render it provides safe defaults; once
@@ -119,6 +126,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const scheduleTokenRefresh = (sess: Session | null) => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
       refreshTimer = null;
+      if (isPreviewOrDev()) return;
       if (!sess?.expires_at) return;
 
       const refreshInMs = Math.max((sess.expires_at * 1000) - Date.now() - 120_000, 30_000);
