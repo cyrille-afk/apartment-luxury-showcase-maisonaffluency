@@ -1869,7 +1869,7 @@ const TradeDesignersAdmin = () => {
                                   onClick={() => {
                                     const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
                                     imgs.splice(idx, 1);
-                                    setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                                    setField(d.id, "biography_images", imgs);
                                   }}
                                   className="text-muted-foreground hover:text-destructive transition-colors p-1 mt-1"
                                 >
@@ -1883,7 +1883,7 @@ const TradeDesignersAdmin = () => {
                             size="sm"
                             onClick={() => {
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || []), ""];
-                              setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                              setField(d.id, "biography_images", imgs);
                             }}
                           >
                             <Plus className="w-3.5 h-3.5 mr-1" />
@@ -1903,13 +1903,13 @@ const TradeDesignersAdmin = () => {
                         </label>
                         <Input
                           value={(editBuffer[d.id]?.instagram_handle ?? d.instagram_handle) || ""}
-                          onChange={(e) => setField(d.id, "instagram_handle" as keyof DesignerRow, e.target.value || null as any)}
+                          onChange={(e) => setField(d.id, "instagram_handle", e.target.value || null)}
                           placeholder="@handle (e.g. @achille_salvagni)"
                           className="mt-1 text-sm font-mono"
                         />
                         <Input
                           value={(editBuffer[d.id]?.instagram_handle_2 ?? d.instagram_handle_2) || ""}
-                          onChange={(e) => setField(d.id, "instagram_handle_2" as keyof DesignerRow, e.target.value || null as any)}
+                          onChange={(e) => setField(d.id, "instagram_handle_2", e.target.value || null)}
                           placeholder="Second handle (optional)"
                           className="mt-1 text-sm font-mono"
                         />
@@ -1948,7 +1948,7 @@ const TradeDesignersAdmin = () => {
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={getField(d.id, "is_published") as unknown as boolean}
-                            onCheckedChange={(checked) => setField(d.id, "is_published", checked as unknown as string)}
+                            onCheckedChange={(checked) => setField(d.id, "is_published", checked)}
                           />
                           <span className="text-xs text-muted-foreground">
                             {getField(d.id, "is_published") ? (
