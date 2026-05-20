@@ -1386,7 +1386,7 @@ const TradeDesignersAdmin = () => {
     [editBuffer, designers]
   );
 
-  const setField = useCallback((id: string, field: keyof DesignerRow, value: any) => {
+  const setField = useCallback(<K extends keyof DesignerRow>(id: string, field: K, value: DesignerRow[K]) => {
     setEditBuffer((prev) => ({
       ...prev,
       [id]: { ...prev[id], [field]: value },
