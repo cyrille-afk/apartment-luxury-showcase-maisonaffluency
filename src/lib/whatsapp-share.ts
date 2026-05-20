@@ -5,7 +5,7 @@
  * social previews on WhatsApp, iMessage, Slack, etc.
  */
 
-const SITE_URL = "https://www.maisonaffluency.com";
+const SITE_URL = "https://maisonaffluency.com";
 const OG_SHARE_VERSION = "20260327i";
 
 type ShareSection = "designer" | "collectible" | "atelier";
@@ -109,18 +109,15 @@ const PIECE_OG_BRIDGE_OVERRIDES: Record<string, string> = {
 };
 
 /**
- * Build a piece-specific OG bridge URL for a curator pick.
- * Falls back to the designer OG bridge if no piece-specific bridge exists.
+ * Build the canonical product page URL for a curator pick.
+ * Product routes are prerendered with their own OG tags; the old /collectibles/*-og.html
+ * bridge path can fall back to the generic app shell on production and produce no preview.
  */
 export const buildPieceOgUrl = (designerName: string, pieceTitle: string, pieceSubtitle?: string | null) => {
   const designerSlug = slugify(designerName);
   const fullPieceTitle = pieceSubtitle ? `${pieceTitle}-${pieceSubtitle}` : pieceTitle;
   const pieceSlug = slugify(fullPieceTitle);
-  const titleOnlySlug = slugify(pieceTitle);
-  const key = `${designerSlug}/${titleOnlySlug}`;
-  const override = PIECE_OG_BRIDGE_OVERRIDES[key];
-  if (override) return withOgCacheBust(`${SITE_URL}${override}`);
-  return withOgCacheBust(`${SITE_URL}/collectibles/${designerSlug}-${pieceSlug}-og.html`);
+  return `${SITE_URL}/designers/${designerSlug}/${pieceSlug}`;
 };
 
 /**
