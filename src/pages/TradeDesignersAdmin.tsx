@@ -1203,18 +1203,83 @@ interface DesignerRow {
   instagram_handle_2: string | null;
 }
 
+const DESIGNER_EDITOR_DRAFT_KEY = "ma-designer-editor-draft-v2";
+
+type DesignerEditorDraft = {
+  search: string;
+  activeLetter: string | null;
+  expandedId: string | null;
+  editBuffer: Record<string, Partial<DesignerRow>>;
+  previewId: string | null;
+  previewMobile: boolean;
+  previewDebug: boolean;
+  updatedAt: number;
+};
+
+const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
 const TradeDesignersAdmin = () => {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
 
-  const [search, setSearch] = useState("");
-  const [activeLetter, setActiveLetter] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>({});
-  const [previewId, setPreviewId] = useState<string | null>(null);
-  const [previewMobile, setPreviewMobile] = useState(false);
-  const [previewDebug, setPreviewDebug] = useState(false);
+  const [search, setSearch] = useState(initialDraft.search ?? "");
+  const [activeLetter, setActiveLetter] = useState<string | null>(initialDraft.activeLetter ?? null);
+  const [expandedId, setExpandedId] = useState<string | null>(initialDraft.expandedId ?? null);
+  const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>(initialDraft.editBuffer ?? {});
+  const [previewId, setPreviewId] = useState<string | null>(initialDraft.previewId ?? null);
+  const [previewMobile, setPreviewMobile] = useState(initialDraft.previewMobile ?? false);
+  const [previewDebug, setPreviewDebug] = useState(initialDraft.previewDebug ?? false);
+
+  useEffect(() => {
+    const persistDraft = () => {
+      if (typeof window === "undefined") return;
+      const hasState =
+        search.trim() !== "" ||
+        activeLetter !== null ||
+        expandedId !== null ||
+        previewId !== null ||
+        previewMobile ||
+        previewDebug ||
+        Object.keys(editBuffer).length > 0;
+
+      try {
+        if (!hasState) {
+          sessionStorage.removeItem(DESIGNER_EDITOR_DRAFT_KEY);
+          return;
+        }
+
+        sessionStorage.setItem(
+          DESIGNER_EDITOR_DRAFT_KEY,
+          JSON.stringify({
+            search,
+            activeLetter,
+            expandedId,
+            editBuffer,
+            previewId,
+            previewMobile,
+            previewDebug,
+            updatedAt: Date.now(),
+          } satisfies DesignerEditorDraft),
+        );
+      } catch {
+        /* keep editing even if browser storage is unavailable */
+      }
+    };
+
+    persistDraft();
+    window.addEventListener("pagehide", persistDraft);
+    return () => window.removeEventListener("pagehide", persistDraft);
+  }, [search, activeLetter, expandedId, editBuffer, previewId, previewMobile, previewDebug]);
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
@@ -1227,6 +1292,8 @@ const TradeDesignersAdmin = () => {
       return data as DesignerRow[];
     },
     enabled: !!isAdmin,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch public picks count per designer for debug counter
@@ -1244,6 +1311,8 @@ const TradeDesignersAdmin = () => {
       return counts;
     },
     enabled: !!isAdmin,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const saveMutation = useMutation({
@@ -1317,7 +1386,7 @@ const TradeDesignersAdmin = () => {
     [editBuffer, designers]
   );
 
-  const setField = useCallback((id: string, field: keyof DesignerRow, value: string) => {
+  const setField = useCallback(<K extends keyof DesignerRow>(id: string, field: K, value: DesignerRow[K]) => {
     setEditBuffer((prev) => ({
       ...prev,
       [id]: { ...prev[id], [field]: value },
@@ -1690,13 +1759,13 @@ const TradeDesignersAdmin = () => {
                                     accept="image/*"
                                     label="Upload Hero"
                                     onUpload={(urls) => {
-                                      if (urls[0]) setField(d.id, "hero_image_url" as keyof DesignerRow, urls[0] as any);
+                                      if (urls[0]) setField(d.id, "hero_image_url", urls[0]);
                                     }}
                                   />
                                   {currentHero && (
                                     <button
                                       type="button"
-                                      onClick={() => setField(d.id, "hero_image_url" as keyof DesignerRow, null as any)}
+                                      onClick={() => setField(d.id, "hero_image_url", null)}
                                       className="text-xs font-body text-destructive hover:text-destructive/80 transition-colors px-2 py-1"
                                     >
                                       Clear hero
@@ -1705,7 +1774,7 @@ const TradeDesignersAdmin = () => {
                                 </div>
                                 <Input
                                   value={currentHero}
-                                  onChange={(e) => setField(d.id, "hero_image_url" as keyof DesignerRow, e.target.value || null)}
+                                  onChange={(e) => setField(d.id, "hero_image_url", e.target.value || null)}
                                   placeholder="Or paste an absolute Cloudinary/Supabase URL…"
                                   className="font-mono text-xs"
                                 />
@@ -1732,7 +1801,7 @@ const TradeDesignersAdmin = () => {
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
                               const oldSerialized = imgs[idx];
                               imgs[idx] = serializeBiographyMediaEntry(newUrl, newCaption, metadata);
-                              setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                              setField(d.id, "biography_images", imgs);
 
                               // Sync inline biography token when caption changes
                               const bioVal = getField(d.id, "biography") || "";
@@ -1800,7 +1869,7 @@ const TradeDesignersAdmin = () => {
                                   onClick={() => {
                                     const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
                                     imgs.splice(idx, 1);
-                                    setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                                    setField(d.id, "biography_images", imgs);
                                   }}
                                   className="text-muted-foreground hover:text-destructive transition-colors p-1 mt-1"
                                 >
@@ -1814,7 +1883,7 @@ const TradeDesignersAdmin = () => {
                             size="sm"
                             onClick={() => {
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || []), ""];
-                              setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                              setField(d.id, "biography_images", imgs);
                             }}
                           >
                             <Plus className="w-3.5 h-3.5 mr-1" />
@@ -1834,13 +1903,13 @@ const TradeDesignersAdmin = () => {
                         </label>
                         <Input
                           value={(editBuffer[d.id]?.instagram_handle ?? d.instagram_handle) || ""}
-                          onChange={(e) => setField(d.id, "instagram_handle" as keyof DesignerRow, e.target.value || null as any)}
+                          onChange={(e) => setField(d.id, "instagram_handle", e.target.value || null)}
                           placeholder="@handle (e.g. @achille_salvagni)"
                           className="mt-1 text-sm font-mono"
                         />
                         <Input
                           value={(editBuffer[d.id]?.instagram_handle_2 ?? d.instagram_handle_2) || ""}
-                          onChange={(e) => setField(d.id, "instagram_handle_2" as keyof DesignerRow, e.target.value || null as any)}
+                          onChange={(e) => setField(d.id, "instagram_handle_2", e.target.value || null)}
                           placeholder="Second handle (optional)"
                           className="mt-1 text-sm font-mono"
                         />
@@ -1879,7 +1948,7 @@ const TradeDesignersAdmin = () => {
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={getField(d.id, "is_published") as unknown as boolean}
-                            onCheckedChange={(checked) => setField(d.id, "is_published", checked as unknown as string)}
+                            onCheckedChange={(checked) => setField(d.id, "is_published", checked)}
                           />
                           <span className="text-xs text-muted-foreground">
                             {getField(d.id, "is_published") ? (
