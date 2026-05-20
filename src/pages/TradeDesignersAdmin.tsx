@@ -1774,7 +1774,7 @@ const TradeDesignersAdmin = () => {
                                 </div>
                                 <Input
                                   value={currentHero}
-                                  onChange={(e) => setField(d.id, "hero_image_url" as keyof DesignerRow, e.target.value || null)}
+                                  onChange={(e) => setField(d.id, "hero_image_url", e.target.value || null)}
                                   placeholder="Or paste an absolute Cloudinary/Supabase URL…"
                                   className="font-mono text-xs"
                                 />
