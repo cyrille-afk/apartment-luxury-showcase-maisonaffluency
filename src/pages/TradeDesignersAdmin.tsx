@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, Fragment, useEffect } from "react";
+import { useState, useMemo, useCallback, Fragment, useEffect, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { cn } from "@/lib/utils";
 import { Helmet } from "react-helmet-async";
@@ -1281,6 +1281,9 @@ const TradeDesignersAdmin = () => {
     return () => window.removeEventListener("pagehide", persistDraft);
   }, [search, activeLetter, expandedId, editBuffer, previewId, previewMobile, previewDebug]);
 
+  // After data loads on mount, scroll the previously expanded row back into view
+  const didRestoreScrollRef = useRef(false);
+
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
     queryFn: async () => {
@@ -1293,8 +1296,30 @@ const TradeDesignersAdmin = () => {
     },
     enabled: !!isAdmin,
     staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
+
+  // Once designers are loaded, scroll the previously expanded row into view
+  // so returning from another page lands you exactly where you left off.
+  useEffect(() => {
+    if (didRestoreScrollRef.current) return;
+    if (!expandedId || designers.length === 0) return;
+    didRestoreScrollRef.current = true;
+    // Wait a tick for the accordion content to render before scrolling.
+    const t = window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(
+        `[data-designer-row-id="${expandedId}"]`,
+      );
+      if (el) {
+        el.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior });
+        // Nudge up a bit so the row header isn't glued to the top edge.
+        window.scrollBy({ top: -80, behavior: "instant" as ScrollBehavior });
+      }
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [designers.length, expandedId]);
 
   // Fetch public picks count per designer for debug counter
   const { data: picksCountMap = {} } = useQuery({
@@ -1312,7 +1337,9 @@ const TradeDesignersAdmin = () => {
     },
     enabled: !!isAdmin,
     staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const saveMutation = useMutation({
@@ -1647,7 +1674,11 @@ const TradeDesignersAdmin = () => {
               const dirty = hasChanges(d.id);
 
               return (
-                <div key={d.id} className="border border-border rounded-sm overflow-hidden">
+                <div
+                  key={d.id}
+                  data-designer-row-id={d.id}
+                  className="border border-border rounded-sm overflow-hidden"
+                >
                   {/* Row header */}
                   <button
                     onClick={() => setExpandedId(isOpen ? null : d.id)}
