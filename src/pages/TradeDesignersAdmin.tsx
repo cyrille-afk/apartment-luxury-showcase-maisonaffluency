@@ -1281,6 +1281,9 @@ const TradeDesignersAdmin = () => {
     return () => window.removeEventListener("pagehide", persistDraft);
   }, [search, activeLetter, expandedId, editBuffer, previewId, previewMobile, previewDebug]);
 
+  // After data loads on mount, scroll the previously expanded row back into view
+  const didRestoreScrollRef = useRef(false);
+
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
     queryFn: async () => {
