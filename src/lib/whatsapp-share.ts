@@ -92,23 +92,6 @@ export const buildParentBrandOgUrl = (name: string) => {
 };
 
 /**
- * Piece-specific OG bridge overrides for collectible items.
- * Key format: "designer-slug/piece-slug"
- */
-const PIECE_OG_BRIDGE_OVERRIDES: Record<string, string> = {
-  "christopher-boots/prometheus-iii-astraea": "/collectibles/christopher-boots-prometheus-iii-astraea-og.html",
-  "man-of-parts/frenchmen-street-armchair": "/collectibles/man-of-parts-frenchmen-street-armchair-og.html",
-  "man-of-parts/praia-da-granja-coffee-table": "/collectibles/man-of-parts-praia-da-granja-coffee-table-og.html",
-  "man-of-parts/frenchmen-street-lounge-chair": "/collectibles/man-of-parts-frenchmen-street-lounge-chair-og.html",
-  "man-of-parts/cinnamon-gardens-floor-lamp": "/collectibles/man-of-parts-cinnamon-gardens-floor-lamp-og.html",
-  "man-of-parts/rua-leblon": "/collectibles/man-of-parts-rua-leblon-og.html",
-  "man-of-parts/bond-street-stool": "/collectibles/man-of-parts-bond-street-stool-og.html",
-  "man-of-parts/sandy-cove-sofa": "/collectibles/man-of-parts-sandy-cove-sofa-og.html",
-  "man-of-parts/park-place-bar-counter-stool": "/collectibles/man-of-parts-park-place-bar-counter-stool-og.html",
-  "man-of-parts/madison-avenue-cocktail-table": "/collectibles/man-of-parts-madison-avenue-cocktail-table-og.html",
-};
-
-/**
  * Build the canonical product page URL for a curator pick.
  * Product routes are prerendered with their own OG tags; the old /collectibles/*-og.html
  * bridge path can fall back to the generic app shell on production and produce no preview.
