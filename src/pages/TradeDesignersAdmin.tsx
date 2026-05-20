@@ -1581,11 +1581,20 @@ const TradeDesignersAdmin = () => {
                     onClick={() => setExpandedId(isOpen ? null : d.id)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors"
                   >
-                    {d.image_url && (
+                    {(d.image_url || d.hero_image_url) && (
                       <img
-                        src={d.image_url}
+                        src={d.image_url || d.hero_image_url || ""}
                         alt=""
-                        className="w-10 h-10 rounded-full object-cover shrink-0"
+                        className="w-10 h-10 rounded-full object-cover shrink-0 bg-muted"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (d.hero_image_url && img.src !== d.hero_image_url) {
+                            img.src = d.hero_image_url;
+                          } else {
+                            img.style.visibility = "hidden";
+                          }
+                        }}
                       />
                     )}
                     <div className="flex-1 min-w-0">
