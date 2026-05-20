@@ -728,8 +728,10 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
 /*  Mobile Collapsible — collapses long text on small screens          */
 /* ------------------------------------------------------------------ */
 function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
+  const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState(false);
-  const shouldCollapse = paragraphs.length > MOBILE_COLLAPSE_THRESHOLD;
+  const shouldCollapse = isMobile && paragraphs.length > MOBILE_COLLAPSE_THRESHOLD;
+
   const visibleParagraphs = shouldCollapse && !expanded
     ? paragraphs.slice(0, MOBILE_COLLAPSE_THRESHOLD)
     : paragraphs;
