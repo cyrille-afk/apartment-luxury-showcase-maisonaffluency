@@ -166,7 +166,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(sess?.user ?? null);
       scheduleTokenRefresh(sess);
       if (sess?.user) {
-        setTimeout(() => fetchUserData(sess.user.id, sbClient), 0);
+        // Keep route guards blocked until roles are hydrated. Otherwise an
+        // admin can briefly look like a public user during token refresh and
+        // get redirected to /trade/me?restricted=1.
+        setLoading(true);
+        setTimeout(async () => {
+          await fetchUserData(sess.user.id, sbClient);
+          setLoading(false);
+        }, 0);
+        return;
       } else {
         setIsTradeUser(false);
         setIsAdmin(false);
