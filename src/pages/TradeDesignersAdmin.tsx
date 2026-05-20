@@ -1299,6 +1299,26 @@ const TradeDesignersAdmin = () => {
     refetchOnWindowFocus: false,
   });
 
+  // Once designers are loaded, scroll the previously expanded row into view
+  // so returning from another page lands you exactly where you left off.
+  useEffect(() => {
+    if (didRestoreScrollRef.current) return;
+    if (!expandedId || designers.length === 0) return;
+    didRestoreScrollRef.current = true;
+    // Wait a tick for the accordion content to render before scrolling.
+    const t = window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(
+        `[data-designer-row-id="${expandedId}"]`,
+      );
+      if (el) {
+        el.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior });
+        // Nudge up a bit so the row header isn't glued to the top edge.
+        window.scrollBy({ top: -80, behavior: "instant" as ScrollBehavior });
+      }
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [designers.length, expandedId]);
+
   // Fetch public picks count per designer for debug counter
   const { data: picksCountMap = {} } = useQuery({
     queryKey: ["admin-public-picks-counts"],
