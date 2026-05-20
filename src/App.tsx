@@ -140,7 +140,14 @@ const PageTracker = lazy(() => import("./hooks/usePageTracking").then(m => {
   return { default: Tracker };
 }));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  },
+});
 
 const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
 let previewLocationRestored = false;
