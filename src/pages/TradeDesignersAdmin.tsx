@@ -1296,7 +1296,9 @@ const TradeDesignersAdmin = () => {
     },
     enabled: !!isAdmin,
     staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // Once designers are loaded, scroll the previously expanded row into view
