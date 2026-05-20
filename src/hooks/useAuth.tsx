@@ -166,14 +166,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(sess?.user ?? null);
       scheduleTokenRefresh(sess);
       if (sess?.user) {
-        // Keep route guards blocked until roles are hydrated. Otherwise an
-        // admin can briefly look like a public user during token refresh and
-        // get redirected to /trade/me?restricted=1.
-        setLoading(true);
-        setTimeout(async () => {
-          await fetchUserData(sess.user.id, sbClient);
-          setLoading(false);
-        }, 0);
+        // Only re-hydrate roles on an actual sign-in. TOKEN_REFRESHED fires
+        // periodically (and on tab focus) — flipping `loading` there causes
+        // gated routes (like the designer editor) to unmount mid-edit.
+        if (event === "SIGNED_IN") {
+          setLoading(true);
+          setTimeout(async () => {
+            await fetchUserData(sess.user.id, sbClient);
+            setLoading(false);
+          }, 0);
+          return;
+        }
+        setLoading(false);
         return;
       } else {
         setIsTradeUser(false);
