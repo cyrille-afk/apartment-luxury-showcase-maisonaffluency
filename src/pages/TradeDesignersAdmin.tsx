@@ -1647,7 +1647,11 @@ const TradeDesignersAdmin = () => {
               const dirty = hasChanges(d.id);
 
               return (
-                <div key={d.id} className="border border-border rounded-sm overflow-hidden">
+                <div
+                  key={d.id}
+                  data-designer-row-id={d.id}
+                  className="border border-border rounded-sm overflow-hidden"
+                >
                   {/* Row header */}
                   <button
                     onClick={() => setExpandedId(isOpen ? null : d.id)}
