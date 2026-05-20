@@ -1203,18 +1203,83 @@ interface DesignerRow {
   instagram_handle_2: string | null;
 }
 
+const DESIGNER_EDITOR_DRAFT_KEY = "ma-designer-editor-draft-v2";
+
+type DesignerEditorDraft = {
+  search: string;
+  activeLetter: string | null;
+  expandedId: string | null;
+  editBuffer: Record<string, Partial<DesignerRow>>;
+  previewId: string | null;
+  previewMobile: boolean;
+  previewDebug: boolean;
+  updatedAt: number;
+};
+
+const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
 const TradeDesignersAdmin = () => {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
 
-  const [search, setSearch] = useState("");
-  const [activeLetter, setActiveLetter] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>({});
-  const [previewId, setPreviewId] = useState<string | null>(null);
-  const [previewMobile, setPreviewMobile] = useState(false);
-  const [previewDebug, setPreviewDebug] = useState(false);
+  const [search, setSearch] = useState(initialDraft.search ?? "");
+  const [activeLetter, setActiveLetter] = useState<string | null>(initialDraft.activeLetter ?? null);
+  const [expandedId, setExpandedId] = useState<string | null>(initialDraft.expandedId ?? null);
+  const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>(initialDraft.editBuffer ?? {});
+  const [previewId, setPreviewId] = useState<string | null>(initialDraft.previewId ?? null);
+  const [previewMobile, setPreviewMobile] = useState(initialDraft.previewMobile ?? false);
+  const [previewDebug, setPreviewDebug] = useState(initialDraft.previewDebug ?? false);
+
+  useEffect(() => {
+    const persistDraft = () => {
+      if (typeof window === "undefined") return;
+      const hasState =
+        search.trim() !== "" ||
+        activeLetter !== null ||
+        expandedId !== null ||
+        previewId !== null ||
+        previewMobile ||
+        previewDebug ||
+        Object.keys(editBuffer).length > 0;
+
+      try {
+        if (!hasState) {
+          sessionStorage.removeItem(DESIGNER_EDITOR_DRAFT_KEY);
+          return;
+        }
+
+        sessionStorage.setItem(
+          DESIGNER_EDITOR_DRAFT_KEY,
+          JSON.stringify({
+            search,
+            activeLetter,
+            expandedId,
+            editBuffer,
+            previewId,
+            previewMobile,
+            previewDebug,
+            updatedAt: Date.now(),
+          } satisfies DesignerEditorDraft),
+        );
+      } catch {
+        /* keep editing even if browser storage is unavailable */
+      }
+    };
+
+    persistDraft();
+    window.addEventListener("pagehide", persistDraft);
+    return () => window.removeEventListener("pagehide", persistDraft);
+  }, [search, activeLetter, expandedId, editBuffer, previewId, previewMobile, previewDebug]);
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
@@ -1227,6 +1292,8 @@ const TradeDesignersAdmin = () => {
       return data as DesignerRow[];
     },
     enabled: !!isAdmin,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch public picks count per designer for debug counter
@@ -1244,6 +1311,8 @@ const TradeDesignersAdmin = () => {
       return counts;
     },
     enabled: !!isAdmin,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const saveMutation = useMutation({
@@ -1317,7 +1386,7 @@ const TradeDesignersAdmin = () => {
     [editBuffer, designers]
   );
 
-  const setField = useCallback((id: string, field: keyof DesignerRow, value: string) => {
+  const setField = useCallback((id: string, field: keyof DesignerRow, value: any) => {
     setEditBuffer((prev) => ({
       ...prev,
       [id]: { ...prev[id], [field]: value },
