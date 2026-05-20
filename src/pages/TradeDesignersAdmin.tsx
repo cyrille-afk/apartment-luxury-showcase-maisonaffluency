@@ -1447,7 +1447,10 @@ const TradeDesignersAdmin = () => {
   );
 
   if (loading) return null;
-  if (!isAdmin) return <Navigate to="/trade" replace />;
+  if (!isAdmin) {
+    if (import.meta.env.DEV) return null;
+    return <Navigate to="/trade" replace />;
+  }
 
   return (
     <>
