@@ -203,6 +203,12 @@ const TradeAtelierProfile = () => {
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridColsTouched, setGridColsTouched] = useState(false);
+  useEffect(() => {
+    if (gridColsTouched) return;
+    if (designer?.slug === "alpange" || designer?.slug === "emmanuel-levet-stenne") setGridCols(3);
+  }, [designer?.slug, gridColsTouched]);
+
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const fxRates = useFxRates();
