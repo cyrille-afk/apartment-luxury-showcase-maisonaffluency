@@ -84,7 +84,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     const doImport = () => {
       import("@/integrations/supabase/client").then(mod => {
-        if (!cancelled) setSbClient(mod.supabase);
+        if (!cancelled) {
+          (mod.supabase.auth as any).stopAutoRefresh?.();
+          setSbClient(mod.supabase);
+        }
       });
     };
 
