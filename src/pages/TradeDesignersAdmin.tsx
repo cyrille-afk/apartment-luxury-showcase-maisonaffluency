@@ -1759,13 +1759,13 @@ const TradeDesignersAdmin = () => {
                                     accept="image/*"
                                     label="Upload Hero"
                                     onUpload={(urls) => {
-                                      if (urls[0]) setField(d.id, "hero_image_url" as keyof DesignerRow, urls[0] as any);
+                                      if (urls[0]) setField(d.id, "hero_image_url", urls[0]);
                                     }}
                                   />
                                   {currentHero && (
                                     <button
                                       type="button"
-                                      onClick={() => setField(d.id, "hero_image_url" as keyof DesignerRow, null as any)}
+                                      onClick={() => setField(d.id, "hero_image_url", null)}
                                       className="text-xs font-body text-destructive hover:text-destructive/80 transition-colors px-2 py-1"
                                     >
                                       Clear hero
@@ -1801,7 +1801,7 @@ const TradeDesignersAdmin = () => {
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
                               const oldSerialized = imgs[idx];
                               imgs[idx] = serializeBiographyMediaEntry(newUrl, newCaption, metadata);
-                              setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                              setField(d.id, "biography_images", imgs);
 
                               // Sync inline biography token when caption changes
                               const bioVal = getField(d.id, "biography") || "";
