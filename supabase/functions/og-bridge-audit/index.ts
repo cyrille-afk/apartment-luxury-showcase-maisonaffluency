@@ -136,17 +136,15 @@ async function auditBridge(base: string, path: string, checkImages: boolean) {
   const issues: string[] = [];
   const warnings: string[] = [];
   try {
-    const res = await fetch(url, {
-      headers: { "user-agent": UA, "cache-control": "no-cache", "pragma": "no-cache" },
-      redirect: "follow",
-      signal: ctrl.signal,
-    });
-    const finalUrl = res.url;
+    const { res, finalUrl, redirects, headers } = await fetchCrawlerVisible(url, ctrl.signal);
     if (res.status !== 200) {
+      const html = await res.text().catch(() => "");
+      const parsed = parseBridge(html);
+      if (isLikelyRenderedShell(html, headers, parsed.og)) issues.push("cdn_rendered_app_shell");
       return {
-        path, url, finalUrl, status: res.status,
-        issues: [`http_${res.status}`], warnings: [],
-        og: {} as Record<string, string>,
+        path, url, finalUrl, status: res.status, redirects, headers,
+        issues: [`http_${res.status}`, ...issues], warnings: [],
+        og: parsed.og,
         imageCheck: null as null | Awaited<ReturnType<typeof checkImage>>,
       };
     }
@@ -158,22 +156,20 @@ async function auditBridge(base: string, path: string, checkImages: boolean) {
       if (!og[tag]?.trim()) issues.push(`missing_${tag.replace(":", "_")}`);
     }
 
-    // ── SPA-shell substitution detector ─────────────────────────────────
-    // The CDN can return HTTP 200 with the generic index.html instead of the
-    // bridge file. The audit was previously blind to this. Detect by:
-    //  1) og:url path doesn't match the requested bridge path, OR
-    //  2) og:title is the generic site title.
-    const expectedPathTail = path.split("/").pop()!.toLowerCase();
+    // ── CDN/app-shell substitution detector ─────────────────────────────
+    // Lovable's custom-domain crawler layer can return a rendered 404/app
+    // shell for an .html bridge path while the lovable.app static host serves
+    // the real bridge. Detect the actual crawler-visible final HTML.
+    const expectedOgPath = expectedCanonicalPath(path);
     const ogUrlPath = (() => {
       try { return new URL(og["og:url"] ?? "").pathname.toLowerCase(); }
       catch { return ""; }
     })();
-    const ogUrlMatches = ogUrlPath.endsWith(expectedPathTail);
-    const isShellTitle = (og["og:title"] ?? "").includes(SPA_SHELL_TITLE_FRAGMENT)
-      && !path.includes("collectibles") && !path.includes("trade-program");
+    const ogUrlMatches = ogUrlPath === expectedOgPath;
+    const renderedShell = isLikelyRenderedShell(html, headers, og);
 
     if (og["og:url"] && !ogUrlMatches) issues.push("spa_shell_served_wrong_og_url");
-    if (isShellTitle) issues.push("spa_shell_served_generic_title");
+    if (renderedShell) issues.push("cdn_rendered_app_shell");
 
     if (hasRedirect && !hasBotCheck) issues.push("redirect_without_bot_guard");
     if (!og["og:description"]) warnings.push("missing_og_description");
@@ -187,7 +183,7 @@ async function auditBridge(base: string, path: string, checkImages: boolean) {
       if (imageCheck.sizeKb && imageCheck.sizeKb > 300) warnings.push(`og_image_oversize_${imageCheck.sizeKb}kb`);
     }
 
-    return { path, url, finalUrl, status: 200, issues, warnings, og, imageCheck };
+    return { path, url, finalUrl, status: 200, redirects, headers, issues, warnings, og, imageCheck };
   } catch (e) {
     return {
       path, url, finalUrl: url, status: 0,
