@@ -106,6 +106,20 @@ const scheduleWhenIdle = (callback: () => void, timeout: number) => {
   return () => window.clearTimeout(timeoutId);
 };
 
+const isStandaloneHomeLaunch = () => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    window.location.pathname === "/" &&
+    !window.location.hash &&
+    (
+      params.get("source") === "pwa" ||
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true
+    )
+  );
+};
+
 type IndexProps = {
   categoryMode?: boolean;
 };
@@ -132,11 +146,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     // land on the hero. iOS keeps sessionStorage alive between standalone
     // launches, which otherwise restores a stale scroll position and renders
     // the page below the fold on open.
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      // @ts-ignore — iOS Safari only
-      window.navigator.standalone === true ||
-      new URLSearchParams(window.location.search).get("source") === "pwa";
+    const isStandalone = isStandaloneHomeLaunch();
     if (isStandalone && !hasExplicitSectionHash) {
       sessionStorage.removeItem("__scroll_y");
       needsScrollRestore.current = false;
@@ -154,7 +164,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     }
 
     // Deep-links and scroll restore both need sections immediately
-    const hasRestore = Number(sessionStorage.getItem("__scroll_y") || 0) > 0;
+    const hasRestore = !isStandalone && Number(sessionStorage.getItem("__scroll_y") || 0) > 0;
     if (routeIsCategory || isDeepLink() || hasRestore) {
       needsScrollRestore.current = hasRestore;
       setShowNavigation(true);
