@@ -43,7 +43,11 @@ function parseHead(html: string) {
   };
 }
 
-async function fetchAs(url: string, ua: string) {
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchAs(url: string, ua: string, retry404 = true) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
@@ -55,6 +59,11 @@ async function fetchAs(url: string, ua: string) {
     const finalUrl = res.url;
     const status = res.status;
     const ct = res.headers.get("content-type") ?? "";
+    if (status === 404 && retry404) {
+      clearTimeout(t);
+      await sleep(1000);
+      return fetchAs(url, ua, false); // one retry only
+    }
     const html = ct.includes("text/") || ct.includes("html") ? await res.text() : "";
     return { status, contentType: ct, finalUrl, html, bytes: html.length };
   } catch (e) {
