@@ -322,7 +322,171 @@ const TradeAdminSharePreview = () => {
   );
 };
 
+const FixesEditor = ({ result: r }: { result: Result }) => {
+  const baseFixes = buildFixes(r);
+  const [edits, setEdits] = useState<Record<number, string>>({});
+
+  if (baseFixes.length === 0) return null;
+
+  const buildSnippet = (f: Fix, value: string): string => {
+    if (f.tag === "og:image:width / og:image:height") {
+      const m = value.match(/(\d+)\s*[x×]\s*(\d+)/);
+      const w = m?.[1] ?? "1200";
+      const h = m?.[2] ?? "630";
+      return `<meta property="og:image:width" content="${w}" />\n<meta property="og:image:height" content="${h}" />`;
+    }
+    if (f.tag === "twitter:card") {
+      return `<meta name="twitter:card" content="${esc(value)}" />`;
+    }
+    if (f.tag.startsWith("og:") || f.tag.startsWith("twitter:")) {
+      const attr = f.tag.startsWith("twitter:") ? "name" : "property";
+      return `<meta ${attr}="${f.tag}" content="${esc(value)}" />`;
+    }
+    return f.snippet;
+  };
+
+  const fixes = baseFixes.map((f, i) => {
+    const value = edits[i] ?? f.expected;
+    return { ...f, expected: value, snippet: f.snippet ? buildSnippet(f, value) : "" };
+  });
+
+  // Live simulated merged values (for preview card)
+  const merged: Record<string, string> = { ...r.parsed.og };
+  for (const f of fixes) {
+    if (f.tag.startsWith("og:") && !f.tag.includes("/")) merged[f.tag] = f.expected;
+  }
+  const fullSnippet = fixes.filter(f => f.snippet).map(f => f.snippet).join("\n");
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex items-center gap-2">
+          <Wrench className="h-4 w-4" />
+          <h2 className="font-medium">What to change ({fixes.length})</h2>
+        </div>
+        {fullSnippet && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              navigator.clipboard.writeText(fullSnippet);
+              toast.success("All fixes copied");
+            }}
+          >
+            <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy all
+          </Button>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Edit any value inline — the snippet and merged-head preview below update live before you copy.
+      </p>
+
+      <div className="space-y-3 mb-5">
+        {fixes.map((f, idx) => (
+          <div
+            key={idx}
+            className={`border rounded p-3 ${
+              f.severity === "issue" ? "border-destructive/40 bg-destructive/5" : "border-amber-600/30 bg-amber-50/40 dark:bg-amber-950/10"
+            }`}
+          >
+            <div className="flex items-start gap-2 mb-2">
+              <Badge variant={f.severity === "issue" ? "destructive" : "outline"} className="text-[10px] uppercase tracking-wide shrink-0">
+                {f.severity}
+              </Badge>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{f.problem}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{f.why}</p>
+              </div>
+            </div>
+            <dl className="text-xs grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 mb-2">
+              <dt className="text-muted-foreground">tag</dt>
+              <dd className="font-mono">{f.tag}</dd>
+              {f.current !== undefined && (
+                <>
+                  <dt className="text-muted-foreground">current</dt>
+                  <dd className="font-mono break-all">
+                    {f.current
+                      ? truncate(f.current, 120)
+                      : <span className="italic text-muted-foreground">— empty / missing —</span>}
+                  </dd>
+                </>
+              )}
+              <dt className="text-muted-foreground pt-1">expected</dt>
+              <dd>
+                {f.snippet ? (
+                  <Input
+                    value={f.expected}
+                    onChange={(e) => setEdits((prev) => ({ ...prev, [idx]: e.target.value }))}
+                    className="h-7 text-xs font-mono"
+                  />
+                ) : (
+                  <span className="italic text-muted-foreground">manual</span>
+                )}
+              </dd>
+            </dl>
+            {f.snippet && (
+              <div className="relative">
+                <pre className="bg-muted/60 rounded p-2 pr-9 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap break-all">{f.snippet}</pre>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(f.snippet);
+                    toast.success("Snippet copied");
+                  }}
+                  className="absolute top-1.5 right-1.5 p-1.5 rounded hover:bg-background/80 text-muted-foreground hover:text-foreground"
+                  aria-label="Copy snippet"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Live merged-head preview */}
+      <div className="border-t pt-4">
+        <h3 className="text-sm font-medium mb-2">Live preview after applying edits</h3>
+        <div className="grid gap-4 md:grid-cols-[260px_1fr] mb-3">
+          <div className="aspect-[1.91/1] bg-muted overflow-hidden rounded border">
+            {merged["og:image"] ? (
+              <img
+                src={merged["og:image"]}
+                alt="merged og:image"
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0.3"; }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">no og:image</div>
+            )}
+          </div>
+          <div className="text-sm space-y-1">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              {merged["og:site_name"] || (() => { try { return new URL(merged["og:url"] || r.requestedUrl).hostname; } catch { return ""; } })()}
+            </p>
+            <p className="font-medium">{merged["og:title"] || <em className="text-muted-foreground">— no title —</em>}</p>
+            <p className="text-muted-foreground text-xs">{merged["og:description"] || ""}</p>
+            <p className="text-[10px] font-mono text-muted-foreground break-all mt-1">{merged["og:url"] || r.requestedUrl}</p>
+          </div>
+        </div>
+        {fullSnippet && (
+          <div className="relative">
+            <pre className="bg-muted/60 rounded p-2 pr-9 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap break-all">{fullSnippet}</pre>
+            <button
+              onClick={() => { navigator.clipboard.writeText(fullSnippet); toast.success("Merged head copied"); }}
+              className="absolute top-1.5 right-1.5 p-1.5 rounded hover:bg-background/80 text-muted-foreground hover:text-foreground"
+              aria-label="Copy merged head"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
+
 const CrawlerBlock = ({ label, info }: { label: string; info: Result["facebook"] }) => (
+
   <div className="border rounded p-3">
     <div className="flex items-center gap-2 mb-2">
       <span className="text-sm font-medium">{label}</span>
