@@ -136,6 +136,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const magazineBadgeRef = useRef<HTMLDivElement>(null);
   const magazineImpressionFiredRef = useRef(false);
 
+  const handleMobileMenuOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setCategoryPanelOpen(false);
+      setExpandedCategory(null);
+      setContactExpanded(false);
+    }
+  };
+
   // Fire one impression event per session when the persistent magazine
   // badge enters the viewport. Lets us measure the badge's reach against
   // its click-through and download conversion rate.
@@ -307,8 +316,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
-        <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
+           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — absolute left */}
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-16 w-16 text-primary absolute left-0 bottom-2" aria-label="Toggle menu">
@@ -524,12 +533,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
               {/* Category overlay panel — slides over the menu */}
               <div
-                className={`absolute inset-0 bg-background z-10 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${categoryPanelOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`absolute inset-0 bg-background z-10 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${categoryPanelOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}`}
               >
                 {/* Dark header bar */}
                 <div className="bg-foreground text-background flex items-center px-4 py-3.5">
                   <button
-                    onClick={() => setCategoryPanelOpen(false)}
+                    onClick={() => {
+                      setCategoryPanelOpen(false);
+                      setExpandedCategory(null);
+                    }}
                     className="flex items-center gap-1 text-background/80 hover:text-background transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5" />
