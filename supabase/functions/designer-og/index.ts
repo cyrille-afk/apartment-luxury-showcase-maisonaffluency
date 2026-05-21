@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     <link rel="icon" href="https://www.maisonaffluency.com/favicon.ico" sizes="any" />
 
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="Maison Affluency" />
     <meta property="og:title" content="${title}" />
