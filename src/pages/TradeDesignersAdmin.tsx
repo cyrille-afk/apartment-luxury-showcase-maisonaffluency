@@ -167,7 +167,21 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [expandedPickId, setExpandedPickId] = useState<string | null>(null);
+  const expandedPickStorageKey = `designer_editor_expanded_pick_v1::${designerId}`;
+  const [expandedPickId, setExpandedPickIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try { return sessionStorage.getItem(expandedPickStorageKey); } catch { return null; }
+  });
+  const setExpandedPickId = useCallback((value: string | null | ((prev: string | null) => string | null)) => {
+    setExpandedPickIdState((prev) => {
+      const next = typeof value === "function" ? (value as (p: string | null) => string | null)(prev) : value;
+      try {
+        if (next) sessionStorage.setItem(expandedPickStorageKey, next);
+        else sessionStorage.removeItem(expandedPickStorageKey);
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, [expandedPickStorageKey]);
 
   const loadPicks = useCallback(async () => {
     const { data, error } = await applyCuratorPickOrder(
@@ -190,6 +204,16 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   useEffect(() => {
     void loadPicks();
   }, [loadPicks]);
+
+  const didRestorePickScrollRef = useRef(false);
+  useEffect(() => {
+    if (!loaded || didRestorePickScrollRef.current || !expandedPickId) return;
+    const el = document.querySelector(`[data-pick-row-id="${expandedPickId}"]`);
+    if (el) {
+      didRestorePickScrollRef.current = true;
+      requestAnimationFrame(() => el.scrollIntoView({ block: "center", behavior: "auto" }));
+    }
+  }, [loaded, expandedPickId, picks.length]);
 
   const handleAdd = async () => {
     const order = picks.length;
@@ -268,7 +292,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
       </label>
       <div className="mt-2 space-y-2">
         {picks.map((pick) => (
-          <div key={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
+          <div key={pick.id} data-pick-row-id={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
             <div className="flex items-center gap-2">
               {pick.image_url && (
                 <img src={pick.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0" />
