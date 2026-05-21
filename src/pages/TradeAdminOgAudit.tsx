@@ -214,6 +214,13 @@ const TradeAdminOgAudit = () => {
                         <Field label="og:title" value={r.og["og:title"] ?? ""} />
                         <Field label="og:image" value={r.og["og:image"] ?? ""} mono />
                         <Field label="og:url" value={r.og["og:url"] ?? ""} mono />
+                        <Field label="final URL" value={r.finalUrl ?? r.url} mono />
+                        {r.redirects && r.redirects.length > 0 && (
+                          <Field label="redirects" value={r.redirects.map((x) => `${x.status} → ${x.location}`).join(" · ")} mono />
+                        )}
+                        {r.headers && Object.keys(r.headers).length > 0 && (
+                          <Field label="CDN headers" value={Object.entries(r.headers).map(([k, v]) => `${k}: ${v}`).join(" · ")} mono />
+                        )}
                         {r.imageCheck && (
                           <Field label="image"
                             value={`HTTP ${r.imageCheck.status} · ${r.imageCheck.contentType}${r.imageCheck.sizeKb ? ` · ${r.imageCheck.sizeKb} KB` : ""}`}
