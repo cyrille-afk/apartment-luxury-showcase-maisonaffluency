@@ -132,6 +132,90 @@ const TradeAdminSharePreview = () => {
               </div>
             </Card>
 
+            {(() => {
+              const fixes = buildFixes(r);
+              if (fixes.length === 0) return null;
+              const fullSnippet = fixes.filter(f => f.snippet).map(f => f.snippet).join("\n");
+              return (
+                <Card className="p-5">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2">
+                      <Wrench className="h-4 w-4" />
+                      <h2 className="font-medium">What to change ({fixes.length})</h2>
+                    </div>
+                    {fullSnippet && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(fullSnippet);
+                          toast.success("All fixes copied");
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy all
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Each row maps a detected problem to the exact meta tag and the value it should have. Drop these into the page's <code>&lt;head&gt;</code>.
+                  </p>
+                  <div className="space-y-3">
+                    {fixes.map((f, idx) => (
+                      <div
+                        key={idx}
+                        className={`border rounded p-3 ${
+                          f.severity === "issue" ? "border-destructive/40 bg-destructive/5" : "border-amber-600/30 bg-amber-50/40 dark:bg-amber-950/10"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2 mb-2">
+                          <Badge variant={f.severity === "issue" ? "destructive" : "outline"} className="text-[10px] uppercase tracking-wide shrink-0">
+                            {f.severity}
+                          </Badge>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">{f.problem}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{f.why}</p>
+                          </div>
+                        </div>
+                        <dl className="text-xs grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 mb-2">
+                          <dt className="text-muted-foreground">tag</dt>
+                          <dd className="font-mono">{f.tag}</dd>
+                          {f.current !== undefined && (
+                            <>
+                              <dt className="text-muted-foreground">current</dt>
+                              <dd className="font-mono break-all">
+                                {f.current
+                                  ? truncate(f.current, 120)
+                                  : <span className="italic text-muted-foreground">— empty / missing —</span>}
+                              </dd>
+                            </>
+                          )}
+                          <dt className="text-muted-foreground">expected</dt>
+                          <dd className="font-mono break-all">{truncate(f.expected, 160)}</dd>
+                        </dl>
+                        {f.snippet && (
+                          <div className="relative">
+                            <pre className="bg-muted/60 rounded p-2 pr-9 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap break-all">{f.snippet}</pre>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(f.snippet);
+                                toast.success("Snippet copied");
+                              }}
+                              className="absolute top-1.5 right-1.5 p-1.5 rounded hover:bg-background/80 text-muted-foreground hover:text-foreground"
+                              aria-label="Copy snippet"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              );
+            })()}
+
+
+
             {r.parsed.og["og:image"] && (
               <Card className="p-5">
                 <div className="flex items-center gap-2 mb-3">
