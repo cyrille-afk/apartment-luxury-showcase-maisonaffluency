@@ -52,6 +52,20 @@ function displayName(name: string): string {
   return name;
 }
 
+// Per-slug overrides for pages where the algorithmic title collides with a
+// sibling slug or otherwise fails to describe the page uniquely. Keep each
+// override within Google's 40-60 char title band.
+const DESIGNER_TITLE_OVERRIDES: Record<string, string> = {
+  "christophe-delcourt": "Christophe Delcourt — Delcourt Collection Furniture",
+  "christophe-delcourt-cc-tapis": "Christophe Delcourt Rugs for CC-Tapis | Maison Affluency",
+  "gaelle-lauriot-prevost": "Gaëlle Lauriot-Prévost & Dominique Perrault for Ozone",
+  "gaelle-lauriot-prevost-dominique-perrault-cc-tapis": "Lauriot-Prévost & Perrault for CC-Tapis — Rugs",
+  "ozone": "Ozone Paris — Bronze Furniture & Lighting Editions",
+  "ozone-light": "Ozone Light — Sculptural Bronze Lighting Collection",
+  "yabu-pushelberg": "Yabu Pushelberg × Collection Particulière Furniture",
+  "yabu-pushelberg-man-of-parts": "Yabu Pushelberg for Man of Parts — Furniture Design",
+};
+
 // Target Google's display bands: title 40-60 chars, description 140-160 chars.
 function designerSeoTitle(
   name: string,
@@ -59,6 +73,7 @@ function designerSeoTitle(
   isChildDesigner?: boolean,
   slug?: string | null,
 ): string {
+  if (slug && DESIGNER_TITLE_OVERRIDES[slug]) return DESIGNER_TITLE_OVERRIDES[slug];
   const cleanName = displayName(name);
   const cleanFounder = founder?.trim();
 
