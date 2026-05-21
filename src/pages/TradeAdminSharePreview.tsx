@@ -29,6 +29,107 @@ type Result = {
   imageCheck: null | { status: number; contentType: string; sizeKb?: number; ok: boolean; error?: string };
 };
 
+type Fix = {
+  severity: "issue" | "warning";
+  problem: string;
+  tag: string;
+  current?: string;
+  expected: string;
+  snippet: string;
+  why: string;
+};
+
+const truncate = (s: string, n = 80) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+const esc = (s: string) => s.replace(/"/g, "&quot;");
+
+function buildFixes(r: Result): Fix[] {
+  const og = r.parsed.og;
+  const tw = r.parsed.tw;
+  const fixes: Fix[] = [];
+
+  const titleGuess = og["og:title"] || r.parsed.title || "Your page title";
+  const descGuess = og["og:description"] || r.parsed.description || "Short, compelling description (max ~200 chars).";
+  const urlGuess = og["og:url"] || r.parsed.canonical || r.requestedUrl;
+  const imageGuess = og["og:image"] || "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:good,f_jpg/your-image.jpg";
+
+  const addOg = (severity: Fix["severity"], problem: string, prop: string, expected: string, why: string, current?: string) => {
+    fixes.push({
+      severity, problem, tag: prop, current, expected, why,
+      snippet: `<meta property="${prop}" content="${esc(expected)}" />`,
+    });
+  };
+
+  for (const issue of r.issues) {
+    if (issue.includes("og:title")) {
+      addOg("issue", issue, "og:title", titleGuess,
+        "Crawlers fall back to <title>, which is often too generic to render a rich card.", og["og:title"]);
+    } else if (issue.includes("og:image fetch failed")) {
+      addOg("issue", issue, "og:image", imageGuess,
+        "The current og:image returns an error or wrong content-type. Use a publicly reachable HTTPS JPG/PNG.",
+        og["og:image"]);
+    } else if (issue.includes("og:image too large")) {
+      addOg("issue", issue, "og:image",
+        og["og:image"]?.replace(/q_[^/,]+/, "q_auto:good") || imageGuess,
+        "WhatsApp drops images >300 KB; Facebook caps at ~8 MB. Lower quality or use f_auto.",
+        og["og:image"]);
+    } else if (issue.includes("missing og:image")) {
+      addOg("issue", issue, "og:image", imageGuess,
+        "No og:image means NO preview card — links render as plain text on every platform.");
+    } else if (issue.includes("missing og:url")) {
+      addOg("issue", issue, "og:url", urlGuess,
+        "Without og:url, crawlers may dedupe to the wrong canonical and reuse stale previews.");
+    } else if (issue.includes("missing og:site_name")) {
+      addOg("issue", issue, "og:site_name", "Maison Affluency",
+        "Sets the brand label shown above the title in WhatsApp / iMessage previews.");
+    } else {
+      fixes.push({ severity: "issue", problem: issue, tag: "—", expected: "", snippet: "", why: "Manual review required." });
+    }
+  }
+
+  for (const w of r.warnings) {
+    if (w.includes("og:url")) {
+      addOg("warning", w, "og:url", urlGuess, "Helps crawlers identify the canonical page for caching.");
+    } else if (w.includes("og:type")) {
+      const guess = /\/journal\//.test(urlGuess) ? "article"
+        : /\/(designers|collectibles|products)\//.test(urlGuess) ? "product"
+        : "website";
+      addOg("warning", w, "og:type", guess, "Controls how the card is classified (article/product/website).");
+    } else if (w.includes("og:description")) {
+      addOg("warning", w, "og:description", descGuess, "Without a description, the preview shows only the title.");
+    } else if (w.includes("og:image dimensions")) {
+      fixes.push({
+        severity: "warning", problem: w, tag: "og:image:width / og:image:height",
+        expected: "1200 × 630",
+        snippet: `<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />`,
+        why: "Lets crawlers pre-allocate the card; reduces flicker and avoids fallback rendering.",
+      });
+    } else if (w.includes("og:image is http")) {
+      addOg("warning", w, "og:image", (og["og:image"] || "").replace(/^http:/, "https:") || imageGuess,
+        "Facebook & WhatsApp reject mixed-content (http) images on https pages.",
+        og["og:image"]);
+    } else if (/og:image is \d+ KB/.test(w)) {
+      const kb = w.match(/(\d+) KB/)?.[1];
+      addOg("warning", w, "og:image",
+        og["og:image"]?.replace(/q_[^/,]+/, "q_auto:good") || imageGuess,
+        `Currently ${kb} KB — WhatsApp recommends ≤300 KB. Lower Cloudinary quality (q_auto:good) or use f_auto.`,
+        og["og:image"]);
+    } else {
+      fixes.push({ severity: "warning", problem: w, tag: "—", expected: "", snippet: "", why: "Minor — won't block previews." });
+    }
+  }
+
+  if (og["og:image"] && !tw["twitter:card"]) {
+    fixes.push({
+      severity: "warning", problem: "missing twitter:card", tag: "twitter:card",
+      expected: "summary_large_image",
+      snippet: `<meta name="twitter:card" content="summary_large_image" />`,
+      why: "Without this, X/Twitter renders a small thumbnail instead of the large preview.",
+    });
+  }
+
+  return fixes;
+}
+
 const TradeAdminSharePreview = () => {
   const [url, setUrl] = useState("");
 
