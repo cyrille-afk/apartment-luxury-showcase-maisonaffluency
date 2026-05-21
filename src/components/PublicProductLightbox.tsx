@@ -301,16 +301,36 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
-          <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 pt-3 pb-2 bg-background/90 backdrop-blur-sm border-b border-border/60 shrink-0">
-            <div className="w-8" />
+          <div
+            className="md:hidden sticky top-0 z-20 flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/60 shrink-0"
+            style={{
+              paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+              paddingBottom: "0.5rem",
+              paddingLeft: "max(1rem, env(safe-area-inset-left))",
+              paddingRight: "max(1rem, env(safe-area-inset-right))",
+            }}
+          >
+            <div className="w-10" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            <button onClick={onClose} className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all" aria-label="Close">
-              <X size={18} />
+            <button
+              onClick={onClose}
+              className="p-2.5 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 active:bg-foreground/30 transition-all"
+              aria-label="Close"
+            >
+              <X size={20} />
             </button>
           </div>
 
           {/* Desktop close */}
-          <button onClick={onClose} className="hidden md:flex absolute top-3 right-3 z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="hidden md:flex absolute z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
+            style={{
+              top: "max(0.75rem, env(safe-area-inset-top))",
+              right: "max(0.75rem, env(safe-area-inset-right))",
+            }}
+            aria-label="Close"
+          >
             <X size={18} />
           </button>
 
