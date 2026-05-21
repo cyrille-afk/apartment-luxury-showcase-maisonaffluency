@@ -167,7 +167,21 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [expandedPickId, setExpandedPickId] = useState<string | null>(null);
+  const expandedPickStorageKey = `designer_editor_expanded_pick_v1::${designerId}`;
+  const [expandedPickId, setExpandedPickIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try { return sessionStorage.getItem(expandedPickStorageKey); } catch { return null; }
+  });
+  const setExpandedPickId = useCallback((value: string | null | ((prev: string | null) => string | null)) => {
+    setExpandedPickIdState((prev) => {
+      const next = typeof value === "function" ? (value as (p: string | null) => string | null)(prev) : value;
+      try {
+        if (next) sessionStorage.setItem(expandedPickStorageKey, next);
+        else sessionStorage.removeItem(expandedPickStorageKey);
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, [expandedPickStorageKey]);
 
   const loadPicks = useCallback(async () => {
     const { data, error } = await applyCuratorPickOrder(
