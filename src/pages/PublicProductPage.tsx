@@ -797,9 +797,7 @@ const PublicProductPage: React.FC = () => {
                 overlay={
                   product.description ? (
                     <div className="flex flex-col items-end gap-2">
-                      <div className="hidden md:block">
-                        <LightboxDescriptionDropdown description={product.description} />
-                      </div>
+                      <LightboxDescriptionDropdown description={product.description} />
                     </div>
                   ) : null
                 }
