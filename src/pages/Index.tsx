@@ -128,6 +128,21 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     const sectionHash = parseSectionHash(window.location.hash);
     const hasExplicitSectionHash = !!sectionHash && sectionHash !== "home";
 
+    // PWA cold-launch (standalone display-mode or ?source=pwa) must always
+    // land on the hero. iOS keeps sessionStorage alive between standalone
+    // launches, which otherwise restores a stale scroll position and renders
+    // the page below the fold on open.
+    const isStandalone =
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      // @ts-ignore — iOS Safari only
+      window.navigator.standalone === true ||
+      new URLSearchParams(window.location.search).get("source") === "pwa";
+    if (isStandalone && !hasExplicitSectionHash) {
+      sessionStorage.removeItem("__scroll_y");
+      needsScrollRestore.current = false;
+      window.scrollTo(0, 0);
+    }
+
     // If URL explicitly asks for a section, it must win over stale scroll restore.
     if (hasExplicitSectionHash) {
       sessionStorage.removeItem("__scroll_y");
