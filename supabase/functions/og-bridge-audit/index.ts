@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
     notFound: rows.filter((r) => r.status === 404).length,
     shellSubstituted: rows.filter((r) =>
       r.issues.includes("spa_shell_served_wrong_og_url") ||
-      r.issues.includes("spa_shell_served_generic_title")
+      r.issues.includes("cdn_rendered_app_shell")
     ).length,
     elapsedMs,
   };
