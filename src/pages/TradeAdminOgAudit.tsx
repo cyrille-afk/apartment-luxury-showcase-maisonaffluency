@@ -14,7 +14,10 @@ import { ArrowLeft, AlertTriangle, CheckCircle2, ExternalLink, Search } from "lu
 type Row = {
   path: string;
   url: string;
+  finalUrl?: string;
   status: number;
+  headers?: Record<string, string>;
+  redirects?: Array<{ url: string; status: number; location?: string; headers?: Record<string, string> }>;
   issues: string[];
   warnings: string[];
   og: Record<string, string>;
@@ -43,7 +46,7 @@ const ISSUE_LABELS: Record<string, string> = {
   missing_og_site_name: "Missing og:site_name",
   redirect_without_bot_guard: "Redirect without bot guard (crawlers will miss tags)",
   spa_shell_served_wrong_og_url: "CDN served SPA shell (wrong og:url)",
-  spa_shell_served_generic_title: "CDN served SPA shell (generic site title)",
+  cdn_rendered_app_shell: "CDN rendered app shell / snapshot, not bridge file",
   fetch_error: "Fetch error",
 };
 
@@ -54,11 +57,13 @@ const TradeAdminOgAudit = () => {
   const [checkImages, setCheckImages] = useState(false);
   const [filter, setFilter] = useState<"all" | "issues" | "warnings">("issues");
   const [search, setSearch] = useState("");
+  const [only, setOnly] = useState("designers/emmanuel-levet-stenne-og-v2.html");
 
   const audit = useMutation({
     mutationFn: async (): Promise<Report> => {
       const params = new URLSearchParams({ base });
       if (!checkImages) params.set("images", "0");
+      if (only.trim()) params.set("only", only.trim());
       const { data, error } = await supabase.functions.invoke(
         `og-bridge-audit?${params.toString()}`,
         { method: "GET" }
@@ -104,7 +109,7 @@ const TradeAdminOgAudit = () => {
         </div>
 
         <Card className="p-6 mb-6">
-          <div className="grid gap-4 md:grid-cols-[1fr_auto_auto] items-end">
+            <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto_auto] items-end">
             <div>
               <Label htmlFor="base">Base URL</Label>
               <Input
@@ -112,6 +117,15 @@ const TradeAdminOgAudit = () => {
                 value={base}
                 onChange={(e) => setBase(e.target.value)}
                 placeholder="https://apartment-luxury-showcase-maisonaffluency.lovable.app"
+              />
+            </div>
+            <div>
+              <Label htmlFor="only">Single bridge / filter</Label>
+              <Input
+                id="only"
+                value={only}
+                onChange={(e) => setOnly(e.target.value)}
+                placeholder="designers/emmanuel-levet-stenne-og-v2.html"
               />
             </div>
             <label className="flex items-center gap-2 pb-2">
@@ -200,6 +214,13 @@ const TradeAdminOgAudit = () => {
                         <Field label="og:title" value={r.og["og:title"] ?? ""} />
                         <Field label="og:image" value={r.og["og:image"] ?? ""} mono />
                         <Field label="og:url" value={r.og["og:url"] ?? ""} mono />
+                        <Field label="final URL" value={r.finalUrl ?? r.url} mono />
+                        {r.redirects && r.redirects.length > 0 && (
+                          <Field label="redirects" value={r.redirects.map((x) => `${x.status} → ${x.location}`).join(" · ")} mono />
+                        )}
+                        {r.headers && Object.keys(r.headers).length > 0 && (
+                          <Field label="CDN headers" value={Object.entries(r.headers).map(([k, v]) => `${k}: ${v}`).join(" · ")} mono />
+                        )}
                         {r.imageCheck && (
                           <Field label="image"
                             value={`HTTP ${r.imageCheck.status} · ${r.imageCheck.contentType}${r.imageCheck.sizeKb ? ` · ${r.imageCheck.sizeKb} KB` : ""}`}
