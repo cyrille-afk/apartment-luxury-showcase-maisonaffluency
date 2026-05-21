@@ -136,13 +136,20 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const magazineBadgeRef = useRef<HTMLDivElement>(null);
   const magazineImpressionFiredRef = useRef(false);
 
+  const resetMobilePanels = () => {
+    setCategoryPanelOpen(false);
+    setExpandedCategory(null);
+    setContactExpanded(false);
+  };
+
+  const closeMobileMenu = () => {
+    resetMobilePanels();
+    setIsOpen(false);
+  };
+
   const handleMobileMenuOpenChange = (open: boolean) => {
+    resetMobilePanels();
     setIsOpen(open);
-    if (!open) {
-      setCategoryPanelOpen(false);
-      setExpandedCategory(null);
-      setContactExpanded(false);
-    }
   };
 
   // Fire one impression event per session when the persistent magazine
@@ -284,7 +291,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         sessionStorage.removeItem('galleryFilterDesigner');
         sessionStorage.removeItem('galleryOpenIntentAt');
       }
-      setIsOpen(false);
+      closeMobileMenu();
       navigate(href);
       return;
     }
@@ -293,18 +300,18 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
     // If not on the homepage, navigate there first with the hash
     if (window.location.pathname !== "/") {
-      setIsOpen(false);
+      closeMobileMenu();
       navigate(`/${href}`);
       return;
     }
 
     if (isMobileSheetNav) {
       setPendingSection(id);
-      setIsOpen(false);
+      closeMobileMenu();
       return;
     }
 
-    setIsOpen(false);
+    closeMobileMenu();
     scrollToSection(id);
   };
 
