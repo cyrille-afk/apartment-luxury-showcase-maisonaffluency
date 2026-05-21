@@ -51,7 +51,7 @@ const DEFAULT_BASE = "https://www.maisonaffluency.com";
 
 const TradeAdminOgAudit = () => {
   const [base, setBase] = useState(DEFAULT_BASE);
-  const [checkImages, setCheckImages] = useState(true);
+  const [checkImages, setCheckImages] = useState(false);
   const [filter, setFilter] = useState<"all" | "issues" | "warnings">("issues");
   const [search, setSearch] = useState("");
 
