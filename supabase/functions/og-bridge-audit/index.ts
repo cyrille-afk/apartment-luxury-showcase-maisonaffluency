@@ -112,16 +112,15 @@ async function auditBridge(base: string, path: string, checkImages: boolean) {
   const warnings: string[] = [];
   try {
     const res = await fetch(url, {
-      headers: { "user-agent": UA, "cache-control": "no-cache" },
+      headers: { "user-agent": UA, "cache-control": "no-cache", "pragma": "no-cache" },
+      redirect: "follow",
       signal: ctrl.signal,
     });
+    const finalUrl = res.url;
     if (res.status !== 200) {
       return {
-        path,
-        url,
-        status: res.status,
-        issues: [`http_${res.status}`],
-        warnings: [],
+        path, url, finalUrl, status: res.status,
+        issues: [`http_${res.status}`], warnings: [],
         og: {} as Record<string, string>,
         imageCheck: null as null | Awaited<ReturnType<typeof checkImage>>,
       };
@@ -133,6 +132,24 @@ async function auditBridge(base: string, path: string, checkImages: boolean) {
     for (const tag of ["og:title", "og:image", "og:url", "og:site_name"]) {
       if (!og[tag]?.trim()) issues.push(`missing_${tag.replace(":", "_")}`);
     }
+
+    // ── SPA-shell substitution detector ─────────────────────────────────
+    // The CDN can return HTTP 200 with the generic index.html instead of the
+    // bridge file. The audit was previously blind to this. Detect by:
+    //  1) og:url path doesn't match the requested bridge path, OR
+    //  2) og:title is the generic site title.
+    const expectedPathTail = path.split("/").pop()!.toLowerCase();
+    const ogUrlPath = (() => {
+      try { return new URL(og["og:url"] ?? "").pathname.toLowerCase(); }
+      catch { return ""; }
+    })();
+    const ogUrlMatches = ogUrlPath.endsWith(expectedPathTail);
+    const isShellTitle = (og["og:title"] ?? "").includes(SPA_SHELL_TITLE_FRAGMENT)
+      && !path.includes("collectibles") && !path.includes("trade-program");
+
+    if (og["og:url"] && !ogUrlMatches) issues.push("spa_shell_served_wrong_og_url");
+    if (isShellTitle) issues.push("spa_shell_served_generic_title");
+
     if (hasRedirect && !hasBotCheck) issues.push("redirect_without_bot_guard");
     if (!og["og:description"]) warnings.push("missing_og_description");
     if (!og["og:image:width"] || !og["og:image:height"]) warnings.push("missing_og_image_dims");
@@ -145,10 +162,10 @@ async function auditBridge(base: string, path: string, checkImages: boolean) {
       if (imageCheck.sizeKb && imageCheck.sizeKb > 300) warnings.push(`og_image_oversize_${imageCheck.sizeKb}kb`);
     }
 
-    return { path, url, status: 200, issues, warnings, og, imageCheck };
+    return { path, url, finalUrl, status: 200, issues, warnings, og, imageCheck };
   } catch (e) {
     return {
-      path, url, status: 0,
+      path, url, finalUrl: url, status: 0,
       issues: [`fetch_error`], warnings: [],
       og: {} as Record<string, string>,
       imageCheck: null,
