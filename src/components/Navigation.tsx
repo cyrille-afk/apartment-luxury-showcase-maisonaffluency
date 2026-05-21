@@ -352,7 +352,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
               {/* Header branding visible in menu */}
               <div className="flex flex-col items-center pt-2 pb-4 border-b border-border/30 mb-6">
-                <button onClick={() => { setIsOpen(false); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
+                <button onClick={() => { closeMobileMenu(); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
                   <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
@@ -424,7 +424,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
-                    onClick={() => { setIsOpen(false); navigate("/favorites"); }}
+                    onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
                     <span className="flex items-center gap-2">
@@ -440,7 +440,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </button>
                   {pinItems.length > 0 && (
                     <button
-                      onClick={() => { setIsOpen(false); setIsComparing(true); }}
+                      onClick={() => { closeMobileMenu(); setIsComparing(true); }}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                     >
                       <span className="flex items-center gap-2">
@@ -493,7 +493,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         <button
                           key={option.label}
                           onTouchEnd={undefined}
-                          onClick={() => { setIsOpen(false); option.action(); }}
+                          onClick={() => { closeMobileMenu(); option.action(); }}
                           className="flex items-center gap-3 text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                         >
                           <option.icon className="h-4 w-4 text-primary" />
@@ -508,14 +508,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Sticky bottom toolbar — My Account / Wishlist / Contact Us */}
               <div className="mt-auto sticky bottom-0 border-t border-border bg-muted/50 backdrop-blur-sm grid grid-cols-3 py-3">
                 <button
-                  onClick={() => { setIsOpen(false); user ? navigate("/trade") : setAuthGateOpen(true); }}
+                  onClick={() => { closeMobileMenu(); user ? navigate("/trade") : setAuthGateOpen(true); }}
                   className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
                   <User className="h-5 w-5" />
                   <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">My Account</span>
                 </button>
                 <button
-                  onClick={() => { setIsOpen(false); navigate("/favorites"); }}
+                  onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
                   className="relative flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
                   <Heart className="h-5 w-5" />
@@ -530,7 +530,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   href="https://wa.me/6591393850"
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => { setIsOpen(false); trackCTA.whatsapp("Mobile Menu"); }}
+                  onClick={() => { closeMobileMenu(); trackCTA.whatsapp("Mobile Menu"); }}
                   className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
                   <MessageCircle className="h-5 w-5" />
