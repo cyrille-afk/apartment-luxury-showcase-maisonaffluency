@@ -565,8 +565,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     <button
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                        setCategoryPanelOpen(false);
-                        setIsOpen(false);
+                        closeMobileMenu();
                       }}
                       className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1.5 rounded-full bg-background border border-border hover:border-foreground text-muted-foreground hover:text-foreground"
                     >
@@ -587,8 +586,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         <div className="pb-3 space-y-0">
                           <button
                             onClick={() => {
-                              setCategoryPanelOpen(false);
-                              setIsOpen(false);
+                              closeMobileMenu();
                               navigate(categoryUrl(cat, null));
                             }}
                             className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
@@ -599,8 +597,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                             <button
                               key={sub}
                               onClick={() => {
-                                setCategoryPanelOpen(false);
-                                setIsOpen(false);
+                                closeMobileMenu();
                                 navigate(categoryUrl(cat, sub));
                               }}
                               className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
