@@ -30,6 +30,7 @@ type Report = {
     withIssues: number;
     withWarnings: number;
     notFound: number;
+    shellSubstituted: number;
     elapsedMs: number;
   };
   rows: Row[];
@@ -41,10 +42,12 @@ const ISSUE_LABELS: Record<string, string> = {
   missing_og_url: "Missing og:url",
   missing_og_site_name: "Missing og:site_name",
   redirect_without_bot_guard: "Redirect without bot guard (crawlers will miss tags)",
+  spa_shell_served_wrong_og_url: "CDN served SPA shell (wrong og:url)",
+  spa_shell_served_generic_title: "CDN served SPA shell (generic site title)",
   fetch_error: "Fetch error",
 };
 
-const DEFAULT_BASE = "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
+const DEFAULT_BASE = "https://www.maisonaffluency.com";
 
 const TradeAdminOgAudit = () => {
   const [base, setBase] = useState(DEFAULT_BASE);
