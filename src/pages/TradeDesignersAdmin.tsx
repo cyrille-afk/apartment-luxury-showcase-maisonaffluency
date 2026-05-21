@@ -282,7 +282,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
       </label>
       <div className="mt-2 space-y-2">
         {picks.map((pick) => (
-          <div key={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
+          <div key={pick.id} data-pick-row-id={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
             <div className="flex items-center gap-2">
               {pick.image_url && (
                 <img src={pick.image_url} alt="" className="w-10 h-10 object-cover rounded shrink-0" />
