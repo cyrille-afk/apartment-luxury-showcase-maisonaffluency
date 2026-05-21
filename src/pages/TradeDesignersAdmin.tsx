@@ -205,6 +205,16 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     void loadPicks();
   }, [loadPicks]);
 
+  const didRestorePickScrollRef = useRef(false);
+  useEffect(() => {
+    if (!loaded || didRestorePickScrollRef.current || !expandedPickId) return;
+    const el = document.querySelector(`[data-pick-row-id="${expandedPickId}"]`);
+    if (el) {
+      didRestorePickScrollRef.current = true;
+      requestAnimationFrame(() => el.scrollIntoView({ block: "center", behavior: "auto" }));
+    }
+  }, [loaded, expandedPickId, picks.length]);
+
   const handleAdd = async () => {
     const order = picks.length;
     const { data, error } = await supabase
