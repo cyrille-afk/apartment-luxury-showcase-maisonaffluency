@@ -136,6 +136,22 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const magazineBadgeRef = useRef<HTMLDivElement>(null);
   const magazineImpressionFiredRef = useRef(false);
 
+  const resetMobilePanels = () => {
+    setCategoryPanelOpen(false);
+    setExpandedCategory(null);
+    setContactExpanded(false);
+  };
+
+  const closeMobileMenu = () => {
+    resetMobilePanels();
+    setIsOpen(false);
+  };
+
+  const handleMobileMenuOpenChange = (open: boolean) => {
+    resetMobilePanels();
+    setIsOpen(open);
+  };
+
   // Fire one impression event per session when the persistent magazine
   // badge enters the viewport. Lets us measure the badge's reach against
   // its click-through and download conversion rate.
@@ -275,7 +291,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         sessionStorage.removeItem('galleryFilterDesigner');
         sessionStorage.removeItem('galleryOpenIntentAt');
       }
-      setIsOpen(false);
+      closeMobileMenu();
       navigate(href);
       return;
     }
@@ -284,18 +300,18 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
     // If not on the homepage, navigate there first with the hash
     if (window.location.pathname !== "/") {
-      setIsOpen(false);
+      closeMobileMenu();
       navigate(`/${href}`);
       return;
     }
 
     if (isMobileSheetNav) {
       setPendingSection(id);
-      setIsOpen(false);
+      closeMobileMenu();
       return;
     }
 
-    setIsOpen(false);
+    closeMobileMenu();
     scrollToSection(id);
   };
 
@@ -307,8 +323,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
-        <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
+           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — absolute left */}
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-16 w-16 text-primary absolute left-0 bottom-2" aria-label="Toggle menu">
@@ -336,7 +352,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
               {/* Header branding visible in menu */}
               <div className="flex flex-col items-center pt-2 pb-4 border-b border-border/30 mb-6">
-                <button onClick={() => { setIsOpen(false); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
+                <button onClick={() => { closeMobileMenu(); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
                   <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
@@ -408,7 +424,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
-                    onClick={() => { setIsOpen(false); navigate("/favorites"); }}
+                    onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
                     <span className="flex items-center gap-2">
@@ -424,7 +440,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </button>
                   {pinItems.length > 0 && (
                     <button
-                      onClick={() => { setIsOpen(false); setIsComparing(true); }}
+                      onClick={() => { closeMobileMenu(); setIsComparing(true); }}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                     >
                       <span className="flex items-center gap-2">
@@ -477,7 +493,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         <button
                           key={option.label}
                           onTouchEnd={undefined}
-                          onClick={() => { setIsOpen(false); option.action(); }}
+                          onClick={() => { closeMobileMenu(); option.action(); }}
                           className="flex items-center gap-3 text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                         >
                           <option.icon className="h-4 w-4 text-primary" />
@@ -492,14 +508,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Sticky bottom toolbar — My Account / Wishlist / Contact Us */}
               <div className="mt-auto sticky bottom-0 border-t border-border bg-muted/50 backdrop-blur-sm grid grid-cols-3 py-3">
                 <button
-                  onClick={() => { setIsOpen(false); user ? navigate("/trade") : setAuthGateOpen(true); }}
+                  onClick={() => { closeMobileMenu(); user ? navigate("/trade") : setAuthGateOpen(true); }}
                   className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
                   <User className="h-5 w-5" />
                   <span className="font-body text-[9px] uppercase tracking-[0.15em] font-semibold">My Account</span>
                 </button>
                 <button
-                  onClick={() => { setIsOpen(false); navigate("/favorites"); }}
+                  onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
                   className="relative flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
                   <Heart className="h-5 w-5" />
@@ -514,7 +530,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   href="https://wa.me/6591393850"
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => { setIsOpen(false); trackCTA.whatsapp("Mobile Menu"); }}
+                  onClick={() => { closeMobileMenu(); trackCTA.whatsapp("Mobile Menu"); }}
                   className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"
                 >
                   <MessageCircle className="h-5 w-5" />
@@ -524,12 +540,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
               {/* Category overlay panel — slides over the menu */}
               <div
-                className={`absolute inset-0 bg-background z-10 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${categoryPanelOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`absolute inset-0 bg-background z-10 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${categoryPanelOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}`}
               >
                 {/* Dark header bar */}
                 <div className="bg-foreground text-background flex items-center px-4 py-3.5">
                   <button
-                    onClick={() => setCategoryPanelOpen(false)}
+                    onClick={() => {
+                      setCategoryPanelOpen(false);
+                      setExpandedCategory(null);
+                    }}
                     className="flex items-center gap-1 text-background/80 hover:text-background transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5" />
@@ -546,8 +565,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     <button
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                        setCategoryPanelOpen(false);
-                        setIsOpen(false);
+                        closeMobileMenu();
                       }}
                       className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1.5 rounded-full bg-background border border-border hover:border-foreground text-muted-foreground hover:text-foreground"
                     >
@@ -568,8 +586,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                         <div className="pb-3 space-y-0">
                           <button
                             onClick={() => {
-                              setCategoryPanelOpen(false);
-                              setIsOpen(false);
+                              closeMobileMenu();
                               navigate(categoryUrl(cat, null));
                             }}
                             className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-foreground hover:text-primary transition-colors py-2 pl-4 font-semibold"
@@ -580,8 +597,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                             <button
                               key={sub}
                               onClick={() => {
-                                setCategoryPanelOpen(false);
-                                setIsOpen(false);
+                                closeMobileMenu();
                                 navigate(categoryUrl(cat, sub));
                               }}
                               className="block w-full text-left text-[13px] tracking-[0.1em] font-body text-muted-foreground hover:text-foreground transition-colors py-2 pl-4"
