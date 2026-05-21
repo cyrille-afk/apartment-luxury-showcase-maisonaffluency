@@ -166,9 +166,21 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const base = (url.searchParams.get("base") ?? DEFAULT_BASE).replace(/\/$/, "");
   const checkImages = url.searchParams.get("images") !== "0";
+  // Optional path filter so a single bridge can be re-audited cheaply.
+  const only = url.searchParams.get("only");
 
   const started = Date.now();
-  const rows = await pool(ALL_BRIDGES, CONCURRENCY, (p) => auditBridge(base, p, checkImages));
+  let bridges: string[];
+  try {
+    bridges = await loadManifest(base);
+  } catch (e) {
+    return new Response(JSON.stringify({
+      error: `Could not load bridge manifest from ${base}/og-bridges-manifest.json — ${(e as Error).message}`,
+    }), { status: 500, headers: { ...cors, "content-type": "application/json" } });
+  }
+  if (only) bridges = bridges.filter((p) => p.includes(only));
+
+  const rows = await pool(bridges, CONCURRENCY, (p) => auditBridge(base, p, checkImages));
   const elapsedMs = Date.now() - started;
 
   const summary = {
@@ -178,6 +190,10 @@ Deno.serve(async (req) => {
     withIssues: rows.filter((r) => r.issues.length > 0).length,
     withWarnings: rows.filter((r) => r.warnings.length > 0).length,
     notFound: rows.filter((r) => r.status === 404).length,
+    shellSubstituted: rows.filter((r) =>
+      r.issues.includes("spa_shell_served_wrong_og_url") ||
+      r.issues.includes("spa_shell_served_generic_title")
+    ).length,
     elapsedMs,
   };
 
