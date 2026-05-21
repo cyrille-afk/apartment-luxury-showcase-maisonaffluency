@@ -2,10 +2,16 @@
 // validates required og:* tags, bot-detection guard, and HEAD-checks og:image.
 // Replaces the old per-route SEO audit (useless on an SPA without prerender).
 
-const DEFAULT_BASE = "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
-const UA = "MaisonAffluency-OG-Audit/1.0";
+// Default to the PRODUCTION host users actually share. Auditing the lovable.app
+// preview is misleading: bridges can exist there but be missing / replaced by
+// the SPA shell at the production CDN edge.
+const DEFAULT_BASE = "https://www.maisonaffluency.com";
+// Use a real bot UA so any UA-based routing matches what Facebook/WhatsApp see.
+const UA = "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)";
 const TIMEOUT_MS = 10000;
-const CONCURRENCY = 16;
+const CONCURRENCY = 12;
+// Generic SPA-shell title; if a bridge returns this, the CDN served fallback.
+const SPA_SHELL_TITLE_FRAGMENT = "Luxury Collectible Design";
 
 // Hardcoded bridge inventory — mirrors public/ directory structure.
 // Update when bridges are added or removed.
