@@ -203,7 +203,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <Maximize2 size={14} className="text-foreground" />
             </div>
           </div>
-        </div>
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
@@ -214,6 +213,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <div className="pointer-events-auto">{firstImageBadge}</div>
             </div>
           )}
+        </div>
 
           {/* Preload neighboring main images so navigation feels instant */}
           <div aria-hidden="true" className="hidden">
