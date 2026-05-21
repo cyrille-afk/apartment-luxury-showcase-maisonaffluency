@@ -35,3 +35,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.track-email-click]
     verify_jwt = false
+  [functions.og-preview-check]
+    verify_jwt = false
