@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, AlertTriangle, CheckCircle2, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle2, ExternalLink, Image as ImageIcon, Wrench, Copy } from "lucide-react";
+import { toast } from "sonner";
 
 type Result = {
   requestedUrl: string;
