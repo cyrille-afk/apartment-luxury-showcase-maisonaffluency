@@ -7,6 +7,43 @@ import BuildUpdateBanner from "./components/BuildUpdateBanner";
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v1";
 
+function isStandaloneHomeLaunch(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  const isStandalone =
+    params.get("source") === "pwa" ||
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true;
+
+  return isStandalone && window.location.pathname === "/" && !window.location.hash;
+}
+
+function pinStandaloneHomeLaunchToHero() {
+  if (!isStandaloneHomeLaunch()) return;
+
+  try {
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+    sessionStorage.removeItem("__scroll_y");
+  } catch {
+    /* noop */
+  }
+
+  const startedAt = performance.now();
+  let userInteracted = false;
+  const stop = () => { userInteracted = true; };
+  const keepAtTop = () => {
+    if (userInteracted) return;
+    window.scrollTo(0, 0);
+    if (performance.now() - startedAt < 2500) requestAnimationFrame(keepAtTop);
+  };
+
+  window.addEventListener("touchstart", stop, { once: true, passive: true });
+  window.addEventListener("pointerdown", stop, { once: true, passive: true });
+  window.addEventListener("wheel", stop, { once: true, passive: true });
+  window.addEventListener("keydown", stop, { once: true });
+  keepAtTop();
+}
+
 function isPreviewOrDev(): boolean {
   if (import.meta.env.DEV) return true;
   if (typeof window === "undefined") return true;
@@ -59,6 +96,7 @@ async function clearStaleFrontendCachesOnce() {
 }
 
 void clearStaleFrontendCachesOnce();
+pinStandaloneHomeLaunchToHero();
 
 // Auto cache-busting banner disabled per request.
 // startBuildVersionWatcher();

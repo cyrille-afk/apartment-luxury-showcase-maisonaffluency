@@ -12,6 +12,15 @@ const CookieConsent = () => {
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("mobile_preview") === "1") return;
+    const isStandaloneHomeLaunch =
+      window.location.pathname === "/" &&
+      !window.location.hash &&
+      (
+        new URLSearchParams(window.location.search).get("source") === "pwa" ||
+        window.matchMedia?.("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true
+      );
+    if (isStandaloneHomeLaunch) return;
 
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
