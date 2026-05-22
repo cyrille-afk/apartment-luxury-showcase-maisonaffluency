@@ -493,14 +493,17 @@ export function AIConcierge() {
       });
     };
 
-    const handleProposal = (proposal: TearsheetProposal) => {
-      // Compute which picks are NEW relative to the previous proposal so the
-      // card can highlight rationales for replacements/additions only.
+    const handleProposal = (proposal: ConciergeProposal) => {
+      if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
+        setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
+        return;
+      }
+      // Tearsheet proposal — compute which picks are NEW relative to the
+      // previous proposal so the card can highlight rationales for replacements only.
       const prevIds = new Set(
         lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
       );
       const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
-      // Insert as its own timeline item (after current assistant text, if any)
       setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
     };
 
