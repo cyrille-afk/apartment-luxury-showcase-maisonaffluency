@@ -400,6 +400,10 @@ async function loadUserBoards(
     .limit(40);
   if (!boards || boards.length === 0) {
     return "(The user has no existing tearsheets yet — only \`propose_tearsheet\` is available.)";
+  }
+  return boards
+    .map((b: any) => `- "${b.title}" [board_id: ${b.id}]${b.client_name ? ` · ${b.client_name}` : ""}${b.status ? ` · ${b.status}` : ""}`)
+    .join("\n");
 }
 
 /** Load the active project (name/client/currency/studio) + its studio's clients for grounding. */
