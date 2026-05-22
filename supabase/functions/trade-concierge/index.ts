@@ -400,7 +400,60 @@ async function loadUserBoards(
     .limit(40);
   if (!boards || boards.length === 0) {
     return "(The user has no existing tearsheets yet — only \`propose_tearsheet\` is available.)";
+}
+
+/** Load the active project (name/client/currency/studio) + its studio's clients for grounding. */
+async function loadProjectContext(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+  projectId: string | null,
+): Promise<string> {
+  if (!userId || !projectId) {
+    return "(No active project — the user is browsing without a project context. Do not bind quotes to any project.)";
   }
+  const { data: proj } = await supabase
+    .from("projects")
+    .select("id, name, client_name, location, status, studio_id, studios:studio_id(name), clients:client_id(name)")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (!proj) {
+    return "(Active project id was provided but not found / not accessible. Treat as no project.)";
+  }
+  const studio = (proj as any).studios?.name || null;
+  const clientFromTable = (proj as any).clients?.name || null;
+  const clientLabel = clientFromTable || (proj as any).client_name || null;
+  const lines: string[] = [];
+  lines.push(`- ACTIVE PROJECT: "${proj.name}" [project_id: ${proj.id}]${proj.location ? ` · ${proj.location}` : ""}${proj.status ? ` · ${proj.status}` : ""}`);
+  if (clientLabel) lines.push(`- Client: ${clientLabel}`);
+  if (studio) lines.push(`- Studio: ${studio}`);
+  lines.push(`- When drafting a quote with \`draft_quote\`, you MUST pass project_id: "${proj.id}".`);
+  return lines.join("\n");
+}
+
+/** Load the user's open (draft) quotes so `add_to_quote` has valid IDs to reference. */
+async function loadOpenQuotes(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "(No user session — only `draft_quote` is available.)";
+  const { data: quotes } = await supabase
+    .from("trade_quotes")
+    .select("id, currency, notes, updated_at, project_id, projects:project_id(name)")
+    .eq("user_id", userId)
+    .eq("status", "draft")
+    .order("updated_at", { ascending: false })
+    .limit(20);
+  if (!quotes || quotes.length === 0) {
+    return "(The user has no open draft quotes — only `draft_quote` is available.)";
+  }
+  return quotes
+    .map((q: any) => {
+      const project = q.projects?.name ? ` for "${q.projects.name}"` : "";
+      const label = (q.notes || "Untitled draft").toString().slice(0, 60);
+      return `- "${label}"${project} (${q.currency}) [quote_id: ${q.id}]`;
+    })
+    .join("\n");
+}
   return boards
     .map((b: any) => {
       const meta = [b.client_name, b.status].filter(Boolean).join(" · ");
