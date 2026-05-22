@@ -400,6 +400,10 @@ async function loadUserBoards(
     .limit(40);
   if (!boards || boards.length === 0) {
     return "(The user has no existing tearsheets yet — only \`propose_tearsheet\` is available.)";
+  }
+  return boards
+    .map((b: any) => `- "${b.title}" [board_id: ${b.id}]${b.client_name ? ` · ${b.client_name}` : ""}${b.status ? ` · ${b.status}` : ""}`)
+    .join("\n");
 }
 
 /** Load the active project (name/client/currency/studio) + its studio's clients for grounding. */
@@ -451,13 +455,6 @@ async function loadOpenQuotes(
       const project = q.projects?.name ? ` for "${q.projects.name}"` : "";
       const label = (q.notes || "Untitled draft").toString().slice(0, 60);
       return `- "${label}"${project} (${q.currency}) [quote_id: ${q.id}]`;
-    })
-    .join("\n");
-}
-  return boards
-    .map((b: any) => {
-      const meta = [b.client_name, b.status].filter(Boolean).join(" · ");
-      return `- "${b.title || "Untitled"}"${meta ? ` (${meta})` : ""} [board_id: ${b.id}]`;
     })
     .join("\n");
 }
