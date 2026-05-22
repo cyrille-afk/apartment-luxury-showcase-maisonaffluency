@@ -185,6 +185,8 @@ function buildSystemPrompt(
   userBoards: string,
   userSignals: string,
   sentimentDirective: string,
+  projectContext: string,
+  openQuotes: string,
 ) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
@@ -221,6 +223,12 @@ Rules for both tools:
 - ALWAYS populate \`pick_rationales\` with a short one-sentence \`reason\` for every NEW pick (any id not in the previous KEPT list). When the pick is a REPLACEMENT for a removed item, you MUST also include a longer \`detail\` field — 2–4 editorial sentences expanding on the reason: how the piece converses with the rest of the selection (material, scale, silhouette, palette, designer language) and what it adds vs the item it replaces. Reasons must be specific — never generic ("a great fit").
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
 - If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
+
+## ACTIVE PROJECT
+${projectContext}
+
+## USER'S OPEN QUOTES
+${openQuotes}
 
 ## USER'S EXISTING TEARSHEETS
 ${userBoards}
@@ -392,7 +400,60 @@ async function loadUserBoards(
     .limit(40);
   if (!boards || boards.length === 0) {
     return "(The user has no existing tearsheets yet — only \`propose_tearsheet\` is available.)";
+}
+
+/** Load the active project (name/client/currency/studio) + its studio's clients for grounding. */
+async function loadProjectContext(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+  projectId: string | null,
+): Promise<string> {
+  if (!userId || !projectId) {
+    return "(No active project — the user is browsing without a project context. Do not bind quotes to any project.)";
   }
+  const { data: proj } = await supabase
+    .from("projects")
+    .select("id, name, client_name, location, status, studio_id, studios:studio_id(name), clients:client_id(name)")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (!proj) {
+    return "(Active project id was provided but not found / not accessible. Treat as no project.)";
+  }
+  const studio = (proj as any).studios?.name || null;
+  const clientFromTable = (proj as any).clients?.name || null;
+  const clientLabel = clientFromTable || (proj as any).client_name || null;
+  const lines: string[] = [];
+  lines.push(`- ACTIVE PROJECT: "${proj.name}" [project_id: ${proj.id}]${proj.location ? ` · ${proj.location}` : ""}${proj.status ? ` · ${proj.status}` : ""}`);
+  if (clientLabel) lines.push(`- Client: ${clientLabel}`);
+  if (studio) lines.push(`- Studio: ${studio}`);
+  lines.push(`- When drafting a quote with \`draft_quote\`, you MUST pass project_id: "${proj.id}".`);
+  return lines.join("\n");
+}
+
+/** Load the user's open (draft) quotes so `add_to_quote` has valid IDs to reference. */
+async function loadOpenQuotes(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "(No user session — only `draft_quote` is available.)";
+  const { data: quotes } = await supabase
+    .from("trade_quotes")
+    .select("id, currency, notes, updated_at, project_id, projects:project_id(name)")
+    .eq("user_id", userId)
+    .eq("status", "draft")
+    .order("updated_at", { ascending: false })
+    .limit(20);
+  if (!quotes || quotes.length === 0) {
+    return "(The user has no open draft quotes — only `draft_quote` is available.)";
+  }
+  return quotes
+    .map((q: any) => {
+      const project = q.projects?.name ? ` for "${q.projects.name}"` : "";
+      const label = (q.notes || "Untitled draft").toString().slice(0, 60);
+      return `- "${label}"${project} (${q.currency}) [quote_id: ${q.id}]`;
+    })
+    .join("\n");
+}
   return boards
     .map((b: any) => {
       const meta = [b.client_name, b.status].filter(Boolean).join(" · ");
@@ -666,6 +727,58 @@ async function hydratePickPreview(
     .filter(Boolean);
 }
 
+/** Build per-line preview rows for a draft_quote / add_to_quote proposal. */
+async function hydrateQuotePreview(
+  supabase: ReturnType<typeof createClient>,
+  lines: Array<{ pick_id: string; qty: number; variant?: string | null; lead_weeks?: number | null; note?: string | null }>,
+  fallbackCurrency: string | null,
+  discountPct: number,
+) {
+  if (!lines.length) return [];
+  const pickIds = lines.map((l) => l.pick_id);
+  const previews = await hydratePickPreview(supabase, pickIds);
+  const previewById = new Map<string, any>(previews.filter(Boolean).map((p: any) => [p.id, p]));
+
+  // Pricing: try curator pick first, then trade_products row (matched by id directly OR by brand+title from the curator pick).
+  const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("id, title, designer_id, trade_price_cents, currency")
+      .in("id", pickIds),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency")
+      .in("id", pickIds),
+  ]);
+  const pickPriceById = new Map<string, { cents: number | null; currency: string | null }>();
+  (pickRows || []).forEach((p: any) => {
+    pickPriceById.set(p.id, { cents: p.trade_price_cents ?? null, currency: p.currency ?? null });
+  });
+  const tradePriceById = new Map<string, { cents: number | null; currency: string | null }>();
+  (tradeRows || []).forEach((t: any) => {
+    const cents = t.trade_price_cents ?? t.rrp_price_cents ?? null;
+    tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
+  });
+
+  return lines.map((l) => {
+    const p = previewById.get(l.pick_id) || null;
+    const priced = tradePriceById.get(l.pick_id) || pickPriceById.get(l.pick_id) || { cents: null, currency: null };
+    return {
+      pick_id: l.pick_id,
+      title: p?.title || "Unknown piece",
+      designer_name: p?.designer_name || null,
+      image_url: p?.image_url || null,
+      variant: typeof l.variant === "string" && l.variant.trim() ? l.variant.trim() : null,
+      qty: Math.max(1, Number(l.qty) || 1),
+      unit_price_cents: priced.cents,
+      currency: priced.currency || fallbackCurrency || null,
+      trade_discount_pct: discountPct,
+      lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+      note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
+    };
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -707,15 +820,27 @@ serve(async (req) => {
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
-    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment] = await Promise.all([
+    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, projectContext, openQuotes, discountRow] = await Promise.all([
       loadCatalogContext(supabase),
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      loadProjectContext(supabase, userId, activeProjectId),
+      loadOpenQuotes(supabase, userId),
+      supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
     ]);
+    // Resolve trade discount % for this user (defaults to 8%).
+    let tradeDiscountPct = 0.08;
+    try {
+      const tier = (discountRow.data as any)?.trade_tier;
+      if (tier) {
+        const { data: cfg } = await supabase.from("trade_tier_config").select("discount_pct").eq("tier", tier).maybeSingle();
+        if (cfg?.discount_pct != null) tradeDiscountPct = Number(cfg.discount_pct);
+      }
+    } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective,
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes,
     );
 
     const upstream = await fetch(
@@ -784,6 +909,72 @@ serve(async (req) => {
         }
         const flushProposal = async () => {
           for (const tc of toolCallBuffers.values()) {
+            // ====== QUOTE TOOLS ======
+            if (tc.name === "draft_quote" || tc.name === "add_to_quote") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse quote tool args:", tc.argsText, e);
+                continue;
+              }
+              const rawLines: any[] = Array.isArray(parsed.lines) ? parsed.lines : [];
+              const lines = rawLines
+                .filter((l) => l && typeof l.pick_id === "string" && Number.isFinite(Number(l.qty)))
+                .slice(0, 24)
+                .map((l) => ({
+                  pick_id: l.pick_id,
+                  qty: Math.max(1, Math.min(99, Number(l.qty) || 1)),
+                  variant: typeof l.variant === "string" ? l.variant : null,
+                  lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+                  note: typeof l.note === "string" ? l.note : null,
+                }));
+              if (lines.length === 0) continue;
+
+              if (tc.name === "draft_quote") {
+                const projectId: string | null =
+                  typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : activeProjectId;
+                const currency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
+                const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
+                const proposal = {
+                  tool: "draft_quote",
+                  tool_call_id: tc.id || crypto.randomUUID(),
+                  args: {
+                    project_id: projectId,
+                    currency,
+                    note: typeof parsed.note === "string" ? parsed.note : null,
+                    lines,
+                  },
+                  preview,
+                };
+                controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              } else {
+                const quoteId: string | null = typeof parsed.quote_id === "string" ? parsed.quote_id : null;
+                if (!quoteId) continue;
+                // Pull the quote's currency + a human label for the card
+                const { data: q } = await supabase
+                  .from("trade_quotes")
+                  .select("id, currency, notes, project_id, projects:project_id(name)")
+                  .eq("id", quoteId)
+                  .eq("user_id", userId)
+                  .maybeSingle();
+                const quoteLabel = (q as any)?.projects?.name || (q as any)?.notes || "your draft quote";
+                const currency = (q as any)?.currency || null;
+                const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
+                const proposal = {
+                  tool: "add_to_quote",
+                  tool_call_id: tc.id || crypto.randomUUID(),
+                  args: {
+                    quote_id: quoteId,
+                    quote_label: quoteLabel,
+                    note: typeof parsed.note === "string" ? parsed.note : null,
+                    lines,
+                  },
+                  preview,
+                };
+                controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              }
+              continue;
+            }
+
             if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
             let parsed: any = null;
             try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {

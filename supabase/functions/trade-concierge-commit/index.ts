@@ -137,6 +137,192 @@ serve(async (req) => {
     const tool: string = body.tool;
     const args = body.args || {};
 
+    // ============================================================
+    // QUOTE TOOLS: draft_quote / add_to_quote
+    // ============================================================
+    if (tool === "draft_quote" || tool === "add_to_quote") {
+      const rawLines: any[] = Array.isArray(args.lines) ? args.lines : [];
+      const cleanLines = rawLines
+        .filter((l) => l && typeof l.pick_id === "string" && Number.isFinite(Number(l.qty)))
+        .slice(0, 24)
+        .map((l) => ({
+          pick_id: l.pick_id as string,
+          qty: Math.max(1, Math.min(99, Number(l.qty) || 1)),
+          variant: typeof l.variant === "string" && l.variant.trim() ? l.variant.trim() : null,
+          lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+          note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
+        }));
+      if (cleanLines.length === 0) return json(400, { error: "At least one line item is required" });
+
+      const note: string | null =
+        typeof args.note === "string" ? args.note.slice(0, 500) : null;
+      const quoteNotes: string | null = note;
+
+      // Resolve every pick_id to a real trade_products.id (creating rows as needed).
+      const resolutions = await Promise.all(
+        cleanLines.map(async (l) => {
+          const { tradeProductId } = await resolvePickToTradeProduct(supabase, l.pick_id);
+          return { line: l, tradeProductId };
+        })
+      );
+      const resolved = resolutions.filter((r) => r.tradeProductId) as Array<{
+        line: typeof cleanLines[number];
+        tradeProductId: string;
+      }>;
+      const skipped = resolutions
+        .filter((r) => !r.tradeProductId)
+        .map((r) => ({ pickId: r.line.pick_id, reason: "could not resolve to trade product" }));
+      if (resolved.length === 0) {
+        return json(422, { error: "None of the line items could be resolved to a product", skipped });
+      }
+
+      // Pull pricing for the resolved trade_products in one shot
+      const productIds = resolved.map((r) => r.tradeProductId);
+      const { data: priced } = await supabase
+        .from("trade_products")
+        .select("id, trade_price_cents, rrp_price_cents")
+        .in("id", productIds);
+      const priceById = new Map<string, number | null>();
+      (priced || []).forEach((p: any) => {
+        priceById.set(p.id, p.trade_price_cents ?? p.rrp_price_cents ?? null);
+      });
+
+      // ----- draft_quote: create a new draft -----
+      if (tool === "draft_quote") {
+        const requestedProjectId: string | null =
+          typeof args.project_id === "string" && args.project_id ? args.project_id : null;
+        let projectId: string | null = null;
+        let studioId: string | null = null;
+        let quoteCurrency: string =
+          typeof args.currency === "string" && args.currency.trim()
+            ? args.currency.trim().toUpperCase().slice(0, 8)
+            : "EUR";
+
+        if (requestedProjectId) {
+          const { data: proj } = await supabase
+            .from("projects")
+            .select("id, user_id, studio_id")
+            .eq("id", requestedProjectId)
+            .maybeSingle();
+          if (proj && (proj as any).user_id === userId) {
+            projectId = (proj as any).id;
+            studioId = (proj as any).studio_id || null;
+          }
+        }
+
+        const { data: quote, error: quoteErr } = await supabase
+          .from("trade_quotes")
+          .insert({
+            user_id: userId,
+            status: "draft",
+            notes: quoteNotes,
+            currency: quoteCurrency,
+            project_id: projectId,
+            studio_id: studioId,
+          })
+          .select("id")
+          .single();
+        if (quoteErr || !quote) {
+          console.error("Quote insert failed:", quoteErr);
+          return json(500, { error: "Could not create draft quote" });
+        }
+
+        const itemsPayload = resolved.map((r) => ({
+          quote_id: quote.id,
+          product_id: r.tradeProductId,
+          quantity: r.line.qty,
+          unit_price_cents: priceById.get(r.tradeProductId) ?? null,
+          variant_label: r.line.variant,
+          lead_time_weeks_override: r.line.lead_weeks,
+          notes: r.line.note,
+        }));
+        const { error: itemsErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+        if (itemsErr) {
+          console.error("Quote items insert failed:", itemsErr);
+          await supabase.from("trade_quotes").delete().eq("id", quote.id);
+          return json(500, { error: "Could not add items to draft quote" });
+        }
+
+        await supabase.from("trade_concierge_actions").insert({
+          user_id: userId,
+          tool: "draft_quote",
+          args: {
+            project_id: projectId,
+            currency: quoteCurrency,
+            note: quoteNotes,
+            lines: cleanLines,
+            added: resolved.length,
+            skipped,
+          },
+          status: "approved",
+          resulting_resource_id: quote.id,
+          resulting_resource_type: "trade_quote",
+        });
+
+        return json(200, {
+          ok: true,
+          quote_id: quote.id,
+          url: `/trade/quotes/${quote.id}`,
+          added: resolved.length,
+          skipped,
+        });
+      }
+
+      // ----- add_to_quote: append to existing draft -----
+      const quoteId: string | null = typeof args.quote_id === "string" ? args.quote_id : null;
+      if (!quoteId) return json(400, { error: "quote_id is required" });
+
+      const { data: existingQuote } = await supabase
+        .from("trade_quotes")
+        .select("id, status, user_id")
+        .eq("id", quoteId)
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!existingQuote) return json(404, { error: "Quote not found or you don't have access" });
+      if ((existingQuote as any).status !== "draft") {
+        return json(409, { error: "Only draft quotes can be appended to" });
+      }
+
+      const itemsPayload = resolved.map((r) => ({
+        quote_id: quoteId,
+        product_id: r.tradeProductId,
+        quantity: r.line.qty,
+        unit_price_cents: priceById.get(r.tradeProductId) ?? null,
+        variant_label: r.line.variant,
+        lead_time_weeks_override: r.line.lead_weeks,
+        notes: r.line.note,
+      }));
+      const { error: appendErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+      if (appendErr) {
+        console.error("Quote items append failed:", appendErr);
+        return json(500, { error: "Could not append items to quote" });
+      }
+      await supabase
+        .from("trade_quotes")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", quoteId);
+
+      await supabase.from("trade_concierge_actions").insert({
+        user_id: userId,
+        tool: "add_to_quote",
+        args: { quote_id: quoteId, note: quoteNotes, lines: cleanLines, added: resolved.length, skipped },
+        status: "approved",
+        resulting_resource_id: quoteId,
+        resulting_resource_type: "trade_quote",
+      });
+
+      return json(200, {
+        ok: true,
+        quote_id: quoteId,
+        url: `/trade/quotes/${quoteId}`,
+        added: resolved.length,
+        skipped,
+      });
+    }
+
+    // ============================================================
+    // TEARSHEET TOOLS (existing): require pick_ids
+    // ============================================================
     const note: string | null = typeof args.note === "string" ? args.note.slice(0, 500) : null;
     const pickIds: string[] = Array.isArray(args.pick_ids)
       ? args.pick_ids.filter((x: unknown) => typeof x === "string")
