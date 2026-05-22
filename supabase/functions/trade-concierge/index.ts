@@ -909,6 +909,72 @@ serve(async (req) => {
         }
         const flushProposal = async () => {
           for (const tc of toolCallBuffers.values()) {
+            // ====== QUOTE TOOLS ======
+            if (tc.name === "draft_quote" || tc.name === "add_to_quote") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse quote tool args:", tc.argsText, e);
+                continue;
+              }
+              const rawLines: any[] = Array.isArray(parsed.lines) ? parsed.lines : [];
+              const lines = rawLines
+                .filter((l) => l && typeof l.pick_id === "string" && Number.isFinite(Number(l.qty)))
+                .slice(0, 24)
+                .map((l) => ({
+                  pick_id: l.pick_id,
+                  qty: Math.max(1, Math.min(99, Number(l.qty) || 1)),
+                  variant: typeof l.variant === "string" ? l.variant : null,
+                  lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+                  note: typeof l.note === "string" ? l.note : null,
+                }));
+              if (lines.length === 0) continue;
+
+              if (tc.name === "draft_quote") {
+                const projectId: string | null =
+                  typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : activeProjectId;
+                const currency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
+                const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
+                const proposal = {
+                  tool: "draft_quote",
+                  tool_call_id: tc.id || crypto.randomUUID(),
+                  args: {
+                    project_id: projectId,
+                    currency,
+                    note: typeof parsed.note === "string" ? parsed.note : null,
+                    lines,
+                  },
+                  preview,
+                };
+                controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              } else {
+                const quoteId: string | null = typeof parsed.quote_id === "string" ? parsed.quote_id : null;
+                if (!quoteId) continue;
+                // Pull the quote's currency + a human label for the card
+                const { data: q } = await supabase
+                  .from("trade_quotes")
+                  .select("id, currency, notes, project_id, projects:project_id(name)")
+                  .eq("id", quoteId)
+                  .eq("user_id", userId)
+                  .maybeSingle();
+                const quoteLabel = (q as any)?.projects?.name || (q as any)?.notes || "your draft quote";
+                const currency = (q as any)?.currency || null;
+                const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
+                const proposal = {
+                  tool: "add_to_quote",
+                  tool_call_id: tc.id || crypto.randomUUID(),
+                  args: {
+                    quote_id: quoteId,
+                    quote_label: quoteLabel,
+                    note: typeof parsed.note === "string" ? parsed.note : null,
+                    lines,
+                  },
+                  preview,
+                };
+                controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              }
+              continue;
+            }
+
             if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
             let parsed: any = null;
             try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
