@@ -820,15 +820,27 @@ serve(async (req) => {
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
-    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment] = await Promise.all([
+    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, projectContext, openQuotes, discountRow] = await Promise.all([
       loadCatalogContext(supabase),
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      loadProjectContext(supabase, userId, activeProjectId),
+      loadOpenQuotes(supabase, userId),
+      supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
     ]);
+    // Resolve trade discount % for this user (defaults to 8%).
+    let tradeDiscountPct = 0.08;
+    try {
+      const tier = (discountRow.data as any)?.trade_tier;
+      if (tier) {
+        const { data: cfg } = await supabase.from("trade_tier_config").select("discount_pct").eq("tier", tier).maybeSingle();
+        if (cfg?.discount_pct != null) tradeDiscountPct = Number(cfg.discount_pct);
+      }
+    } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective,
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes,
     );
 
     const upstream = await fetch(
