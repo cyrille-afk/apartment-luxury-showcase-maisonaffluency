@@ -458,13 +458,6 @@ async function loadOpenQuotes(
     })
     .join("\n");
 }
-  return boards
-    .map((b: any) => {
-      const meta = [b.client_name, b.status].filter(Boolean).join(" · ");
-      return `- "${b.title || "Untitled"}"${meta ? ` (${meta})` : ""} [board_id: ${b.id}]`;
-    })
-    .join("\n");
-}
 
 /** Load predictive personalization signals for the signed-in user. */
 async function loadUserSignals(
