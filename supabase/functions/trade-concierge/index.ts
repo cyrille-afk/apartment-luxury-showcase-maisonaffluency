@@ -685,7 +685,8 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, project_id: bodyProjectId } = await req.json();
+    const activeProjectId: string | null = typeof bodyProjectId === "string" ? bodyProjectId : null;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
