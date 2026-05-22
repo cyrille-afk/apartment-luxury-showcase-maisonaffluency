@@ -727,6 +727,58 @@ async function hydratePickPreview(
     .filter(Boolean);
 }
 
+/** Build per-line preview rows for a draft_quote / add_to_quote proposal. */
+async function hydrateQuotePreview(
+  supabase: ReturnType<typeof createClient>,
+  lines: Array<{ pick_id: string; qty: number; variant?: string | null; lead_weeks?: number | null; note?: string | null }>,
+  fallbackCurrency: string | null,
+  discountPct: number,
+) {
+  if (!lines.length) return [];
+  const pickIds = lines.map((l) => l.pick_id);
+  const previews = await hydratePickPreview(supabase, pickIds);
+  const previewById = new Map<string, any>(previews.filter(Boolean).map((p: any) => [p.id, p]));
+
+  // Pricing: try curator pick first, then trade_products row (matched by id directly OR by brand+title from the curator pick).
+  const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("id, title, designer_id, trade_price_cents, currency")
+      .in("id", pickIds),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency")
+      .in("id", pickIds),
+  ]);
+  const pickPriceById = new Map<string, { cents: number | null; currency: string | null }>();
+  (pickRows || []).forEach((p: any) => {
+    pickPriceById.set(p.id, { cents: p.trade_price_cents ?? null, currency: p.currency ?? null });
+  });
+  const tradePriceById = new Map<string, { cents: number | null; currency: string | null }>();
+  (tradeRows || []).forEach((t: any) => {
+    const cents = t.trade_price_cents ?? t.rrp_price_cents ?? null;
+    tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
+  });
+
+  return lines.map((l) => {
+    const p = previewById.get(l.pick_id) || null;
+    const priced = tradePriceById.get(l.pick_id) || pickPriceById.get(l.pick_id) || { cents: null, currency: null };
+    return {
+      pick_id: l.pick_id,
+      title: p?.title || "Unknown piece",
+      designer_name: p?.designer_name || null,
+      image_url: p?.image_url || null,
+      variant: typeof l.variant === "string" && l.variant.trim() ? l.variant.trim() : null,
+      qty: Math.max(1, Number(l.qty) || 1),
+      unit_price_cents: priced.cents,
+      currency: priced.currency || fallbackCurrency || null,
+      trade_discount_pct: discountPct,
+      lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+      note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
+    };
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
