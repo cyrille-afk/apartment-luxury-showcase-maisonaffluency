@@ -29,7 +29,41 @@ export type AddToTearsheetProposal = {
   preview: PickPreview[];
 };
 
+export type QuoteLine = {
+  pick_id: string;
+  qty: number;
+  variant?: string | null;
+  lead_weeks?: number | null;
+  note?: string | null;
+};
+
+export type DraftQuoteProposal = {
+  tool: "draft_quote";
+  tool_call_id: string;
+  args: {
+    project_id: string | null;
+    currency: string | null;
+    note: string | null;
+    lines: QuoteLine[];
+  };
+  preview: QuoteLinePreview[];
+};
+
+export type AddToQuoteProposal = {
+  tool: "add_to_quote";
+  tool_call_id: string;
+  args: {
+    quote_id: string;
+    quote_label: string;
+    note: string | null;
+    lines: QuoteLine[];
+  };
+  preview: QuoteLinePreview[];
+};
+
 export type TearsheetProposal = CreateTearsheetProposal | AddToTearsheetProposal;
+export type QuoteProposal = DraftQuoteProposal | AddToQuoteProposal;
+export type ConciergeProposal = TearsheetProposal | QuoteProposal;
 
 export type EscalationEvent = {
   sentiment: string;
@@ -50,10 +84,25 @@ export type PickPreview = {
   rationale_detail?: string | null;
 };
 
+export type QuoteLinePreview = {
+  pick_id: string;
+  title: string;
+  designer_name: string | null;
+  image_url: string | null;
+  variant: string | null;
+  qty: number;
+  unit_price_cents: number | null;
+  currency: string | null;
+  trade_discount_pct: number;
+  lead_weeks: number | null;
+  note: string | null;
+};
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
 
 export async function streamConcierge({
   messages,
+  projectId,
   onDelta,
   onProposal,
   onEscalation,
@@ -62,8 +111,10 @@ export async function streamConcierge({
   signal,
 }: {
   messages: ChatMessage[];
+  /** Active trade project id (from session storage / URL) — gives the agent project + studio context. */
+  projectId?: string | null;
   onDelta: (text: string) => void;
-  onProposal?: (proposal: TearsheetProposal) => void;
+  onProposal?: (proposal: ConciergeProposal) => void;
   onEscalation?: (event: EscalationEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -80,7 +131,7 @@ export async function streamConcierge({
       Authorization: `Bearer ${bearer}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, project_id: projectId ?? null }),
     signal,
   });
 
@@ -109,7 +160,7 @@ export async function streamConcierge({
     try {
       const parsed = JSON.parse(jsonStr);
       if (currentEvent === "proposal") {
-        if (onProposal) onProposal(parsed as TearsheetProposal);
+        if (onProposal) onProposal(parsed as ConciergeProposal);
         return;
       }
       if (currentEvent === "escalation") {
@@ -169,7 +220,7 @@ export async function streamConcierge({
 const COMMIT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge-commit`;
 
 export type CommitResult =
-  | { ok: true; board_id: string; url: string; added: number; duplicates?: number }
+  | { ok: true; board_id?: string; quote_id?: string; url: string; added: number; duplicates?: number }
   | { ok: false; error: string };
 
 export async function commitProposal(
@@ -190,6 +241,7 @@ export async function commitProposal(
     return {
       ok: true,
       board_id: data.board_id,
+      quote_id: data.quote_id,
       url: data.url,
       added: data.added,
       duplicates: data.duplicates,

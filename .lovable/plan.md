@@ -1,89 +1,64 @@
-# User Dashboard + Favorite Folders + Paid FF&E Tool
+# Concierge Multi-Step Orchestration — Implementation Plan
 
-## 1. New `/trade/me` user dashboard
+Goal: evolve the Trade AI Concierge from a single-tool recommender into a brief-aware orchestrator that can draft quotes, FF&E rows, custom requests, sample requests and presentations — all behind a unified human-approval gate. Mirrors the roadmap in `concierge-multi-step-orchestration.pdf`.
 
-Single landing for trade users with three primary widgets:
+## Build order (each step is independently shippable)
 
-- **Favorites preview** — last ~8 favorites with quick "add to folder" affordance, link to full Favorites page.
-- **Favorite folders** — grid of user's folders + "New folder" tile. Click → folder detail page.
-- **Studios grid** — reuse existing Studios component (the same one used elsewhere) embedded here.
-- **Floor Plan → FF&E tile** — locked card showing progress: "X / 6 favorites" then "Unlock $100 (credited to next quote)" once threshold met.
+### Step 1 — Project + studio grounding
+- Pass active `project_id`, project name, studio name, and the studio's `clients` list into the `trade-concierge` system prompt.
+- Frontend (`AIConcierge` / wherever `streamConcierge` is called) reads active project from existing `useProjectFilter` / route context and forwards it in the request body.
+- Edge function injects this into the system message so existing `propose_tearsheet` calls become project-aware (no new tools yet).
 
-Add a "My Dashboard" sidebar entry between Dashboard and Showroom in `TradeSidebar` + `TradeMobileMenu`.
+### Step 2 — Richer grounding payload
+- Extend the catalog block sent to the model with: `trade_price_cents`, `currency`, `lead_time_weeks`, `stock_status`, applicable trade-tier discount %, and variant axes (size_variants summary).
+- Reuse `useTradeDisplayCurrency` + `useTradeDiscount` server-side equivalents inside the edge function (read from `profiles` / `studios`).
+- No UX change; unblocks pricing-aware tools.
 
-## 2. Favorite folders (new concept, separate from project boards)
+### Step 3 — `draft_quote` + `add_to_quote` + Quote review card
+- New tools registered in `trade-concierge/index.ts`:
+  - `draft_quote(project_id, currency, lines[{pick_id, qty, variant?, lead_weeks?, note?}])`
+  - `add_to_quote(quote_id, lines[...])`
+- Stream emits `event: proposal` with `tool: "draft_quote"` payload + line preview (title, image, unit price, line total, discount, currency).
+- New `QuoteProposalCard` component (mirrors existing tearsheet proposal card) with inline qty/variant edit, Approve / Discard.
+- New edge function `trade-concierge-commit-quote` — validates studio + project ownership via `auth.getClaims`, inserts into `trade_quotes` + `trade_quote_items`, returns `{quote_id, url}`.
+- Audit row in `concierge_commits` (created in this step) with `who/what/when/source='concierge'`.
 
-New tables:
+### Step 4 — Brief extractor + inner multi-tool loop
+- Add a planner pass: before the main stream, run a cheap structured-extraction call (`gemini-2.5-flash-lite`) to derive `{project, room, style, budget_band, lead_time_ceiling, qty_hints, client}` from the latest user turn + conversation.
+- Persist the brief on the conversation (sessionStorage client-side + `concierge_briefs` table for cross-turn memory keyed by `conversation_id`).
+- Inner loop in the edge function: after the first tool call resolves, feed the tool result back to the model and let it emit additional tool calls in the same turn (cap at 4 tools / turn). Stream a single combined `event: plan` payload listing all proposed drafts.
+- Frontend renders a **Plan card** that contains N child proposal cards (tearsheet + quote + future FF&E etc.) with a single **Approve all** + per-item toggle.
 
-- `favorite_folders` — `id`, `user_id`, `studio_id` (nullable, follows existing pattern), `name`, `cover_image_url`, `created_at`, `updated_at`.
-- `favorite_folder_items` — `id`, `folder_id`, `favorite_id` (FK → `trade_favorites.id`), `sort_order`, `created_at`. Unique on `(folder_id, favorite_id)`.
+### Step 5 — `propose_ffe_rows` + unified Drafts tray
+- New tool `propose_ffe_rows(project_id, room, rows[{category, spec, qty, lead_weeks, budget_band, pick_id?}])`.
+- New `FfeProposalCard` + commit endpoint `trade-concierge-commit-ffe` writing to existing FF&E tables, gated by `useFfeEntitlement`.
+- New `ConciergeDraftsTray` (slide-over from `ConciergeHeaderButton`) listing all pending proposals across the conversation, grouped by plan, with selective approve/discard. Backed by `concierge_drafts` table (status: pending/approved/discarded).
 
-RLS: owner-only (read/write where `user_id = auth.uid()`); folder_items inherit via `folder_id` join.
+### Step 6 — Long-tail tools
+- `draft_custom_request` → `trade_custom_requests`
+- `request_samples` → existing samples flow
+- `draft_presentation` → assembles a tearsheet into a white-label PDF via existing presentation builder, respecting studio branding settings.
+- Each gets its own proposal card + commit endpoint, all surfaced in the unified Drafts tray.
 
-UI:
+## Technical notes
 
-- Folder grid on dashboard + dedicated `/trade/favorites/folders/:id` detail page.
-- "Add to folder" menu on every favorited product card (existing Favorites page + new dashboard preview).
-- Reuse existing favorite card visuals.
+- **Auth**: every new commit endpoint uses `supabase.auth.getClaims(token)` (per Core memory), validates `studio_id` ownership of `project_id` and every `pick_id`.
+- **Tools registration**: extend the existing tools array in `supabase/functions/trade-concierge/index.ts`; keep the OpenAI-compatible function schema.
+- **Streaming**: extend `tradeConciergeStream.ts` with new proposal types via a discriminated union; add `event: plan` for combined plans.
+- **DB migrations**:
+  - `concierge_briefs(id, conversation_id, user_id, studio_id, brief jsonb, created_at)`
+  - `concierge_drafts(id, conversation_id, user_id, studio_id, tool text, args jsonb, status text default 'pending', commit_ref text null, created_at, decided_at)`
+  - `concierge_commits(id, draft_id, user_id, studio_id, tool, target_table, target_id, created_at)`
+  - All with RLS scoped to `auth.uid()` + studio membership via `has_role`/studio helper.
+- **Grounding**: cap catalog payload at ~30 picks ranked by relevance to brief to keep token budget sane.
+- **Variants**: when a pick has `size_variants`, agent must pick a specific variant before drafting a line item; enforce via JSON schema `required: ["variant"]` when applicable.
+- **Currency**: drafted line totals computed server-side at commit time using live FX (existing `useTradeDisplayCurrency` logic ported into a shared `_shared/pricing.ts`).
+- **No autocommit ever** — every write goes through an Approve click.
 
-## 3. FF&E unlock + Stripe $100 payment
+## Out of scope for this pass
+- Replacing manual quote/FF&E UIs (the orchestrator pre-fills, humans still drive).
+- Voice / multi-modal input.
+- Cross-conversation memory beyond the current thread.
 
-### Gating logic
-
-- Count user's `trade_favorites`. If < 6 → tile shows progress bar, disabled CTA.
-- If ≥ 6 and no active FF&E entitlement → CTA "Unlock for $100 — fully credited to your next quote".
-- If ≥ 6 and entitlement active → CTA "Open Floor Plan → FF&E".
-
-### Tables
-
-- `ffe_entitlements` — `id`, `user_id`, `stripe_session_id`, `amount_cents` (10000), `currency` ('usd'), `status` ('pending' | 'paid' | 'consumed' | 'refunded'), `paid_at`, `created_at`. RLS: owner read; service role write.
-- `trade_credits` — `id`, `user_id`, `source` ('ffe_unlock'), `source_ref` (entitlement id), `amount_cents`, `currency`, `status` ('available' | 'applied' | 'expired'), `applied_to_quote_id` (nullable), `created_at`, `applied_at`. RLS: owner read; service role write; admin read all.
-
-### Edge functions
-
-- `create-ffe-checkout` — verifies user has ≥ 6 favorites; creates Stripe Checkout (`mode: payment`, $100 USD); inserts pending `ffe_entitlements`; returns session URL.
-- `ffe-stripe-webhook` — handles `checkout.session.completed`; flips entitlement to `paid`; inserts matching `trade_credits` row (`status: 'available'`).
-- Reuse existing `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (already in secrets).
-
-### Auto-apply credit to next quote
-
-- On `trade_quotes` status transition to `submitted`/`confirmed` (we'll add this in the existing quote submit flow, not a DB trigger to keep currency-handling explicit):
-  - Find user's oldest `available` credit in same/convertible currency.
-  - Mark it `applied`, set `applied_to_quote_id`.
-  - Add a `quote_credit_cents` field on `trade_quotes` (display only — actual price math stays in the existing quote totals; we render the credit as a line discount in the quote summary/PDF).
-
-### FF&E tool itself
-
-Out of scope for this pass — we'll wire the unlock to the existing `/trade/floor-plan` (or create a placeholder route `/trade/tools/ffe` that says "Coming soon — your unlock is active"). The user can confirm which existing tool to point this at next.
-
-## 4. Files to touch
-
-**New:**
-- `src/pages/TradeMyDashboard.tsx` (the `/trade/me` page)
-- `src/pages/TradeFavoriteFolderDetail.tsx`
-- `src/components/trade/FavoriteFoldersGrid.tsx`
-- `src/components/trade/AddToFolderMenu.tsx`
-- `src/components/trade/FfeUnlockTile.tsx`
-- `src/hooks/useFavoriteFolders.ts`
-- `src/hooks/useFfeEntitlement.ts`
-- `src/hooks/useTradeCredits.ts`
-- `supabase/functions/create-ffe-checkout/index.ts`
-- `supabase/functions/ffe-stripe-webhook/index.ts`
-
-**Edited:**
-- `src/components/trade/TradeSidebar.tsx`, `TradeMobileMenu.tsx` — add "My Dashboard" entry
-- `src/App.tsx` (or wherever trade routes are mounted) — register new routes
-- existing Favorites page — add "Add to folder" affordance
-- existing quote submission code — auto-consume an available credit
-
-## 5. Order of operations
-
-1. Run DB migration (tables + RLS).
-2. Build dashboard page + folders UI (works without payment).
-3. Deploy Stripe edge functions + webhook.
-4. Wire FfeUnlockTile to checkout.
-5. Wire credit auto-apply into quote submission.
-
-## Open question (non-blocking, can confirm during build)
-
-Which existing route is the actual "Floor Plan → FF&E tool" that should open once unlocked? If unsure I'll stub `/trade/tools/ffe` and you can point it later.
+## Order of work in this loop
+I'll ship **Steps 1–3** end-to-end in this iteration (project grounding, pricing-aware payload, `draft_quote` + commit + review card + `concierge_commits` audit). Steps 4–6 will follow as separate loops so each is reviewable on its own.

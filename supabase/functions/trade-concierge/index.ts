@@ -107,6 +107,75 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "draft_quote",
+      description:
+        "Draft a NEW trade quote for the user with line items (qty, optional variant, optional lead time, optional per-line note). Only call when the user explicitly asks for a quote, estimate, pricing breakdown, or to 'put together a quote'. pick_ids in lines MUST come from CATALOG PIECES. Always bind to the ACTIVE PROJECT id when one is shown in the system prompt.",
+      parameters: {
+        type: "object",
+        properties: {
+          project_id: { type: "string", description: "UUID of the active project (from ACTIVE PROJECT section). Null if none." },
+          currency: { type: "string", description: "Three-letter currency the user wants the quote in (e.g. EUR, GBP, USD, SGD). Default to the project/profile currency shown in the system prompt." },
+          note: { type: "string", description: "Optional one-line note about the quote (e.g. 'Mayfair drawing-room — bronze / mohair edit')." },
+          lines: {
+            type: "array",
+            minItems: 1,
+            maxItems: 24,
+            items: {
+              type: "object",
+              properties: {
+                pick_id: { type: "string", description: "UUID from CATALOG PIECES." },
+                qty: { type: "integer", minimum: 1, maximum: 99 },
+                variant: { type: "string", description: "Variant/finish label when the piece has size_variants." },
+                lead_weeks: { type: "integer", minimum: 1, maximum: 104 },
+                note: { type: "string" },
+              },
+              required: ["pick_id", "qty"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["lines"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_to_quote",
+      description:
+        "Append line items to one of the user's EXISTING draft quotes listed in USER'S OPEN QUOTES. quote_id MUST be a UUID from that list — never invent. Same line shape as draft_quote.",
+      parameters: {
+        type: "object",
+        properties: {
+          quote_id: { type: "string", description: "UUID of the existing draft quote from USER'S OPEN QUOTES." },
+          note: { type: "string" },
+          lines: {
+            type: "array",
+            minItems: 1,
+            maxItems: 24,
+            items: {
+              type: "object",
+              properties: {
+                pick_id: { type: "string" },
+                qty: { type: "integer", minimum: 1, maximum: 99 },
+                variant: { type: "string" },
+                lead_weeks: { type: "integer", minimum: 1, maximum: 104 },
+                note: { type: "string" },
+              },
+              required: ["pick_id", "qty"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["quote_id", "lines"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 function buildSystemPrompt(
@@ -616,7 +685,8 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, project_id: bodyProjectId } = await req.json();
+    const activeProjectId: string | null = typeof bodyProjectId === "string" ? bodyProjectId : null;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(

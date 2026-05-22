@@ -3,8 +3,9 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type TearsheetProposal } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type TearsheetProposal, type QuoteProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
+import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -23,6 +24,7 @@ export type ConciergeQuickAction = { label: string; prompt: string; primary?: bo
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
+  | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
 
 import {
@@ -491,20 +493,28 @@ export function AIConcierge() {
       });
     };
 
-    const handleProposal = (proposal: TearsheetProposal) => {
-      // Compute which picks are NEW relative to the previous proposal so the
-      // card can highlight rationales for replacements/additions only.
+    const handleProposal = (proposal: ConciergeProposal) => {
+      if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
+        setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
+        return;
+      }
+      // Tearsheet proposal — compute which picks are NEW relative to the
+      // previous proposal so the card can highlight rationales for replacements only.
       const prevIds = new Set(
         lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
       );
       const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
-      // Insert as its own timeline item (after current assistant text, if any)
       setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
     };
+
+    // Active project from cross-page session storage (set by useProjectFilter).
+    let projectId: string | null = null;
+    try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch {}
 
     try {
       await streamConcierge({
         messages: messagesForApi,
+        projectId,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onEscalation: (ev) => {
@@ -1007,6 +1017,29 @@ export function AIConcierge() {
                       } catch (e) {
                         toast.error("Could not reach the concierge — please try again.");
                       }
+                    }}
+                  />
+                );
+              }
+              if (item.kind === "quote_proposal") {
+                return (
+                  <QuoteProposalCard
+                    key={i}
+                    proposal={item.proposal}
+                    onResolved={(outcome, info) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "quote_proposal") copy[i] = { ...t, resolved: outcome };
+                        const msg =
+                          outcome === "discarded"
+                            ? "Got it — quote draft discarded."
+                            : info?.mode === "append"
+                              ? `✓ Added ${info.added} ${info.added === 1 ? "line" : "lines"} to your quote — taking you there now…`
+                              : `✓ Quote drafted — taking you there now…`;
+                        copy.push({ kind: "msg", role: "assistant", content: msg });
+                        return copy;
+                      });
                     }}
                   />
                 );
