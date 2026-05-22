@@ -224,6 +224,12 @@ Rules for both tools:
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
 - If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
 
+## ACTIVE PROJECT
+${projectContext}
+
+## USER'S OPEN QUOTES
+${openQuotes}
+
 ## USER'S EXISTING TEARSHEETS
 ${userBoards}
 
