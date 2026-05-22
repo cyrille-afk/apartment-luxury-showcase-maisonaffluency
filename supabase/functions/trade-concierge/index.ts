@@ -769,7 +769,7 @@ async function hydrateQuotePreview(
       qty: Math.max(1, Number(l.qty) || 1),
       unit_price_cents: priced.cents,
       currency: priced.currency || fallbackCurrency || null,
-      trade_discount_pct: discountPct,
+      trade_discount_pct: discountPct <= 1 ? Math.round(discountPct * 10000) / 100 : discountPct,
       lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
       note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
     };
