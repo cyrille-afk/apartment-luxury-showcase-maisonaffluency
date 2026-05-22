@@ -1013,6 +1013,29 @@ export function AIConcierge() {
                   />
                 );
               }
+              if (item.kind === "quote_proposal") {
+                return (
+                  <QuoteProposalCard
+                    key={i}
+                    proposal={item.proposal}
+                    onResolved={(outcome, info) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "quote_proposal") copy[i] = { ...t, resolved: outcome };
+                        const msg =
+                          outcome === "discarded"
+                            ? "Got it — quote draft discarded."
+                            : info?.mode === "append"
+                              ? `✓ Added ${info.added} ${info.added === 1 ? "line" : "lines"} to your quote — taking you there now…`
+                              : `✓ Quote drafted — taking you there now…`;
+                        copy.push({ kind: "msg", role: "assistant", content: msg });
+                        return copy;
+                      });
+                    }}
+                  />
+                );
+              }
               return (
                 <TearsheetProposalCard
                   key={i}
