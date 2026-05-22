@@ -185,6 +185,8 @@ function buildSystemPrompt(
   userBoards: string,
   userSignals: string,
   sentimentDirective: string,
+  projectContext: string,
+  openQuotes: string,
 ) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
