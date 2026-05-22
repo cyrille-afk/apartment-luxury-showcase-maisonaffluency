@@ -116,7 +116,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
           };
 
     const res = await commitProposal(body, token);
-    if (!res.ok) {
+    if (res.ok === false) {
       setStatus("pending");
       setError(res.error);
       toast.error(res.error);
