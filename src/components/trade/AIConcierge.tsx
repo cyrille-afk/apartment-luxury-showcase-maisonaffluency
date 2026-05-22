@@ -507,9 +507,14 @@ export function AIConcierge() {
       setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
     };
 
+    // Active project from cross-page session storage (set by useProjectFilter).
+    let projectId: string | null = null;
+    try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch {}
+
     try {
       await streamConcierge({
         messages: messagesForApi,
+        projectId,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onEscalation: (ev) => {
