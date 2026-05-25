@@ -297,7 +297,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   // tearsheet tools).
   const { data: picks } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id")
+    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -307,7 +307,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   // we never list the same item twice.
   const { data: tradeAll } = await supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, materials, category, subcategory")
+    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
     .eq("is_active", true)
     .order("brand_name", { ascending: true })
     .order("product_name", { ascending: true })
@@ -331,6 +331,8 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
     materials: string | null;
     category: string | null;
     subcategory: string | null;
+    priceNote?: string | null;
+    source: "curator" | "trade";
   };
   const merged = new Map<string, Line>();
   const keyOf = (designer: string, title: string) =>
@@ -345,6 +347,8 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       materials: p.materials || null,
       category: p.category || null,
       subcategory: p.subcategory || null,
+      priceNote: summarizeVariants(p.size_variants, p.currency) || formatCatalogPrice(p.trade_price_cents, p.currency),
+      source: "curator",
     });
   });
   (tradeAll || []).forEach((t: any) => {
@@ -356,7 +360,15 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       baseBrand ||
       "Unknown";
     const k = keyOf(designer, t.product_name);
-    if (merged.has(k)) return; // curator pick already covers it
+    const priceNote = formatCatalogPrice(t.trade_price_cents ?? t.rrp_price_cents, t.currency);
+    const existing = merged.get(k) || Array.from(merged.values()).find((line) =>
+      line.designer.trim().toLowerCase() === designer.trim().toLowerCase() &&
+      titlesAreNearTwins(line.title, t.product_name)
+    );
+    if (existing) {
+      if (!existing.priceNote && priceNote) existing.priceNote = priceNote;
+      return;
+    }
     merged.set(k, {
       id: t.id,
       title: t.product_name,
@@ -364,13 +376,15 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       materials: t.materials || null,
       category: t.category || null,
       subcategory: t.subcategory || null,
+      priceNote,
+      source: "trade",
     });
   });
 
   const pieceLines = Array.from(merged.values())
     .sort((a, b) => a.designer.localeCompare(b.designer) || a.title.localeCompare(b.title))
     .map((p) => {
-      const meta = [p.subcategory || p.category, p.materials].filter(Boolean).join(" · ");
+      const meta = [p.subcategory || p.category, p.materials, p.priceNote ? `pricing: ${p.priceNote}` : null].filter(Boolean).join(" · ");
       return `- "${p.title}" by ${p.designer}${meta ? ` (${meta})` : ""} [id: ${p.id}]`;
     });
 
@@ -624,6 +638,57 @@ function buildSentimentDirective(c: { sentiment: string; intent: string; escalat
   }
   return "Tone: warm, refined, helpful. Default register.";
 }
+
+const GENERIC_PRODUCT_TOKENS = new Set([
+  "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
+  "table", "tables", "chair", "chairs", "sofa", "sofas", "console", "cabinet", "mirror",
+  "collection", "piece", "medium", "large", "small",
+]);
+
+function normalizeLoose(value: string | null | undefined): string {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function titleTokens(value: string | null | undefined): string[] {
+  return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
+}
+
+function titlesAreNearTwins(a: string, b: string): boolean {
+  const an = normalizeLoose(a);
+  const bn = normalizeLoose(b);
+  if (!an || !bn) return false;
+  if (an === bn || an.includes(bn) || bn.includes(an)) return true;
+  const aTokens = titleTokens(a);
+  const bTokens = titleTokens(b);
+  const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+  const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
+  if (!shorter.length) return false;
+  return shorter.every((token) => longer.includes(token));
+}
+
+function formatCatalogPrice(cents: number | null | undefined, currency: string | null | undefined): string | null {
+  if (!cents || !currency) return null;
+  return `${currency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
+}
+
+function summarizeVariants(variants: any, currency: string | null | undefined): string | null {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+  const rows = variants
+    .filter((v) => v && Number(v.price_cents) > 0)
+    .slice(0, 8)
+    .map((v) => {
+      const label = [v.base, v.top, v.label].filter(Boolean).map((x) => String(x).trim()).join(" × ");
+      const price = formatCatalogPrice(Number(v.price_cents), currency);
+      return [label || "variant", price].filter(Boolean).join(" — ");
+    });
+  if (!rows.length) return null;
+  return `variants: ${rows.join("; ")}${variants.length > rows.length ? "; …" : ""}`;
+}
 async function hydratePickPreview(
   supabase: ReturnType<typeof createClient>,
   pickIds: string[],
@@ -736,15 +801,17 @@ async function hydrateQuotePreview(
   const previews = await hydratePickPreview(supabase, pickIds);
   const previewById = new Map<string, any>(previews.filter(Boolean).map((p: any) => [p.id, p]));
 
-  // Pricing: try curator pick first, then trade_products row (matched by id directly OR by brand+title from the curator pick).
+  // Pricing: curator pick/variant first, then the selected trade_products row. The
+  // catalog merge above hides stale near-duplicates, but this keeps old proposal
+  // cards from displaying a rogue duplicate price if one is still approved.
   const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, designer_id, trade_price_cents, currency")
+      .select("id, title, designer_id, trade_price_cents, currency, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
       .in("id", pickIds),
   ]);
   const pickPriceById = new Map<string, { cents: number | null; currency: string | null }>();
@@ -757,9 +824,74 @@ async function hydrateQuotePreview(
     tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
   });
 
+  const { data: allTradeRows } = tradeRows?.length
+    ? await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .eq("is_active", true)
+        .limit(2000)
+    : { data: [] as any[] };
+
+  const canonicalTradePrice = (tradeRow: any) => {
+    if (!tradeRow) return null;
+    const rowBrand = normalizeLoose(String(tradeRow.brand_name || "").split(" - ")[0]);
+    const twins = (allTradeRows || []).filter((c: any) =>
+      c.id !== tradeRow.id &&
+      normalizeLoose(String(c.brand_name || "").split(" - ")[0]) === rowBrand &&
+      titlesAreNearTwins(c.product_name, tradeRow.product_name)
+    );
+    const best = twins
+      .map((c: any) => ({
+        row: c,
+        cents: c.trade_price_cents ?? c.rrp_price_cents ?? null,
+        score: ((c.trade_price_cents ?? c.rrp_price_cents) ? 1000 : 0) + (c.price_unit !== "per_sqm" ? 100 : 0),
+      }))
+      .sort((a, b) => b.score - a.score)[0];
+    if (!best?.cents) return null;
+    const currentCents = tradeRow.trade_price_cents ?? tradeRow.rrp_price_cents ?? null;
+    if (!currentCents || tradeRow.price_unit === "per_sqm" || best.score > 1000) {
+      return { cents: best.cents, currency: best.row.currency ?? null };
+    }
+    return null;
+  };
+
+  const resolveVariantPrice = (pickId: string, variantLabel: string | null | undefined) => {
+    if (!variantLabel) return null;
+    const row = (pickRows || []).find((p: any) => p.id === pickId);
+    const variants = Array.isArray(row?.size_variants) ? row.size_variants : [];
+    const wanted = normalizeLoose(variantLabel);
+    const hit = variants.find((v: any) => {
+      const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
+      return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
+    });
+    return hit && Number(hit.price_cents) > 0
+      ? { cents: Number(hit.price_cents), currency: row?.currency ?? null }
+      : null;
+  };
+
+  const canonicalTwinPrice = (tradeRow: any) => {
+    if (!tradeRow) return null;
+    const sameBrandPicks = (pickRows || []).filter((p: any) => {
+      const preview = previewById.get(p.id);
+      return normalizeLoose(preview?.designer_name) === normalizeLoose(tradeRow.brand_name?.split(" - ")?.[0] || tradeRow.brand_name);
+    });
+    const twin = sameBrandPicks.find((p: any) => titlesAreNearTwins(p.title, tradeRow.product_name));
+    if (!twin) return null;
+    const variants = Array.isArray(twin.size_variants) ? twin.size_variants.filter((v: any) => Number(v.price_cents) > 0) : [];
+    const cents = variants.length ? Math.min(...variants.map((v: any) => Number(v.price_cents))) : twin.trade_price_cents;
+    return cents ? { cents, currency: twin.currency ?? null } : null;
+  };
+
   return lines.map((l) => {
     const p = previewById.get(l.pick_id) || null;
-    const priced = tradePriceById.get(l.pick_id) || pickPriceById.get(l.pick_id) || { cents: null, currency: null };
+    const directTrade = (tradeRows || []).find((t: any) => t.id === l.pick_id);
+    const priced =
+      resolveVariantPrice(l.pick_id, l.variant) ||
+      pickPriceById.get(l.pick_id) ||
+      canonicalTwinPrice(directTrade) ||
+      canonicalTradePrice(directTrade) ||
+      tradePriceById.get(l.pick_id) ||
+      { cents: null, currency: null };
     return {
       pick_id: l.pick_id,
       title: p?.title || "Unknown piece",

@@ -14,6 +14,84 @@ function json(status: number, body: unknown) {
   });
 }
 
+const GENERIC_PRODUCT_TOKENS = new Set([
+  "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
+  "table", "tables", "chair", "chairs", "sofa", "sofas", "console", "cabinet", "mirror",
+  "collection", "piece", "medium", "large", "small",
+]);
+
+function normalizeLoose(value: string | null | undefined): string {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function brandBase(value: string | null | undefined): string {
+  return String(value || "").split(" - ")[0].trim();
+}
+
+function titleTokens(value: string | null | undefined): string[] {
+  return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
+}
+
+function titlesAreNearTwins(a: string, b: string): boolean {
+  const an = normalizeLoose(a);
+  const bn = normalizeLoose(b);
+  if (!an || !bn) return false;
+  if (an === bn || an.includes(bn) || bn.includes(an)) return true;
+  const aTokens = titleTokens(a);
+  const bTokens = titleTokens(b);
+  const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+  const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
+  return shorter.length > 0 && shorter.every((token) => longer.includes(token));
+}
+
+async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClient>, row: any) {
+  const rowBrand = normalizeLoose(brandBase(row?.brand_name));
+  if (!rowBrand || !row?.product_name) return row;
+  const { data: candidates } = await supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
+    .eq("is_active", true)
+    .limit(2000);
+  const twins = (candidates || []).filter((c: any) =>
+    c.id !== row.id &&
+    normalizeLoose(brandBase(c.brand_name)) === rowBrand &&
+    titlesAreNearTwins(c.product_name, row.product_name)
+  );
+  if (!twins.length) return row;
+  const scored = twins
+    .map((c: any) => {
+      const cents = c.trade_price_cents ?? c.rrp_price_cents ?? null;
+      return {
+        row: c,
+        score:
+          (cents ? 1000 : 0) +
+          (c.price_unit !== "per_sqm" ? 100 : 0) +
+          Math.min(Number(cents || 0) / 100000, 50),
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+  const currentCents = row.trade_price_cents ?? row.rrp_price_cents ?? null;
+  const best = scored[0];
+  if (!best) return row;
+  if (!currentCents || row.price_unit === "per_sqm" || best.score > 1000) return best.row;
+  return row;
+}
+
+function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | null): number | null {
+  if (!pick || !variantLabel || !Array.isArray(pick.size_variants)) return null;
+  const wanted = normalizeLoose(variantLabel);
+  const hit = pick.size_variants.find((v: any) => {
+    const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
+    return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
+  });
+  return hit && Number(hit.price_cents) > 0 ? Number(hit.price_cents) : null;
+}
+
 /** Resolve a pick id (curator pick OR trade_products) to a trade_products.id, creating a row if needed. */
 async function resolvePickToTradeProduct(
   supabase: ReturnType<typeof createClient>,
@@ -25,14 +103,17 @@ async function resolvePickToTradeProduct(
   // back to the curator-pick → trade-product resolution path.
   const { data: directTrade } = await supabase
     .from("trade_products")
-    .select("id")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
     .eq("id", pickId)
     .maybeSingle();
-  if (directTrade?.id) return { tradeProductId: directTrade.id, pick: null };
+  if (directTrade?.id) {
+    const canonical = await findCanonicalTradeProduct(supabase, directTrade);
+    return { tradeProductId: canonical?.id || directTrade.id, pick: null };
+  }
 
   const { data: pick } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, description, origin, price_prefix, pdf_url")
+    .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, description, origin, price_prefix, pdf_url, size_variants")
     .eq("id", pickId)
     .maybeSingle();
 
@@ -50,12 +131,15 @@ async function resolvePickToTradeProduct(
   // 1. Exact match
   const { data: exact } = await supabase
     .from("trade_products")
-    .select("id")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
     .eq("brand_name", brandName)
     .eq("product_name", pick.title)
     .limit(1)
     .maybeSingle();
-  if (exact?.id) return { tradeProductId: exact.id, pick };
+  if (exact?.id) {
+    const canonical = await findCanonicalTradeProduct(supabase, exact);
+    return { tradeProductId: canonical?.id || exact.id, pick };
+  }
 
   // 2. Create new (mirrors the sync trigger's COALESCE pattern)
   const { data: created, error } = await supabase
@@ -162,13 +246,14 @@ serve(async (req) => {
       // Resolve every pick_id to a real trade_products.id (creating rows as needed).
       const resolutions = await Promise.all(
         cleanLines.map(async (l) => {
-          const { tradeProductId } = await resolvePickToTradeProduct(supabase, l.pick_id);
-          return { line: l, tradeProductId };
+          const { tradeProductId, pick } = await resolvePickToTradeProduct(supabase, l.pick_id);
+          return { line: l, tradeProductId, pick };
         })
       );
       const resolved = resolutions.filter((r) => r.tradeProductId) as Array<{
         line: typeof cleanLines[number];
         tradeProductId: string;
+        pick: any | null;
       }>;
       const skipped = resolutions
         .filter((r) => !r.tradeProductId)
@@ -259,7 +344,7 @@ serve(async (req) => {
           quote_id: quote.id,
           product_id: r.tradeProductId,
           quantity: r.line.qty,
-          unit_price_cents: priceById.get(r.tradeProductId) ?? null,
+          unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
           variant_label: r.line.variant,
           lead_time_weeks_override: r.line.lead_weeks,
           notes: r.line.note,
@@ -317,7 +402,7 @@ serve(async (req) => {
         quote_id: quoteId,
         product_id: r.tradeProductId,
         quantity: r.line.qty,
-        unit_price_cents: priceById.get(r.tradeProductId) ?? null,
+        unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
         variant_label: r.line.variant,
         lead_time_weeks_override: r.line.lead_weeks,
         notes: r.line.note,
