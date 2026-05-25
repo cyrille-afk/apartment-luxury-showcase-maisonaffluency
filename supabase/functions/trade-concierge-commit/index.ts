@@ -124,12 +124,13 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData?.user?.id) {
-      console.error("getUser failed:", userError);
+    // Use getClaims per project Core memory rule (not getUser)
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      console.error("getClaims failed:", claimsErr);
       return json(401, { error: "Invalid auth token" });
     }
-    const userId: string = userData.user.id;
+    const userId: string = String(claimsData.claims.sub);
 
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") return json(400, { error: "Invalid JSON body" });
