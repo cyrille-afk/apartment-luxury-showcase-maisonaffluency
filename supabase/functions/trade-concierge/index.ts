@@ -297,7 +297,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   // tearsheet tools).
   const { data: picks } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id")
+    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -307,7 +307,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   // we never list the same item twice.
   const { data: tradeAll } = await supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, materials, category, subcategory")
+    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
     .eq("is_active", true)
     .order("brand_name", { ascending: true })
     .order("product_name", { ascending: true })
@@ -331,6 +331,8 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
     materials: string | null;
     category: string | null;
     subcategory: string | null;
+    priceNote?: string | null;
+    source: "curator" | "trade";
   };
   const merged = new Map<string, Line>();
   const keyOf = (designer: string, title: string) =>
@@ -345,6 +347,8 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       materials: p.materials || null,
       category: p.category || null,
       subcategory: p.subcategory || null,
+      priceNote: summarizeVariants(p.size_variants, p.currency) || formatCatalogPrice(p.trade_price_cents, p.currency),
+      source: "curator",
     });
   });
   (tradeAll || []).forEach((t: any) => {
@@ -356,7 +360,15 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       baseBrand ||
       "Unknown";
     const k = keyOf(designer, t.product_name);
-    if (merged.has(k)) return; // curator pick already covers it
+    const priceNote = formatCatalogPrice(t.trade_price_cents ?? t.rrp_price_cents, t.currency);
+    const existing = merged.get(k) || Array.from(merged.values()).find((line) =>
+      line.designer.trim().toLowerCase() === designer.trim().toLowerCase() &&
+      titlesAreNearTwins(line.title, t.product_name)
+    );
+    if (existing) {
+      if (!existing.priceNote && priceNote) existing.priceNote = priceNote;
+      return;
+    }
     merged.set(k, {
       id: t.id,
       title: t.product_name,
@@ -364,13 +376,15 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       materials: t.materials || null,
       category: t.category || null,
       subcategory: t.subcategory || null,
+      priceNote,
+      source: "trade",
     });
   });
 
   const pieceLines = Array.from(merged.values())
     .sort((a, b) => a.designer.localeCompare(b.designer) || a.title.localeCompare(b.title))
     .map((p) => {
-      const meta = [p.subcategory || p.category, p.materials].filter(Boolean).join(" · ");
+      const meta = [p.subcategory || p.category, p.materials, p.priceNote ? `pricing: ${p.priceNote}` : null].filter(Boolean).join(" · ");
       return `- "${p.title}" by ${p.designer}${meta ? ` (${meta})` : ""} [id: ${p.id}]`;
     });
 
