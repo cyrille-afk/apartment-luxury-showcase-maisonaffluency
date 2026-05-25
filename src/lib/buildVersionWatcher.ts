@@ -15,24 +15,10 @@ const POLL_INTERVAL_MS = 60_000;
 let started = false;
 let currentBuildId: string | null = null;
 
-function isPreviewOrDev(): boolean {
+function isDev(): boolean {
   if (import.meta.env.DEV) return true;
   if (typeof window === "undefined") return true;
-
-  const host = window.location.hostname;
-  const isLovablePreview =
-    host.includes("lovableproject.com") ||
-    host.includes("lovable.app") ||
-    host.includes("id-preview--");
-
-  let isFramed = false;
-  try {
-    isFramed = window.self !== window.top;
-  } catch {
-    isFramed = true;
-  }
-
-  return isLovablePreview || isFramed;
+  return false;
 }
 
 function readMetaBuildId(): string | null {
@@ -102,7 +88,7 @@ async function checkForUpdate() {
 export function startBuildVersionWatcher() {
   if (started) return;
   started = true;
-  if (isPreviewOrDev()) return;
+  if (isDev()) return;
   currentBuildId = readMetaBuildId();
   // No build id stamped → likely dev server. Nothing to watch.
   if (!currentBuildId) return;
