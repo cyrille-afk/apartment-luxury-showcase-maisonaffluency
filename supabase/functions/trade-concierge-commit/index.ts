@@ -124,12 +124,13 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData?.user?.id) {
-      console.error("getUser failed:", userError);
+    // Use getClaims per project Core memory rule (not getUser)
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      console.error("getClaims failed:", claimsErr);
       return json(401, { error: "Invalid auth token" });
     }
-    const userId: string = userData.user.id;
+    const userId: string = String(claimsData.claims.sub);
 
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") return json(400, { error: "Invalid JSON body" });
@@ -191,6 +192,10 @@ serve(async (req) => {
       if (tool === "draft_quote") {
         const requestedProjectId: string | null =
           typeof args.project_id === "string" && args.project_id ? args.project_id : null;
+        const requestedClientId: string | null =
+          typeof args.client_id === "string" && args.client_id ? args.client_id : null;
+        const requestedClientName: string =
+          typeof args.client_name === "string" ? args.client_name.slice(0, 200) : "";
         let projectId: string | null = null;
         let studioId: string | null = null;
         let quoteCurrency: string =
@@ -210,6 +215,27 @@ serve(async (req) => {
           }
         }
 
+        // Validate the client belongs to the user's studio (defense-in-depth — UI also gates).
+        let validClientId: string | null = null;
+        let validClientName: string = requestedClientName;
+        if (requestedClientId) {
+          const { data: cli } = await supabase
+            .from("clients")
+            .select("id, name, studio_id")
+            .eq("id", requestedClientId)
+            .maybeSingle();
+          if (cli) {
+            // If we already have a studio from the project, require the client to be in it.
+            const okStudio = studioId ? (cli as any).studio_id === studioId : true;
+            if (okStudio) {
+              validClientId = (cli as any).id;
+              if (!validClientName) validClientName = (cli as any).name || "";
+              // If quote has no project (no studio yet), adopt the client's studio.
+              if (!studioId) studioId = (cli as any).studio_id || null;
+            }
+          }
+        }
+
         const { data: quote, error: quoteErr } = await supabase
           .from("trade_quotes")
           .insert({
@@ -219,6 +245,8 @@ serve(async (req) => {
             currency: quoteCurrency,
             project_id: projectId,
             studio_id: studioId,
+            client_id: validClientId,
+            client_name: validClientName,
           })
           .select("id")
           .single();
@@ -248,6 +276,8 @@ serve(async (req) => {
           tool: "draft_quote",
           args: {
             project_id: projectId,
+            client_id: validClientId,
+            client_name: validClientName,
             currency: quoteCurrency,
             note: quoteNotes,
             lines: cleanLines,
