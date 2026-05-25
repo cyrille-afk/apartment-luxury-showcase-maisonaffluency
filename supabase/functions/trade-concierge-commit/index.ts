@@ -82,6 +82,16 @@ async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClien
   return row;
 }
 
+function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | null): number | null {
+  if (!pick || !variantLabel || !Array.isArray(pick.size_variants)) return null;
+  const wanted = normalizeLoose(variantLabel);
+  const hit = pick.size_variants.find((v: any) => {
+    const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
+    return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
+  });
+  return hit && Number(hit.price_cents) > 0 ? Number(hit.price_cents) : null;
+}
+
 /** Resolve a pick id (curator pick OR trade_products) to a trade_products.id, creating a row if needed. */
 async function resolvePickToTradeProduct(
   supabase: ReturnType<typeof createClient>,
