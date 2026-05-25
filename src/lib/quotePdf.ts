@@ -116,7 +116,10 @@ async function fetchImageDataUrl(url: string): Promise<{ data: string; w: number
   try {
     // Inject a small Cloudinary thumbnail transform — fast + CORS-friendly via fetch proxy
     const optimized = optimizeImageUrl(url, "w_400,h_400,c_fill,q_auto:good,f_jpg");
-    const res = await fetch(optimized, { mode: "cors" });
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 6_000);
+    const res = await fetch(optimized, { mode: "cors", signal: controller.signal });
+    window.clearTimeout(timeout);
     if (!res.ok) return null;
     const blob = await res.blob();
     const dataUrl: string = await new Promise((resolve, reject) => {
