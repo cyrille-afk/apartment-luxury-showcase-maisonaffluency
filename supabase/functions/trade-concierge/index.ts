@@ -811,7 +811,7 @@ async function hydrateQuotePreview(
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
       .in("id", pickIds),
   ]);
   const pickPriceById = new Map<string, { cents: number | null; currency: string | null }>();
@@ -823,6 +823,37 @@ async function hydrateQuotePreview(
     const cents = t.trade_price_cents ?? t.rrp_price_cents ?? null;
     tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
   });
+
+  const { data: allTradeRows } = tradeRows?.length
+    ? await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .eq("is_active", true)
+        .limit(2000)
+    : { data: [] as any[] };
+
+  const canonicalTradePrice = (tradeRow: any) => {
+    if (!tradeRow) return null;
+    const rowBrand = normalizeLoose(String(tradeRow.brand_name || "").split(" - ")[0]);
+    const twins = (allTradeRows || []).filter((c: any) =>
+      c.id !== tradeRow.id &&
+      normalizeLoose(String(c.brand_name || "").split(" - ")[0]) === rowBrand &&
+      titlesAreNearTwins(c.product_name, tradeRow.product_name)
+    );
+    const best = twins
+      .map((c: any) => ({
+        row: c,
+        cents: c.trade_price_cents ?? c.rrp_price_cents ?? null,
+        score: ((c.trade_price_cents ?? c.rrp_price_cents) ? 1000 : 0) + (c.price_unit !== "per_sqm" ? 100 : 0),
+      }))
+      .sort((a, b) => b.score - a.score)[0];
+    if (!best?.cents) return null;
+    const currentCents = tradeRow.trade_price_cents ?? tradeRow.rrp_price_cents ?? null;
+    if (!currentCents || tradeRow.price_unit === "per_sqm" || best.score > 1000) {
+      return { cents: best.cents, currency: best.row.currency ?? null };
+    }
+    return null;
+  };
 
   const resolveVariantPrice = (pickId: string, variantLabel: string | null | undefined) => {
     if (!variantLabel) return null;
@@ -858,6 +889,7 @@ async function hydrateQuotePreview(
       resolveVariantPrice(l.pick_id, l.variant) ||
       pickPriceById.get(l.pick_id) ||
       canonicalTwinPrice(directTrade) ||
+      canonicalTradePrice(directTrade) ||
       tradePriceById.get(l.pick_id) ||
       { cents: null, currency: null };
     return {
