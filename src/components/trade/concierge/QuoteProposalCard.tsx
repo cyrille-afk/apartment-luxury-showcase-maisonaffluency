@@ -82,6 +82,20 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     );
   };
 
+  const setVariant = (pickId: string, label: string) => {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (l.pick_id !== pickId) return l;
+        const opt = l.variant_options?.find((o) => o.label === label);
+        return {
+          ...l,
+          variant: label || null,
+          unit_price_cents: opt?.price_cents ?? l.unit_price_cents,
+        };
+      }),
+    );
+  };
+
   const toggleExclude = (pickId: string) => {
     setExcluded((prev) => {
       const next = new Set(prev);
