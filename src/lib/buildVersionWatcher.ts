@@ -88,7 +88,7 @@ async function checkForUpdate() {
 export function startBuildVersionWatcher() {
   if (started) return;
   started = true;
-  if (isPreviewOrDev()) return;
+  if (isDev()) return;
   currentBuildId = readMetaBuildId();
   // No build id stamped → likely dev server. Nothing to watch.
   if (!currentBuildId) return;
