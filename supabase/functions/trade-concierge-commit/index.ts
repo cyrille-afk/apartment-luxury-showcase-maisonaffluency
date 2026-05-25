@@ -14,6 +14,74 @@ function json(status: number, body: unknown) {
   });
 }
 
+const GENERIC_PRODUCT_TOKENS = new Set([
+  "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
+  "table", "tables", "chair", "chairs", "sofa", "sofas", "console", "cabinet", "mirror",
+  "collection", "piece", "medium", "large", "small",
+]);
+
+function normalizeLoose(value: string | null | undefined): string {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function brandBase(value: string | null | undefined): string {
+  return String(value || "").split(" - ")[0].trim();
+}
+
+function titleTokens(value: string | null | undefined): string[] {
+  return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
+}
+
+function titlesAreNearTwins(a: string, b: string): boolean {
+  const an = normalizeLoose(a);
+  const bn = normalizeLoose(b);
+  if (!an || !bn) return false;
+  if (an === bn || an.includes(bn) || bn.includes(an)) return true;
+  const aTokens = titleTokens(a);
+  const bTokens = titleTokens(b);
+  const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+  const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
+  return shorter.length > 0 && shorter.every((token) => longer.includes(token));
+}
+
+async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClient>, row: any) {
+  const rowBrand = normalizeLoose(brandBase(row?.brand_name));
+  if (!rowBrand || !row?.product_name) return row;
+  const { data: candidates } = await supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
+    .eq("is_active", true)
+    .limit(2000);
+  const twins = (candidates || []).filter((c: any) =>
+    c.id !== row.id &&
+    normalizeLoose(brandBase(c.brand_name)) === rowBrand &&
+    titlesAreNearTwins(c.product_name, row.product_name)
+  );
+  if (!twins.length) return row;
+  const scored = twins
+    .map((c: any) => {
+      const cents = c.trade_price_cents ?? c.rrp_price_cents ?? null;
+      return {
+        row: c,
+        score:
+          (cents ? 1000 : 0) +
+          (c.price_unit !== "per_sqm" ? 100 : 0) +
+          Math.min(Number(cents || 0) / 100000, 50),
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+  const currentCents = row.trade_price_cents ?? row.rrp_price_cents ?? null;
+  const best = scored[0];
+  if (!best) return row;
+  if (!currentCents || row.price_unit === "per_sqm" || best.score > 1000) return best.row;
+  return row;
+}
+
 /** Resolve a pick id (curator pick OR trade_products) to a trade_products.id, creating a row if needed. */
 async function resolvePickToTradeProduct(
   supabase: ReturnType<typeof createClient>,
