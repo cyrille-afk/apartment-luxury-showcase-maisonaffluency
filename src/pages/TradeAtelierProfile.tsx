@@ -420,16 +420,6 @@ const TradeAtelierProfile = () => {
                 >
                   {designer.philosophy && (() => {
                     const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
-                    const attrMatch = clean.match(/^([\s\S]*)(?:\s+—\s+|\s+-\s+)(.+?)$/);
-                    if (attrMatch) {
-                      return (
-                        <blockquote className="font-display italic leading-snug mb-5 [text-wrap:pretty]">
-                          <span className="text-base md:text-lg text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
-                          <br />
-                          <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
-                        </blockquote>
-                      );
-                    }
                     return (
                       <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 whitespace-pre-line font-semibold [text-wrap:pretty]">
                         "{clean}"
@@ -496,16 +486,6 @@ const TradeAtelierProfile = () => {
                 >
                   {designer.philosophy && (() => {
                     const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
-                    const attrMatch = clean.match(/^([\s\S]*)(?:\s+—\s+|\s+-\s+)(.+?)$/);
-                    if (attrMatch) {
-                      return (
-                        <blockquote className="font-display italic leading-snug mb-6 [text-wrap:pretty]">
-                          <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{attrMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
-                          <br />
-                          <span className="text-sm text-muted-foreground/60 not-italic mt-2 block font-normal">— {attrMatch[2].trim()}</span>
-                        </blockquote>
-                      );
-                    }
                     return (
                       <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 whitespace-pre-line font-semibold [text-wrap:pretty]">
                         "{clean}"
