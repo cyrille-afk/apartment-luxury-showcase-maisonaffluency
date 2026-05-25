@@ -190,7 +190,9 @@ const TradeQuotes = () => {
         quoteNotes={quote?.notes || null}
         onBack={() => {
           setSelectedQuoteId(null);
-          if (searchParams.get("quote")) {
+          if (quoteId) {
+            navigate("/trade/quotes", { replace: true });
+          } else if (searchParams.get("quote")) {
             searchParams.delete("quote");
             setSearchParams(searchParams, { replace: true });
           }
@@ -198,7 +200,9 @@ const TradeQuotes = () => {
         }}
         onStatusChange={() => {
           setSelectedQuoteId(null);
-          if (searchParams.get("quote")) {
+          if (quoteId) {
+            navigate("/trade/quotes", { replace: true });
+          } else if (searchParams.get("quote")) {
             searchParams.delete("quote");
             setSearchParams(searchParams, { replace: true });
           }
