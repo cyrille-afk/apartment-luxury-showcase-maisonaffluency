@@ -246,13 +246,14 @@ serve(async (req) => {
       // Resolve every pick_id to a real trade_products.id (creating rows as needed).
       const resolutions = await Promise.all(
         cleanLines.map(async (l) => {
-          const { tradeProductId } = await resolvePickToTradeProduct(supabase, l.pick_id);
-          return { line: l, tradeProductId };
+          const { tradeProductId, pick } = await resolvePickToTradeProduct(supabase, l.pick_id);
+          return { line: l, tradeProductId, pick };
         })
       );
       const resolved = resolutions.filter((r) => r.tradeProductId) as Array<{
         line: typeof cleanLines[number];
         tradeProductId: string;
+        pick: any | null;
       }>;
       const skipped = resolutions
         .filter((r) => !r.tradeProductId)
@@ -343,7 +344,7 @@ serve(async (req) => {
           quote_id: quote.id,
           product_id: r.tradeProductId,
           quantity: r.line.qty,
-          unit_price_cents: priceById.get(r.tradeProductId) ?? null,
+          unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
           variant_label: r.line.variant,
           lead_time_weeks_override: r.line.lead_weeks,
           notes: r.line.note,
@@ -401,7 +402,7 @@ serve(async (req) => {
         quote_id: quoteId,
         product_id: r.tradeProductId,
         quantity: r.line.qty,
-        unit_price_cents: priceById.get(r.tradeProductId) ?? null,
+        unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
         variant_label: r.line.variant,
         lead_time_weeks_override: r.line.lead_weeks,
         notes: r.line.note,
