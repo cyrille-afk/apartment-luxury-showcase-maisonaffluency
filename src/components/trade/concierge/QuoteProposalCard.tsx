@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Check, X, ExternalLink, Plus, FileText, Minus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins } from "lucide-react";
+import { Link } from "react-router-dom";
 import { commitProposal, type QuoteProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
+import { useProjects } from "@/hooks/useProjects";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -16,6 +18,8 @@ interface Props {
     info?: { quoteId: string; url: string; added: number; mode: "create" | "append" },
   ) => void;
 }
+
+const CURRENCY_OPTIONS = ["EUR", "USD", "GBP", "SGD", "CHF", "AED", "HKD", "AUD"] as const;
 
 function formatPrice(cents: number | null, currency: string | null): string {
   if (cents == null || !currency) return "Price on Request";
@@ -37,13 +41,29 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const [lines, setLines] = useState(proposal.preview);
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<{ quoteId: string; url: string; added: number } | null>(null);
-  const navigate = useNavigate();
 
-  const currency =
-    proposal.tool === "draft_quote"
-      ? proposal.args.currency || lines.find((l) => l.currency)?.currency || null
-      : lines.find((l) => l.currency)?.currency || null;
+  // Pre-fill project from session if available (set by AIConcierge when entering chat).
+  const initialProjectId =
+    !isAppend && proposal.tool === "draft_quote"
+      ? proposal.args.project_id ||
+        (typeof window !== "undefined"
+          ? sessionStorage.getItem("trade:lastProjectFilter") || null
+          : null)
+      : null;
+  const initialCurrency =
+    proposal.tool === "draft_quote" ? proposal.args.currency || "EUR" : null;
 
+  const [projectId, setProjectId] = useState<string | null>(initialProjectId);
+  const [client, setClient] = useState<PickedClient | null>(null);
+  const [currency, setCurrencyState] = useState<string>(initialCurrency || "EUR");
+
+  const { projects } = useProjects({ activeOnly: true });
+
+  const lineCurrency = useMemo(
+    () => lines.find((l) => l.currency)?.currency || null,
+    [lines],
+  );
+  const displayCurrency = isAppend ? lineCurrency : currency;
   const trade_discount_pct = lines[0]?.trade_discount_pct ?? 0;
 
   const visibleLines = lines.filter((l) => !excluded.has(l.pick_id));
@@ -71,9 +91,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     });
   };
 
+  const needsClient = !isAppend;
+  const canApprove =
+    visibleLines.length > 0 && (!needsClient || !!client?.id);
+
   const handleApprove = async () => {
     if (visibleLines.length === 0) {
       toast.error("Add at least one line to the quote.");
+      return;
+    }
+    if (needsClient && !client?.id) {
+      toast.error("Pick a client before drafting the quote.");
       return;
     }
     setStatus("committing");
@@ -100,8 +128,10 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         ? {
             tool: "draft_quote" as const,
             args: {
-              project_id: proposal.args.project_id,
-              currency: proposal.args.currency,
+              project_id: projectId,
+              client_id: client?.id ?? null,
+              client_name: client?.name ?? "",
+              currency,
               note: proposal.args.note,
               lines: linesPayload,
             },
@@ -125,13 +155,29 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     setStatus("approved");
     const quoteId = res.quote_id || "";
     setResult({ quoteId, url: res.url, added: res.added });
+
+    // Toast with a link — replaces the previous jarring auto-navigate.
+    const quoteLabel = quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : "quote";
+    toast.success(
+      isAppend
+        ? `Added ${res.added} ${res.added === 1 ? "line" : "lines"} to ${quoteLabel}`
+        : `Drafted ${quoteLabel} with ${res.added} ${res.added === 1 ? "line" : "lines"}`,
+      {
+        action: {
+          label: "Open quote",
+          onClick: () => {
+            window.location.assign(res.url);
+          },
+        },
+      },
+    );
+
     onResolved?.("approved", {
       quoteId,
       url: res.url,
       added: res.added,
       mode: isAppend ? "append" : "create",
     });
-    setTimeout(() => navigate(res.url), 700);
   };
 
   const handleDiscard = () => {
@@ -151,9 +197,9 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           {headerLabel}
         </span>
-        {currency && (
+        {displayCurrency && (
           <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-            {currency}
+            {displayCurrency}
             {trade_discount_pct > 0 && ` · trade −${trade_discount_pct}%`}
           </span>
         )}
@@ -162,6 +208,63 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       {proposal.tool === "add_to_quote" && (
         <div className="mb-2 font-display text-sm text-foreground truncate" title={proposal.args.quote_label}>
           {proposal.args.quote_label}
+        </div>
+      )}
+
+      {/* Client / Project / Currency chips — only for new drafts and only while pending */}
+      {!isAppend && status === "pending" && (
+        <div className="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="min-w-0">
+            <label className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+              Client *
+            </label>
+            <ClientPicker
+              value={client?.id ?? null}
+              onChange={setClient}
+              size="sm"
+              placeholder="Pick client…"
+              showManageLink={false}
+            />
+          </div>
+          <div className="min-w-0">
+            <label className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+              Project
+            </label>
+            <div className="relative">
+              <FolderOpen className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <select
+                value={projectId ?? ""}
+                onChange={(e) => setProjectId(e.target.value || null)}
+                className="w-full h-9 pl-7 pr-2 rounded-md border border-input bg-background text-xs font-body text-foreground appearance-none"
+              >
+                <option value="">No project</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="min-w-0">
+            <label className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+              Currency
+            </label>
+            <div className="relative">
+              <Coins className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <select
+                value={currency}
+                onChange={(e) => setCurrencyState(e.target.value)}
+                className="w-full h-9 pl-7 pr-2 rounded-md border border-input bg-background text-xs font-body text-foreground appearance-none"
+              >
+                {CURRENCY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       )}
 
@@ -240,17 +343,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         <div className="rounded-md border border-border/60 bg-background/40 px-2.5 py-2 mb-3 font-body text-[11px] text-foreground/80 space-y-0.5">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Subtotal (RRP)</span>
-            <span className="tabular-nums">{formatPrice(subtotalCents, currency)}</span>
+            <span className="tabular-nums">{formatPrice(subtotalCents, displayCurrency)}</span>
           </div>
           {trade_discount_pct > 0 && (
             <div className="flex justify-between text-accent">
               <span>Trade discount −{trade_discount_pct}%</span>
-              <span className="tabular-nums">−{formatPrice(discountCents, currency)}</span>
+              <span className="tabular-nums">−{formatPrice(discountCents, displayCurrency)}</span>
             </div>
           )}
           <div className="flex justify-between font-display text-foreground">
             <span>Total</span>
-            <span className="tabular-nums">{formatPrice(totalCents, currency)}</span>
+            <span className="tabular-nums">{formatPrice(totalCents, displayCurrency)}</span>
           </div>
           {hasUnpriced && (
             <div className="pt-1 text-[10px] text-muted-foreground italic">
@@ -263,21 +366,28 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       {error && <p className="font-body text-[11px] text-destructive mb-2">{error}</p>}
 
       {status === "pending" && (
-        <div className="flex items-center justify-end gap-2">
-          <button
-            onClick={handleDiscard}
-            className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2.5 py-1.5 transition-colors"
-          >
-            Discard
-          </button>
-          <button
-            onClick={handleApprove}
-            disabled={visibleLines.length === 0}
-            className="flex items-center gap-1.5 rounded-full bg-foreground text-background font-body text-[11px] uppercase tracking-widest px-3.5 py-1.5 hover:opacity-90 transition-opacity disabled:opacity-40"
-          >
-            <ApproveIcon className="h-3 w-3" />
-            {approveLabel}
-          </button>
+        <div className="flex items-center justify-between gap-2">
+          {needsClient && !client?.id ? (
+            <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+              Pick a client to continue
+            </span>
+          ) : <span />}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDiscard}
+              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2.5 py-1.5 transition-colors"
+            >
+              Discard
+            </button>
+            <button
+              onClick={handleApprove}
+              disabled={!canApprove}
+              className="flex items-center gap-1.5 rounded-full bg-foreground text-background font-body text-[11px] uppercase tracking-widest px-3.5 py-1.5 hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ApproveIcon className="h-3 w-3" />
+              {approveLabel}
+            </button>
+          </div>
         </div>
       )}
 
@@ -291,18 +401,18 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       )}
 
       {status === "approved" && result && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="font-body text-[11px] text-foreground/80">
             <Check className="inline h-3 w-3 mr-1 text-accent" />
             {isAppend
               ? `Added ${result.added} ${result.added === 1 ? "line" : "lines"}`
-              : `Drafted with ${result.added} ${result.added === 1 ? "line" : "lines"}`}
+              : `Drafted QU-${result.quoteId.slice(0, 6).toUpperCase()} with ${result.added} ${result.added === 1 ? "line" : "lines"}`}
           </span>
           <Link
             to={result.url}
-            className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline"
+            className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline shrink-0"
           >
-            Open
+            Open quote
             <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
