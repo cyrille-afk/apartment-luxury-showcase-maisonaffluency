@@ -694,15 +694,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const handlePreviewPdf = async () => {
+    if (previewLoading) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewError(null);
+    setPreviewOpen(true);
     setPreviewLoading(true);
     try {
       const args = await buildPdfArgs();
       const url = await previewQuotePdfUrl(args);
       setPreviewUrl(url);
     } catch (err: any) {
-      toast({ title: "Preview failed", description: err?.message || "Could not generate preview.", variant: "destructive" });
+      const message = err?.message || "Could not generate preview.";
+      setPreviewError(message);
+      toast({ title: "Preview failed", description: message, variant: "destructive" });
     } finally {
       setPreviewLoading(false);
     }
@@ -710,6 +719,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const closePreview = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
+    setPreviewError(null);
+    setPreviewOpen(false);
   };
 
 
@@ -2040,12 +2051,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       </div>
 
       {/* PDF preview dialog */}
-      <Dialog open={!!previewUrl} onOpenChange={(o) => { if (!o) closePreview(); }}>
+      <Dialog open={previewOpen} onOpenChange={(o) => { if (!o) closePreview(); else setPreviewOpen(true); }}>
         <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col">
           <DialogHeader className="px-4 py-3 border-b border-border">
             <DialogTitle className="font-body text-sm">PDF preview · {quoteNumber}</DialogTitle>
           </DialogHeader>
-          <QuotePdfPreviewPages blobUrl={previewUrl} />
+          {previewError ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-2 px-6 text-center font-body text-xs text-muted-foreground bg-muted/20">
+              <p className="text-destructive">Preview failed.</p>
+              <p>{previewError}</p>
+            </div>
+          ) : (
+            <QuotePdfPreviewPages blobUrl={previewUrl} />
+          )}
           <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
             <button
               onClick={closePreview}
