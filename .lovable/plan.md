@@ -1,64 +1,55 @@
-# Concierge Multi-Step Orchestration — Implementation Plan
+# Quote Flow — End-to-End Build
 
-Goal: evolve the Trade AI Concierge from a single-tool recommender into a brief-aware orchestrator that can draft quotes, FF&E rows, custom requests, sample requests and presentations — all behind a unified human-approval gate. Mirrors the roadmap in `concierge-multi-step-orchestration.pdf`.
+A lot already exists (`QuoteDetail.tsx` ~2.2k lines, `TradeQuotesAdmin.tsx` ~800 lines, status lifecycle, order timeline, email log). My job is to **walk the flow as a user**, fix every dead-end, fill every gap, and make every status transition complete with notification + audit trail. Shipped in 4 passes — you review each before I move on.
 
-## Build order (each step is independently shippable)
+## Pass 1 — Concierge → Draft (intake polish)
 
-### Step 1 — Project + studio grounding
-- Pass active `project_id`, project name, studio name, and the studio's `clients` list into the `trade-concierge` system prompt.
-- Frontend (`AIConcierge` / wherever `streamConcierge` is called) reads active project from existing `useProjectFilter` / route context and forwards it in the request body.
-- Edge function injects this into the system message so existing `propose_tearsheet` calls become project-aware (no new tools yet).
+Goal: every concierge-drafted quote lands attached to a real client + project, never floats in limbo.
 
-### Step 2 — Richer grounding payload
-- Extend the catalog block sent to the model with: `trade_price_cents`, `currency`, `lead_time_weeks`, `stock_status`, applicable trade-tier discount %, and variant axes (size_variants summary).
-- Reuse `useTradeDisplayCurrency` + `useTradeDiscount` server-side equivalents inside the edge function (read from `profiles` / `studios`).
-- No UX change; unblocks pricing-aware tools.
+- `QuoteProposalCard`: add `ClientPicker` + `ProjectPicker` chips at the top (pre-filled from active project if any). Required before Approve when none on file.
+- Currency selector chip in the card (defaults to studio/profile default per memory).
+- After commit: keep the chat open, replace the card with a "Quote QU-XXXX created — Open quote" inline confirmation **plus** a sonner toast. No auto-navigate (current 700ms `navigate()` is jarring).
+- `trade-concierge-commit`: persist `client_id`, `client_name` (denormalized per memory), `project_id`, `currency` on the new quote. Audit row in `concierge_commits`.
+- Stream type extension: `DraftQuoteProposal.args` gains optional `client_id`, `client_name`.
 
-### Step 3 — `draft_quote` + `add_to_quote` + Quote review card
-- New tools registered in `trade-concierge/index.ts`:
-  - `draft_quote(project_id, currency, lines[{pick_id, qty, variant?, lead_weeks?, note?}])`
-  - `add_to_quote(quote_id, lines[...])`
-- Stream emits `event: proposal` with `tool: "draft_quote"` payload + line preview (title, image, unit price, line total, discount, currency).
-- New `QuoteProposalCard` component (mirrors existing tearsheet proposal card) with inline qty/variant edit, Approve / Discard.
-- New edge function `trade-concierge-commit-quote` — validates studio + project ownership via `auth.getClaims`, inserts into `trade_quotes` + `trade_quote_items`, returns `{quote_id, url}`.
-- Audit row in `concierge_commits` (created in this step) with `who/what/when/source='concierge'`.
+## Pass 2 — Quote Detail (draft state UX)
 
-### Step 4 — Brief extractor + inner multi-tool loop
-- Add a planner pass: before the main stream, run a cheap structured-extraction call (`gemini-2.5-flash-lite`) to derive `{project, room, style, budget_band, lead_time_ceiling, qty_hints, client}` from the latest user turn + conversation.
-- Persist the brief on the conversation (sessionStorage client-side + `concierge_briefs` table for cross-turn memory keyed by `conversation_id`).
-- Inner loop in the edge function: after the first tool call resolves, feed the tool result back to the model and let it emit additional tool calls in the same turn (cap at 4 tools / turn). Stream a single combined `event: plan` payload listing all proposed drafts.
-- Frontend renders a **Plan card** that contains N child proposal cards (tearsheet + quote + future FF&E etc.) with a single **Approve all** + per-item toggle.
+Goal: a freshly-drafted quote opens to a screen with zero dead-ends — every visible button works, every empty state has a CTA.
 
-### Step 5 — `propose_ffe_rows` + unified Drafts tray
-- New tool `propose_ffe_rows(project_id, room, rows[{category, spec, qty, lead_weeks, budget_band, pick_id?}])`.
-- New `FfeProposalCard` + commit endpoint `trade-concierge-commit-ffe` writing to existing FF&E tables, gated by `useFfeEntitlement`.
-- New `ConciergeDraftsTray` (slide-over from `ConciergeHeaderButton`) listing all pending proposals across the conversation, grouped by plan, with selective approve/discard. Backed by `concierge_drafts` table (status: pending/approved/discarded).
+- Audit the `draft` view of `QuoteDetail`: header (number, status pill, project chip, client chip, currency, totals), line table, add-line CTA, notes field, submit/cancel buttons.
+- Make sure: editing qty, removing a line, changing variant, applying credit, toggling insurance all persist & re-total live.
+- Wire **Submit for pricing** → status `submitted`, sets `submitted_at`, fires `quote-submitted` app email to admin (`cyrille@maisonaffluency.com` + studio admins), plus in-app notification.
+- Wire **Discard draft** with confirm modal → soft-delete (status `cancelled`) instead of hard-delete unless empty.
+- Empty-state CTAs: "Add from Showroom", "Add from Favorites", "Ask Concierge" (opens the concierge with project pre-bound).
 
-### Step 6 — Long-tail tools
-- `draft_custom_request` → `trade_custom_requests`
-- `request_samples` → existing samples flow
-- `draft_presentation` → assembles a tearsheet into a white-label PDF via existing presentation builder, respecting studio branding settings.
-- Each gets its own proposal card + commit endpoint, all surfaced in the unified Drafts tray.
+## Pass 3 — Admin Pricing → Client Review → Confirm
+
+Goal: every status transition past `submitted` is wired with action, notification, audit.
+
+- **Admin pricing screen** (`TradeQuotesAdmin`): for each `submitted` quote, allow per-line unit price entry (or override of the catalog RRP), confirm currency, add admin note, set status → `priced`. Fires `quote-priced` app email to the requesting user + studio admins.
+- **Client-side priced view**: read-only line table with prices, prominent **Accept & Confirm** + **Request changes** (free-text → re-opens to `draft` with admin note attached). Accept → status `confirmed`, sets `confirmed_at`, fires `quote-confirmed` email + admin notification, initializes `order_timeline` row.
+- **Cancel from any non-terminal state** with reason field, recorded in `admin_notes`.
+- Status badges + timestamps surfaced on the detail header throughout.
+
+## Pass 4 — Payment + Fulfillment closeout
+
+Goal: `confirmed → deposit_paid → paid` is real.
+
+- Add **Generate deposit invoice** + **Generate final invoice** actions in the confirmed view (50/30/20 split per memory `trade-quote-system-logic`). Each generates a PDF via existing presentation/ukDdpPdf pipeline, stamps `quote_email_log`, emails the client (if `client_id` has primary contact) and the user.
+- Add manual **Mark deposit paid** / **Mark fully paid** admin-only actions → status transitions, timestamps, notifications.
+- Order timeline updates on each transition (already has lifecycle hooks per memory `trade-order-timeline`).
+- `paid` view: read-only archive with download links to all invoices + spec sheets, "Reorder" CTA (existing `TradeReorder` page).
 
 ## Technical notes
 
-- **Auth**: every new commit endpoint uses `supabase.auth.getClaims(token)` (per Core memory), validates `studio_id` ownership of `project_id` and every `pick_id`.
-- **Tools registration**: extend the existing tools array in `supabase/functions/trade-concierge/index.ts`; keep the OpenAI-compatible function schema.
-- **Streaming**: extend `tradeConciergeStream.ts` with new proposal types via a discriminated union; add `event: plan` for combined plans.
-- **DB migrations**:
-  - `concierge_briefs(id, conversation_id, user_id, studio_id, brief jsonb, created_at)`
-  - `concierge_drafts(id, conversation_id, user_id, studio_id, tool text, args jsonb, status text default 'pending', commit_ref text null, created_at, decided_at)`
-  - `concierge_commits(id, draft_id, user_id, studio_id, tool, target_table, target_id, created_at)`
-  - All with RLS scoped to `auth.uid()` + studio membership via `has_role`/studio helper.
-- **Grounding**: cap catalog payload at ~30 picks ranked by relevance to brief to keep token budget sane.
-- **Variants**: when a pick has `size_variants`, agent must pick a specific variant before drafting a line item; enforce via JSON schema `required: ["variant"]` when applicable.
-- **Currency**: drafted line totals computed server-side at commit time using live FX (existing `useTradeDisplayCurrency` logic ported into a shared `_shared/pricing.ts`).
-- **No autocommit ever** — every write goes through an Approve click.
+- All new edge functions: `supabase.auth.getClaims(token)` (Core rule).
+- All commit writes: validate studio ownership via `can_view_studio` / `can_edit_studio`.
+- New `concierge_commits` audit table from the plan if not present yet.
+- Email templates use existing `_shared/transactional-email-templates/` (jade theme per memory `branded-email-design`). Five new templates: `quote-submitted-admin`, `quote-priced-user`, `quote-confirmed-admin`, `quote-deposit-invoice`, `quote-final-invoice`.
+- No new tables beyond `concierge_commits` and possibly `quote_invoices` (id, quote_id, kind: deposit|final, pdf_url, sent_at, amount_cents).
+- Legacy `studio_id IS NULL` rows respected throughout (memory rule).
+- Client always captured via `ClientPicker`, both `client_id` and `client_name` written (memory rule).
 
-## Out of scope for this pass
-- Replacing manual quote/FF&E UIs (the orchestrator pre-fills, humans still drive).
-- Voice / multi-modal input.
-- Cross-conversation memory beyond the current thread.
+## Pass order
 
-## Order of work in this loop
-I'll ship **Steps 1–3** end-to-end in this iteration (project grounding, pricing-aware payload, `draft_quote` + commit + review card + `concierge_commits` audit). Steps 4–6 will follow as separate loops so each is reviewable on its own.
+I'll do Pass 1, ping you, you click around, then I do Pass 2, etc. Each pass leaves the app in a shippable state — nothing half-wired.
