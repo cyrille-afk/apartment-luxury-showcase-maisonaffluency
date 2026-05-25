@@ -560,19 +560,6 @@ const PublicDesignerProfile = () => {
             </blockquote>
           );
         }
-        // Try em-dash or hyphen attribution: "quote text — Author" or "quote text\n- Author"
-        const dashMatch = clean.match(/^([\s\S]*)(?:\s+—\s+|\s+-\s+)(.+?)$/);
-        if (dashMatch) {
-          const quoteBody = dashMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '');
-          const attribution = dashMatch[2].trim();
-          return (
-            <blockquote className="font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
-              <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{quoteBody}"</span>
-              <br />
-              <span className="text-sm md:text-base text-muted-foreground/60 not-italic mt-2 block font-normal">— {attribution}</span>
-            </blockquote>
-          );
-        }
         return (
           <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line font-semibold [text-wrap:pretty]">
             "{clean}"
