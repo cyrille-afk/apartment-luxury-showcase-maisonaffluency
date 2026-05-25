@@ -624,6 +624,57 @@ function buildSentimentDirective(c: { sentiment: string; intent: string; escalat
   }
   return "Tone: warm, refined, helpful. Default register.";
 }
+
+const GENERIC_PRODUCT_TOKENS = new Set([
+  "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
+  "table", "tables", "chair", "chairs", "sofa", "sofas", "console", "cabinet", "mirror",
+  "collection", "piece", "medium", "large", "small",
+]);
+
+function normalizeLoose(value: string | null | undefined): string {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function titleTokens(value: string | null | undefined): string[] {
+  return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
+}
+
+function titlesAreNearTwins(a: string, b: string): boolean {
+  const an = normalizeLoose(a);
+  const bn = normalizeLoose(b);
+  if (!an || !bn) return false;
+  if (an === bn || an.includes(bn) || bn.includes(an)) return true;
+  const aTokens = titleTokens(a);
+  const bTokens = titleTokens(b);
+  const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+  const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
+  if (!shorter.length) return false;
+  return shorter.every((token) => longer.includes(token));
+}
+
+function formatCatalogPrice(cents: number | null | undefined, currency: string | null | undefined): string | null {
+  if (!cents || !currency) return null;
+  return `${currency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
+}
+
+function summarizeVariants(variants: any, currency: string | null | undefined): string | null {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+  const rows = variants
+    .filter((v) => v && Number(v.price_cents) > 0)
+    .slice(0, 8)
+    .map((v) => {
+      const label = [v.base, v.top, v.label].filter(Boolean).map((x) => String(x).trim()).join(" × ");
+      const price = formatCatalogPrice(Number(v.price_cents), currency);
+      return [label || "variant", price].filter(Boolean).join(" — ");
+    });
+  if (!rows.length) return null;
+  return `variants: ${rows.join("; ")}${variants.length > rows.length ? "; …" : ""}`;
+}
 async function hydratePickPreview(
   supabase: ReturnType<typeof createClient>,
   pickIds: string[],
