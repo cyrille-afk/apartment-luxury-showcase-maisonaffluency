@@ -93,14 +93,17 @@ async function resolvePickToTradeProduct(
   // back to the curator-pick → trade-product resolution path.
   const { data: directTrade } = await supabase
     .from("trade_products")
-    .select("id")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
     .eq("id", pickId)
     .maybeSingle();
-  if (directTrade?.id) return { tradeProductId: directTrade.id, pick: null };
+  if (directTrade?.id) {
+    const canonical = await findCanonicalTradeProduct(supabase, directTrade);
+    return { tradeProductId: canonical?.id || directTrade.id, pick: null };
+  }
 
   const { data: pick } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, description, origin, price_prefix, pdf_url")
+    .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, description, origin, price_prefix, pdf_url, size_variants")
     .eq("id", pickId)
     .maybeSingle();
 
@@ -118,12 +121,15 @@ async function resolvePickToTradeProduct(
   // 1. Exact match
   const { data: exact } = await supabase
     .from("trade_products")
-    .select("id")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
     .eq("brand_name", brandName)
     .eq("product_name", pick.title)
     .limit(1)
     .maybeSingle();
-  if (exact?.id) return { tradeProductId: exact.id, pick };
+  if (exact?.id) {
+    const canonical = await findCanonicalTradeProduct(supabase, exact);
+    return { tradeProductId: canonical?.id || exact.id, pick };
+  }
 
   // 2. Create new (mirrors the sync trigger's COALESCE pattern)
   const { data: created, error } = await supabase
