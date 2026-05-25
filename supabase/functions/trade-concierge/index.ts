@@ -892,6 +892,17 @@ async function hydrateQuotePreview(
       canonicalTradePrice(directTrade) ||
       tradePriceById.get(l.pick_id) ||
       { cents: null, currency: null };
+
+    // Expose variant options so the proposal card can render a picker.
+    const pickRow = (pickRows || []).find((r: any) => r.id === l.pick_id);
+    const rawVariants = Array.isArray(pickRow?.size_variants) ? pickRow.size_variants : [];
+    const variant_options = rawVariants
+      .map((v: any) => ({
+        label: [v.base, v.top, v.label].filter((s: string) => s && String(s).trim()).join(" — "),
+        price_cents: Number(v.price_cents) > 0 ? Number(v.price_cents) : null,
+      }))
+      .filter((v: any) => v.label);
+
     return {
       pick_id: l.pick_id,
       title: p?.title || "Unknown piece",
@@ -904,6 +915,7 @@ async function hydrateQuotePreview(
       trade_discount_pct: discountPct <= 1 ? Math.round(discountPct * 10000) / 100 : discountPct,
       lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
       note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
+      variant_options: variant_options.length > 1 ? variant_options : undefined,
     };
   });
 }
