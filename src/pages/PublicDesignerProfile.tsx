@@ -561,7 +561,7 @@ const PublicDesignerProfile = () => {
           );
         }
         // Try em-dash or hyphen attribution: "quote text — Author" or "quote text\n- Author"
-        const dashMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
+        const dashMatch = clean.match(/^([\s\S]*)(?:\s+—\s+|\s+-\s+)(.+?)$/);
         if (dashMatch) {
           const quoteBody = dashMatch[1].trim().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '');
           const attribution = dashMatch[2].trim();
