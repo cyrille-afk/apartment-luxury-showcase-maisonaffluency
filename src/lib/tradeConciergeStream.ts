@@ -88,6 +88,11 @@ export type PickPreview = {
   rationale_detail?: string | null;
 };
 
+export type VariantOption = {
+  label: string;
+  price_cents: number | null;
+};
+
 export type QuoteLinePreview = {
   pick_id: string;
   title: string;
@@ -100,6 +105,7 @@ export type QuoteLinePreview = {
   trade_discount_pct: number;
   lead_weeks: number | null;
   note: string | null;
+  variant_options?: VariantOption[];
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
