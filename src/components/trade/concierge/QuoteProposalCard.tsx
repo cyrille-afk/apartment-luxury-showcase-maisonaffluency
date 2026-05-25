@@ -306,8 +306,25 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
               <div className="flex-1 min-w-0">
                 <div className="font-body text-xs text-foreground truncate">{l.title}</div>
                 <div className="font-body text-[10px] text-muted-foreground truncate">
-                  {[l.designer_name, l.variant].filter(Boolean).join(" · ") || "—"}
+                  {[l.designer_name, !l.variant_options ? l.variant : null].filter(Boolean).join(" · ") || "—"}
                 </div>
+                {l.variant_options && l.variant_options.length > 0 && status === "pending" && (
+                  <select
+                    value={l.variant ?? ""}
+                    onChange={(e) => setVariant(l.pick_id, e.target.value)}
+                    className="mt-1 w-full h-7 px-1.5 rounded border border-input bg-background text-[10px] font-body text-foreground"
+                  >
+                    <option value="">Select option…</option>
+                    {l.variant_options.map((o) => (
+                      <option key={o.label} value={o.label}>
+                        {o.label}
+                        {o.price_cents != null
+                          ? ` — ${formatPrice(o.price_cents, l.currency)}`
+                          : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <div className="mt-0.5 font-body text-[10px] text-muted-foreground">
                   {formatPrice(l.unit_price_cents, l.currency)}
                   {lineTotal != null && l.qty > 1 && (
