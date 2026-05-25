@@ -420,7 +420,7 @@ const TradeAtelierProfile = () => {
                 >
                   {designer.philosophy && (() => {
                     const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
-                    const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
+                    const attrMatch = clean.match(/^([\s\S]*)(?:\s+—\s+|\s+-\s+)(.+?)$/);
                     if (attrMatch) {
                       return (
                         <blockquote className="font-display italic leading-snug mb-5 [text-wrap:pretty]">
@@ -496,7 +496,7 @@ const TradeAtelierProfile = () => {
                 >
                   {designer.philosophy && (() => {
                     const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
-                    const attrMatch = clean.match(/^([\s\S]*?)\s*(?:—\s*|-\s*)(.+)$/);
+                    const attrMatch = clean.match(/^([\s\S]*)(?:\s+—\s+|\s+-\s+)(.+?)$/);
                     if (attrMatch) {
                       return (
                         <blockquote className="font-display italic leading-snug mb-6 [text-wrap:pretty]">
