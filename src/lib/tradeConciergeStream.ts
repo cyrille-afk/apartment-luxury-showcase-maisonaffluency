@@ -42,6 +42,10 @@ export type DraftQuoteProposal = {
   tool_call_id: string;
   args: {
     project_id: string | null;
+    /** Picked client id (added by the QuoteProposalCard before commit). */
+    client_id?: string | null;
+    /** Denormalized client display name (written alongside client_id, per memory rule). */
+    client_name?: string | null;
     currency: string | null;
     note: string | null;
     lines: QuoteLine[];
