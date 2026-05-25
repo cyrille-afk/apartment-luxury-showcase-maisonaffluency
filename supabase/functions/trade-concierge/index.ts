@@ -801,11 +801,13 @@ async function hydrateQuotePreview(
   const previews = await hydratePickPreview(supabase, pickIds);
   const previewById = new Map<string, any>(previews.filter(Boolean).map((p: any) => [p.id, p]));
 
-  // Pricing: try curator pick first, then trade_products row (matched by id directly OR by brand+title from the curator pick).
+  // Pricing: curator pick/variant first, then the selected trade_products row. The
+  // catalog merge above hides stale near-duplicates, but this keeps old proposal
+  // cards from displaying a rogue duplicate price if one is still approved.
   const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, designer_id, trade_price_cents, currency")
+      .select("id, title, designer_id, trade_price_cents, currency, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
@@ -822,9 +824,42 @@ async function hydrateQuotePreview(
     tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
   });
 
+  const resolveVariantPrice = (pickId: string, variantLabel: string | null | undefined) => {
+    if (!variantLabel) return null;
+    const row = (pickRows || []).find((p: any) => p.id === pickId);
+    const variants = Array.isArray(row?.size_variants) ? row.size_variants : [];
+    const wanted = normalizeLoose(variantLabel);
+    const hit = variants.find((v: any) => {
+      const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
+      return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
+    });
+    return hit && Number(hit.price_cents) > 0
+      ? { cents: Number(hit.price_cents), currency: row?.currency ?? null }
+      : null;
+  };
+
+  const canonicalTwinPrice = (tradeRow: any) => {
+    if (!tradeRow) return null;
+    const sameBrandPicks = (pickRows || []).filter((p: any) => {
+      const preview = previewById.get(p.id);
+      return normalizeLoose(preview?.designer_name) === normalizeLoose(tradeRow.brand_name?.split(" - ")?.[0] || tradeRow.brand_name);
+    });
+    const twin = sameBrandPicks.find((p: any) => titlesAreNearTwins(p.title, tradeRow.product_name));
+    if (!twin) return null;
+    const variants = Array.isArray(twin.size_variants) ? twin.size_variants.filter((v: any) => Number(v.price_cents) > 0) : [];
+    const cents = variants.length ? Math.min(...variants.map((v: any) => Number(v.price_cents))) : twin.trade_price_cents;
+    return cents ? { cents, currency: twin.currency ?? null } : null;
+  };
+
   return lines.map((l) => {
     const p = previewById.get(l.pick_id) || null;
-    const priced = tradePriceById.get(l.pick_id) || pickPriceById.get(l.pick_id) || { cents: null, currency: null };
+    const directTrade = (tradeRows || []).find((t: any) => t.id === l.pick_id);
+    const priced =
+      resolveVariantPrice(l.pick_id, l.variant) ||
+      pickPriceById.get(l.pick_id) ||
+      canonicalTwinPrice(directTrade) ||
+      tradePriceById.get(l.pick_id) ||
+      { cents: null, currency: null };
     return {
       pick_id: l.pick_id,
       title: p?.title || "Unknown piece",
