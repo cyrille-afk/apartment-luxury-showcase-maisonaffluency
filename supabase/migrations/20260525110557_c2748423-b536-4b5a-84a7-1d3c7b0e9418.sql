@@ -1,0 +1,13 @@
+UPDATE public.designers
+SET
+  founder = 'Aaron FitzGerald',
+  philosophy = 'Scandinavian Modern design represents the perfect marriage between aesthetic beauty, quality craftsmanship and functionality — a feat achieved by a movement of culture-defining designers and craftsmen during a golden era stretching from 1930 to 1970. Dagmar exists to preserve, restore and faithfully reissue that legacy for the contemporary home.',
+  biography = 'Dagmar was founded in London in 2014 by furniture restorer and collector Aaron FitzGerald. The studio is devoted to rare and important pieces from the golden age of Scandinavian design, producing classic 20th-century Scandinavian furniture for the modern home.
+
+Scandinavian Modern design represents what FitzGerald considers the perfect marriage between aesthetic beauty, quality craftsmanship, and functionality — a feat achieved by a movement of culture-defining designers and craftsmen in a golden era from 1930 to 1970. Dagmar''s curation centres on the masters of that period: Ole Wanscher, Finn Juhl, Hans J. Wegner, Niels Otto Møller, Arnold Madsen, Kaare Klint and their contemporaries.
+
+From its Clerkenwell showroom at 5–8 Hardwick Street, the gallery presents two parallel collections. The Vintage Collection gathers original pieces sourced directly from Denmark, Sweden, Finland and Norway, each one brought back to life in Dagmar''s in-house workshop by craftsmen trained in traditional cabinetmaking, upholstery and finishing techniques. The Classic Collection comprises authorised reissues produced under licence from the designers'' estates, spearheaded by Arnold Madsen''s iconic 1944 Clam chair — a piece Dagmar is credited with reintroducing to a global audience.
+
+The result is a gallery that operates equally as a dealer, a workshop and a publisher of historic design. Dagmar has become a go-to London address for collectors, interior designers and architects seeking mid-century Scandinavian furniture with verifiable provenance and exhibition-grade restoration.',
+  notable_works = 'Arnold Madsen Clam chair (licensed reissue, 1944 design). Ole Wanscher Bergère chair (1931). Hans J. Wegner China chair (1944). Niels Otto Møller Model 54 and W1 dining chairs. Karu chair and Medallion chair under the Classic Collection. In-house restoration workshop, Clerkenwell, London. Permanent showroom at 5–8 Hardwick Street, EC1R. Regular exhibitor at Modern Shows and PAD London.'
+WHERE slug = 'dagmar-london';
