@@ -1035,8 +1035,8 @@ export function AIConcierge() {
                           outcome === "discarded"
                             ? "Got it — quote draft discarded."
                             : info?.mode === "append"
-                              ? `✓ Added ${info.added} ${info.added === 1 ? "line" : "lines"} to your quote — taking you there now…`
-                              : `✓ Quote drafted — taking you there now…`;
+                              ? `✓ Added ${info.added} ${info.added === 1 ? "line" : "lines"} to your quote. Open it whenever you're ready.`
+                              : `✓ Quote drafted. Open it whenever you're ready — anything else?`;
                         copy.push({ kind: "msg", role: "assistant", content: msg });
                         return copy;
                       });
