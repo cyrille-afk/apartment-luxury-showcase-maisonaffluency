@@ -227,13 +227,21 @@ export default function ClientPicker({
               />
             </div>
             <div className="max-h-72 overflow-y-auto">
-              {loading ? (
+              {!currentStudio ? (
+                <p className="px-3 py-4 text-sm font-body text-muted-foreground">
+                  Join or create a studio first to manage clients.
+                </p>
+              ) : loading ? (
                 <div className="flex items-center justify-center py-6">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
+              ) : clients.length === 0 ? (
+                <p className="px-3 py-4 text-sm font-body text-muted-foreground">
+                  No clients yet — type a name above to create your first one.
+                </p>
               ) : filtered.length === 0 ? (
                 <p className="px-3 py-4 text-sm font-body text-muted-foreground">
-                  No clients match.
+                  No clients match — type a new name to create one.
                 </p>
               ) : (
                 filtered.map((c) => {
@@ -267,7 +275,7 @@ export default function ClientPicker({
                 })
               )}
             </div>
-            {canEdit && search.trim() && !exactMatch && (
+            {currentStudio && canEdit && search.trim() && !exactMatch && (
               <div className="border-t border-border p-2">
                 <Button
                   type="button" variant="ghost" size="sm"
