@@ -276,6 +276,8 @@ serve(async (req) => {
           tool: "draft_quote",
           args: {
             project_id: projectId,
+            client_id: validClientId,
+            client_name: validClientName,
             currency: quoteCurrency,
             note: quoteNotes,
             lines: cleanLines,
