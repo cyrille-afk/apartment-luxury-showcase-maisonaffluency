@@ -136,8 +136,7 @@ export default function VariantPreviewPanel({
                   }}
                 >
                   <option value="">
-                    {variantPlaceholder ||
-                      `Select your ${(baseAxisLabel || "base").toLowerCase()} choice`}
+                    {basePh}
                   </option>
                   {baseOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
