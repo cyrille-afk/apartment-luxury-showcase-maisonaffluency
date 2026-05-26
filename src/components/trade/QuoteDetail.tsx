@@ -1136,6 +1136,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <span className="text-foreground">{quoteNumber}</span>
               </div>
               <StatusBadge className="mt-1" />
+              {(submittedAt || respondedAt || confirmedAtTs) && (
+                <div className="mt-2 space-y-0.5 text-[10px] font-body text-muted-foreground print:hidden">
+                  {submittedAt && (
+                    <div><span className="uppercase tracking-widest">Submitted</span> · {formatDate(new Date(submittedAt))}</div>
+                  )}
+                  {respondedAt && (
+                    <div><span className="uppercase tracking-widest">Priced</span> · {formatDate(new Date(respondedAt))}</div>
+                  )}
+                  {confirmedAtTs && (
+                    <div><span className="uppercase tracking-widest">Confirmed</span> · {formatDate(new Date(confirmedAtTs))}</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right: Logo + Company details */}
