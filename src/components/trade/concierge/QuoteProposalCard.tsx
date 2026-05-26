@@ -429,9 +429,9 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
 
       {status === "pending" && (
         <div className="flex items-center justify-between gap-2">
-          {needsClient && !client?.id ? (
+          {needsClient && !hasClientForDraft ? (
             <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-              Pick a client to continue
+              Pick a client or linked project to continue
             </span>
           ) : <span />}
           <div className="flex items-center gap-2">
