@@ -994,7 +994,7 @@ const TradeProductPage: React.FC = () => {
                 );
               })()}
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
-              {!(isRugCategory(product.category) && (product as any)?.price_per_sqm_cents) && !isDualAxis && hasSingleAxisSplit && (
+              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={singleMaterialOptions.join("\n")}
