@@ -51,7 +51,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
-import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
+import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 
 /** Inject per-sqm prices into rug variants when the pick has a price/m² rate. */
