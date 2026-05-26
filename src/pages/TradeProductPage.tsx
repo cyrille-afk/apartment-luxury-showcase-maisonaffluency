@@ -1037,7 +1037,7 @@ const TradeProductPage: React.FC = () => {
                   }}
                 />
               )}
-              {!isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
+              {!isRugSqmActive && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
