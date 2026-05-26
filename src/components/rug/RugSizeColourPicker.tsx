@@ -36,6 +36,7 @@ interface Props {
   currency: string;
   sizeAxisLabel?: string | null;
   colourAxisLabel?: string | null;
+  hidePrice?: boolean;
   onChange: (sel: RugSelection) => void;
 }
 
@@ -60,6 +61,7 @@ export default function RugSizeColourPicker({
   currency,
   sizeAxisLabel,
   colourAxisLabel,
+  hidePrice = false,
   onChange,
 }: Props) {
   // Parse stock sizes from the variant.base column (or label as fallback).
@@ -296,17 +298,27 @@ export default function RugSizeColourPicker({
       </div>
 
       {/* PRICE */}
-      <div className="rounded-md border border-border/60 bg-muted/30 p-3 flex items-baseline justify-between">
-        <span className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground">
-          {totalCents != null ? "Price for your selection" : "Enter dimensions for a price"}
-        </span>
-        <span className="font-display text-lg text-foreground">
-          {totalCents != null ? formatPrice(totalCents, currency) : "—"}
-        </span>
-      </div>
-      <p className="font-body text-[11px] text-muted-foreground">
-        Calculated at {formatPrice(pricePerSqmCents, currency)} / m². Final lead time confirmed after order.
-      </p>
+      {hidePrice ? (
+        <div className="rounded-md border border-border/60 bg-muted/30 p-3">
+          <span className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            Price on request
+          </span>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-md border border-border/60 bg-muted/30 p-3 flex items-baseline justify-between">
+            <span className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground">
+              {totalCents != null ? "Price for your selection" : "Enter dimensions for a price"}
+            </span>
+            <span className="font-display text-lg text-foreground">
+              {totalCents != null ? formatPrice(totalCents, currency) : "—"}
+            </span>
+          </div>
+          <p className="font-body text-[11px] text-muted-foreground">
+            Calculated at {formatPrice(pricePerSqmCents, currency)} / m². Final lead time confirmed after order.
+          </p>
+        </>
+      )}
     </div>
   );
 }

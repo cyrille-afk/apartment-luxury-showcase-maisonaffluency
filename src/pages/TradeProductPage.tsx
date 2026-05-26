@@ -756,6 +756,11 @@ const TradeProductPage: React.FC = () => {
         ))
     : [];
   const sizeVariants = pricing?.size_variants || (productSizeVariants.length ? productSizeVariants : null);
+  const isRugSqmActive =
+    isRugCategory(product.category) &&
+    !!(product as any)?.price_per_sqm_cents &&
+    ((product as any).price_per_sqm_cents as number) > 0 &&
+    ((sizeVariants?.length || 0) > 0);
   const axes = computeVariantAxes(sizeVariants);
   const {
     hasVariants,
@@ -989,7 +994,7 @@ const TradeProductPage: React.FC = () => {
                 );
               })()}
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
-              {!(isRugCategory(product.category) && (product as any)?.price_per_sqm_cents) && !isDualAxis && hasSingleAxisSplit && (
+              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={singleMaterialOptions.join("\n")}
@@ -1013,7 +1018,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {isBaseOnly && (
+              {!isRugSqmActive && isBaseOnly && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={baseOptions.join("\n")}
@@ -1032,7 +1037,7 @@ const TradeProductPage: React.FC = () => {
                   }}
                 />
               )}
-              {!isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
+              {!isRugSqmActive && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
@@ -1046,7 +1051,7 @@ const TradeProductPage: React.FC = () => {
                 );
               })()}
               {/* Dual-axis: Base × Top finish dropdowns */}
-              {isDualAxis && (
+              {!isRugSqmActive && isDualAxis && (
                 <>
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
@@ -1124,7 +1129,7 @@ const TradeProductPage: React.FC = () => {
                 </>
               )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
-              {!isDualAxis && hasSingleAxisSplit && (
+              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={singleSizeOptions.join("\n")}
@@ -1147,7 +1152,7 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
-              {product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (
+              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={
@@ -1173,7 +1178,7 @@ const TradeProductPage: React.FC = () => {
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
                 />
               )}
-              {isDualAxis && hasDualSize && (
+              {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={dualSizeOptions.join("\n")}
@@ -1204,7 +1209,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {product.dimensions && isDualAxis && !hasDualSize && (
+              {!isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={formatDimensionsMultiline(product.dimensions)}
