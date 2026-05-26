@@ -158,6 +158,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     materials: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
+    price_per_sqm_cents: number | null;
     price_prefix: string | null; sort_order: number; created_at: string;
     size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
     variant_placeholder: string | null;
