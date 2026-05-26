@@ -103,11 +103,11 @@ export default function RugSizeColourPicker({
     return out;
   }, [sizeVariants]);
 
-  const [sizeKey, setSizeKey] = useState<string>(stockSizes[0]?.key ?? CUSTOM_SIZE_KEY);
+  const [sizeKey, setSizeKey] = useState<string>("");
   const [unit, setUnit] = useState<Unit>("cm");
   const [lengthInput, setLengthInput] = useState<string>("");
   const [widthInput, setWidthInput] = useState<string>("");
-  const [colour, setColour] = useState<string | null>(stockColours[0] ?? null);
+  const [colour, setColour] = useState<string | null>(null);
   const [customColour, setCustomColour] = useState<string>("");
 
   const isCustomSize = sizeKey === CUSTOM_SIZE_KEY;
