@@ -169,9 +169,8 @@ export default function RugSizeColourPicker({
     : colour ?? "";
 
   const rowTriggerClass =
-    "group flex w-full items-center justify-between gap-4 border-t border-border/60 py-4 text-left " +
-    "font-display text-base text-foreground hover:bg-muted/30 transition-colors focus:outline-none " +
-    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:opacity-50";
+    "group flex h-auto w-full items-center justify-between gap-4 rounded-none border-0 border-t border-border/60 bg-transparent px-0 py-4 text-left " +
+    "font-display text-base text-foreground hover:bg-muted/20 transition-colors focus:outline-none focus:ring-0 focus:ring-offset-0";
 
   return (
     <div className="space-y-5">
