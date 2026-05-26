@@ -10,6 +10,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 interface AdminQuote {
   id: string;
@@ -40,6 +41,8 @@ interface AdminQuoteItem {
     product_name: string;
     brand_name: string;
     trade_price_cents: number | null;
+    price_per_sqm_cents?: number | null;
+    price_unit?: string | null;
     currency: string;
     image_url: string | null;
     dimensions: string | null;
@@ -61,6 +64,15 @@ interface CatalogPriceInfo {
   match: "exact" | "fuzzy";
   matched_name?: string;
 }
+
+const catalogSourcePriceCents = (item: AdminQuoteItem) => {
+  const product = item.trade_products;
+  if (!product) return null;
+  if (product.price_unit === "per_sqm" && product.price_per_sqm_cents) {
+    return priceRugVariantFromLabel((item as any).variant_label || product.dimensions, product.price_per_sqm_cents);
+  }
+  return product.trade_price_cents;
+};
 
 const formatLeadTime = (info?: LeadTimeInfo) => {
   if (!info) return null;
