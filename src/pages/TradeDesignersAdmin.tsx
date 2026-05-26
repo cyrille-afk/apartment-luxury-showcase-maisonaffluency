@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, Fragment, useEffect, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { cn } from "@/lib/utils";
+import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
