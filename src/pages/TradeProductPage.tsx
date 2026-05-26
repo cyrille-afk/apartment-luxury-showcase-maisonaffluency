@@ -1129,7 +1129,7 @@ const TradeProductPage: React.FC = () => {
                 </>
               )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
-              {!isDualAxis && hasSingleAxisSplit && (
+              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={singleSizeOptions.join("\n")}
