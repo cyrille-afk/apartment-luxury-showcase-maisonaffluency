@@ -308,11 +308,31 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
 }
 
 // ─── Sub-Designers Grid ──────────────────────────────────────────────────────
-function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: () => void }) {
+function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string; onClose: () => void; autoScroll?: boolean }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!autoScroll) return;
+    if (!designers.length) return;
+    // Wait for layout + AnimatePresence to settle, then align the sub-grid
+    // header just below the sticky navigation so the first row isn't truncated.
+    const align = () => {
+      const el = rootRef.current;
+      if (!el) return;
+      const nav = document.querySelector("nav");
+      const navHeight = nav?.getBoundingClientRect().height ?? 96;
+      const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - 12);
+      window.scrollTo({ top: y, behavior: "smooth" });
+    };
+    const t1 = setTimeout(align, 220);
+    const t2 = setTimeout(align, 600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [autoScroll, designers.length]);
 
   return (
     <motion.div
+      ref={rootRef}
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
