@@ -846,13 +846,14 @@ async function hydrateQuotePreview(
     tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
   });
 
-  const { data: allTradeRows } = tradeRows?.length
+  const { data: allTradeRows } = (tradeRows?.length || pickRows?.length)
     ? await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
         .eq("is_active", true)
         .limit(2000)
     : { data: [] as any[] };
+
 
   const canonicalTradePrice = (tradeRow: any) => {
     if (!tradeRow) return null;
@@ -904,6 +905,29 @@ async function hydrateQuotePreview(
     return cents ? { cents, currency: twin.currency ?? null } : null;
   };
 
+  /** For a curator-pick line with no own price, find a matching trade_products row by brand + near-twin title. */
+  const pickToTradePrice = (pickId: string) => {
+    const pick = (pickRows || []).find((p: any) => p.id === pickId);
+    if (!pick) return null;
+    const preview = previewById.get(pickId);
+    const designer = normalizeLoose(preview?.designer_name);
+    if (!designer) return null;
+    const candidates = (allTradeRows || []).filter((c: any) => {
+      const brand = normalizeLoose(String(c.brand_name || "").split(" - ")[0]);
+      return brand === designer && titlesAreNearTwins(c.product_name, pick.title);
+    });
+    if (!candidates.length) return null;
+    const best = candidates
+      .map((c: any) => ({
+        row: c,
+        cents: c.trade_price_cents ?? c.rrp_price_cents ?? null,
+        score: ((c.trade_price_cents ?? c.rrp_price_cents) ? 1000 : 0) + (c.price_unit !== "per_sqm" ? 100 : 0),
+      }))
+      .filter((x: any) => x.cents)
+      .sort((a: any, b: any) => b.score - a.score)[0];
+    return best ? { cents: best.cents, currency: best.row.currency ?? null } : null;
+  };
+
   return lines.map((l) => {
     const p = previewById.get(l.pick_id) || null;
     const directTrade = (tradeRows || []).find((t: any) => t.id === l.pick_id);
@@ -913,7 +937,9 @@ async function hydrateQuotePreview(
       canonicalTwinPrice(directTrade) ||
       canonicalTradePrice(directTrade) ||
       tradePriceById.get(l.pick_id) ||
+      pickToTradePrice(l.pick_id) ||
       { cents: null, currency: null };
+
 
     // Expose variant options so the proposal card can render a picker.
     const pickRow = (pickRows || []).find((r: any) => r.id === l.pick_id);
