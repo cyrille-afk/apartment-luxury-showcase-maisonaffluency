@@ -14,6 +14,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { looksLikeDimension } from "@/lib/rugPricing";
 import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
