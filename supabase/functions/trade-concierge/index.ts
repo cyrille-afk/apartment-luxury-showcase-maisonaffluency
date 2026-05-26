@@ -711,6 +711,36 @@ function summarizeVariants(variants: any, currency: string | null | undefined): 
   if (!rows.length) return null;
   return `variants: ${rows.join("; ")}${variants.length > rows.length ? "; …" : ""}`;
 }
+
+function parseRugSqm(label: string | null | undefined): number | null {
+  const match = String(label || "").match(/(\d+(?:[.,]\d+)?)\s*[x×*]\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?/i);
+  if (!match) return null;
+  const width = parseFloat(match[1].replace(",", "."));
+  const length = parseFloat(match[2].replace(",", "."));
+  const unit = (match[3] || "cm").toLowerCase();
+  if (!(width > 0 && length > 0)) return null;
+  const factor = unit === "m" ? 1 : 0.01;
+  return width * factor * length * factor;
+}
+
+function variantLabel(v: any): string {
+  return [v?.base, v?.top, v?.label].filter((s: string) => s && String(s).trim()).join(" — ");
+}
+
+function resolveVariantPriceFromPick(row: any, variantLabelValue: string | null | undefined) {
+  if (!row || !variantLabelValue || !Array.isArray(row.size_variants)) return null;
+  const wanted = normalizeLoose(variantLabelValue);
+  const hit = row.size_variants.find((v: any) => {
+    const label = normalizeLoose(variantLabel(v));
+    return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
+  });
+  if (!hit) return null;
+  if (Number(hit.price_cents) > 0) return { cents: Number(hit.price_cents), currency: row.currency ?? null };
+  const rate = Number(row.price_per_sqm_cents);
+  const sqm = parseRugSqm(variantLabel(hit) || variantLabelValue);
+  if (rate > 0 && sqm) return { cents: Math.round(sqm * rate), currency: row.currency ?? null };
+  return null;
+}
 async function hydratePickPreview(
   supabase: ReturnType<typeof createClient>,
   pickIds: string[],
