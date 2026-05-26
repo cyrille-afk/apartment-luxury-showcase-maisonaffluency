@@ -300,9 +300,10 @@ const PublicDesignerProfile = () => {
   const displayBiography = isChildDesigner && !designer?.biography && parentDesigner?.biography
     ? parentDesigner.biography
     : designer?.biography;
-  const displayBiographyImages = isChildDesigner && (!designer?.biography_images || designer.biography_images.length === 0) && parentDesigner?.biography_images?.length
-    ? parentDesigner.biography_images
-    : designer?.biography_images;
+  // Child designers must only show media curated in their own Design Editor.
+  // Never inherit biography_images (or the inline media URLs embedded in the
+  // parent biography text) from the parent brand — they belong to the parent.
+  const displayBiographyImages = designer?.biography_images;
   const displayPhilosophy = isChildDesigner && !designer?.philosophy && parentDesigner?.philosophy
     ? parentDesigner.philosophy
     : designer?.philosophy;
