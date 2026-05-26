@@ -756,6 +756,11 @@ const TradeProductPage: React.FC = () => {
         ))
     : [];
   const sizeVariants = pricing?.size_variants || (productSizeVariants.length ? productSizeVariants : null);
+  const isRugSqmActive =
+    isRugCategory(product.category) &&
+    !!(product as any)?.price_per_sqm_cents &&
+    ((product as any).price_per_sqm_cents as number) > 0 &&
+    ((sizeVariants?.length || 0) > 0);
   const axes = computeVariantAxes(sizeVariants);
   const {
     hasVariants,
