@@ -540,6 +540,51 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     onStatusChange();
   };
 
+  const appendAdminNote = (existing: string | null | undefined, header: string, body: string) => {
+    const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+    const block = `[${header} — ${stamp}]\n${body.trim()}`;
+    return existing && existing.trim() ? `${existing.trim()}\n\n${block}` : block;
+  };
+
+  const handleSubmitRevise = async () => {
+    const reason = reviseReason.trim();
+    if (!reason) {
+      toast({ title: "Reason required", description: "Please describe what you'd like changed.", variant: "destructive" });
+      return;
+    }
+    const newNotes = appendAdminNote(adminNotes, "Client requested changes", reason);
+    await supabase.from("trade_quotes").update({
+      status: "draft",
+      submitted_at: null,
+      responded_at: null,
+      admin_notes: newNotes,
+    } as any).eq("id", quoteId);
+    setAdminNotes(newNotes);
+    setReviseOpen(false);
+    setReviseReason("");
+    toast({ title: "Changes requested", description: "Quote reopened as draft with your note attached." });
+    onStatusChange();
+  };
+
+  const handleSubmitCancel = async () => {
+    const reason = cancelReason.trim();
+    if (!reason) {
+      toast({ title: "Reason required", description: "Please add a brief reason for cancellation.", variant: "destructive" });
+      return;
+    }
+    const newNotes = appendAdminNote(adminNotes, "Cancelled by client", reason);
+    await supabase.from("trade_quotes").update({
+      status: "cancelled",
+      admin_notes: newNotes,
+    } as any).eq("id", quoteId);
+    setAdminNotes(newNotes);
+    setCancelOpen(false);
+    setCancelReason("");
+    toast({ title: "Quote cancelled", description: "Your reason has been recorded." });
+    onStatusChange();
+  };
+
+
   const handleSaveNotes = async () => {
     await supabase.from("trade_quotes").update({ notes: notes || null }).eq("id", quoteId);
     toast({ title: "Notes saved" });
