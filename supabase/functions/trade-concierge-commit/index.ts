@@ -262,16 +262,20 @@ serve(async (req) => {
         return json(422, { error: "None of the line items could be resolved to a product", skipped });
       }
 
-      // Pull pricing for the resolved trade_products in one shot
+      // Pull pricing (+ catalog currency) for the resolved trade_products in one shot
       const productIds = resolved.map((r) => r.tradeProductId);
       const { data: priced } = await supabase
         .from("trade_products")
-        .select("id, trade_price_cents, rrp_price_cents")
+        .select("id, trade_price_cents, rrp_price_cents, currency")
         .in("id", productIds);
-      const priceById = new Map<string, number | null>();
+      const priceById = new Map<string, { cents: number | null; currency: string }>();
       (priced || []).forEach((p: any) => {
-        priceById.set(p.id, p.trade_price_cents ?? p.rrp_price_cents ?? null);
+        priceById.set(p.id, {
+          cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          currency: (p.currency || "EUR").toUpperCase(),
+        });
       });
+
 
       // ----- draft_quote: create a new draft -----
       if (tool === "draft_quote") {
