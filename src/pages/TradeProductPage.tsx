@@ -973,8 +973,23 @@ const TradeProductPage: React.FC = () => {
 
             {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
+              {(() => {
+                const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
+                const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
+                if (!isRugSqm) return null;
+                return (
+                  <RugSizeColourPicker
+                    sizeVariants={sizeVariants as any}
+                    pricePerSqmCents={sqm as number}
+                    currency={pricing?.currency || (product as any).currency || "EUR"}
+                    sizeAxisLabel={(product as any).base_axis_label}
+                    colourAxisLabel={(product as any).top_axis_label}
+                    onChange={setRugSelection}
+                  />
+                );
+              })()}
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
-              {!isDualAxis && hasSingleAxisSplit && (
+              {!(isRugCategory(product.category) && (product as any)?.price_per_sqm_cents) && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={singleMaterialOptions.join("\n")}
