@@ -838,12 +838,16 @@ async function hydrateQuotePreview(
   ]);
   const pickPriceById = new Map<string, { cents: number | null; currency: string | null }>();
   (pickRows || []).forEach((p: any) => {
-    pickPriceById.set(p.id, { cents: p.trade_price_cents ?? null, currency: p.currency ?? null });
+    if (Number(p.trade_price_cents) > 0) {
+      pickPriceById.set(p.id, { cents: Number(p.trade_price_cents), currency: p.currency ?? null });
+    }
   });
   const tradePriceById = new Map<string, { cents: number | null; currency: string | null }>();
   (tradeRows || []).forEach((t: any) => {
     const cents = t.trade_price_cents ?? t.rrp_price_cents ?? null;
-    tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
+    if (Number(cents) > 0) {
+      tradePriceById.set(t.id, { cents: Number(cents), currency: t.currency ?? null });
+    }
   });
 
   const { data: allTradeRows } = (tradeRows?.length || pickRows?.length)
