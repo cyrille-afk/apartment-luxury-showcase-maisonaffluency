@@ -174,9 +174,12 @@ export default function RugSizeColourPicker({
 
   return (
     <div className="space-y-5">
-      <p className="font-body text-sm text-muted-foreground">
-        Please select your desired options to update the price
-      </p>
+      {!hidePrice && (
+        <p className="font-body text-sm text-muted-foreground">
+          Please select your desired options to update the price
+        </p>
+      )}
+
 
       <div>
         {/* SIZE ROW */}
