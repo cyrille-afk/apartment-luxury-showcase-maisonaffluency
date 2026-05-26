@@ -859,7 +859,7 @@ async function hydrateQuotePreview(
   const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, designer_id, trade_price_cents, currency, size_variants")
+      .select("id, title, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
@@ -912,19 +912,8 @@ async function hydrateQuotePreview(
     return null;
   };
 
-  const resolveVariantPrice = (pickId: string, variantLabel: string | null | undefined) => {
-    if (!variantLabel) return null;
-    const row = (pickRows || []).find((p: any) => p.id === pickId);
-    const variants = Array.isArray(row?.size_variants) ? row.size_variants : [];
-    const wanted = normalizeLoose(variantLabel);
-    const hit = variants.find((v: any) => {
-      const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
-      return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
-    });
-    return hit && Number(hit.price_cents) > 0
-      ? { cents: Number(hit.price_cents), currency: row?.currency ?? null }
-      : null;
-  };
+  const resolveVariantPrice = (pickId: string, selectedVariant: string | null | undefined) =>
+    resolveVariantPriceFromPick((pickRows || []).find((p: any) => p.id === pickId), selectedVariant);
 
   const canonicalTwinPrice = (tradeRow: any) => {
     if (!tradeRow) return null;
