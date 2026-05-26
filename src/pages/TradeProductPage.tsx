@@ -51,6 +51,30 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
+import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
+
+/** Inject per-sqm prices into rug variants when the pick has a price/m² rate. */
+function applyRugPerSqmPricing(
+  variants: { label?: string; base?: string; top?: string; price_cents?: number }[],
+  category: string | null | undefined,
+  pricePerSqmCents: number | null | undefined,
+): { label?: string; base?: string; top?: string; price_cents: number }[] {
+  if (!variants?.length) return [];
+  if (!isRugCategory(category) || !pricePerSqmCents) {
+    return variants
+      .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0)
+      .map((v) => ({ ...v, price_cents: v.price_cents as number }));
+  }
+  return variants
+    .map((v) => {
+      const explicit = typeof v.price_cents === "number" && v.price_cents > 0 ? v.price_cents : null;
+      if (explicit) return { ...v, price_cents: explicit };
+      const dimSource = v.base || v.label || "";
+      const computed = priceRugVariantFromLabel(dimSource, pricePerSqmCents);
+      return computed ? { ...v, price_cents: computed } : null;
+    })
+    .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
+}
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
