@@ -201,14 +201,15 @@ function useTradeProductBySlug(
           edition_signing: curatorPick?.edition_signing || null,
         };
 
-        const rawSizeVariants = Array.isArray(curatorPick?.size_variants)
-          ? (curatorPick.size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
-              .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
-                (typeof v.label === "string" && v.label.trim()) ||
-                (typeof v.base === "string" && v.base.trim()) ||
-                (typeof v.top === "string" && v.top.trim())
-              ))
-          : [];
+        const rawSizeVariants = applyRugPerSqmPricing(
+          Array.isArray(curatorPick?.size_variants) ? (curatorPick.size_variants as any[]) : [],
+          curatorPick?.category,
+          (curatorPick as any)?.price_per_sqm_cents,
+        ).filter((v) => (
+          (typeof v.label === "string" && v.label.trim()) ||
+          (typeof v.base === "string" && v.base.trim()) ||
+          (typeof v.top === "string" && v.top.trim())
+        ));
 
         const pricing: TradePricing | null = {
           trade_price_cents: (tradeProduct as any).trade_price_cents ?? null,
