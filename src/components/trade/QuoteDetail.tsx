@@ -223,6 +223,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [insuranceTier, setInsuranceTier] = useState<InsuranceTier>("standard");
   const [insuranceRateBps, setInsuranceRateBps] = useState<number>(50);
   const [insuranceNotes, setInsuranceNotes] = useState("");
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
+  const [respondedAt, setRespondedAt] = useState<string | null>(null);
+  const [confirmedAtTs, setConfirmedAtTs] = useState<string | null>(null);
+  const [reviseOpen, setReviseOpen] = useState(false);
+  const [reviseReason, setReviseReason] = useState("");
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
