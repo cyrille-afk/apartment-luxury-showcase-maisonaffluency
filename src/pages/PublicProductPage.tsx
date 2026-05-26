@@ -27,7 +27,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import { isRugCategory, parseRugDims } from "@/lib/rugPricing";
+import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
@@ -497,11 +497,11 @@ const VariantSelectors: React.FC<{
             emphasized
             placeholder="Select your size"
           />
-        ) : product.dimensions ? (
+        ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
           <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
         ) : null;
       })()}
-      {!hasVariants && product.dimensions && (
+      {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
         <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
       )}
     </>
