@@ -297,7 +297,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   // tearsheet tools).
   const { data: picks } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, currency, size_variants")
+    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -347,7 +347,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       materials: p.materials || null,
       category: p.category || null,
       subcategory: p.subcategory || null,
-      priceNote: summarizeVariants(p.size_variants, p.currency) || formatCatalogPrice(p.trade_price_cents, p.currency),
+      priceNote: summarizeVariants(p.size_variants, p.currency, p.price_per_sqm_cents) || formatCatalogPrice(p.trade_price_cents, p.currency),
       source: "curator",
     });
   });
@@ -698,18 +698,51 @@ function formatCatalogPrice(cents: number | null | undefined, currency: string |
   return `${currency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
 }
 
-function summarizeVariants(variants: any, currency: string | null | undefined): string | null {
+function summarizeVariants(variants: any, currency: string | null | undefined, pricePerSqmCents?: number | null): string | null {
   if (!Array.isArray(variants) || variants.length === 0) return null;
   const rows = variants
-    .filter((v) => v && Number(v.price_cents) > 0)
+    .filter((v) => v && (Number(v.price_cents) > 0 || (Number(pricePerSqmCents) > 0 && parseRugSqm(variantLabel(v)))))
     .slice(0, 8)
     .map((v) => {
-      const label = [v.base, v.top, v.label].filter(Boolean).map((x) => String(x).trim()).join(" × ");
-      const price = formatCatalogPrice(Number(v.price_cents), currency);
+      const label = variantLabel(v);
+      const cents = Number(v.price_cents) > 0
+        ? Number(v.price_cents)
+        : Math.round((parseRugSqm(label) || 0) * Number(pricePerSqmCents || 0));
+      const price = formatCatalogPrice(cents, currency);
       return [label || "variant", price].filter(Boolean).join(" — ");
     });
   if (!rows.length) return null;
   return `variants: ${rows.join("; ")}${variants.length > rows.length ? "; …" : ""}`;
+}
+
+function parseRugSqm(label: string | null | undefined): number | null {
+  const match = String(label || "").match(/(\d+(?:[.,]\d+)?)\s*[x×*]\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?/i);
+  if (!match) return null;
+  const width = parseFloat(match[1].replace(",", "."));
+  const length = parseFloat(match[2].replace(",", "."));
+  const unit = (match[3] || "cm").toLowerCase();
+  if (!(width > 0 && length > 0)) return null;
+  const factor = unit === "m" ? 1 : 0.01;
+  return width * factor * length * factor;
+}
+
+function variantLabel(v: any): string {
+  return [v?.base, v?.top, v?.label].filter((s: string) => s && String(s).trim()).join(" — ");
+}
+
+function resolveVariantPriceFromPick(row: any, variantLabelValue: string | null | undefined) {
+  if (!row || !variantLabelValue || !Array.isArray(row.size_variants)) return null;
+  const wanted = normalizeLoose(variantLabelValue);
+  const hit = row.size_variants.find((v: any) => {
+    const label = normalizeLoose(variantLabel(v));
+    return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
+  });
+  if (!hit) return null;
+  if (Number(hit.price_cents) > 0) return { cents: Number(hit.price_cents), currency: row.currency ?? null };
+  const rate = Number(row.price_per_sqm_cents);
+  const sqm = parseRugSqm(variantLabel(hit) || variantLabelValue);
+  if (rate > 0 && sqm) return { cents: Math.round(sqm * rate), currency: row.currency ?? null };
+  return null;
 }
 async function hydratePickPreview(
   supabase: ReturnType<typeof createClient>,
@@ -829,7 +862,7 @@ async function hydrateQuotePreview(
   const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, designer_id, trade_price_cents, currency, size_variants")
+      .select("id, title, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
@@ -882,19 +915,8 @@ async function hydrateQuotePreview(
     return null;
   };
 
-  const resolveVariantPrice = (pickId: string, variantLabel: string | null | undefined) => {
-    if (!variantLabel) return null;
-    const row = (pickRows || []).find((p: any) => p.id === pickId);
-    const variants = Array.isArray(row?.size_variants) ? row.size_variants : [];
-    const wanted = normalizeLoose(variantLabel);
-    const hit = variants.find((v: any) => {
-      const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
-      return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
-    });
-    return hit && Number(hit.price_cents) > 0
-      ? { cents: Number(hit.price_cents), currency: row?.currency ?? null }
-      : null;
-  };
+  const resolveVariantPrice = (pickId: string, selectedVariant: string | null | undefined) =>
+    resolveVariantPriceFromPick((pickRows || []).find((p: any) => p.id === pickId), selectedVariant);
 
   const canonicalTwinPrice = (tradeRow: any) => {
     if (!tradeRow) return null;
@@ -949,10 +971,14 @@ async function hydrateQuotePreview(
     const pickRow = (pickRows || []).find((r: any) => r.id === l.pick_id);
     const rawVariants = Array.isArray(pickRow?.size_variants) ? pickRow.size_variants : [];
     const variant_options = rawVariants
-      .map((v: any) => ({
-        label: [v.base, v.top, v.label].filter((s: string) => s && String(s).trim()).join(" — "),
-        price_cents: Number(v.price_cents) > 0 ? Number(v.price_cents) : null,
-      }))
+      .map((v: any) => {
+        const label = variantLabel(v);
+        const computed = resolveVariantPriceFromPick(pickRow, label);
+        return {
+          label,
+          price_cents: computed?.cents ?? null,
+        };
+      })
       .filter((v: any) => v.label);
 
     return {
