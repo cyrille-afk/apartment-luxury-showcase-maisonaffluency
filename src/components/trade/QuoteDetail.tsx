@@ -457,6 +457,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     });
   }, [clientId]);
 
+  // Pull the linked client's billing country to gate destination-specific panels (e.g. UK DDP)
+  const [clientCountry, setClientCountry] = useState<string | null>(null);
+  useEffect(() => {
+    if (!clientId) { setClientCountry(null); return; }
+    (supabase.from("clients" as any).select("billing_country").eq("id", clientId).maybeSingle() as any)
+      .then(({ data }: any) => setClientCountry((data?.billing_country as string) || null));
+  }, [clientId]);
+  const isUkDestination = (() => {
+    const c = (clientCountry || "").trim().toLowerCase();
+    return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
+  })();
+
+
   // Load email audit log for this quote
   const loadEmailLog = useCallback(async () => {
     const { data } = await (supabase as any)
