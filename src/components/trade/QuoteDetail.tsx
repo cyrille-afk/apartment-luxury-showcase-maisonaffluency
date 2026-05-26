@@ -2118,6 +2118,52 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
       </div>
 
+      {/* Request changes dialog */}
+      <Dialog open={reviseOpen} onOpenChange={setReviseOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Request changes</DialogTitle>
+          </DialogHeader>
+          <p className="font-body text-xs text-muted-foreground">
+            Tell our team what you'd like adjusted. The quote will be reopened as a draft and your note attached for the concierge.
+          </p>
+          <textarea
+            value={reviseReason}
+            onChange={(e) => setReviseReason(e.target.value)}
+            rows={5}
+            placeholder="e.g. Please swap the sofa for the linen variant and remove item 3…"
+            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <button onClick={() => setReviseOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Cancel</button>
+            <button onClick={handleSubmitRevise} className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90">Send & reopen as draft</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel quote dialog */}
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Cancel this quote?</DialogTitle>
+          </DialogHeader>
+          <p className="font-body text-xs text-muted-foreground">
+            This marks the quote as cancelled. Please share a brief reason so our team can follow up appropriately.
+          </p>
+          <textarea
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            rows={4}
+            placeholder="e.g. Project on hold, client changed direction…"
+            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <button onClick={() => setCancelOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Keep quote</button>
+            <button onClick={handleSubmitCancel} className="px-3 py-1.5 bg-destructive text-destructive-foreground rounded-md font-body text-xs hover:opacity-90">Cancel quote</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* PDF preview dialog */}
       <Dialog open={previewOpen} onOpenChange={(o) => { if (!o) closePreview(); else setPreviewOpen(true); }}>
         <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col">
