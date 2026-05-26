@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects, type Project } from "@/hooks/useProjects";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -20,6 +20,8 @@ interface Props {
 }
 
 const CURRENCY_OPTIONS = ["EUR", "USD", "GBP", "SGD", "CHF", "AED", "HKD", "AUD"] as const;
+
+type ProjectClientInfo = { client_id?: string | null; client_name?: string | null };
 
 function formatPrice(cents: number | null, currency: string | null): string {
   if (cents == null || !currency) return "Price on Request";
@@ -63,8 +65,9 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     () => projects.find((p) => p.id === projectId) || null,
     [projects, projectId],
   );
-  const projectClientId = selectedProject ? ((selectedProject as any).client_id as string | null | undefined) ?? null : null;
-  const projectClientName = selectedProject?.client_name?.trim() || "";
+  const projectRecord = selectedProject as (Project & ProjectClientInfo) | null;
+  const projectClientId = projectRecord?.client_id ?? null;
+  const projectClientName = projectRecord?.client_name?.trim() || "";
 
   useEffect(() => {
     let cancelled = false;
@@ -79,9 +82,10 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
-        setProjectClientFallback(data ? {
-          id: ((data as any).client_id as string | null | undefined) ?? null,
-          name: ((data as any).client_name as string | null | undefined)?.trim() || "",
+        const row = data as ProjectClientInfo | null;
+        setProjectClientFallback(row ? {
+          id: row.client_id ?? null,
+          name: row.client_name?.trim() || "",
         } : null);
       });
     return () => { cancelled = true; };
