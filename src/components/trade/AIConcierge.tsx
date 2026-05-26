@@ -48,6 +48,7 @@ import {
   DEFAULT_NAME,
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
+import { useStudio } from "@/hooks/useStudio";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
@@ -56,6 +57,7 @@ const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
 export function AIConcierge() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { currentStudio } = useStudio();
   const isDashboard = pathname === "/trade";
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
@@ -376,6 +378,29 @@ export function AIConcierge() {
     return saved;
   }, []);
 
+  const openLatestQuote = useCallback(async () => {
+    let query = supabase
+      .from("trade_quotes")
+      .select("id")
+      .in("status", ["draft", "submitted", "priced", "confirmed"])
+      .order("updated_at", { ascending: false })
+      .limit(1);
+    if (currentStudio?.id) {
+      query = query.or(`studio_id.eq.${currentStudio.id},studio_id.is.null`);
+    }
+    const { data, error } = await query.maybeSingle();
+    if (error || !data?.id) {
+      toast.error("I couldn't find a quote to open.");
+      return false;
+    }
+    navigate(`/trade/quotes?quote=${data.id}`);
+    setTimeline((prev) => [
+      ...prev,
+      { kind: "msg", role: "assistant", content: "Opening your quote now." },
+    ]);
+    return true;
+  }, [currentStudio?.id, navigate]);
+
   const send = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
@@ -410,6 +435,22 @@ export function AIConcierge() {
         ...prev,
         { kind: "msg", role: "assistant", content: conciergeStatusCopy("brief", lang) },
       ]);
+      return;
+    }
+
+    const normalized = text.toLowerCase().replace(/[.!?]/g, "").trim();
+    const lastAssistantText = [...timeline]
+      .reverse()
+      .find((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "assistant")
+      ?.content.toLowerCase() || "";
+    const isQuoteNavigationFollowup =
+      ["yes", "y", "take me there", "open it", "open quote", "review and edit"].includes(normalized) &&
+      lastAssistantText.includes("quote") &&
+      (lastAssistantText.includes("quote builder") || lastAssistantText.includes("take you there") || lastAssistantText.includes("review and edit"));
+    if (isQuoteNavigationFollowup) {
+      setTimeline((prev) => [...prev, { kind: "msg", role: "user", content: text }]);
+      setInput("");
+      await openLatestQuote();
       return;
     }
 
@@ -533,7 +574,7 @@ export function AIConcierge() {
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline, stage, tone, lang, name]);
+  }, [input, streaming, timeline, stage, tone, lang, name, openLatestQuote]);
 
   const handleProposalResolved = (
     proposalIndex: number,
