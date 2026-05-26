@@ -90,6 +90,13 @@ export default function VariantPreviewPanel({
     return sv.find((v) => (v.label || "").trim() === effectiveSize);
   }, [sv, isDualAxis, isBaseOnly, baseNeedsSelection, sizeNeedsSelection, selectedSize, selectedBase, effectiveSize, effectiveBase, effectiveTop, baseOptions, topOptions.length]);
 
+  const placeholderInput = {
+    variant_placeholder: variantPlaceholder,
+    base_axis_label: baseAxisLabel,
+    top_axis_label: topAxisLabel,
+  };
+  const basePh = getBasePlaceholder(placeholderInput);
+  const topPh = getTopPlaceholder(placeholderInput);
   const sizePlaceholder = "Select your size";
   const materialPlaceholder = variantPlaceholder || "Select your material choice";
 
