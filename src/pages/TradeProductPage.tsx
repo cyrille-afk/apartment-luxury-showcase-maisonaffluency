@@ -463,10 +463,16 @@ const TradeProductPage: React.FC = () => {
       // Build the chosen variant label (finish/size) from the current selection
       // so the quote line records exactly what the user picked.
       let variantLabel: string | null = null;
+      let overrideUnitPriceCents: number | null = null;
       const sv: any[] | undefined = data?.pricing?.size_variants;
       const buildDualLabel = (v: any): string =>
         [v?.base, v?.top, v?.size, v?.label].filter(Boolean).map((s: string) => String(s).trim()).join(" · ");
-      if (selectedBase || selectedTop) {
+      if (rugSelection && rugSelection.sizeLabel) {
+        // Rug per-sqm selection wins — encodes custom dims + colour and a
+        // computed unit price that the standard variant lookup doesn't know about.
+        variantLabel = [rugSelection.sizeLabel, rugSelection.colour].filter(Boolean).join(" · ");
+        if (rugSelection.totalCents) overrideUnitPriceCents = rugSelection.totalCents;
+      } else if (selectedBase || selectedTop) {
         variantLabel = [selectedBase, selectedTop, selectedDualSize].filter(Boolean).join(" · ");
       } else if (selectedSingleMaterial || selectedSingleSize) {
         variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
