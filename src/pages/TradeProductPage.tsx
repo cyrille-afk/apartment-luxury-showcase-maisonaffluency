@@ -1018,7 +1018,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {isBaseOnly && (
+              {!isRugSqmActive && isBaseOnly && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={baseOptions.join("\n")}
