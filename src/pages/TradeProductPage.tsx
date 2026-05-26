@@ -52,6 +52,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
+import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 
 /** Inject per-sqm prices into rug variants when the pick has a price/m² rate. */
 function applyRugPerSqmPricing(
@@ -396,6 +397,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
+  const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
   // Single-axis split: when each variant label encodes both size + material,
   // we expose two independent dropdowns and resolve the active variant by both.
@@ -461,10 +463,16 @@ const TradeProductPage: React.FC = () => {
       // Build the chosen variant label (finish/size) from the current selection
       // so the quote line records exactly what the user picked.
       let variantLabel: string | null = null;
+      let overrideUnitPriceCents: number | null = null;
       const sv: any[] | undefined = data?.pricing?.size_variants;
       const buildDualLabel = (v: any): string =>
         [v?.base, v?.top, v?.size, v?.label].filter(Boolean).map((s: string) => String(s).trim()).join(" · ");
-      if (selectedBase || selectedTop) {
+      if (rugSelection && rugSelection.sizeLabel) {
+        // Rug per-sqm selection wins — encodes custom dims + colour and a
+        // computed unit price that the standard variant lookup doesn't know about.
+        variantLabel = [rugSelection.sizeLabel, rugSelection.colour].filter(Boolean).join(" · ");
+        if (rugSelection.totalCents) overrideUnitPriceCents = rugSelection.totalCents;
+      } else if (selectedBase || selectedTop) {
         variantLabel = [selectedBase, selectedTop, selectedDualSize].filter(Boolean).join(" · ");
       } else if (selectedSingleMaterial || selectedSingleSize) {
         variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
@@ -494,10 +502,13 @@ const TradeProductPage: React.FC = () => {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         // Persist the chosen variant on the freshly created/merged quote item.
-        if (itemId && variantLabel) {
+        if (itemId && (variantLabel || overrideUnitPriceCents != null)) {
+          const patch: any = {};
+          if (variantLabel) patch.variant_label = variantLabel;
+          if (overrideUnitPriceCents != null) patch.unit_price_cents = overrideUnitPriceCents;
           await supabase
             .from("trade_quote_items")
-            .update({ variant_label: variantLabel } as any)
+            .update(patch)
             .eq("id", itemId as unknown as string);
         }
         setAdded(true);
@@ -512,7 +523,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -962,8 +973,23 @@ const TradeProductPage: React.FC = () => {
 
             {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
+              {(() => {
+                const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
+                const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
+                if (!isRugSqm) return null;
+                return (
+                  <RugSizeColourPicker
+                    sizeVariants={sizeVariants as any}
+                    pricePerSqmCents={sqm as number}
+                    currency={pricing?.currency || (product as any).currency || "EUR"}
+                    sizeAxisLabel={(product as any).base_axis_label}
+                    colourAxisLabel={(product as any).top_axis_label}
+                    onChange={setRugSelection}
+                  />
+                );
+              })()}
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
-              {!isDualAxis && hasSingleAxisSplit && (
+              {!(isRugCategory(product.category) && (product as any)?.price_per_sqm_cents) && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                   text={singleMaterialOptions.join("\n")}
