@@ -1051,7 +1051,7 @@ const TradeProductPage: React.FC = () => {
                 );
               })()}
               {/* Dual-axis: Base × Top finish dropdowns */}
-              {isDualAxis && (
+              {!isRugSqmActive && isDualAxis && (
                 <>
                   <ExpandableSpec
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
