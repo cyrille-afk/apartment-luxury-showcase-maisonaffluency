@@ -92,6 +92,35 @@ function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | nu
   return hit && Number(hit.price_cents) > 0 ? Number(hit.price_cents) : null;
 }
 
+/** Fetch FX rates for the given source currencies into the target. Returns map[src] = rate. */
+async function fetchFxRates(sources: string[], target: string): Promise<Record<string, number>> {
+  const out: Record<string, number> = { [target]: 1 };
+  const unique = Array.from(new Set(sources.map((s) => s.toUpperCase()).filter((s) => s && s !== target)));
+  await Promise.all(unique.map(async (src) => {
+    try {
+      const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${target}`);
+      const data = await res.json();
+      const rate = data?.rates?.[target];
+      if (typeof rate === "number" && rate > 0) out[src] = rate;
+    } catch (err) {
+      console.error(`FX fetch ${src}->${target} failed:`, err);
+    }
+  }));
+  return out;
+}
+
+/** Convert cents from one currency to another using a prefetched rate map. Returns null if unknown. */
+function fxConvertCents(cents: number | null, from: string | null, to: string, rates: Record<string, number>): number | null {
+  if (cents == null) return null;
+  const src = (from || to).toUpperCase();
+  const dst = to.toUpperCase();
+  if (src === dst) return cents;
+  const rate = rates[src];
+  if (!rate) return cents; // fall back to raw if FX unavailable — better than nulling
+  return Math.round(cents * rate);
+}
+
+
 /** Resolve a pick id (curator pick OR trade_products) to a trade_products.id, creating a row if needed. */
 async function resolvePickToTradeProduct(
   supabase: ReturnType<typeof createClient>,
@@ -262,16 +291,20 @@ serve(async (req) => {
         return json(422, { error: "None of the line items could be resolved to a product", skipped });
       }
 
-      // Pull pricing for the resolved trade_products in one shot
+      // Pull pricing (+ catalog currency) for the resolved trade_products in one shot
       const productIds = resolved.map((r) => r.tradeProductId);
       const { data: priced } = await supabase
         .from("trade_products")
-        .select("id, trade_price_cents, rrp_price_cents")
+        .select("id, trade_price_cents, rrp_price_cents, currency")
         .in("id", productIds);
-      const priceById = new Map<string, number | null>();
+      const priceById = new Map<string, { cents: number | null; currency: string }>();
       (priced || []).forEach((p: any) => {
-        priceById.set(p.id, p.trade_price_cents ?? p.rrp_price_cents ?? null);
+        priceById.set(p.id, {
+          cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          currency: (p.currency || "EUR").toUpperCase(),
+        });
       });
+
 
       // ----- draft_quote: create a new draft -----
       if (tool === "draft_quote") {
@@ -340,16 +373,29 @@ serve(async (req) => {
           return json(500, { error: "Could not create draft quote" });
         }
 
-        const itemsPayload = resolved.map((r) => ({
+        // Compute source price + currency for each line, then FX-convert into the quote currency.
+        const lineSources = resolved.map((r) => {
+          const variantCents = resolveVariantPriceFromPick(r.pick, r.line.variant);
+          const fallback = priceById.get(r.tradeProductId) || { cents: null, currency: "EUR" };
+          // Variants live on the curator pick, so use the pick's currency for them.
+          const sourceCurrency = (variantCents != null
+            ? (r.pick?.currency || fallback.currency || "EUR")
+            : fallback.currency) || "EUR";
+          const sourceCents = variantCents ?? fallback.cents;
+          return { r, sourceCents, sourceCurrency: String(sourceCurrency).toUpperCase() };
+        });
+        const fxRates = await fetchFxRates(lineSources.map((s) => s.sourceCurrency), quoteCurrency);
+        const itemsPayload = lineSources.map(({ r, sourceCents, sourceCurrency }) => ({
           quote_id: quote.id,
           product_id: r.tradeProductId,
           quantity: r.line.qty,
-          unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
+          unit_price_cents: fxConvertCents(sourceCents, sourceCurrency, quoteCurrency, fxRates),
           variant_label: r.line.variant,
           lead_time_weeks_override: r.line.lead_weeks,
           notes: r.line.note,
         }));
         const { error: itemsErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+
         if (itemsErr) {
           console.error("Quote items insert failed:", itemsErr);
           await supabase.from("trade_quotes").delete().eq("id", quote.id);
@@ -389,7 +435,7 @@ serve(async (req) => {
 
       const { data: existingQuote } = await supabase
         .from("trade_quotes")
-        .select("id, status, user_id")
+        .select("id, status, user_id, currency")
         .eq("id", quoteId)
         .eq("user_id", userId)
         .maybeSingle();
@@ -397,17 +443,29 @@ serve(async (req) => {
       if ((existingQuote as any).status !== "draft") {
         return json(409, { error: "Only draft quotes can be appended to" });
       }
+      const appendCurrency = String((existingQuote as any).currency || "EUR").toUpperCase();
 
-      const itemsPayload = resolved.map((r) => ({
+      const lineSourcesAppend = resolved.map((r) => {
+        const variantCents = resolveVariantPriceFromPick(r.pick, r.line.variant);
+        const fallback = priceById.get(r.tradeProductId) || { cents: null, currency: "EUR" };
+        const sourceCurrency = (variantCents != null
+          ? (r.pick?.currency || fallback.currency || "EUR")
+          : fallback.currency) || "EUR";
+        const sourceCents = variantCents ?? fallback.cents;
+        return { r, sourceCents, sourceCurrency: String(sourceCurrency).toUpperCase() };
+      });
+      const fxRatesAppend = await fetchFxRates(lineSourcesAppend.map((s) => s.sourceCurrency), appendCurrency);
+      const itemsPayload = lineSourcesAppend.map(({ r, sourceCents, sourceCurrency }) => ({
         quote_id: quoteId,
         product_id: r.tradeProductId,
         quantity: r.line.qty,
-        unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
+        unit_price_cents: fxConvertCents(sourceCents, sourceCurrency, appendCurrency, fxRatesAppend),
         variant_label: r.line.variant,
         lead_time_weeks_override: r.line.lead_weeks,
         notes: r.line.note,
       }));
       const { error: appendErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+
       if (appendErr) {
         console.error("Quote items append failed:", appendErr);
         return json(500, { error: "Could not append items to quote" });
