@@ -964,7 +964,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }}>
-        {openParentItem && openParent && <ParentSubGrid key={openParent} parentName={openParent} onClose={() => setOpenParent(null)} />}
+        {openParentItem && openParent && <ParentSubGrid key={openParent} parentName={openParent} onClose={() => setOpenParent(null)} autoScroll={!!initialExpand && openParent === initialExpand} />}
       </AnimatePresence>
     </div>
   );
