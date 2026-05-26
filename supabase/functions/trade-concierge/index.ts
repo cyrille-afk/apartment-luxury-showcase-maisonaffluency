@@ -983,6 +983,10 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt(
       designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes,
     );
+    const isExplicitQuoteIntent = /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg);
+    const availableTools = isExplicitQuoteIntent
+      ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
+      : TOOLS;
 
     const upstream = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -995,8 +999,8 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-2.5-pro",
           messages: [{ role: "system", content: systemPrompt }, ...messages],
-          tools: TOOLS,
-          tool_choice: "auto",
+          tools: availableTools,
+          tool_choice: isExplicitQuoteIntent ? "required" : "auto",
           stream: true,
         }),
       }
