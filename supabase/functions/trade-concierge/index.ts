@@ -117,7 +117,7 @@ const TOOLS = [
         type: "object",
         properties: {
           project_id: { type: "string", description: "UUID of the active project (from ACTIVE PROJECT section). Null if none." },
-          currency: { type: "string", description: "Three-letter currency the user wants the quote in (e.g. EUR, GBP, USD, SGD). Default to the project/profile currency shown in the system prompt." },
+          currency: { type: "string", description: "Three-letter currency the user explicitly asks for (e.g. EUR, GBP, USD, SGD). If the user does not name a currency, omit this so the quote stays in the catalog item currency." },
           note: { type: "string", description: "Optional one-line note about the quote (e.g. 'Mayfair drawing-room — bronze / mohair edit')." },
           lines: {
             type: "array",
@@ -1158,8 +1158,10 @@ serve(async (req) => {
               if (tc.name === "draft_quote") {
                 const projectId: string | null =
                   typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : resolvedProjectId;
-                const currency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
-                const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
+                const requestedCurrency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
+                const preview = await hydrateQuotePreview(supabase, lines, requestedCurrency, tradeDiscountPct);
+                const previewCurrencies = Array.from(new Set(preview.map((l: any) => l.currency).filter(Boolean)));
+                const currency: string | null = requestedCurrency || (previewCurrencies.length === 1 ? previewCurrencies[0] as string : null);
                 const proposal = {
                   tool: "draft_quote",
                   tool_call_id: tc.id || crypto.randomUUID(),
