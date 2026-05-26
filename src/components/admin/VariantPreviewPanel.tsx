@@ -5,6 +5,7 @@
  */
 import { useMemo, useState } from "react";
 import { Ruler, Layers, Eye } from "lucide-react";
+import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 
 export interface VariantPreviewProps {
   sizeVariants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null | undefined;
@@ -89,6 +90,13 @@ export default function VariantPreviewPanel({
     return sv.find((v) => (v.label || "").trim() === effectiveSize);
   }, [sv, isDualAxis, isBaseOnly, baseNeedsSelection, sizeNeedsSelection, selectedSize, selectedBase, effectiveSize, effectiveBase, effectiveTop, baseOptions, topOptions.length]);
 
+  const placeholderInput = {
+    variant_placeholder: variantPlaceholder,
+    base_axis_label: baseAxisLabel,
+    top_axis_label: topAxisLabel,
+  };
+  const basePh = getBasePlaceholder(placeholderInput);
+  const topPh = getTopPlaceholder(placeholderInput);
   const sizePlaceholder = "Select your size";
   const materialPlaceholder = variantPlaceholder || "Select your material choice";
 
@@ -128,8 +136,7 @@ export default function VariantPreviewPanel({
                   }}
                 >
                   <option value="">
-                    {variantPlaceholder ||
-                      `Select your ${(baseAxisLabel || "base").toLowerCase()} choice`}
+                    {basePh}
                   </option>
                   {baseOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
@@ -153,8 +160,7 @@ export default function VariantPreviewPanel({
                   }}
                 >
                   <option value="">
-                    {variantPlaceholder ||
-                      `Select your ${(topAxisLabel || "top").toLowerCase()} choice`}
+                    {topPh}
                   </option>
                   {topOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
