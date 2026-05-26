@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -54,6 +54,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     proposal.tool === "draft_quote" ? proposal.args.currency || "EUR" : null;
 
   const [projectId, setProjectId] = useState<string | null>(initialProjectId);
+  const [projectClientFallback, setProjectClientFallback] = useState<{ id: string | null; name: string } | null>(null);
   const [client, setClient] = useState<PickedClient | null>(null);
   const [currency, setCurrencyState] = useState<string>(initialCurrency || "EUR");
 
@@ -64,6 +65,27 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   );
   const projectClientId = selectedProject ? ((selectedProject as any).client_id as string | null | undefined) ?? null : null;
   const projectClientName = selectedProject?.client_name?.trim() || "";
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!projectId || projectClientId || projectClientName) {
+      setProjectClientFallback(null);
+      return;
+    }
+    supabase
+      .from("projects" as any)
+      .select("client_id, client_name")
+      .eq("id", projectId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setProjectClientFallback(data ? {
+          id: ((data as any).client_id as string | null | undefined) ?? null,
+          name: ((data as any).client_name as string | null | undefined)?.trim() || "",
+        } : null);
+      });
+    return () => { cancelled = true; };
+  }, [projectId, projectClientId, projectClientName]);
 
   const lineCurrency = useMemo(
     () => lines.find((l) => l.currency)?.currency || null,
@@ -112,7 +134,9 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   };
 
   const needsClient = !isAppend;
-  const hasClientForDraft = !!client?.id || !!projectClientId || !!projectClientName;
+  const effectiveProjectClientId = projectClientId ?? projectClientFallback?.id ?? null;
+  const effectiveProjectClientName = projectClientName || projectClientFallback?.name || "";
+  const hasClientForDraft = !!client?.id || !!effectiveProjectClientId || !!effectiveProjectClientName || !!projectId;
   const canApprove =
     visibleLines.length > 0 && (!needsClient || hasClientForDraft);
 
@@ -150,8 +174,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
             tool: "draft_quote" as const,
             args: {
               project_id: projectId,
-              client_id: client?.id ?? projectClientId ?? null,
-              client_name: client?.name ?? projectClientName,
+              client_id: client?.id ?? effectiveProjectClientId ?? null,
+              client_name: client?.name ?? effectiveProjectClientName,
               currency,
               note: proposal.args.note,
               lines: linesPayload,
