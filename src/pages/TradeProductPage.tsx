@@ -1209,7 +1209,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {product.dimensions && isDualAxis && !hasDualSize && (
+              {!isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={formatDimensionsMultiline(product.dimensions)}
