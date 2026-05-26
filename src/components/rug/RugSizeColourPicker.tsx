@@ -280,14 +280,8 @@ export default function RugSizeColourPicker({
         )}
       </div>
 
-      {/* PRICE */}
-      {hidePrice ? (
-        <div className="rounded-md border border-border/60 bg-muted/30 p-3">
-          <span className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground">
-            Price on request
-          </span>
-        </div>
-      ) : (
+      {/* PRICE — hidden on public side (page already shows a Price on Request CTA) */}
+      {!hidePrice && (
         <>
           <div className="rounded-md border border-border/60 bg-muted/30 p-3 flex items-baseline justify-between">
             <span className="font-body text-xs uppercase tracking-[0.12em] text-muted-foreground">
