@@ -968,10 +968,14 @@ async function hydrateQuotePreview(
     const pickRow = (pickRows || []).find((r: any) => r.id === l.pick_id);
     const rawVariants = Array.isArray(pickRow?.size_variants) ? pickRow.size_variants : [];
     const variant_options = rawVariants
-      .map((v: any) => ({
-        label: [v.base, v.top, v.label].filter((s: string) => s && String(s).trim()).join(" — "),
-        price_cents: Number(v.price_cents) > 0 ? Number(v.price_cents) : null,
-      }))
+      .map((v: any) => {
+        const label = variantLabel(v);
+        const computed = resolveVariantPriceFromPick(pickRow, label);
+        return {
+          label,
+          price_cents: computed?.cents ?? null,
+        };
+      })
       .filter((v: any) => v.label);
 
     return {
