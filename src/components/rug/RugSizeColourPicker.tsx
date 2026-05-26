@@ -164,44 +164,29 @@ export default function RugSizeColourPicker({
     <div className="space-y-5">
       {/* SIZE */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-          <span className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground">
-            <Ruler size={14} className="text-[hsl(var(--gold))]" />
-            Select {sizeAxis}
-          </span>
-          <span className="font-body text-xs text-muted-foreground">
-            {isCustomSize ? "Enter your dimensions below" : stockSizes.find((s) => s.key === sizeKey)?.label}
-          </span>
+        <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground border-b border-border/60 pb-2">
+          <Ruler size={14} className="text-[hsl(var(--gold))]" />
+          Select {sizeAxis}
         </div>
 
-        <div className="space-y-2 pl-1">
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <input
-              type="radio"
-              name="rug-size"
-              checked={isCustomSize}
-              onChange={() => setSizeKey(CUSTOM_SIZE_KEY)}
-              className="h-4 w-4 accent-foreground"
-            />
-            <span className="font-body text-sm text-foreground group-hover:text-foreground">
-              Enter your dimensions below
-            </span>
-          </label>
-          {stockSizes.map((s) => (
-            <label key={s.key} className="flex items-center gap-3 cursor-pointer group">
-              <input
-                type="radio"
-                name="rug-size"
-                checked={sizeKey === s.key}
-                onChange={() => setSizeKey(s.key)}
-                className="h-4 w-4 accent-foreground"
-              />
-              <span className="font-body text-sm text-muted-foreground group-hover:text-foreground">
+        <Select
+          value={sizeKey}
+          onValueChange={(v) => setSizeKey(v)}
+        >
+          <SelectTrigger className="w-full font-body text-sm">
+            <SelectValue placeholder={`Select your ${sizeAxis.toLowerCase()}`} />
+          </SelectTrigger>
+          <SelectContent className="z-[10050] bg-background border-border">
+            {stockSizes.map((s) => (
+              <SelectItem key={s.key} value={s.key} className="font-body text-sm cursor-pointer">
                 {s.label}
-              </span>
-            </label>
-          ))}
-        </div>
+              </SelectItem>
+            ))}
+            <SelectItem value={CUSTOM_SIZE_KEY} className="font-body text-sm cursor-pointer italic">
+              Enter your dimensions
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
         {isCustomSize && (
           <div className="space-y-2">
@@ -260,12 +245,41 @@ export default function RugSizeColourPicker({
 
       {/* COLOUR */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-          <span className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground">
-            <Palette size={14} className="text-[hsl(var(--gold))]" />
-            Select {colourAxis}
-          </span>
+        <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground border-b border-border/60 pb-2">
+          <Palette size={14} className="text-[hsl(var(--gold))]" />
+          Select {colourAxis}
         </div>
+
+        <Select
+          value={isCustomColour ? CUSTOM_COLOUR_KEY : colour ?? ""}
+          onValueChange={(v) => setColour(v)}
+        >
+          <SelectTrigger className="w-full font-body text-sm">
+            <SelectValue placeholder={`Select your ${colourAxis.toLowerCase()}`} />
+          </SelectTrigger>
+          <SelectContent className="z-[10050] bg-background border-border">
+            {stockColours.map((c) => (
+              <SelectItem key={c} value={c} className="font-body text-sm cursor-pointer">
+                {c}
+              </SelectItem>
+            ))}
+            <SelectItem value={CUSTOM_COLOUR_KEY} className="font-body text-sm cursor-pointer italic">
+              Enter your custom {colourAxis.toLowerCase()}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        {isCustomColour && (
+          <input
+            type="text"
+            value={customColour}
+            onChange={(e) => setCustomColour(e.target.value)}
+            placeholder={`Describe your ${colourAxis.toLowerCase()}`}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        )}
+      </div>
+
 
         <div className="space-y-2 pl-1">
           {stockColours.map((c) => (
