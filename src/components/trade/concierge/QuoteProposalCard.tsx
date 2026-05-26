@@ -100,9 +100,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
 
   const visibleLines = lines.filter((l) => !excluded.has(l.pick_id));
 
+  const effectiveLineUnitPrice = (l: (typeof lines)[number]) => {
+    if (l.variant_options && l.variant) {
+      return l.variant_options.find((o) => o.label === l.variant)?.price_cents ?? null;
+    }
+    return l.unit_price_cents;
+  };
+
   const subtotalCents = visibleLines.reduce((sum, l) => {
-    if (l.unit_price_cents == null) return sum;
-    return sum + l.unit_price_cents * l.qty;
+    const unitPrice = effectiveLineUnitPrice(l);
+    if (unitPrice == null) return sum;
+    return sum + unitPrice * l.qty;
   }, 0);
   const discountCents = Math.round((subtotalCents * trade_discount_pct) / 100);
   const totalCents = subtotalCents - discountCents;
@@ -122,7 +130,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         return {
           ...l,
           variant: label || null,
-          unit_price_cents: opt?.price_cents ?? l.unit_price_cents,
+          unit_price_cents: opt?.price_cents ?? null,
         };
       }),
     );
@@ -324,7 +332,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       <ul className="space-y-1.5 mb-3">
         {lines.map((l) => {
           const isExcluded = excluded.has(l.pick_id);
-          const lineTotal = l.unit_price_cents != null ? l.unit_price_cents * l.qty : null;
+          const effectiveUnitPrice = effectiveLineUnitPrice(l);
+          const lineTotal = effectiveUnitPrice != null ? effectiveUnitPrice * l.qty : null;
           return (
             <li
               key={l.pick_id}
@@ -361,7 +370,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                   </select>
                 )}
                 <div className="mt-0.5 font-body text-[10px] text-muted-foreground">
-                  {formatPrice(l.unit_price_cents, l.currency)}
+                  {formatPrice(effectiveUnitPrice, l.currency)}
                   {lineTotal != null && l.qty > 1 && (
                     <span className="ml-1 text-foreground/70">
                       × {l.qty} = {formatPrice(lineTotal, l.currency)}
