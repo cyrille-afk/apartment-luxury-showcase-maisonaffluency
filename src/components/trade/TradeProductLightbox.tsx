@@ -8,6 +8,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { looksLikeDimension } from "@/lib/rugPricing";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { getBasePlaceholder, getMaterialPlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
@@ -530,7 +531,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                       autoSplit
                     />
                   )}
-                  {product.dimensions && (
+                  {product.dimensions && looksLikeDimension(product.dimensions) && (
                     <ExpandableSpec
                       icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                       text={formatDimensionsMultiline(product.dimensions)}

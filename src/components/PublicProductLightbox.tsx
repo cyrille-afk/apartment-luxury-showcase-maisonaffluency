@@ -14,6 +14,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { looksLikeDimension } from "@/lib/rugPricing";
 import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
@@ -537,7 +538,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     );
                   }
                 }
-                return product.dimensions ? (
+                return product.dimensions && looksLikeDimension(product.dimensions) ? (
                   <ExpandableSpec
                     icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                     text={formatDimensionsMultiline(product.dimensions)}
