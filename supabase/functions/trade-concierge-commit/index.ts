@@ -162,7 +162,7 @@ async function resolvePickToTradeProduct(
 
   const { data: pick } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, description, origin, price_prefix, pdf_url, size_variants")
+    .select("id, title, image_url, dimensions, materials, category, subcategory, designer_id, gallery_images, lead_time, currency, trade_price_cents, price_per_sqm_cents, description, origin, price_prefix, pdf_url, size_variants")
     .eq("id", pickId)
     .maybeSingle();
 
