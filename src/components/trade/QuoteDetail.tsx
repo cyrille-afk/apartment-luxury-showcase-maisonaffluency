@@ -1816,8 +1816,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   )}
                 </div>
 
-                {/* UK landed cost (DDP, GBP) — for UK clients on EUR/USD/SGD quotes */}
-                {subtotalCents > 0 && (
+                {/* UK landed cost (DDP, GBP) — only shown when the linked client's billing country is UK */}
+                {subtotalCents > 0 && isUkDestination && (
                   <div className="mt-4">
                     <UkLandedCostPanel
                       goodsAfterDiscountCents={
@@ -1832,6 +1832,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     />
                   </div>
                 )}
+
               </div>
             </>
           )}
