@@ -714,7 +714,7 @@ function MobileLetterRow({
                     transition={{ duration: 0.25 }}
                     className="mt-4"
                   >
-                    <ParentSubGrid parentName={openParent} onClose={() => setOpenParent(null)} />
+                    <ParentSubGrid parentName={openParent} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && openParent === initialExpand} />
                   </motion.div>
                 )}
               </AnimatePresence>
