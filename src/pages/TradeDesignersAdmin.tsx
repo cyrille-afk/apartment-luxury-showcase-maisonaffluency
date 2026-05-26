@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, Fragment, useEffect, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { cn } from "@/lib/utils";
+import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -739,19 +740,30 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         placeholder="e.g. Carrara"
                         className="text-xs h-8"
                       />
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={variant.price_cents ? (variant.price_cents / 100).toString() : ""}
-                        onChange={(e) => {
-                          const updated = [...(pick.size_variants || [])];
-                          const num = parseFloat(e.target.value);
-                          updated[idx] = { ...variant, price_cents: Number.isFinite(num) ? Math.round(num * 100) : 0 };
-                          updateField(pick.id, "size_variants", updated as any);
-                        }}
-                        placeholder="0.00"
-                        className="text-xs h-8"
-                      />
+                      {(() => {
+                        const computedCents = (isRugCategory(pick.category) && pick.price_per_sqm_cents)
+                          ? priceRugVariantFromLabel(variant.base || variant.label || "", pick.price_per_sqm_cents)
+                          : null;
+                        const placeholderText = computedCents
+                          ? `${(computedCents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })} (auto)`
+                          : "0.00";
+                        return (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={variant.price_cents ? (variant.price_cents / 100).toString() : ""}
+                            onChange={(e) => {
+                              const updated = [...(pick.size_variants || [])];
+                              const num = parseFloat(e.target.value);
+                              updated[idx] = { ...variant, price_cents: Number.isFinite(num) ? Math.round(num * 100) : 0 };
+                              updateField(pick.id, "size_variants", updated as any);
+                            }}
+                            placeholder={placeholderText}
+                            title={computedCents ? "Auto-computed from Price / m² × size. Leave blank to use this value, or type to override." : undefined}
+                            className={cn("text-xs h-8", computedCents && !variant.price_cents && "text-muted-foreground italic")}
+                          />
+                        );
+                      })()}
                       <Input
                         type="number"
                         min={1}
