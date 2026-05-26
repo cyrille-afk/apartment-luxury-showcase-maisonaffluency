@@ -510,7 +510,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                 const sv = product.size_variants || [];
                 const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
                 const dualSizeOptions = isDualAxis
-                  ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean)))
+                  ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
                   : [];
                 if (isDualAxis && dualSizeOptions.length > 0) {
                   return (
@@ -526,7 +526,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                 if (!isDualAxis && sv.length > 1) {
                   const labels = Array.from(
                     new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
-                  );
+                  ).filter(looksLikeDimension);
                   if (labels.length > 1) {
                     return (
                       <ExpandableSpec
