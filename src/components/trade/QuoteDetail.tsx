@@ -17,6 +17,7 @@ import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/q
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -39,6 +40,8 @@ interface QuoteItemWithProduct {
     brand_name: string;
     trade_price_cents: number | null;
     rrp_price_cents?: number | null;
+    price_per_sqm_cents?: number | null;
+    price_unit?: string | null;
     currency: string;
     image_url: string | null;
     dimensions: string | null;
@@ -70,6 +73,15 @@ const formatPriceRaw = (cents: number | null, currency: string = "SGD") => {
 const currencySymbol = (c: string) => {
   const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£" };
   return map[c] || c;
+};
+
+const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
+  const product = item.trade_products;
+  if (!product) return null;
+  if (product.price_unit === "per_sqm" && product.price_per_sqm_cents) {
+    return priceRugVariantFromLabel(item.variant_label || product.dimensions, product.price_per_sqm_cents);
+  }
+  return product.trade_price_cents;
 };
 
 const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
