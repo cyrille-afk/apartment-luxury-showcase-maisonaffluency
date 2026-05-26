@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -95,12 +95,15 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const [projectClientFallback, setProjectClientFallback] = useState<{ id: string | null; name: string } | null>(null);
   const [client, setClient] = useState<PickedClient | null>(null);
   const [currency, setCurrencyState] = useState<string>(initialCurrency || "EUR");
+  const hydratedVariantPricingIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const missingIds = Array.from(new Set(lines
       .filter((l) => l.variant_options?.some((o) => o.price_cents == null))
-      .map((l) => l.pick_id)));
+      .map((l) => l.pick_id)))
+      .filter((id) => !hydratedVariantPricingIdsRef.current.has(id));
     if (!missingIds.length) return;
+    missingIds.forEach((id) => hydratedVariantPricingIdsRef.current.add(id));
     let cancelled = false;
     supabase
       .from("designer_curator_picks" as any)
