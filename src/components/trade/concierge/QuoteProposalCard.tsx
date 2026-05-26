@@ -36,6 +36,42 @@ function formatPrice(cents: number | null, currency: string | null): string {
   }
 }
 
+function normalizeLoose(value: string | null | undefined): string {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function parseSqm(label: string | null | undefined): number | null {
+  const match = String(label || "").match(/(\d+(?:[.,]\d+)?)\s*[x×*]\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?/i);
+  if (!match) return null;
+  const width = parseFloat(match[1].replace(",", "."));
+  const length = parseFloat(match[2].replace(",", "."));
+  if (!(width > 0 && length > 0)) return null;
+  const factor = (match[3] || "cm").toLowerCase() === "m" ? 1 : 0.01;
+  return width * factor * length * factor;
+}
+
+function variantOptionLabel(v: any): string {
+  return [v?.base, v?.top, v?.label].filter((s) => s && String(s).trim()).join(" — ");
+}
+
+function computeVariantOptionPrice(row: any, label: string): number | null {
+  const wanted = normalizeLoose(label);
+  const variants = Array.isArray(row?.size_variants) ? row.size_variants : [];
+  const hit = variants.find((v: any) => {
+    const option = normalizeLoose(variantOptionLabel(v));
+    return option && (option === wanted || option.includes(wanted) || wanted.includes(option));
+  });
+  if (Number(hit?.price_cents) > 0) return Number(hit.price_cents);
+  const sqm = parseSqm(label);
+  const rate = Number(row?.price_per_sqm_cents);
+  return sqm && rate > 0 ? Math.round(sqm * rate) : null;
+}
+
 export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const isAppend = proposal.tool === "add_to_quote";
   const [status, setStatus] = useState<Status>("pending");
@@ -59,6 +95,35 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const [projectClientFallback, setProjectClientFallback] = useState<{ id: string | null; name: string } | null>(null);
   const [client, setClient] = useState<PickedClient | null>(null);
   const [currency, setCurrencyState] = useState<string>(initialCurrency || "EUR");
+
+  useEffect(() => {
+    const missingIds = Array.from(new Set(lines
+      .filter((l) => l.variant_options?.some((o) => o.price_cents == null))
+      .map((l) => l.pick_id)));
+    if (!missingIds.length) return;
+    let cancelled = false;
+    supabase
+      .from("designer_curator_picks" as any)
+      .select("id, price_per_sqm_cents, currency, size_variants")
+      .in("id", missingIds)
+      .then(({ data }) => {
+        if (cancelled || !Array.isArray(data)) return;
+        const rows = new Map((data as any[]).map((row) => [row.id, row]));
+        setLines((prev) => prev.map((line) => {
+          const row = rows.get(line.pick_id);
+          if (!row || !line.variant_options?.length) return line;
+          return {
+            ...line,
+            currency: line.currency || row.currency || null,
+            variant_options: line.variant_options.map((option) => ({
+              ...option,
+              price_cents: option.price_cents ?? computeVariantOptionPrice(row, option.label),
+            })),
+          };
+        }));
+      });
+    return () => { cancelled = true; };
+  }, [lines]);
 
   const { projects } = useProjects({ activeOnly: true });
   const selectedProject = useMemo(
@@ -101,7 +166,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const visibleLines = lines.filter((l) => !excluded.has(l.pick_id));
 
   const effectiveLineUnitPrice = (l: (typeof lines)[number]) => {
-    if (l.variant_options && l.variant) {
+    if (l.variant_options?.length) {
+      if (!l.variant) return null;
       return l.variant_options.find((o) => o.label === l.variant)?.price_cents ?? null;
     }
     return l.unit_price_cents;
@@ -114,7 +180,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   }, 0);
   const discountCents = Math.round((subtotalCents * trade_discount_pct) / 100);
   const totalCents = subtotalCents - discountCents;
-  const hasUnpriced = visibleLines.some((l) => l.unit_price_cents == null);
+  const hasUnpriced = visibleLines.some((l) => effectiveLineUnitPrice(l) == null);
 
   const setQty = (pickId: string, qty: number) => {
     setLines((prev) =>
