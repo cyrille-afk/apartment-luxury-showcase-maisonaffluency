@@ -17,6 +17,7 @@ import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/q
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -39,6 +40,8 @@ interface QuoteItemWithProduct {
     brand_name: string;
     trade_price_cents: number | null;
     rrp_price_cents?: number | null;
+    price_per_sqm_cents?: number | null;
+    price_unit?: string | null;
     currency: string;
     image_url: string | null;
     dimensions: string | null;
@@ -70,6 +73,15 @@ const formatPriceRaw = (cents: number | null, currency: string = "SGD") => {
 const currencySymbol = (c: string) => {
   const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£" };
   return map[c] || c;
+};
+
+const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
+  const product = item.trade_products;
+  if (!product) return null;
+  if (product.price_unit === "per_sqm" && product.price_per_sqm_cents) {
+    return priceRugVariantFromLabel(item.variant_label || product.dimensions, product.price_per_sqm_cents);
+  }
+  return product.trade_price_cents;
 };
 
 const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
@@ -316,7 +328,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at").eq("id", quoteId).single(),
@@ -631,7 +643,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const subtotalCents = items.reduce((sum, item) => {
-    const rawPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
+    const rawPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? 0;
     // If admin set unit_price_cents, it's already in the quote's currency — skip conversion
     const prodCurrency = item.unit_price_cents != null ? currency : (item.trade_products?.currency || currency);
     const converted = convertCents(rawPrice, prodCurrency, currency) ?? 0;
@@ -641,7 +653,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
-      const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+      const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
       const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
       const unit = convertCents(rawUnit, fromCur, currency);
       return {
@@ -848,7 +860,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     try {
       const lines: ProcurementLine[] = items.map((item, idx) => {
         const product = item.trade_products;
-        const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+        const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
         const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
         const unitTrade = convertCents(rawUnit, fromCur, currency);
         const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
@@ -1361,7 +1373,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const groupItems = groups.get(roomKey)!;
                   const groupSubtotal = groupItems.reduce((sum, it) => {
                     const p = it.trade_products;
-                    const raw = it.unit_price_cents ?? p?.trade_price_cents ?? null;
+                    const raw = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? null;
                     const fc = it.unit_price_cents != null ? currency : (p?.currency || currency);
                     const u = convertCents(raw, fc, currency);
                     return sum + (u ? u * it.quantity : 0);
@@ -1382,7 +1394,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <div className="divide-y divide-border">
                         {groupItems.map((item) => {
                   const product = item.trade_products;
-                  const rawUnitPrice = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+                  const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
                   // unit_price_cents is already in the quote currency (admin converts before saving)
                   const prodCurrency = item.unit_price_cents != null ? currency : (product?.currency || currency);
                   const unitPrice = convertCents(rawUnitPrice, prodCurrency, currency);
@@ -1441,11 +1453,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-xs text-foreground font-medium">
                             {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
                           </span>
-                          {item.unit_price_cents != null && product?.currency && product.currency !== currency && product.trade_price_cents && (
-                            <p className="font-body text-[8px] text-muted-foreground/60 mt-0.5">
-                              Catalog: {currencySymbol(product.currency)} {formatPriceRaw(product.trade_price_cents, product.currency)}
-                            </p>
-                          )}
                         </div>
                       </div>
                       {/* Desktop: standard columns */}
@@ -1468,11 +1475,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span className="font-body text-sm text-foreground tabular-nums">
                           {unitPrice ? `${currencySymbol(currency)} ${formatPriceRaw(unitPrice, currency)}` : "TBD"}
                         </span>
-                        {item.unit_price_cents != null && product?.currency && product.currency !== currency && product.trade_price_cents && (
-                          <p className="font-body text-[9px] text-muted-foreground/60">
-                            Catalog: {currencySymbol(product.currency)} {formatPriceRaw(product.trade_price_cents, product.currency)}
-                          </p>
-                        )}
                       </div>
                       <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium tabular-nums">
