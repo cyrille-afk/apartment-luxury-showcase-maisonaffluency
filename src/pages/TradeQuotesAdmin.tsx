@@ -801,7 +801,21 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
         {/* Action */}
         {canSendPricing && (
-          <div className="border-t border-border p-4 md:p-6 flex justify-end">
+          <div className="border-t border-border p-4 md:p-6 flex flex-wrap items-center justify-end gap-2">
+            <button
+              onClick={handleCancelQuote}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-3 py-2 border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-destructive/10 transition-colors disabled:opacity-40"
+            >
+              <XCircle className="h-3.5 w-3.5" /> Cancel Quote
+            </button>
+            <button
+              onClick={handleRequestChanges}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground disabled:opacity-40"
+            >
+              <Edit3 className="h-3.5 w-3.5" /> Request Changes
+            </button>
             <button
               onClick={handleSendPricing}
               disabled={saving || subtotalCents === 0}
