@@ -82,6 +82,18 @@ async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClien
   return row;
 }
 
+function parseRugSqm(label: string | null | undefined): number | null {
+  if (!label) return null;
+  const m = label.match(/(\d+(?:[.,]\d+)?)\s*[x×*]\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?/i);
+  if (!m) return null;
+  const a = parseFloat(m[1].replace(",", "."));
+  const b = parseFloat(m[2].replace(",", "."));
+  const unit = (m[3] || "cm").toLowerCase();
+  if (!(a > 0 && b > 0)) return null;
+  const factor = unit === "m" ? 1 : 0.01;
+  return (a * factor) * (b * factor);
+}
+
 function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | null): number | null {
   if (!pick || !variantLabel || !Array.isArray(pick.size_variants)) return null;
   const wanted = normalizeLoose(variantLabel);
@@ -89,8 +101,16 @@ function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | nu
     const label = normalizeLoose([v.base, v.top, v.label].filter(Boolean).join(" "));
     return label && (label === wanted || label.includes(wanted) || wanted.includes(label));
   });
-  return hit && Number(hit.price_cents) > 0 ? Number(hit.price_cents) : null;
+  if (hit && Number(hit.price_cents) > 0) return Number(hit.price_cents);
+  // Fallback: rugs with a per-sqm rate compute price from W × L in the variant label.
+  const rate = Number(pick.price_per_sqm_cents);
+  if (hit && rate > 0 && /rug/i.test(pick.category || "")) {
+    const sqm = parseRugSqm(hit.base || hit.label || variantLabel);
+    if (sqm) return Math.round(sqm * rate);
+  }
+  return null;
 }
+
 
 /** Fetch FX rates for the given source currencies into the target. Returns map[src] = rate. */
 async function fetchFxRates(sources: string[], target: string): Promise<Record<string, number>> {
