@@ -373,16 +373,29 @@ serve(async (req) => {
           return json(500, { error: "Could not create draft quote" });
         }
 
-        const itemsPayload = resolved.map((r) => ({
+        // Compute source price + currency for each line, then FX-convert into the quote currency.
+        const lineSources = resolved.map((r) => {
+          const variantCents = resolveVariantPriceFromPick(r.pick, r.line.variant);
+          const fallback = priceById.get(r.tradeProductId) || { cents: null, currency: "EUR" };
+          // Variants live on the curator pick, so use the pick's currency for them.
+          const sourceCurrency = (variantCents != null
+            ? (r.pick?.currency || fallback.currency || "EUR")
+            : fallback.currency) || "EUR";
+          const sourceCents = variantCents ?? fallback.cents;
+          return { r, sourceCents, sourceCurrency: String(sourceCurrency).toUpperCase() };
+        });
+        const fxRates = await fetchFxRates(lineSources.map((s) => s.sourceCurrency), quoteCurrency);
+        const itemsPayload = lineSources.map(({ r, sourceCents, sourceCurrency }) => ({
           quote_id: quote.id,
           product_id: r.tradeProductId,
           quantity: r.line.qty,
-          unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
+          unit_price_cents: fxConvertCents(sourceCents, sourceCurrency, quoteCurrency, fxRates),
           variant_label: r.line.variant,
           lead_time_weeks_override: r.line.lead_weeks,
           notes: r.line.note,
         }));
         const { error: itemsErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+
         if (itemsErr) {
           console.error("Quote items insert failed:", itemsErr);
           await supabase.from("trade_quotes").delete().eq("id", quote.id);
