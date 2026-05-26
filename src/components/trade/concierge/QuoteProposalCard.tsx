@@ -58,6 +58,12 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const [currency, setCurrencyState] = useState<string>(initialCurrency || "EUR");
 
   const { projects } = useProjects({ activeOnly: true });
+  const selectedProject = useMemo(
+    () => projects.find((p) => p.id === projectId) || null,
+    [projects, projectId],
+  );
+  const projectClientId = selectedProject ? ((selectedProject as any).client_id as string | null | undefined) ?? null : null;
+  const projectClientName = selectedProject?.client_name?.trim() || "";
 
   const lineCurrency = useMemo(
     () => lines.find((l) => l.currency)?.currency || null,
@@ -106,16 +112,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   };
 
   const needsClient = !isAppend;
+  const hasClientForDraft = !!client?.id || !!projectClientId || !!projectClientName;
   const canApprove =
-    visibleLines.length > 0 && (!needsClient || !!client?.id);
+    visibleLines.length > 0 && (!needsClient || hasClientForDraft);
 
   const handleApprove = async () => {
     if (visibleLines.length === 0) {
       toast.error("Add at least one line to the quote.");
       return;
     }
-    if (needsClient && !client?.id) {
-      toast.error("Pick a client before drafting the quote.");
+    if (needsClient && !hasClientForDraft) {
+      toast.error("Pick a client or a project with a client before drafting the quote.");
       return;
     }
     setStatus("committing");
@@ -143,8 +150,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
             tool: "draft_quote" as const,
             args: {
               project_id: projectId,
-              client_id: client?.id ?? null,
-              client_name: client?.name ?? "",
+              client_id: client?.id ?? projectClientId ?? null,
+              client_name: client?.name ?? projectClientName,
               currency,
               note: proposal.args.note,
               lines: linesPayload,
