@@ -427,7 +427,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <label className="text-[10px] text-muted-foreground">Origin</label>
                   <Input value={(pick as any).origin || ""} onChange={(e) => updateField(pick.id, "origin", e.target.value || null)} className="text-xs" placeholder="e.g. Handmade in Europe" />
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
                     <Input value={pick.currency} onChange={(e) => updateField(pick.id, "currency", e.target.value)} className="text-xs" />
