@@ -193,7 +193,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [emailBody, setEmailBody] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
-  const [tradeDiscount, setTradeDiscount] = useState(false);
+  const [tradeDiscount, setTradeDiscount] = useState(true);
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
   // The user can still toggle it on manually if needed.
   const [gstEnabled, setGstEnabled] = useState(false);
@@ -456,6 +456,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       });
     });
   }, [clientId]);
+
+  // Pull the linked client's billing country to gate destination-specific panels (e.g. UK DDP)
+  const [clientCountry, setClientCountry] = useState<string | null>(null);
+  useEffect(() => {
+    if (!clientId) { setClientCountry(null); return; }
+    (supabase.from("clients" as any).select("billing_country").eq("id", clientId).maybeSingle() as any)
+      .then(({ data }: any) => setClientCountry((data?.billing_country as string) || null));
+  }, [clientId]);
+  const isUkDestination = (() => {
+    const c = (clientCountry || "").trim().toLowerCase();
+    return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
+  })();
+
 
   // Load email audit log for this quote
   const loadEmailLog = useCallback(async () => {
@@ -1803,8 +1816,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   )}
                 </div>
 
-                {/* UK landed cost (DDP, GBP) — for UK clients on EUR/USD/SGD quotes */}
-                {subtotalCents > 0 && (
+                {/* UK landed cost (DDP, GBP) — only shown when the linked client's billing country is UK */}
+                {subtotalCents > 0 && isUkDestination && (
                   <div className="mt-4">
                     <UkLandedCostPanel
                       goodsAfterDiscountCents={
@@ -1819,6 +1832,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     />
                   </div>
                 )}
+
               </div>
             </>
           )}
