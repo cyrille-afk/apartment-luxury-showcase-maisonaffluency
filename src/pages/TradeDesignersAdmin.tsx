@@ -460,6 +460,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     />
                   </div>
                   <div>
+                    <label className="text-[10px] text-muted-foreground">
+                      Price / m² ({pick.currency || "EUR"}) <span className="italic">— rugs</span>
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={pick.price_per_sqm_cents != null ? (pick.price_per_sqm_cents / 100).toString() : ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "") { updateField(pick.id, "price_per_sqm_cents" as any, null); return; }
+                        const num = parseFloat(v);
+                        updateField(pick.id, "price_per_sqm_cents" as any, Number.isFinite(num) ? Math.round(num * 100) : null);
+                      }}
+                      placeholder="e.g. 600 → auto-prices variants by W×L"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
                     <label className="text-[10px] text-muted-foreground">Sort Order</label>
                     <Input type="number" value={pick.sort_order} onChange={(e) => updateField(pick.id, "sort_order", parseInt(e.target.value) || 0)} className="text-xs" />
                   </div>
