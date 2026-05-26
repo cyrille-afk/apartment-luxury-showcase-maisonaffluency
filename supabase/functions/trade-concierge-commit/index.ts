@@ -92,6 +92,35 @@ function resolveVariantPriceFromPick(pick: any | null, variantLabel: string | nu
   return hit && Number(hit.price_cents) > 0 ? Number(hit.price_cents) : null;
 }
 
+/** Fetch FX rates for the given source currencies into the target. Returns map[src] = rate. */
+async function fetchFxRates(sources: string[], target: string): Promise<Record<string, number>> {
+  const out: Record<string, number> = { [target]: 1 };
+  const unique = Array.from(new Set(sources.map((s) => s.toUpperCase()).filter((s) => s && s !== target)));
+  await Promise.all(unique.map(async (src) => {
+    try {
+      const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${target}`);
+      const data = await res.json();
+      const rate = data?.rates?.[target];
+      if (typeof rate === "number" && rate > 0) out[src] = rate;
+    } catch (err) {
+      console.error(`FX fetch ${src}->${target} failed:`, err);
+    }
+  }));
+  return out;
+}
+
+/** Convert cents from one currency to another using a prefetched rate map. Returns null if unknown. */
+function fxConvertCents(cents: number | null, from: string | null, to: string, rates: Record<string, number>): number | null {
+  if (cents == null) return null;
+  const src = (from || to).toUpperCase();
+  const dst = to.toUpperCase();
+  if (src === dst) return cents;
+  const rate = rates[src];
+  if (!rate) return cents; // fall back to raw if FX unavailable — better than nulling
+  return Math.round(cents * rate);
+}
+
+
 /** Resolve a pick id (curator pick OR trade_products) to a trade_products.id, creating a row if needed. */
 async function resolvePickToTradeProduct(
   supabase: ReturnType<typeof createClient>,
