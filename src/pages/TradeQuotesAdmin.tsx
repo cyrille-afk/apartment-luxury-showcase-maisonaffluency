@@ -486,6 +486,42 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     onBack();
   };
 
+  const appendAdminNote = (existing: string | null, label: string, reason: string) => {
+    const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+    const entry = `[${stamp}] ${label}: ${reason}`;
+    return existing ? `${existing}\n\n${entry}` : entry;
+  };
+
+  const handleRequestChanges = async () => {
+    const reason = window.prompt("Reason for requesting changes (visible to client):");
+    if (!reason || !reason.trim()) return;
+    setSaving(true);
+    const merged = appendAdminNote(adminNotes, "Changes requested", reason.trim());
+    await supabase.from("trade_quotes").update({
+      status: "draft",
+      admin_notes: merged,
+    } as any).eq("id", quoteId);
+    toast({ title: "Reopened as draft", description: "Client can revise the quote." });
+    setSaving(false);
+    onBack();
+  };
+
+  const handleCancelQuote = async () => {
+    const reason = window.prompt("Reason for cancelling this quote (visible to client):");
+    if (!reason || !reason.trim()) return;
+    if (!window.confirm("Cancel this quote? The client will be notified.")) return;
+    setSaving(true);
+    const merged = appendAdminNote(adminNotes, "Cancelled", reason.trim());
+    await supabase.from("trade_quotes").update({
+      status: "cancelled",
+      admin_notes: merged,
+    } as any).eq("id", quoteId);
+    toast({ title: "Quote cancelled" });
+    setSaving(false);
+    onBack();
+  };
+
+
   const subtotalCents = items.reduce((sum, item) => {
     const priceStr = itemPrices[item.id];
     const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
