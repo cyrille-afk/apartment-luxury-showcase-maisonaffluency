@@ -62,3 +62,29 @@ export function isRugCategory(category: string | null | undefined): boolean {
   if (!category) return false;
   return /\brug/i.test(category);
 }
+
+/**
+ * Heuristic: does this text look like an actual dimension/size value?
+ * Used as a safety net to avoid rendering material/finish copy under a Ruler
+ * icon when the underlying `dimensions` field (or single size-variant label)
+ * was filled with the wrong content.
+ *
+ * Accepts: cm/mm/m/in/inches/" units, ×/x separators, Ø/⌀ diameters, or a
+ * clear H/W/L/D dimension prefix followed by a number.
+ */
+export function looksLikeDimension(text: string | null | undefined): boolean {
+  if (!text) return false;
+  // Check each line independently — if any line looks dimensional, keep it.
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .some((line) => {
+      if (/\d\s*(?:cm|mm|in|inches?|")\b/i.test(line)) return true;
+      if (/(?<![A-Za-z\/])\d+(?:[.,]\d+)?\s*m(?![A-Za-z\/])/i.test(line)) return true;
+      if (/\d\s*[×x*]\s*\d/i.test(line)) return true;
+      if (/[Ø⌀]\s*\d/.test(line)) return true;
+      if (/\b[HWLDhwld]\s*\d/.test(line)) return true;
+      return false;
+    });
+}
