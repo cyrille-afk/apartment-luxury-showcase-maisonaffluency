@@ -497,11 +497,11 @@ const VariantSelectors: React.FC<{
             emphasized
             placeholder="Select your size"
           />
-        ) : product.dimensions ? (
+        ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
           <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
         ) : null;
       })()}
-      {!hasVariants && product.dimensions && (
+      {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
         <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
       )}
     </>
