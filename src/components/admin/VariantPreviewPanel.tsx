@@ -160,8 +160,7 @@ export default function VariantPreviewPanel({
                   }}
                 >
                   <option value="">
-                    {variantPlaceholder ||
-                      `Select your ${(topAxisLabel || "top").toLowerCase()} choice`}
+                    {topPh}
                   </option>
                   {topOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
