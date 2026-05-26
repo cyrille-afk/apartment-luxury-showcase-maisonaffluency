@@ -1171,6 +1171,7 @@ export type Database = {
           image_url: string
           instagram_handle: string | null
           instagram_handle_2: string | null
+          is_independent: boolean
           is_published: boolean
           links: Json | null
           logo_url: string | null
@@ -1196,6 +1197,7 @@ export type Database = {
           image_url?: string
           instagram_handle?: string | null
           instagram_handle_2?: string | null
+          is_independent?: boolean
           is_published?: boolean
           links?: Json | null
           logo_url?: string | null
@@ -1221,6 +1223,7 @@ export type Database = {
           image_url?: string
           instagram_handle?: string | null
           instagram_handle_2?: string | null
+          is_independent?: boolean
           is_published?: boolean
           links?: Json | null
           logo_url?: string | null

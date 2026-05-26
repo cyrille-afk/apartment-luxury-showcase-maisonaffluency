@@ -286,8 +286,14 @@ function useFullCuratorPicks(enabled: boolean) {
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
+  // Independent designers also listed under a parent atelier (e.g. Fabrice Ausset)
+  // should appear as standalone cards in the alpha listing with no parent label.
+  const isIndependent = (item as any).is_independent === true;
   if (item.founder && item.founder !== item.name) {
-    return { displayName: item.display_name || item.name, parentLabel: item.founder };
+    return {
+      displayName: item.display_name || item.name,
+      parentLabel: isIndependent ? null : item.founder,
+    };
   }
   if (!item.founder && item.display_name && item.display_name !== item.name) {
     return { displayName: item.display_name, parentLabel: item.name };
@@ -302,11 +308,31 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
 }
 
 // ─── Sub-Designers Grid ──────────────────────────────────────────────────────
-function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: () => void }) {
+function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string; onClose: () => void; autoScroll?: boolean }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!autoScroll) return;
+    if (!designers.length) return;
+    // Wait for layout + AnimatePresence to settle, then align the sub-grid
+    // header just below the sticky navigation so the first row isn't truncated.
+    const align = () => {
+      const el = rootRef.current;
+      if (!el) return;
+      const nav = document.querySelector("nav");
+      const navHeight = nav?.getBoundingClientRect().height ?? 96;
+      const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - 12);
+      window.scrollTo({ top: y, behavior: "smooth" });
+    };
+    const t1 = setTimeout(align, 220);
+    const t2 = setTimeout(align, 600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [autoScroll, designers.length]);
 
   return (
     <motion.div
+      ref={rootRef}
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
@@ -688,7 +714,7 @@ function MobileLetterRow({
                     transition={{ duration: 0.25 }}
                     className="mt-4"
                   >
-                    <ParentSubGrid parentName={openParent} onClose={() => setOpenParent(null)} />
+                    <ParentSubGrid parentName={openParent} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && openParent === initialExpand} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -748,6 +774,7 @@ function LetterGroup({
                 parentDesignerCountByName={parentDesignerCountByName}
                 fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
                 designersWithIgPosts={designersWithIgPosts}
+                initialExpand={initialExpand}
               />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
@@ -762,7 +789,7 @@ function LetterGroup({
                         <AnimatePresence>
                           {isOpen && (
                             <div className="col-span-2 md:col-span-3 lg:col-span-5">
-                              <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} />
+                              <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
                             </div>
                           )}
                         </AnimatePresence>
@@ -785,7 +812,7 @@ function LetterGroup({
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner, designersWithIgPosts }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]>; designersWithIgPosts?: Set<string> }) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner, designersWithIgPosts, initialExpand }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number[]>; designersWithIgPosts?: Set<string>; initialExpand?: string }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -938,7 +965,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }}>
-        {openParentItem && openParent && <ParentSubGrid key={openParent} parentName={openParent} onClose={() => setOpenParent(null)} />}
+        {openParentItem && openParent && <ParentSubGrid key={openParent} parentName={openParent} onClose={() => setOpenParent(null)} autoScroll={!!initialExpand && openParent === initialExpand} />}
       </AnimatePresence>
     </div>
   );
