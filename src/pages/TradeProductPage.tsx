@@ -502,10 +502,13 @@ const TradeProductPage: React.FC = () => {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         // Persist the chosen variant on the freshly created/merged quote item.
-        if (itemId && variantLabel) {
+        if (itemId && (variantLabel || overrideUnitPriceCents != null)) {
+          const patch: any = {};
+          if (variantLabel) patch.variant_label = variantLabel;
+          if (overrideUnitPriceCents != null) patch.unit_price_cents = overrideUnitPriceCents;
           await supabase
             .from("trade_quote_items")
-            .update({ variant_label: variantLabel } as any)
+            .update(patch)
             .eq("id", itemId as unknown as string);
         }
         setAdded(true);
