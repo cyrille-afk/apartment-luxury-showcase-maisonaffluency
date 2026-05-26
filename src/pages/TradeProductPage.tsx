@@ -1152,32 +1152,34 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
-              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (
-                <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={
-                    sizeVariants && sizeVariants.length > 0
-                      ? sizeVariants
-                          .map((v) => {
-                            let label = (v.label || "").trim();
-                            const colonIdx = label.indexOf(":");
-                            if (colonIdx > -1 && colonIdx < 60) {
-                              label = label.slice(colonIdx + 1).trim();
-                            }
-                            const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
-                              || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
-                            if (dimMatch) label = dimMatch[1].trim();
-                            return label;
-                          })
-                          .join("\n")
-                      : formatDimensionsMultiline(product.dimensions)
-                  }
-                  emphasized
-                  placeholder="Select your size"
-                  value={hasVariants ? selectedVariantIdx : undefined}
-                  onChange={hasVariants ? setSelectedVariantIdx : undefined}
-                />
-              )}
+              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
+                const sizeText = sizeVariants && sizeVariants.length > 0
+                  ? sizeVariants
+                      .map((v) => {
+                        let label = (v.label || "").trim();
+                        const colonIdx = label.indexOf(":");
+                        if (colonIdx > -1 && colonIdx < 60) {
+                          label = label.slice(colonIdx + 1).trim();
+                        }
+                        const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
+                          || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
+                        if (dimMatch) label = dimMatch[1].trim();
+                        return label;
+                      })
+                      .join("\n")
+                  : formatDimensionsMultiline(product.dimensions);
+                if (!looksLikeDimension(sizeText)) return null;
+                return (
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={sizeText}
+                    emphasized
+                    placeholder="Select your size"
+                    value={hasVariants ? selectedVariantIdx : undefined}
+                    onChange={hasVariants ? setSelectedVariantIdx : undefined}
+                  />
+                );
+              })()}
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
