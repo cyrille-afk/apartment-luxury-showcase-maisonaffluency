@@ -160,63 +160,77 @@ export default function RugSizeColourPicker({
   const sizeAxis = (sizeAxisLabel || "Size").trim();
   const colourAxis = (colourAxisLabel || "Colour").trim();
 
+  const selectedSizeLabel =
+    isCustomSize
+      ? "Enter your dimensions below"
+      : stockSizes.find((s) => s.key === sizeKey)?.label ?? "";
+  const selectedColourLabel = isCustomColour
+    ? "Enter your custom colour below"
+    : colour ?? "";
+
+  const rowTriggerClass =
+    "group flex h-auto w-full items-center justify-between gap-4 rounded-none border-0 border-t border-border/60 bg-transparent px-0 py-4 text-left " +
+    "font-display text-base text-foreground hover:bg-muted/20 transition-colors focus:outline-none focus:ring-0 focus:ring-offset-0";
+
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* SIZE */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground">
-            <Ruler size={14} className="text-[hsl(var(--gold))]" />
-            Select {sizeAxis}
-          </div>
+      <p className="font-body text-sm text-muted-foreground">
+        Please select your desired options to update the price
+      </p>
 
-          <Select
-            value={sizeKey}
-            onValueChange={(v) => setSizeKey(v)}
-          >
-            <SelectTrigger className="w-full font-body text-sm">
-              <SelectValue placeholder={`Select your ${sizeAxis.toLowerCase()} choice`} />
-            </SelectTrigger>
-            <SelectContent className="z-[10050] bg-background border-border">
-              {stockSizes.map((s) => (
-                <SelectItem key={s.key} value={s.key} className="font-body text-sm cursor-pointer">
-                  {s.label}
-                </SelectItem>
-              ))}
-              <SelectItem value={CUSTOM_SIZE_KEY} className="font-body text-sm cursor-pointer italic">
-                Enter your dimensions
+      <div>
+        {/* SIZE ROW */}
+        <Select value={sizeKey} onValueChange={(v) => setSizeKey(v)}>
+          <SelectTrigger className={rowTriggerClass}>
+            <span className="flex items-center gap-2">
+              <Ruler size={16} className="text-[hsl(var(--gold))]" />
+              Select {sizeAxis}
+            </span>
+            <span className="flex items-center gap-3 text-sm text-muted-foreground">
+              <SelectValue placeholder="" />
+              {!selectedSizeLabel && <span className="italic">Choose an option</span>}
+            </span>
+          </SelectTrigger>
+          <SelectContent className="z-[10050] bg-background border-border">
+            {stockSizes.map((s) => (
+              <SelectItem key={s.key} value={s.key} className="font-body text-sm cursor-pointer">
+                {s.label}
               </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            ))}
+            <SelectItem value={CUSTOM_SIZE_KEY} className="font-body text-sm cursor-pointer italic">
+              Enter your dimensions
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
-        {/* COLOUR */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground">
-            <Palette size={14} className="text-[hsl(var(--gold))]" />
-            Select {colourAxis}
-          </div>
-
-          <Select
-            value={isCustomColour ? CUSTOM_COLOUR_KEY : colour ?? ""}
-            onValueChange={(v) => setColour(v)}
-          >
-            <SelectTrigger className="w-full font-body text-sm">
-              <SelectValue placeholder={`Select your ${colourAxis.toLowerCase()} choice`} />
-            </SelectTrigger>
-            <SelectContent className="z-[10050] bg-background border-border">
-              {stockColours.map((c) => (
-                <SelectItem key={c} value={c} className="font-body text-sm cursor-pointer">
-                  {c}
-                </SelectItem>
-              ))}
-              <SelectItem value={CUSTOM_COLOUR_KEY} className="font-body text-sm cursor-pointer italic">
-                Enter your custom {colourAxis.toLowerCase()}
+        {/* COLOUR ROW */}
+        <Select
+          value={isCustomColour ? CUSTOM_COLOUR_KEY : colour ?? ""}
+          onValueChange={(v) => setColour(v)}
+        >
+          <SelectTrigger className={cn(rowTriggerClass, "border-b border-border/60")}>
+            <span className="flex items-center gap-2">
+              <Palette size={16} className="text-[hsl(var(--gold))]" />
+              Select {colourAxis}
+            </span>
+            <span className="flex items-center gap-3 text-sm text-muted-foreground">
+              <SelectValue placeholder="" />
+              {!selectedColourLabel && <span className="italic">Choose an option</span>}
+            </span>
+          </SelectTrigger>
+          <SelectContent className="z-[10050] bg-background border-border">
+            {stockColours.map((c) => (
+              <SelectItem key={c} value={c} className="font-body text-sm cursor-pointer">
+                {c}
               </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            ))}
+            <SelectItem value={CUSTOM_COLOUR_KEY} className="font-body text-sm cursor-pointer italic">
+              Enter your custom {colourAxis.toLowerCase()}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
 
       {isCustomSize && (
         <div className="space-y-2">
