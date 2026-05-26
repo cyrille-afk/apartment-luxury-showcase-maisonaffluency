@@ -61,6 +61,7 @@ export default function RugSizeColourPicker({
   currency,
   sizeAxisLabel,
   colourAxisLabel,
+  hidePrice = false,
   onChange,
 }: Props) {
   // Parse stock sizes from the variant.base column (or label as fallback).
