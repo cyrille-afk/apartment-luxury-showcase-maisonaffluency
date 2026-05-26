@@ -51,6 +51,30 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
+import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
+
+/** Inject per-sqm prices into rug variants when the pick has a price/m² rate. */
+function applyRugPerSqmPricing(
+  variants: { label?: string; base?: string; top?: string; price_cents?: number }[],
+  category: string | null | undefined,
+  pricePerSqmCents: number | null | undefined,
+): { label?: string; base?: string; top?: string; price_cents: number }[] {
+  if (!variants?.length) return [];
+  if (!isRugCategory(category) || !pricePerSqmCents) {
+    return variants
+      .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0)
+      .map((v) => ({ ...v, price_cents: v.price_cents as number }));
+  }
+  return variants
+    .map((v) => {
+      const explicit = typeof v.price_cents === "number" && v.price_cents > 0 ? v.price_cents : null;
+      if (explicit) return { ...v, price_cents: explicit };
+      const dimSource = v.base || v.label || "";
+      const computed = priceRugVariantFromLabel(dimSource, pricePerSqmCents);
+      return computed ? { ...v, price_cents: computed } : null;
+    })
+    .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
+}
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -143,7 +167,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           curatorPick = (picks || []).find((p: any) => p.title === (tradeProduct as any).product_name) || null;
@@ -177,14 +201,15 @@ function useTradeProductBySlug(
           edition_signing: curatorPick?.edition_signing || null,
         };
 
-        const rawSizeVariants = Array.isArray(curatorPick?.size_variants)
-          ? (curatorPick.size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
-              .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
-                (typeof v.label === "string" && v.label.trim()) ||
-                (typeof v.base === "string" && v.base.trim()) ||
-                (typeof v.top === "string" && v.top.trim())
-              ))
-          : [];
+        const rawSizeVariants = applyRugPerSqmPricing(
+          Array.isArray(curatorPick?.size_variants) ? (curatorPick.size_variants as any[]) : [],
+          curatorPick?.category,
+          (curatorPick as any)?.price_per_sqm_cents,
+        ).filter((v) => (
+          (typeof v.label === "string" && v.label.trim()) ||
+          (typeof v.base === "string" && v.base.trim()) ||
+          (typeof v.top === "string" && v.top.trim())
+        ));
 
         const pricing: TradePricing | null = {
           trade_price_cents: (tradeProduct as any).trade_price_cents ?? null,
@@ -222,7 +247,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -272,14 +297,15 @@ function useTradeProductBySlug(
       const { data: tradeMatches } = await tradeQuery;
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
-      const rawSizeVariants = Array.isArray((product as any).size_variants)
-        ? ((product as any).size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
-            .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
-              (typeof v.label === "string" && v.label.trim()) ||
-              (typeof v.base === "string" && v.base.trim()) ||
-              (typeof v.top === "string" && v.top.trim())
-            ))
-        : [];
+      const rawSizeVariants = applyRugPerSqmPricing(
+        Array.isArray((product as any).size_variants) ? ((product as any).size_variants as any[]) : [],
+        (product as any).category,
+        (product as any).price_per_sqm_cents,
+      ).filter((v) => (
+        (typeof v.label === "string" && v.label.trim()) ||
+        (typeof v.base === "string" && v.base.trim()) ||
+        (typeof v.top === "string" && v.top.trim())
+      ));
 
       const pricing: TradePricing | null = tradeProduct
         ? {

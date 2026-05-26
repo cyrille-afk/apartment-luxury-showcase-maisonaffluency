@@ -984,6 +984,7 @@ export type Database = {
           pdf_url: string | null
           pdf_urls: Json | null
           photo_credit: string | null
+          price_per_sqm_cents: number | null
           price_prefix: string | null
           size_variants: Json | null
           sort_order: number
@@ -1019,6 +1020,7 @@ export type Database = {
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
+          price_per_sqm_cents?: number | null
           price_prefix?: string | null
           size_variants?: Json | null
           sort_order?: number
@@ -1054,6 +1056,7 @@ export type Database = {
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
+          price_per_sqm_cents?: number | null
           price_prefix?: string | null
           size_variants?: Json | null
           sort_order?: number
@@ -4205,6 +4208,7 @@ export type Database = {
           lead_weeks_min_override: number | null
           materials: string | null
           origin: string | null
+          price_per_sqm_cents: number | null
           price_prefix: string | null
           price_unit: string
           product_name: string
@@ -4233,6 +4237,7 @@ export type Database = {
           lead_weeks_min_override?: number | null
           materials?: string | null
           origin?: string | null
+          price_per_sqm_cents?: number | null
           price_prefix?: string | null
           price_unit?: string
           product_name: string
@@ -4261,6 +4266,7 @@ export type Database = {
           lead_weeks_min_override?: number | null
           materials?: string | null
           origin?: string | null
+          price_per_sqm_cents?: number | null
           price_prefix?: string | null
           price_unit?: string
           product_name?: string

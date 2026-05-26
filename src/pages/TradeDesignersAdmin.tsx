@@ -158,6 +158,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     materials: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
+    price_per_sqm_cents: number | null;
     price_prefix: string | null; sort_order: number; created_at: string;
     size_variants: { label?: string; base?: string; top?: string; price_cents: number }[] | null;
     variant_placeholder: string | null;
@@ -426,7 +427,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <label className="text-[10px] text-muted-foreground">Origin</label>
                   <Input value={(pick as any).origin || ""} onChange={(e) => updateField(pick.id, "origin", e.target.value || null)} className="text-xs" placeholder="e.g. Handmade in Europe" />
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
                     <Input value={pick.currency} onChange={(e) => updateField(pick.id, "currency", e.target.value)} className="text-xs" />
@@ -455,6 +456,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         updateField(pick.id, "trade_price_cents", Number.isFinite(num) ? Math.round(num * 100) : null);
                       }}
                       placeholder="Used when no size variants"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">
+                      Price / m² ({pick.currency || "EUR"}) <span className="italic">— rugs</span>
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={pick.price_per_sqm_cents != null ? (pick.price_per_sqm_cents / 100).toString() : ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "") { updateField(pick.id, "price_per_sqm_cents" as any, null); return; }
+                        const num = parseFloat(v);
+                        updateField(pick.id, "price_per_sqm_cents" as any, Number.isFinite(num) ? Math.round(num * 100) : null);
+                      }}
+                      placeholder="e.g. 600 → auto-prices variants by W×L"
                       className="text-xs"
                     />
                   </div>
