@@ -36,6 +36,7 @@ interface Props {
   currency: string;
   sizeAxisLabel?: string | null;
   colourAxisLabel?: string | null;
+  hidePrice?: boolean;
   onChange: (sel: RugSelection) => void;
 }
 
