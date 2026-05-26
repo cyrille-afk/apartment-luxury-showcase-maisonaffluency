@@ -788,7 +788,7 @@ function LetterGroup({
                         <AnimatePresence>
                           {isOpen && (
                             <div className="col-span-2 md:col-span-3 lg:col-span-5">
-                              <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} />
+                              <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
                             </div>
                           )}
                         </AnimatePresence>
