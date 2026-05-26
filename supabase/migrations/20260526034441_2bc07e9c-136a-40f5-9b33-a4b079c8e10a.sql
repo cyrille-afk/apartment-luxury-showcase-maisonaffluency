@@ -1,0 +1,1 @@
+GRANT SELECT ON public.designer_curator_picks TO anon, authenticated;
