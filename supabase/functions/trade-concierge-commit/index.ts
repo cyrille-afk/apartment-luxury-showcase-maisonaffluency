@@ -435,7 +435,7 @@ serve(async (req) => {
 
       const { data: existingQuote } = await supabase
         .from("trade_quotes")
-        .select("id, status, user_id")
+        .select("id, status, user_id, currency")
         .eq("id", quoteId)
         .eq("user_id", userId)
         .maybeSingle();
@@ -443,17 +443,29 @@ serve(async (req) => {
       if ((existingQuote as any).status !== "draft") {
         return json(409, { error: "Only draft quotes can be appended to" });
       }
+      const appendCurrency = String((existingQuote as any).currency || "EUR").toUpperCase();
 
-      const itemsPayload = resolved.map((r) => ({
+      const lineSourcesAppend = resolved.map((r) => {
+        const variantCents = resolveVariantPriceFromPick(r.pick, r.line.variant);
+        const fallback = priceById.get(r.tradeProductId) || { cents: null, currency: "EUR" };
+        const sourceCurrency = (variantCents != null
+          ? (r.pick?.currency || fallback.currency || "EUR")
+          : fallback.currency) || "EUR";
+        const sourceCents = variantCents ?? fallback.cents;
+        return { r, sourceCents, sourceCurrency: String(sourceCurrency).toUpperCase() };
+      });
+      const fxRatesAppend = await fetchFxRates(lineSourcesAppend.map((s) => s.sourceCurrency), appendCurrency);
+      const itemsPayload = lineSourcesAppend.map(({ r, sourceCents, sourceCurrency }) => ({
         quote_id: quoteId,
         product_id: r.tradeProductId,
         quantity: r.line.qty,
-        unit_price_cents: resolveVariantPriceFromPick(r.pick, r.line.variant) ?? priceById.get(r.tradeProductId) ?? null,
+        unit_price_cents: fxConvertCents(sourceCents, sourceCurrency, appendCurrency, fxRatesAppend),
         variant_label: r.line.variant,
         lead_time_weeks_override: r.line.lead_weeks,
         notes: r.line.note,
       }));
       const { error: appendErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+
       if (appendErr) {
         console.error("Quote items append failed:", appendErr);
         return json(500, { error: "Could not append items to quote" });
