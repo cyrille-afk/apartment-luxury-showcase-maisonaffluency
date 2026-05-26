@@ -328,7 +328,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at").eq("id", quoteId).single(),
@@ -643,7 +643,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const subtotalCents = items.reduce((sum, item) => {
-    const rawPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
+    const rawPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? 0;
     // If admin set unit_price_cents, it's already in the quote's currency — skip conversion
     const prodCurrency = item.unit_price_cents != null ? currency : (item.trade_products?.currency || currency);
     const converted = convertCents(rawPrice, prodCurrency, currency) ?? 0;
@@ -653,7 +653,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
-      const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+      const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
       const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
       const unit = convertCents(rawUnit, fromCur, currency);
       return {
@@ -860,7 +860,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     try {
       const lines: ProcurementLine[] = items.map((item, idx) => {
         const product = item.trade_products;
-        const rawUnit = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+        const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
         const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
         const unitTrade = convertCents(rawUnit, fromCur, currency);
         const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
