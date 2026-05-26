@@ -37,6 +37,7 @@ interface AdminQuoteItem {
   unit_price_cents: number | null;
   notes: string | null;
   lead_time_weeks_override: number | null;
+  variant_label?: string | null;
   trade_products: {
     product_name: string;
     brand_name: string;
@@ -260,7 +261,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       const [itemsRes, quoteRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("*").eq("id", quoteId).single(),
@@ -348,9 +349,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       // Build a resolved price map: item.id → CatalogPriceInfo
       const resolvedPrices: Record<string, CatalogPriceInfo> = {};
       fetchedItems.forEach((item) => {
-        if (item.trade_products?.trade_price_cents != null) {
+        const catalogCents = catalogSourcePriceCents(item);
+        if (catalogCents != null) {
           resolvedPrices[item.id] = {
-            cents: item.trade_products.trade_price_cents,
+            cents: catalogCents,
             currency: item.trade_products.currency || "SGD",
             match: "exact",
           };
