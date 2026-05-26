@@ -259,6 +259,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       lead_weeks: l.lead_weeks,
       note: l.note,
     }));
+    const quoteCurrency = lineCurrency || currency;
 
     const body =
       proposal.tool === "draft_quote"
@@ -268,7 +269,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
               project_id: projectId,
               client_id: client?.id ?? effectiveProjectClientId ?? null,
               client_name: client?.name ?? effectiveProjectClientName,
-              currency,
+              currency: quoteCurrency,
               note: proposal.args.note,
               lines: linesPayload,
             },
