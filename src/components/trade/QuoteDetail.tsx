@@ -469,6 +469,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
   })();
 
+  useEffect(() => {
+    if (!isUkDestination && displayCcy === "gbp") setDisplayCcy("quote");
+  }, [isUkDestination, displayCcy]);
+
 
   // Load email audit log for this quote
   const loadEmailLog = useCallback(async () => {
@@ -809,7 +813,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
-    goodsAfterDiscountCents: insuredBaseCents,
+    goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
     quoteCurrency: currency,
   });
 
@@ -1692,7 +1696,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
-                {subtotalCents > 0 && (
+                {subtotalCents > 0 && isUkDestination && (
                   <div className="flex justify-end">
                     <div className="w-72">
                       <QuoteDisplayCurrencyToggle
@@ -1705,7 +1709,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                 )}
                 <div className="flex justify-end">
-                  {displayCcy === "gbp" && subtotalCents > 0 ? (
+                  {displayCcy === "gbp" && subtotalCents > 0 && isUkDestination ? (
                     <div className="w-72 space-y-1">
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
                         <span>Goods (after discount)</span>
