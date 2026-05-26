@@ -698,14 +698,17 @@ function formatCatalogPrice(cents: number | null | undefined, currency: string |
   return `${currency} ${Math.round(cents / 100).toLocaleString("en-US")}`;
 }
 
-function summarizeVariants(variants: any, currency: string | null | undefined): string | null {
+function summarizeVariants(variants: any, currency: string | null | undefined, pricePerSqmCents?: number | null): string | null {
   if (!Array.isArray(variants) || variants.length === 0) return null;
   const rows = variants
-    .filter((v) => v && Number(v.price_cents) > 0)
+    .filter((v) => v && (Number(v.price_cents) > 0 || (Number(pricePerSqmCents) > 0 && parseRugSqm(variantLabel(v)))))
     .slice(0, 8)
     .map((v) => {
-      const label = [v.base, v.top, v.label].filter(Boolean).map((x) => String(x).trim()).join(" × ");
-      const price = formatCatalogPrice(Number(v.price_cents), currency);
+      const label = variantLabel(v);
+      const cents = Number(v.price_cents) > 0
+        ? Number(v.price_cents)
+        : Math.round((parseRugSqm(label) || 0) * Number(pricePerSqmCents || 0));
+      const price = formatCatalogPrice(cents, currency);
       return [label || "variant", price].filter(Boolean).join(" — ");
     });
   if (!rows.length) return null;
