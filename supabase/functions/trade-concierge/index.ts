@@ -297,7 +297,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   // tearsheet tools).
   const { data: picks } = await supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, currency, size_variants")
+    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -347,7 +347,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
       materials: p.materials || null,
       category: p.category || null,
       subcategory: p.subcategory || null,
-      priceNote: summarizeVariants(p.size_variants, p.currency) || formatCatalogPrice(p.trade_price_cents, p.currency),
+      priceNote: summarizeVariants(p.size_variants, p.currency, p.price_per_sqm_cents) || formatCatalogPrice(p.trade_price_cents, p.currency),
       source: "curator",
     });
   });
