@@ -473,6 +473,28 @@ async function loadOpenQuotes(
     .join("\n");
 }
 
+async function resolveMentionedProjectId(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  text: string,
+): Promise<string | null> {
+  const normalize = (value: string | null | undefined) => String(value || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const haystack = normalize(text);
+  if (!haystack) return null;
+  const { data: owned } = await supabase
+    .from("projects")
+    .select("id, name")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(50);
+  const match = (owned || []).find((p: any) => {
+    const name = normalize(p.name);
+    return name && (haystack.includes(name) || name.includes(haystack));
+  });
+  return match?.id || null;
+}
+
 /** Load predictive personalization signals for the signed-in user. */
 async function loadUserSignals(
   supabase: ReturnType<typeof createClient>,
@@ -961,15 +983,18 @@ serve(async (req) => {
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
-    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, projectContext, openQuotes, discountRow] = await Promise.all([
+    const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
+    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
       loadCatalogContext(supabase),
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
-      loadProjectContext(supabase, userId, activeProjectId),
+      mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
     ]);
+    const resolvedProjectId = activeProjectId || mentionedProjectId;
+    const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     // Resolve trade discount % for this user (defaults to 8%).
     let tradeDiscountPct = 0.08;
     try {
@@ -983,6 +1008,10 @@ serve(async (req) => {
     const systemPrompt = buildSystemPrompt(
       designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes,
     );
+    const isExplicitQuoteIntent = /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg);
+    const availableTools = isExplicitQuoteIntent
+      ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
+      : TOOLS;
 
     const upstream = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -995,8 +1024,8 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-2.5-pro",
           messages: [{ role: "system", content: systemPrompt }, ...messages],
-          tools: TOOLS,
-          tool_choice: "auto",
+          tools: availableTools,
+          tool_choice: isExplicitQuoteIntent ? "required" : "auto",
           stream: true,
         }),
       }
@@ -1072,7 +1101,7 @@ serve(async (req) => {
 
               if (tc.name === "draft_quote") {
                 const projectId: string | null =
-                  typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : activeProjectId;
+                  typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : resolvedProjectId;
                 const currency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
                 const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
                 const proposal = {
