@@ -281,6 +281,32 @@ const VariantSelectors: React.FC<{
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
 
+  // Per-square-metre rug picker short-circuit: when the product is a rug and
+  // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
+  // the dedicated picker (stock sizes + custom L × W + colour) instead of the
+  // generic dropdowns. Price is hidden on the public side ("Price on request").
+  const rugSqmActive =
+    isRugCategory(product?.category) &&
+    Array.isArray(product?.size_variants) &&
+    (product.size_variants as any[]).some((v: any) => !!parseRugDims((v?.base || v?.label || "").trim()));
+
+  if (rugSqmActive) {
+    return (
+      <RugSizeColourPicker
+        sizeVariants={product.size_variants as any}
+        pricePerSqmCents={0}
+        currency={product.currency || "EUR"}
+        sizeAxisLabel={product.base_axis_label}
+        colourAxisLabel={product.top_axis_label}
+        hidePrice
+        onChange={(sel: RugSelection) => {
+          const label = sel.colour ? `${sel.sizeLabel} · ${sel.colour}` : sel.sizeLabel;
+          onMaterialChange?.(label, { base: sel.sizeLabel, top: sel.colour, size: sel.sizeLabel });
+        }}
+      />
+    );
+  }
+
   return (
     <>
       {/* Material / finish dropdown(s) */}
