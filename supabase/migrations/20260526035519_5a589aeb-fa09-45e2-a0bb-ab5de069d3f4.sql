@@ -1,0 +1,1 @@
+UPDATE public.designers SET name='Atelier Février', hero_image_url=NULL, updated_at=now() WHERE id='978acfb6-03a8-4e78-a208-33d33d88dab6';
