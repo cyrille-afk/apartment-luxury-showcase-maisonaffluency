@@ -5,6 +5,7 @@
  */
 import { useMemo, useState } from "react";
 import { Ruler, Layers, Eye } from "lucide-react";
+import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 
 export interface VariantPreviewProps {
   sizeVariants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null | undefined;
