@@ -538,7 +538,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     );
                   }
                 }
-                return product.dimensions ? (
+                return product.dimensions && looksLikeDimension(product.dimensions) ? (
                   <ExpandableSpec
                     icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                     text={formatDimensionsMultiline(product.dimensions)}
