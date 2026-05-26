@@ -280,44 +280,6 @@ export default function RugSizeColourPicker({
         )}
       </div>
 
-
-        <div className="space-y-2 pl-1">
-          {stockColours.map((c) => (
-            <label key={c} className="flex items-center gap-3 cursor-pointer group">
-              <input
-                type="radio"
-                name="rug-colour"
-                checked={colour === c}
-                onChange={() => setColour(c)}
-                className="h-4 w-4 accent-foreground"
-              />
-              <span className="font-body text-sm text-muted-foreground group-hover:text-foreground">{c}</span>
-            </label>
-          ))}
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <input
-              type="radio"
-              name="rug-colour"
-              checked={isCustomColour}
-              onChange={() => setColour(CUSTOM_COLOUR_KEY)}
-              className="h-4 w-4 accent-foreground"
-            />
-            <span className="font-body text-sm text-foreground group-hover:text-foreground">
-              Enter your custom {colourAxis.toLowerCase()} below
-            </span>
-          </label>
-          {isCustomColour && (
-            <input
-              type="text"
-              value={customColour}
-              onChange={(e) => setCustomColour(e.target.value)}
-              placeholder={`Describe your ${colourAxis.toLowerCase()}`}
-              className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          )}
-        </div>
-      </div>
-
       {/* PRICE */}
       {hidePrice ? (
         <div className="rounded-md border border-border/60 bg-muted/30 p-3">
