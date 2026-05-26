@@ -76,7 +76,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       return;
     }
     supabase
-      .from("projects" as any)
+      .from("projects")
       .select("client_id, client_name")
       .eq("id", projectId)
       .maybeSingle()
