@@ -297,16 +297,11 @@ const PublicDesignerProfile = () => {
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
   const rawPicks = isGrouped ? groupedPicks : ownPicks;
-  const displayBiography = isChildDesigner && !designer?.biography && parentDesigner?.biography
-    ? parentDesigner.biography
-    : designer?.biography;
-  // Child designers must only show media curated in their own Design Editor.
-  // Never inherit biography_images (or the inline media URLs embedded in the
-  // parent biography text) from the parent brand — they belong to the parent.
+  // Child designers must never inherit biography text, philosophy, or media from
+  // the parent brand — parent bios embed inline image/video URLs that would leak.
+  const displayBiography = designer?.biography;
   const displayBiographyImages = designer?.biography_images;
-  const displayPhilosophy = isChildDesigner && !designer?.philosophy && parentDesigner?.philosophy
-    ? parentDesigner.philosophy
-    : designer?.philosophy;
+  const displayPhilosophy = designer?.philosophy;
 
   const picks = useMemo(() => {
     // Collect image URLs used in biography so matching picks are excluded from the grid.
