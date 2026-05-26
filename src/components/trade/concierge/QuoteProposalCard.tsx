@@ -80,6 +80,11 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<{ quoteId: string; url: string; added: number } | null>(null);
 
+  const proposalLineCurrency = (() => {
+    const currencies = Array.from(new Set(proposal.preview.map((l) => l.currency).filter(Boolean)));
+    return currencies.length === 1 ? currencies[0] : null;
+  })();
+
   // Pre-fill project from session if available (set by AIConcierge when entering chat).
   const initialProjectId =
     !isAppend && proposal.tool === "draft_quote"
@@ -89,7 +94,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
           : null)
       : null;
   const initialCurrency =
-    proposal.tool === "draft_quote" ? proposal.args.currency || "EUR" : null;
+    proposal.tool === "draft_quote" ? proposalLineCurrency || proposal.args.currency || "EUR" : null;
 
   const [projectId, setProjectId] = useState<string | null>(initialProjectId);
   const [projectClientFallback, setProjectClientFallback] = useState<{ id: string | null; name: string } | null>(null);
@@ -163,8 +168,14 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     () => lines.find((l) => l.currency)?.currency || null,
     [lines],
   );
-  const displayCurrency = isAppend ? lineCurrency : currency;
+  const displayCurrency = isAppend ? lineCurrency : lineCurrency || currency;
   const trade_discount_pct = lines[0]?.trade_discount_pct ?? 0;
+
+  useEffect(() => {
+    if (!isAppend && lineCurrency && currency !== lineCurrency) {
+      setCurrencyState(lineCurrency);
+    }
+  }, [currency, isAppend, lineCurrency]);
 
   const visibleLines = lines.filter((l) => !excluded.has(l.pick_id));
 
