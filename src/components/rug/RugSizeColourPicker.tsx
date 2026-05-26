@@ -12,6 +12,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Ruler, Palette } from "lucide-react";
 import { parseRugDims, dimsToSqm, computeRugPriceCents } from "@/lib/rugPricing";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface RugSelection {
   sizeLabel: string;        // e.g. "300 × 400 cm" or "Custom: 220 × 350 cm"
