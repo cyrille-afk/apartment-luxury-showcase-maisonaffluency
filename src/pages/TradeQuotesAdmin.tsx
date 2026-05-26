@@ -463,6 +463,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       responded_at: new Date().toISOString(),
     } as any).eq("id", quoteId);
 
+    // Notify requesting user + admins (fire-and-forget)
+    supabase.functions.invoke("send-quote-priced", {
+      body: { quoteId },
+    }).catch((err) => console.error("Quote priced email failed:", err));
+
     toast({ title: "Pricing sent", description: "The user can now review and confirm." });
     setSaving(false);
     onBack();

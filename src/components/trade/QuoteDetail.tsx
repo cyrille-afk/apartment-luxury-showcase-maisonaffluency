@@ -223,6 +223,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [insuranceTier, setInsuranceTier] = useState<InsuranceTier>("standard");
   const [insuranceRateBps, setInsuranceRateBps] = useState<number>(50);
   const [insuranceNotes, setInsuranceNotes] = useState("");
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
+  const [respondedAt, setRespondedAt] = useState<string | null>(null);
+  const [confirmedAtTs, setConfirmedAtTs] = useState<string | null>(null);
+  const [reviseOpen, setReviseOpen] = useState(false);
+  const [reviseReason, setReviseReason] = useState("");
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
@@ -312,7 +319,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -367,6 +374,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (q?.insurance_rate_bps != null) setInsuranceRateBps(q.insurance_rate_bps);
       if (q?.insurance_notes) setInsuranceNotes(q.insurance_notes);
       if (q?.issue_date !== undefined) setIssueDate(q.issue_date ?? null);
+      if (q?.submitted_at !== undefined) setSubmittedAt(q.submitted_at ?? null);
+      if (q?.responded_at !== undefined) setRespondedAt(q.responded_at ?? null);
+      if (q?.confirmed_at !== undefined) setConfirmedAtTs(q.confirmed_at ?? null);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
@@ -529,6 +539,51 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     toast({ title: "Order cancelled", description: "This quote has been marked as cancelled." });
     onStatusChange();
   };
+
+  const appendAdminNote = (existing: string | null | undefined, header: string, body: string) => {
+    const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+    const block = `[${header} — ${stamp}]\n${body.trim()}`;
+    return existing && existing.trim() ? `${existing.trim()}\n\n${block}` : block;
+  };
+
+  const handleSubmitRevise = async () => {
+    const reason = reviseReason.trim();
+    if (!reason) {
+      toast({ title: "Reason required", description: "Please describe what you'd like changed.", variant: "destructive" });
+      return;
+    }
+    const newNotes = appendAdminNote(adminNotes, "Client requested changes", reason);
+    await supabase.from("trade_quotes").update({
+      status: "draft",
+      submitted_at: null,
+      responded_at: null,
+      admin_notes: newNotes,
+    } as any).eq("id", quoteId);
+    setAdminNotes(newNotes);
+    setReviseOpen(false);
+    setReviseReason("");
+    toast({ title: "Changes requested", description: "Quote reopened as draft with your note attached." });
+    onStatusChange();
+  };
+
+  const handleSubmitCancel = async () => {
+    const reason = cancelReason.trim();
+    if (!reason) {
+      toast({ title: "Reason required", description: "Please add a brief reason for cancellation.", variant: "destructive" });
+      return;
+    }
+    const newNotes = appendAdminNote(adminNotes, "Cancelled by client", reason);
+    await supabase.from("trade_quotes").update({
+      status: "cancelled",
+      admin_notes: newNotes,
+    } as any).eq("id", quoteId);
+    setAdminNotes(newNotes);
+    setCancelOpen(false);
+    setCancelReason("");
+    toast({ title: "Quote cancelled", description: "Your reason has been recorded." });
+    onStatusChange();
+  };
+
 
   const handleSaveNotes = async () => {
     await supabase.from("trade_quotes").update({ notes: notes || null }).eq("id", quoteId);
@@ -1081,6 +1136,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <span className="text-foreground">{quoteNumber}</span>
               </div>
               <StatusBadge className="mt-1" />
+              {(submittedAt || respondedAt || confirmedAtTs) && (
+                <div className="mt-2 space-y-0.5 text-[10px] font-body text-muted-foreground print:hidden">
+                  {submittedAt && (
+                    <div><span className="uppercase tracking-widest">Submitted</span> · {formatDate(new Date(submittedAt))}</div>
+                  )}
+                  {respondedAt && (
+                    <div><span className="uppercase tracking-widest">Priced</span> · {formatDate(new Date(respondedAt))}</div>
+                  )}
+                  {confirmedAtTs && (
+                    <div><span className="uppercase tracking-widest">Confirmed</span> · {formatDate(new Date(confirmedAtTs))}</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right: Logo + Company details */}
@@ -1847,26 +1915,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {/* Revise Quote — shown for submitted or priced quotes */}
+        {/* Request changes / Cancel — shown for submitted or priced quotes */}
         {(quoteStatus === "submitted" || quoteStatus === "priced") && (
-          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <p className="font-body text-[10px] text-muted-foreground max-w-xs">
-              Need to make changes? Revise will reopen the quote as a draft so you can add or remove items, then resubmit.
+              Need adjustments? Request changes reopens the quote as a draft with your note attached for our team.
             </p>
-            <button
-              onClick={async () => {
-                await supabase.from("trade_quotes").update({
-                  status: "draft",
-                  submitted_at: null,
-                  responded_at: null,
-                } as any).eq("id", quoteId);
-                toast({ title: "Quote reopened", description: "You can now edit items and resubmit." });
-                onStatusChange();
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground"
-            >
-              <Edit3 className="h-3.5 w-3.5" /> Revise Quote
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCancelOpen(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-destructive/10 transition-colors"
+              >
+                <XCircle className="h-3.5 w-3.5" /> Cancel Quote
+              </button>
+              <button
+                onClick={() => setReviseOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground"
+              >
+                <Edit3 className="h-3.5 w-3.5" /> Request Changes
+              </button>
+            </div>
           </div>
         )}
 
@@ -2049,6 +2117,52 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
       </div>
+
+      {/* Request changes dialog */}
+      <Dialog open={reviseOpen} onOpenChange={setReviseOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Request changes</DialogTitle>
+          </DialogHeader>
+          <p className="font-body text-xs text-muted-foreground">
+            Tell our team what you'd like adjusted. The quote will be reopened as a draft and your note attached for the concierge.
+          </p>
+          <textarea
+            value={reviseReason}
+            onChange={(e) => setReviseReason(e.target.value)}
+            rows={5}
+            placeholder="e.g. Please swap the sofa for the linen variant and remove item 3…"
+            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <button onClick={() => setReviseOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Cancel</button>
+            <button onClick={handleSubmitRevise} className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90">Send & reopen as draft</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel quote dialog */}
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Cancel this quote?</DialogTitle>
+          </DialogHeader>
+          <p className="font-body text-xs text-muted-foreground">
+            This marks the quote as cancelled. Please share a brief reason so our team can follow up appropriately.
+          </p>
+          <textarea
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            rows={4}
+            placeholder="e.g. Project on hold, client changed direction…"
+            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <button onClick={() => setCancelOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Keep quote</button>
+            <button onClick={handleSubmitCancel} className="px-3 py-1.5 bg-destructive text-destructive-foreground rounded-md font-body text-xs hover:opacity-90">Cancel quote</button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* PDF preview dialog */}
       <Dialog open={previewOpen} onOpenChange={(o) => { if (!o) closePreview(); else setPreviewOpen(true); }}>
