@@ -103,11 +103,11 @@ export default function RugSizeColourPicker({
     return out;
   }, [sizeVariants]);
 
-  const [sizeKey, setSizeKey] = useState<string>(stockSizes[0]?.key ?? CUSTOM_SIZE_KEY);
+  const [sizeKey, setSizeKey] = useState<string>("");
   const [unit, setUnit] = useState<Unit>("cm");
   const [lengthInput, setLengthInput] = useState<string>("");
   const [widthInput, setWidthInput] = useState<string>("");
-  const [colour, setColour] = useState<string | null>(stockColours[0] ?? null);
+  const [colour, setColour] = useState<string | null>(null);
   const [customColour, setCustomColour] = useState<string>("");
 
   const isCustomSize = sizeKey === CUSTOM_SIZE_KEY;
@@ -162,123 +162,126 @@ export default function RugSizeColourPicker({
 
   return (
     <div className="space-y-5">
-      {/* SIZE */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground border-b border-border/60 pb-2">
-          <Ruler size={14} className="text-[hsl(var(--gold))]" />
-          Select {sizeAxis}
-        </div>
-
-        <Select
-          value={sizeKey}
-          onValueChange={(v) => setSizeKey(v)}
-        >
-          <SelectTrigger className="w-full font-body text-sm">
-            <SelectValue placeholder={`Select your ${sizeAxis.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent className="z-[10050] bg-background border-border">
-            {stockSizes.map((s) => (
-              <SelectItem key={s.key} value={s.key} className="font-body text-sm cursor-pointer">
-                {s.label}
-              </SelectItem>
-            ))}
-            <SelectItem value={CUSTOM_SIZE_KEY} className="font-body text-sm cursor-pointer italic">
-              Enter your dimensions
-            </SelectItem>
-          </SelectContent>
-        </Select>
-
-        {isCustomSize && (
-          <div className="space-y-2">
-            <div className="flex items-end gap-3">
-              <label className="flex flex-col gap-1">
-                <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Length</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={1}
-                  value={lengthInput}
-                  onChange={(e) => setLengthInput(e.target.value)}
-                  className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Width</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={1}
-                  value={widthInput}
-                  onChange={(e) => setWidthInput(e.target.value)}
-                  className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </label>
-              <div className="inline-flex rounded-md border border-input overflow-hidden text-xs">
-                {(["cm", "in"] as Unit[]).map((u) => (
-                  <button
-                    key={u}
-                    type="button"
-                    onClick={() => setUnit(u)}
-                    className={cn(
-                      "px-3 py-2 transition-colors",
-                      unit === u
-                        ? "bg-foreground text-background"
-                        : "bg-background text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {u}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {isCustomSize && (widthCm == null || lengthCm == null) && (lengthInput || widthInput) && (
-              <p className="font-body text-[11px] text-destructive">Kindly add both length and width.</p>
-            )}
-            {widthCm != null && lengthCm != null && (
-              <p className="font-body text-[11px] text-muted-foreground">
-                {lengthCm} × {widthCm} cm · {(dimsToSqm(widthCm, lengthCm)).toFixed(2)} m²
-              </p>
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* SIZE */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground">
+            <Ruler size={14} className="text-[hsl(var(--gold))]" />
+            Select {sizeAxis}
           </div>
-        )}
-      </div>
 
-      {/* COLOUR */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground border-b border-border/60 pb-2">
-          <Palette size={14} className="text-[hsl(var(--gold))]" />
-          Select {colourAxis}
+          <Select
+            value={sizeKey}
+            onValueChange={(v) => setSizeKey(v)}
+          >
+            <SelectTrigger className="w-full font-body text-sm">
+              <SelectValue placeholder={`Select your ${sizeAxis.toLowerCase()} choice`} />
+            </SelectTrigger>
+            <SelectContent className="z-[10050] bg-background border-border">
+              {stockSizes.map((s) => (
+                <SelectItem key={s.key} value={s.key} className="font-body text-sm cursor-pointer">
+                  {s.label}
+                </SelectItem>
+              ))}
+              <SelectItem value={CUSTOM_SIZE_KEY} className="font-body text-sm cursor-pointer italic">
+                Enter your dimensions
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <Select
-          value={isCustomColour ? CUSTOM_COLOUR_KEY : colour ?? ""}
-          onValueChange={(v) => setColour(v)}
-        >
-          <SelectTrigger className="w-full font-body text-sm">
-            <SelectValue placeholder={`Select your ${colourAxis.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent className="z-[10050] bg-background border-border">
-            {stockColours.map((c) => (
-              <SelectItem key={c} value={c} className="font-body text-sm cursor-pointer">
-                {c}
-              </SelectItem>
-            ))}
-            <SelectItem value={CUSTOM_COLOUR_KEY} className="font-body text-sm cursor-pointer italic">
-              Enter your custom {colourAxis.toLowerCase()}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        {/* COLOUR */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 font-display text-sm tracking-wide text-foreground">
+            <Palette size={14} className="text-[hsl(var(--gold))]" />
+            Select {colourAxis}
+          </div>
 
-        {isCustomColour && (
-          <input
-            type="text"
-            value={customColour}
-            onChange={(e) => setCustomColour(e.target.value)}
-            placeholder={`Describe your ${colourAxis.toLowerCase()}`}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        )}
+          <Select
+            value={isCustomColour ? CUSTOM_COLOUR_KEY : colour ?? ""}
+            onValueChange={(v) => setColour(v)}
+          >
+            <SelectTrigger className="w-full font-body text-sm">
+              <SelectValue placeholder={`Select your ${colourAxis.toLowerCase()} choice`} />
+            </SelectTrigger>
+            <SelectContent className="z-[10050] bg-background border-border">
+              {stockColours.map((c) => (
+                <SelectItem key={c} value={c} className="font-body text-sm cursor-pointer">
+                  {c}
+                </SelectItem>
+              ))}
+              <SelectItem value={CUSTOM_COLOUR_KEY} className="font-body text-sm cursor-pointer italic">
+                Enter your custom {colourAxis.toLowerCase()}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {isCustomSize && (
+        <div className="space-y-2">
+          <div className="flex items-end gap-3 flex-wrap">
+            <label className="flex flex-col gap-1">
+              <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Length</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={1}
+                value={lengthInput}
+                onChange={(e) => setLengthInput(e.target.value)}
+                className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Width</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={1}
+                value={widthInput}
+                onChange={(e) => setWidthInput(e.target.value)}
+                className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </label>
+            <div className="inline-flex rounded-md border border-input overflow-hidden text-xs">
+              {(["cm", "in"] as Unit[]).map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => setUnit(u)}
+                  className={cn(
+                    "px-3 py-2 transition-colors",
+                    unit === u
+                      ? "bg-foreground text-background"
+                      : "bg-background text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {u}
+                </button>
+              ))}
+            </div>
+          </div>
+          {(widthCm == null || lengthCm == null) && (lengthInput || widthInput) && (
+            <p className="font-body text-[11px] text-destructive">Kindly add both length and width.</p>
+          )}
+          {widthCm != null && lengthCm != null && (
+            <p className="font-body text-[11px] text-muted-foreground">
+              {lengthCm} × {widthCm} cm · {(dimsToSqm(widthCm, lengthCm)).toFixed(2)} m²
+            </p>
+          )}
+        </div>
+      )}
+
+      {isCustomColour && (
+        <input
+          type="text"
+          value={customColour}
+          onChange={(e) => setCustomColour(e.target.value)}
+          placeholder={`Describe your ${colourAxis.toLowerCase()}`}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+      )}
+
 
       {/* PRICE — hidden on public side (page already shows a Price on Request CTA) */}
       {!hidePrice && (
