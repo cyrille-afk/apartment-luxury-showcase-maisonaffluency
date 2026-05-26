@@ -473,6 +473,28 @@ async function loadOpenQuotes(
     .join("\n");
 }
 
+async function resolveMentionedProjectId(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  text: string,
+): Promise<string | null> {
+  const normalize = (value: string | null | undefined) => String(value || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const haystack = normalize(text);
+  if (!haystack) return null;
+  const { data: owned } = await supabase
+    .from("projects")
+    .select("id, name")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(50);
+  const match = (owned || []).find((p: any) => {
+    const name = normalize(p.name);
+    return name && (haystack.includes(name) || name.includes(haystack));
+  });
+  return match?.id || null;
+}
+
 /** Load predictive personalization signals for the signed-in user. */
 async function loadUserSignals(
   supabase: ReturnType<typeof createClient>,
