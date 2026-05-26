@@ -297,14 +297,15 @@ function useTradeProductBySlug(
       const { data: tradeMatches } = await tradeQuery;
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
-      const rawSizeVariants = Array.isArray((product as any).size_variants)
-        ? ((product as any).size_variants as { label?: string; base?: string; top?: string; price_cents: number }[])
-            .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0 && (
-              (typeof v.label === "string" && v.label.trim()) ||
-              (typeof v.base === "string" && v.base.trim()) ||
-              (typeof v.top === "string" && v.top.trim())
-            ))
-        : [];
+      const rawSizeVariants = applyRugPerSqmPricing(
+        Array.isArray((product as any).size_variants) ? ((product as any).size_variants as any[]) : [],
+        (product as any).category,
+        (product as any).price_per_sqm_cents,
+      ).filter((v) => (
+        (typeof v.label === "string" && v.label.trim()) ||
+        (typeof v.base === "string" && v.base.trim()) ||
+        (typeof v.top === "string" && v.top.trim())
+      ));
 
       const pricing: TradePricing | null = tradeProduct
         ? {
