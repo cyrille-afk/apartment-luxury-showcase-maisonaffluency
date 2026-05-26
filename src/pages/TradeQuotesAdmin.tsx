@@ -14,6 +14,7 @@ import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 interface AdminQuote {
   id: string;
   user_id: string;
+  client_id?: string | null;
   status: string;
   notes: string | null;
   admin_notes: string | null;
@@ -237,6 +238,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   /** Trade discount % to apply on the client side (e.g. 0.08 for silver). */
   const [ownerDiscountPct, setOwnerDiscountPct] = useState<number>(0);
   const [ownerTierLabel, setOwnerTierLabel] = useState<string>("");
+  const [clientCountry, setClientCountry] = useState<string | null>(null);
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
 
@@ -256,6 +258,13 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       const q = quoteRes.data as AdminQuote | null;
       setQuote(q);
       setAdminNotes(q?.admin_notes || "");
+      setDisplayCcy("quote");
+      setClientCountry(null);
+
+      if (q?.client_id) {
+        const { data: client } = await (supabase.from("clients" as any).select("billing_country").eq("id", q.client_id).maybeSingle() as any);
+        setClientCountry((client?.billing_country as string) || null);
+      }
 
       const quoteCurrency = (quoteRes.data as any)?.currency || "SGD";
 
@@ -528,11 +537,16 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     return sum + cents * item.quantity;
   }, 0);
 
+  const isUkDestination = (() => {
+    const c = (clientCountry || "").trim().toLowerCase();
+    return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
+  })();
+
   // GBP DDP landed-cost amounts for the totals toggle
   const goodsAfterDiscountCents =
     subtotalCents - (ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0);
   const gbp = useGbpLandedCost({
-    goodsAfterDiscountCents,
+    goodsAfterDiscountCents: isUkDestination ? goodsAfterDiscountCents : 0,
     quoteCurrency: currency,
   });
 
@@ -673,7 +687,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
               {/* Subtotal */}
               <div className="border-t border-border mt-2 pt-4 flex flex-col items-end">
-                {subtotalCents > 0 && (
+                {subtotalCents > 0 && isUkDestination && (
                   <div className="w-72">
                     <QuoteDisplayCurrencyToggle
                       value={displayCcy}
@@ -692,7 +706,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const totalCents = afterDiscountCents + gstCents;
 
                   // GBP DDP view
-                  if (displayCcy === "gbp") {
+                  if (displayCcy === "gbp" && isUkDestination) {
                     return (
                       <div className="w-72 space-y-1">
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
@@ -763,8 +777,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                 })()}
               </div>
 
-              {/* UK landed cost (DDP, GBP) — useful when client is in the UK but quoted in EUR/USD/SGD */}
-              {subtotalCents > 0 && (() => {
+              {/* UK landed cost (DDP, GBP) — only for linked UK clients */}
+              {subtotalCents > 0 && isUkDestination && (() => {
                 const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
                 const goodsAfter = subtotalCents - discountCents;
                 return (
@@ -780,6 +794,14 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   </div>
                 );
               })()}
+              {subtotalCents > 0 && !clientCountry && (
+                <div className="mt-4 rounded-md border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground">Select a delivery country</p>
+                  <p className="mt-1">
+                    Link a client with a billing country before showing any destination-specific landed-cost panel.
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>
