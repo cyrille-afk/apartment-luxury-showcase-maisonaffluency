@@ -846,13 +846,14 @@ async function hydrateQuotePreview(
     tradePriceById.set(t.id, { cents, currency: t.currency ?? null });
   });
 
-  const { data: allTradeRows } = tradeRows?.length
+  const { data: allTradeRows } = (tradeRows?.length || pickRows?.length)
     ? await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
         .eq("is_active", true)
         .limit(2000)
     : { data: [] as any[] };
+
 
   const canonicalTradePrice = (tradeRow: any) => {
     if (!tradeRow) return null;
