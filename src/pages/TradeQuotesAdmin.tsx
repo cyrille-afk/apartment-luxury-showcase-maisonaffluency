@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2 } from "lucide-react";
+import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2, Edit3, XCircle } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
 import SectionHero from "@/components/trade/SectionHero";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
@@ -486,6 +486,42 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     onBack();
   };
 
+  const appendAdminNote = (existing: string | null, label: string, reason: string) => {
+    const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+    const entry = `[${stamp}] ${label}: ${reason}`;
+    return existing ? `${existing}\n\n${entry}` : entry;
+  };
+
+  const handleRequestChanges = async () => {
+    const reason = window.prompt("Reason for requesting changes (visible to client):");
+    if (!reason || !reason.trim()) return;
+    setSaving(true);
+    const merged = appendAdminNote(adminNotes, "Changes requested", reason.trim());
+    await supabase.from("trade_quotes").update({
+      status: "draft",
+      admin_notes: merged,
+    } as any).eq("id", quoteId);
+    toast({ title: "Reopened as draft", description: "Client can revise the quote." });
+    setSaving(false);
+    onBack();
+  };
+
+  const handleCancelQuote = async () => {
+    const reason = window.prompt("Reason for cancelling this quote (visible to client):");
+    if (!reason || !reason.trim()) return;
+    if (!window.confirm("Cancel this quote? The client will be notified.")) return;
+    setSaving(true);
+    const merged = appendAdminNote(adminNotes, "Cancelled", reason.trim());
+    await supabase.from("trade_quotes").update({
+      status: "cancelled",
+      admin_notes: merged,
+    } as any).eq("id", quoteId);
+    toast({ title: "Quote cancelled" });
+    setSaving(false);
+    onBack();
+  };
+
+
   const subtotalCents = items.reduce((sum, item) => {
     const priceStr = itemPrices[item.id];
     const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
@@ -765,7 +801,21 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
         {/* Action */}
         {canSendPricing && (
-          <div className="border-t border-border p-4 md:p-6 flex justify-end">
+          <div className="border-t border-border p-4 md:p-6 flex flex-wrap items-center justify-end gap-2">
+            <button
+              onClick={handleCancelQuote}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-3 py-2 border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-destructive/10 transition-colors disabled:opacity-40"
+            >
+              <XCircle className="h-3.5 w-3.5" /> Cancel Quote
+            </button>
+            <button
+              onClick={handleRequestChanges}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground disabled:opacity-40"
+            >
+              <Edit3 className="h-3.5 w-3.5" /> Request Changes
+            </button>
             <button
               onClick={handleSendPricing}
               disabled={saving || subtotalCents === 0}
