@@ -184,11 +184,10 @@ export default function RugSizeColourPicker({
           <SelectTrigger className={rowTriggerClass}>
             <span className="flex items-center gap-2">
               <Ruler size={16} className="text-[hsl(var(--gold))]" />
-              Select {sizeAxis}
+              Select Your {sizeAxis}
             </span>
             <span className="flex items-center gap-3 text-sm text-muted-foreground">
               <SelectValue placeholder="" />
-              {!selectedSizeLabel && <span className="italic">Choose an option</span>}
             </span>
           </SelectTrigger>
           <SelectContent className="z-[10050] bg-background border-border">
@@ -211,13 +210,13 @@ export default function RugSizeColourPicker({
           <SelectTrigger className={cn(rowTriggerClass, "border-b border-border/60")}>
             <span className="flex items-center gap-2">
               <Palette size={16} className="text-[hsl(var(--gold))]" />
-              Select {colourAxis}
+              Select Your {colourAxis}
             </span>
             <span className="flex items-center gap-3 text-sm text-muted-foreground">
               <SelectValue placeholder="" />
-              {!selectedColourLabel && <span className="italic">Choose an option</span>}
             </span>
           </SelectTrigger>
+
           <SelectContent className="z-[10050] bg-background border-border">
             {stockColours.map((c) => (
               <SelectItem key={c} value={c} className="font-body text-sm cursor-pointer">
