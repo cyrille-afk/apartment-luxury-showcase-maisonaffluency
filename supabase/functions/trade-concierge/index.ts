@@ -983,15 +983,18 @@ serve(async (req) => {
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
-    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, projectContext, openQuotes, discountRow] = await Promise.all([
+    const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
+    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
       loadCatalogContext(supabase),
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
-      loadProjectContext(supabase, userId, activeProjectId),
+      mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
     ]);
+    const resolvedProjectId = activeProjectId || mentionedProjectId;
+    const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     // Resolve trade discount % for this user (defaults to 8%).
     let tradeDiscountPct = 0.08;
     try {
@@ -1098,7 +1101,7 @@ serve(async (req) => {
 
               if (tc.name === "draft_quote") {
                 const projectId: string | null =
-                  typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : activeProjectId;
+                  typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : resolvedProjectId;
                 const currency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
                 const preview = await hydrateQuotePreview(supabase, lines, currency, tradeDiscountPct);
                 const proposal = {
