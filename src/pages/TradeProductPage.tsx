@@ -1178,7 +1178,7 @@ const TradeProductPage: React.FC = () => {
                   onChange={hasVariants ? setSelectedVariantIdx : undefined}
                 />
               )}
-              {isDualAxis && hasDualSize && (
+              {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
                   text={dualSizeOptions.join("\n")}
