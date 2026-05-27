@@ -78,8 +78,9 @@ export default function TradeConciergeUsage() {
 
   const profileById = new Map((profiles || []).map((p) => [p.id, p]));
 
-  // Aggregate by user
+  // Aggregate by user + collect raw rows per user for drill-down
   const byUser = new Map<string, { turns: number; pt: number; ct: number; tt: number }>();
+  const rowsByUser = new Map<string, UsageRow[]>();
   let totalPT = 0, totalCT = 0, totalTT = 0, totalTurns = 0;
   for (const r of rows || []) {
     totalPT += r.prompt_tokens; totalCT += r.completion_tokens; totalTT += r.total_tokens; totalTurns++;
@@ -87,6 +88,9 @@ export default function TradeConciergeUsage() {
     const agg = byUser.get(key) || { turns: 0, pt: 0, ct: 0, tt: 0 };
     agg.turns++; agg.pt += r.prompt_tokens; agg.ct += r.completion_tokens; agg.tt += r.total_tokens;
     byUser.set(key, agg);
+    const list = rowsByUser.get(key) || [];
+    list.push(r);
+    rowsByUser.set(key, list);
   }
 
   const totalCost = (totalPT / 1_000_000) * PRICE_IN_PER_M + (totalCT / 1_000_000) * PRICE_OUT_PER_M;
