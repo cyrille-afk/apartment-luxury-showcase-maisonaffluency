@@ -44,6 +44,7 @@ const analyticsGroup: AdminCard[] = [
   { title: "Downloads by Country", description: "Track catalogue and spec sheet downloads per country", url: "/trade/downloads-by-country", icon: Globe },
   { title: "Magazine Funnel", description: "Featured issue impressions, clicks, and downloads", url: "/trade/magazine-analytics", icon: BarChart3 },
   { title: "Client Profiles", description: "AI-powered taste profiles and engagement scores", url: "/trade/client-profiles", icon: Sparkles },
+  { title: "Concierge Token Usage", description: "AI concierge token consumption per user (last 30 days) with cost estimate", url: "/trade/admin/concierge-usage", icon: Sparkles },
   { title: "Audit Log", description: "Track content changes and admin actions", url: "/trade/audit-log", icon: History },
 ];
 
