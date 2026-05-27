@@ -3,7 +3,8 @@ import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, Fragment } from "react";
 
 type UsageRow = {
   id: string;
@@ -12,6 +13,9 @@ type UsageRow = {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
+  message_count: number | null;
+  sentiment: string | null;
+  intent: string | null;
   created_at: string;
 };
 
