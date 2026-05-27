@@ -1121,6 +1121,8 @@ serve(async (req) => {
     // tool_calls arrive as fragments; key by index
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
     let buffer = "";
+    let capturedUsage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null = null;
+    const usageModel = "google/gemini-2.5-pro";
 
     const stream = new ReadableStream({
       async start(controller) {
