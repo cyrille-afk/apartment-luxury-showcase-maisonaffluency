@@ -389,6 +389,7 @@ const App = () => {
                     <Route path="dashboard" element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
                     <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
+                    <Route path="admin/concierge-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeConciergeUsage /></Suspense>} />
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
                     <Route path="gallery" element={<TradeGallery />} />
