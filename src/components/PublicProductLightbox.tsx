@@ -468,6 +468,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={baseOptions.join("\n")}
                         placeholder={getBasePlaceholder(product)}
+                        singleValueLabel={product.base_axis_label || undefined}
                         emphasized
                         value={selectedBaseIdx ?? null}
                         onChange={(idx) => {
@@ -482,6 +483,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                         icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                         text={topOptions.join("\n")}
                         placeholder={getTopPlaceholder(product)}
+                        singleValueLabel={product.top_axis_label || undefined}
                         emphasized
                         value={selectedTopIdx ?? null}
                         onChange={(idx) => {
@@ -500,6 +502,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
                     text={materialOptions.join("\n")}
                     placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
+                    singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
                     autoSplit={!hasAnyBase}
                     value={selectedMaterialIdx ?? null}
                     onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
