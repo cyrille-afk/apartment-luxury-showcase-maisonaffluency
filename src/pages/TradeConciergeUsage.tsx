@@ -119,6 +119,7 @@ export default function TradeConciergeUsage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-foreground/60 uppercase tracking-wider text-xs">
               <tr>
+                <th className="text-left px-4 py-3 w-8"></th>
                 <th className="text-left px-4 py-3">User</th>
                 <th className="text-right px-4 py-3">Turns</th>
                 <th className="text-right px-4 py-3">Input</th>
@@ -129,26 +130,79 @@ export default function TradeConciergeUsage() {
             </thead>
             <tbody>
               {isLoading && (
-                <tr><td colSpan={6} className="px-4 py-6 text-center text-foreground/50">Loading…</td></tr>
+                <tr><td colSpan={7} className="px-4 py-6 text-center text-foreground/50">Loading…</td></tr>
               )}
               {!isLoading && userRows.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-6 text-center text-foreground/50">No usage logged yet.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-6 text-center text-foreground/50">No usage logged yet.</td></tr>
               )}
               {userRows.map((u) => {
                 const p = profileById.get(u.uid);
                 const name = p ? [p.first_name, p.last_name].filter(Boolean).join(" ").trim() || p.email || u.uid : u.uid;
+                const isOpen = expanded.has(u.uid);
+                const detail = rowsByUser.get(u.uid) || [];
                 return (
-                  <tr key={u.uid} className="border-t border-border">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{name}</div>
-                      {p?.company && <div className="text-xs text-foreground/50">{p.company}</div>}
-                    </td>
-                    <td className="px-4 py-3 text-right">{u.turns.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right">{u.pt.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right">{u.ct.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-medium">{u.tt.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right">{fmtUSD(u.cost)}</td>
-                  </tr>
+                  <Fragment key={u.uid}>
+                    <tr
+                      className="border-t border-border cursor-pointer hover:bg-muted/30"
+                      onClick={() => toggle(u.uid)}
+                    >
+                      <td className="px-4 py-3 text-foreground/50">
+                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{name}</div>
+                        {p?.company && <div className="text-xs text-foreground/50">{p.company}</div>}
+                        {p?.email && <div className="text-xs text-foreground/40">{p.email}</div>}
+                      </td>
+                      <td className="px-4 py-3 text-right">{u.turns.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right">{u.pt.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right">{u.ct.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-medium">{u.tt.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right">{fmtUSD(u.cost)}</td>
+                    </tr>
+                    {isOpen && (
+                      <tr className="bg-muted/20">
+                        <td></td>
+                        <td colSpan={6} className="px-4 py-3">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead className="text-foreground/50 uppercase tracking-wider">
+                                <tr>
+                                  <th className="text-left py-2 pr-3">When</th>
+                                  <th className="text-left py-2 pr-3">Model</th>
+                                  <th className="text-left py-2 pr-3">Intent</th>
+                                  <th className="text-left py-2 pr-3">Sentiment</th>
+                                  <th className="text-right py-2 pr-3">Msgs</th>
+                                  <th className="text-right py-2 pr-3">Input</th>
+                                  <th className="text-right py-2 pr-3">Output</th>
+                                  <th className="text-right py-2 pr-3">Total</th>
+                                  <th className="text-right py-2">Cost</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {detail.map((d) => {
+                                  const cost = (d.prompt_tokens / 1_000_000) * PRICE_IN_PER_M + (d.completion_tokens / 1_000_000) * PRICE_OUT_PER_M;
+                                  return (
+                                    <tr key={d.id} className="border-t border-border/50">
+                                      <td className="py-1.5 pr-3 whitespace-nowrap">{new Date(d.created_at).toLocaleString()}</td>
+                                      <td className="py-1.5 pr-3 text-foreground/60">{d.model}</td>
+                                      <td className="py-1.5 pr-3">{d.intent || "—"}</td>
+                                      <td className="py-1.5 pr-3">{d.sentiment || "—"}</td>
+                                      <td className="py-1.5 pr-3 text-right">{d.message_count ?? "—"}</td>
+                                      <td className="py-1.5 pr-3 text-right">{d.prompt_tokens.toLocaleString()}</td>
+                                      <td className="py-1.5 pr-3 text-right">{d.completion_tokens.toLocaleString()}</td>
+                                      <td className="py-1.5 pr-3 text-right font-medium">{d.total_tokens.toLocaleString()}</td>
+                                      <td className="py-1.5 text-right">{fmtUSD(cost)}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
@@ -156,7 +210,7 @@ export default function TradeConciergeUsage() {
         </div>
 
         <p className="text-xs text-foreground/40 mt-4">
-          Pricing estimate: ${PRICE_IN_PER_M}/M input + ${PRICE_OUT_PER_M}/M output (Gemini 2.5 Pro list price). Actual billing depends on your AI gateway plan.
+          Pricing estimate: ${PRICE_IN_PER_M}/M input + ${PRICE_OUT_PER_M}/M output (Gemini 2.5 Pro list price). Actual billing depends on your AI gateway plan. Click a row to see every turn.
         </p>
       </div>
     </>
