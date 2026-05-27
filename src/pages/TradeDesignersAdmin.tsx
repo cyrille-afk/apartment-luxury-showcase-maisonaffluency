@@ -1274,12 +1274,17 @@ type DesignerEditorDraft = {
 const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   if (typeof window === "undefined") return {};
   try {
-    const raw = sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
+    // Prefer localStorage (survives tab close + hard reloads); fall back to
+    // sessionStorage for drafts saved by older builds.
+    const raw =
+      localStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY) ||
+      sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 };
+
 
 const TradeDesignersAdmin = () => {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
@@ -1296,6 +1301,8 @@ const TradeDesignersAdmin = () => {
   const [previewDebug, setPreviewDebug] = useState(initialDraft.previewDebug ?? false);
 
   useEffect(() => {
+    const hasUnsaved = Object.keys(editBuffer).length > 0;
+
     const persistDraft = () => {
       if (typeof window === "undefined") return;
       const hasState =
@@ -1305,27 +1312,31 @@ const TradeDesignersAdmin = () => {
         previewId !== null ||
         previewMobile ||
         previewDebug ||
-        Object.keys(editBuffer).length > 0;
+        hasUnsaved;
 
       try {
         if (!hasState) {
+          localStorage.removeItem(DESIGNER_EDITOR_DRAFT_KEY);
           sessionStorage.removeItem(DESIGNER_EDITOR_DRAFT_KEY);
           return;
         }
 
-        sessionStorage.setItem(
-          DESIGNER_EDITOR_DRAFT_KEY,
-          JSON.stringify({
-            search,
-            activeLetter,
-            expandedId,
-            editBuffer,
-            previewId,
-            previewMobile,
-            previewDebug,
-            updatedAt: Date.now(),
-          } satisfies DesignerEditorDraft),
-        );
+        const payload = JSON.stringify({
+          search,
+          activeLetter,
+          expandedId,
+          editBuffer,
+          previewId,
+          previewMobile,
+          previewDebug,
+          updatedAt: Date.now(),
+        } satisfies DesignerEditorDraft);
+
+        // Write to BOTH stores: localStorage survives reloads / new-build
+        // banners / accidental tab closes; sessionStorage keeps per-tab
+        // isolation for restoration when reopening the same tab.
+        localStorage.setItem(DESIGNER_EDITOR_DRAFT_KEY, payload);
+        sessionStorage.setItem(DESIGNER_EDITOR_DRAFT_KEY, payload);
       } catch {
         /* keep editing even if browser storage is unavailable */
       }
@@ -1333,8 +1344,28 @@ const TradeDesignersAdmin = () => {
 
     persistDraft();
     window.addEventListener("pagehide", persistDraft);
-    return () => window.removeEventListener("pagehide", persistDraft);
+
+    // Warn the user before any reload / tab close / navigation away while
+    // they have unsaved edits in the buffer. This catches the case where
+    // the build-update banner, an OS-level refresh, or a stray Cmd+R would
+    // otherwise wipe in-progress work (e.g. a bulk Instagram import).
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!hasUnsaved) return;
+      persistDraft();
+      e.preventDefault();
+      // Required for Chrome to actually show the prompt.
+      e.returnValue = "";
+    };
+    if (hasUnsaved) {
+      window.addEventListener("beforeunload", onBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("pagehide", persistDraft);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
   }, [search, activeLetter, expandedId, editBuffer, previewId, previewMobile, previewDebug]);
+
 
   // After data loads on mount, scroll the previously expanded row back into view
   const didRestoreScrollRef = useRef(false);
