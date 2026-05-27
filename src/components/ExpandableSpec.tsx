@@ -44,6 +44,13 @@ interface ExpandableSpecProps {
   disabledIndices?: number[];
   /** Optional muted caption rendered below the dropdown (e.g. constraint hints). */
   helperText?: string;
+  /**
+   * When the spec collapses to a single value (e.g. only one Frame option),
+   * prefix the displayed value with this axis label so the public page still
+   * communicates which dimension it represents — e.g. "Frame: Laser cut aluminum".
+   * Ignored when multiple options render as a dropdown.
+   */
+  singleValueLabel?: string;
 }
 
 /**
@@ -64,6 +71,7 @@ export default function ExpandableSpec({
   onChange,
   disabledIndices,
   helperText,
+  singleValueLabel,
 }: ExpandableSpecProps) {
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -107,10 +115,12 @@ export default function ExpandableSpec({
 
   // Single value → plain row
   if (lines.length === 1) {
+    const label = singleValueLabel?.trim();
+    const display = label ? `${label}: ${lines[0]}` : lines[0];
     return (
       <div className={rowClasses}>
         <span className="shrink-0">{icon}</span>
-        <p className={cn(textClasses, "flex-1")}>{lines[0]}</p>
+        <p className={cn(textClasses, "flex-1")}>{display}</p>
       </div>
     );
   }
