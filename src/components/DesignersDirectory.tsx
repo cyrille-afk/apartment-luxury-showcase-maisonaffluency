@@ -310,7 +310,20 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
 // ─── Sub-Designers Grid ──────────────────────────────────────────────────────
 function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string; onClose: () => void; autoScroll?: boolean }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
+  const { data: designersWithIgPosts = new Set<string>() } = useQuery({
+    queryKey: ["designers-with-ig-posts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_instagram_posts")
+        .select("designer_id")
+        .eq("hidden", false);
+      if (!data) return new Set<string>();
+      return new Set(data.map((r: any) => r.designer_id as string));
+    },
+    staleTime: 1000 * 60 * 10,
+  });
   const rootRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     if (!autoScroll) return;
@@ -358,7 +371,8 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 md:gap-3">
             {designers.map((d) => {
-              const igUrl = d.instagramUrl || INSTAGRAM_LINKS[d.slug];
+              const hasIg = designersWithIgPosts.has(d.id);
+              const igUrl = hasIg ? undefined : (d.instagramUrl || INSTAGRAM_LINKS[d.slug]);
               return (
                 <Link
                   key={d.slug}
@@ -382,6 +396,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                       </span>
                     )}
                   </div>
+
                   <div className="px-2 py-1.5 bg-background text-center">
                     <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
                     <p className="font-body text-[8px] text-muted-foreground/60 uppercase tracking-[0.1em] mt-0.5 line-clamp-1">{parentName}</p>

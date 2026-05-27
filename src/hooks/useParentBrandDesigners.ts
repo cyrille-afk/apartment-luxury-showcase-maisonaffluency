@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 const HIDDEN_CHILD_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
 export interface SubDesigner {
+  id: string;
   name: string;
   slug: string;
   image: string;
@@ -24,7 +25,7 @@ export function useParentBrandDesigners(parentName: string | null) {
       if (!parentName) return [];
       const { data, error } = await supabase
         .from("designers")
-        .select("name, slug, image_url, links")
+        .select("id, name, slug, image_url, links")
         .eq("founder", parentName)
         .neq("name", parentName)
         .eq("is_published", true)
@@ -34,6 +35,7 @@ export function useParentBrandDesigners(parentName: string | null) {
         const linksArr = Array.isArray(d.links) ? d.links : [];
         const igLink = linksArr.find((l: any) => l.type?.toLowerCase() === "instagram");
         return {
+          id: d.id,
           name: d.name,
           slug: d.slug,
           image: d.image_url
@@ -47,3 +49,4 @@ export function useParentBrandDesigners(parentName: string | null) {
     },
   });
 }
+
