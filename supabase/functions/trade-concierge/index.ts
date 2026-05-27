@@ -1335,6 +1335,28 @@ serve(async (req) => {
         } catch (e) {
           console.error("stream interceptor error:", e);
         } finally {
+          // Persist token usage (best-effort; never blocks the stream close)
+          if (capturedUsage) {
+            const pt = Number(capturedUsage.prompt_tokens ?? 0);
+            const ct = Number(capturedUsage.completion_tokens ?? 0);
+            const tt = Number(capturedUsage.total_tokens ?? pt + ct);
+            console.log(`[concierge usage] user=${userId} model=${usageModel} prompt=${pt} completion=${ct} total=${tt}`);
+            try {
+              await supabase.from("trade_concierge_usage").insert({
+                user_id: userId,
+                project_id: projectId ?? null,
+                model: usageModel,
+                prompt_tokens: pt,
+                completion_tokens: ct,
+                total_tokens: tt,
+                message_count: messages.length,
+                sentiment: sentiment?.sentiment ?? null,
+                intent: sentiment?.intent ?? null,
+              });
+            } catch (logErr) {
+              console.error("usage log insert failed:", logErr);
+            }
+          }
           controller.close();
         }
       },
