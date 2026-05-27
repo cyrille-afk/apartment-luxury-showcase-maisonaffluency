@@ -1083,6 +1083,7 @@ serve(async (req) => {
           tools: availableTools,
           tool_choice: isExplicitQuoteIntent ? "required" : "auto",
           stream: true,
+          stream_options: { include_usage: true },
         }),
       }
     );
