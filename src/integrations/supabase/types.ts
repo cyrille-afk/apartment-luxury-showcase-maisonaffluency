@@ -3781,6 +3781,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_concierge_usage: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          id: string
+          intent: string | null
+          message_count: number | null
+          model: string
+          project_id: string | null
+          prompt_tokens: number
+          sentiment: string | null
+          total_tokens: number
+          user_id: string | null
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          id?: string
+          intent?: string | null
+          message_count?: number | null
+          model: string
+          project_id?: string | null
+          prompt_tokens?: number
+          sentiment?: string | null
+          total_tokens?: number
+          user_id?: string | null
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          id?: string
+          intent?: string | null
+          message_count?: number | null
+          model?: string
+          project_id?: string | null
+          prompt_tokens?: number
+          sentiment?: string | null
+          total_tokens?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       trade_credits: {
         Row: {
           amount_cents: number

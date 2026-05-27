@@ -1083,6 +1083,7 @@ serve(async (req) => {
           tools: availableTools,
           tool_choice: isExplicitQuoteIntent ? "required" : "auto",
           stream: true,
+          stream_options: { include_usage: true },
         }),
       }
     );
@@ -1120,6 +1121,8 @@ serve(async (req) => {
     // tool_calls arrive as fragments; key by index
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
     let buffer = "";
+    let capturedUsage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null = null;
+    const usageModel = "google/gemini-2.5-pro";
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -1302,6 +1305,9 @@ serve(async (req) => {
 
               try {
                 const obj = JSON.parse(payload);
+                if (obj.usage && typeof obj.usage === "object") {
+                  capturedUsage = obj.usage;
+                }
                 const delta = obj.choices?.[0]?.delta;
                 const toolCalls = delta?.tool_calls;
                 if (Array.isArray(toolCalls)) {
@@ -1329,6 +1335,28 @@ serve(async (req) => {
         } catch (e) {
           console.error("stream interceptor error:", e);
         } finally {
+          // Persist token usage (best-effort; never blocks the stream close)
+          if (capturedUsage) {
+            const pt = Number(capturedUsage.prompt_tokens ?? 0);
+            const ct = Number(capturedUsage.completion_tokens ?? 0);
+            const tt = Number(capturedUsage.total_tokens ?? pt + ct);
+            console.log(`[concierge usage] user=${userId} model=${usageModel} prompt=${pt} completion=${ct} total=${tt}`);
+            try {
+              await supabase.from("trade_concierge_usage").insert({
+                user_id: userId,
+                project_id: activeProjectId,
+                model: usageModel,
+                prompt_tokens: pt,
+                completion_tokens: ct,
+                total_tokens: tt,
+                message_count: messages.length,
+                sentiment: sentiment?.sentiment ?? null,
+                intent: sentiment?.intent ?? null,
+              });
+            } catch (logErr) {
+              console.error("usage log insert failed:", logErr);
+            }
+          }
           controller.close();
         }
       },
