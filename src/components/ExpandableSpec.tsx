@@ -44,6 +44,13 @@ interface ExpandableSpecProps {
   disabledIndices?: number[];
   /** Optional muted caption rendered below the dropdown (e.g. constraint hints). */
   helperText?: string;
+  /**
+   * When the spec collapses to a single value (e.g. only one Frame option),
+   * prefix the displayed value with this axis label so the public page still
+   * communicates which dimension it represents — e.g. "Frame: Laser cut aluminum".
+   * Ignored when multiple options render as a dropdown.
+   */
+  singleValueLabel?: string;
 }
 
 /**
