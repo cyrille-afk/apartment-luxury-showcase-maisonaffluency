@@ -272,7 +272,62 @@ You do NOT have live pricing or stock data. For specific pricing, direct users t
 Format responses with markdown when helpful (bold for emphasis, bullet lists for options).`;
 }
 
-async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
+/** Heuristic — true if the user message warrants loading the full pieces list. */
+function needsFullCatalog(text: string, designerNames: string[]): boolean {
+  const t = (text || "").toLowerCase();
+  if (!t) return false;
+  // Product-recommendation verbs / discovery intents
+  if (/\b(show|find|pull|suggest|recommend|propose|curate|compose|draft|quote|tearsheet|add to|put together|in (oak|brass|bronze|marble|leather|mohair|velvet|stone|wood))\b/.test(t)) return true;
+  // Category keywords
+  if (/\b(chandelier|sconce|lamp|lighting|table|chair|sofa|armchair|console|cabinet|mirror|rug|carpet|desk|bed|stool|bench|sideboard|dining|coffee|side table|dressing|wall light|pendant|floor lamp|objet)\b/.test(t)) return true;
+  // Designer name mention
+  for (const name of designerNames) {
+    const n = name.toLowerCase();
+    if (n.length >= 4 && t.includes(n)) return true;
+  }
+  return false;
+}
+
+/** Check daily token usage; returns true if user is over cap (and not admin). */
+async function isOverDailyCap(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  capTokens = 200_000,
+): Promise<boolean> {
+  try {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    const isAdmin = (roles || []).some((r: any) => r.role === "admin" || r.role === "super_admin");
+    if (isAdmin) return false;
+    const since = new Date();
+    since.setUTCHours(0, 0, 0, 0);
+    const { data } = await supabase
+      .from("trade_concierge_usage")
+      .select("total_tokens")
+      .eq("user_id", userId)
+      .gte("created_at", since.toISOString());
+    const sum = (data || []).reduce((s: number, r: any) => s + Number(r.total_tokens || 0), 0);
+    return sum >= capTokens;
+  } catch (e) {
+    console.error("daily cap check failed:", e);
+    return false;
+  }
+}
+
+/** Router — pick Pro for complex, multi-constraint briefs; Flash for the rest. */
+function pickModel(text: string, includePieces: boolean): string {
+  const t = (text || "").toLowerCase();
+  const len = t.length;
+  const complexSignals =
+    /\b(curate|art[- ]direct|compose|edit for|mood|narrative|brief:|palette|atmosphere|whole (room|scheme|project)|multi[- ]room|across (the )?(apartment|house|hotel|villa))\b/.test(t);
+  const longBrief = len > 600;
+  if (includePieces && (complexSignals || longBrief)) return "google/gemini-2.5-pro";
+  return "google/gemini-2.5-flash";
+}
+
+async function loadCatalogContext(supabase: ReturnType<typeof createClient>, includePieces: boolean) {
   // Fetch published designers
   const { data: designers } = await supabase
     .from("designers")
