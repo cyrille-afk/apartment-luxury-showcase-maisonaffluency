@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET origin = 'France' WHERE id = 'dc7b6157-8415-4a64-8079-5730d46606d4';
