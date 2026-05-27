@@ -1274,12 +1274,17 @@ type DesignerEditorDraft = {
 const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   if (typeof window === "undefined") return {};
   try {
-    const raw = sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
+    // Prefer localStorage (survives tab close + hard reloads); fall back to
+    // sessionStorage for drafts saved by older builds.
+    const raw =
+      localStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY) ||
+      sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 };
+
 
 const TradeDesignersAdmin = () => {
   const { isAdmin, isSuperAdmin, loading } = useAuth();
