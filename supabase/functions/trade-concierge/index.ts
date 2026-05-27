@@ -458,7 +458,9 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
 
   return {
     designersList: designerLines.join("\n") || "No designers currently loaded.",
-    piecesList: pieceLines.join("\n") || "No pieces currently loaded.",
+    piecesList: includePieces
+      ? (pieceLines.join("\n") || "No pieces currently loaded.")
+      : "(Pieces list omitted to keep the prompt lean. The user has not yet named a designer, category, or asked for recommendations. If they do, reply with: \"Want me to pull up matching pieces from the catalog?\" — the next turn will load the full list.)",
     showroomBrands: showroomBrandLines.join("\n") || "No showroom brands currently loaded.",
   };
 }
