@@ -39,7 +39,7 @@ export default function TradeConciergeUsage() {
       const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("trade_concierge_usage")
-        .select("id, user_id, model, prompt_tokens, completion_tokens, total_tokens, created_at")
+        .select("id, user_id, model, prompt_tokens, completion_tokens, total_tokens, message_count, sentiment, intent, created_at")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(5000);
@@ -47,6 +47,15 @@ export default function TradeConciergeUsage() {
       return (data || []) as UsageRow[];
     },
   });
+
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const toggle = (uid: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) next.delete(uid); else next.add(uid);
+      return next;
+    });
+  };
 
   const userIds = Array.from(new Set((rows || []).map((r) => r.user_id).filter(Boolean) as string[]));
 
