@@ -1,0 +1,1 @@
+UPDATE public.designers SET biography = replace(biography, 'Maison Pouenat', '<a href="/designers/pouenat">Maison Pouenat</a>') WHERE slug = 'caroline-scholl';
