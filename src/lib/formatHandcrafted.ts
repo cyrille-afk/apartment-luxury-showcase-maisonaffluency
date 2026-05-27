@@ -12,7 +12,7 @@
  */
 
 // Match Handmade / Handmande (typo) / Handcrafted / Made — followed by "in"
-const ORIGIN_PREFIX_RE = /^\s*(handmande|handmade|handcrafted|made)\s+in\s+/i;
+const ORIGIN_PREFIX_RE = /^\s*(handmande|handmade|handcrafted|hancrafted|handcraft|made)\s+in\s+/i;
 const LEAD_TIME_PREFIX_RE = /^\s*ships?\s+in\s+/i;
 
 const ORIGIN_FIXES: Array<[RegExp, string]> = [
