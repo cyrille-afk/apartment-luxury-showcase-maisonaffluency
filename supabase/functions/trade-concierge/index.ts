@@ -272,7 +272,62 @@ You do NOT have live pricing or stock data. For specific pricing, direct users t
 Format responses with markdown when helpful (bold for emphasis, bullet lists for options).`;
 }
 
-async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
+/** Heuristic — true if the user message warrants loading the full pieces list. */
+function needsFullCatalog(text: string, designerNames: string[]): boolean {
+  const t = (text || "").toLowerCase();
+  if (!t) return false;
+  // Product-recommendation verbs / discovery intents
+  if (/\b(show|find|pull|suggest|recommend|propose|curate|compose|draft|quote|tearsheet|add to|put together|in (oak|brass|bronze|marble|leather|mohair|velvet|stone|wood))\b/.test(t)) return true;
+  // Category keywords
+  if (/\b(chandelier|sconce|lamp|lighting|table|chair|sofa|armchair|console|cabinet|mirror|rug|carpet|desk|bed|stool|bench|sideboard|dining|coffee|side table|dressing|wall light|pendant|floor lamp|objet)\b/.test(t)) return true;
+  // Designer name mention
+  for (const name of designerNames) {
+    const n = name.toLowerCase();
+    if (n.length >= 4 && t.includes(n)) return true;
+  }
+  return false;
+}
+
+/** Check daily token usage; returns true if user is over cap (and not admin). */
+async function isOverDailyCap(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  capTokens = 200_000,
+): Promise<boolean> {
+  try {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    const isAdmin = (roles || []).some((r: any) => r.role === "admin" || r.role === "super_admin");
+    if (isAdmin) return false;
+    const since = new Date();
+    since.setUTCHours(0, 0, 0, 0);
+    const { data } = await supabase
+      .from("trade_concierge_usage")
+      .select("total_tokens")
+      .eq("user_id", userId)
+      .gte("created_at", since.toISOString());
+    const sum = (data || []).reduce((s: number, r: any) => s + Number(r.total_tokens || 0), 0);
+    return sum >= capTokens;
+  } catch (e) {
+    console.error("daily cap check failed:", e);
+    return false;
+  }
+}
+
+/** Router — pick Pro for complex, multi-constraint briefs; Flash for the rest. */
+function pickModel(text: string, includePieces: boolean): string {
+  const t = (text || "").toLowerCase();
+  const len = t.length;
+  const complexSignals =
+    /\b(curate|art[- ]direct|compose|edit for|mood|narrative|brief:|palette|atmosphere|whole (room|scheme|project)|multi[- ]room|across (the )?(apartment|house|hotel|villa))\b/.test(t);
+  const longBrief = len > 600;
+  if (includePieces && (complexSignals || longBrief)) return "google/gemini-2.5-pro";
+  return "google/gemini-2.5-flash";
+}
+
+async function loadCatalogContext(supabase: ReturnType<typeof createClient>, includePieces: boolean) {
   // Fetch published designers
   const { data: designers } = await supabase
     .from("designers")
@@ -294,24 +349,32 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
   });
 
   // Fetch ALL curator picks (these own the canonical pick_ids used by the
-  // tearsheet tools).
-  const { data: picks } = await supabase
-    .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
-    .order("designer_id", { ascending: true })
-    .order("title", { ascending: true })
-    .limit(2000);
+  // tearsheet tools). Skipped on the lightweight path.
+  const { data: picks } = includePieces
+    ? await supabase
+        .from("designer_curator_picks")
+        .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+        .order("designer_id", { ascending: true })
+        .order("title", { ascending: true })
+        .limit(2000)
+    : { data: [] as any[] };
 
   // Fetch the trade_products catalog so the assistant can SEE every active
-  // piece (not just the curator subset). Merged below by (brand,title) so
-  // we never list the same item twice.
-  const { data: tradeAll } = await supabase
-    .from("trade_products")
-    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
-    .eq("is_active", true)
-    .order("brand_name", { ascending: true })
-    .order("product_name", { ascending: true })
-    .limit(2000);
+  // piece (not just the curator subset). On the lightweight path we only
+  // need brand names for the SHOWROOM BRANDS section.
+  const { data: tradeAll } = includePieces
+    ? await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .eq("is_active", true)
+        .order("brand_name", { ascending: true })
+        .order("product_name", { ascending: true })
+        .limit(2000)
+    : await supabase
+        .from("trade_products")
+        .select("brand_name")
+        .eq("is_active", true)
+        .limit(2000);
 
   const { data: hotspotBrands } = await supabase
     .from("gallery_hotspots")
@@ -395,7 +458,9 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>) {
 
   return {
     designersList: designerLines.join("\n") || "No designers currently loaded.",
-    piecesList: pieceLines.join("\n") || "No pieces currently loaded.",
+    piecesList: includePieces
+      ? (pieceLines.join("\n") || "No pieces currently loaded.")
+      : "(Pieces list omitted to keep the prompt lean. The user has not yet named a designer, category, or asked for recommendations. If they do, reply with: \"Want me to pull up matching pieces from the catalog?\" — the next turn will load the full list.)",
     showroomBrands: showroomBrandLines.join("\n") || "No showroom brands currently loaded.",
   };
 }
@@ -1036,12 +1101,32 @@ serve(async (req) => {
 
     const userId: string = auth.userId;
 
+    // Daily token cap (skip for admins). Soft block with friendly message.
+    if (await isOverDailyCap(supabase, userId)) {
+      return new Response(
+        JSON.stringify({ error: "You've reached today's concierge usage limit. Please come back tomorrow — or reach the team directly for urgent requests." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
+    // Trim history: keep only the last ~8 turns to control prompt size.
+    const trimmedMessages = messages.slice(-8);
+
+    // Quick designer-name fetch to power the two-stage catalog decision.
+    const { data: designerNamesRows } = await supabase
+      .from("designers")
+      .select("name, display_name")
+      .eq("is_published", true);
+    const designerNames = (designerNamesRows || [])
+      .flatMap((d: any) => [d.name, d.display_name])
+      .filter(Boolean) as string[];
+    const includePieces = needsFullCatalog(lastUserMsg, designerNames);
+
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
-      loadCatalogContext(supabase),
+      loadCatalogContext(supabase, includePieces),
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
@@ -1069,6 +1154,9 @@ serve(async (req) => {
       ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
       : TOOLS;
 
+    // Model router: Flash by default, Pro for complex multi-constraint briefs.
+    const chosenModel = pickModel(lastUserMsg, includePieces);
+
     const upstream = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -1078,10 +1166,11 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
-          messages: [{ role: "system", content: systemPrompt }, ...messages],
+          model: chosenModel,
+          messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
           tools: availableTools,
           tool_choice: isExplicitQuoteIntent ? "required" : "auto",
+          max_tokens: 800,
           stream: true,
           stream_options: { include_usage: true },
         }),
@@ -1122,7 +1211,7 @@ serve(async (req) => {
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
     let buffer = "";
     let capturedUsage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null = null;
-    const usageModel = "google/gemini-2.5-pro";
+    const usageModel = chosenModel;
 
     const stream = new ReadableStream({
       async start(controller) {
