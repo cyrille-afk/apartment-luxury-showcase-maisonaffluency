@@ -349,24 +349,32 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
   });
 
   // Fetch ALL curator picks (these own the canonical pick_ids used by the
-  // tearsheet tools).
-  const { data: picks } = await supabase
-    .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
-    .order("designer_id", { ascending: true })
-    .order("title", { ascending: true })
-    .limit(2000);
+  // tearsheet tools). Skipped on the lightweight path.
+  const { data: picks } = includePieces
+    ? await supabase
+        .from("designer_curator_picks")
+        .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+        .order("designer_id", { ascending: true })
+        .order("title", { ascending: true })
+        .limit(2000)
+    : { data: [] as any[] };
 
   // Fetch the trade_products catalog so the assistant can SEE every active
-  // piece (not just the curator subset). Merged below by (brand,title) so
-  // we never list the same item twice.
-  const { data: tradeAll } = await supabase
-    .from("trade_products")
-    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
-    .eq("is_active", true)
-    .order("brand_name", { ascending: true })
-    .order("product_name", { ascending: true })
-    .limit(2000);
+  // piece (not just the curator subset). On the lightweight path we only
+  // need brand names for the SHOWROOM BRANDS section.
+  const { data: tradeAll } = includePieces
+    ? await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .eq("is_active", true)
+        .order("brand_name", { ascending: true })
+        .order("product_name", { ascending: true })
+        .limit(2000)
+    : await supabase
+        .from("trade_products")
+        .select("brand_name")
+        .eq("is_active", true)
+        .limit(2000);
 
   const { data: hotspotBrands } = await supabase
     .from("gallery_hotspots")
