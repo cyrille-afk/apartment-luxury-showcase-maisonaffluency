@@ -1305,6 +1305,9 @@ serve(async (req) => {
 
               try {
                 const obj = JSON.parse(payload);
+                if (obj.usage && typeof obj.usage === "object") {
+                  capturedUsage = obj.usage;
+                }
                 const delta = obj.choices?.[0]?.delta;
                 const toolCalls = delta?.tool_calls;
                 if (Array.isArray(toolCalls)) {
