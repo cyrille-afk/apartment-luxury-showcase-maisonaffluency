@@ -571,22 +571,28 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                             const galleryEl = document.getElementById('gallery');
                             if (galleryEl) {
                               galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                  detail: {
+                                    index: resolvedGalleryIdx,
+                                    sourceId: `designer-card-${item.slug}`,
+                                    filterDesigner: item.name,
+                                  },
+                                }));
+                              }, 600);
+                            } else {
+                              // Gallery isn't mounted on this route (e.g. /designers).
+                              // Navigate home; Gallery picks up sessionStorage on mount.
+                              navigate('/');
                             }
-                            setTimeout(() => {
-                              window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                detail: {
-                                  index: resolvedGalleryIdx,
-                                  sourceId: `designer-card-${item.slug}`,
-                                  filterDesigner: item.name,
-                                },
-                              }));
-                            }, 600);
                           } else {
                             const galleryEl = document.getElementById('gallery');
                             if (galleryEl) {
                               galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
+                            } else {
+                              navigate('/');
                             }
-                            toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
                           }
                         }}
                         className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer touch-manipulation"
