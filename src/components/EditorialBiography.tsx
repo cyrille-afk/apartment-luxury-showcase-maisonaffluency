@@ -330,7 +330,7 @@ function VideoBlock({
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
   const ytId = extractYouTubeId(url);
   const isYouTube = !!ytId;
-  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI", "0y69QUFEnX8", "RG2VhkWkQgw", "Fa7f1xHOc-I"]), []);
+  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI", "0y69QUFEnX8", "RG2VhkWkQgw", "Fa7f1xHOc-I", "oHx35m3gkSg"]), []);
   const startUnmuted = !!ytId && unmutedVideos.has(ytId);
   const useDirectYouTubeEmbed = false; // Always use YT IFrame API for reliable autoplay
 
