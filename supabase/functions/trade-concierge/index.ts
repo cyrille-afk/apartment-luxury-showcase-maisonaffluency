@@ -1344,7 +1344,7 @@ serve(async (req) => {
             try {
               await supabase.from("trade_concierge_usage").insert({
                 user_id: userId,
-                project_id: projectId ?? null,
+                project_id: activeProjectId,
                 model: usageModel,
                 prompt_tokens: pt,
                 completion_tokens: ct,
