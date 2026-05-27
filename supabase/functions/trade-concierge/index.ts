@@ -1101,12 +1101,32 @@ serve(async (req) => {
 
     const userId: string = auth.userId;
 
+    // Daily token cap (skip for admins). Soft block with friendly message.
+    if (await isOverDailyCap(supabase, userId)) {
+      return new Response(
+        JSON.stringify({ error: "You've reached today's concierge usage limit. Please come back tomorrow — or reach the team directly for urgent requests." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
+    // Trim history: keep only the last ~8 turns to control prompt size.
+    const trimmedMessages = messages.slice(-8);
+
+    // Quick designer-name fetch to power the two-stage catalog decision.
+    const { data: designerNamesRows } = await supabase
+      .from("designers")
+      .select("name, display_name")
+      .eq("is_published", true);
+    const designerNames = (designerNamesRows || [])
+      .flatMap((d: any) => [d.name, d.display_name])
+      .filter(Boolean) as string[];
+    const includePieces = needsFullCatalog(lastUserMsg, designerNames);
+
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
-      loadCatalogContext(supabase),
+      loadCatalogContext(supabase, includePieces),
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
@@ -1134,6 +1154,9 @@ serve(async (req) => {
       ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
       : TOOLS;
 
+    // Model router: Flash by default, Pro for complex multi-constraint briefs.
+    const chosenModel = pickModel(lastUserMsg, includePieces);
+
     const upstream = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -1143,10 +1166,11 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
-          messages: [{ role: "system", content: systemPrompt }, ...messages],
+          model: chosenModel,
+          messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
           tools: availableTools,
           tool_choice: isExplicitQuoteIntent ? "required" : "auto",
+          max_tokens: 800,
           stream: true,
           stream_options: { include_usage: true },
         }),
