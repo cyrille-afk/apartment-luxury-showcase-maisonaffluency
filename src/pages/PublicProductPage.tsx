@@ -347,6 +347,7 @@ const VariantSelectors: React.FC<{
             icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
             text={topOptions.join("\n")}
             placeholder={getTopPlaceholder(product)}
+            singleValueLabel={product.top_axis_label || undefined}
             emphasized
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : null}
             onChange={(idx) => {
