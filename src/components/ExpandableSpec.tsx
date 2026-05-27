@@ -115,10 +115,12 @@ export default function ExpandableSpec({
 
   // Single value → plain row
   if (lines.length === 1) {
+    const label = singleValueLabel?.trim();
+    const display = label ? `${label}: ${lines[0]}` : lines[0];
     return (
       <div className={rowClasses}>
         <span className="shrink-0">{icon}</span>
-        <p className={cn(textClasses, "flex-1")}>{lines[0]}</p>
+        <p className={cn(textClasses, "flex-1")}>{display}</p>
       </div>
     );
   }
