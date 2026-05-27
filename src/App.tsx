@@ -34,6 +34,7 @@ const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBound
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
 const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
+const TradeConciergeUsage = lazy(() => import("./pages/TradeConciergeUsage"));
 const TradeDescriptionWriter = lazy(() => import("./pages/TradeDescriptionWriter"));
 const TradeRegisteredUsers = lazy(() => import("./pages/TradeRegisteredUsers"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
