@@ -92,7 +92,7 @@ const ozoneLightBg = cloudinaryUrl("ozone-light-bg_v2zneb", { width: 1200, quali
 const collectionParticuliereBg = cloudinaryUrl("collection-particuliere-bg_hn4jiq", { width: 1200, quality: "auto:good", crop: "fill" });
 const biekeCasteleynBg = cloudinaryUrl("bieke-casteleyn-bg_wuhwso", { width: 1200, quality: "auto:good", crop: "fill" });
 const galerieMcdeBg = cloudinaryUrl("galerie-mcde-bg_fxxdp6", { width: 1200, quality: "auto:good", crop: "fill" });
-const gillesBoissierBg = cloudinaryUrl("gilles-boissier-bg", { width: 1200, quality: "auto:good", crop: "fill" });
+const gillesBoissierBg = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,g_auto,q_auto:good,f_auto/v1779962917/Screen_Shot_2026-05-28_at_6.08.17_PM_jw2xpr.png";
 const jacobHashimotoBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.21.31_AM_ifnvmk", { width: 1200, quality: "auto:good", crop: "fill" });
 const paulCocksedgeBg = cloudinaryUrl("4f1411eb0731397ecc000e70_kskbly", { width: 1200, quality: "auto:good", crop: "fill" });
 const leBerreVevaudBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.40.24_AM_nfyg7z", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -1290,15 +1290,6 @@ const partnerBrands = [
     origin: "France",
     description: "Serge Mouille (1922–1988) is considered the most important French lighting designer of the 1950s. Trained as a silversmith, he brought the precision of jewelry-making to lighting design. His tripod floor lamps and spider wall lights are now part of MoMA's permanent collection.",
     instagram: "https://www.instagram.com/sergemouilleofficial/?hl=en",
-  },
-  {
-    id: "pouenat",
-    name: "Pouenat",
-    category: "Lighting",
-    subcategory: "Floor Lamps",
-    origin: "France",
-    description: "Founded in 1880, Pouenat is a Parisian atelier of master metalworkers (bronziers) specializing in bespoke lighting and furniture. Collaborating with leading designers including Tristan Auer, the house produces exceptional limited-edition pieces where artisanal metalwork meets contemporary design vision.",
-    instagram: "https://www.instagram.com/pouenat.official/?hl=en",
   },
   {
     id: "se-collections",
