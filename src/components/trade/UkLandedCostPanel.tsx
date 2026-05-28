@@ -9,11 +9,25 @@
  * Quote currency (usually EUR) is left untouched — this is purely a side-panel
  * helper for UK clients quoted in EUR.
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Truck, Loader2, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
 import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
 import { useGbpLandedCost, FX_BUFFER, fmtGbp } from "@/hooks/useGbpLandedCost";
+
+// Chargeable-weight conversion ratios (kg per CBM) used by carriers as the
+// industry-standard volumetric/dim-weight factor. Carriers bill on the GREATER
+// of actual weight or volumetric weight, so these are sensible defaults when
+// the actual gross weight isn't known yet.
+//   • Road (groupage / white-glove): 1 CBM ≈ 333 kg (IRU / European standard)
+//   • Courier / express air:         1 CBM ≈ 200 kg (DHL/FedEx 1:5000 rule)
+// Furniture is typically lighter than these ratios, which means freight is
+// almost always charged on volume — so the chargeable kg figure shown here is
+// the volumetric upper bound, not the literal scale weight.
+const KG_PER_CBM: Record<"road" | "courier", number> = {
+  road: 333,
+  courier: 200,
+};
 
 interface Props {
   /** Net goods subtotal AFTER trade discount, in the quote's currency */
@@ -42,8 +56,14 @@ export const UkLandedCostPanel = ({
   clientName,
 }: Props) => {
   const [cbm, setCbm] = useState(2);
-  const [kg, setKg] = useState(200);
   const [mode, setMode] = useState<"road" | "courier">("road");
+  // kg follows cbm × mode-ratio automatically unless the user edits it.
+  const [kg, setKg] = useState(() => Math.round(2 * KG_PER_CBM.road));
+  const kgEditedRef = useRef(false);
+  useEffect(() => {
+    if (kgEditedRef.current) return;
+    setKg(Math.round(cbm * KG_PER_CBM[mode]));
+  }, [cbm, mode]);
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const gbp = useGbpLandedCost({
