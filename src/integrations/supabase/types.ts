@@ -4406,6 +4406,9 @@ export type Database = {
           insurance_rate_bps: number
           insurance_tier: string
           issue_date: string | null
+          landed_cost_cbm: number | null
+          landed_cost_kg: number | null
+          landed_cost_mode: string
           notes: string | null
           project_id: string | null
           responded_at: string | null
@@ -4429,6 +4432,9 @@ export type Database = {
           insurance_rate_bps?: number
           insurance_tier?: string
           issue_date?: string | null
+          landed_cost_cbm?: number | null
+          landed_cost_kg?: number | null
+          landed_cost_mode?: string
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
@@ -4452,6 +4458,9 @@ export type Database = {
           insurance_rate_bps?: number
           insurance_tier?: string
           issue_date?: string | null
+          landed_cost_cbm?: number | null
+          landed_cost_kg?: number | null
+          landed_cost_mode?: string
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
