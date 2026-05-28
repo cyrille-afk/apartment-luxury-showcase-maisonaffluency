@@ -1438,7 +1438,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {/* Mobile: qty + prices in a row */}
                       <div className="flex items-center justify-between mt-2 md:hidden">
                         <div className="flex items-center gap-1">
-                          {isDraft ? (
+                          {canEditLines ? (
                             <>
                               <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
                                 <Minus className="h-3 w-3" />
