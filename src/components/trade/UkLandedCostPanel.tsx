@@ -55,9 +55,20 @@ export const UkLandedCostPanel = ({
   const [kg, setKg] = useState(() => initialKg ?? Math.round((initialCbm ?? DEFAULT_GBP_LANDED_CBM) * GBP_LANDED_KG_PER_CBM[initialMode ?? "road"]));
   const kgEditedRef = useRef(initialKg != null);
   useEffect(() => {
+    const nextMode = initialMode ?? "road";
+    const nextCbm = initialCbm ?? DEFAULT_GBP_LANDED_CBM;
+    setMode(nextMode);
+    setCbm(nextCbm);
+    kgEditedRef.current = initialKg != null;
+    setKg(initialKg ?? Math.round(nextCbm * GBP_LANDED_KG_PER_CBM[nextMode]));
+  }, [initialCbm, initialKg, initialMode]);
+  useEffect(() => {
     if (kgEditedRef.current) return;
     setKg(Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]));
   }, [cbm, mode]);
+  useEffect(() => {
+    onSettingsChange?.({ cbm, kg, mode });
+  }, [cbm, kg, mode, onSettingsChange]);
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const gbp = useGbpLandedCost({
