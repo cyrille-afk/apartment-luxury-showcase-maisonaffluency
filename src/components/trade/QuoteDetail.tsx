@@ -548,7 +548,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       landed_cost_cbm: landedCostSettings.cbm,
       landed_cost_kg: landedCostSettings.kg,
       landed_cost_mode: landedCostSettings.mode,
-    }).eq("id", quoteId);
+    } as any).eq("id", quoteId);
 
     // Auto-apply any available credit (e.g. FF&E unlock)
     try {
