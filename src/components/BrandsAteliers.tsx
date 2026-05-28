@@ -1292,15 +1292,6 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/sergemouilleofficial/?hl=en",
   },
   {
-    id: "pouenat",
-    name: "Pouenat",
-    category: "Lighting",
-    subcategory: "Floor Lamps",
-    origin: "France",
-    description: "Founded in 1880, Pouenat is a Parisian atelier of master metalworkers (bronziers) specializing in bespoke lighting and furniture. Collaborating with leading designers including Tristan Auer, the house produces exceptional limited-edition pieces where artisanal metalwork meets contemporary design vision.",
-    instagram: "https://www.instagram.com/pouenat.official/?hl=en",
-  },
-  {
     id: "se-collections",
     name: "Sé Collections",
     category: "Seating",
