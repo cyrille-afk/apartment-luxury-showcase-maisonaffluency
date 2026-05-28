@@ -545,6 +545,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       notes: notes || null,
       status: "submitted",
       submitted_at: new Date().toISOString(),
+      landed_cost_cbm: landedCostSettings.cbm,
+      landed_cost_kg: landedCostSettings.kg,
+      landed_cost_mode: landedCostSettings.mode,
     }).eq("id", quoteId);
 
     // Auto-apply any available credit (e.g. FF&E unlock)
@@ -847,7 +850,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
     quoteCurrency: currency,
+    cbm: landedCostSettings.cbm,
+    kg: landedCostSettings.kg,
+    mode: landedCostSettings.mode,
   });
+
+  const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
+    setLandedCostSettings((prev) => (
+      prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
+    ));
+  }, []);
 
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
