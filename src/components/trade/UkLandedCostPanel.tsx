@@ -58,9 +58,6 @@ export const UkLandedCostPanel = ({
     if (kgEditedRef.current) return;
     setKg(Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]));
   }, [cbm, mode]);
-  useEffect(() => {
-    onSettingsChange?.({ cbm, kg, mode });
-  }, [cbm, kg, mode, onSettingsChange]);
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const gbp = useGbpLandedCost({
@@ -121,7 +118,13 @@ export const UkLandedCostPanel = ({
               <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">CBM</span>
               <input
                 type="number" min={0.1} step={0.1} value={cbm}
-                onChange={(e) => setCbm(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
+                onChange={(e) => {
+                  const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
+                  const nextKg = kgEditedRef.current ? kg : Math.round(nextCbm * GBP_LANDED_KG_PER_CBM[mode]);
+                  setCbm(nextCbm);
+                  if (!kgEditedRef.current) setKg(nextKg);
+                  onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
+                }}
                 className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
               />
             </label>
@@ -131,7 +134,12 @@ export const UkLandedCostPanel = ({
               </span>
               <input
                 type="number" min={0} step={10} value={kg}
-                onChange={(e) => { kgEditedRef.current = true; setKg(Math.max(0, parseFloat(e.target.value) || 0)); }}
+                onChange={(e) => {
+                  const nextKg = Math.max(0, parseFloat(e.target.value) || 0);
+                  kgEditedRef.current = true;
+                  setKg(nextKg);
+                  onSettingsChange?.({ cbm, kg: nextKg, mode });
+                }}
                 className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
               />
             </label>
@@ -139,7 +147,13 @@ export const UkLandedCostPanel = ({
               <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Mode</span>
               <select
                 value={mode}
-                onChange={(e) => setMode(e.target.value as "road" | "courier")}
+                onChange={(e) => {
+                  const nextMode = e.target.value as "road" | "courier";
+                  const nextKg = kgEditedRef.current ? kg : Math.round(cbm * GBP_LANDED_KG_PER_CBM[nextMode]);
+                  setMode(nextMode);
+                  if (!kgEditedRef.current) setKg(nextKg);
+                  onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
+                }}
                 className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
               >
                 <option value="road">Road · white-glove</option>
