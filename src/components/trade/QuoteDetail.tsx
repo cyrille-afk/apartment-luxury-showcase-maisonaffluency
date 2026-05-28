@@ -1460,7 +1460,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       </div>
                       {/* Desktop: standard columns */}
                       <div className="hidden md:flex items-center justify-center gap-1">
-                        {isDraft ? (
+                        {canEditLines ? (
                           <>
                             <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
                               <Minus className="h-3 w-3" />
