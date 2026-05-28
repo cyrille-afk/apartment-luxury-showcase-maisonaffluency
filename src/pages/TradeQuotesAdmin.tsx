@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,7 +9,7 @@ import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeleto
 import SectionHero from "@/components/trade/SectionHero";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 interface AdminQuote {
@@ -26,6 +26,9 @@ interface AdminQuote {
   confirmed_at: string | null;
   created_at: string;
   updated_at: string;
+  landed_cost_cbm?: number | null;
+  landed_cost_kg?: number | null;
+  landed_cost_mode?: "road" | "courier" | null;
   profiles?: { first_name: string; last_name: string; email: string; company: string } | null;
   item_count?: number;
 }
