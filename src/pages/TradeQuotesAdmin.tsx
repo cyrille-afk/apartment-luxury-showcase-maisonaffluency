@@ -496,6 +496,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       status: "priced",
       admin_notes: adminNotes || null,
       responded_at: new Date().toISOString(),
+      landed_cost_cbm: landedCostSettings.cbm,
+      landed_cost_kg: landedCostSettings.kg,
+      landed_cost_mode: landedCostSettings.mode,
     } as any).eq("id", quoteId);
 
     // Notify requesting user + admins (fire-and-forget)
@@ -574,7 +577,16 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? goodsAfterDiscountCents : 0,
     quoteCurrency: currency,
+    cbm: landedCostSettings.cbm,
+    kg: landedCostSettings.kg,
+    mode: landedCostSettings.mode,
   });
+
+  const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
+    setLandedCostSettings((prev) => (
+      prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
+    ));
+  }, []);
 
   const canSendPricing = quote?.status === "submitted" || quote?.status === "priced";
 
