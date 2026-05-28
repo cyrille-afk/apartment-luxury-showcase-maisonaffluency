@@ -577,11 +577,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handleSubmitRevise = async () => {
     const reason = reviseReason.trim();
-    if (!reason) {
+    if (!isSuperAdmin && !reason) {
       toast({ title: "Reason required", description: "Please describe what you'd like changed.", variant: "destructive" });
       return;
     }
-    const newNotes = appendAdminNote(adminNotes, "Client requested changes", reason);
+    const header = isSuperAdmin ? "Reopened as draft by admin" : "Client requested changes";
+    const newNotes = reason ? appendAdminNote(adminNotes, header, reason) : adminNotes;
     await supabase.from("trade_quotes").update({
       status: "draft",
       submitted_at: null,
@@ -591,7 +592,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setAdminNotes(newNotes);
     setReviseOpen(false);
     setReviseReason("");
-    toast({ title: "Changes requested", description: "Quote reopened as draft with your note attached." });
+    toast({ title: isSuperAdmin ? "Quote reopened as draft" : "Changes requested", description: isSuperAdmin ? "You can now edit lines directly." : "Quote reopened as draft with your note attached." });
     onStatusChange();
   };
 
@@ -1948,7 +1949,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {(quoteStatus === "submitted" || quoteStatus === "priced") && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <p className="font-body text-[10px] text-muted-foreground max-w-xs">
-              Need adjustments? Request changes reopens the quote as a draft with your note attached for our team.
+              {isSuperAdmin
+                ? "Reopen as draft to edit lines directly on the client's behalf — the quote returns to draft and can be re-priced after."
+                : "Need adjustments? Request changes reopens the quote as a draft with your note attached for our team."}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -1961,7 +1964,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 onClick={() => setReviseOpen(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground"
               >
-                <Edit3 className="h-3.5 w-3.5" /> Request Changes
+                <Edit3 className="h-3.5 w-3.5" /> {isSuperAdmin ? "Reopen as Draft" : "Request Changes"}
               </button>
             </div>
           </div>
@@ -2151,24 +2154,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       <Dialog open={reviseOpen} onOpenChange={setReviseOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-base">Request changes</DialogTitle>
+            <DialogTitle className="font-display text-base">{isSuperAdmin ? "Reopen as draft" : "Request changes"}</DialogTitle>
           </DialogHeader>
           <p className="font-body text-xs text-muted-foreground">
-            Tell our team what you'd like adjusted. The quote will be reopened as a draft and your note attached for the concierge.
+            {isSuperAdmin
+              ? "Reopen this quote as a draft so you can edit lines on the client's behalf. Optionally log a note for the audit trail."
+              : "Tell our team what you'd like adjusted. The quote will be reopened as a draft and your note attached for the concierge."}
           </p>
           <textarea
             value={reviseReason}
             onChange={(e) => setReviseReason(e.target.value)}
             rows={5}
-            placeholder="e.g. Please swap the sofa for the linen variant and remove item 3…"
+            placeholder={isSuperAdmin
+              ? "Optional — e.g. Client called to remove all items except Lady Bud side table."
+              : "e.g. Please swap the sofa for the linen variant and remove item 3…"}
             className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
           />
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => setReviseOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Cancel</button>
-            <button onClick={handleSubmitRevise} className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90">Send & reopen as draft</button>
+            <button onClick={handleSubmitRevise} className="px-3 py-1.5 bg-foreground text-background rounded-md font-body text-xs hover:opacity-90">{isSuperAdmin ? "Reopen as draft" : "Send & reopen as draft"}</button>
           </div>
         </DialogContent>
       </Dialog>
+
 
       {/* Cancel quote dialog */}
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
