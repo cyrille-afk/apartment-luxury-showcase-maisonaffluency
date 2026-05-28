@@ -257,6 +257,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [clientCountry, setClientCountry] = useState<string | null>(null);
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
+  const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
+    cbm: DEFAULT_GBP_LANDED_CBM,
+    kg: Math.round(DEFAULT_GBP_LANDED_CBM * GBP_LANDED_KG_PER_CBM.road),
+    mode: "road",
+  }));
 
   useEffect(() => {
     const load = async () => {
@@ -276,6 +281,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       setAdminNotes(q?.admin_notes || "");
       setDisplayCcy("quote");
       setClientCountry(null);
+      const landedMode = q?.landed_cost_mode === "courier" ? "courier" : "road";
+      const landedCbm = Number(q?.landed_cost_cbm ?? DEFAULT_GBP_LANDED_CBM);
+      const landedKg = Number(q?.landed_cost_kg ?? Math.round(landedCbm * GBP_LANDED_KG_PER_CBM[landedMode]));
+      setLandedCostSettings({ cbm: landedCbm, kg: landedKg, mode: landedMode });
 
       if (q?.client_id) {
         const { data: client } = await (supabase.from("clients" as any).select("billing_country").eq("id", q.client_id).maybeSingle() as any);
