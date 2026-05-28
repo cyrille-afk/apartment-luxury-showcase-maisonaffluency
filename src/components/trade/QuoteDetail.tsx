@@ -251,6 +251,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const isDepositPaid = quoteStatus === "deposit_paid";
   const isFullyPaid = quoteStatus === "paid";
   const isReadOnly = !isDraft && !isSuperAdmin;
+  // Admins can edit line items at any status (remove, change qty) without first reopening as draft.
+  const canEditLines = isDraft || isSuperAdmin;
 
   const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
     draft:        { label: "Draft",        cls: "bg-muted text-muted-foreground" },
