@@ -1628,9 +1628,27 @@ const TradeDesignersAdmin = () => {
     [setPreviewMobile, setPreviewDebug]
   );
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="p-8 text-sm text-muted-foreground font-body">
+        Checking admin access…
+      </div>
+    );
+  }
   if (!isAdmin) {
-    if (import.meta.env.DEV) return null;
+    if (import.meta.env.DEV) {
+      return (
+        <div className="p-8 max-w-xl space-y-3">
+          <h1 className="font-display text-xl">Admin access required</h1>
+          <p className="text-sm text-muted-foreground font-body">
+            You're signed in but your account doesn't have the <code>admin</code> role,
+            so the Designer Editor can't load. In production you'd be redirected to{" "}
+            <code>/trade</code>; in the preview we show this message instead so the page
+            isn't silently blank.
+          </p>
+        </div>
+      );
+    }
     return <Navigate to="/trade" replace />;
   }
 
