@@ -1948,7 +1948,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {(quoteStatus === "submitted" || quoteStatus === "priced") && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex flex-wrap items-center justify-between gap-3 print:hidden">
             <p className="font-body text-[10px] text-muted-foreground max-w-xs">
-              Need adjustments? Request changes reopens the quote as a draft with your note attached for our team.
+              {isSuperAdmin
+                ? "Reopen as draft to edit lines directly on the client's behalf — the quote returns to draft and can be re-priced after."
+                : "Need adjustments? Request changes reopens the quote as a draft with your note attached for our team."}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -1961,7 +1963,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 onClick={() => setReviseOpen(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground"
               >
-                <Edit3 className="h-3.5 w-3.5" /> Request Changes
+                <Edit3 className="h-3.5 w-3.5" /> {isSuperAdmin ? "Reopen as Draft" : "Request Changes"}
               </button>
             </div>
           </div>
