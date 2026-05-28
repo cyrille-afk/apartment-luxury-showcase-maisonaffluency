@@ -49,11 +49,21 @@ export const UkLandedCostPanel = ({
   initialMode,
   onSettingsChange,
 }: Props) => {
-  const [cbm, setCbm] = useState(initialCbm ?? DEFAULT_GBP_LANDED_CBM);
-  const [mode, setMode] = useState<"road" | "courier">(initialMode ?? "road");
+  const resolvedInitialMode = initialMode ?? "road";
+  const resolvedInitialCbm = initialCbm ?? DEFAULT_GBP_LANDED_CBM;
+  const resolvedInitialKg = initialKg ?? Math.round(resolvedInitialCbm * GBP_LANDED_KG_PER_CBM[resolvedInitialMode]);
+  const isInitialKgManual = initialKg != null && initialKg !== Math.round(resolvedInitialCbm * GBP_LANDED_KG_PER_CBM[resolvedInitialMode]);
+  const [cbm, setCbm] = useState(resolvedInitialCbm);
+  const [mode, setMode] = useState<"road" | "courier">(resolvedInitialMode);
   // kg follows cbm × mode-ratio automatically unless the user edits it.
-  const [kg, setKg] = useState(() => initialKg ?? Math.round((initialCbm ?? DEFAULT_GBP_LANDED_CBM) * GBP_LANDED_KG_PER_CBM[initialMode ?? "road"]));
-  const kgEditedRef = useRef(initialKg != null);
+  const [kg, setKg] = useState(resolvedInitialKg);
+  const kgEditedRef = useRef(isInitialKgManual);
+  useEffect(() => {
+    setCbm(resolvedInitialCbm);
+    setMode(resolvedInitialMode);
+    setKg(resolvedInitialKg);
+    kgEditedRef.current = isInitialKgManual;
+  }, [resolvedInitialCbm, resolvedInitialKg, resolvedInitialMode, isInitialKgManual]);
   useEffect(() => {
     if (kgEditedRef.current) return;
     setKg(Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]));
