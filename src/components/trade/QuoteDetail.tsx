@@ -251,6 +251,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const isDepositPaid = quoteStatus === "deposit_paid";
   const isFullyPaid = quoteStatus === "paid";
   const isReadOnly = !isDraft && !isSuperAdmin;
+  // Admins can edit line items at any status (remove, change qty) without first reopening as draft.
+  const canEditLines = isDraft || isSuperAdmin;
 
   const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
     draft:        { label: "Draft",        cls: "bg-muted text-muted-foreground" },
@@ -1426,7 +1428,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p>}
                           {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 break-words">{item.notes}</p>}
-                          {isDraft && (
+                          {canEditLines && (
                             <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-1.5 md:mt-2 transition-colors">
                               <Trash2 className="h-3 w-3" /> Remove
                             </button>
@@ -1436,7 +1438,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {/* Mobile: qty + prices in a row */}
                       <div className="flex items-center justify-between mt-2 md:hidden">
                         <div className="flex items-center gap-1">
-                          {isDraft ? (
+                          {canEditLines ? (
                             <>
                               <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
                                 <Minus className="h-3 w-3" />
@@ -1458,7 +1460,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       </div>
                       {/* Desktop: standard columns */}
                       <div className="hidden md:flex items-center justify-center gap-1">
-                        {isDraft ? (
+                        {canEditLines ? (
                           <>
                             <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
                               <Minus className="h-3 w-3" />
