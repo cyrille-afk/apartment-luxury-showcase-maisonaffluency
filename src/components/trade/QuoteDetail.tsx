@@ -513,12 +513,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return;
-    await supabase.from("trade_quote_items").update({ quantity: newQty }).eq("id", itemId);
+    const { error } = await supabase.from("trade_quote_items").update({ quantity: newQty }).eq("id", itemId);
+    if (error) {
+      toast({ title: "Could not update quantity", description: error.message, variant: "destructive" });
+      return;
+    }
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, quantity: newQty } : i)));
   };
 
   const handleRemoveItem = async (itemId: string) => {
-    await supabase.from("trade_quote_items").delete().eq("id", itemId);
+    const { error } = await supabase.from("trade_quote_items").delete().eq("id", itemId);
+    if (error) {
+      toast({ title: "Could not remove item", description: error.message, variant: "destructive" });
+      return;
+    }
     setItems((prev) => prev.filter((i) => i.id !== itemId));
     toast({ title: "Item removed" });
   };
@@ -1440,8 +1448,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <div className="flex items-center gap-1">
                           {canEditLines ? (
                             <>
-                              <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
-                                <Minus className="h-3 w-3" />
+                              <button onClick={() => item.quantity <= 1 ? handleRemoveItem(item.id) : handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label={item.quantity <= 1 ? "Remove item" : "Decrease quantity"} title={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}>
+                                {item.quantity <= 1 ? <Trash2 className="h-3 w-3 text-destructive" /> : <Minus className="h-3 w-3" />}
                               </button>
                               <span className="font-body text-xs text-foreground w-6 text-center">{item.quantity}</span>
                               <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
@@ -1462,8 +1470,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <div className="hidden md:flex items-center justify-center gap-1">
                         {canEditLines ? (
                           <>
-                            <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
-                              <Minus className="h-3 w-3" />
+                            <button onClick={() => item.quantity <= 1 ? handleRemoveItem(item.id) : handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label={item.quantity <= 1 ? "Remove item" : "Decrease quantity"} title={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}>
+                              {item.quantity <= 1 ? <Trash2 className="h-3 w-3 text-destructive" /> : <Minus className="h-3 w-3" />}
                             </button>
                             <span className="font-body text-sm text-foreground w-8 text-center">{item.quantity}</span>
                             <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
