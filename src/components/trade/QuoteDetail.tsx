@@ -577,11 +577,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handleSubmitRevise = async () => {
     const reason = reviseReason.trim();
-    if (!reason) {
+    if (!isSuperAdmin && !reason) {
       toast({ title: "Reason required", description: "Please describe what you'd like changed.", variant: "destructive" });
       return;
     }
-    const newNotes = appendAdminNote(adminNotes, "Client requested changes", reason);
+    const header = isSuperAdmin ? "Reopened as draft by admin" : "Client requested changes";
+    const newNotes = reason ? appendAdminNote(adminNotes, header, reason) : adminNotes;
     await supabase.from("trade_quotes").update({
       status: "draft",
       submitted_at: null,
@@ -591,7 +592,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setAdminNotes(newNotes);
     setReviseOpen(false);
     setReviseReason("");
-    toast({ title: "Changes requested", description: "Quote reopened as draft with your note attached." });
+    toast({ title: isSuperAdmin ? "Quote reopened as draft" : "Changes requested", description: isSuperAdmin ? "You can now edit lines directly." : "Quote reopened as draft with your note attached." });
     onStatusChange();
   };
 
