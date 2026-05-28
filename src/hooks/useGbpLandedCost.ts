@@ -41,6 +41,12 @@ export interface GbpLandedCostResult {
   goodsEurCents: number;
 }
 
+export const DEFAULT_GBP_LANDED_CBM = 2;
+export const GBP_LANDED_KG_PER_CBM: Record<"road" | "courier", number> = {
+  road: 333,
+  courier: 200,
+};
+
 // Hardcoded sane defaults (mid-2025 indicative). Used only when both live
 // FX endpoints fail (e.g. CORS-blocked preview environments).
 const FALLBACK_TO_EUR: Record<string, number> = {
@@ -105,8 +111,8 @@ const fetchFx = async (
 export const useGbpLandedCost = ({
   goodsAfterDiscountCents,
   quoteCurrency,
-  cbm = 2,
-  kg = 200,
+  cbm = DEFAULT_GBP_LANDED_CBM,
+  kg,
   mode = "road",
   category = "furniture",
 }: GbpLandedCostInput): GbpLandedCostResult => {
@@ -136,6 +142,8 @@ export const useGbpLandedCost = ({
     return Math.round(goodsAfterDiscountCents * fxQuoteEur);
   }, [goodsAfterDiscountCents, fxQuoteEur]);
 
+  const chargeableKg = kg ?? Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -146,7 +154,7 @@ export const useGbpLandedCost = ({
           origin_country: "FR",
           dest_country: "GB",
           total_volume_cbm: cbm,
-          total_weight_kg: kg,
+          total_weight_kg: chargeableKg,
           declared_value_cents: goodsEurCents,
           currency: "EUR",
           preferred_mode: mode,
@@ -158,7 +166,7 @@ export const useGbpLandedCost = ({
       }
     })();
     return () => { cancelled = true; };
-  }, [cbm, kg, mode, category, goodsEurCents]);
+  }, [cbm, chargeableKg, mode, category, goodsEurCents]);
 
   const eurToGbp = (eurCents: number): number => {
     if (!fxEurGbp) return 0;
