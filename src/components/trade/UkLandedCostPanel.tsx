@@ -129,10 +129,12 @@ export const UkLandedCostPanel = ({
               />
             </label>
             <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Weight (kg)</span>
+              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                Weight (kg){!kgEditedRef.current && <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">· auto</span>}
+              </span>
               <input
                 type="number" min={0} step={10} value={kg}
-                onChange={(e) => setKg(Math.max(0, parseFloat(e.target.value) || 0))}
+                onChange={(e) => { kgEditedRef.current = true; setKg(Math.max(0, parseFloat(e.target.value) || 0)); }}
                 className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
               />
             </label>
