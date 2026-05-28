@@ -13,21 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Truck, Loader2, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
 import { downloadUkDdpPdf } from "@/lib/ukDdpPdf";
-import { useGbpLandedCost, FX_BUFFER, fmtGbp } from "@/hooks/useGbpLandedCost";
-
-// Chargeable-weight conversion ratios (kg per CBM) used by carriers as the
-// industry-standard volumetric/dim-weight factor. Carriers bill on the GREATER
-// of actual weight or volumetric weight, so these are sensible defaults when
-// the actual gross weight isn't known yet.
-//   • Road (groupage / white-glove): 1 CBM ≈ 333 kg (IRU / European standard)
-//   • Courier / express air:         1 CBM ≈ 200 kg (DHL/FedEx 1:5000 rule)
-// Furniture is typically lighter than these ratios, which means freight is
-// almost always charged on volume — so the chargeable kg figure shown here is
-// the volumetric upper bound, not the literal scale weight.
-const KG_PER_CBM: Record<"road" | "courier", number> = {
-  road: 333,
-  courier: 200,
-};
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, FX_BUFFER, fmtGbp } from "@/hooks/useGbpLandedCost";
 
 interface Props {
   /** Net goods subtotal AFTER trade discount, in the quote's currency */
@@ -44,6 +30,10 @@ interface Props {
   quoteRef?: string;
   /** Optional client / studio name for the PDF header */
   clientName?: string | null;
+  initialCbm?: number | null;
+  initialKg?: number | null;
+  initialMode?: "road" | "courier" | null;
+  onSettingsChange?: (settings: { cbm: number; kg: number; mode: "road" | "courier" }) => void;
 }
 
 export const UkLandedCostPanel = ({
@@ -54,16 +44,23 @@ export const UkLandedCostPanel = ({
   title = "UK landed cost (DDP, GBP)",
   quoteRef,
   clientName,
+  initialCbm,
+  initialKg,
+  initialMode,
+  onSettingsChange,
 }: Props) => {
-  const [cbm, setCbm] = useState(2);
-  const [mode, setMode] = useState<"road" | "courier">("road");
+  const [cbm, setCbm] = useState(initialCbm ?? DEFAULT_GBP_LANDED_CBM);
+  const [mode, setMode] = useState<"road" | "courier">(initialMode ?? "road");
   // kg follows cbm × mode-ratio automatically unless the user edits it.
-  const [kg, setKg] = useState(() => Math.round(2 * KG_PER_CBM.road));
-  const kgEditedRef = useRef(false);
+  const [kg, setKg] = useState(() => initialKg ?? Math.round((initialCbm ?? DEFAULT_GBP_LANDED_CBM) * GBP_LANDED_KG_PER_CBM[initialMode ?? "road"]));
+  const kgEditedRef = useRef(initialKg != null);
   useEffect(() => {
     if (kgEditedRef.current) return;
-    setKg(Math.round(cbm * KG_PER_CBM[mode]));
+    setKg(Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]));
   }, [cbm, mode]);
+  useEffect(() => {
+    onSettingsChange?.({ cbm, kg, mode });
+  }, [cbm, kg, mode, onSettingsChange]);
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const gbp = useGbpLandedCost({

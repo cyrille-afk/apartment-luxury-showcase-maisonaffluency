@@ -16,7 +16,7 @@ import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from 
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
@@ -223,6 +223,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [addingProduct, setAddingProduct] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [issueDate, setIssueDate] = useState<string | null>(null);
+  const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
+    cbm: DEFAULT_GBP_LANDED_CBM,
+    kg: Math.round(DEFAULT_GBP_LANDED_CBM * GBP_LANDED_KG_PER_CBM.road),
+    mode: "road",
+  }));
 
   // Insurance bundling
   type InsuranceTier = "standard" | "premium" | "all_risk";
@@ -333,7 +338,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -388,6 +393,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (q?.insurance_rate_bps != null) setInsuranceRateBps(q.insurance_rate_bps);
       if (q?.insurance_notes) setInsuranceNotes(q.insurance_notes);
       if (q?.issue_date !== undefined) setIssueDate(q.issue_date ?? null);
+      const mode = q?.landed_cost_mode === "courier" ? "courier" : "road";
+      const cbm = Number(q?.landed_cost_cbm ?? DEFAULT_GBP_LANDED_CBM);
+      const kg = Number(q?.landed_cost_kg ?? Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]));
+      setLandedCostSettings({ cbm, kg, mode });
       if (q?.submitted_at !== undefined) setSubmittedAt(q.submitted_at ?? null);
       if (q?.responded_at !== undefined) setRespondedAt(q.responded_at ?? null);
       if (q?.confirmed_at !== undefined) setConfirmedAtTs(q.confirmed_at ?? null);
@@ -536,7 +545,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       notes: notes || null,
       status: "submitted",
       submitted_at: new Date().toISOString(),
-    }).eq("id", quoteId);
+      landed_cost_cbm: landedCostSettings.cbm,
+      landed_cost_kg: landedCostSettings.kg,
+      landed_cost_mode: landedCostSettings.mode,
+    } as any).eq("id", quoteId);
 
     // Auto-apply any available credit (e.g. FF&E unlock)
     try {
@@ -838,7 +850,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
     quoteCurrency: currency,
+    cbm: landedCostSettings.cbm,
+    kg: landedCostSettings.kg,
+    mode: landedCostSettings.mode,
   });
+
+  const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
+    setLandedCostSettings((prev) => (
+      prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
+    ));
+  }, []);
 
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
@@ -1846,6 +1867,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
                       clientName={clientName || null}
+                      initialCbm={landedCostSettings.cbm}
+                      initialKg={landedCostSettings.kg}
+                      initialMode={landedCostSettings.mode}
+                      onSettingsChange={handleLandedCostSettingsChange}
                     />
                   </div>
                 )}

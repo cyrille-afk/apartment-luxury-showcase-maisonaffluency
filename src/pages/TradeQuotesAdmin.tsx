@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,7 +9,7 @@ import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeleto
 import SectionHero from "@/components/trade/SectionHero";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 interface AdminQuote {
@@ -26,6 +26,9 @@ interface AdminQuote {
   confirmed_at: string | null;
   created_at: string;
   updated_at: string;
+  landed_cost_cbm?: number | null;
+  landed_cost_kg?: number | null;
+  landed_cost_mode?: "road" | "courier" | null;
   profiles?: { first_name: string; last_name: string; email: string; company: string } | null;
   item_count?: number;
 }
@@ -254,6 +257,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [clientCountry, setClientCountry] = useState<string | null>(null);
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
+  const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
+    cbm: DEFAULT_GBP_LANDED_CBM,
+    kg: Math.round(DEFAULT_GBP_LANDED_CBM * GBP_LANDED_KG_PER_CBM.road),
+    mode: "road",
+  }));
 
   useEffect(() => {
     const load = async () => {
@@ -273,6 +281,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       setAdminNotes(q?.admin_notes || "");
       setDisplayCcy("quote");
       setClientCountry(null);
+      const landedMode = q?.landed_cost_mode === "courier" ? "courier" : "road";
+      const landedCbm = Number(q?.landed_cost_cbm ?? DEFAULT_GBP_LANDED_CBM);
+      const landedKg = Number(q?.landed_cost_kg ?? Math.round(landedCbm * GBP_LANDED_KG_PER_CBM[landedMode]));
+      setLandedCostSettings({ cbm: landedCbm, kg: landedKg, mode: landedMode });
 
       if (q?.client_id) {
         const { data: client } = await (supabase.from("clients" as any).select("billing_country").eq("id", q.client_id).maybeSingle() as any);
@@ -484,6 +496,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       status: "priced",
       admin_notes: adminNotes || null,
       responded_at: new Date().toISOString(),
+      landed_cost_cbm: landedCostSettings.cbm,
+      landed_cost_kg: landedCostSettings.kg,
+      landed_cost_mode: landedCostSettings.mode,
     } as any).eq("id", quoteId);
 
     // Notify requesting user + admins (fire-and-forget)
@@ -562,7 +577,16 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? goodsAfterDiscountCents : 0,
     quoteCurrency: currency,
+    cbm: landedCostSettings.cbm,
+    kg: landedCostSettings.kg,
+    mode: landedCostSettings.mode,
   });
+
+  const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
+    setLandedCostSettings((prev) => (
+      prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
+    ));
+  }, []);
 
   const canSendPricing = quote?.status === "submitted" || quote?.status === "priced";
 
@@ -804,6 +828,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                       title="UK landed cost (DDP, GBP) — admin preview"
                       quoteRef={`QU-${quoteId.slice(0, 6).toUpperCase()}`}
                       clientName={quote?.client_name ?? null}
+                      initialCbm={landedCostSettings.cbm}
+                      initialKg={landedCostSettings.kg}
+                      initialMode={landedCostSettings.mode}
+                      onSettingsChange={handleLandedCostSettingsChange}
                     />
                   </div>
                 );
