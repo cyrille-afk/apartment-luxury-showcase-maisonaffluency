@@ -586,7 +586,12 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     setLandedCostSettings((prev) => (
       prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
     ));
-  }, []);
+    void supabase.from("trade_quotes").update({
+      landed_cost_cbm: settings.cbm,
+      landed_cost_kg: settings.kg,
+      landed_cost_mode: settings.mode,
+    } as any).eq("id", quoteId);
+  }, [quoteId]);
 
   const canSendPricing = quote?.status === "submitted" || quote?.status === "priced";
 
