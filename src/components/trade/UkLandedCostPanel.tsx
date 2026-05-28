@@ -130,9 +130,10 @@ export const UkLandedCostPanel = ({
                 type="number" min={0.1} step={0.1} value={cbm}
                 onChange={(e) => {
                   const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
-                  const nextKg = kgEditedRef.current ? kg : Math.round(nextCbm * GBP_LANDED_KG_PER_CBM[mode]);
+                  const nextKg = Math.round(nextCbm * GBP_LANDED_KG_PER_CBM[mode]);
+                  kgEditedRef.current = false;
                   setCbm(nextCbm);
-                  if (!kgEditedRef.current) setKg(nextKg);
+                  setKg(nextKg);
                   onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
                 }}
                 className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
@@ -159,9 +160,10 @@ export const UkLandedCostPanel = ({
                 value={mode}
                 onChange={(e) => {
                   const nextMode = e.target.value as "road" | "courier";
-                  const nextKg = kgEditedRef.current ? kg : Math.round(cbm * GBP_LANDED_KG_PER_CBM[nextMode]);
+                  const nextKg = Math.round(cbm * GBP_LANDED_KG_PER_CBM[nextMode]);
+                  kgEditedRef.current = false;
                   setMode(nextMode);
-                  if (!kgEditedRef.current) setKg(nextKg);
+                  setKg(nextKg);
                   onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
                 }}
                 className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
