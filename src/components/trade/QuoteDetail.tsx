@@ -1867,6 +1867,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
                       clientName={clientName || null}
+                      initialCbm={landedCostSettings.cbm}
+                      initialKg={landedCostSettings.kg}
+                      initialMode={landedCostSettings.mode}
+                      onSettingsChange={handleLandedCostSettingsChange}
                     />
                   </div>
                 )}
