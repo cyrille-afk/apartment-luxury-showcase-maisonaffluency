@@ -1428,7 +1428,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p>}
                           {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 break-words">{item.notes}</p>}
-                          {isDraft && (
+                          {canEditLines && (
                             <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-1.5 md:mt-2 transition-colors">
                               <Trash2 className="h-3 w-3" /> Remove
                             </button>
