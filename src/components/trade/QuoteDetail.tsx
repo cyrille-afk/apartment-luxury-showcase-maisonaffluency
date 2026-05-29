@@ -943,6 +943,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             dutyGbpCents: gbp.dutyGbpCents,
             vatGbpCents: gbp.vatGbpCents,
             totalGbpCents: gbp.totalGbpCents,
+            // Per-origin so the PDF can show shipping mode (air / sea LCL / etc.) per consolidation.
+            origins: perLine.shipments.length && gbp.fxEurGbp
+              ? perLine.shipments.map((s) => ({
+                  country: s.origin,
+                  modeLabel: labelForMode(s.mode),
+                  gbpCents: Math.round((s.shippingEurCents + s.dutyEurCents + s.vatEurCents) * (gbp.fxEurGbp || 0)),
+                }))
+              : undefined,
           }
         : null,
       hkdLanded: hkd.ready && isHkDestination
@@ -958,8 +966,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             goodsEurCents: hkd.goodsEurCents,
             shippingEurCents: hkd.shippingEurCents,
             totalEurCents: hkd.totalEurCents,
+            // Per-origin so the PDF can show shipping mode (air / sea LCL / etc.) per consolidation.
+            origins: perLine.shipments.length && hkd.fxEurHkd
+              ? perLine.shipments.map((s) => {
+                  const eurCents = s.shippingEurCents + s.dutyEurCents + s.vatEurCents;
+                  return {
+                    country: s.origin,
+                    modeLabel: labelForMode(s.mode),
+                    hkdCents: Math.round(eurCents * (hkd.fxEurHkd || 0)),
+                    eurCents,
+                  };
+                })
+              : undefined,
           }
         : null,
+
     };
   };
 
