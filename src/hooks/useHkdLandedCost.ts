@@ -132,6 +132,19 @@ export const useHkdLandedCost = ({
   const vatHkdCents = eurToHkd(breakdown?.vat_cents ?? 0);
   const totalHkdCents = goodsHkdCents + shippingHkdCents + dutyHkdCents + vatHkdCents;
 
+  const shippingEurCents =
+    (breakdown?.freight_cents ?? 0) +
+    (breakdown?.fuel_cents ?? 0) +
+    (breakdown?.insurance_cents ?? 0) +
+    (breakdown?.customs_cents ?? 0) +
+    (breakdown?.handling_cents ?? 0) +
+    (breakdown?.last_mile_cents ?? 0);
+  const totalEurCents =
+    goodsEurCents +
+    shippingEurCents +
+    (breakdown?.duty_cents ?? 0) +
+    (breakdown?.vat_cents ?? 0);
+
   return {
     ready: fxEurHkd != null && fxQuoteEur != null,
     loading,
@@ -151,6 +164,8 @@ export const useHkdLandedCost = ({
     totalHkdCents,
     breakdown,
     goodsEurCents,
+    shippingEurCents,
+    totalEurCents,
   };
 };
 
