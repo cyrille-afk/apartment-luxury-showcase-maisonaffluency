@@ -69,7 +69,10 @@ export const HkLandedCostPanel = ({
     insuranceHkdCents: insuranceHkd, customsHkdCents: customsHkd, handlingHkdCents: handlingHkd,
     lastMileHkdCents: lastMileHkd, shippingHkdCents: shippingHkd,
     dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: totalHkd, breakdown,
+    shippingEurCents: shippingEur, totalEurCents: totalEur,
   } = hkd;
+  const fmtEur = (cents: number) =>
+    new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format((cents || 0) / 100);
 
   return (
     <div className="border border-border rounded-md bg-background/40 print:bg-white">
@@ -165,7 +168,10 @@ export const HkLandedCostPanel = ({
                     Freight — {breakdown.selected_carrier} · {mode === "air" ? "Air" : "Sea LCL"}
                     {breakdown.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}
                   </span>
-                  <span className="tabular-nums">{fmtHkd(shippingHkd)}</span>
+                  <span className="tabular-nums">
+                    {fmtHkd(shippingHkd)}
+                    <span className="ml-2 normal-case tracking-normal text-muted-foreground">≈ {fmtEur(shippingEur)}</span>
+                  </span>
                 </div>
                 {freightHkd > 0 && <Row label="· Base freight (Paris → Hong Kong)" value={fmtHkd(freightHkd)} indent />}
                 {fuelHkd > 0 && <Row label="· Fuel / BAF surcharge" value={fmtHkd(fuelHkd)} indent />}
@@ -185,7 +191,10 @@ export const HkLandedCostPanel = ({
 
               <div className="flex justify-between border-t-2 border-foreground/20 pt-2 mt-1 font-display text-sm uppercase tracking-wider text-foreground">
                 <span>DAP delivered Hong Kong — all in</span>
-                <span className="font-medium tabular-nums">{fmtHkd(totalHkd)}</span>
+                <span className="font-medium tabular-nums">
+                  {fmtHkd(totalHkd)}
+                  <span className="ml-2 normal-case tracking-normal text-muted-foreground text-xs">≈ {fmtEur(totalEur)}</span>
+                </span>
               </div>
 
               {fxIsFallback && (
