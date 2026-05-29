@@ -85,6 +85,10 @@ export interface QuotePdfArgs {
   /** Freight estimate in quote currency; included in Order total and 60/40 split. */
   shippingEstimateCents?: number;
   shippingShipmentCount?: number;
+  /** When all shipments share a single mode, the totals row reflects it
+   *  (e.g. "Air freight estimate", "Sea LCL estimate"). Falls back to
+   *  "Shipping estimate" when mixed or unknown. */
+  shippingModeLabel?: string | null;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
@@ -937,8 +941,11 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   }
   const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
   if (shippingEstimateCents > 0) {
+    const baseLabel = args.shippingModeLabel
+      ? `${args.shippingModeLabel} estimate`
+      : "Shipping estimate";
     rows.push({
-      label: `Shipping estimate${args.shippingShipmentCount && args.shippingShipmentCount > 1 ? ` (${args.shippingShipmentCount} shipments)` : ""}`,
+      label: `${baseLabel}${args.shippingShipmentCount && args.shippingShipmentCount > 1 ? ` (${args.shippingShipmentCount} shipments)` : ""}`,
       value: `+ ${fmtMoney(shippingEstimateCents, args.currency)}`,
       muted: true,
     });

@@ -839,6 +839,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const shippingEstimateCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
       ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
       : 0;
+    const uniqueModes = Array.from(new Set(perLine.shipments.map((s) => s.mode)));
+    const shippingModeLabel = uniqueModes.length === 1 ? labelForMode(uniqueModes[0]) : null;
 
     // Pull structured billing + primary contact from the linked client (if any)
     let clientCompanyName: string | null = null;
@@ -916,6 +918,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       insurancePremiumCents: insurancePremiumCents || 0,
       shippingEstimateCents,
       shippingShipmentCount: perLine.shipments.length,
+      shippingModeLabel,
       insuranceLabel: insuranceEnabled ? insLabel : null,
       insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
       insuranceEnabled,
