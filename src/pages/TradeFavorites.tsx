@@ -14,6 +14,7 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates 
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
+import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
 
 interface FavoritedProduct {
   favoriteId: string;
@@ -85,11 +86,13 @@ export default function TradeFavorites() {
         quoteId = newQuote.id;
       }
 
-      await supabase.from("trade_quote_items").insert({
+      const { data: inserted } = await supabase.from("trade_quote_items").insert({
         quote_id: quoteId,
         product_id: product.id,
         quantity: 1,
-      });
+      }).select("id");
+      const insertedIds = (inserted || []).map((r: any) => r.id);
+      await prefillLineShippingFromCatalog(insertedIds);
 
       setAddedToQuote(true);
       toast({ title: "Added to quote", description: product.product_name });
@@ -179,14 +182,19 @@ export default function TradeFavorites() {
 
       // Add each favorited product
       let added = 0;
+      const insertedIds: string[] = [];
       for (const fav of favorites) {
-        const { error } = await supabase.from("trade_quote_items").insert({
+        const { data: ins, error } = await supabase.from("trade_quote_items").insert({
           quote_id: quoteId,
           product_id: fav.productId,
           quantity: 1,
-        });
-        if (!error) added++;
+        }).select("id");
+        if (!error) {
+          added++;
+          (ins || []).forEach((r: any) => insertedIds.push(r.id));
+        }
       }
+      await prefillLineShippingFromCatalog(insertedIds);
 
       toast({ title: `${added} products added to quote`, description: `Quote QU-${quoteId.slice(0, 6).toUpperCase()}` });
     } catch (err: any) {

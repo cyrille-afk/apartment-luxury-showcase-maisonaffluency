@@ -1,55 +1,81 @@
-# Quote Flow — End-to-End Build
+# Accurate shipping from the product sheet
 
-A lot already exists (`QuoteDetail.tsx` ~2.2k lines, `TradeQuotesAdmin.tsx` ~800 lines, status lifecycle, order timeline, email log). My job is to **walk the flow as a user**, fix every dead-end, fill every gap, and make every status transition complete with notification + audit trail. Shipped in 4 passes — you review each before I move on.
+Add per-product **packing data** (CBM, weight, carton count, default ship mode) and **pickup address** (ISO country + postcode + free-text address) to the designer's curator-pick editor. Mirror those onto `trade_products` via the existing sync trigger. When a product is added to a quote, prefill `trade_quote_items.ship_*` from the catalogue so the per-line shipping estimator returns an accurate figure on day one instead of waiting for the studio to type CBM/weight per line.
 
-## Pass 1 — Concierge → Draft (intake polish)
+---
 
-Goal: every concierge-drafted quote lands attached to a real client + project, never floats in limbo.
+## 1. Database (single migration)
 
-- `QuoteProposalCard`: add `ClientPicker` + `ProjectPicker` chips at the top (pre-filled from active project if any). Required before Approve when none on file.
-- Currency selector chip in the card (defaults to studio/profile default per memory).
-- After commit: keep the chat open, replace the card with a "Quote QU-XXXX created — Open quote" inline confirmation **plus** a sonner toast. No auto-navigate (current 700ms `navigate()` is jarring).
-- `trade-concierge-commit`: persist `client_id`, `client_name` (denormalized per memory), `project_id`, `currency` on the new quote. Audit row in `concierge_commits`.
-- Stream type extension: `DraftQuoteProposal.args` gains optional `client_id`, `client_name`.
+Add the same shipping columns to **both** tables (curator picks = source of truth, trade_products = consumed by quotes):
 
-## Pass 2 — Quote Detail (draft state UX)
+```text
+designer_curator_picks  +  trade_products
+─────────────────────────────────────────
+pack_cbm              numeric(8,3)   -- per unit, includes crating
+pack_weight_kg        numeric(10,2)  -- per unit, gross
+pack_carton_count     integer        -- # cartons / crates per unit
+default_ship_mode     text           -- sea_lcl | sea_fcl | air | road | courier
+pickup_country        text           -- ISO-2 (FR, IT, DE…)
+pickup_postcode       text
+pickup_address        text           -- free-text street/atelier, internal use
+```
 
-Goal: a freshly-drafted quote opens to a screen with zero dead-ends — every visible button works, every empty state has a CTA.
+Constraints:
+- `default_ship_mode` CHECK matches the existing `trade_quote_items.ship_mode` check (`sea_lcl|sea_fcl|air|road|courier`).
+- `pickup_country` is ISO-2; the existing free-text `origin` column stays for display.
 
-- Audit the `draft` view of `QuoteDetail`: header (number, status pill, project chip, client chip, currency, totals), line table, add-line CTA, notes field, submit/cancel buttons.
-- Make sure: editing qty, removing a line, changing variant, applying credit, toggling insurance all persist & re-total live.
-- Wire **Submit for pricing** → status `submitted`, sets `submitted_at`, fires `quote-submitted` app email to admin (`cyrille@maisonaffluency.com` + studio admins), plus in-app notification.
-- Wire **Discard draft** with confirm modal → soft-delete (status `cancelled`) instead of hard-delete unless empty.
-- Empty-state CTAs: "Add from Showroom", "Add from Favorites", "Ask Concierge" (opens the concierge with project pre-bound).
+Update `sync_curator_pick_to_trade_product()` to mirror the seven new columns with the same COALESCE-only pattern (never wipes a trade_products value) and include them in the INSERT branch.
 
-## Pass 3 — Admin Pricing → Client Review → Confirm
+## 2. Editor UI — `CuratorPicksManager` in `src/pages/TradeDesignersAdmin.tsx`
 
-Goal: every status transition past `submitted` is wired with action, notification, audit.
+New collapsible **"Logistics & packing"** section in the form, between Dimensions and PDFs:
 
-- **Admin pricing screen** (`TradeQuotesAdmin`): for each `submitted` quote, allow per-line unit price entry (or override of the catalog RRP), confirm currency, add admin note, set status → `priced`. Fires `quote-priced` app email to the requesting user + studio admins.
-- **Client-side priced view**: read-only line table with prices, prominent **Accept & Confirm** + **Request changes** (free-text → re-opens to `draft` with admin note attached). Accept → status `confirmed`, sets `confirmed_at`, fires `quote-confirmed` email + admin notification, initializes `order_timeline` row.
-- **Cancel from any non-terminal state** with reason field, recorded in `admin_notes`.
-- Status badges + timestamps surfaced on the detail header throughout.
+```text
+Logistics & packing
+───────────────────
+Packing CBM (m³)      [ 0.50 ]    Weight (kg) [ 84 ]    Cartons [ 1 ]
+Default ship mode     [ Air freight ▾ ]   (sea LCL / sea FCL / air / road / courier)
 
-## Pass 4 — Payment + Fulfillment closeout
+Pickup point
+Country (ISO-2)       [ FR ]      Postcode    [ 75011 ]
+Address (internal)    [ Atelier Lemaire, 12 rue de Charonne, Paris ]
+```
 
-Goal: `confirmed → deposit_paid → paid` is real.
+- All optional; placeholders show defaults (`0.5 m³`, mode auto-resolved from destination).
+- Existing free-text `origin` field stays for marketing copy.
+- Extend the inline `Pick` type and the create/update mutations.
 
-- Add **Generate deposit invoice** + **Generate final invoice** actions in the confirmed view (50/30/20 split per memory `trade-quote-system-logic`). Each generates a PDF via existing presentation/ukDdpPdf pipeline, stamps `quote_email_log`, emails the client (if `client_id` has primary contact) and the user.
-- Add manual **Mark deposit paid** / **Mark fully paid** admin-only actions → status transitions, timestamps, notifications.
-- Order timeline updates on each transition (already has lifecycle hooks per memory `trade-order-timeline`).
-- `paid` view: read-only archive with download links to all invoices + spec sheets, "Reorder" CTA (existing `TradeReorder` page).
+## 3. Quote line prefill
 
-## Technical notes
+Change the three INSERT call sites so a new line carries packing defaults from the catalogue:
 
-- All new edge functions: `supabase.auth.getClaims(token)` (Core rule).
-- All commit writes: validate studio ownership via `can_view_studio` / `can_edit_studio`.
-- New `concierge_commits` audit table from the plan if not present yet.
-- Email templates use existing `_shared/transactional-email-templates/` (jade theme per memory `branded-email-design`). Five new templates: `quote-submitted-admin`, `quote-priced-user`, `quote-confirmed-admin`, `quote-deposit-invoice`, `quote-final-invoice`.
-- No new tables beyond `concierge_commits` and possibly `quote_invoices` (id, quote_id, kind: deposit|final, pdf_url, sent_at, amount_cents).
-- Legacy `studio_id IS NULL` rows respected throughout (memory rule).
-- Client always captured via `ClientPicker`, both `client_id` and `client_name` written (memory rule).
+- `src/pages/TradeProductPage.tsx:450` ("Add to Quote")
+- `src/pages/TradeFavorites.tsx:88` and `:183` (single + bulk)
+- `src/components/trade/concierge/CreateQuoteFromBoard.tsx:158` (board → quote)
 
-## Pass order
+Before insert, fetch the product's `pack_cbm / pack_weight_kg / default_ship_mode / pickup_country` from `trade_products` and write them into `ship_cbm / ship_weight_kg / ship_mode / ship_origin_country`. If the catalogue values are NULL, leave the line NULL (the estimator's existing fallbacks kick in).
 
-I'll do Pass 1, ping you, you click around, then I do Pass 2, etc. Each pass leaves the app in a shippable state — nothing half-wired.
+## 4. QuoteDetail editor
+
+No structural change — the existing inline editors at `QuoteDetail.tsx:1976-2042` already let the studio override the prefilled values per line. Add a small "(from catalogue)" hint when the line value matches the product default, so the user knows where the number came from.
+
+## 5. Shipping estimator
+
+No change needed. `usePerLineShipping` already reads `ship_cbm / ship_weight_kg / ship_origin_country / ship_mode` per line and falls back to defaults — once lines are prefilled, accuracy improves automatically.
+
+---
+
+## Technical details
+
+- Migration is schema-only (`ALTER TABLE … ADD COLUMN IF NOT EXISTS`) plus a `CREATE OR REPLACE FUNCTION` for the sync trigger. Backfill is not required: NULL = "use defaults", which is the current behaviour.
+- Brand normalization unchanged — the sync still matches on `(designers.name, curator_pick.title)`.
+- ISO-2 for `pickup_country` keeps the estimator path simple (it already maps ISO codes via `toIsoCountry`). The free-text `origin` field is kept untouched for display copy.
+- No edge function changes.
+- `default_ship_mode` is a *hint*: the estimator still respects `defaultModeFor(destCountry)` when the line has no override, but if the product is e.g. fragile lighting that must fly, the catalogue value wins on prefill.
+- Files touched: 1 migration, `TradeDesignersAdmin.tsx`, `TradeProductPage.tsx`, `TradeFavorites.tsx`, `CreateQuoteFromBoard.tsx`, minor hint in `QuoteDetail.tsx`. Supabase types regenerate automatically after migration.
+
+## Out of scope (flag, do not build now)
+
+- Multi-carton packing list (per-box dims L×W×H) — current scope uses per-unit aggregate CBM + carton count, which is what carriers price on. Add later if needed.
+- HS code / customs tariff fields — separate concern from freight rating; can be a follow-up.
+- Auto-rerun of the estimator when the catalogue is edited after a quote is sent — out of scope; existing quotes keep their snapshot values.

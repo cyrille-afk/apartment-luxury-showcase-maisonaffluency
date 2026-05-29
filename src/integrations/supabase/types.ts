@@ -966,6 +966,7 @@ export type Database = {
           category: string | null
           created_at: string
           currency: string
+          default_ship_mode: string | null
           description: string | null
           designer_id: string
           dimensions: string | null
@@ -980,10 +981,16 @@ export type Database = {
           lead_time: string | null
           materials: string | null
           origin: string | null
+          pack_carton_count: number | null
+          pack_cbm: number | null
+          pack_weight_kg: number | null
           pdf_filename: string | null
           pdf_url: string | null
           pdf_urls: Json | null
           photo_credit: string | null
+          pickup_address: string | null
+          pickup_country: string | null
+          pickup_postcode: string | null
           price_per_sqm_cents: number | null
           price_prefix: string | null
           size_variants: Json | null
@@ -1002,6 +1009,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           currency?: string
+          default_ship_mode?: string | null
           description?: string | null
           designer_id: string
           dimensions?: string | null
@@ -1016,10 +1024,16 @@ export type Database = {
           lead_time?: string | null
           materials?: string | null
           origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
           size_variants?: Json | null
@@ -1038,6 +1052,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           currency?: string
+          default_ship_mode?: string | null
           description?: string | null
           designer_id?: string
           dimensions?: string | null
@@ -1052,10 +1067,16 @@ export type Database = {
           lead_time?: string | null
           materials?: string | null
           origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
           size_variants?: Json | null
@@ -4277,6 +4298,7 @@ export type Database = {
           category: string
           created_at: string
           currency: string
+          default_ship_mode: string | null
           description: string | null
           dimensions: string | null
           gallery_images: string[] | null
@@ -4289,6 +4311,12 @@ export type Database = {
           lead_weeks_min_override: number | null
           materials: string | null
           origin: string | null
+          pack_carton_count: number | null
+          pack_cbm: number | null
+          pack_weight_kg: number | null
+          pickup_address: string | null
+          pickup_country: string | null
+          pickup_postcode: string | null
           price_per_sqm_cents: number | null
           price_prefix: string | null
           price_unit: string
@@ -4306,6 +4334,7 @@ export type Database = {
           category?: string
           created_at?: string
           currency?: string
+          default_ship_mode?: string | null
           description?: string | null
           dimensions?: string | null
           gallery_images?: string[] | null
@@ -4318,6 +4347,12 @@ export type Database = {
           lead_weeks_min_override?: number | null
           materials?: string | null
           origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
           price_unit?: string
@@ -4335,6 +4370,7 @@ export type Database = {
           category?: string
           created_at?: string
           currency?: string
+          default_ship_mode?: string | null
           description?: string | null
           dimensions?: string | null
           gallery_images?: string[] | null
@@ -4347,6 +4383,12 @@ export type Database = {
           lead_weeks_min_override?: number | null
           materials?: string | null
           origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
           price_unit?: string

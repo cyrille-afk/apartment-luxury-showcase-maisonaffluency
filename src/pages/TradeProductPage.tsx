@@ -501,15 +501,45 @@ const TradeProductPage: React.FC = () => {
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        // Persist the chosen variant on the freshly created/merged quote item.
-        if (itemId && (variantLabel || overrideUnitPriceCents != null)) {
+        // Persist the chosen variant on the freshly created/merged quote item,
+        // and pre-fill shipping (CBM / kg / mode / origin country) from the
+        // catalogue so the per-line shipping estimator is accurate from day one.
+        if (itemId) {
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
           if (overrideUnitPriceCents != null) patch.unit_price_cents = overrideUnitPriceCents;
-          await supabase
+
+          // Read the line's resolved product, then read the product's packing
+          // defaults. Only fill ship_* fields that are still NULL on the line.
+          const { data: itemRow } = await supabase
             .from("trade_quote_items")
-            .update(patch)
-            .eq("id", itemId as unknown as string);
+            .select("id, product_id, ship_cbm, ship_weight_kg, ship_mode, ship_origin_country")
+            .eq("id", itemId as unknown as string)
+            .maybeSingle();
+          if (itemRow?.product_id) {
+            const { data: prod } = await supabase
+              .from("trade_products")
+              .select("pack_cbm, pack_weight_kg, default_ship_mode, pickup_country")
+              .eq("id", itemRow.product_id)
+              .maybeSingle();
+            if (prod) {
+              if (itemRow.ship_cbm == null && prod.pack_cbm != null)
+                patch.ship_cbm = prod.pack_cbm;
+              if (itemRow.ship_weight_kg == null && prod.pack_weight_kg != null)
+                patch.ship_weight_kg = prod.pack_weight_kg;
+              if (!itemRow.ship_mode && prod.default_ship_mode)
+                patch.ship_mode = prod.default_ship_mode;
+              if (!itemRow.ship_origin_country && prod.pickup_country)
+                patch.ship_origin_country = prod.pickup_country;
+            }
+          }
+
+          if (Object.keys(patch).length > 0) {
+            await supabase
+              .from("trade_quote_items")
+              .update(patch)
+              .eq("id", itemId as unknown as string);
+          }
         }
         setAdded(true);
         setDrawerRefreshKey((k) => k + 1);

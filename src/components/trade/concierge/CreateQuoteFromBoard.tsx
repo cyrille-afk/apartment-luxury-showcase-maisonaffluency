@@ -4,6 +4,7 @@ import { FileText, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -170,8 +171,13 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       return { quote_id: quoteId, product_id: i.product_id, quantity: 1, room };
     });
 
-    const { error } = await supabase.from("trade_quote_items").insert(rows as any);
+    const { data: inserted, error } = await supabase
+      .from("trade_quote_items")
+      .insert(rows as any)
+      .select("id");
     if (error) throw error;
+    const insertedIds = (inserted || []).map((r: any) => r.id);
+    await prefillLineShippingFromCatalog(insertedIds);
     return { added: rows.length, byRoom };
   };
 
