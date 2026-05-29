@@ -124,6 +124,9 @@ export interface QuotePdfArgs {
     dutyHkdCents: number;
     vatHkdCents: number;
     totalHkdCents: number;
+    goodsEurCents?: number;
+    shippingEurCents?: number;
+    totalEurCents?: number;
   } | null;
 }
 
