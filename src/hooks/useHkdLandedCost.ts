@@ -44,7 +44,7 @@ export interface HkdLandedCostResult {
   goodsEurCents: number;
 }
 
-export const DEFAULT_HKD_LANDED_CBM = 2;
+export const DEFAULT_HKD_LANDED_CBM = 1;
 /** Sea LCL volumetric is generous (350 kg/m³); air is much denser (167). */
 export const HKD_LANDED_KG_PER_CBM: Record<HkMode, number> = {
   sea_lcl: 350,
