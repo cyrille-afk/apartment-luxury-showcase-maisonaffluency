@@ -2570,10 +2570,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const withGst = gstEnabled && afterDiscount > 0
             ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
             : afterDiscount;
+          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+            : 0;
+          const orderTotal = withGst + shippingQuoteCents;
 
           const isPayingDeposit = quoteStatus === "confirmed";
           const isPayingBalance = quoteStatus === "deposit_paid";
-          const portionCents = isPayingDeposit ? Math.round(withGst * 0.6) : Math.round(withGst * 0.4);
+          const portionCents = isPayingDeposit ? Math.round(orderTotal * 0.6) : Math.round(orderTotal * 0.4);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
           const chargeTotal = Math.ceil((portionCents + fixedFee) / (1 - 0.034));
@@ -2593,6 +2597,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   {isPayingBalance && (
                     <p className="font-body text-[10px] text-muted-foreground">
                       60% deposit received. Please pay the remaining 40% balance to complete your order.
+                      {shippingQuoteCents > 0 && " Freight has been re-quoted at live rates; the balance below reflects the final figure."}
                     </p>
                   )}
                 </div>
@@ -2617,9 +2622,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
                   <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency}.</li>
+                    <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency} (on an order total of {currencySymbol(currency)}{formatPriceRaw(orderTotal, currency)} {currency}{shippingQuoteCents > 0 ? ", goods + shipping" : ""}).</li>
                     <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
                     {gstEnabled && <li>{gstRate}% GST is included.</li>}
+                    {isPayingDeposit && shippingQuoteCents > 0 && (
+                      <li>Shipping &amp; FX shown are estimates. Two weeks before delivery we'll re-quote freight at live carrier rates and FX, then email you the adjusted balance invoice.</li>
+                    )}
                     <li>
                       If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
