@@ -1410,6 +1410,22 @@ function drawFooterPages(
   }
 }
 
+/** Slugify a client name into a filesystem-safe PascalCase token. */
+function slugifyClient(name?: string | null): string {
+  if (!name) return "Client";
+  const cleaned = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9\s-]/g, " ")
+    .trim();
+  if (!cleaned) return "Client";
+  return cleaned
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join("");
+}
+
 /** Trigger a download in the browser using a blob URL (session-safe). */
 export async function downloadQuotePdf(args: QuotePdfArgs) {
   const doc = await buildQuotePdf(args);
@@ -1417,12 +1433,17 @@ export async function downloadQuotePdf(args: QuotePdfArgs) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${args.quoteNumber}-quote.pdf`;
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  a.download = `MaisonAffluency_Quote_${slugifyClient(args.clientName)}_${yyyy}-${mm}-${dd}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
 
 /**
  * Build the PDF and return a blob URL suitable for previewing in an iframe
