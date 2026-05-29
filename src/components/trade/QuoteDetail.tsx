@@ -518,7 +518,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       .then(({ data }: any) => setClientCountry((data?.billing_country as string) || null));
   }, [clientId]);
   const isUkDestination = (() => {
-    const c = (clientCountry || "").trim().toLowerCase();
+    // Effective destination = ship-to country when a separate ship-to is set,
+    // otherwise fall back to the client's billing country. Avoids showing a
+    // GBP DDP London estimate when the goods are actually shipping elsewhere
+    // (e.g. DAP Hong Kong against a UK-billed client).
+    const effective = (!shipToSameAsBill && shipTo.country ? shipTo.country : clientCountry) || "";
+    const c = effective.trim().toLowerCase();
     return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
   })();
 
