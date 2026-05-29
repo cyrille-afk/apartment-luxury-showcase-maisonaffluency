@@ -106,8 +106,7 @@ export function renderUkDdpPage(doc: jsPDF, args: UkDdpPageArgs): void {
   // Section: Freight breakdown
   sectionTitle(doc, "Freight & logistics", M, y);
   y += 22;
-  costRow(doc, M, y, pageW - M, "Base freight (Paris to London)", fmtGbp(gbp.freightGbpCents));
-  y += 16;
+  if (gbp.freightGbpCents > 0) { costRow(doc, M, y, pageW - M, "Base freight (Paris to London)", fmtGbp(gbp.freightGbpCents)); y += 16; }
   if (gbp.fuelGbpCents > 0) { costRow(doc, M, y, pageW - M, "Fuel surcharge", fmtGbp(gbp.fuelGbpCents)); y += 16; }
   if (gbp.insuranceGbpCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtGbp(gbp.insuranceGbpCents)); y += 16; }
   if (gbp.customsGbpCents > 0) { costRow(doc, M, y, pageW - M, "Customs clearance", fmtGbp(gbp.customsGbpCents)); y += 16; }
