@@ -2477,7 +2477,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {isPriced && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
           const withGst = gstEnabled && afterDiscount > 0 ? afterDiscount + Math.round(afterDiscount * gstRate / 100) : afterDiscount;
-          const depositCents = Math.round(withGst * 0.6);
+          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+            : 0;
+          const orderTotal = withGst + shippingQuoteCents;
+          const depositCents = Math.round(orderTotal * 0.6);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
           const chargeTotal = Math.ceil((depositCents + fixedFee) / (1 - 0.034));
@@ -2536,13 +2540,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {gstEnabled && (
                         <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
+                      {shippingQuoteCents > 0 && (
+                        <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
+                      )}
                       <div className="border-t border-border my-1.5" />
-                      <Row label="Order total (incl. GST)" value={`${fmt(withGst)} ${currency}`} strong />
+                      <Row label="Order total" value={`${fmt(orderTotal)} ${currency}`} strong />
                       <Row label="60% deposit due now" value={`${fmt(depositCents)} ${currency}`} strong />
                       <div className="border-t border-border my-1.5" />
                       <Row label="Stripe processing fee (3.4% + fixed)" value={`+ ${fmt(processingFee)} ${currency}`} muted />
                       <Row label="Total charge to your card" value={`${fmt(chargeTotal)} ${currency}`} strong />
                     </div>
+                    {shippingQuoteCents > 0 && (
+                      <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                        <strong className="text-foreground/70">Note on shipping &amp; FX:</strong> the freight figure above reflects today's carrier rates and FX. Production lead times run 18–20 weeks, during which rates and exchange rates will move. Two weeks before delivery we'll re-quote freight at the live rate and email you a balance invoice reflecting any difference. The 40% balance is therefore indicative until that point.
+                      </p>
+                    )}
                     <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
                       Card-denominated foreign transaction fees (~1–2%) may apply separately. To avoid the processing fee, pay {fmt(depositCents)} {currency} via bank transfer using the details above.
                     </p>
