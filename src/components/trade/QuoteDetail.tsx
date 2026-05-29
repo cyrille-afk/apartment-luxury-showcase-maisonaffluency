@@ -2225,13 +2225,23 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     {(() => {
                       const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
                       const taxable = afterDiscount + insurancePremiumCents;
-                      const total = gstEnabled && taxable > 0
+                      const goodsTotal = gstEnabled && taxable > 0
                         ? taxable + Math.round(taxable * gstRate / 100)
                         : taxable;
+                      const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+                        ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+                        : 0;
+                      const total = goodsTotal + shippingQuoteCents;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
                       return (
                         <>
+                          {shippingQuoteCents > 0 && (
+                            <div className="flex justify-between font-body text-xs text-muted-foreground">
+                              <span>Shipping (estimate, {perLine.shipments.length} shipment{perLine.shipments.length > 1 ? "s" : ""})</span>
+                              <span>{formatPriceRaw(shippingQuoteCents, currency)}</span>
+                            </div>
+                          )}
                           <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
                             <span className="uppercase tracking-wider">Total {currency}</span>
                             <span className="font-medium">
@@ -2259,6 +2269,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   {currencySymbol(currency)} {formatPriceRaw(balanceCents, currency)}
                                 </span>
                               </div>
+                              {shippingQuoteCents > 0 && (
+                                <p className="font-body text-[10px] text-muted-foreground leading-relaxed pt-1.5 italic">
+                                  Shipping &amp; FX are estimates valid today. Final freight is re-quoted with live carrier rates and FX ~2 weeks before delivery; any variance is settled with the balance invoice.
+                                </p>
+                              )}
                             </div>
                           )}
                         </>
