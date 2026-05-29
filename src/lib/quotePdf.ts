@@ -1381,9 +1381,18 @@ function ensureSpace(doc: jsPDF, y: number, needed: number, pageH: number): numb
   return y;
 }
 
-function drawFooterAllPages(doc: jsPDF, args: QuotePdfArgs, pageW: number, pageH: number, M: number) {
-  const total = doc.getNumberOfPages();
-  for (let p = 1; p <= total; p++) {
+function drawFooterPages(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  pageW: number,
+  pageH: number,
+  M: number,
+  fromPage: number,
+  toPage: number,
+) {
+  const total = toPage - fromPage + 1;
+  for (let p = fromPage; p <= toPage; p++) {
+    const idx = p - fromPage + 1;
     doc.setPage(p);
     doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
     doc.setLineWidth(0.4);
@@ -1393,7 +1402,7 @@ function drawFooterAllPages(doc: jsPDF, args: QuotePdfArgs, pageW: number, pageH
     doc.setFontSize(8);
     doc.text("Maison Affluency - hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 38);
     doc.text(
-      `${args.quoteNumber} - ${args.statusLabel} - Page ${p} of ${total}`,
+      `${args.quoteNumber} - ${args.statusLabel} - Page ${idx} of ${total}`,
       pageW - M,
       pageH - 38,
       { align: "right" },
