@@ -7,8 +7,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Truck, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
-import { downloadHkDapPdf } from "@/lib/hkDapPdf";
+import { Truck, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import {
   DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM,
   useHkdLandedCost, fmtHkd, type HkMode,
