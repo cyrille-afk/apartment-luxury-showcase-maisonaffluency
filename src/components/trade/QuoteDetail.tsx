@@ -21,6 +21,8 @@ import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurre
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry } from "@/lib/perLineShipping";
+import { labelForMode } from "@/lib/shippingEstimator";
+
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
