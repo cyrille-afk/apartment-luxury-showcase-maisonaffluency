@@ -109,55 +109,66 @@ export const HkLandedCostPanel = ({
 
       {expanded && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border/60">
-          {/* Inputs */}
-          <div className="grid grid-cols-3 gap-2">
-            <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">CBM</span>
-              <input
-                type="number" min={0.1} step={0.1} value={cbm}
-                onChange={(e) => {
-                  const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
-                  const nextKg = Math.round(nextCbm * HKD_LANDED_KG_PER_CBM[mode]);
-                  kgEditedRef.current = false;
-                  setCbm(nextCbm); setKg(nextKg);
-                  onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
-                }}
-                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
-              />
-            </label>
-            <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                Weight (kg){!kgEditedRef.current && <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">· auto</span>}
-              </span>
-              <input
-                type="number" min={0} step={10} value={kg}
-                onChange={(e) => {
-                  const nextKg = Math.max(0, parseFloat(e.target.value) || 0);
-                  kgEditedRef.current = true;
-                  setKg(nextKg);
-                  onSettingsChange?.({ cbm, kg: nextKg, mode });
-                }}
-                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
-              />
-            </label>
-            <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Mode</span>
-              <select
-                value={mode}
-                onChange={(e) => {
-                  const nextMode = e.target.value as HkMode;
-                  const nextKg = Math.round(cbm * HKD_LANDED_KG_PER_CBM[nextMode]);
-                  kgEditedRef.current = false;
-                  setMode(nextMode); setKg(nextKg);
-                  onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
-                }}
-                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
-              >
-                <option value="sea_lcl">Sea LCL · standard</option>
-                <option value="air">Air freight · express</option>
-              </select>
-            </label>
-          </div>
+          {/* Inputs — hidden when freight is sourced from per-line packing recap */}
+          {!useOverride && (
+            <div className="grid grid-cols-3 gap-2">
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">CBM</span>
+                <input
+                  type="number" min={0.1} step={0.1} value={cbm}
+                  onChange={(e) => {
+                    const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
+                    const nextKg = Math.round(nextCbm * HKD_LANDED_KG_PER_CBM[mode]);
+                    kgEditedRef.current = false;
+                    setCbm(nextCbm); setKg(nextKg);
+                    onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
+                  }}
+                  className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+                />
+              </label>
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Weight (kg){!kgEditedRef.current && <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">· auto</span>}
+                </span>
+                <input
+                  type="number" min={0} step={10} value={kg}
+                  onChange={(e) => {
+                    const nextKg = Math.max(0, parseFloat(e.target.value) || 0);
+                    kgEditedRef.current = true;
+                    setKg(nextKg);
+                    onSettingsChange?.({ cbm, kg: nextKg, mode });
+                  }}
+                  className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+                />
+              </label>
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Mode</span>
+                <select
+                  value={mode}
+                  onChange={(e) => {
+                    const nextMode = e.target.value as HkMode;
+                    const nextKg = Math.round(cbm * HKD_LANDED_KG_PER_CBM[nextMode]);
+                    kgEditedRef.current = false;
+                    setMode(nextMode); setKg(nextKg);
+                    onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
+                  }}
+                  className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+                >
+                  <option value="sea_lcl">Sea LCL · standard</option>
+                  <option value="air">Air freight · express</option>
+                </select>
+              </label>
+            </div>
+          )}
+          {useOverride && (
+            <p className="font-body text-[10px] text-muted-foreground leading-relaxed">
+              Freight is summed from the per-line packing
+              {overrideShipping?.shipmentCount ? ` (${overrideShipping.shipmentCount} shipment${overrideShipping.shipmentCount > 1 ? "s" : ""})` : ""}
+              {overrideShipping?.totalCbm ? ` — ${overrideShipping.totalCbm.toFixed(2)} m³` : ""}
+              {overrideShipping?.totalKg ? ` · ${Math.round(overrideShipping.totalKg)} kg` : ""}.
+              Edit a line's origin / CBM / kg in the items table to refine.
+            </p>
+          )}
 
           {/* Breakdown */}
           {!ratesReady ? (
@@ -168,7 +179,7 @@ export const HkLandedCostPanel = ({
             <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
               <DotCircleLoader size="sm" /> Calculating…
             </div>
-          ) : !breakdown?.available ? (
+          ) : (!useOverride && !breakdown?.available) ? (
             <p className="font-body text-xs text-amber-700">
               {breakdown?.reason || "No shipping rate available."}
             </p>
@@ -181,21 +192,28 @@ export const HkLandedCostPanel = ({
               <div className="space-y-1 border-t border-border/40 pt-2">
                 <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
                   <span>
-                    Freight — {breakdown.selected_carrier} · {mode === "air" ? "Air" : "Sea LCL"}
-                    {breakdown.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}
+                    {useOverride
+                      ? `Freight — per-line aggregate${overrideShipping?.shipmentCount && overrideShipping.shipmentCount > 1 ? ` · ${overrideShipping.shipmentCount} shipments` : ""}`
+                      : `Freight — ${breakdown?.selected_carrier} · ${mode === "air" ? "Air" : "Sea LCL"}${breakdown?.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}`}
                   </span>
                   <span className="tabular-nums">
                     {fmtHkd(shippingHkd)}
                     <span className="ml-2 normal-case tracking-normal text-muted-foreground">≈ {fmtEur(shippingEur)}</span>
                   </span>
                 </div>
-                {freightHkd > 0 && <Row label="· Base freight (Paris → Hong Kong)" value={fmtHkd(freightHkd)} indent />}
-                {fuelHkd > 0 && <Row label="· Fuel / BAF surcharge" value={fmtHkd(fuelHkd)} indent />}
-                {insuranceHkd > 0 && <Row label="· Cargo insurance" value={fmtHkd(insuranceHkd)} indent />}
-                {customsHkd > 0 && <Row label="· Customs clearance (HK)" value={fmtHkd(customsHkd)} indent />}
-                {handlingHkd > 0 && <Row label="· Handling & documentation" value={fmtHkd(handlingHkd)} indent />}
-                {lastMileHkd > 0 && <Row label="· Last-mile delivery (Hong Kong)" value={fmtHkd(lastMileHkd)} indent />}
+                {!useOverride && freightHkd > 0 && <Row label="· Base freight (Paris → Hong Kong)" value={fmtHkd(freightHkd)} indent />}
+                {!useOverride && fuelHkd > 0 && <Row label="· Fuel / BAF surcharge" value={fmtHkd(fuelHkd)} indent />}
+                {!useOverride && insuranceHkd > 0 && <Row label="· Cargo insurance" value={fmtHkd(insuranceHkd)} indent />}
+                {!useOverride && customsHkd > 0 && <Row label="· Customs clearance (HK)" value={fmtHkd(customsHkd)} indent />}
+                {!useOverride && handlingHkd > 0 && <Row label="· Handling & documentation" value={fmtHkd(handlingHkd)} indent />}
+                {!useOverride && lastMileHkd > 0 && <Row label="· Last-mile delivery (Hong Kong)" value={fmtHkd(lastMileHkd)} indent />}
+                {useOverride && (
+                  <p className="pl-2 font-body text-[10px] text-muted-foreground/80 leading-snug">
+                    Detailed cost components are shown per origin in the Shipments-by-origin recap above.
+                  </p>
+                )}
               </div>
+
 
               <div className="space-y-1 border-t border-border/40 pt-2">
                 <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
