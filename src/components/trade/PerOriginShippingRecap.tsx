@@ -12,7 +12,7 @@ import { Package, AlertTriangle } from "lucide-react";
 
 const fmtEur = (cents: number) =>
   new Intl.NumberFormat("en-GB", {
-    style: "currency", currency: "EUR", maximumFractionDigits: 0,
+    style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2,
   }).format((cents || 0) / 100);
 
 const countryFlag = (iso: string) => {
