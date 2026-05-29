@@ -1950,6 +1950,86 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           />
                         </label>
                       </div>
+
+                      {/* Per-line shipping — origin / mode / CBM / weight. Defaults inherit from product.origin and destination mode. */}
+                      <div className="md:col-span-4 mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 print:hidden">
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Ship From</span>
+                          <input
+                            type="text"
+                            maxLength={2}
+                            defaultValue={item.ship_origin_country || ""}
+                            placeholder={(product?.origin || "FR").toString().slice(0, 2).toUpperCase()}
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            onBlur={(e) => {
+                              if (isReadOnly) return;
+                              const v = e.target.value.trim().toUpperCase().slice(0, 2);
+                              const next = v || null;
+                              if (next !== item.ship_origin_country) updateItemField(item.id, { ship_origin_country: next });
+                            }}
+                            className="font-body text-[11px] uppercase text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Mode</span>
+                          <select
+                            value={item.ship_mode || ""}
+                            disabled={isReadOnly}
+                            onChange={(e) => {
+                              if (isReadOnly) return;
+                              const v = e.target.value || null;
+                              if (v !== item.ship_mode) updateItemField(item.id, { ship_mode: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            <option value="">Auto</option>
+                            <option value="road">Road</option>
+                            <option value="sea_lcl">Sea LCL</option>
+                            <option value="sea_fcl">Sea FCL</option>
+                            <option value="air">Air freight</option>
+                            <option value="courier">Courier</option>
+                          </select>
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">CBM / unit</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            defaultValue={item.ship_cbm != null ? Number(item.ship_cbm) : ""}
+                            placeholder="0.50"
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            onBlur={(e) => {
+                              if (isReadOnly) return;
+                              const raw = e.target.value.trim();
+                              const v = raw === "" ? null : Math.max(0, parseFloat(raw));
+                              if (v !== (item.ship_cbm != null ? Number(item.ship_cbm) : null)) updateItemField(item.id, { ship_cbm: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-0.5">
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Kg / unit</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={1}
+                            defaultValue={item.ship_weight_kg != null ? Number(item.ship_weight_kg) : ""}
+                            placeholder="auto"
+                            disabled={isReadOnly}
+                            readOnly={isReadOnly}
+                            onBlur={(e) => {
+                              if (isReadOnly) return;
+                              const raw = e.target.value.trim();
+                              const v = raw === "" ? null : Math.max(0, parseFloat(raw));
+                              if (v !== (item.ship_weight_kg != null ? Number(item.ship_weight_kg) : null)) updateItemField(item.id, { ship_weight_kg: v });
+                            }}
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
+                          />
+                        </label>
+                      </div>
                     </div>
                   );
                         })}
