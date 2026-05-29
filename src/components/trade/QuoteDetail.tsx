@@ -782,8 +782,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const handleStripePayment = async (paymentType: "deposit" | "balance" = "deposit") => {
     setPayingStripe(true);
     try {
+      const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+        ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+        : 0;
       const { data, error } = await supabase.functions.invoke("create-quote-payment", {
-        body: { quoteId, paymentType },
+        body: { quoteId, paymentType, shippingCents: shippingQuoteCents },
       });
       if (error) throw error;
       if (data?.url) {
