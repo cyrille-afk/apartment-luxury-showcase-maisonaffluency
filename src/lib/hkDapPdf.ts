@@ -140,8 +140,7 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
   // Freight breakdown
   sectionTitle(doc, "Freight & logistics", M, y);
   y += 22;
-  costRow(doc, M, y, pageW - M, "Base freight (Paris to Hong Kong)", fmtHkd(hkd.freightHkdCents));
-  y += 16;
+  if (hkd.freightHkdCents > 0) { costRow(doc, M, y, pageW - M, "Base freight (Paris to Hong Kong)", fmtHkd(hkd.freightHkdCents)); y += 16; }
   if (hkd.fuelHkdCents > 0) { costRow(doc, M, y, pageW - M, "Fuel / BAF surcharge", fmtHkd(hkd.fuelHkdCents)); y += 16; }
   if (hkd.insuranceHkdCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtHkd(hkd.insuranceHkdCents)); y += 16; }
   if (hkd.customsHkdCents > 0) { costRow(doc, M, y, pageW - M, "Customs clearance (HK)", fmtHkd(hkd.customsHkdCents)); y += 16; }
