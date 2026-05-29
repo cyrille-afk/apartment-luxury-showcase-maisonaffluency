@@ -252,15 +252,20 @@ export const UkLandedCostPanel = ({
                   <span>UK Import Taxes (DDP)</span>
                 </div>
                 <Row
-                  label={`· Import duty (${breakdown.duty_cents > 0 ? ((breakdown.duty_cents / Math.max(1, goodsEurCents)) * 100).toFixed(1) : "0"}% — furniture/lighting)`}
+                  label={useOverride
+                    ? `· Import duty (per-line aggregate)`
+                    : `· Import duty (${breakdown!.duty_cents > 0 ? ((breakdown!.duty_cents / Math.max(1, goodsEurCents)) * 100).toFixed(1) : "0"}% — furniture/lighting)`}
                   value={fmtGbp(dutyGbp)}
                   indent
                 />
                 <Row
-                  label={`· UK VAT (${(((breakdown.vat_cents) / Math.max(1, goodsEurCents + breakdown.freight_cents + breakdown.duty_cents)) * 100).toFixed(0)}% on goods + freight + duty)`}
+                  label={useOverride
+                    ? `· UK VAT (per-line aggregate)`
+                    : `· UK VAT (${(((breakdown!.vat_cents) / Math.max(1, goodsEurCents + breakdown!.freight_cents + breakdown!.duty_cents)) * 100).toFixed(0)}% on goods + freight + duty)`}
                   value={fmtGbp(vatGbp)}
                   indent
                 />
+
               </div>
 
               {/* Total */}
