@@ -467,7 +467,7 @@ function drawHeader(
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("Curated furniture, lighting and objets for trade", textX, 72);
+  doc.text("Curated furniture, lighting and objects for trade", textX, 72);
   doc.text("Affluency Etc Pte. Ltd. - Singapore", textX, 86);
 
   // Right side: Quote ref + status
