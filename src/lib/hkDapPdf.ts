@@ -138,17 +138,26 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
   costRow(doc, M, y, pageW - M, "Goods, net of trade discount", fmtHkd(hkd.goodsHkdCents));
   y += 22;
 
-  // Freight breakdown
-  sectionTitle(doc, "Freight & logistics", M, y);
+  // Freight breakdown — collapse to a simple "Shipping" subtotal when no
+  // component-level rollup is present (per-line shipping mode).
+  const hasFreightComponents =
+    hkd.freightHkdCents > 0 || hkd.fuelHkdCents > 0 || hkd.insuranceHkdCents > 0 ||
+    hkd.customsHkdCents > 0 || hkd.handlingHkdCents > 0 || hkd.lastMileHkdCents > 0;
+  sectionTitle(doc, hasFreightComponents ? "Freight & logistics" : "Shipping", M, y);
   y += 22;
-  if (hkd.freightHkdCents > 0) { costRow(doc, M, y, pageW - M, "Base freight (Paris to Hong Kong)", fmtHkd(hkd.freightHkdCents)); y += 16; }
-  if (hkd.fuelHkdCents > 0) { costRow(doc, M, y, pageW - M, "Fuel / BAF surcharge", fmtHkd(hkd.fuelHkdCents)); y += 16; }
-  if (hkd.insuranceHkdCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtHkd(hkd.insuranceHkdCents)); y += 16; }
-  if (hkd.customsHkdCents > 0) { costRow(doc, M, y, pageW - M, "Customs clearance (HK)", fmtHkd(hkd.customsHkdCents)); y += 16; }
-  if (hkd.handlingHkdCents > 0) { costRow(doc, M, y, pageW - M, "Handling & documentation", fmtHkd(hkd.handlingHkdCents)); y += 16; }
-  if (hkd.lastMileHkdCents > 0) { costRow(doc, M, y, pageW - M, "Last-mile delivery (Hong Kong)", fmtHkd(hkd.lastMileHkdCents)); y += 16; }
-  rule(doc, M, y - 6, pageW - M);
-  costRow(doc, M, y + 8, pageW - M, "Shipping subtotal", fmtHkd(hkd.shippingHkdCents), true);
+  if (hasFreightComponents) {
+    if (hkd.freightHkdCents > 0) { costRow(doc, M, y, pageW - M, "Base freight (Paris to Hong Kong)", fmtHkd(hkd.freightHkdCents)); y += 16; }
+    if (hkd.fuelHkdCents > 0) { costRow(doc, M, y, pageW - M, "Fuel / BAF surcharge", fmtHkd(hkd.fuelHkdCents)); y += 16; }
+    if (hkd.insuranceHkdCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtHkd(hkd.insuranceHkdCents)); y += 16; }
+    if (hkd.customsHkdCents > 0) { costRow(doc, M, y, pageW - M, "Customs clearance (HK)", fmtHkd(hkd.customsHkdCents)); y += 16; }
+    if (hkd.handlingHkdCents > 0) { costRow(doc, M, y, pageW - M, "Handling & documentation", fmtHkd(hkd.handlingHkdCents)); y += 16; }
+    if (hkd.lastMileHkdCents > 0) { costRow(doc, M, y, pageW - M, "Last-mile delivery (Hong Kong)", fmtHkd(hkd.lastMileHkdCents)); y += 16; }
+    rule(doc, M, y - 6, pageW - M);
+    costRow(doc, M, y + 8, pageW - M, "Shipping subtotal", fmtHkd(hkd.shippingHkdCents), true);
+  } else {
+    costRow(doc, M, y, pageW - M, "Shipping subtotal (sum of per-shipment costs above)", fmtHkd(hkd.shippingHkdCents), true);
+    y -= 8;
+  }
   // EUR equivalent sub-line so the studio sees both currencies at a glance.
   if (hkd.shippingEurCents > 0) {
     const fmtE = (cents: number) =>
