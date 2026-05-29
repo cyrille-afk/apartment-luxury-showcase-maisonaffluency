@@ -441,6 +441,7 @@ const App = () => {
                     <Route path="admin/shipping-rates" element={<TradeAdminShippingRates />} />
                     <Route path="admin/shipping-surcharges" element={<TradeAdminShippingSurcharges />} />
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
+                    <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
                     <Route path="admin/tiers" element={<TradeAdminTiers />} />
