@@ -411,6 +411,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (q?.submitted_at !== undefined) setSubmittedAt(q.submitted_at ?? null);
       if (q?.responded_at !== undefined) setRespondedAt(q.responded_at ?? null);
       if (q?.confirmed_at !== undefined) setConfirmedAtTs(q.confirmed_at ?? null);
+      // Ship-to / Incoterm
+      if (q?.ship_to_same_as_bill !== undefined && q?.ship_to_same_as_bill !== null) {
+        setShipToSameAsBill(!!q.ship_to_same_as_bill);
+        if (!q.ship_to_same_as_bill) setShipToOpen(true);
+      }
+      if (q?.incoterm) setIncoterm(q.incoterm as Incoterm);
+      setShipTo({
+        name: q?.ship_to_name ?? "",
+        attention: q?.ship_to_attention ?? "",
+        address1: q?.ship_to_address1 ?? "",
+        address2: q?.ship_to_address2 ?? "",
+        city: q?.ship_to_city ?? "",
+        state: q?.ship_to_state ?? "",
+        postal_code: q?.ship_to_postal_code ?? "",
+        country: q?.ship_to_country ?? "",
+        phone: q?.ship_to_phone ?? "",
+        email: q?.ship_to_email ?? "",
+        notes: q?.ship_to_notes ?? "",
+      });
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
