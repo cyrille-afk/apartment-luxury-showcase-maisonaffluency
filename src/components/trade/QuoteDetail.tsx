@@ -2227,12 +2227,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 ? "Reopen as draft to edit lines directly on the client's behalf — the quote returns to draft and can be re-priced after."
                 : "Need adjustments? Request changes reopens the quote as a draft with your note attached for our team."}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setCancelOpen(true)}
                 className="inline-flex items-center gap-2 px-3 py-2 border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-destructive/10 transition-colors"
               >
                 <XCircle className="h-3.5 w-3.5" /> Cancel Quote
+              </button>
+              <button
+                onClick={handleCancelAndRecreate}
+                disabled={recreating}
+                title="Cancel this quote and open a fresh draft pre-filled with the same lines, client, ship-to and Incoterm."
+                className="inline-flex items-center gap-2 px-3 py-2 border border-border font-body text-[10px] uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground disabled:opacity-50"
+              >
+                {recreating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}
+                {recreating ? "Recreating…" : "Cancel & Recreate"}
               </button>
               <button
                 onClick={() => setReviseOpen(true)}
