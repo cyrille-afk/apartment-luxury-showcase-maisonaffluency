@@ -956,6 +956,20 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       value: `+ ${fmtMoney(shippingEstimateCents, args.currency)}`,
       muted: true,
     });
+    // Per-mode breakdown — only when the quote mixes multiple modes.
+    if (
+      !args.shippingModeLabel &&
+      args.shippingModeBreakdown &&
+      args.shippingModeBreakdown.length > 1
+    ) {
+      args.shippingModeBreakdown.forEach((m) => {
+        rows.push({
+          label: `   · ${m.modeLabel}${m.shipmentCount > 1 ? ` (${m.shipmentCount} shipments)` : ""}`,
+          value: fmtMoney(m.cents, args.currency),
+          muted: true,
+        });
+      });
+    }
   }
   const grand = baseForGst + gstCents + shippingEstimateCents;
   const deposit = Math.round(grand * 0.6);
