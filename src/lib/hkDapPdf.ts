@@ -149,6 +149,18 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
   if (hkd.lastMileHkdCents > 0) { costRow(doc, M, y, pageW - M, "Last-mile delivery (Hong Kong)", fmtHkd(hkd.lastMileHkdCents)); y += 16; }
   rule(doc, M, y - 6, pageW - M);
   costRow(doc, M, y + 8, pageW - M, "Shipping subtotal", fmtHkd(hkd.shippingHkdCents), true);
+  // EUR equivalent sub-line so the studio sees both currencies at a glance.
+  if (hkd.shippingEurCents > 0) {
+    const fmtE = (cents: number) =>
+      new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
+        .format((cents || 0) / 100);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(JADE_SOFT[0], JADE_SOFT[1], JADE_SOFT[2]);
+    doc.text(`~ ${fmtE(hkd.shippingEurCents)} EUR equivalent`, pageW - M, y + 20, { align: "right" });
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    y += 12;
+  }
   y += 30;
 
   // Taxes (HK = free port → 0)
