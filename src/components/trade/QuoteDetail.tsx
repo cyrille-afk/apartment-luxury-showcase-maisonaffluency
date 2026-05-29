@@ -37,6 +37,11 @@ interface QuoteItemWithProduct {
   deposit_pct_override: number | null;
   variant_label: string | null;
   room: string | null;
+  // Per-line shipping (multi-origin support)
+  ship_origin_country: string | null;
+  ship_mode: string | null;
+  ship_cbm: number | null;
+  ship_weight_kg: number | null;
   trade_products: {
     product_name: string;
     brand_name: string;
@@ -50,6 +55,7 @@ interface QuoteItemWithProduct {
     materials: string | null;
     lead_time: string | null;
     sku: string | null;
+    origin: string | null;
   } | null;
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
@@ -354,7 +360,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
@@ -1033,7 +1039,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
     itemId: string,
-    patch: Partial<Pick<QuoteItemWithProduct, "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room">>
+    patch: Partial<Pick<QuoteItemWithProduct,
+      "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room"
+      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg"
+    >>
   ) => {
     if (isReadOnly) return;
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
