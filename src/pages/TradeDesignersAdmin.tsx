@@ -435,6 +435,111 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <label className="text-[10px] text-muted-foreground">Origin</label>
                   <Input value={(pick as any).origin || ""} onChange={(e) => updateField(pick.id, "origin", e.target.value || null)} className="text-xs" placeholder="e.g. Handmade in Europe" />
                 </div>
+
+                {/* Logistics & packing — feeds the shipping estimator on quotes */}
+                <div className="space-y-2 border border-dashed border-border rounded-md p-2.5 bg-muted/20">
+                  <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                    Logistics & packing <span className="italic normal-case font-normal">— used to pre-fill shipping on quotes</span>
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">Packing CBM (m³)</label>
+                      <Input
+                        type="number"
+                        step="0.001"
+                        value={pick.pack_cbm != null ? String(pick.pack_cbm) : ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "") { updateField(pick.id, "pack_cbm", null); return; }
+                          const n = parseFloat(v);
+                          updateField(pick.id, "pack_cbm", Number.isFinite(n) ? n : null);
+                        }}
+                        placeholder="e.g. 0.50"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">Weight (kg, gross)</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={pick.pack_weight_kg != null ? String(pick.pack_weight_kg) : ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "") { updateField(pick.id, "pack_weight_kg", null); return; }
+                          const n = parseFloat(v);
+                          updateField(pick.id, "pack_weight_kg", Number.isFinite(n) ? n : null);
+                        }}
+                        placeholder="e.g. 84"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">Cartons / crates</label>
+                      <Input
+                        type="number"
+                        step="1"
+                        value={pick.pack_carton_count != null ? String(pick.pack_carton_count) : ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "") { updateField(pick.id, "pack_carton_count", null); return; }
+                          const n = parseInt(v, 10);
+                          updateField(pick.id, "pack_carton_count", Number.isFinite(n) ? n : null);
+                        }}
+                        placeholder="e.g. 1"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">Default ship mode</label>
+                      <select
+                        value={pick.default_ship_mode || ""}
+                        onChange={(e) => updateField(pick.id, "default_ship_mode", e.target.value || null)}
+                        className="w-full h-9 px-2 text-xs border border-input bg-background rounded-md"
+                      >
+                        <option value="">Auto (by destination)</option>
+                        <option value="sea_lcl">Sea LCL</option>
+                        <option value="sea_fcl">Sea FCL</option>
+                        <option value="air">Air freight</option>
+                        <option value="road">Road</option>
+                        <option value="courier">Courier</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">Pickup country (ISO-2)</label>
+                      <Input
+                        value={pick.pickup_country || ""}
+                        onChange={(e) => {
+                          const v = e.target.value.toUpperCase().slice(0, 2).replace(/[^A-Z]/g, "");
+                          updateField(pick.id, "pickup_country", v || null);
+                        }}
+                        placeholder="FR"
+                        className="text-xs uppercase"
+                        maxLength={2}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">Pickup postcode</label>
+                      <Input
+                        value={pick.pickup_postcode || ""}
+                        onChange={(e) => updateField(pick.id, "pickup_postcode", e.target.value || null)}
+                        placeholder="75011"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] text-muted-foreground">Pickup address <span className="italic">(internal, for carriers)</span></label>
+                      <Input
+                        value={pick.pickup_address || ""}
+                        onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
+                        placeholder="Atelier, 12 rue de Charonne, Paris"
+                        className="text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Currency</label>
