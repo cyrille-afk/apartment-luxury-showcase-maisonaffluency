@@ -8,7 +8,7 @@
 import jsPDF from "jspdf";
 import { GbpLandedCostResult, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 
-interface BuildPdfArgs {
+export interface UkDdpPageArgs {
   quoteRef: string;            // e.g. "QU-22A02A"
   clientName?: string | null;  // optional client / studio name
   quoteCurrency: string;       // working currency on the quote
@@ -19,6 +19,8 @@ interface BuildPdfArgs {
   transitDays?: { min: number | null; max: number | null };
   gbp: GbpLandedCostResult;
 }
+type BuildPdfArgs = UkDdpPageArgs;
+
 
 // Maison palette (deep jade) — matches studio-guide PDFs
 const JADE = [12, 49, 47] as const;     // #0C312F
@@ -33,18 +35,12 @@ const fmtGbp = (cents: number) =>
     maximumFractionDigits: 0,
   }).format((cents || 0) / 100);
 
-export function buildUkDdpPdf({
-  quoteRef,
-  clientName,
-  quoteCurrency,
-  cbm,
-  kg,
-  mode,
-  carrier,
-  transitDays,
-  gbp,
-}: BuildPdfArgs): jsPDF {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+/**
+ * Render the UK DDP estimate onto the *current* page of `doc`.
+ * Assumes the page is fresh.
+ */
+export function renderUkDdpPage(doc: jsPDF, args: UkDdpPageArgs): void {
+  const { quoteRef, clientName, quoteCurrency, cbm, kg, mode, carrier, transitDays, gbp } = args;
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 56; // page margin
