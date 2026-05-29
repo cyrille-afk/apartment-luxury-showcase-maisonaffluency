@@ -1,0 +1,258 @@
+/**
+ * Hong Kong Landed Cost Panel (DAP, HKD)
+ * --------------------------------------
+ * Mirrors UkLandedCostPanel. Converts goods → EUR → HKD with FX buffer,
+ * runs FR→HK shipping estimator (sea LCL default, air optional), shows
+ * a courtesy HKD landed cost. HK is a free port: duty / VAT = 0.
+ */
+import { useEffect, useRef, useState } from "react";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { Truck, ChevronDown, ChevronUp, FileDown, AlertTriangle } from "lucide-react";
+import { downloadHkDapPdf } from "@/lib/hkDapPdf";
+import {
+  DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM,
+  useHkdLandedCost, fmtHkd, type HkMode,
+} from "@/hooks/useHkdLandedCost";
+import { FX_BUFFER } from "@/hooks/useGbpLandedCost";
+
+interface Props {
+  goodsAfterDiscountCents: number;
+  quoteCurrency: string;
+  category?: "furniture" | "lighting" | "art" | "textile" | "accessory" | "other";
+  defaultExpanded?: boolean;
+  title?: string;
+  quoteRef?: string;
+  clientName?: string | null;
+  initialCbm?: number | null;
+  initialKg?: number | null;
+  initialMode?: HkMode | null;
+  onSettingsChange?: (settings: { cbm: number; kg: number; mode: HkMode }) => void;
+}
+
+export const HkLandedCostPanel = ({
+  goodsAfterDiscountCents,
+  quoteCurrency,
+  category = "furniture",
+  defaultExpanded = false,
+  title = "Hong Kong landed cost (DAP, HKD)",
+  quoteRef,
+  clientName,
+  initialCbm,
+  initialKg,
+  initialMode,
+  onSettingsChange,
+}: Props) => {
+  const resolvedInitialMode: HkMode = initialMode ?? "sea_lcl";
+  const resolvedInitialCbm = initialCbm ?? DEFAULT_HKD_LANDED_CBM;
+  const resolvedInitialKg = initialKg ?? Math.round(resolvedInitialCbm * HKD_LANDED_KG_PER_CBM[resolvedInitialMode]);
+  const isInitialKgManual = initialKg != null && initialKg !== Math.round(resolvedInitialCbm * HKD_LANDED_KG_PER_CBM[resolvedInitialMode]);
+  const [cbm, setCbm] = useState(resolvedInitialCbm);
+  const [mode, setMode] = useState<HkMode>(resolvedInitialMode);
+  const [kg, setKg] = useState(resolvedInitialKg);
+  const kgEditedRef = useRef(isInitialKgManual);
+  useEffect(() => {
+    setCbm(resolvedInitialCbm);
+    setMode(resolvedInitialMode);
+    setKg(resolvedInitialKg);
+    kgEditedRef.current = isInitialKgManual;
+  }, [resolvedInitialCbm, resolvedInitialKg, resolvedInitialMode, isInitialKgManual]);
+  useEffect(() => {
+    if (kgEditedRef.current) return;
+    setKg(Math.round(cbm * HKD_LANDED_KG_PER_CBM[mode]));
+  }, [cbm, mode]);
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  const hkd = useHkdLandedCost({ goodsAfterDiscountCents, quoteCurrency, cbm, kg, mode, category });
+  const {
+    ready: ratesReady, loading, fxEurHkd, fxIsFallback,
+    goodsHkdCents: goodsHkd, freightHkdCents: freightHkd, fuelHkdCents: fuelHkd,
+    insuranceHkdCents: insuranceHkd, customsHkdCents: customsHkd, handlingHkdCents: handlingHkd,
+    lastMileHkdCents: lastMileHkd, shippingHkdCents: shippingHkd,
+    dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: totalHkd, breakdown,
+  } = hkd;
+
+  return (
+    <div className="border border-border rounded-md bg-background/40 print:bg-white">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center justify-between px-3 py-2 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <Truck className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="font-display text-xs uppercase tracking-wider text-foreground/80">{title}</span>
+          {ratesReady && totalHkd > 0 && (
+            <span className="font-body text-xs text-muted-foreground">· {fmtHkd(totalHkd)} all-in</span>
+          )}
+        </div>
+        {expanded ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+      </button>
+
+      {expanded && (
+        <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border/60">
+          {/* Inputs */}
+          <div className="grid grid-cols-3 gap-2">
+            <label className="block">
+              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">CBM</span>
+              <input
+                type="number" min={0.1} step={0.1} value={cbm}
+                onChange={(e) => {
+                  const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
+                  const nextKg = Math.round(nextCbm * HKD_LANDED_KG_PER_CBM[mode]);
+                  kgEditedRef.current = false;
+                  setCbm(nextCbm); setKg(nextKg);
+                  onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
+                }}
+                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+              />
+            </label>
+            <label className="block">
+              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                Weight (kg){!kgEditedRef.current && <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">· auto</span>}
+              </span>
+              <input
+                type="number" min={0} step={10} value={kg}
+                onChange={(e) => {
+                  const nextKg = Math.max(0, parseFloat(e.target.value) || 0);
+                  kgEditedRef.current = true;
+                  setKg(nextKg);
+                  onSettingsChange?.({ cbm, kg: nextKg, mode });
+                }}
+                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+              />
+            </label>
+            <label className="block">
+              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Mode</span>
+              <select
+                value={mode}
+                onChange={(e) => {
+                  const nextMode = e.target.value as HkMode;
+                  const nextKg = Math.round(cbm * HKD_LANDED_KG_PER_CBM[nextMode]);
+                  kgEditedRef.current = false;
+                  setMode(nextMode); setKg(nextKg);
+                  onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
+                }}
+                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+              >
+                <option value="sea_lcl">Sea LCL · standard</option>
+                <option value="air">Air freight · express</option>
+              </select>
+            </label>
+          </div>
+
+          {/* Breakdown */}
+          {!ratesReady ? (
+            <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
+              <DotCircleLoader size="sm" /> Loading FX rates…
+            </div>
+          ) : loading ? (
+            <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
+              <DotCircleLoader size="sm" /> Calculating…
+            </div>
+          ) : !breakdown?.available ? (
+            <p className="font-body text-xs text-amber-700">
+              {breakdown?.reason || "No shipping rate available."}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Row label="Goods (net, after trade discount)" value={fmtHkd(goodsHkd)} bold />
+              </div>
+
+              <div className="space-y-1 border-t border-border/40 pt-2">
+                <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                  <span>
+                    Freight — {breakdown.selected_carrier} · {mode === "air" ? "Air" : "Sea LCL"}
+                    {breakdown.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}
+                  </span>
+                  <span className="tabular-nums">{fmtHkd(shippingHkd)}</span>
+                </div>
+                {freightHkd > 0 && <Row label="· Base freight (Paris → Hong Kong)" value={fmtHkd(freightHkd)} indent />}
+                {fuelHkd > 0 && <Row label="· Fuel / BAF surcharge" value={fmtHkd(fuelHkd)} indent />}
+                {insuranceHkd > 0 && <Row label="· Cargo insurance" value={fmtHkd(insuranceHkd)} indent />}
+                {customsHkd > 0 && <Row label="· Customs clearance (HK)" value={fmtHkd(customsHkd)} indent />}
+                {handlingHkd > 0 && <Row label="· Handling & documentation" value={fmtHkd(handlingHkd)} indent />}
+                {lastMileHkd > 0 && <Row label="· Last-mile delivery (Hong Kong)" value={fmtHkd(lastMileHkd)} indent />}
+              </div>
+
+              <div className="space-y-1 border-t border-border/40 pt-2">
+                <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                  <span>HK Import Taxes (DAP)</span>
+                </div>
+                <Row label="· Import duty (Hong Kong free port — 0%)" value={fmtHkd(dutyHkd)} indent />
+                <Row label="· Sales tax / VAT (none in Hong Kong)" value={fmtHkd(vatHkd)} indent />
+              </div>
+
+              <div className="flex justify-between border-t-2 border-foreground/20 pt-2 mt-1 font-display text-sm uppercase tracking-wider text-foreground">
+                <span>DAP delivered Hong Kong — all in</span>
+                <span className="font-medium tabular-nums">{fmtHkd(totalHkd)}</span>
+              </div>
+
+              {fxIsFallback && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-50/60 px-2.5 py-2 mt-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="font-body text-[10px] leading-snug text-amber-900">
+                    <span className="font-medium">Live FX unavailable</span> — using fallback indicative rate.
+                    Treat the HKD figure as approximate; final invoice issued at the rate of the day.
+                  </p>
+                </div>
+              )}
+
+              <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
+                <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
+                  <span className="font-medium text-foreground/80">Indicative estimate.</span>{" "}
+                  Freight is calculated on declared volume ({cbm} CBM) and weight ({kg} kg) — actual crating
+                  may vary on confirmation. Hong Kong is a free port — DAP terms cover origin handling,
+                  international freight, HK customs clearance and inland delivery. Building access /
+                  installation fees are receiver-side.
+                </p>
+                <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
+                  <span className="font-medium text-foreground/80">FX:</span>{" "}
+                  EUR→HKD @ {fxEurHkd?.toFixed(4)} including a +{(FX_BUFFER * 100).toFixed(0)}% buffer to
+                  cushion currency movement between quote and invoice. Final HKD invoice issued on order
+                  confirmation at the rate of the day; the buffer protects the quoted figure for ~30 days.
+                </p>
+                <p className="font-body text-[10px] text-muted-foreground/70 leading-relaxed italic">
+                  Quote remains in {quoteCurrency} as the working currency. This panel is a courtesy
+                  landed-cost view for the Hong Kong end-client.
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    downloadHkDapPdf({
+                      quoteRef: quoteRef || "QUOTE",
+                      clientName: clientName ?? null,
+                      quoteCurrency, cbm, kg, mode,
+                      carrier: breakdown?.selected_carrier ?? null,
+                      transitDays: {
+                        min: breakdown?.transit_days_min ?? null,
+                        max: breakdown?.transit_days_max ?? null,
+                      },
+                      hkd,
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"
+                >
+                  <FileDown className="w-3.5 h-3.5" />
+                  Download HK DAP estimate (PDF)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const Row = ({ label, value, bold, indent }: { label: string; value: string; bold?: boolean; indent?: boolean }) => (
+  <div className={`flex justify-between font-body text-xs ${bold ? "text-foreground font-medium" : "text-muted-foreground"} ${indent ? "pl-2" : ""}`}>
+    <span className="pr-2">{label}</span>
+    <span className="tabular-nums">{value}</span>
+  </div>
+);
+
+export default HkLandedCostPanel;
