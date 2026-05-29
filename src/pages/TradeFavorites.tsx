@@ -85,11 +85,13 @@ export default function TradeFavorites() {
         quoteId = newQuote.id;
       }
 
-      await supabase.from("trade_quote_items").insert({
+      const { data: inserted } = await supabase.from("trade_quote_items").insert({
         quote_id: quoteId,
         product_id: product.id,
         quantity: 1,
-      });
+      }).select("id");
+      const insertedIds = (inserted || []).map((r: any) => r.id);
+      await prefillLineShippingFromCatalog(insertedIds);
 
       setAddedToQuote(true);
       toast({ title: "Added to quote", description: product.product_name });
