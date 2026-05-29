@@ -1004,6 +1004,42 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
     : 0;
 
+  /**
+   * Per-line shipping: groups quote lines by (origin, mode), runs the
+   * estimator per group, returns aggregated EUR totals. Feeds the
+   * landed-cost panels as `overrideShipping` so multi-origin quotes
+   * (e.g. one item from FR, another from DE) get a correct freight figure.
+   */
+  const destIso = toIsoCountry(effectiveDestCountry || "", "");
+  const fxQuoteEur = gbp.fxQuoteEur ?? hkd.fxQuoteEur ?? null;
+  const perLineRawLines = useMemo(() => items.map((it) => {
+    const product = it.trade_products;
+    const lineCents = (it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0) * it.quantity;
+    return {
+      id: it.id,
+      qty: it.quantity,
+      lineCents,
+      productOrigin: product?.origin ?? null,
+      shipOriginCountry: it.ship_origin_country,
+      shipMode: it.ship_mode,
+      shipCbm: it.ship_cbm != null ? Number(it.ship_cbm) : null,
+      shipWeightKg: it.ship_weight_kg != null ? Number(it.ship_weight_kg) : null,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [items]);
+  const { result: perLine, loading: perLineLoading } = usePerLineShipping(
+    perLineRawLines,
+    destIso || null,
+    fxQuoteEur,
+    !!destIso && !!fxQuoteEur && items.length > 0,
+  );
+  const overrideShipping = perLine.shipments.length > 0 ? {
+    shippingEurCents: perLine.totalShippingEurCents,
+    dutyEurCents: perLine.totalDutyEurCents,
+    vatEurCents: perLine.totalVatEurCents,
+    shipmentCount: perLine.shipments.length,
+  } : null;
+
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
@@ -1011,6 +1047,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     cbm: landedCostSettings.cbm,
     kg: landedCostSettings.kg,
     mode: landedCostSettings.mode,
+    overrideShipping: isUkDestination ? overrideShipping : null,
   });
 
   const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
@@ -1031,6 +1068,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     cbm: hkLandedSettings.cbm,
     kg: hkLandedSettings.kg,
     mode: hkLandedSettings.mode,
+    overrideShipping: isHkDestination ? overrideShipping : null,
   });
 
   const handleHkLandedSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: HkMode }) => {
@@ -1038,6 +1076,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
     ));
   }, []);
+
 
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
