@@ -175,7 +175,19 @@ export function renderUkDdpPage(doc: jsPDF, args: UkDdpPageArgs): void {
   doc.text("hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 26);
   doc.text(`Estimate ref. ${quoteRef} - DDP-GB`, pageW - M, pageH - 26, { align: "right" });
 
+}
+
+/** Create a standalone UK DDP PDF (single page). */
+export function buildUkDdpPdf(args: UkDdpPageArgs): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  renderUkDdpPage(doc, args);
   return doc;
+}
+
+/** Append the UK DDP estimate as a new page on an existing jsPDF. */
+export function appendUkDdpPage(doc: jsPDF, args: UkDdpPageArgs): void {
+  doc.addPage();
+  renderUkDdpPage(doc, args);
 }
 
 // ---------- helpers
