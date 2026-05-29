@@ -42,6 +42,8 @@ export interface HkdLandedCostResult {
   totalHkdCents: number;
   breakdown: ShippingBreakdown | null;
   goodsEurCents: number;
+  shippingEurCents: number;
+  totalEurCents: number;
 }
 
 export const DEFAULT_HKD_LANDED_CBM = 1;
