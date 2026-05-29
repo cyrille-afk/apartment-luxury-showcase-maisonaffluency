@@ -103,19 +103,28 @@ export function renderUkDdpPage(doc: jsPDF, args: UkDdpPageArgs): void {
   costRow(doc, M, y, pageW - M, "Goods, net of trade discount", fmtGbp(gbp.goodsGbpCents));
   y += 22;
 
-  // Section: Freight breakdown
-  sectionTitle(doc, "Freight & logistics", M, y);
+  // Section: Freight breakdown — collapse to a simple "Shipping" subtotal when no
+  // component-level rollup is present (per-line shipping mode).
+  const hasFreightComponents =
+    gbp.freightGbpCents > 0 || gbp.fuelGbpCents > 0 || gbp.insuranceGbpCents > 0 ||
+    gbp.customsGbpCents > 0 || gbp.handlingGbpCents > 0 || gbp.lastMileGbpCents > 0;
+  sectionTitle(doc, hasFreightComponents ? "Freight & logistics" : "Shipping", M, y);
   y += 22;
-  if (gbp.freightGbpCents > 0) { costRow(doc, M, y, pageW - M, "Base freight (Paris to London)", fmtGbp(gbp.freightGbpCents)); y += 16; }
-  if (gbp.fuelGbpCents > 0) { costRow(doc, M, y, pageW - M, "Fuel surcharge", fmtGbp(gbp.fuelGbpCents)); y += 16; }
-  if (gbp.insuranceGbpCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtGbp(gbp.insuranceGbpCents)); y += 16; }
-  if (gbp.customsGbpCents > 0) { costRow(doc, M, y, pageW - M, "Customs clearance", fmtGbp(gbp.customsGbpCents)); y += 16; }
-  if (gbp.handlingGbpCents > 0) { costRow(doc, M, y, pageW - M, "Handling & documentation", fmtGbp(gbp.handlingGbpCents)); y += 16; }
-  if (gbp.lastMileGbpCents > 0) { costRow(doc, M, y, pageW - M, "Last-mile delivery (London)", fmtGbp(gbp.lastMileGbpCents)); y += 16; }
-  // subtotal rule
-  rule(doc, M, y - 6, pageW - M);
-  costRow(doc, M, y + 8, pageW - M, "Shipping subtotal", fmtGbp(gbp.shippingGbpCents), true);
-  y += 30;
+  if (hasFreightComponents) {
+    if (gbp.freightGbpCents > 0) { costRow(doc, M, y, pageW - M, "Base freight (Paris to London)", fmtGbp(gbp.freightGbpCents)); y += 16; }
+    if (gbp.fuelGbpCents > 0) { costRow(doc, M, y, pageW - M, "Fuel surcharge", fmtGbp(gbp.fuelGbpCents)); y += 16; }
+    if (gbp.insuranceGbpCents > 0) { costRow(doc, M, y, pageW - M, "Cargo insurance", fmtGbp(gbp.insuranceGbpCents)); y += 16; }
+    if (gbp.customsGbpCents > 0) { costRow(doc, M, y, pageW - M, "Customs clearance", fmtGbp(gbp.customsGbpCents)); y += 16; }
+    if (gbp.handlingGbpCents > 0) { costRow(doc, M, y, pageW - M, "Handling & documentation", fmtGbp(gbp.handlingGbpCents)); y += 16; }
+    if (gbp.lastMileGbpCents > 0) { costRow(doc, M, y, pageW - M, "Last-mile delivery (London)", fmtGbp(gbp.lastMileGbpCents)); y += 16; }
+    // subtotal rule
+    rule(doc, M, y - 6, pageW - M);
+    costRow(doc, M, y + 8, pageW - M, "Shipping subtotal", fmtGbp(gbp.shippingGbpCents), true);
+    y += 30;
+  } else {
+    costRow(doc, M, y, pageW - M, "Shipping subtotal (sum of per-shipment costs above)", fmtGbp(gbp.shippingGbpCents), true);
+    y += 22;
+  }
 
   // Section: UK taxes
   sectionTitle(doc, "UK import taxes (DDP)", M, y);
