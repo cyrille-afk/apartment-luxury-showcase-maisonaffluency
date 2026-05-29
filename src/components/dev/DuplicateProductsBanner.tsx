@@ -13,8 +13,10 @@ import { useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
  */
 export default function DuplicateProductsBanner({
   groups,
+  forceVisible = false,
 }: {
   groups: DuplicateGroup[];
+  forceVisible?: boolean;
 }) {
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(true);
