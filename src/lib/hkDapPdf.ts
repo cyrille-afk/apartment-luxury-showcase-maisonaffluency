@@ -205,7 +205,19 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
   doc.text("hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 26);
   doc.text(`Estimate ref. ${quoteRef} - DAP-HK`, pageW - M, pageH - 26, { align: "right" });
 
+}
+
+/** Create a standalone HK DAP PDF (single page). */
+export function buildHkDapPdf(args: HkDapPageArgs): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  renderHkDapPage(doc, args);
   return doc;
+}
+
+/** Append the HK DAP estimate as a new page on an existing jsPDF. */
+export function appendHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
+  doc.addPage();
+  renderHkDapPage(doc, args);
 }
 
 function sectionTitle(doc: jsPDF, label: string, x: number, y: number) {
