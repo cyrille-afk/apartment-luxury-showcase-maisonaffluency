@@ -17,6 +17,8 @@
 import jsPDF from "jspdf";
 import affluencyLogoUrl from "@/assets/affluency-quote-logo.jpg";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
+import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -132,7 +134,13 @@ export interface QuotePdfArgs {
     /** Per-origin breakdown so the PDF can show shipping mode (air/sea/etc.) per consolidation. */
     origins?: { country: string; modeLabel: string; hkdCents: number; eurCents: number }[];
   } | null;
+  /** Full HK DAP estimate appended as a dedicated final page when provided. */
+  hkDapPage?: HkDapPageArgs | null;
+  /** Full UK DDP estimate appended as a dedicated final page when provided. */
+  ukDdpPage?: UkDdpPageArgs | null;
 }
+
+
 
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
@@ -217,15 +225,17 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     y = drawTierBlock(doc, args, M, y, contentW);
   }
 
-  // ---- UK Landed Cost (GBP DDP London) — indicative
-  if (args.gbpLanded && args.gbpLanded.ready && args.gbpLanded.totalGbpCents > 0) {
+  // ---- UK Landed Cost (GBP DDP London) — inline summary only when a full
+  //      dedicated UK DDP page isn't being appended at the end.
+  if (!args.ukDdpPage && args.gbpLanded && args.gbpLanded.ready && args.gbpLanded.totalGbpCents > 0) {
     y = ensureSpace(doc, y, 150, pageH);
     y += 12;
     y = drawGbpLandedBlock(doc, args, M, y, contentW);
   }
 
-  // ---- HK Landed Cost (HKD DAP Hong Kong) — indicative
-  if (args.hkdLanded && args.hkdLanded.ready && args.hkdLanded.totalHkdCents > 0) {
+  // ---- HK Landed Cost (HKD DAP Hong Kong) — inline summary only when a full
+  //      dedicated HK DAP page isn't being appended at the end.
+  if (!args.hkDapPage && args.hkdLanded && args.hkdLanded.ready && args.hkdLanded.totalHkdCents > 0) {
     y = ensureSpace(doc, y, 150, pageH);
     y += 12;
     y = drawHkdLandedBlock(doc, args, M, y, contentW);
@@ -270,8 +280,18 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   y += 24;
   drawSignatureSeal(doc, args, M, y, contentW);
 
-  // ---- Footer on every page
-  drawFooterAllPages(doc, args, pageW, pageH, M);
+  // ---- Footer on every quote page (before appending landed-cost annexes,
+  //      which carry their own self-contained footer).
+  const mainPagesCount = doc.getNumberOfPages();
+  drawFooterPages(doc, args, pageW, pageH, M, 1, mainPagesCount);
+
+  // ---- Appended landed-cost annexes (each on its own fresh page)
+  if (args.ukDdpPage) {
+    appendUkDdpPage(doc, args.ukDdpPage);
+  }
+  if (args.hkDapPage) {
+    appendHkDapPage(doc, args.hkDapPage);
+  }
 
   return doc;
 }
@@ -1361,9 +1381,18 @@ function ensureSpace(doc: jsPDF, y: number, needed: number, pageH: number): numb
   return y;
 }
 
-function drawFooterAllPages(doc: jsPDF, args: QuotePdfArgs, pageW: number, pageH: number, M: number) {
-  const total = doc.getNumberOfPages();
-  for (let p = 1; p <= total; p++) {
+function drawFooterPages(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  pageW: number,
+  pageH: number,
+  M: number,
+  fromPage: number,
+  toPage: number,
+) {
+  const total = toPage - fromPage + 1;
+  for (let p = fromPage; p <= toPage; p++) {
+    const idx = p - fromPage + 1;
     doc.setPage(p);
     doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
     doc.setLineWidth(0.4);
@@ -1373,7 +1402,7 @@ function drawFooterAllPages(doc: jsPDF, args: QuotePdfArgs, pageW: number, pageH
     doc.setFontSize(8);
     doc.text("Maison Affluency - hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 38);
     doc.text(
-      `${args.quoteNumber} - ${args.statusLabel} - Page ${p} of ${total}`,
+      `${args.quoteNumber} - ${args.statusLabel} - Page ${idx} of ${total}`,
       pageW - M,
       pageH - 38,
       { align: "right" },

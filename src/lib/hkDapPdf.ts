@@ -17,7 +17,7 @@ interface PdfOriginShipment {
   hkdCents: number;       // freight+duty+VAT in HKD for line amount
 }
 
-interface BuildPdfArgs {
+export interface HkDapPageArgs {
   quoteRef: string;
   clientName?: string | null;
   quoteCurrency: string;
@@ -31,6 +31,8 @@ interface BuildPdfArgs {
    *  instead of showing the single panel-level "Mode" cell. */
   origins?: PdfOriginShipment[];
 }
+// Back-compat alias
+type BuildPdfArgs = HkDapPageArgs;
 
 const JADE = [12, 49, 47] as const;
 const JADE_SOFT = [70, 99, 96] as const;
@@ -44,13 +46,16 @@ const fmtHkd = (cents: number) =>
     maximumFractionDigits: 0,
   }).format((cents || 0) / 100);
 
-export function buildHkDapPdf({
-  quoteRef, clientName, quoteCurrency, cbm, kg, mode, carrier, transitDays, hkd, origins,
-}: BuildPdfArgs): jsPDF {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+/**
+ * Render the HK DAP estimate onto the *current* page of `doc`.
+ * Assumes the page is fresh (e.g. just created via `doc.addPage()` or a new jsPDF).
+ */
+export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
+  const { quoteRef, clientName, quoteCurrency, cbm, kg, mode, carrier, transitDays, hkd, origins } = args;
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 56;
+
 
   // Header band
   doc.setFillColor(JADE[0], JADE[1], JADE[2]);
@@ -200,7 +205,19 @@ export function buildHkDapPdf({
   doc.text("hello@maisonaffluency.com - maisonaffluency.com", M, pageH - 26);
   doc.text(`Estimate ref. ${quoteRef} - DAP-HK`, pageW - M, pageH - 26, { align: "right" });
 
+}
+
+/** Create a standalone HK DAP PDF (single page). */
+export function buildHkDapPdf(args: HkDapPageArgs): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  renderHkDapPage(doc, args);
   return doc;
+}
+
+/** Append the HK DAP estimate as a new page on an existing jsPDF. */
+export function appendHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
+  doc.addPage();
+  renderHkDapPage(doc, args);
 }
 
 function sectionTitle(doc: jsPDF, label: string, x: number, y: number) {

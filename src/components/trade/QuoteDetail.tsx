@@ -18,7 +18,7 @@ import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
@@ -983,6 +983,52 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           }
         : null,
 
+      // Full dedicated annex pages — appended to the main quote PDF so the
+      // client receives a single multi-page document (no separate downloads).
+      ukDdpPage: isUkDestination && gbp.ready && gbp.totalGbpCents > 0
+        ? {
+            quoteRef: quoteNumber,
+            clientName: clientName || null,
+            quoteCurrency: currency,
+            cbm: landedCostSettings.cbm,
+            kg: landedCostSettings.kg,
+            mode: landedCostSettings.mode,
+            carrier: gbp.breakdown?.selected_carrier ?? null,
+            transitDays: {
+              min: gbp.breakdown?.transit_days_min ?? null,
+              max: gbp.breakdown?.transit_days_max ?? null,
+            },
+            gbp,
+          }
+        : null,
+      hkDapPage: isHkDestination && hkd.ready && hkd.totalHkdCents > 0
+        ? {
+            quoteRef: quoteNumber,
+            clientName: clientName || null,
+            quoteCurrency: currency,
+            cbm: hkLandedSettings.cbm,
+            kg: hkLandedSettings.kg,
+            mode: hkLandedSettings.mode,
+            carrier: hkd.breakdown?.selected_carrier ?? null,
+            transitDays: {
+              min: hkd.breakdown?.transit_days_min ?? null,
+              max: hkd.breakdown?.transit_days_max ?? null,
+            },
+            hkd,
+            origins: perLine.shipments.length && hkd.fxEurHkd
+              ? perLine.shipments.map((s) => {
+                  const eurCents = s.shippingEurCents + s.dutyEurCents + s.vatEurCents;
+                  return {
+                    country: s.origin,
+                    modeLabel: labelForMode(s.mode),
+                    totalCbm: s.totalCbm,
+                    totalKg: s.totalKg,
+                    hkdCents: Math.round(eurCents * (hkd.fxEurHkd || 0) * (1 + FX_BUFFER)),
+                  };
+                })
+              : undefined,
+          }
+        : null,
     };
   };
 
