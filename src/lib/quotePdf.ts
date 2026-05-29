@@ -225,15 +225,17 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     y = drawTierBlock(doc, args, M, y, contentW);
   }
 
-  // ---- UK Landed Cost (GBP DDP London) — indicative
-  if (args.gbpLanded && args.gbpLanded.ready && args.gbpLanded.totalGbpCents > 0) {
+  // ---- UK Landed Cost (GBP DDP London) — inline summary only when a full
+  //      dedicated UK DDP page isn't being appended at the end.
+  if (!args.ukDdpPage && args.gbpLanded && args.gbpLanded.ready && args.gbpLanded.totalGbpCents > 0) {
     y = ensureSpace(doc, y, 150, pageH);
     y += 12;
     y = drawGbpLandedBlock(doc, args, M, y, contentW);
   }
 
-  // ---- HK Landed Cost (HKD DAP Hong Kong) — indicative
-  if (args.hkdLanded && args.hkdLanded.ready && args.hkdLanded.totalHkdCents > 0) {
+  // ---- HK Landed Cost (HKD DAP Hong Kong) — inline summary only when a full
+  //      dedicated HK DAP page isn't being appended at the end.
+  if (!args.hkDapPage && args.hkdLanded && args.hkdLanded.ready && args.hkdLanded.totalHkdCents > 0) {
     y = ensureSpace(doc, y, 150, pageH);
     y += 12;
     y = drawHkdLandedBlock(doc, args, M, y, contentW);
@@ -278,8 +280,18 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   y += 24;
   drawSignatureSeal(doc, args, M, y, contentW);
 
-  // ---- Footer on every page
-  drawFooterAllPages(doc, args, pageW, pageH, M);
+  // ---- Footer on every quote page (before appending landed-cost annexes,
+  //      which carry their own self-contained footer).
+  const mainPagesCount = doc.getNumberOfPages();
+  drawFooterPages(doc, args, pageW, pageH, M, 1, mainPagesCount);
+
+  // ---- Appended landed-cost annexes (each on its own fresh page)
+  if (args.ukDdpPage) {
+    appendUkDdpPage(doc, args.ukDdpPage);
+  }
+  if (args.hkDapPage) {
+    appendHkDapPage(doc, args.hkDapPage);
+  }
 
   return doc;
 }
