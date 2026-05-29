@@ -9,6 +9,14 @@ import jsPDF from "jspdf";
 import { HkdLandedCostResult, HkMode } from "@/hooks/useHkdLandedCost";
 import { FX_BUFFER } from "@/hooks/useGbpLandedCost";
 
+interface PdfOriginShipment {
+  country: string;        // ISO-2
+  modeLabel: string;      // "Air freight", "Sea LCL", ...
+  totalCbm: number;
+  totalKg: number;
+  hkdCents: number;       // freight+duty+VAT in HKD for line amount
+}
+
 interface BuildPdfArgs {
   quoteRef: string;
   clientName?: string | null;
@@ -19,6 +27,9 @@ interface BuildPdfArgs {
   carrier?: string | null;
   transitDays?: { min: number | null; max: number | null };
   hkd: HkdLandedCostResult;
+  /** When provided, the PDF lists each origin shipment with its mode
+   *  instead of showing the single panel-level "Mode" cell. */
+  origins?: PdfOriginShipment[];
 }
 
 const JADE = [12, 49, 47] as const;
