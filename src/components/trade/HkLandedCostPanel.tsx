@@ -27,6 +27,20 @@ interface Props {
   initialKg?: number | null;
   initialMode?: HkMode | null;
   onSettingsChange?: (settings: { cbm: number; kg: number; mode: HkMode }) => void;
+  /**
+   * When provided, the panel uses the pre-aggregated per-line shipping totals
+   * (one shipment per origin) instead of running its own single-shipment
+   * estimator. CBM / kg / mode controls are hidden because the figures come
+   * from the per-line packing recap above.
+   */
+  overrideShipping?: {
+    shippingEurCents: number;
+    dutyEurCents: number;
+    vatEurCents: number;
+    shipmentCount?: number;
+    totalCbm?: number;
+    totalKg?: number;
+  } | null;
 }
 
 export const HkLandedCostPanel = ({
@@ -41,7 +55,9 @@ export const HkLandedCostPanel = ({
   initialKg,
   initialMode,
   onSettingsChange,
+  overrideShipping = null,
 }: Props) => {
+  const useOverride = !!overrideShipping;
   const resolvedInitialMode: HkMode = initialMode ?? "sea_lcl";
   const resolvedInitialCbm = initialCbm ?? DEFAULT_HKD_LANDED_CBM;
   const resolvedInitialKg = initialKg ?? Math.round(resolvedInitialCbm * HKD_LANDED_KG_PER_CBM[resolvedInitialMode]);
@@ -62,7 +78,7 @@ export const HkLandedCostPanel = ({
   }, [cbm, mode]);
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const hkd = useHkdLandedCost({ goodsAfterDiscountCents, quoteCurrency, cbm, kg, mode, category });
+  const hkd = useHkdLandedCost({ goodsAfterDiscountCents, quoteCurrency, cbm, kg, mode, category, overrideShipping });
   const {
     ready: ratesReady, loading, fxEurHkd, fxIsFallback,
     goodsHkdCents: goodsHkd, freightHkdCents: freightHkd, fuelHkdCents: fuelHkd,
