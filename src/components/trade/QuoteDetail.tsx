@@ -18,7 +18,7 @@ import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
