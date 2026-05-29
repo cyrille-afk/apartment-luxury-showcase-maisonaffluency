@@ -907,12 +907,24 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const grand = baseForGst + gstCents;
+  const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
+  if (shippingEstimateCents > 0) {
+    rows.push({
+      label: `Shipping estimate${args.shippingShipmentCount && args.shippingShipmentCount > 1 ? ` (${args.shippingShipmentCount} shipments)` : ""}`,
+      value: `+ ${fmtMoney(shippingEstimateCents, args.currency)}`,
+      muted: true,
+    });
+  }
+  const grand = baseForGst + gstCents + shippingEstimateCents;
   const deposit = Math.round(grand * 0.6);
   const balance = grand - deposit;
 
   const rowH = 18;
-  const totalH = rows.length * rowH + 80;
+  const disclaimer = shippingEstimateCents > 0
+    ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
+    : "";
+  const disclaimerLines = disclaimer ? doc.splitTextToSize(disclaimer, blockW - 28) : [];
+  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0);
   doc.rect(x, cy, blockW, totalH, "F");
 
   cy += 16;
@@ -947,6 +959,14 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   cy += 14;
   doc.text("40% balance before shipment", x + 14, cy);
   doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
+  cy += 16;
+
+  if (disclaimerLines.length) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.2);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    disclaimerLines.forEach((ln: string) => { doc.text(ln, x + 14, cy); cy += 9; });
+  }
 
   return y + totalH + 12;
 }
