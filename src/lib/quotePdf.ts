@@ -113,6 +113,8 @@ export interface QuotePdfArgs {
     dutyGbpCents: number;
     vatGbpCents: number;
     totalGbpCents: number;
+    /** Per-origin breakdown so the PDF can show shipping mode (air/sea/etc.) per consolidation. */
+    origins?: { country: string; modeLabel: string; gbpCents: number }[];
   } | null;
   /** Optional HK Landed Cost (HKD DAP Hong Kong) breakdown — rendered after the GBP block when provided. */
   hkdLanded?: {
@@ -127,8 +129,11 @@ export interface QuotePdfArgs {
     goodsEurCents?: number;
     shippingEurCents?: number;
     totalEurCents?: number;
+    /** Per-origin breakdown so the PDF can show shipping mode (air/sea/etc.) per consolidation. */
+    origins?: { country: string; modeLabel: string; hkdCents: number; eurCents: number }[];
   } | null;
 }
+
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
 
