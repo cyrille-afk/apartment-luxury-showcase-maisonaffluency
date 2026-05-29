@@ -41,6 +41,15 @@ interface Props {
     totalCbm?: number;
     totalKg?: number;
   } | null;
+  /** Per-origin shipment summary used in the PDF (so each origin's mode
+   *  is shown rather than the panel's single-mode dropdown value). */
+  shipmentOrigins?: Array<{
+    country: string;
+    modeLabel: string;
+    totalCbm: number;
+    totalKg: number;
+    eurCents: number;
+  }> | null;
 }
 
 export const HkLandedCostPanel = ({
