@@ -597,6 +597,100 @@ function drawCompanyAndMeta(
     yEnd = lyL + 6;
   }
 
+  // ---- Optional SHIP TO panel — only when ship-to differs from bill-to
+  const s = args.shipTo || {};
+  const shipDifferent = args.shipToSameAsBill === false;
+  const shipAddr: string[] = [];
+  if (s.address1) shipAddr.push(s.address1);
+  if (s.address2) shipAddr.push(s.address2);
+  const sCityRegion = [s.city, s.state].filter(Boolean).join(", ");
+  const sCityLine = [sCityRegion, s.postalCode].filter(Boolean).join(" ");
+  if (sCityLine) shipAddr.push(sCityLine);
+  if (s.country) shipAddr.push(s.country);
+  const shipHasAny = shipDifferent && (
+    shipAddr.length > 0 || s.name || s.attention || s.phone || s.email || s.notes || args.incoterm
+  );
+  if (shipHasAny) {
+    const py = yEnd + 4;
+    doc.setDrawColor(230, 228, 222);
+    doc.setLineWidth(0.4);
+    doc.line(M, py, M + contentW, py);
+    const pyt = py + 14;
+    // Header row: SHIP TO (left) — INCOTERM pill (right)
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text("SHIP TO", M, pyt);
+    if (args.incoterm) {
+      const label = `INCOTERM · ${args.incoterm}`;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      const pillW = doc.getTextWidth(label) + 14;
+      const pillX = M + contentW - pillW;
+      doc.setFillColor(JADE[0], JADE[1], JADE[2]);
+      doc.roundedRect(pillX, pyt - 10, pillW, 14, 7, 7, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.text(label, pillX + pillW / 2, pyt, { align: "center" });
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+    }
+    // Body — two columns: address (left) + contact / notes (right)
+    const colW2 = contentW / 2;
+    const metaX2 = M + colW2;
+    let lyL2 = pyt + 14;
+    const headerName = (s.name || "").trim() || (args.clientCompany || "").trim();
+    if (headerName) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      doc.text(doc.splitTextToSize(headerName, colW2 - 8), M, lyL2);
+      lyL2 += 11;
+    }
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    shipAddr.forEach((ln) => {
+      const w = doc.splitTextToSize(ln, colW2 - 8);
+      doc.text(w, M, lyL2);
+      lyL2 += w.length * 11;
+    });
+    // Right column: attention / phone / email / notes
+    let lyR2 = pyt + 14;
+    const colWR2 = colW2 - 8;
+    if (s.attention) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text("ATTENTION", metaX2, lyR2);
+      lyR2 += 10;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      const w = doc.splitTextToSize(s.attention, colWR2);
+      doc.text(w, metaX2, lyR2);
+      lyR2 += w.length * 11 + 2;
+    }
+    if (s.phone) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      doc.text(doc.splitTextToSize(s.phone, colWR2), metaX2, lyR2);
+      lyR2 += 11;
+    }
+    if (s.email) {
+      doc.text(doc.splitTextToSize(s.email, colWR2), metaX2, lyR2);
+      lyR2 += 11;
+    }
+    if (s.notes) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8.5);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      const w = doc.splitTextToSize(s.notes, colWR2);
+      doc.text(w, metaX2, lyR2);
+      lyR2 += w.length * 10;
+    }
+    yEnd = Math.max(lyL2, lyR2) + 6;
+  }
+
   return yEnd;
 }
 
