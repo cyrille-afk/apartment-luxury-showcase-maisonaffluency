@@ -105,6 +105,7 @@ export function renderHkDapPage(doc: jsPDF, args: HkDapPageArgs): void {
     doc.setFontSize(8.5);
     doc.setTextColor(JADE_SOFT[0], JADE_SOFT[1], JADE_SOFT[2]);
     doc.text("ORIGINS & MODES", M, y);
+    doc.text("SHIPPING (HKD)", pageW - M, y, { align: "right" });
     y += 12;
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.setFontSize(9.5);
