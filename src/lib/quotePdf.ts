@@ -107,6 +107,17 @@ export interface QuotePdfArgs {
     vatGbpCents: number;
     totalGbpCents: number;
   } | null;
+  /** Optional HK Landed Cost (HKD DAP Hong Kong) breakdown — rendered after the GBP block when provided. */
+  hkdLanded?: {
+    ready: boolean;
+    fxEurHkd: number | null;
+    fxIsFallback: boolean;
+    goodsHkdCents: number;
+    shippingHkdCents: number;
+    dutyHkdCents: number;
+    vatHkdCents: number;
+    totalHkdCents: number;
+  } | null;
 }
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
@@ -196,6 +207,13 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     y = ensureSpace(doc, y, 150, pageH);
     y += 12;
     y = drawGbpLandedBlock(doc, args, M, y, contentW);
+  }
+
+  // ---- HK Landed Cost (HKD DAP Hong Kong) — indicative
+  if (args.hkdLanded && args.hkdLanded.ready && args.hkdLanded.totalHkdCents > 0) {
+    y = ensureSpace(doc, y, 150, pageH);
+    y += 12;
+    y = drawHkdLandedBlock(doc, args, M, y, contentW);
   }
 
   // ---- Insurance & coverage (if enabled)
@@ -1038,6 +1056,73 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
 
   return y + totalH + 12;
 }
+
+// -------- HK Landed Cost block (HKD DAP Hong Kong) ----------------------
+function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {
+  const h = args.hkdLanded!;
+  const fmtH = (cents: number) =>
+    new Intl.NumberFormat("en-HK", { style: "currency", currency: "HKD", maximumFractionDigits: 0 }).format((cents || 0) / 100);
+
+  const blockW = 280;
+  const x = M + contentW - blockW;
+  let cy = y;
+
+  const rows: { label: string; value: string }[] = [];
+  rows.push({ label: "Goods (after discount)", value: fmtH(h.goodsHkdCents) });
+  rows.push({ label: "Shipping FR to HK", value: fmtH(h.shippingHkdCents) });
+  if (h.dutyHkdCents > 0) rows.push({ label: "Import duty", value: fmtH(h.dutyHkdCents) });
+  if (h.vatHkdCents > 0) rows.push({ label: "Sales tax / VAT", value: fmtH(h.vatHkdCents) });
+
+  const rowH = 16;
+  const fxNote = `Indicative. EUR-HKD @ ${h.fxEurHkd?.toFixed(4) ?? "-"} (+2% FX buffer). DAP - Hong Kong is a free port: 0% duty & 0% VAT. Payments & deposits remain in ${args.currency}.`;
+  const fxLines = doc.splitTextToSize(fxNote, blockW - 28);
+  const fallbackLines = h.fxIsFallback
+    ? doc.splitTextToSize("Live FX unavailable - figures use a fallback indicative rate. Treat the HKD total as approximate.", blockW - 28)
+    : [];
+  const totalH = 28 + rows.length * rowH + 28 + fxLines.length * 10 + fallbackLines.length * 10 + 14;
+
+  doc.setFillColor(250, 249, 246);
+  doc.rect(x, cy, blockW, totalH, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("HK LANDED COST · HKD DAP HONG KONG", x + 14, cy + 14);
+  cy += 28;
+
+  rows.forEach((r) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text(r.label, x + 14, cy);
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    doc.text(r.value, x + blockW - 14, cy, { align: "right" });
+    cy += rowH;
+  });
+
+  doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
+  doc.setLineWidth(0.6);
+  doc.line(x + 14, cy - 2, x + blockW - 14, cy - 2);
+  cy += 12;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("Total HKD · DAP Hong Kong", x + 14, cy);
+  doc.text(fmtH(h.totalHkdCents), x + blockW - 14, cy, { align: "right" });
+  cy += 14;
+
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  fxLines.forEach((ln: string) => { doc.text(ln, x + 14, cy); cy += 9; });
+  if (fallbackLines.length) {
+    doc.setTextColor(178, 100, 30);
+    fallbackLines.forEach((ln: string) => { doc.text(ln, x + 14, cy); cy += 9; });
+  }
+
+  return y + totalH + 12;
+}
+
 
 // -------- Insurance block -----------------------------------------------
 function drawInsuranceBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, contentW: number): number {

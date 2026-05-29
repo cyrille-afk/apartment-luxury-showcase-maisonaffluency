@@ -16,6 +16,7 @@ import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from 
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
+import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
@@ -240,6 +241,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     cbm: DEFAULT_GBP_LANDED_CBM,
     kg: Math.round(DEFAULT_GBP_LANDED_CBM * GBP_LANDED_KG_PER_CBM.road),
     mode: "road",
+  }));
+  const [hkLandedSettings, setHkLandedSettings] = useState<{ cbm: number; kg: number; mode: HkMode }>(() => ({
+    cbm: DEFAULT_HKD_LANDED_CBM,
+    kg: Math.round(DEFAULT_HKD_LANDED_CBM * HKD_LANDED_KG_PER_CBM.sea_lcl),
+    mode: "sea_lcl",
   }));
 
   // Insurance bundling
@@ -918,6 +924,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             totalGbpCents: gbp.totalGbpCents,
           }
         : null,
+      hkdLanded: hkd.ready && isHkDestination
+        ? {
+            ready: hkd.ready,
+            fxEurHkd: hkd.fxEurHkd,
+            fxIsFallback: hkd.fxIsFallback,
+            goodsHkdCents: hkd.goodsHkdCents,
+            shippingHkdCents: hkd.shippingHkdCents,
+            dutyHkdCents: hkd.dutyHkdCents,
+            vatHkdCents: hkd.vatHkdCents,
+            totalHkdCents: hkd.totalHkdCents,
+          }
+        : null,
     };
   };
 
@@ -996,6 +1014,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       landed_cost_mode: settings.mode,
     } as any).eq("id", quoteId);
   }, [quoteId]);
+
+  /** HKD DAP landed-cost amounts for the PDF (Paris → Hong Kong). */
+  const hkd = useHkdLandedCost({
+    goodsAfterDiscountCents: isHkDestination ? insuredBaseCents : 0,
+    quoteCurrency: currency,
+    cbm: hkLandedSettings.cbm,
+    kg: hkLandedSettings.kg,
+    mode: hkLandedSettings.mode,
+  });
+
+  const handleHkLandedSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: HkMode }) => {
+    setHkLandedSettings((prev) => (
+      prev.cbm === settings.cbm && prev.kg === settings.kg && prev.mode === settings.mode ? prev : settings
+    ));
+  }, []);
 
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
@@ -2129,6 +2162,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
                       clientName={clientName || null}
+                      initialCbm={hkLandedSettings.cbm}
+                      initialKg={hkLandedSettings.kg}
+                      initialMode={hkLandedSettings.mode}
+                      onSettingsChange={handleHkLandedSettingsChange}
                     />
                   </div>
                 )}
