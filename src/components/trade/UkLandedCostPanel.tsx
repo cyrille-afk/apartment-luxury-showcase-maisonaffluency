@@ -34,6 +34,20 @@ interface Props {
   initialKg?: number | null;
   initialMode?: "road" | "courier" | null;
   onSettingsChange?: (settings: { cbm: number; kg: number; mode: "road" | "courier" }) => void;
+  /**
+   * When provided, the panel uses the pre-aggregated per-line shipping totals
+   * (one shipment per origin) instead of running its own single-shipment
+   * estimator. CBM / kg / mode controls are hidden because the figures come
+   * from the per-line packing recap above.
+   */
+  overrideShipping?: {
+    shippingEurCents: number;
+    dutyEurCents: number;
+    vatEurCents: number;
+    shipmentCount?: number;
+    totalCbm?: number;
+    totalKg?: number;
+  } | null;
 }
 
 export const UkLandedCostPanel = ({
@@ -48,7 +62,9 @@ export const UkLandedCostPanel = ({
   initialKg,
   initialMode,
   onSettingsChange,
+  overrideShipping = null,
 }: Props) => {
+  const useOverride = !!overrideShipping;
   const resolvedInitialMode = initialMode ?? "road";
   const resolvedInitialCbm = initialCbm ?? DEFAULT_GBP_LANDED_CBM;
   const resolvedInitialKg = initialKg ?? Math.round(resolvedInitialCbm * GBP_LANDED_KG_PER_CBM[resolvedInitialMode]);
@@ -77,6 +93,7 @@ export const UkLandedCostPanel = ({
     kg,
     mode,
     category,
+    overrideShipping,
   });
 
   const {
