@@ -90,6 +90,8 @@ serve(async (req) => {
     if (currency === "sgd" && subtotalCents > 0) {
       totalCents = subtotalCents + Math.round(subtotalCents * 0.09);
     }
+    // Add shipping (passed by client; already in quote currency)
+    totalCents += shippingCentsSafe;
 
     // Calculate the portion: 60% deposit or 40% balance
     const portionCents = paymentType === "deposit"
