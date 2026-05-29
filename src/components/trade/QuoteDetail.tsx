@@ -1202,7 +1202,114 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                 )
               )}
+
+              {/* Ship-to & Incoterm */}
+              {isDraft ? (
+                <div className="w-full max-w-[320px] mt-3 pt-3 border-t border-border/60">
+                  <label className="flex items-center gap-2 cursor-pointer mb-2">
+                    <input
+                      type="checkbox"
+                      checked={!shipToSameAsBill}
+                      onChange={async (e) => {
+                        const different = e.target.checked;
+                        const same = !different;
+                        setShipToSameAsBill(same);
+                        setShipToOpen(different);
+                        const patch: any = { ship_to_same_as_bill: same };
+                        // Default Incoterm to DAP when enabling separate ship-to
+                        if (different && !incoterm) {
+                          setIncoterm("DAP");
+                          patch.incoterm = "DAP";
+                        }
+                        await supabase.from("trade_quotes").update(patch).eq("id", quoteId);
+                      }}
+                      className="h-3.5 w-3.5"
+                    />
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                      Different ship-to address
+                    </span>
+                  </label>
+
+                  {!shipToSameAsBill && (
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Incoterm</span>
+                        <select
+                          value={incoterm}
+                          onChange={async (e) => {
+                            const v = (e.target.value || "") as Incoterm | "";
+                            setIncoterm(v);
+                            await supabase.from("trade_quotes")
+                              .update({ incoterm: v || null } as any)
+                              .eq("id", quoteId);
+                          }}
+                          className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
+                        >
+                          <option value="">—</option>
+                          {INCOTERMS.map((ic) => (
+                            <option key={ic} value={ic}>{ic}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {(["name","attention","address1","address2","city","state","postal_code","country","phone","email","notes"] as const).map((key) => {
+                        const labelMap: Record<string, string> = {
+                          name: "Ship-to name / company",
+                          attention: "Attention",
+                          address1: "Address line 1",
+                          address2: "Address line 2",
+                          city: "City",
+                          state: "State / region",
+                          postal_code: "Postal code",
+                          country: "Country",
+                          phone: "Phone",
+                          email: "Email",
+                          notes: "Delivery notes",
+                        };
+                        const dbCol = `ship_to_${key}`;
+                        return (
+                          <div key={key}>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-0.5">{labelMap[key]}</span>
+                            <input
+                              type="text"
+                              value={shipTo[key] || ""}
+                              onChange={(e) => setShipTo((s) => ({ ...s, [key]: e.target.value }))}
+                              onBlur={async (e) => {
+                                await supabase.from("trade_quotes")
+                                  .update({ [dbCol]: e.target.value || null } as any)
+                                  .eq("id", quoteId);
+                              }}
+                              className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                !shipToSameAsBill && (
+                  <div className="mt-3 pt-3 border-t border-border/60">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">
+                      Ship to {incoterm ? `· ${incoterm}` : ""}
+                    </span>
+                    <p className="font-body text-xs text-foreground leading-relaxed">
+                      {[shipTo.name, shipTo.attention].filter(Boolean).join(" — ")}
+                      {shipTo.address1 && <><br />{shipTo.address1}</>}
+                      {shipTo.address2 && <><br />{shipTo.address2}</>}
+                      {(shipTo.city || shipTo.postal_code) && <><br />{[shipTo.postal_code, shipTo.city].filter(Boolean).join(" ")}{shipTo.state ? `, ${shipTo.state}` : ""}</>}
+                      {shipTo.country && <><br />{shipTo.country}</>}
+                      {shipTo.phone && <><br />Tel: {shipTo.phone}</>}
+                      {shipTo.email && <><br />{shipTo.email}</>}
+                    </p>
+                    {shipTo.notes && (
+                      <p className="font-body text-[11px] text-muted-foreground italic mt-1">{shipTo.notes}</p>
+                    )}
+                  </div>
+                )
+              )}
             </div>
+
 
             {/* Middle: Date / Expiry / Number */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
