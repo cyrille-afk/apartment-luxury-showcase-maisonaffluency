@@ -15,6 +15,7 @@ import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
+import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
@@ -518,14 +519,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (supabase.from("clients" as any).select("billing_country").eq("id", clientId).maybeSingle() as any)
       .then(({ data }: any) => setClientCountry((data?.billing_country as string) || null));
   }, [clientId]);
+  const effectiveDestCountry = (() => {
+    // Ship-to country wins when a separate ship-to is set.
+    const v = ((!shipToSameAsBill && shipTo.country ? shipTo.country : clientCountry) || "").trim().toLowerCase();
+    return v;
+  })();
   const isUkDestination = (() => {
-    // Effective destination = ship-to country when a separate ship-to is set,
-    // otherwise fall back to the client's billing country. Avoids showing a
-    // GBP DDP London estimate when the goods are actually shipping elsewhere
-    // (e.g. DAP Hong Kong against a UK-billed client).
-    const effective = (!shipToSameAsBill && shipTo.country ? shipTo.country : clientCountry) || "";
-    const c = effective.trim().toLowerCase();
+    const c = effectiveDestCountry;
     return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
+  })();
+  const isHkDestination = (() => {
+    const c = effectiveDestCountry;
+    return c === "hk" || c === "hong kong" || c === "hong kong sar" || c === "hong kong sar china" || c === "hksar";
   })();
 
   useEffect(() => {
@@ -2112,11 +2117,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     />
                   </div>
                 )}
-                {subtotalCents > 0 && !clientCountry && (
+                {subtotalCents > 0 && isHkDestination && (
+                  <div className="mt-4">
+                    <HkLandedCostPanel
+                      goodsAfterDiscountCents={
+                        tradeDiscount
+                          ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
+                          : subtotalCents
+                      }
+                      quoteCurrency={currency}
+                      defaultExpanded={false}
+                      quoteRef={quoteNumber}
+                      clientName={clientName || null}
+                    />
+                  </div>
+                )}
+                {subtotalCents > 0 && !clientCountry && !isHkDestination && !isUkDestination && (
                   <div className="mt-4 rounded-md border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                     <p className="font-medium text-foreground">Select a delivery country</p>
                     <p className="mt-1">
-                      Add a billing country to the linked client to calculate landed costs (e.g. UK DDP in GBP).
+                      Add a billing country to the linked client (or fill in a ship-to country) to calculate landed costs (UK DDP in GBP, HK DAP in HKD, …).
                       Until then, destination-specific duties and taxes can't be estimated.
                     </p>
                   </div>

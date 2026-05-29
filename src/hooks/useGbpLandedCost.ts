@@ -49,7 +49,7 @@ export const GBP_LANDED_KG_PER_CBM: Record<"road" | "courier", number> = {
 
 // Hardcoded sane defaults (mid-2025 indicative). Used only when both live
 // FX endpoints fail (e.g. CORS-blocked preview environments).
-const FALLBACK_TO_EUR: Record<string, number> = {
+export const FALLBACK_TO_EUR: Record<string, number> = {
   EUR: 1,
   GBP: 1.17,
   USD: 0.92,
@@ -64,7 +64,7 @@ const FALLBACK_TO_EUR: Record<string, number> = {
 const FALLBACK_EUR_TO_GBP = 0.85;
 
 /** Try frankfurter → exchangerate.host → hardcoded fallback. Always resolves. */
-const fetchFx = async (
+export const fetchFx = async (
   from: string,
   to: string
 ): Promise<{ rate: number; isFallback: boolean }> => {
