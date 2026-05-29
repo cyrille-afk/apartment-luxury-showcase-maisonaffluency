@@ -826,10 +826,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         unitPriceCents: unit,
         lineTotalCents: unit != null ? unit * item.quantity : null,
         imageUrl: product?.image_url ?? null,
+        shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
+        shipMode: item.ship_mode || null,
+        shipCbm: item.ship_cbm != null ? Number(item.ship_cbm) : null,
+        shipWeightKg: item.ship_weight_kg != null ? Number(item.ship_weight_kg) : null,
       };
     });
     const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
     const insLabel = INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label ?? null;
+    const shippingEstimateCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+      ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+      : 0;
 
     // Pull structured billing + primary contact from the linked client (if any)
     let clientCompanyName: string | null = null;
@@ -905,6 +912,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       gstEnabled,
       gstRate,
       insurancePremiumCents: insurancePremiumCents || 0,
+      shippingEstimateCents,
+      shippingShipmentCount: perLine.shipments.length,
       insuranceLabel: insuranceEnabled ? insLabel : null,
       insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
       insuranceEnabled,
