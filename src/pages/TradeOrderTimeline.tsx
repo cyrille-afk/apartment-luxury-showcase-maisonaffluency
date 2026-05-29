@@ -44,6 +44,12 @@ interface OrderTimeline {
   profile_first_name?: string;
   profile_last_name?: string;
   profile_company?: string;
+  // Ship-to / Incoterm (sourced from trade_quotes)
+  ship_to_same_as_bill?: boolean | null;
+  incoterm?: string | null;
+  ship_to_name?: string | null;
+  ship_to_city?: string | null;
+  ship_to_country?: string | null;
 }
 
 const KANBAN_COLUMNS = [
