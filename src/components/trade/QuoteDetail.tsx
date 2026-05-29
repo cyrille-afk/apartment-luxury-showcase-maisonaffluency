@@ -739,7 +739,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       sp.set("quote", newId);
       if (src.project_id) sp.set("project", src.project_id);
       navigate(`/trade/quotes?${sp.toString()}`, { replace: true });
-      onStatusChange();
     } catch (err: any) {
       toast({ title: "Could not recreate", description: err?.message || "Please try again.", variant: "destructive" });
     } finally {
