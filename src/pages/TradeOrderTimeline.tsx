@@ -109,6 +109,26 @@ function OrderCard({ order, isAdmin, onMoveNext }: { order: OrderTimeline; isAdm
         <span>{order.production_weeks}w prod · {order.shipping_weeks}w ship · {order.customs_days}d customs</span>
       </div>
 
+      {/* Ship-to + Incoterm */}
+      {(order.ship_to_same_as_bill === false || order.incoterm) && (
+        <div className="mt-2 pt-2 border-t border-border/60 text-[10px] font-body text-muted-foreground space-y-0.5">
+          {order.incoterm && (
+            <div>
+              <span className="uppercase tracking-widest">Incoterm</span>
+              <span className="ml-1 font-medium text-foreground">{order.incoterm}</span>
+            </div>
+          )}
+          {order.ship_to_same_as_bill === false && (order.ship_to_name || order.ship_to_city || order.ship_to_country) && (
+            <div className="flex items-start gap-1">
+              <Truck className="h-3 w-3 shrink-0 mt-0.5" />
+              <span className="truncate">
+                {[order.ship_to_name, order.ship_to_city, order.ship_to_country].filter(Boolean).join(" · ")}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Admin: advance to next column */}
       {isAdmin && nextCol && (
         <button
