@@ -45,11 +45,12 @@ serve(async (req) => {
     const user = userData?.user;
     if (authErr || !user?.email) throw new Error("User not authenticated");
 
-    const { quoteId, paymentType = "deposit" } = await req.json();
+    const { quoteId, paymentType = "deposit", shippingCents = 0 } = await req.json();
     if (!quoteId) throw new Error("quoteId is required");
     if (!["deposit", "balance"].includes(paymentType)) throw new Error("Invalid paymentType");
+    const shippingCentsSafe = Math.max(0, Math.round(Number(shippingCents) || 0));
 
-    console.log("[create-quote-payment] User:", user.id, "Quote:", quoteId, "Type:", paymentType);
+    console.log("[create-quote-payment] User:", user.id, "Quote:", quoteId, "Type:", paymentType, "Shipping:", shippingCentsSafe);
 
     const { data: quote, error: qErr } = await supabaseClient
       .from("trade_quotes")
@@ -89,6 +90,8 @@ serve(async (req) => {
     if (currency === "sgd" && subtotalCents > 0) {
       totalCents = subtotalCents + Math.round(subtotalCents * 0.09);
     }
+    // Add shipping (passed by client; already in quote currency)
+    totalCents += shippingCentsSafe;
 
     // Calculate the portion: 60% deposit or 40% balance
     const portionCents = paymentType === "deposit"

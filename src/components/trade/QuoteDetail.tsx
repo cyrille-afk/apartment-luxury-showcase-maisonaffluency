@@ -782,8 +782,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const handleStripePayment = async (paymentType: "deposit" | "balance" = "deposit") => {
     setPayingStripe(true);
     try {
+      const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+        ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+        : 0;
       const { data, error } = await supabase.functions.invoke("create-quote-payment", {
-        body: { quoteId, paymentType },
+        body: { quoteId, paymentType, shippingCents: shippingQuoteCents },
       });
       if (error) throw error;
       if (data?.url) {
@@ -2225,13 +2228,23 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     {(() => {
                       const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
                       const taxable = afterDiscount + insurancePremiumCents;
-                      const total = gstEnabled && taxable > 0
+                      const goodsTotal = gstEnabled && taxable > 0
                         ? taxable + Math.round(taxable * gstRate / 100)
                         : taxable;
+                      const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+                        ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+                        : 0;
+                      const total = goodsTotal + shippingQuoteCents;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
                       return (
                         <>
+                          {shippingQuoteCents > 0 && (
+                            <div className="flex justify-between font-body text-xs text-muted-foreground">
+                              <span>Shipping (estimate, {perLine.shipments.length} shipment{perLine.shipments.length > 1 ? "s" : ""})</span>
+                              <span>{formatPriceRaw(shippingQuoteCents, currency)}</span>
+                            </div>
+                          )}
                           <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
                             <span className="uppercase tracking-wider">Total {currency}</span>
                             <span className="font-medium">
@@ -2259,6 +2272,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   {currencySymbol(currency)} {formatPriceRaw(balanceCents, currency)}
                                 </span>
                               </div>
+                              {shippingQuoteCents > 0 && (
+                                <p className="font-body text-[10px] text-muted-foreground leading-relaxed pt-1.5 italic">
+                                  Shipping &amp; FX are estimates valid today. Final freight is re-quoted with live carrier rates and FX ~2 weeks before delivery; any variance is settled with the balance invoice.
+                                </p>
+                              )}
                             </div>
                           )}
                         </>
@@ -2462,7 +2480,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {isPriced && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
           const withGst = gstEnabled && afterDiscount > 0 ? afterDiscount + Math.round(afterDiscount * gstRate / 100) : afterDiscount;
-          const depositCents = Math.round(withGst * 0.6);
+          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+            : 0;
+          const orderTotal = withGst + shippingQuoteCents;
+          const depositCents = Math.round(orderTotal * 0.6);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
           const chargeTotal = Math.ceil((depositCents + fixedFee) / (1 - 0.034));
@@ -2521,13 +2543,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {gstEnabled && (
                         <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
+                      {shippingQuoteCents > 0 && (
+                        <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
+                      )}
                       <div className="border-t border-border my-1.5" />
-                      <Row label="Order total (incl. GST)" value={`${fmt(withGst)} ${currency}`} strong />
+                      <Row label="Order total" value={`${fmt(orderTotal)} ${currency}`} strong />
                       <Row label="60% deposit due now" value={`${fmt(depositCents)} ${currency}`} strong />
                       <div className="border-t border-border my-1.5" />
                       <Row label="Stripe processing fee (3.4% + fixed)" value={`+ ${fmt(processingFee)} ${currency}`} muted />
                       <Row label="Total charge to your card" value={`${fmt(chargeTotal)} ${currency}`} strong />
                     </div>
+                    {shippingQuoteCents > 0 && (
+                      <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                        <strong className="text-foreground/70">Note on shipping &amp; FX:</strong> the freight figure above reflects today's carrier rates and FX. Production lead times run 18–20 weeks, during which rates and exchange rates will move. Two weeks before delivery we'll re-quote freight at the live rate and email you a balance invoice reflecting any difference. The 40% balance is therefore indicative until that point.
+                      </p>
+                    )}
                     <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
                       Card-denominated foreign transaction fees (~1–2%) may apply separately. To avoid the processing fee, pay {fmt(depositCents)} {currency} via bank transfer using the details above.
                     </p>
@@ -2543,10 +2573,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const withGst = gstEnabled && afterDiscount > 0
             ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
             : afterDiscount;
+          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+            : 0;
+          const orderTotal = withGst + shippingQuoteCents;
 
           const isPayingDeposit = quoteStatus === "confirmed";
           const isPayingBalance = quoteStatus === "deposit_paid";
-          const portionCents = isPayingDeposit ? Math.round(withGst * 0.6) : Math.round(withGst * 0.4);
+          const portionCents = isPayingDeposit ? Math.round(orderTotal * 0.6) : Math.round(orderTotal * 0.4);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
           const chargeTotal = Math.ceil((portionCents + fixedFee) / (1 - 0.034));
@@ -2566,6 +2600,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   {isPayingBalance && (
                     <p className="font-body text-[10px] text-muted-foreground">
                       60% deposit received. Please pay the remaining 40% balance to complete your order.
+                      {shippingQuoteCents > 0 && " Freight has been re-quoted at live rates; the balance below reflects the final figure."}
                     </p>
                   )}
                 </div>
@@ -2590,9 +2625,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
                   <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency}.</li>
+                    <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency} (on an order total of {currencySymbol(currency)}{formatPriceRaw(orderTotal, currency)} {currency}{shippingQuoteCents > 0 ? ", goods + shipping" : ""}).</li>
                     <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
                     {gstEnabled && <li>{gstRate}% GST is included.</li>}
+                    {isPayingDeposit && shippingQuoteCents > 0 && (
+                      <li>Shipping &amp; FX shown are estimates. Two weeks before delivery we'll re-quote freight at live carrier rates and FX, then email you the adjusted balance invoice.</li>
+                    )}
                     <li>
                       If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
