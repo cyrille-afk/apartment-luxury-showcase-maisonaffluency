@@ -15,6 +15,7 @@ import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
+import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
