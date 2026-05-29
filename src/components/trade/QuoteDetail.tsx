@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,7 +18,7 @@ import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry } from "@/lib/perLineShipping";
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
@@ -1011,7 +1011,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
    * (e.g. one item from FR, another from DE) get a correct freight figure.
    */
   const destIso = toIsoCountry(effectiveDestCountry || "", "");
-  const fxQuoteEur = gbp.fxQuoteEur ?? hkd.fxQuoteEur ?? null;
+  const [fxQuoteEur, setFxQuoteEur] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetchFx(currency, "EUR").then((r) => { if (!cancelled) setFxQuoteEur(r.rate); });
+    return () => { cancelled = true; };
+  }, [currency]);
   const perLineRawLines = useMemo(() => items.map((it) => {
     const product = it.trade_products;
     const lineCents = (it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0) * it.quantity;
