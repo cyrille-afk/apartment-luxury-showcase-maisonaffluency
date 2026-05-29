@@ -18,6 +18,18 @@ export interface GbpLandedCostInput {
   kg?: number;
   mode?: "road" | "courier";
   category?: "furniture" | "lighting" | "art" | "textile" | "accessory" | "other";
+  /**
+   * Optional per-line shipping override (already aggregated, in EUR cents).
+   * When provided, replaces the panel's single-shipment estimator call —
+   * caller is responsible for summing freight, duty and VAT across all
+   * origin shipments.
+   */
+  overrideShipping?: {
+    shippingEurCents: number;
+    dutyEurCents: number;
+    vatEurCents: number;
+    shipmentCount?: number;
+  } | null;
 }
 
 export interface GbpLandedCostResult {
@@ -115,6 +127,7 @@ export const useGbpLandedCost = ({
   kg,
   mode = "road",
   category = "furniture",
+  overrideShipping = null,
 }: GbpLandedCostInput): GbpLandedCostResult => {
   const [fxEurGbp, setFxEurGbp] = useState<number | null>(null);
   const [fxQuoteEur, setFxQuoteEur] = useState<number | null>(null);
@@ -143,11 +156,12 @@ export const useGbpLandedCost = ({
   }, [goodsAfterDiscountCents, fxQuoteEur]);
 
   const chargeableKg = kg ?? Math.round(cbm * GBP_LANDED_KG_PER_CBM[mode]);
+  const useOverride = !!overrideShipping;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (goodsEurCents <= 0) { setBreakdown(null); return; }
+      if (useOverride || goodsEurCents <= 0) { setBreakdown(null); return; }
       setLoading(true);
       try {
         const b = await estimateShipping({
@@ -166,7 +180,7 @@ export const useGbpLandedCost = ({
       }
     })();
     return () => { cancelled = true; };
-  }, [cbm, chargeableKg, mode, category, goodsEurCents]);
+  }, [cbm, chargeableKg, mode, category, goodsEurCents, useOverride]);
 
   const eurToGbp = (eurCents: number): number => {
     if (!fxEurGbp) return 0;
@@ -174,17 +188,24 @@ export const useGbpLandedCost = ({
   };
 
   const goodsGbpCents = eurToGbp(goodsEurCents);
-  const freightGbpCents = eurToGbp(breakdown?.freight_cents ?? 0);
-  const fuelGbpCents = eurToGbp(breakdown?.fuel_cents ?? 0);
-  const insuranceGbpCents = eurToGbp(breakdown?.insurance_cents ?? 0);
-  const customsGbpCents = eurToGbp(breakdown?.customs_cents ?? 0);
-  const handlingGbpCents = eurToGbp(breakdown?.handling_cents ?? 0);
-  const lastMileGbpCents = eurToGbp(breakdown?.last_mile_cents ?? 0);
-  const shippingGbpCents =
-    freightGbpCents + fuelGbpCents + insuranceGbpCents +
-    customsGbpCents + handlingGbpCents + lastMileGbpCents;
-  const dutyGbpCents = eurToGbp(breakdown?.duty_cents ?? 0);
-  const vatGbpCents = eurToGbp(breakdown?.vat_cents ?? 0);
+
+  // When per-line override is supplied, freight/duty/VAT come pre-summed in EUR.
+  const shippingEurOverride = overrideShipping?.shippingEurCents ?? 0;
+  const dutyEurOverride = overrideShipping?.dutyEurCents ?? 0;
+  const vatEurOverride = overrideShipping?.vatEurCents ?? 0;
+
+  const freightGbpCents = useOverride ? 0 : eurToGbp(breakdown?.freight_cents ?? 0);
+  const fuelGbpCents = useOverride ? 0 : eurToGbp(breakdown?.fuel_cents ?? 0);
+  const insuranceGbpCents = useOverride ? 0 : eurToGbp(breakdown?.insurance_cents ?? 0);
+  const customsGbpCents = useOverride ? 0 : eurToGbp(breakdown?.customs_cents ?? 0);
+  const handlingGbpCents = useOverride ? 0 : eurToGbp(breakdown?.handling_cents ?? 0);
+  const lastMileGbpCents = useOverride ? 0 : eurToGbp(breakdown?.last_mile_cents ?? 0);
+  const shippingGbpCents = useOverride
+    ? eurToGbp(shippingEurOverride)
+    : freightGbpCents + fuelGbpCents + insuranceGbpCents
+      + customsGbpCents + handlingGbpCents + lastMileGbpCents;
+  const dutyGbpCents = useOverride ? eurToGbp(dutyEurOverride) : eurToGbp(breakdown?.duty_cents ?? 0);
+  const vatGbpCents = useOverride ? eurToGbp(vatEurOverride) : eurToGbp(breakdown?.vat_cents ?? 0);
   const totalGbpCents = goodsGbpCents + shippingGbpCents + dutyGbpCents + vatGbpCents;
 
   return {

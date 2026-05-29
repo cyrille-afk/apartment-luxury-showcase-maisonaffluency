@@ -21,6 +21,16 @@ export interface HkdLandedCostInput {
   kg?: number;
   mode?: HkMode;
   category?: "furniture" | "lighting" | "art" | "textile" | "accessory" | "other";
+  /**
+   * Optional per-line shipping override (already aggregated, in EUR cents).
+   * When provided, replaces the panel's single-shipment estimator call.
+   */
+  overrideShipping?: {
+    shippingEurCents: number;
+    dutyEurCents: number;
+    vatEurCents: number;
+    shipmentCount?: number;
+  } | null;
 }
 
 export interface HkdLandedCostResult {
