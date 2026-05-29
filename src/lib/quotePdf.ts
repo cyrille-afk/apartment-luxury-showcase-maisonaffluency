@@ -776,6 +776,9 @@ function drawTable(
       showMaterials ? line.materials : null,
       editionLabel,
       line.leadTime,
+      line.shipOriginCountry || line.shipMode || line.shipCbm || line.shipWeightKg
+        ? `Shipping: ${line.shipOriginCountry || "origin TBC"}${line.shipMode ? ` · ${line.shipMode.replace("_", " ").toUpperCase()}` : ""}${line.shipCbm ? ` · ${line.shipCbm} CBM/unit` : ""}${line.shipWeightKg ? ` · ${line.shipWeightKg} kg/unit` : ""}`
+        : null,
       line.notes,
     ].filter(Boolean) as string[];
     const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
