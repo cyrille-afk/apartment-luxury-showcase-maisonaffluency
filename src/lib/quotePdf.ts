@@ -89,6 +89,13 @@ export interface QuotePdfArgs {
    *  (e.g. "Air freight estimate", "Sea LCL estimate"). Falls back to
    *  "Shipping estimate" when mixed or unknown. */
   shippingModeLabel?: string | null;
+  /** When a quote consolidates multiple shipping modes (e.g. air + sea),
+   *  this breaks the shipping estimate down per mode in the totals block. */
+  shippingModeBreakdown?: Array<{
+    modeLabel: string;
+    cents: number;
+    shipmentCount: number;
+  }>;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
