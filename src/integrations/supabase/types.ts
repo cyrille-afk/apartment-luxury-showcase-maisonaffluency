@@ -2080,12 +2080,24 @@ export type Database = {
           deposit_paid_at: string | null
           estimated_delivery_at: string | null
           id: string
+          incoterm: string | null
           kanban_status: string
           production_end_at: string | null
           production_start_at: string | null
           production_weeks: number
           project_id: string | null
           quote_id: string
+          ship_to_address1: string | null
+          ship_to_address2: string | null
+          ship_to_attention: string | null
+          ship_to_city: string | null
+          ship_to_country: string | null
+          ship_to_email: string | null
+          ship_to_name: string | null
+          ship_to_notes: string | null
+          ship_to_phone: string | null
+          ship_to_postal_code: string | null
+          ship_to_state: string | null
           shipping_end_at: string | null
           shipping_start_at: string | null
           shipping_weeks: number
@@ -2105,12 +2117,24 @@ export type Database = {
           deposit_paid_at?: string | null
           estimated_delivery_at?: string | null
           id?: string
+          incoterm?: string | null
           kanban_status?: string
           production_end_at?: string | null
           production_start_at?: string | null
           production_weeks?: number
           project_id?: string | null
           quote_id: string
+          ship_to_address1?: string | null
+          ship_to_address2?: string | null
+          ship_to_attention?: string | null
+          ship_to_city?: string | null
+          ship_to_country?: string | null
+          ship_to_email?: string | null
+          ship_to_name?: string | null
+          ship_to_notes?: string | null
+          ship_to_phone?: string | null
+          ship_to_postal_code?: string | null
+          ship_to_state?: string | null
           shipping_end_at?: string | null
           shipping_start_at?: string | null
           shipping_weeks?: number
@@ -2130,12 +2154,24 @@ export type Database = {
           deposit_paid_at?: string | null
           estimated_delivery_at?: string | null
           id?: string
+          incoterm?: string | null
           kanban_status?: string
           production_end_at?: string | null
           production_start_at?: string | null
           production_weeks?: number
           project_id?: string | null
           quote_id?: string
+          ship_to_address1?: string | null
+          ship_to_address2?: string | null
+          ship_to_attention?: string | null
+          ship_to_city?: string | null
+          ship_to_country?: string | null
+          ship_to_email?: string | null
+          ship_to_name?: string | null
+          ship_to_notes?: string | null
+          ship_to_phone?: string | null
+          ship_to_postal_code?: string | null
+          ship_to_state?: string | null
           shipping_end_at?: string | null
           shipping_start_at?: string | null
           shipping_weeks?: number
@@ -4401,6 +4437,7 @@ export type Database = {
           credit_applied_cents: number
           currency: string
           id: string
+          incoterm: string | null
           insurance_enabled: boolean
           insurance_notes: string | null
           insurance_rate_bps: number
@@ -4412,6 +4449,18 @@ export type Database = {
           notes: string | null
           project_id: string | null
           responded_at: string | null
+          ship_to_address1: string | null
+          ship_to_address2: string | null
+          ship_to_attention: string | null
+          ship_to_city: string | null
+          ship_to_country: string | null
+          ship_to_email: string | null
+          ship_to_name: string | null
+          ship_to_notes: string | null
+          ship_to_phone: string | null
+          ship_to_postal_code: string | null
+          ship_to_same_as_bill: boolean
+          ship_to_state: string | null
           status: string
           studio_id: string | null
           submitted_at: string | null
@@ -4427,6 +4476,7 @@ export type Database = {
           credit_applied_cents?: number
           currency?: string
           id?: string
+          incoterm?: string | null
           insurance_enabled?: boolean
           insurance_notes?: string | null
           insurance_rate_bps?: number
@@ -4438,6 +4488,18 @@ export type Database = {
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
+          ship_to_address1?: string | null
+          ship_to_address2?: string | null
+          ship_to_attention?: string | null
+          ship_to_city?: string | null
+          ship_to_country?: string | null
+          ship_to_email?: string | null
+          ship_to_name?: string | null
+          ship_to_notes?: string | null
+          ship_to_phone?: string | null
+          ship_to_postal_code?: string | null
+          ship_to_same_as_bill?: boolean
+          ship_to_state?: string | null
           status?: string
           studio_id?: string | null
           submitted_at?: string | null
@@ -4453,6 +4515,7 @@ export type Database = {
           credit_applied_cents?: number
           currency?: string
           id?: string
+          incoterm?: string | null
           insurance_enabled?: boolean
           insurance_notes?: string | null
           insurance_rate_bps?: number
@@ -4464,6 +4527,18 @@ export type Database = {
           notes?: string | null
           project_id?: string | null
           responded_at?: string | null
+          ship_to_address1?: string | null
+          ship_to_address2?: string | null
+          ship_to_attention?: string | null
+          ship_to_city?: string | null
+          ship_to_country?: string | null
+          ship_to_email?: string | null
+          ship_to_name?: string | null
+          ship_to_notes?: string | null
+          ship_to_phone?: string | null
+          ship_to_postal_code?: string | null
+          ship_to_same_as_bill?: boolean
+          ship_to_state?: string | null
           status?: string
           studio_id?: string | null
           submitted_at?: string | null
