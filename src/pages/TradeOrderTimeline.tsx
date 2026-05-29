@@ -169,7 +169,7 @@ export default function TradeOrderTimeline() {
       const userIds = [...new Set(data.map((d: any) => d.user_id))];
 
       const [quotesRes, profilesRes] = await Promise.all([
-        supabase.from("trade_quotes").select("id, client_name, status, currency").in("id", quoteIds),
+        supabase.from("trade_quotes").select("id, client_name, status, currency, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_city, ship_to_country").in("id", quoteIds),
         supabase.from("profiles").select("id, first_name, last_name, company").in("id", userIds),
       ]);
 
