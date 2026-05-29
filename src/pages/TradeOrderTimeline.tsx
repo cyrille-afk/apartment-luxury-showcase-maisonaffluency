@@ -187,6 +187,11 @@ export default function TradeOrderTimeline() {
           profile_first_name: p.first_name,
           profile_last_name: p.last_name,
           profile_company: p.company,
+          ship_to_same_as_bill: q.ship_to_same_as_bill,
+          incoterm: q.incoterm,
+          ship_to_name: q.ship_to_name,
+          ship_to_city: q.ship_to_city,
+          ship_to_country: q.ship_to_country,
         } as OrderTimeline;
       });
     },
