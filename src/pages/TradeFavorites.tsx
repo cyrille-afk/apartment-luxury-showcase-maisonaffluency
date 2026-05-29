@@ -182,14 +182,19 @@ export default function TradeFavorites() {
 
       // Add each favorited product
       let added = 0;
+      const insertedIds: string[] = [];
       for (const fav of favorites) {
-        const { error } = await supabase.from("trade_quote_items").insert({
+        const { data: ins, error } = await supabase.from("trade_quote_items").insert({
           quote_id: quoteId,
           product_id: fav.productId,
           quantity: 1,
-        });
-        if (!error) added++;
+        }).select("id");
+        if (!error) {
+          added++;
+          (ins || []).forEach((r: any) => insertedIds.push(r.id));
+        }
       }
+      await prefillLineShippingFromCatalog(insertedIds);
 
       toast({ title: `${added} products added to quote`, description: `Quote QU-${quoteId.slice(0, 6).toUpperCase()}` });
     } catch (err: any) {
