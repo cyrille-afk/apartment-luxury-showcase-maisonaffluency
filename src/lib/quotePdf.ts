@@ -1214,7 +1214,8 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFontSize(8.5);
   doc.setTextColor(FG[0], FG[1], FG[2]);
   const terms = [
-    "60% deposit due on order confirmation; 40% balance due before shipment.",
+    "60% deposit due on order confirmation; 40% balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.",
+    "Shipping and FX are estimates at quote date. Around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.",
     "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
     "Lead times start from receipt of cleared deposit and finalised specifications.",
     `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
