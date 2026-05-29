@@ -287,6 +287,15 @@ export const HkLandedCostPanel = ({
                         max: breakdown?.transit_days_max ?? null,
                       },
                       hkd,
+                      origins: shipmentOrigins && fxEurHkd
+                        ? shipmentOrigins.map((o) => ({
+                            country: o.country,
+                            modeLabel: o.modeLabel,
+                            totalCbm: o.totalCbm,
+                            totalKg: o.totalKg,
+                            hkdCents: Math.round(o.eurCents * fxEurHkd * (1 + FX_BUFFER)),
+                          }))
+                        : undefined,
                     });
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"
