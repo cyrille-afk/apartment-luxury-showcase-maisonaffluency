@@ -113,6 +113,8 @@ export interface QuotePdfArgs {
     dutyGbpCents: number;
     vatGbpCents: number;
     totalGbpCents: number;
+    /** Per-origin breakdown so the PDF can show shipping mode (air/sea/etc.) per consolidation. */
+    origins?: { country: string; modeLabel: string; gbpCents: number }[];
   } | null;
   /** Optional HK Landed Cost (HKD DAP Hong Kong) breakdown — rendered after the GBP block when provided. */
   hkdLanded?: {
@@ -127,8 +129,11 @@ export interface QuotePdfArgs {
     goodsEurCents?: number;
     shippingEurCents?: number;
     totalEurCents?: number;
+    /** Per-origin breakdown so the PDF can show shipping mode (air/sea/etc.) per consolidation. */
+    origins?: { country: string; modeLabel: string; hkdCents: number; eurCents: number }[];
   } | null;
 }
+
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
 
@@ -1036,7 +1041,16 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
 
   const rows: { label: string; value: string }[] = [];
   rows.push({ label: "Goods (after discount)", value: fmtG(g.goodsGbpCents) });
-  rows.push({ label: "Shipping FR to GB", value: fmtG(g.shippingGbpCents) });
+  if (g.origins && g.origins.length) {
+    g.origins.forEach((o) => {
+      rows.push({
+        label: `Shipping ${o.country || "?"} \u2192 GB \u00B7 ${o.modeLabel}`,
+        value: fmtG(o.gbpCents),
+      });
+    });
+  } else {
+    rows.push({ label: "Shipping to GB", value: fmtG(g.shippingGbpCents) });
+  }
   if (g.dutyGbpCents > 0) rows.push({ label: "Import duty", value: fmtG(g.dutyGbpCents) });
   if (g.vatGbpCents > 0) rows.push({ label: "UK VAT", value: fmtG(g.vatGbpCents) });
 
@@ -1054,7 +1068,7 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-  doc.text("UK LANDED COST · GBP DDP LONDON", x + 14, cy + 14);
+  doc.text("UK LANDED COST \u00B7 GBP DDP LONDON", x + 14, cy + 14);
   cy += 28;
 
   rows.forEach((r) => {
@@ -1066,6 +1080,7 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
     doc.text(r.value, x + blockW - 14, cy, { align: "right" });
     cy += rowH;
   });
+
 
   doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
   doc.setLineWidth(0.6);
@@ -1102,19 +1117,35 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   const x = M + contentW - blockW;
   let cy = y;
 
-  const rows: { label: string; value: string; eur?: string }[] = [];
-  rows.push({ label: "Goods (after discount)", value: fmtH(h.goodsHkdCents), eur: `≈ ${fmtE(h.goodsEurCents)}` });
-  rows.push({ label: "Shipping FR to HK", value: fmtH(h.shippingHkdCents), eur: `≈ ${fmtE(h.shippingEurCents)}` });
+  // Each row carries its own height: rows with an EUR sub-line use two visual lines so the
+  // EUR equivalent never overlaps the HKD value. Avoid the U+2248 (≈) glyph — jsPDF's default
+  // helvetica encoding mangles it into garbage like `"H`. Use a plain ASCII `~` instead.
+  type Row = { label: string; value: string; eur?: string };
+  const rows: Row[] = [];
+  rows.push({ label: "Goods (after discount)", value: fmtH(h.goodsHkdCents), eur: `~ ${fmtE(h.goodsEurCents)}` });
+  if (h.origins && h.origins.length) {
+    h.origins.forEach((o) => {
+      rows.push({
+        label: `Shipping ${o.country || "?"} \u2192 HK \u00B7 ${o.modeLabel}`,
+        value: fmtH(o.hkdCents),
+        eur: `~ ${fmtE(o.eurCents)}`,
+      });
+    });
+  } else {
+    rows.push({ label: "Shipping to HK", value: fmtH(h.shippingHkdCents), eur: `~ ${fmtE(h.shippingEurCents)}` });
+  }
   if (h.dutyHkdCents > 0) rows.push({ label: "Import duty", value: fmtH(h.dutyHkdCents) });
   if (h.vatHkdCents > 0) rows.push({ label: "Sales tax / VAT", value: fmtH(h.vatHkdCents) });
 
   const rowH = 16;
+  const eurSubH = 10; // extra vertical space for the EUR sub-line beneath HKD value
+  const rowsH = rows.reduce((s, r) => s + rowH + (r.eur ? eurSubH : 0), 0);
   const fxNote = `Indicative. EUR-HKD @ ${h.fxEurHkd?.toFixed(4) ?? "-"} (+2% FX buffer). DAP - Hong Kong is a free port: 0% duty & 0% VAT. Payments & deposits remain in ${args.currency}.`;
   const fxLines = doc.splitTextToSize(fxNote, blockW - 28);
   const fallbackLines = h.fxIsFallback
     ? doc.splitTextToSize("Live FX unavailable - figures use a fallback indicative rate. Treat the HKD total as approximate.", blockW - 28)
     : [];
-  const totalH = 28 + rows.length * rowH + 28 + fxLines.length * 10 + fallbackLines.length * 10 + 14;
+  const totalH = 28 + rowsH + 28 + fxLines.length * 10 + fallbackLines.length * 10 + 14;
 
   doc.setFillColor(250, 249, 246);
   doc.rect(x, cy, blockW, totalH, "F");
@@ -1122,7 +1153,7 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-  doc.text("HK LANDED COST · HKD DAP HONG KONG", x + 14, cy + 14);
+  doc.text("HK LANDED COST \u00B7 HKD DAP HONG KONG", x + 14, cy + 14);
   cy += 28;
 
   rows.forEach((r) => {
@@ -1132,14 +1163,14 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
     doc.text(r.label, x + 14, cy);
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(r.value, x + blockW - 14, cy, { align: "right" });
+    cy += rowH;
     if (r.eur) {
-      const valW = doc.getTextWidth(r.value);
       doc.setFont("helvetica", "italic");
       doc.setFontSize(7.5);
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-      doc.text(r.eur, x + blockW - 14 - valW - 6, cy, { align: "right" });
+      doc.text(r.eur, x + blockW - 14, cy - 4, { align: "right" });
+      cy += eurSubH - 4;
     }
-    cy += rowH;
   });
 
   doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
@@ -1149,14 +1180,15 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-  doc.text("Total HKD · DAP Hong Kong", x + 14, cy);
+  doc.text("Total HKD \u00B7 DAP Hong Kong", x + 14, cy);
   doc.text(fmtH(h.totalHkdCents), x + blockW - 14, cy, { align: "right" });
-  const totalValW = doc.getTextWidth(fmtH(h.totalHkdCents));
+  cy += 11;
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  doc.text(`≈ ${fmtE(h.totalEurCents)}`, x + blockW - 14 - totalValW - 6, cy, { align: "right" });
-  cy += 14;
+  doc.text(`~ ${fmtE(h.totalEurCents)}`, x + blockW - 14, cy, { align: "right" });
+  cy += 6;
+
 
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.5);
