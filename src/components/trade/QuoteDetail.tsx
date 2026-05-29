@@ -2185,6 +2185,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                   )}
                 </div>
+                {subtotalCents > 0 && destIso && perLine.shipments.length > 0 && (
+                  <div className="mt-4">
+                    <PerOriginShippingRecap
+                      result={perLine}
+                      destCountry={destIso}
+                      loading={perLineLoading}
+                    />
+                  </div>
+                )}
+
 
                 {/* UK landed cost (DDP, GBP) — only shown when the linked client's billing country is UK */}
                 {subtotalCents > 0 && isUkDestination && (
