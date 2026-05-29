@@ -80,6 +80,22 @@ export interface QuotePdfArgs {
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
   notes?: string | null;
+  /** Optional ship-to block (only rendered when shipToSameAsBill === false). */
+  shipToSameAsBill?: boolean;
+  incoterm?: string | null;
+  shipTo?: {
+    name?: string | null;
+    attention?: string | null;
+    address1?: string | null;
+    address2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    notes?: string | null;
+  } | null;
   /** Optional UK Landed Cost (GBP DDP London) breakdown — rendered after the main totals block when provided. */
   gbpLanded?: {
     ready: boolean;
