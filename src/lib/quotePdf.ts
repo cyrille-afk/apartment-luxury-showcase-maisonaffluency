@@ -89,6 +89,13 @@ export interface QuotePdfArgs {
    *  (e.g. "Air freight estimate", "Sea LCL estimate"). Falls back to
    *  "Shipping estimate" when mixed or unknown. */
   shippingModeLabel?: string | null;
+  /** When a quote consolidates multiple shipping modes (e.g. air + sea),
+   *  this breaks the shipping estimate down per mode in the totals block. */
+  shippingModeBreakdown?: Array<{
+    modeLabel: string;
+    cents: number;
+    shipmentCount: number;
+  }>;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
@@ -949,6 +956,20 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       value: `+ ${fmtMoney(shippingEstimateCents, args.currency)}`,
       muted: true,
     });
+    // Per-mode breakdown — only when the quote mixes multiple modes.
+    if (
+      !args.shippingModeLabel &&
+      args.shippingModeBreakdown &&
+      args.shippingModeBreakdown.length > 1
+    ) {
+      args.shippingModeBreakdown.forEach((m) => {
+        rows.push({
+          label: `   · ${m.modeLabel}${m.shipmentCount > 1 ? ` (${m.shipmentCount} shipments)` : ""}`,
+          value: fmtMoney(m.cents, args.currency),
+          muted: true,
+        });
+      });
+    }
   }
   const grand = baseForGst + gstCents + shippingEstimateCents;
   const deposit = Math.round(grand * 0.6);
