@@ -306,31 +306,11 @@ export const UkLandedCostPanel = ({
                 </p>
               </div>
 
-              {/* Download PDF */}
+              {/* Annex notice — full UK DDP breakdown is appended to the main Quote PDF. */}
               <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    downloadUkDdpPdf({
-                      quoteRef: quoteRef || "QUOTE",
-                      clientName: clientName ?? null,
-                      quoteCurrency,
-                      cbm,
-                      kg,
-                      mode,
-                      carrier: breakdown?.selected_carrier ?? null,
-                      transitDays: {
-                        min: breakdown?.transit_days_min ?? null,
-                        max: breakdown?.transit_days_max ?? null,
-                      },
-                      gbp,
-                    });
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"
-                >
-                  <FileDown className="w-3.5 h-3.5" />
-                  Download UK DDP estimate (PDF)
-                </button>
+                <p className="font-body text-[10px] text-muted-foreground/80 italic leading-snug">
+                  This UK DDP breakdown is appended automatically as a dedicated page to the main Quote PDF — no separate download needed.
+                </p>
               </div>
             </div>
           )}

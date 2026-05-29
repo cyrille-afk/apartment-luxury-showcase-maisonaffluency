@@ -274,35 +274,9 @@ export const HkLandedCostPanel = ({
               </div>
 
               <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    downloadHkDapPdf({
-                      quoteRef: quoteRef || "QUOTE",
-                      clientName: clientName ?? null,
-                      quoteCurrency, cbm, kg, mode,
-                      carrier: breakdown?.selected_carrier ?? null,
-                      transitDays: {
-                        min: breakdown?.transit_days_min ?? null,
-                        max: breakdown?.transit_days_max ?? null,
-                      },
-                      hkd,
-                      origins: shipmentOrigins && fxEurHkd
-                        ? shipmentOrigins.map((o) => ({
-                            country: o.country,
-                            modeLabel: o.modeLabel,
-                            totalCbm: o.totalCbm,
-                            totalKg: o.totalKg,
-                            hkdCents: Math.round(o.eurCents * fxEurHkd * (1 + FX_BUFFER)),
-                          }))
-                        : undefined,
-                    });
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"
-                >
-                  <FileDown className="w-3.5 h-3.5" />
-                  Download HK DAP estimate (PDF)
-                </button>
+                <p className="font-body text-[10px] text-muted-foreground/80 italic leading-snug">
+                  This Hong Kong DAP breakdown is appended automatically as a dedicated page to the main Quote PDF — no separate download needed.
+                </p>
               </div>
             </div>
           )}
