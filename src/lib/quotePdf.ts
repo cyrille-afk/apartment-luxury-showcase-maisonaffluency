@@ -107,6 +107,17 @@ export interface QuotePdfArgs {
     vatGbpCents: number;
     totalGbpCents: number;
   } | null;
+  /** Optional HK Landed Cost (HKD DAP Hong Kong) breakdown — rendered after the GBP block when provided. */
+  hkdLanded?: {
+    ready: boolean;
+    fxEurHkd: number | null;
+    fxIsFallback: boolean;
+    goodsHkdCents: number;
+    shippingHkdCents: number;
+    dutyHkdCents: number;
+    vatHkdCents: number;
+    totalHkdCents: number;
+  } | null;
 }
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
@@ -196,6 +207,13 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     y = ensureSpace(doc, y, 150, pageH);
     y += 12;
     y = drawGbpLandedBlock(doc, args, M, y, contentW);
+  }
+
+  // ---- HK Landed Cost (HKD DAP Hong Kong) — indicative
+  if (args.hkdLanded && args.hkdLanded.ready && args.hkdLanded.totalHkdCents > 0) {
+    y = ensureSpace(doc, y, 150, pageH);
+    y += 12;
+    y = drawHkdLandedBlock(doc, args, M, y, contentW);
   }
 
   // ---- Insurance & coverage (if enabled)
