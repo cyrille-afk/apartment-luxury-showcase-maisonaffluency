@@ -38,6 +38,10 @@ export interface QuotePdfLine {
   unitPriceCents: number | null;     // already in quote currency
   lineTotalCents: number | null;     // already in quote currency
   imageUrl?: string | null;          // optional product thumbnail
+  shipOriginCountry?: string | null;
+  shipMode?: string | null;
+  shipCbm?: number | null;
+  shipWeightKg?: number | null;
 }
 
 export interface QuotePdfArgs {
@@ -76,6 +80,9 @@ export interface QuotePdfArgs {
   gstEnabled: boolean;
   gstRate: number;                   // percent
   insurancePremiumCents?: number;
+  /** Freight estimate in quote currency; included in Order total and 60/40 split. */
+  shippingEstimateCents?: number;
+  shippingShipmentCount?: number;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
