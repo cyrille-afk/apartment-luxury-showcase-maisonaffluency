@@ -51,7 +51,19 @@ export const toIsoCountry = (raw: string | null | undefined, fallback = "FR"): s
   if (!raw) return fallback;
   const s = raw.trim();
   if (s.length === 2) return s.toUpperCase();
-  return ORIGIN_TO_ISO[s.toLowerCase()] ?? fallback;
+  const lower = s.toLowerCase();
+  // Exact key match first (cheap path).
+  if (ORIGIN_TO_ISO[lower]) return ORIGIN_TO_ISO[lower];
+  // Free-form fallback: scan for any known country name inside the string
+  // (e.g. "Handcrafted in Germany", "Made in Italy", "Hand-made — Portugal").
+  // Match longest keys first so "united kingdom" wins over "uk".
+  const keys = Object.keys(ORIGIN_TO_ISO).sort((a, b) => b.length - a.length);
+  for (const k of keys) {
+    if (k.length < 3) continue; // skip 2-letter ISO codes to avoid false hits
+    const re = new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (re.test(lower)) return ORIGIN_TO_ISO[k];
+  }
+  return fallback;
 };
 
 /** Conservative default packing per product line when nothing is entered. */
