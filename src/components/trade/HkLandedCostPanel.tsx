@@ -69,7 +69,10 @@ export const HkLandedCostPanel = ({
     insuranceHkdCents: insuranceHkd, customsHkdCents: customsHkd, handlingHkdCents: handlingHkd,
     lastMileHkdCents: lastMileHkd, shippingHkdCents: shippingHkd,
     dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: totalHkd, breakdown,
+    shippingEurCents: shippingEur, totalEurCents: totalEur,
   } = hkd;
+  const fmtEur = (cents: number) =>
+    new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format((cents || 0) / 100);
 
   return (
     <div className="border border-border rounded-md bg-background/40 print:bg-white">
