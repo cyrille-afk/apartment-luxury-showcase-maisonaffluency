@@ -672,6 +672,82 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     onStatusChange();
   };
 
+  const [recreating, setRecreating] = useState(false);
+  const handleCancelAndRecreate = async () => {
+    if (!user) return;
+    if (!confirm("Cancel this quote and start a fresh draft with the same lines, client, ship-to and Incoterm?")) return;
+    setRecreating(true);
+    try {
+      // 1) Fetch the full source row (no relations) + items
+      const [srcRes, itemsRes] = await Promise.all([
+        supabase.from("trade_quotes").select("*").eq("id", quoteId).single(),
+        supabase.from("trade_quote_items").select("product_id, quantity, unit_price_cents, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, axonometric_image_url").eq("quote_id", quoteId),
+      ]);
+      if (srcRes.error || !srcRes.data) throw srcRes.error || new Error("Source quote not found");
+      const src: any = srcRes.data;
+
+      // 2) Insert new draft, copying everything that defines the quote
+      const draft: any = {
+        user_id: user.id,
+        studio_id: src.studio_id ?? null,
+        status: "draft",
+        currency: src.currency,
+        client_id: src.client_id ?? null,
+        client_name: src.client_name ?? null,
+        project_id: src.project_id ?? null,
+        notes: src.notes ?? null,
+        insurance_enabled: src.insurance_enabled ?? false,
+        insurance_tier: src.insurance_tier ?? null,
+        insurance_rate_bps: src.insurance_rate_bps ?? null,
+        insurance_notes: src.insurance_notes ?? null,
+        landed_cost_cbm: src.landed_cost_cbm ?? null,
+        landed_cost_kg: src.landed_cost_kg ?? null,
+        landed_cost_mode: src.landed_cost_mode ?? null,
+        ship_to_same_as_bill: src.ship_to_same_as_bill ?? true,
+        incoterm: src.incoterm ?? null,
+        ship_to_name: src.ship_to_name ?? null,
+        ship_to_attention: src.ship_to_attention ?? null,
+        ship_to_address1: src.ship_to_address1 ?? null,
+        ship_to_address2: src.ship_to_address2 ?? null,
+        ship_to_city: src.ship_to_city ?? null,
+        ship_to_state: src.ship_to_state ?? null,
+        ship_to_postal_code: src.ship_to_postal_code ?? null,
+        ship_to_country: src.ship_to_country ?? null,
+        ship_to_phone: src.ship_to_phone ?? null,
+        ship_to_email: src.ship_to_email ?? null,
+        ship_to_notes: src.ship_to_notes ?? null,
+      };
+      const insertRes = await supabase.from("trade_quotes").insert(draft).select("id").single();
+      if (insertRes.error || !insertRes.data) throw insertRes.error || new Error("Could not create new draft");
+      const newId = insertRes.data.id as string;
+
+      // 3) Copy line items
+      const lines = (itemsRes.data || []).map((it: any) => ({ ...it, quote_id: newId }));
+      if (lines.length > 0) {
+        const itemsInsert = await supabase.from("trade_quote_items").insert(lines);
+        if (itemsInsert.error) throw itemsInsert.error;
+      }
+
+      // 4) Mark source cancelled with traceability note
+      const newSrcNotes = appendAdminNote(adminNotes, "Cancelled & recreated", `Replaced by draft QU-${newId.slice(0, 6).toUpperCase()}`);
+      await supabase.from("trade_quotes").update({ status: "cancelled", admin_notes: newSrcNotes } as any).eq("id", quoteId);
+
+      toast({ title: "New draft created", description: `${lines.length} line${lines.length === 1 ? "" : "s"} carried over. Original quote cancelled.` });
+
+      // 5) Navigate to the new draft (parent re-syncs from ?quote=)
+      const sp = new URLSearchParams();
+      sp.set("quote", newId);
+      if (src.project_id) sp.set("project", src.project_id);
+      navigate(`/trade/quotes?${sp.toString()}`, { replace: true });
+      onStatusChange();
+    } catch (err: any) {
+      toast({ title: "Could not recreate", description: err?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setRecreating(false);
+    }
+  };
+
+
 
   const handleSaveNotes = async () => {
     await supabase.from("trade_quotes").update({ notes: notes || null }).eq("id", quoteId);
