@@ -841,6 +841,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       : 0;
     const uniqueModes = Array.from(new Set(perLine.shipments.map((s) => s.mode)));
     const shippingModeLabel = uniqueModes.length === 1 ? labelForMode(uniqueModes[0]) : null;
+    const shippingModeBreakdown = uniqueModes.length > 1 && fxQuoteEur
+      ? uniqueModes.map((mode) => {
+          const group = perLine.shipments.filter((s) => s.mode === mode);
+          const eurCents = group.reduce((sum, s) => sum + s.shippingEurCents, 0);
+          return {
+            modeLabel: labelForMode(mode),
+            cents: Math.round(eurCents / fxQuoteEur),
+            shipmentCount: group.length,
+          };
+        })
+      : undefined;
 
     // Pull structured billing + primary contact from the linked client (if any)
     let clientCompanyName: string | null = null;
