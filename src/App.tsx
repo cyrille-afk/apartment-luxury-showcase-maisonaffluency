@@ -487,11 +487,7 @@ const App = () => {
                   </TooltipProvider>
                 </Suspense>
               )}
-              {import.meta.env.DEV && showDeferredUi && (
-                <Suspense fallback={null}>
-                  <DevDuplicateBannerHost />
-                </Suspense>
-              )}
+              {/* DevDuplicateBannerHost moved to /trade/admin/duplicates page */}
               {showDeferredUi && (
                 <Suspense fallback={null}>
                   <MobilePreviewShareButton />
