@@ -174,7 +174,9 @@ export function buildHkDapPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   const notes = [
-    `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
+    hasOrigins
+      ? `Indicative estimate. Freight is summed from per-line packing across ${origins!.length} shipment${origins!.length > 1 ? "s" : ""} (${origins!.reduce((s, o) => s + o.totalCbm, 0).toFixed(2)} CBM · ${Math.round(origins!.reduce((s, o) => s + o.totalKg, 0))} kg) - actual crating may vary on confirmation. Modes (sea LCL / air freight) are taken from each line's chosen mode.`
+      : `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
     `Hong Kong is a free port: no import duty and no sales tax / VAT. DAP terms cover origin handling, international freight, HK customs clearance and inland delivery to the consignee address. Receiver is responsible for any local building access or installation fees.`,
     `FX: ${quoteCurrency} to HKD via EUR pivot @ ${hkd.fxEurHkd?.toFixed(4)} (EUR to HKD) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final HKD invoice issued on order confirmation.`,
     ...(hkd.fxIsFallback
