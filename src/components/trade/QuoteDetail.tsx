@@ -2117,11 +2117,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     />
                   </div>
                 )}
-                {subtotalCents > 0 && !clientCountry && (
+                {subtotalCents > 0 && isHkDestination && (
+                  <div className="mt-4">
+                    <HkLandedCostPanel
+                      goodsAfterDiscountCents={
+                        tradeDiscount
+                          ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
+                          : subtotalCents
+                      }
+                      quoteCurrency={currency}
+                      defaultExpanded={false}
+                      quoteRef={quoteNumber}
+                      clientName={clientName || null}
+                    />
+                  </div>
+                )}
+                {subtotalCents > 0 && !clientCountry && !isHkDestination && !isUkDestination && (
                   <div className="mt-4 rounded-md border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                     <p className="font-medium text-foreground">Select a delivery country</p>
                     <p className="mt-1">
-                      Add a billing country to the linked client to calculate landed costs (e.g. UK DDP in GBP).
+                      Add a billing country to the linked client (or fill in a ship-to country) to calculate landed costs (UK DDP in GBP, HK DAP in HKD, …).
                       Until then, destination-specific duties and taxes can't be estimated.
                     </p>
                   </div>
