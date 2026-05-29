@@ -38,6 +38,10 @@ export interface QuotePdfLine {
   unitPriceCents: number | null;     // already in quote currency
   lineTotalCents: number | null;     // already in quote currency
   imageUrl?: string | null;          // optional product thumbnail
+  shipOriginCountry?: string | null;
+  shipMode?: string | null;
+  shipCbm?: number | null;
+  shipWeightKg?: number | null;
 }
 
 export interface QuotePdfArgs {
@@ -76,6 +80,9 @@ export interface QuotePdfArgs {
   gstEnabled: boolean;
   gstRate: number;                   // percent
   insurancePremiumCents?: number;
+  /** Freight estimate in quote currency; included in Order total and 60/40 split. */
+  shippingEstimateCents?: number;
+  shippingShipmentCount?: number;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
@@ -769,6 +776,9 @@ function drawTable(
       showMaterials ? line.materials : null,
       editionLabel,
       line.leadTime,
+      line.shipOriginCountry || line.shipMode || line.shipCbm || line.shipWeightKg
+        ? `Shipping: ${line.shipOriginCountry || "origin TBC"}${line.shipMode ? ` · ${line.shipMode.replace("_", " ").toUpperCase()}` : ""}${line.shipCbm ? ` · ${line.shipCbm} CBM/unit` : ""}${line.shipWeightKg ? ` · ${line.shipWeightKg} kg/unit` : ""}`
+        : null,
       line.notes,
     ].filter(Boolean) as string[];
     const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
@@ -897,12 +907,24 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const grand = baseForGst + gstCents;
+  const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
+  if (shippingEstimateCents > 0) {
+    rows.push({
+      label: `Shipping estimate${args.shippingShipmentCount && args.shippingShipmentCount > 1 ? ` (${args.shippingShipmentCount} shipments)` : ""}`,
+      value: `+ ${fmtMoney(shippingEstimateCents, args.currency)}`,
+      muted: true,
+    });
+  }
+  const grand = baseForGst + gstCents + shippingEstimateCents;
   const deposit = Math.round(grand * 0.6);
   const balance = grand - deposit;
 
   const rowH = 18;
-  const totalH = rows.length * rowH + 80;
+  const disclaimer = shippingEstimateCents > 0
+    ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
+    : "";
+  const disclaimerLines = disclaimer ? doc.splitTextToSize(disclaimer, blockW - 28) : [];
+  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0);
   doc.rect(x, cy, blockW, totalH, "F");
 
   cy += 16;
@@ -937,6 +959,14 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   cy += 14;
   doc.text("40% balance before shipment", x + 14, cy);
   doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
+  cy += 16;
+
+  if (disclaimerLines.length) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.2);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    disclaimerLines.forEach((ln: string) => { doc.text(ln, x + 14, cy); cy += 9; });
+  }
 
   return y + totalH + 12;
 }
@@ -1184,7 +1214,8 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFontSize(8.5);
   doc.setTextColor(FG[0], FG[1], FG[2]);
   const terms = [
-    "60% deposit due on order confirmation; 40% balance due before shipment.",
+    "60% deposit due on order confirmation; 40% balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.",
+    "Shipping and FX are estimates at quote date. Around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.",
     "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
     "Lead times start from receipt of cleared deposit and finalised specifications.",
     `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
