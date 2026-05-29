@@ -4375,6 +4375,10 @@ export type Database = {
           quantity: number
           quote_id: string
           room: string | null
+          ship_cbm: number | null
+          ship_mode: string | null
+          ship_origin_country: string | null
+          ship_weight_kg: number | null
           unit_price_cents: number | null
           variant_label: string | null
         }
@@ -4391,6 +4395,10 @@ export type Database = {
           quantity?: number
           quote_id: string
           room?: string | null
+          ship_cbm?: number | null
+          ship_mode?: string | null
+          ship_origin_country?: string | null
+          ship_weight_kg?: number | null
           unit_price_cents?: number | null
           variant_label?: string | null
         }
@@ -4407,6 +4415,10 @@ export type Database = {
           quantity?: number
           quote_id?: string
           room?: string | null
+          ship_cbm?: number | null
+          ship_mode?: string | null
+          ship_origin_country?: string | null
+          ship_weight_kg?: number | null
           unit_price_cents?: number | null
           variant_label?: string | null
         }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,7 +18,10 @@ import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
-import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp } from "@/hooks/useGbpLandedCost";
+import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx } from "@/hooks/useGbpLandedCost";
+import { usePerLineShipping } from "@/hooks/usePerLineShipping";
+import { toIsoCountry } from "@/lib/perLineShipping";
+import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
@@ -37,6 +40,11 @@ interface QuoteItemWithProduct {
   deposit_pct_override: number | null;
   variant_label: string | null;
   room: string | null;
+  // Per-line shipping (multi-origin support)
+  ship_origin_country: string | null;
+  ship_mode: string | null;
+  ship_cbm: number | null;
+  ship_weight_kg: number | null;
   trade_products: {
     product_name: string;
     brand_name: string;
@@ -50,6 +58,7 @@ interface QuoteItemWithProduct {
     materials: string | null;
     lead_time: string | null;
     sku: string | null;
+    origin: string | null;
   } | null;
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
@@ -354,7 +363,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
@@ -995,6 +1004,47 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
     : 0;
 
+  /**
+   * Per-line shipping: groups quote lines by (origin, mode), runs the
+   * estimator per group, returns aggregated EUR totals. Feeds the
+   * landed-cost panels as `overrideShipping` so multi-origin quotes
+   * (e.g. one item from FR, another from DE) get a correct freight figure.
+   */
+  const destIso = toIsoCountry(effectiveDestCountry || "", "");
+  const [fxQuoteEur, setFxQuoteEur] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetchFx(currency, "EUR").then((r) => { if (!cancelled) setFxQuoteEur(r.rate); });
+    return () => { cancelled = true; };
+  }, [currency]);
+  const perLineRawLines = useMemo(() => items.map((it) => {
+    const product = it.trade_products;
+    const lineCents = (it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0) * it.quantity;
+    return {
+      id: it.id,
+      qty: it.quantity,
+      lineCents,
+      productOrigin: product?.origin ?? null,
+      shipOriginCountry: it.ship_origin_country,
+      shipMode: it.ship_mode,
+      shipCbm: it.ship_cbm != null ? Number(it.ship_cbm) : null,
+      shipWeightKg: it.ship_weight_kg != null ? Number(it.ship_weight_kg) : null,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [items]);
+  const { result: perLine, loading: perLineLoading } = usePerLineShipping(
+    perLineRawLines,
+    destIso || null,
+    fxQuoteEur,
+    !!destIso && !!fxQuoteEur && items.length > 0,
+  );
+  const overrideShipping = perLine.shipments.length > 0 ? {
+    shippingEurCents: perLine.totalShippingEurCents,
+    dutyEurCents: perLine.totalDutyEurCents,
+    vatEurCents: perLine.totalVatEurCents,
+    shipmentCount: perLine.shipments.length,
+  } : null;
+
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
@@ -1002,6 +1052,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     cbm: landedCostSettings.cbm,
     kg: landedCostSettings.kg,
     mode: landedCostSettings.mode,
+    overrideShipping: isUkDestination ? overrideShipping : null,
   });
 
   const handleLandedCostSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: "road" | "courier" }) => {
@@ -1022,6 +1073,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     cbm: hkLandedSettings.cbm,
     kg: hkLandedSettings.kg,
     mode: hkLandedSettings.mode,
+    overrideShipping: isHkDestination ? overrideShipping : null,
   });
 
   const handleHkLandedSettingsChange = useCallback((settings: { cbm: number; kg: number; mode: HkMode }) => {
@@ -1030,10 +1082,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ));
   }, []);
 
+
   /** Optimistic patch: update one quote-line column and persist. */
   const updateItemField = async (
     itemId: string,
-    patch: Partial<Pick<QuoteItemWithProduct, "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room">>
+    patch: Partial<Pick<QuoteItemWithProduct,
+      "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room"
+      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg"
+    >>
   ) => {
     if (isReadOnly) return;
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
@@ -2129,6 +2185,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                   )}
                 </div>
+                {subtotalCents > 0 && destIso && perLine.shipments.length > 0 && (
+                  <div className="mt-4">
+                    <PerOriginShippingRecap
+                      result={perLine}
+                      destCountry={destIso}
+                      loading={perLineLoading}
+                    />
+                  </div>
+                )}
+
 
                 {/* UK landed cost (DDP, GBP) — only shown when the linked client's billing country is UK */}
                 {subtotalCents > 0 && isUkDestination && (

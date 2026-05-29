@@ -21,6 +21,16 @@ export interface HkdLandedCostInput {
   kg?: number;
   mode?: HkMode;
   category?: "furniture" | "lighting" | "art" | "textile" | "accessory" | "other";
+  /**
+   * Optional per-line shipping override (already aggregated, in EUR cents).
+   * When provided, replaces the panel's single-shipment estimator call.
+   */
+  overrideShipping?: {
+    shippingEurCents: number;
+    dutyEurCents: number;
+    vatEurCents: number;
+    shipmentCount?: number;
+  } | null;
 }
 
 export interface HkdLandedCostResult {
@@ -60,6 +70,7 @@ export const useHkdLandedCost = ({
   kg,
   mode = "sea_lcl",
   category = "furniture",
+  overrideShipping = null,
 }: HkdLandedCostInput): HkdLandedCostResult => {
   const [fxEurHkd, setFxEurHkd] = useState<number | null>(null);
   const [fxQuoteEur, setFxQuoteEur] = useState<number | null>(null);
@@ -88,11 +99,12 @@ export const useHkdLandedCost = ({
   }, [goodsAfterDiscountCents, fxQuoteEur]);
 
   const chargeableKg = kg ?? Math.round(cbm * HKD_LANDED_KG_PER_CBM[mode]);
+  const useOverride = !!overrideShipping;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (goodsEurCents <= 0) { setBreakdown(null); return; }
+      if (useOverride || goodsEurCents <= 0) { setBreakdown(null); return; }
       setLoading(true);
       try {
         const b = await estimateShipping({
@@ -111,7 +123,7 @@ export const useHkdLandedCost = ({
       }
     })();
     return () => { cancelled = true; };
-  }, [cbm, chargeableKg, mode, category, goodsEurCents]);
+  }, [cbm, chargeableKg, mode, category, goodsEurCents, useOverride]);
 
   const eurToHkd = (eurCents: number): number => {
     if (!fxEurHkd) return 0;
@@ -119,31 +131,33 @@ export const useHkdLandedCost = ({
   };
 
   const goodsHkdCents = eurToHkd(goodsEurCents);
-  const freightHkdCents = eurToHkd(breakdown?.freight_cents ?? 0);
-  const fuelHkdCents = eurToHkd(breakdown?.fuel_cents ?? 0);
-  const insuranceHkdCents = eurToHkd(breakdown?.insurance_cents ?? 0);
-  const customsHkdCents = eurToHkd(breakdown?.customs_cents ?? 0);
-  const handlingHkdCents = eurToHkd(breakdown?.handling_cents ?? 0);
-  const lastMileHkdCents = eurToHkd(breakdown?.last_mile_cents ?? 0);
-  const shippingHkdCents =
-    freightHkdCents + fuelHkdCents + insuranceHkdCents +
-    customsHkdCents + handlingHkdCents + lastMileHkdCents;
-  const dutyHkdCents = eurToHkd(breakdown?.duty_cents ?? 0);
-  const vatHkdCents = eurToHkd(breakdown?.vat_cents ?? 0);
+
+  const shippingEurOverride = overrideShipping?.shippingEurCents ?? 0;
+  const dutyEurOverride = overrideShipping?.dutyEurCents ?? 0;
+  const vatEurOverride = overrideShipping?.vatEurCents ?? 0;
+
+  const freightHkdCents = useOverride ? 0 : eurToHkd(breakdown?.freight_cents ?? 0);
+  const fuelHkdCents = useOverride ? 0 : eurToHkd(breakdown?.fuel_cents ?? 0);
+  const insuranceHkdCents = useOverride ? 0 : eurToHkd(breakdown?.insurance_cents ?? 0);
+  const customsHkdCents = useOverride ? 0 : eurToHkd(breakdown?.customs_cents ?? 0);
+  const handlingHkdCents = useOverride ? 0 : eurToHkd(breakdown?.handling_cents ?? 0);
+  const lastMileHkdCents = useOverride ? 0 : eurToHkd(breakdown?.last_mile_cents ?? 0);
+  const shippingHkdCents = useOverride
+    ? eurToHkd(shippingEurOverride)
+    : freightHkdCents + fuelHkdCents + insuranceHkdCents
+      + customsHkdCents + handlingHkdCents + lastMileHkdCents;
+  const dutyHkdCents = useOverride ? eurToHkd(dutyEurOverride) : eurToHkd(breakdown?.duty_cents ?? 0);
+  const vatHkdCents = useOverride ? eurToHkd(vatEurOverride) : eurToHkd(breakdown?.vat_cents ?? 0);
   const totalHkdCents = goodsHkdCents + shippingHkdCents + dutyHkdCents + vatHkdCents;
 
-  const shippingEurCents =
-    (breakdown?.freight_cents ?? 0) +
-    (breakdown?.fuel_cents ?? 0) +
-    (breakdown?.insurance_cents ?? 0) +
-    (breakdown?.customs_cents ?? 0) +
-    (breakdown?.handling_cents ?? 0) +
-    (breakdown?.last_mile_cents ?? 0);
-  const totalEurCents =
-    goodsEurCents +
-    shippingEurCents +
-    (breakdown?.duty_cents ?? 0) +
-    (breakdown?.vat_cents ?? 0);
+  const shippingEurCents = useOverride
+    ? shippingEurOverride
+    : (breakdown?.freight_cents ?? 0) + (breakdown?.fuel_cents ?? 0)
+      + (breakdown?.insurance_cents ?? 0) + (breakdown?.customs_cents ?? 0)
+      + (breakdown?.handling_cents ?? 0) + (breakdown?.last_mile_cents ?? 0);
+  const totalEurCents = goodsEurCents + shippingEurCents
+    + (useOverride ? dutyEurOverride : (breakdown?.duty_cents ?? 0))
+    + (useOverride ? vatEurOverride : (breakdown?.vat_cents ?? 0));
 
   return {
     ready: fxEurHkd != null && fxQuoteEur != null,
