@@ -519,14 +519,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (supabase.from("clients" as any).select("billing_country").eq("id", clientId).maybeSingle() as any)
       .then(({ data }: any) => setClientCountry((data?.billing_country as string) || null));
   }, [clientId]);
+  const effectiveDestCountry = (() => {
+    // Ship-to country wins when a separate ship-to is set.
+    const v = ((!shipToSameAsBill && shipTo.country ? shipTo.country : clientCountry) || "").trim().toLowerCase();
+    return v;
+  })();
   const isUkDestination = (() => {
-    // Effective destination = ship-to country when a separate ship-to is set,
-    // otherwise fall back to the client's billing country. Avoids showing a
-    // GBP DDP London estimate when the goods are actually shipping elsewhere
-    // (e.g. DAP Hong Kong against a UK-billed client).
-    const effective = (!shipToSameAsBill && shipTo.country ? shipTo.country : clientCountry) || "";
-    const c = effective.trim().toLowerCase();
+    const c = effectiveDestCountry;
     return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
+  })();
+  const isHkDestination = (() => {
+    const c = effectiveDestCountry;
+    return c === "hk" || c === "hong kong" || c === "hong kong sar" || c === "hong kong sar china" || c === "hksar";
   })();
 
   useEffect(() => {
