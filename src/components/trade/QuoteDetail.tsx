@@ -2215,6 +2215,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialKg={landedCostSettings.kg}
                       initialMode={landedCostSettings.mode}
                       onSettingsChange={handleLandedCostSettingsChange}
+                      overrideShipping={overrideShipping}
                     />
                   </div>
                 )}
@@ -2234,6 +2235,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialKg={hkLandedSettings.kg}
                       initialMode={hkLandedSettings.mode}
                       onSettingsChange={handleHkLandedSettingsChange}
+                      overrideShipping={overrideShipping}
                     />
                   </div>
                 )}
