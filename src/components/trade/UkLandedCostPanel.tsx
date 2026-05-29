@@ -34,6 +34,20 @@ interface Props {
   initialKg?: number | null;
   initialMode?: "road" | "courier" | null;
   onSettingsChange?: (settings: { cbm: number; kg: number; mode: "road" | "courier" }) => void;
+  /**
+   * When provided, the panel uses the pre-aggregated per-line shipping totals
+   * (one shipment per origin) instead of running its own single-shipment
+   * estimator. CBM / kg / mode controls are hidden because the figures come
+   * from the per-line packing recap above.
+   */
+  overrideShipping?: {
+    shippingEurCents: number;
+    dutyEurCents: number;
+    vatEurCents: number;
+    shipmentCount?: number;
+    totalCbm?: number;
+    totalKg?: number;
+  } | null;
 }
 
 export const UkLandedCostPanel = ({
@@ -48,7 +62,9 @@ export const UkLandedCostPanel = ({
   initialKg,
   initialMode,
   onSettingsChange,
+  overrideShipping = null,
 }: Props) => {
+  const useOverride = !!overrideShipping;
   const resolvedInitialMode = initialMode ?? "road";
   const resolvedInitialCbm = initialCbm ?? DEFAULT_GBP_LANDED_CBM;
   const resolvedInitialKg = initialKg ?? Math.round(resolvedInitialCbm * GBP_LANDED_KG_PER_CBM[resolvedInitialMode]);
@@ -77,6 +93,7 @@ export const UkLandedCostPanel = ({
     kg,
     mode,
     category,
+    overrideShipping,
   });
 
   const {
@@ -122,57 +139,68 @@ export const UkLandedCostPanel = ({
 
       {expanded && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border/60">
-          {/* Inputs */}
-          <div className="grid grid-cols-3 gap-2">
-            <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">CBM</span>
-              <input
-                type="number" min={0.1} step={0.1} value={cbm}
-                onChange={(e) => {
-                  const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
-                  const nextKg = Math.round(nextCbm * GBP_LANDED_KG_PER_CBM[mode]);
-                  kgEditedRef.current = false;
-                  setCbm(nextCbm);
-                  setKg(nextKg);
-                  onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
-                }}
-                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
-              />
-            </label>
-            <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                Weight (kg){!kgEditedRef.current && <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">· auto</span>}
-              </span>
-              <input
-                type="number" min={0} step={10} value={kg}
-                onChange={(e) => {
-                  const nextKg = Math.max(0, parseFloat(e.target.value) || 0);
-                  kgEditedRef.current = true;
-                  setKg(nextKg);
-                  onSettingsChange?.({ cbm, kg: nextKg, mode });
-                }}
-                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
-              />
-            </label>
-            <label className="block">
-              <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Mode</span>
-              <select
-                value={mode}
-                onChange={(e) => {
-                  const nextMode = e.target.value as "road" | "courier";
-                  const nextKg = Math.round(cbm * GBP_LANDED_KG_PER_CBM[nextMode]);
-                  kgEditedRef.current = false;
-                  setMode(nextMode);
-                  setKg(nextKg);
-                  onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
-                }}
-                className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
-              >
-                <option value="road">Road · white-glove</option>
-                <option value="courier">Courier · express</option>
-              </select>
-            </label>
-          </div>
+          {/* Inputs — hidden when freight is sourced from per-line packing recap */}
+          {!useOverride && (
+            <div className="grid grid-cols-3 gap-2">
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">CBM</span>
+                <input
+                  type="number" min={0.1} step={0.1} value={cbm}
+                  onChange={(e) => {
+                    const nextCbm = Math.max(0.1, parseFloat(e.target.value) || 0.1);
+                    const nextKg = Math.round(nextCbm * GBP_LANDED_KG_PER_CBM[mode]);
+                    kgEditedRef.current = false;
+                    setCbm(nextCbm);
+                    setKg(nextKg);
+                    onSettingsChange?.({ cbm: nextCbm, kg: nextKg, mode });
+                  }}
+                  className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+                />
+              </label>
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Weight (kg){!kgEditedRef.current && <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">· auto</span>}
+                </span>
+                <input
+                  type="number" min={0} step={10} value={kg}
+                  onChange={(e) => {
+                    const nextKg = Math.max(0, parseFloat(e.target.value) || 0);
+                    kgEditedRef.current = true;
+                    setKg(nextKg);
+                    onSettingsChange?.({ cbm, kg: nextKg, mode });
+                  }}
+                  className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+                />
+              </label>
+              <label className="block">
+                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Mode</span>
+                <select
+                  value={mode}
+                  onChange={(e) => {
+                    const nextMode = e.target.value as "road" | "courier";
+                    const nextKg = Math.round(cbm * GBP_LANDED_KG_PER_CBM[nextMode]);
+                    kgEditedRef.current = false;
+                    setMode(nextMode);
+                    setKg(nextKg);
+                    onSettingsChange?.({ cbm, kg: nextKg, mode: nextMode });
+                  }}
+                  className="mt-0.5 w-full bg-background border border-border rounded px-2 py-1 font-body text-xs"
+                >
+                  <option value="road">Road · white-glove</option>
+                  <option value="courier">Courier · express</option>
+                </select>
+              </label>
+            </div>
+          )}
+          {useOverride && (
+            <p className="font-body text-[10px] text-muted-foreground leading-relaxed">
+              Freight is summed from the per-line packing
+              {overrideShipping?.shipmentCount ? ` (${overrideShipping.shipmentCount} shipment${overrideShipping.shipmentCount > 1 ? "s" : ""})` : ""}
+              {overrideShipping?.totalCbm ? ` — ${overrideShipping.totalCbm.toFixed(2)} m³` : ""}
+              {overrideShipping?.totalKg ? ` · ${Math.round(overrideShipping.totalKg)} kg` : ""}.
+              Edit a line's origin / CBM / kg in the items table to refine.
+            </p>
+          )}
 
           {/* Breakdown */}
           {!ratesReady ? (
@@ -183,7 +211,7 @@ export const UkLandedCostPanel = ({
             <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
               <DotCircleLoader size="sm" /> Calculating…
             </div>
-          ) : !breakdown?.available ? (
+          ) : (!useOverride && !breakdown?.available) ? (
             <p className="font-body text-xs text-amber-700">
               {breakdown?.reason || "No shipping rate available."}
             </p>
@@ -198,18 +226,25 @@ export const UkLandedCostPanel = ({
               <div className="space-y-1 border-t border-border/40 pt-2">
                 <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
                   <span>
-                    Freight — {breakdown.selected_carrier} · {mode === "road" ? "Road white-glove" : "Courier express"}
-                    {breakdown.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}
+                    {useOverride
+                      ? `Freight — per-line aggregate${overrideShipping?.shipmentCount && overrideShipping.shipmentCount > 1 ? ` · ${overrideShipping.shipmentCount} shipments` : ""}`
+                      : `Freight — ${breakdown?.selected_carrier} · ${mode === "road" ? "Road white-glove" : "Courier express"}${breakdown?.transit_days_min ? ` (${breakdown.transit_days_min}–${breakdown.transit_days_max} days)` : ""}`}
                   </span>
                   <span className="tabular-nums">{fmtGbp(shippingGbp)}</span>
                 </div>
-                {freightGbp > 0 && <Row label="· Base freight (Paris → London)" value={fmtGbp(freightGbp)} indent />}
-                {fuelGbp > 0 && <Row label="· Fuel surcharge" value={fmtGbp(fuelGbp)} indent />}
-                {insuranceGbp > 0 && <Row label="· Cargo insurance" value={fmtGbp(insuranceGbp)} indent />}
-                {customsGbp > 0 && <Row label="· Customs clearance" value={fmtGbp(customsGbp)} indent />}
-                {handlingGbp > 0 && <Row label="· Handling & documentation" value={fmtGbp(handlingGbp)} indent />}
-                {lastMileGbp > 0 && <Row label="· Last-mile delivery (London)" value={fmtGbp(lastMileGbp)} indent />}
+                {!useOverride && freightGbp > 0 && <Row label="· Base freight (Paris → London)" value={fmtGbp(freightGbp)} indent />}
+                {!useOverride && fuelGbp > 0 && <Row label="· Fuel surcharge" value={fmtGbp(fuelGbp)} indent />}
+                {!useOverride && insuranceGbp > 0 && <Row label="· Cargo insurance" value={fmtGbp(insuranceGbp)} indent />}
+                {!useOverride && customsGbp > 0 && <Row label="· Customs clearance" value={fmtGbp(customsGbp)} indent />}
+                {!useOverride && handlingGbp > 0 && <Row label="· Handling & documentation" value={fmtGbp(handlingGbp)} indent />}
+                {!useOverride && lastMileGbp > 0 && <Row label="· Last-mile delivery (London)" value={fmtGbp(lastMileGbp)} indent />}
+                {useOverride && (
+                  <p className="pl-2 font-body text-[10px] text-muted-foreground/80 leading-snug">
+                    Detailed cost components are shown per origin in the Shipments-by-origin recap above.
+                  </p>
+                )}
               </div>
+
 
               {/* Duty + VAT */}
               <div className="space-y-1 border-t border-border/40 pt-2">
@@ -217,15 +252,20 @@ export const UkLandedCostPanel = ({
                   <span>UK Import Taxes (DDP)</span>
                 </div>
                 <Row
-                  label={`· Import duty (${breakdown.duty_cents > 0 ? ((breakdown.duty_cents / Math.max(1, goodsEurCents)) * 100).toFixed(1) : "0"}% — furniture/lighting)`}
+                  label={useOverride
+                    ? `· Import duty (per-line aggregate)`
+                    : `· Import duty (${breakdown!.duty_cents > 0 ? ((breakdown!.duty_cents / Math.max(1, goodsEurCents)) * 100).toFixed(1) : "0"}% — furniture/lighting)`}
                   value={fmtGbp(dutyGbp)}
                   indent
                 />
                 <Row
-                  label={`· UK VAT (${(((breakdown.vat_cents) / Math.max(1, goodsEurCents + breakdown.freight_cents + breakdown.duty_cents)) * 100).toFixed(0)}% on goods + freight + duty)`}
+                  label={useOverride
+                    ? `· UK VAT (per-line aggregate)`
+                    : `· UK VAT (${(((breakdown!.vat_cents) / Math.max(1, goodsEurCents + breakdown!.freight_cents + breakdown!.duty_cents)) * 100).toFixed(0)}% on goods + freight + duty)`}
                   value={fmtGbp(vatGbp)}
                   indent
                 />
+
               </div>
 
               {/* Total */}
@@ -248,7 +288,9 @@ export const UkLandedCostPanel = ({
               <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
                 <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
                   <span className="font-medium text-foreground/80">Indicative estimate.</span>{" "}
-                  Freight is calculated on declared volume ({cbm} CBM) and weight ({kg} kg) — actual crating
+                  {useOverride
+                    ? `Freight is summed from per-line packing across ${overrideShipping?.shipmentCount ?? 1} shipment${(overrideShipping?.shipmentCount ?? 1) > 1 ? "s" : ""}${overrideShipping?.totalCbm ? ` (${overrideShipping.totalCbm.toFixed(2)} CBM` : ""}${overrideShipping?.totalKg ? ` · ${Math.round(overrideShipping.totalKg)} kg)` : (overrideShipping?.totalCbm ? ")" : "")} — actual crating`
+                    : `Freight is calculated on declared volume (${cbm} CBM) and weight (${kg} kg) — actual crating`}
                   may vary on confirmation. Prices include UK customs clearance, import duty and VAT under
                   Delivered Duty Paid (DDP) — no further charges on delivery to London.
                 </p>

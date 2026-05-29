@@ -30,6 +30,8 @@ export interface HkdLandedCostInput {
     dutyEurCents: number;
     vatEurCents: number;
     shipmentCount?: number;
+    totalCbm?: number;
+    totalKg?: number;
   } | null;
 }
 

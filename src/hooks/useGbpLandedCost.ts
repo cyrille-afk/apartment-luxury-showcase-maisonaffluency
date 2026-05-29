@@ -29,6 +29,8 @@ export interface GbpLandedCostInput {
     dutyEurCents: number;
     vatEurCents: number;
     shipmentCount?: number;
+    totalCbm?: number;
+    totalKg?: number;
   } | null;
 }
 

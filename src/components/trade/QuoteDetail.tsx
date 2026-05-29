@@ -1043,6 +1043,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     dutyEurCents: perLine.totalDutyEurCents,
     vatEurCents: perLine.totalVatEurCents,
     shipmentCount: perLine.shipments.length,
+    totalCbm: perLine.shipments.reduce((s, x) => s + x.totalCbm, 0),
+    totalKg: perLine.shipments.reduce((s, x) => s + x.totalKg, 0),
   } : null;
 
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
@@ -2213,6 +2215,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialKg={landedCostSettings.kg}
                       initialMode={landedCostSettings.mode}
                       onSettingsChange={handleLandedCostSettingsChange}
+                      overrideShipping={overrideShipping}
                     />
                   </div>
                 )}
@@ -2232,6 +2235,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialKg={hkLandedSettings.kg}
                       initialMode={hkLandedSettings.mode}
                       onSettingsChange={handleHkLandedSettingsChange}
+                      overrideShipping={overrideShipping}
                     />
                   </div>
                 )}
