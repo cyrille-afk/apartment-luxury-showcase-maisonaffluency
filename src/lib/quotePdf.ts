@@ -85,6 +85,10 @@ export interface QuotePdfArgs {
   /** Freight estimate in quote currency; included in Order total and 60/40 split. */
   shippingEstimateCents?: number;
   shippingShipmentCount?: number;
+  /** When all shipments share a single mode, the totals row reflects it
+   *  (e.g. "Air freight estimate", "Sea LCL estimate"). Falls back to
+   *  "Shipping estimate" when mixed or unknown. */
+  shippingModeLabel?: string | null;
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
