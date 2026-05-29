@@ -9,6 +9,14 @@ import jsPDF from "jspdf";
 import { HkdLandedCostResult, HkMode } from "@/hooks/useHkdLandedCost";
 import { FX_BUFFER } from "@/hooks/useGbpLandedCost";
 
+interface PdfOriginShipment {
+  country: string;        // ISO-2
+  modeLabel: string;      // "Air freight", "Sea LCL", ...
+  totalCbm: number;
+  totalKg: number;
+  hkdCents: number;       // freight+duty+VAT in HKD for line amount
+}
+
 interface BuildPdfArgs {
   quoteRef: string;
   clientName?: string | null;
@@ -19,6 +27,9 @@ interface BuildPdfArgs {
   carrier?: string | null;
   transitDays?: { min: number | null; max: number | null };
   hkd: HkdLandedCostResult;
+  /** When provided, the PDF lists each origin shipment with its mode
+   *  instead of showing the single panel-level "Mode" cell. */
+  origins?: PdfOriginShipment[];
 }
 
 const JADE = [12, 49, 47] as const;
@@ -34,7 +45,7 @@ const fmtHkd = (cents: number) =>
   }).format((cents || 0) / 100);
 
 export function buildHkDapPdf({
-  quoteRef, clientName, quoteCurrency, cbm, kg, mode, carrier, transitDays, hkd,
+  quoteRef, clientName, quoteCurrency, cbm, kg, mode, carrier, transitDays, hkd, origins,
 }: BuildPdfArgs): jsPDF {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
@@ -51,7 +62,12 @@ export function buildHkDapPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text("Hong Kong Landed-Cost Estimate - Delivered At Place", M, 60);
-  doc.text("Paris to Hong Kong", M, 74);
+  doc.text(
+    origins && origins.length > 0
+      ? `${origins.length} shipment${origins.length > 1 ? "s" : ""} to Hong Kong`
+      : "Paris to Hong Kong",
+    M, 74
+  );
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
@@ -70,19 +86,45 @@ export function buildHkDapPdf({
   // Shipment summary
   sectionTitle(doc, "Shipment summary", M, y);
   y += 22;
-  twoCol(doc, M, y, "Origin", "Paris, France (FR)");
-  twoCol(doc, M + (pageW - 2 * M) / 2, y, "Destination", "Hong Kong (HK)");
-  y += 30;
-  twoCol(doc, M, y, "Mode", mode === "air" ? "Air freight" : "Sea LCL");
-  twoCol(
-    doc, M + (pageW - 2 * M) / 2, y,
-    "Carrier",
-    carrier ? `${carrier}${transitDays?.min ? ` (${transitDays.min}-${transitDays.max} days)` : ""}` : "—"
-  );
-  y += 30;
-  twoCol(doc, M, y, "Volume", `${cbm.toFixed(2)} CBM`);
-  twoCol(doc, M + (pageW - 2 * M) / 2, y, "Weight", `${kg} kg`);
-  y += 32;
+
+  const hasOrigins = !!(origins && origins.length > 0);
+  if (hasOrigins) {
+    // Per-origin list — one row per shipment with its own mode.
+    const totalCbm = origins!.reduce((s, o) => s + o.totalCbm, 0);
+    const totalKg = origins!.reduce((s, o) => s + o.totalKg, 0);
+    twoCol(doc, M, y, "Destination", "Hong Kong (HK)");
+    twoCol(doc, M + (pageW - 2 * M) / 2, y, "Shipments",
+      `${origins!.length} · ${totalCbm.toFixed(2)} CBM · ${Math.round(totalKg)} kg`);
+    y += 30;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(JADE_SOFT[0], JADE_SOFT[1], JADE_SOFT[2]);
+    doc.text("ORIGINS & MODES", M, y);
+    y += 12;
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+    doc.setFontSize(9.5);
+    origins!.forEach((o) => {
+      const left = `${o.country} -> HK  ·  ${o.modeLabel}  ·  ${o.totalCbm.toFixed(2)} CBM  ·  ${Math.round(o.totalKg)} kg`;
+      doc.text(left, M, y);
+      doc.text(fmtHkd(o.hkdCents), pageW - M, y, { align: "right" });
+      y += 14;
+    });
+    y += 8;
+  } else {
+    twoCol(doc, M, y, "Origin", "Paris, France (FR)");
+    twoCol(doc, M + (pageW - 2 * M) / 2, y, "Destination", "Hong Kong (HK)");
+    y += 30;
+    twoCol(doc, M, y, "Mode", mode === "air" ? "Air freight" : "Sea LCL");
+    twoCol(
+      doc, M + (pageW - 2 * M) / 2, y,
+      "Carrier",
+      carrier ? `${carrier}${transitDays?.min ? ` (${transitDays.min}-${transitDays.max} days)` : ""}` : "—"
+    );
+    y += 30;
+    twoCol(doc, M, y, "Volume", `${cbm.toFixed(2)} CBM`);
+    twoCol(doc, M + (pageW - 2 * M) / 2, y, "Weight", `${kg} kg`);
+    y += 32;
+  }
 
   // Goods
   sectionTitle(doc, "Goods value", M, y);
@@ -132,7 +174,9 @@ export function buildHkDapPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   const notes = [
-    `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
+    hasOrigins
+      ? `Indicative estimate. Freight is summed from per-line packing across ${origins!.length} shipment${origins!.length > 1 ? "s" : ""} (${origins!.reduce((s, o) => s + o.totalCbm, 0).toFixed(2)} CBM · ${Math.round(origins!.reduce((s, o) => s + o.totalKg, 0))} kg) - actual crating may vary on confirmation. Modes (sea LCL / air freight) are taken from each line's chosen mode.`
+      : `Indicative estimate. Freight is calculated on declared volume (${cbm.toFixed(2)} CBM) and weight (${kg} kg) - actual crating may vary on confirmation.`,
     `Hong Kong is a free port: no import duty and no sales tax / VAT. DAP terms cover origin handling, international freight, HK customs clearance and inland delivery to the consignee address. Receiver is responsible for any local building access or installation fees.`,
     `FX: ${quoteCurrency} to HKD via EUR pivot @ ${hkd.fxEurHkd?.toFixed(4)} (EUR to HKD) including a +${(FX_BUFFER * 100).toFixed(0)}% buffer to cushion currency movement between quote and invoice. Final HKD invoice issued on order confirmation.`,
     ...(hkd.fxIsFallback

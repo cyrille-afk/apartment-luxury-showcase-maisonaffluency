@@ -41,6 +41,15 @@ interface Props {
     totalCbm?: number;
     totalKg?: number;
   } | null;
+  /** Per-origin shipment summary used in the PDF (so each origin's mode
+   *  is shown rather than the panel's single-mode dropdown value). */
+  shipmentOrigins?: Array<{
+    country: string;
+    modeLabel: string;
+    totalCbm: number;
+    totalKg: number;
+    eurCents: number;
+  }> | null;
 }
 
 export const HkLandedCostPanel = ({
@@ -56,6 +65,7 @@ export const HkLandedCostPanel = ({
   initialMode,
   onSettingsChange,
   overrideShipping = null,
+  shipmentOrigins = null,
 }: Props) => {
   const useOverride = !!overrideShipping;
   const resolvedInitialMode: HkMode = initialMode ?? "sea_lcl";
@@ -277,6 +287,15 @@ export const HkLandedCostPanel = ({
                         max: breakdown?.transit_days_max ?? null,
                       },
                       hkd,
+                      origins: shipmentOrigins && fxEurHkd
+                        ? shipmentOrigins.map((o) => ({
+                            country: o.country,
+                            modeLabel: o.modeLabel,
+                            totalCbm: o.totalCbm,
+                            totalKg: o.totalKg,
+                            hkdCents: Math.round(o.eurCents * fxEurHkd * (1 + FX_BUFFER)),
+                          }))
+                        : undefined,
                     });
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-full font-body text-[11px] uppercase tracking-wider text-foreground hover:bg-foreground hover:text-background transition-colors"
