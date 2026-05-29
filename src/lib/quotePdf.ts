@@ -1041,7 +1041,16 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
 
   const rows: { label: string; value: string }[] = [];
   rows.push({ label: "Goods (after discount)", value: fmtG(g.goodsGbpCents) });
-  rows.push({ label: "Shipping FR to GB", value: fmtG(g.shippingGbpCents) });
+  if (g.origins && g.origins.length) {
+    g.origins.forEach((o) => {
+      rows.push({
+        label: `Shipping ${o.country || "?"} \u2192 GB \u00B7 ${o.modeLabel}`,
+        value: fmtG(o.gbpCents),
+      });
+    });
+  } else {
+    rows.push({ label: "Shipping to GB", value: fmtG(g.shippingGbpCents) });
+  }
   if (g.dutyGbpCents > 0) rows.push({ label: "Import duty", value: fmtG(g.dutyGbpCents) });
   if (g.vatGbpCents > 0) rows.push({ label: "UK VAT", value: fmtG(g.vatGbpCents) });
 
@@ -1059,7 +1068,7 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
-  doc.text("UK LANDED COST · GBP DDP LONDON", x + 14, cy + 14);
+  doc.text("UK LANDED COST \u00B7 GBP DDP LONDON", x + 14, cy + 14);
   cy += 28;
 
   rows.forEach((r) => {
@@ -1071,6 +1080,7 @@ function drawGbpLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
     doc.text(r.value, x + blockW - 14, cy, { align: "right" });
     cy += rowH;
   });
+
 
   doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
   doc.setLineWidth(0.6);
