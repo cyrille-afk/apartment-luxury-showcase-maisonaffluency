@@ -62,6 +62,7 @@ const systemGroup: AdminCard[] = [
   { title: "CAD & 3D Assets", description: "Upload .dwg, .rfa, .skp files per product and per variant", url: "/trade/admin/cad-assets", icon: FileBox },
   { title: "First-login Flow", description: "Edit welcome panel, Quick Tour steps, and replay onboarding for any user", url: "/trade/admin/onboarding", icon: Sparkle },
   { title: "Onboarding Funnel", description: "Step views, sub-step clicks, completes and skips — filterable by device", url: "/trade/admin/onboarding-funnel", icon: BarChart3 },
+  { title: "Duplicate Products", description: "Inspect and hide near-duplicate cards detected in the Trade catalog merge", url: "/trade/admin/duplicates", icon: Layers },
   
 ];
 
