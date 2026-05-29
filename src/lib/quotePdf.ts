@@ -17,6 +17,8 @@
 import jsPDF from "jspdf";
 import affluencyLogoUrl from "@/assets/affluency-quote-logo.jpg";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
+import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -132,7 +134,13 @@ export interface QuotePdfArgs {
     /** Per-origin breakdown so the PDF can show shipping mode (air/sea/etc.) per consolidation. */
     origins?: { country: string; modeLabel: string; hkdCents: number; eurCents: number }[];
   } | null;
+  /** Full HK DAP estimate appended as a dedicated final page when provided. */
+  hkDapPage?: HkDapPageArgs | null;
+  /** Full UK DDP estimate appended as a dedicated final page when provided. */
+  ukDdpPage?: UkDdpPageArgs | null;
 }
+
+
 
 
 const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
