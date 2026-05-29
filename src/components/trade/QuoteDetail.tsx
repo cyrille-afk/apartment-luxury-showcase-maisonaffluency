@@ -217,6 +217,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string | null>(null);
+  // Ship-to / Incoterm (separate from Bill-to/Client)
+  const INCOTERMS = ["EXW", "FCA", "FOB", "CIF", "CIP", "DAP", "DDP", "DPU"] as const;
+  type Incoterm = (typeof INCOTERMS)[number];
+  const [shipToSameAsBill, setShipToSameAsBill] = useState(true);
+  const [incoterm, setIncoterm] = useState<Incoterm | "">("");
+  const [shipTo, setShipTo] = useState({
+    name: "", attention: "", address1: "", address2: "",
+    city: "", state: "", postal_code: "", country: "",
+    phone: "", email: "", notes: "",
+  });
+  const [shipToOpen, setShipToOpen] = useState(false);
   // Add-product picker state
   const [productOptions, setProductOptions] = useState<PickerItem[]>([]);
   const [pendingProductId, setPendingProductId] = useState<string>("");
