@@ -14,6 +14,7 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates 
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
+import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
 
 interface FavoritedProduct {
   favoriteId: string;
