@@ -955,6 +955,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             dutyHkdCents: hkd.dutyHkdCents,
             vatHkdCents: hkd.vatHkdCents,
             totalHkdCents: hkd.totalHkdCents,
+            goodsEurCents: hkd.goodsEurCents,
+            shippingEurCents: hkd.shippingEurCents,
+            totalEurCents: hkd.totalEurCents,
           }
         : null,
     };

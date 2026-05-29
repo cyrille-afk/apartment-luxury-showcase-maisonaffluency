@@ -124,6 +124,9 @@ export interface QuotePdfArgs {
     dutyHkdCents: number;
     vatHkdCents: number;
     totalHkdCents: number;
+    goodsEurCents?: number;
+    shippingEurCents?: number;
+    totalEurCents?: number;
   } | null;
 }
 
@@ -1092,14 +1095,16 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   const h = args.hkdLanded!;
   const fmtH = (cents: number) =>
     new Intl.NumberFormat("en-HK", { style: "currency", currency: "HKD", maximumFractionDigits: 0 }).format((cents || 0) / 100);
+  const fmtE = (cents: number) =>
+    new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format((cents || 0) / 100);
 
   const blockW = 280;
   const x = M + contentW - blockW;
   let cy = y;
 
-  const rows: { label: string; value: string }[] = [];
-  rows.push({ label: "Goods (after discount)", value: fmtH(h.goodsHkdCents) });
-  rows.push({ label: "Shipping FR to HK", value: fmtH(h.shippingHkdCents) });
+  const rows: { label: string; value: string; eur?: string }[] = [];
+  rows.push({ label: "Goods (after discount)", value: fmtH(h.goodsHkdCents), eur: `≈ ${fmtE(h.goodsEurCents)}` });
+  rows.push({ label: "Shipping FR to HK", value: fmtH(h.shippingHkdCents), eur: `≈ ${fmtE(h.shippingEurCents)}` });
   if (h.dutyHkdCents > 0) rows.push({ label: "Import duty", value: fmtH(h.dutyHkdCents) });
   if (h.vatHkdCents > 0) rows.push({ label: "Sales tax / VAT", value: fmtH(h.vatHkdCents) });
 
@@ -1127,6 +1132,13 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
     doc.text(r.label, x + 14, cy);
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(r.value, x + blockW - 14, cy, { align: "right" });
+    if (r.eur) {
+      const valW = doc.getTextWidth(r.value);
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(7.5);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text(r.eur, x + blockW - 14 - valW - 6, cy, { align: "right" });
+    }
     cy += rowH;
   });
 
@@ -1139,6 +1151,11 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
   doc.text("Total HKD · DAP Hong Kong", x + 14, cy);
   doc.text(fmtH(h.totalHkdCents), x + blockW - 14, cy, { align: "right" });
+  const totalValW = doc.getTextWidth(fmtH(h.totalHkdCents));
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text(`≈ ${fmtE(h.totalEurCents)}`, x + blockW - 14 - totalValW - 6, cy, { align: "right" });
   cy += 14;
 
   doc.setFont("helvetica", "italic");
