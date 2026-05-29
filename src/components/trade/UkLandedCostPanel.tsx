@@ -288,7 +288,9 @@ export const UkLandedCostPanel = ({
               <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
                 <p className="font-body text-[10px] text-muted-foreground/90 leading-relaxed">
                   <span className="font-medium text-foreground/80">Indicative estimate.</span>{" "}
-                  Freight is calculated on declared volume ({cbm} CBM) and weight ({kg} kg) — actual crating
+                  {useOverride
+                    ? `Freight is summed from per-line packing across ${overrideShipping?.shipmentCount ?? 1} shipment${(overrideShipping?.shipmentCount ?? 1) > 1 ? "s" : ""}${overrideShipping?.totalCbm ? ` (${overrideShipping.totalCbm.toFixed(2)} CBM` : ""}${overrideShipping?.totalKg ? ` · ${Math.round(overrideShipping.totalKg)} kg)` : (overrideShipping?.totalCbm ? ")" : "")} — actual crating`
+                    : `Freight is calculated on declared volume (${cbm} CBM) and weight (${kg} kg) — actual crating`}
                   may vary on confirmation. Prices include UK customs clearance, import duty and VAT under
                   Delivered Duty Paid (DDP) — no further charges on delivery to London.
                 </p>
