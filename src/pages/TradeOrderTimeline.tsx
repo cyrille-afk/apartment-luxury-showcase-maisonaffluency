@@ -44,6 +44,12 @@ interface OrderTimeline {
   profile_first_name?: string;
   profile_last_name?: string;
   profile_company?: string;
+  // Ship-to / Incoterm (sourced from trade_quotes)
+  ship_to_same_as_bill?: boolean | null;
+  incoterm?: string | null;
+  ship_to_name?: string | null;
+  ship_to_city?: string | null;
+  ship_to_country?: string | null;
 }
 
 const KANBAN_COLUMNS = [
@@ -102,6 +108,26 @@ function OrderCard({ order, isAdmin, onMoveNext }: { order: OrderTimeline; isAdm
         <Clock className="h-3 w-3" />
         <span>{order.production_weeks}w prod · {order.shipping_weeks}w ship · {order.customs_days}d customs</span>
       </div>
+
+      {/* Ship-to + Incoterm */}
+      {(order.ship_to_same_as_bill === false || order.incoterm) && (
+        <div className="mt-2 pt-2 border-t border-border/60 text-[10px] font-body text-muted-foreground space-y-0.5">
+          {order.incoterm && (
+            <div>
+              <span className="uppercase tracking-widest">Incoterm</span>
+              <span className="ml-1 font-medium text-foreground">{order.incoterm}</span>
+            </div>
+          )}
+          {order.ship_to_same_as_bill === false && (order.ship_to_name || order.ship_to_city || order.ship_to_country) && (
+            <div className="flex items-start gap-1">
+              <Truck className="h-3 w-3 shrink-0 mt-0.5" />
+              <span className="truncate">
+                {[order.ship_to_name, order.ship_to_city, order.ship_to_country].filter(Boolean).join(" · ")}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Admin: advance to next column */}
       {isAdmin && nextCol && (
@@ -163,7 +189,7 @@ export default function TradeOrderTimeline() {
       const userIds = [...new Set(data.map((d: any) => d.user_id))];
 
       const [quotesRes, profilesRes] = await Promise.all([
-        supabase.from("trade_quotes").select("id, client_name, status, currency").in("id", quoteIds),
+        supabase.from("trade_quotes").select("id, client_name, status, currency, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_city, ship_to_country").in("id", quoteIds),
         supabase.from("profiles").select("id, first_name, last_name, company").in("id", userIds),
       ]);
 
@@ -181,6 +207,11 @@ export default function TradeOrderTimeline() {
           profile_first_name: p.first_name,
           profile_last_name: p.last_name,
           profile_company: p.company,
+          ship_to_same_as_bill: q.ship_to_same_as_bill,
+          incoterm: q.incoterm,
+          ship_to_name: q.ship_to_name,
+          ship_to_city: q.ship_to_city,
+          ship_to_country: q.ship_to_country,
         } as OrderTimeline;
       });
     },

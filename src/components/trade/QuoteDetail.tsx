@@ -217,6 +217,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [payingStripe, setPayingStripe] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string | null>(null);
+  // Ship-to / Incoterm (separate from Bill-to/Client)
+  const INCOTERMS = ["EXW", "FCA", "FOB", "CIF", "CIP", "DAP", "DDP", "DPU"] as const;
+  type Incoterm = (typeof INCOTERMS)[number];
+  const [shipToSameAsBill, setShipToSameAsBill] = useState(true);
+  const [incoterm, setIncoterm] = useState<Incoterm | "">("");
+  const [shipTo, setShipTo] = useState({
+    name: "", attention: "", address1: "", address2: "",
+    city: "", state: "", postal_code: "", country: "",
+    phone: "", email: "", notes: "",
+  });
+  const [shipToOpen, setShipToOpen] = useState(false);
   // Add-product picker state
   const [productOptions, setProductOptions] = useState<PickerItem[]>([]);
   const [pendingProductId, setPendingProductId] = useState<string>("");
@@ -338,7 +349,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -400,6 +411,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if (q?.submitted_at !== undefined) setSubmittedAt(q.submitted_at ?? null);
       if (q?.responded_at !== undefined) setRespondedAt(q.responded_at ?? null);
       if (q?.confirmed_at !== undefined) setConfirmedAtTs(q.confirmed_at ?? null);
+      // Ship-to / Incoterm
+      if (q?.ship_to_same_as_bill !== undefined && q?.ship_to_same_as_bill !== null) {
+        setShipToSameAsBill(!!q.ship_to_same_as_bill);
+        if (!q.ship_to_same_as_bill) setShipToOpen(true);
+      }
+      if (q?.incoterm) setIncoterm(q.incoterm as Incoterm);
+      setShipTo({
+        name: q?.ship_to_name ?? "",
+        attention: q?.ship_to_attention ?? "",
+        address1: q?.ship_to_address1 ?? "",
+        address2: q?.ship_to_address2 ?? "",
+        city: q?.ship_to_city ?? "",
+        state: q?.ship_to_state ?? "",
+        postal_code: q?.ship_to_postal_code ?? "",
+        country: q?.ship_to_country ?? "",
+        phone: q?.ship_to_phone ?? "",
+        email: q?.ship_to_email ?? "",
+        notes: q?.ship_to_notes ?? "",
+      });
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
@@ -1172,7 +1202,114 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                 )
               )}
+
+              {/* Ship-to & Incoterm */}
+              {isDraft ? (
+                <div className="w-full max-w-[320px] mt-3 pt-3 border-t border-border/60">
+                  <label className="flex items-center gap-2 cursor-pointer mb-2">
+                    <input
+                      type="checkbox"
+                      checked={!shipToSameAsBill}
+                      onChange={async (e) => {
+                        const different = e.target.checked;
+                        const same = !different;
+                        setShipToSameAsBill(same);
+                        setShipToOpen(different);
+                        const patch: any = { ship_to_same_as_bill: same };
+                        // Default Incoterm to DAP when enabling separate ship-to
+                        if (different && !incoterm) {
+                          setIncoterm("DAP");
+                          patch.incoterm = "DAP";
+                        }
+                        await supabase.from("trade_quotes").update(patch).eq("id", quoteId);
+                      }}
+                      className="h-3.5 w-3.5"
+                    />
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                      Different ship-to address
+                    </span>
+                  </label>
+
+                  {!shipToSameAsBill && (
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">Incoterm</span>
+                        <select
+                          value={incoterm}
+                          onChange={async (e) => {
+                            const v = (e.target.value || "") as Incoterm | "";
+                            setIncoterm(v);
+                            await supabase.from("trade_quotes")
+                              .update({ incoterm: v || null } as any)
+                              .eq("id", quoteId);
+                          }}
+                          className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
+                        >
+                          <option value="">—</option>
+                          {INCOTERMS.map((ic) => (
+                            <option key={ic} value={ic}>{ic}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {(["name","attention","address1","address2","city","state","postal_code","country","phone","email","notes"] as const).map((key) => {
+                        const labelMap: Record<string, string> = {
+                          name: "Ship-to name / company",
+                          attention: "Attention",
+                          address1: "Address line 1",
+                          address2: "Address line 2",
+                          city: "City",
+                          state: "State / region",
+                          postal_code: "Postal code",
+                          country: "Country",
+                          phone: "Phone",
+                          email: "Email",
+                          notes: "Delivery notes",
+                        };
+                        const dbCol = `ship_to_${key}`;
+                        return (
+                          <div key={key}>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-0.5">{labelMap[key]}</span>
+                            <input
+                              type="text"
+                              value={shipTo[key] || ""}
+                              onChange={(e) => setShipTo((s) => ({ ...s, [key]: e.target.value }))}
+                              onBlur={async (e) => {
+                                await supabase.from("trade_quotes")
+                                  .update({ [dbCol]: e.target.value || null } as any)
+                                  .eq("id", quoteId);
+                              }}
+                              className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs font-body"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                !shipToSameAsBill && (
+                  <div className="mt-3 pt-3 border-t border-border/60">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">
+                      Ship to {incoterm ? `· ${incoterm}` : ""}
+                    </span>
+                    <p className="font-body text-xs text-foreground leading-relaxed">
+                      {[shipTo.name, shipTo.attention].filter(Boolean).join(" — ")}
+                      {shipTo.address1 && <><br />{shipTo.address1}</>}
+                      {shipTo.address2 && <><br />{shipTo.address2}</>}
+                      {(shipTo.city || shipTo.postal_code) && <><br />{[shipTo.postal_code, shipTo.city].filter(Boolean).join(" ")}{shipTo.state ? `, ${shipTo.state}` : ""}</>}
+                      {shipTo.country && <><br />{shipTo.country}</>}
+                      {shipTo.phone && <><br />Tel: {shipTo.phone}</>}
+                      {shipTo.email && <><br />{shipTo.email}</>}
+                    </p>
+                    {shipTo.notes && (
+                      <p className="font-body text-[11px] text-muted-foreground italic mt-1">{shipTo.notes}</p>
+                    )}
+                  </div>
+                )
+              )}
             </div>
+
 
             {/* Middle: Date / Expiry / Number */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
