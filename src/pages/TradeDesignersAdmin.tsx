@@ -275,6 +275,15 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     await supabase.from("designer_curator_picks").update({ [field]: value } as any).eq("id", id);
   };
 
+  const applyFieldToAll = async (field: string, value: any) => {
+    setPicks((prev) => prev.map((p) => ({ ...p, [field]: value })));
+    await supabase
+      .from("designer_curator_picks")
+      .update({ [field]: value } as any)
+      .eq("designer_id", designerId);
+    toast({ title: `Applied ${field} to all ${picks.length} picks` });
+  };
+
   const movePick = async (id: string, direction: -1 | 1) => {
     const idx = picks.findIndex((p) => p.id === id);
     if (idx < 0) return;
