@@ -90,7 +90,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, edition, edition_number, edition_signing";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -101,9 +101,10 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       if (!picks || picks.length === 0) return null;
 
       const product = picks.find((p: any) => {
-        const slug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-        return slug === productSlug;
-      }) || picks.find((p: any) => slugify(p.title) === productSlug);
+        const titleSlug = slugify(p.title);
+        const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
+        return fullSlug === productSlug || titleSlug === productSlug || productSlug.startsWith(`${titleSlug}-`);
+      });
 
       if (!product) return null;
 
@@ -138,7 +139,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       return {
         product: {
           ...(product as unknown as ProductRow),
-          variant_image_map: (variantMapRow as any)?.variant_image_map || null,
+          variant_image_map: (product as any).variant_image_map || (variantMapRow as any)?.variant_image_map || null,
           image_url: (product as any).image_url || tradeProduct?.image_url || null,
           gallery_images: (product as any).gallery_images?.length
             ? (product as any).gallery_images
