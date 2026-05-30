@@ -30,7 +30,7 @@ export function useDbCuratorPicks() {
       const { data: picksRaw } = await applyCuratorPickOrder(
         supabase
           .from("designer_curator_picks_public" as any)
-          .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
+          .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
       );
 
       // Defensive client-side sort using identical rules (in case the view drops ORDER BY through joins).
@@ -65,6 +65,12 @@ export function useDbCuratorPicks() {
           pdfUrl: row.pdf_url || undefined,
           pdfFilename: row.pdf_filename || undefined,
           pdfUrls: row.pdf_urls || undefined,
+          size_variants: row.size_variants || undefined,
+          variant_placeholder: row.variant_placeholder || undefined,
+          base_axis_label: row.base_axis_label || undefined,
+          top_axis_label: row.top_axis_label || undefined,
+          gallery_images: row.gallery_images || undefined,
+          variant_image_map: row.variant_image_map || undefined,
         };
 
         if (!pick.image) continue;
