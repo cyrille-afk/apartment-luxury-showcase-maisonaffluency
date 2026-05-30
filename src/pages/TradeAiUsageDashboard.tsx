@@ -127,16 +127,31 @@ export default function TradeAiUsageDashboard() {
         <meta name="robots" content="noindex" />
         <style>{`
           @media print {
-            @page { size: A4 landscape; margin: 12mm; }
-            html, body { background: #fff !important; }
+            @page { size: A4 landscape; margin: 10mm; }
+            html, body, .print-root { background: #ffffff !important; color: #111 !important; min-height: 0 !important; }
             .no-print { display: none !important; }
-            .print-root { min-height: 0 !important; }
             .print-break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+            /* Force readable colors */
+            .print-root, .print-root * {
+              color: #111 !important;
+              border-color: #d4d4d4 !important;
+              box-shadow: none !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-root .bg-card, .print-root section { background: #ffffff !important; }
+            .print-root .bg-muted\\/40 { background: #f5f5f5 !important; }
+            .print-root .text-muted-foreground { color: #555 !important; }
+            /* Recharts: keep SVG visible */
             .recharts-wrapper, .recharts-surface { overflow: visible !important; }
-            section, .bg-card { box-shadow: none !important; border-color: #ddd !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .recharts-cartesian-axis-tick text, .recharts-legend-item-text { fill: #333 !important; color: #333 !important; }
+            .recharts-cartesian-grid line { stroke: #e5e5e5 !important; }
+            /* Tables */
+            table { font-size: 10px !important; }
+            th, td { padding: 4px 8px !important; }
           }
         `}</style>
+
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8 print:px-0 print:py-0 print:space-y-4">
