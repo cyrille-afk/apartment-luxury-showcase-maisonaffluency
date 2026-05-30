@@ -686,6 +686,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const storedIndex = sessionStorage.getItem('openGalleryIndex');
       const sourceId = sessionStorage.getItem('gallerySourceId');
       const storedDesigner = sessionStorage.getItem('galleryFilterDesigner');
+      const storedReturnUrl = sessionStorage.getItem('galleryReturnUrl');
       const intentAt = Number(sessionStorage.getItem('galleryOpenIntentAt') || 0);
       const hasFreshIntent = intentAt > 0 && Date.now() - intentAt < 5000;
       if (storedIndex !== null) {
@@ -697,11 +698,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           setExternalSourceId(sourceId);
           setSourceItemKey(null);
           setFilterDesigner(storedDesigner || null);
+          if (storedReturnUrl) setReturnUrl(storedReturnUrl);
           setLightboxOpen(true);
         }
         sessionStorage.removeItem('openGalleryIndex');
         sessionStorage.removeItem('gallerySourceId');
         sessionStorage.removeItem('galleryFilterDesigner');
+        sessionStorage.removeItem('galleryReturnUrl');
         sessionStorage.removeItem('galleryOpenIntentAt');
       }
     };
