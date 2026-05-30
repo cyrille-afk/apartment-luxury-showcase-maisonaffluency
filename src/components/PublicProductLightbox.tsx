@@ -18,6 +18,7 @@ import { looksLikeDimension } from "@/lib/rugPricing";
 import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
+import { computeVariantAxes } from "@/lib/parseSizeVariants";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -135,6 +136,9 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
   const [selectedTopIdx, setSelectedTopIdx] = useState<number | null>(null);
   const [selectedMaterialIdx, setSelectedMaterialIdx] = useState<number | null>(null);
+  // Single-axis split (variants encode "size — material" in one label).
+  const [selectedSingleSizeIdx, setSelectedSingleSizeIdx] = useState<number | null>(null);
+  const [selectedSingleMaterialIdx, setSelectedSingleMaterialIdx] = useState<number | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -144,6 +148,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     setSelectedBaseIdx(null);
     setSelectedTopIdx(null);
     setSelectedMaterialIdx(null);
+    setSelectedSingleSizeIdx(null);
+    setSelectedSingleMaterialIdx(null);
   }, [product?.id]);
 
   // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
@@ -191,40 +197,34 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const finishMap = buildProductFinishMap(product.variant_image_map);
   const galleryImages = (product.gallery_images || []).filter(Boolean);
   const sv = product.size_variants || [];
+  const axes = computeVariantAxes(sv);
   // True dual-axis only when BOTH base and top are populated. Base-only
   // products (e.g. Atelier Pendhapa "Mangala Coffee Table") behave as
   // single-axis on Base — see src/lib/parseSizeVariants.ts.
-  const hasAnyBase = sv.some((v) => (v.base && v.base.trim()));
-  const hasAnyTop = sv.some((v) => (v.top && v.top.trim()));
-  const isDualAxis = hasAnyBase && hasAnyTop;
-  const baseOptions = isDualAxis
-    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
-    : [];
-  const topOptionsForResolve = isDualAxis
-    ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
-    : [];
+  const hasAnyBase = axes.isDualAxis || axes.isBaseOnly;
+  const isDualAxis = axes.isDualAxis;
+  const baseOptions = isDualAxis ? axes.baseOptions : [];
+  const topOptionsForResolve = isDualAxis ? axes.topOptions : [];
   // For base-only products, surface the bases through the same dropdown the
   // single-axis material picker uses below.
-  const baseOnlyOptions = !isDualAxis && hasAnyBase
-    ? Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean)))
-    : [];
-  const materialOptions = !isDualAxis && hasAnyBase
-    ? baseOnlyOptions
-    : !isDualAxis && product.materials
-      ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean)
-      : [];
-  // Resolve which gallery image matches the current selection. For dual-axis
-  // products we first try the composite Base|Top key (so rows that share the
-  // same Top — e.g. Apparatus Lantern Table Lamp where every row is "Slip-cast
-  // Porcelain" but Structure differs — still get distinct images), then fall
-  // back to single-axis labels.
+  const baseOnlyOptions = !isDualAxis && axes.isBaseOnly ? axes.baseOptions : [];
+  // When single-axis labels actually encode (size × material) we render TWO
+  // dropdowns (material + size) mirroring TradeProductPage — the catalog
+  // legend must always match the product sheet.
+  const hasSingleAxisSplit = axes.hasSingleAxisSplit;
+  const singleSplitSizes = hasSingleAxisSplit ? axes.singleSizeOptions : [];
+  const singleSplitMaterials = hasSingleAxisSplit ? axes.singleMaterialOptions : [];
+  const materialOptions = hasSingleAxisSplit
+    ? singleSplitMaterials
+    : !isDualAxis && axes.isBaseOnly
+      ? baseOnlyOptions
+      : !isDualAxis && product.materials
+        ? product.materials.split("\n").map((s) => s.trim()).filter(Boolean)
+        : [];
+  // Resolve which gallery image matches the current selection.
   let finishImageIdx: number | undefined;
   if (finishMap && galleryImages.length > 0) {
     if (isDualAxis) {
-      // When either axis only offers one option, treat it as implicitly
-      // selected so picking the other axis still resolves the composite key.
-      // (ExpandableSpec collapses single-option axes into a static row that
-      // never fires onChange, so the selected index stays null.)
       const topLabel =
         selectedTopIdx != null && selectedTopIdx >= 0
           ? topOptionsForResolve[selectedTopIdx]
@@ -244,6 +244,27 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
         imageCount: galleryImages.length,
         requireCompletePair: true,
       });
+    } else if (hasSingleAxisSplit) {
+      // Look up the matched variant's full raw label so the composite
+      // (size × material) key in variant_image_map resolves correctly.
+      const mat = selectedSingleMaterialIdx != null && selectedSingleMaterialIdx >= 0
+        ? singleSplitMaterials[selectedSingleMaterialIdx]
+        : null;
+      const size = selectedSingleSizeIdx != null && selectedSingleSizeIdx >= 0
+        ? singleSplitSizes[selectedSingleSizeIdx]
+        : null;
+      if (mat || size) {
+        const match = axes.singleAxisParsed.find(
+          (p) => (!mat || p.material === mat) && (!size || p.size === size),
+        );
+        const rawLabel = match?.variant?.label || null;
+        finishImageIdx = resolveVariantImageIndex(finishMap, {
+          label: rawLabel,
+          variants: sv,
+          imageCount: galleryImages.length,
+          requireCompletePair: false,
+        });
+      }
     } else if (selectedMaterialIdx != null && selectedMaterialIdx >= 0) {
       const v = materialOptions[selectedMaterialIdx];
       if (v) {
@@ -503,13 +524,31 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     text={materialOptions.join("\n")}
                     placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
                     singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
-                    autoSplit={!hasAnyBase}
-                    value={selectedMaterialIdx ?? null}
-                    onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
+                    autoSplit={!hasAnyBase && !hasSingleAxisSplit}
+                    value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
+                    onChange={(idx) => {
+                      if (hasSingleAxisSplit) {
+                        setSelectedSingleMaterialIdx(idx < 0 ? null : idx);
+                      } else {
+                        setSelectedMaterialIdx(idx < 0 ? null : idx);
+                      }
+                    }}
                   />
                 ) : null;
               })()}
               {(() => {
+                if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
+                  return (
+                    <ExpandableSpec
+                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      text={singleSplitSizes.join("\n")}
+                      emphasized
+                      placeholder="Select your size"
+                      value={selectedSingleSizeIdx ?? null}
+                      onChange={(idx) => setSelectedSingleSizeIdx(idx < 0 ? null : idx)}
+                    />
+                  );
+                }
                 const sv = product.size_variants || [];
                 const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
                 const dualSizeOptions = isDualAxis

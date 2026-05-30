@@ -68,6 +68,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [baseIdx, setBaseIdx] = useState<number | null>(null);
   const [topIdx, setTopIdx] = useState<number | null>(null);
   const [sizeIdx, setSizeIdx] = useState<number | null>(null);
+  // Single-axis split (variants encode "size — material" in one label).
+  const [singleSplitMatIdx, setSingleSplitMatIdx] = useState<number | null>(null);
+  const [singleSplitSizeIdx, setSingleSplitSizeIdx] = useState<number | null>(null);
 
   // Reset image + variant states when product changes
   useEffect(() => {
@@ -78,6 +81,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setBaseIdx(null);
     setTopIdx(null);
     setSizeIdx(null);
+    setSingleSplitMatIdx(null);
+    setSingleSplitSizeIdx(null);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
@@ -180,6 +185,16 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
       if (!base) return null;
       return variants.find(v => (v.base || "").trim() === base) || null;
     }
+    // Single-axis split (size × material encoded in label)
+    if (axes.hasSingleAxisSplit) {
+      const mat = singleSplitMatIdx != null && singleSplitMatIdx >= 0 ? axes.singleMaterialOptions[singleSplitMatIdx] : null;
+      const size = singleSplitSizeIdx != null && singleSplitSizeIdx >= 0 ? axes.singleSizeOptions[singleSplitSizeIdx] : null;
+      if (!mat && !size) return null;
+      const match = axes.singleAxisParsed.find(
+        (p) => (!mat || p.material === mat) && (!size || p.size === size),
+      );
+      return match?.variant || null;
+    }
     // single-axis label
     if (sizeIdx != null && sizeIdx >= 0) {
       return variants[sizeIdx] || null;
@@ -203,6 +218,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         base: effectiveBase,
         top: effectiveTop,
         size: effectiveSize,
+        label: axes.hasSingleAxisSplit ? (selectedVariant?.label || null) : undefined,
         variants: variantsList,
         imageCount: galleryImages.length,
         requireCompletePair: axes.isDualAxis,
@@ -512,6 +528,25 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   value={baseIdx}
                   onChange={setBaseIdx}
                 />
+              ) : axes.hasVariants && axes.hasSingleAxisSplit ? (
+                <>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.singleMaterialOptions.join("\n")}
+                    placeholder="Select your material choice"
+                    emphasized
+                    value={singleSplitMatIdx}
+                    onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
+                  />
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.singleSizeOptions.join("\n")}
+                    placeholder="Select your size"
+                    emphasized
+                    value={singleSplitSizeIdx}
+                    onChange={(idx) => setSingleSplitSizeIdx(idx < 0 ? null : idx)}
+                  />
+                </>
               ) : axes.hasVariants ? (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
