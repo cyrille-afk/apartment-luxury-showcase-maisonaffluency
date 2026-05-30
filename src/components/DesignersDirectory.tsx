@@ -1171,11 +1171,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // home-page Gallery lightbox (set via sessionStorage in the thumbnail handler).
   useEffect(() => {
     const id = sessionStorage.getItem('pendingDesignerScrollId');
+    console.log('[DesignersDirectory] mount check pendingDesignerScrollId =', id, 'pathname=', location.pathname);
     if (!id) return;
     let attempts = 0;
     const tryScroll = () => {
       attempts++;
       const el = document.getElementById(id);
+      console.log('[DesignersDirectory] tryScroll attempt', attempts, 'found?', !!el);
       if (el) {
         sessionStorage.removeItem('pendingDesignerScrollId');
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
