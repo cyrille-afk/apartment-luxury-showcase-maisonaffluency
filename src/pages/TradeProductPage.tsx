@@ -955,7 +955,7 @@ const TradeProductPage: React.FC = () => {
                 (() => {
                   const editionLabel = formatEditionLabel(product);
                   return editionLabel ? (
-                    <span className="font-body text-[10px] uppercase tracking-[0.15em] bg-background/85 backdrop-blur-sm border border-[hsl(var(--gold))]/40 text-[hsl(var(--gold))] px-2.5 py-1 rounded-full shadow-sm">
+                    <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                       {editionLabel}
                     </span>
                   ) : null;
