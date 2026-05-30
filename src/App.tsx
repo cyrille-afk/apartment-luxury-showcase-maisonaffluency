@@ -36,6 +36,8 @@ const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
 const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
 const TradeConciergeUsage = lazy(() => import("./pages/TradeConciergeUsage"));
 const TradeAiUsageDashboard = lazy(() => import("./pages/TradeAiUsageDashboard"));
+const TradeAiUsagePrintCheck = lazy(() => import("./pages/TradeAiUsagePrintCheck"));
+
 const TradeDescriptionWriter = lazy(() => import("./pages/TradeDescriptionWriter"));
 const TradeRegisteredUsers = lazy(() => import("./pages/TradeRegisteredUsers"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
@@ -392,6 +394,8 @@ const App = () => {
                     <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
                     <Route path="admin/concierge-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeConciergeUsage /></Suspense>} />
                     <Route path="admin/ai-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAiUsageDashboard /></Suspense>} />
+                    <Route path="admin/ai-usage/print-check" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAiUsagePrintCheck /></Suspense>} />
+
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
                     <Route path="gallery" element={<TradeGallery />} />
