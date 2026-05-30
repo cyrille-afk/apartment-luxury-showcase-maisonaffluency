@@ -622,6 +622,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                               const here = `${window.location.pathname}${window.location.search}`;
                               sessionStorage.setItem('galleryReturnUrl', here);
                               sessionStorage.setItem('pendingDesignerScrollId', `designer-card-${item.slug}`);
+                              sessionStorage.setItem('pendingDesignerScrollLetter', (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase() || "#");
                               navigate('/');
                             }
                           } else {
@@ -1167,29 +1168,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
-  // Restore scroll to originating designer card after returning from the
-  // home-page Gallery lightbox (set via sessionStorage in the thumbnail handler).
-  useEffect(() => {
-    // Only the standalone /designers route should consume this scroll-target;
-    // the homepage also mounts DesignersDirectory and would otherwise clear
-    // sessionStorage before the user navigates back from the lightbox.
-    if (!location.pathname.startsWith('/designers')) return;
-    const id = sessionStorage.getItem('pendingDesignerScrollId');
-    if (!id) return;
-    let attempts = 0;
-    const tryScroll = () => {
-      attempts++;
-      const el = document.getElementById(id);
-      if (el) {
-        sessionStorage.removeItem('pendingDesignerScrollId');
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-      if (attempts < 20) setTimeout(tryScroll, 150);
-      else sessionStorage.removeItem('pendingDesignerScrollId');
-    };
-    tryScroll();
-  }, [location.pathname]);
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
