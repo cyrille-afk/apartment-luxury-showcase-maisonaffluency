@@ -136,6 +136,9 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
   const [selectedTopIdx, setSelectedTopIdx] = useState<number | null>(null);
   const [selectedMaterialIdx, setSelectedMaterialIdx] = useState<number | null>(null);
+  // Single-axis split (variants encode "size — material" in one label).
+  const [selectedSingleSizeIdx, setSelectedSingleSizeIdx] = useState<number | null>(null);
+  const [selectedSingleMaterialIdx, setSelectedSingleMaterialIdx] = useState<number | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -145,6 +148,8 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     setSelectedBaseIdx(null);
     setSelectedTopIdx(null);
     setSelectedMaterialIdx(null);
+    setSelectedSingleSizeIdx(null);
+    setSelectedSingleMaterialIdx(null);
   }, [product?.id]);
 
   // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
