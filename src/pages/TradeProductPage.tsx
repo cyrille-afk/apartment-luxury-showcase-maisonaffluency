@@ -622,9 +622,18 @@ const TradeProductPage: React.FC = () => {
       if ((nextTop ?? null) !== (selectedTop ?? null)) setSelectedTop(nextTop);
       if (nextLabel && nextLabel !== (selectedDualSize ?? null)) setSelectedDualSize(nextLabel);
     }
-    // Single-axis (label) path — keep singleMaterial in sync when applicable
-    if (nextLabel && nextLabel !== (selectedSingleMaterial ?? null)) {
-      setSelectedSingleMaterial(nextLabel);
+    // Single-axis (size — material) path — parse the variant so we set
+    // selectedSingleMaterial to just the material (e.g. "Grand Antique
+    // Marble"), not the full "size — material" label, otherwise the size
+    // availability check greys out every size and surfaces the wrong helper.
+    if (nextLabel) {
+      const parsed = singleAxisParsed.find((p) => p.variant?.label === nextLabel);
+      if (parsed?.material && parsed.material !== (selectedSingleMaterial ?? null)) {
+        setSelectedSingleMaterial(parsed.material);
+      }
+      if (parsed?.size && parsed.size !== (selectedSingleSize ?? null)) {
+        setSelectedSingleSize(parsed.size);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [galleryActiveIndex, data?.product?.id]);
