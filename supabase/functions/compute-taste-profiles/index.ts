@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdmin } from "../_shared/auth.ts";
+import { logAiUsage } from "../_shared/aiUsage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -253,6 +254,7 @@ Respond in this exact JSON format:
         }
 
         const aiData = await aiResp.json();
+        logAiUsage({ feature: "compute-taste-profiles", model: "google/gemini-2.5-flash", usage: aiData?.usage, userId }).catch(() => {});
         const content = aiData.choices?.[0]?.message?.content;
         const parsed = JSON.parse(content);
 

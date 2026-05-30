@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { logAiUsage } from "../_shared/aiUsage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -253,6 +254,7 @@ Look at the floor plan image and propose an FF&E layout per room.`;
     }
 
     const aiJson = await aiResp.json();
+    logAiUsage({ feature: "suggest-ffe-layout", model: "google/gemini-2.5-pro", usage: aiJson?.usage }).catch(() => {});
     const toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "AI returned no layout." }), {

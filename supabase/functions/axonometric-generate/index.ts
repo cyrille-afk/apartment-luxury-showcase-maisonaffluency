@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { logAiUsage } from "../_shared/aiUsage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -653,6 +654,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
       }
 
       const aiData = await aiResponse.json();
+      logAiUsage({ feature: "axonometric-generate", model: attemptModel, usage: aiData?.usage }).catch(() => {});
       generatedImage = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
       textResponse = aiData.choices?.[0]?.message?.content || "";
 
