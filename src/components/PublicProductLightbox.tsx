@@ -19,6 +19,7 @@ import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
+import { supabase } from "@/integrations/supabase/client";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -112,7 +113,7 @@ function useLocalFavorites() {
 
 /* ------------------------------------------------------------------ */
 
-const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
+const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -123,6 +124,41 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const [imageFailed, setImageFailed] = useState(false);
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
+  const [variantPayload, setVariantPayload] = useState<Partial<PublicLightboxItem> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setVariantPayload(null);
+    if (!propProduct?.id) return;
+    const needsHydration =
+      !propProduct.size_variants ||
+      !propProduct.gallery_images ||
+      !propProduct.variant_image_map;
+    if (!needsHydration) return;
+    supabase
+      .from("designer_curator_picks_public" as any)
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+      .eq("id", propProduct.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data) setVariantPayload(data as Partial<PublicLightboxItem>);
+      });
+    return () => { cancelled = true; };
+  }, [propProduct?.id, propProduct?.size_variants, propProduct?.gallery_images, propProduct?.variant_image_map]);
+
+  const product = useMemo(() => {
+    if (!propProduct) return null;
+    if (!variantPayload) return propProduct;
+    return {
+      ...propProduct,
+      size_variants: propProduct.size_variants ?? variantPayload.size_variants ?? null,
+      variant_placeholder: propProduct.variant_placeholder ?? variantPayload.variant_placeholder ?? null,
+      base_axis_label: propProduct.base_axis_label ?? variantPayload.base_axis_label ?? null,
+      top_axis_label: propProduct.top_axis_label ?? variantPayload.top_axis_label ?? null,
+      gallery_images: propProduct.gallery_images ?? variantPayload.gallery_images ?? null,
+      variant_image_map: propProduct.variant_image_map ?? variantPayload.variant_image_map ?? null,
+    };
+  }, [propProduct, variantPayload]);
 
   // Resolve canonical designer slug (same hook used by product pages)
   const designerDisplayName = product
