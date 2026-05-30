@@ -124,7 +124,7 @@ export default function TradeAiUsageDashboard() {
     <div className="min-h-screen bg-background print-root">
       <Helmet>
         <meta name="robots" content="noindex" />
-        <meta name="robots" content="noindex" />
+
         <style>{`
           @media print {
             @page { size: A4 landscape; margin: 10mm; }
