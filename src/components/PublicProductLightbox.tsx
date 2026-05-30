@@ -524,13 +524,31 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
                     text={materialOptions.join("\n")}
                     placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
                     singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
-                    autoSplit={!hasAnyBase}
-                    value={selectedMaterialIdx ?? null}
-                    onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
+                    autoSplit={!hasAnyBase && !hasSingleAxisSplit}
+                    value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
+                    onChange={(idx) => {
+                      if (hasSingleAxisSplit) {
+                        setSelectedSingleMaterialIdx(idx < 0 ? null : idx);
+                      } else {
+                        setSelectedMaterialIdx(idx < 0 ? null : idx);
+                      }
+                    }}
                   />
                 ) : null;
               })()}
               {(() => {
+                if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
+                  return (
+                    <ExpandableSpec
+                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      text={singleSplitSizes.join("\n")}
+                      emphasized
+                      placeholder="Select your size"
+                      value={selectedSingleSizeIdx ?? null}
+                      onChange={(idx) => setSelectedSingleSizeIdx(idx < 0 ? null : idx)}
+                    />
+                  );
+                }
                 const sv = product.size_variants || [];
                 const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
                 const dualSizeOptions = isDualAxis
