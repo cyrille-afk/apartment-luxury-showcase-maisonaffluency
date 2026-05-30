@@ -894,10 +894,13 @@ const PublicDesignerProfile = () => {
               </div>
 
               {(() => {
-                const effectiveDesktopCols = Math.min(gridCols, 4);
-                const desktopColsClass = effectiveDesktopCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4";
-                return (
-              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", mobileCols === 1 ? "grid-cols-1" : "grid-cols-2", desktopColsClass)}>
+                 const forceTwoCol = designer.slug === "adrien-messie";
+                 const effectiveDesktopCols = forceTwoCol ? 2 : Math.min(gridCols, 4);
+                 const desktopColsClass = forceTwoCol ? "md:grid-cols-2" : effectiveDesktopCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4";
+                 const effectiveMobileCols = forceTwoCol ? 2 : mobileCols;
+                 return (
+              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", effectiveMobileCols === 1 ? "grid-cols-1" : "grid-cols-2", desktopColsClass)}>
+
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
                   const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
