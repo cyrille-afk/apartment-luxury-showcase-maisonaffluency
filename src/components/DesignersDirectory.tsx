@@ -516,7 +516,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
     return fromDb;
   })();
   const instagramLink = instagramLinks[0];
-  const fallbackGalleryIndices = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? [];
+  const fallbackGalleryIndices = (() => {
+    for (const stem of designerKeyStems(item.name)) {
+      const hit = fallbackGalleryIndexByDesigner?.[stem];
+      if (hit && hit.length) return hit;
+    }
+    return [];
+  })();
   const getPositionalFallbackIndex = (thumbPosition: number) => {
     if (fallbackGalleryIndices.length === 0) return null;
     return fallbackGalleryIndices[thumbPosition] ?? fallbackGalleryIndices[0] ?? null;
