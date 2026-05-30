@@ -231,9 +231,10 @@ function useDesignerHotspotFallbacks() {
         const index = IMAGE_IDENTIFIER_TO_INDEX[imageIdentifier];
         if (index === undefined) continue;
 
-        const key = normalizeDesignerKey(designerName);
-        if (!countsByDesigner[key]) countsByDesigner[key] = {};
-        countsByDesigner[key][index] = (countsByDesigner[key][index] || 0) + 1;
+        for (const key of designerKeyStems(designerName)) {
+          if (!countsByDesigner[key]) countsByDesigner[key] = {};
+          countsByDesigner[key][index] = (countsByDesigner[key][index] || 0) + 1;
+        }
       }
 
       const rankedByDesigner: Record<string, number[]> = {};
