@@ -32,6 +32,46 @@ const EditorialBiography = lazy(() => import("@/components/EditorialBiography"))
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+/** Small helper: type L × W × H in cm, auto-compute CBM (m³). */
+function DimsToCbm({ onCompute }: { onCompute: (cbm: number) => void }) {
+  const [l, setL] = useState("");
+  const [w, setW] = useState("");
+  const [h, setH] = useState("");
+  const compute = (lv: string, wv: string, hv: string) => {
+    const ln = parseFloat(lv), wn = parseFloat(wv), hn = parseFloat(hv);
+    if ([ln, wn, hn].every((x) => Number.isFinite(x) && x > 0)) {
+      const cbm = Math.round((ln * wn * hn) / 1_000_000 * 1000) / 1000;
+      onCompute(cbm);
+    }
+  };
+  const cbmPreview = (() => {
+    const ln = parseFloat(l), wn = parseFloat(w), hn = parseFloat(h);
+    if ([ln, wn, hn].every((x) => Number.isFinite(x) && x > 0)) {
+      return (Math.round((ln * wn * hn) / 1_000_000 * 1000) / 1000).toFixed(3);
+    }
+    return null;
+  })();
+  return (
+    <div className="flex items-center gap-1.5 mt-1">
+      <Input type="number" step="0.1" value={l} placeholder="L"
+        onChange={(e) => { setL(e.target.value); compute(e.target.value, w, h); }}
+        className="text-xs h-9" />
+      <span className="text-xs text-muted-foreground">×</span>
+      <Input type="number" step="0.1" value={w} placeholder="W"
+        onChange={(e) => { setW(e.target.value); compute(l, e.target.value, h); }}
+        className="text-xs h-9" />
+      <span className="text-xs text-muted-foreground">×</span>
+      <Input type="number" step="0.1" value={h} placeholder="H"
+        onChange={(e) => { setH(e.target.value); compute(l, w, e.target.value); }}
+        className="text-xs h-9" />
+      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+        cm {cbmPreview ? `→ ${cbmPreview} m³` : ""}
+      </span>
+    </div>
+  );
+}
+
+
 const parseBiographyMediaEntry = (entry: string) => {
   const rawSegments = entry.split("|");
   const url = (rawSegments[0] || "").trim();
