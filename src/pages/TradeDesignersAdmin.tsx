@@ -442,8 +442,21 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </div>
                 <div>
                   <label className="text-[10px] text-muted-foreground">Origin</label>
-                  <Input value={(pick as any).origin || ""} onChange={(e) => updateField(pick.id, "origin", e.target.value || null)} className="text-xs" placeholder="e.g. Handmade in Europe" />
+                  <div className="flex gap-2">
+                    <Input value={(pick as any).origin || ""} onChange={(e) => updateField(pick.id, "origin", e.target.value || null)} className="text-xs" placeholder="e.g. Handmade in Europe" />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-[10px] h-8 whitespace-nowrap"
+                      onClick={() => applyFieldToAll("origin", (pick as any).origin || null)}
+                      title="Copy this origin to all picks for this designer"
+                    >
+                      Apply to all
+                    </Button>
+                  </div>
                 </div>
+
 
                 {/* Logistics & packing — feeds the shipping estimator on quotes */}
                 <div className="space-y-2 border border-dashed border-border rounded-md p-2.5 bg-muted/20">
