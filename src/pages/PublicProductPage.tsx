@@ -197,7 +197,15 @@ const VariantSelectors: React.FC<{
       if (isDualAxis && (match.top ?? null) !== selTop) setSelTop(match.top);
       if (isDualAxis && match.label && match.label !== selDualSize) setSelDualSize(match.label);
     } else if (hasSingleAxisSplit) {
-      if (match.label && match.label !== selMat) setSelMat(match.label);
+      // Find the parsed { size, material } for this variant so we set
+      // selMat to just the material (e.g. "Grand Antique Marble"),
+      // not the full "size — material" label — otherwise the size
+      // availability check (p.material === selMat) breaks and the
+      // dropdown wrongly greys out every size.
+      const parsed = singleAxisParsed.find((p) => p.variant?.label === match.label);
+      const nextMat = parsed?.material ?? null;
+      if (nextMat && nextMat !== selMat) setSelMat(nextMat);
+      if (parsed?.size && parsed.size !== selSize) setSelSize(parsed.size);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [galleryActiveIndex, product?.id]);
