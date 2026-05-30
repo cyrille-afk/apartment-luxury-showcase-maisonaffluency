@@ -1,0 +1,1 @@
+UPDATE designers SET biography = REPLACE(biography, '<a href="/designer/">cc-tapis</a>', '<a href="/designers/cc-tapis">CC-Tapis</a>') WHERE id='394d4c2a-56a2-4598-b5ff-55dcbde31475';
