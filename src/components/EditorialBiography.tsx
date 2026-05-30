@@ -293,6 +293,10 @@ const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1774856563/Screen_Shot_2026-03-30_at_3.41.52_PM_sezoxs.png",
   "https://www.youtube.com/watch?v=hQ0_HOzRKwI":
     "/images/lbv-dior-poster.jpg",
+  "https://youtu.be/6o-b80DxkzE":
+    "/images/alex-proba-second-studio-poster.jpg",
+  "https://www.youtube.com/watch?v=6o-b80DxkzE":
+    "/images/alex-proba-second-studio-poster.jpg",
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
@@ -330,7 +334,7 @@ function VideoBlock({
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
   const ytId = extractYouTubeId(url);
   const isYouTube = !!ytId;
-  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI", "0y69QUFEnX8", "RG2VhkWkQgw", "Fa7f1xHOc-I", "oHx35m3gkSg"]), []);
+  const unmutedVideos = useMemo(() => new Set(["hQ0_HOzRKwI", "0y69QUFEnX8", "RG2VhkWkQgw", "Fa7f1xHOc-I", "oHx35m3gkSg", "6o-b80DxkzE"]), []);
   const startUnmuted = !!ytId && unmutedVideos.has(ytId);
   const useDirectYouTubeEmbed = false; // Always use YT IFrame API for reliable autoplay
 
