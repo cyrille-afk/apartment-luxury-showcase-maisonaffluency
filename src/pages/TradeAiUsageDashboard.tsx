@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, Coins, AlertTriangle, Activity } from "lucide-react";
+import { BarChart3, Coins, AlertTriangle, Activity, Printer } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
@@ -121,21 +121,36 @@ export default function TradeAiUsageDashboard() {
   const errorRate = totals && totals.requests > 0 ? (totals.errors / totals.requests) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background print-root">
       <Helmet>
         <title>AI Usage Dashboard — Admin</title>
         <meta name="robots" content="noindex" />
+        <style>{`
+          @media print {
+            @page { size: A4 landscape; margin: 12mm; }
+            html, body { background: #fff !important; }
+            .no-print { display: none !important; }
+            .print-root { min-height: 0 !important; }
+            .print-break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+            .recharts-wrapper, .recharts-surface { overflow: visible !important; }
+            section, .bg-card { box-shadow: none !important; border-color: #ddd !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          }
+        `}</style>
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8 print:px-0 print:py-0 print:space-y-4">
         <header className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-light tracking-tight">AI Usage Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Tokens, requests, and estimated cost by feature and day. Estimates based on published model pricing.
             </p>
+            <p className="hidden print:block text-xs text-muted-foreground mt-1">
+              Window: last {days} days · Generated {format(new Date(), "MMM d, yyyy HH:mm")}
+            </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 no-print">
             {PRESETS.map((p) => (
               <button
                 key={p.days}
@@ -149,6 +164,14 @@ export default function TradeAiUsageDashboard() {
                 {p.label}
               </button>
             ))}
+            <button
+              onClick={() => window.print()}
+              className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+              title="Print or save as PDF"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              Print / PDF
+            </button>
           </div>
         </header>
 
@@ -168,7 +191,7 @@ export default function TradeAiUsageDashboard() {
         {isLoading && <div className="text-sm text-muted-foreground">Loading…</div>}
 
         {/* Daily tokens stacked by feature */}
-        <section className="bg-card border border-border rounded-lg p-4">
+        <section className="bg-card border border-border rounded-lg p-4 print-break-inside-avoid">
           <h2 className="text-sm font-medium mb-3">Daily tokens by feature</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -190,7 +213,7 @@ export default function TradeAiUsageDashboard() {
         </section>
 
         {/* Daily cost line */}
-        <section className="bg-card border border-border rounded-lg p-4">
+        <section className="bg-card border border-border rounded-lg p-4 print-break-inside-avoid">
           <h2 className="text-sm font-medium mb-3">Estimated cost (USD) per day</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -210,7 +233,7 @@ export default function TradeAiUsageDashboard() {
         </section>
 
         {/* Per-feature table */}
-        <section className="bg-card border border-border rounded-lg overflow-hidden">
+        <section className="bg-card border border-border rounded-lg overflow-hidden print-break-inside-avoid">
           <div className="p-4 border-b border-border">
             <h2 className="text-sm font-medium">By feature</h2>
           </div>
