@@ -528,6 +528,25 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   value={baseIdx}
                   onChange={setBaseIdx}
                 />
+              ) : axes.hasVariants && axes.hasSingleAxisSplit ? (
+                <>
+                  <ExpandableSpec
+                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.singleMaterialOptions.join("\n")}
+                    placeholder="Select your material choice"
+                    emphasized
+                    value={singleSplitMatIdx}
+                    onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
+                  />
+                  <ExpandableSpec
+                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    text={axes.singleSizeOptions.join("\n")}
+                    placeholder="Select your size"
+                    emphasized
+                    value={singleSplitSizeIdx}
+                    onChange={(idx) => setSingleSplitSizeIdx(idx < 0 ? null : idx)}
+                  />
+                </>
               ) : axes.hasVariants ? (
                 <ExpandableSpec
                   icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
