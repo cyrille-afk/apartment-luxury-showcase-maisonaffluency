@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart3, Coins, AlertTriangle, Activity, Printer } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -72,6 +72,15 @@ export default function TradeAiUsageDashboard() {
   const { user, isAdmin, loading } = useAuth();
   const [days, setDays] = useState(30);
 
+  // Set document.title directly (bypass Helmet) so the browser's
+  // "Save as PDF" dialog uses it as the default filename.
+  useEffect(() => {
+    const prev = document.title;
+    document.title = `AI Usage Dashboard - ${format(new Date(), "yyyy-MM-dd")}`;
+    return () => { document.title = prev; };
+  }, []);
+
+
   const range = useMemo(() => {
     const to = new Date();
     const from = subDays(to, days);
@@ -123,8 +132,8 @@ export default function TradeAiUsageDashboard() {
   return (
     <div className="min-h-screen bg-background print-root">
       <Helmet>
-        <title>AI Usage Dashboard — Admin</title>
         <meta name="robots" content="noindex" />
+
         <style>{`
           @media print {
             @page { size: A4 landscape; margin: 10mm; }
@@ -189,22 +198,14 @@ export default function TradeAiUsageDashboard() {
               </button>
             ))}
             <button
-              onClick={() => {
-                const prev = document.title;
-                document.title = `AI Usage Dashboard - ${format(new Date(), "yyyy-MM-dd")}`;
-                const restore = () => {
-                  document.title = prev;
-                  window.removeEventListener("afterprint", restore);
-                };
-                window.addEventListener("afterprint", restore);
-                window.print();
-              }}
+              onClick={() => window.print()}
               className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
               title="Print or save as PDF"
             >
               <Printer className="h-3.5 w-3.5" />
               Print / PDF
             </button>
+
 
           </div>
         </header>
