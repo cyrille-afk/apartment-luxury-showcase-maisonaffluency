@@ -69,6 +69,20 @@ const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 const normalizeDesignerKey = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
+// Produce candidate keys for fuzzy designer matching.
+// E.g. "Garnier & Linker - Guillaume Garnier & Florent Linker" → also "garnier & linker"
+// E.g. "Garnier & Linker for Théorème Editions" → also "garnier & linker"
+const designerKeyStems = (value: string): string[] => {
+  const norm = normalizeDesignerKey(value);
+  const stems = new Set<string>([norm]);
+  const seps = [" for ", " - ", " — ", " – ", " by ", " x ", " × ", ", "];
+  for (const sep of seps) {
+    const idx = norm.indexOf(sep);
+    if (idx > 0) stems.add(norm.slice(0, idx).trim());
+  }
+  return [...stems].filter(Boolean);
+};
+
 const IMAGE_IDENTIFIER_TO_INDEX: Record<string, number> = {
   "An Inviting Lounge Area": GALLERY.AN_INVITING_LOUNGE_AREA,
   "A Sophisticated Living Room": GALLERY.A_SOPHISTICATED_LIVING_ROOM,
