@@ -1193,10 +1193,19 @@ const TradeProductPage: React.FC = () => {
                   onChange={(idx) => {
                     const newSize = singleSizeOptions[idx] ?? null;
                     setSelectedSingleSize(newSize);
-                    if (newSize && selectedSingleMaterial && !singleAxisParsed.some((p) => p.size === newSize && p.material === selectedSingleMaterial)) {
+                    let nextMat = selectedSingleMaterial;
+                    if (newSize && nextMat && !singleAxisParsed.some((p) => p.size === newSize && p.material === nextMat)) {
                       setSelectedSingleMaterial(null);
+                      nextMat = null;
                     }
+                    // Sync the gallery using the matched variant's full raw
+                    // label so size+material combos map to the right image.
+                    const match = newSize
+                      ? singleAxisParsed.find((p) => p.size === newSize && (!nextMat || p.material === nextMat))
+                      : null;
+                    handleMaterialChange((match?.variant.label || nextMat || null) as string | null);
                   }}
+
                   disabledIndices={disabledSizeIndices}
                   helperText={
                     disabledSizeIndices.length > 0 && selectedSingleMaterial
