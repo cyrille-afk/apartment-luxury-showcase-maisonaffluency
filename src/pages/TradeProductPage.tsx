@@ -1049,12 +1049,21 @@ const TradeProductPage: React.FC = () => {
                   onChange={(idx) => {
                     const newMat = singleMaterialOptions[idx] ?? null;
                     setSelectedSingleMaterial(newMat);
-                    handleMaterialChange(newMat);
                     // Reset size if it isn't offered for the new material
-                    if (newMat && selectedSingleSize && !singleAxisParsed.some((p) => p.material === newMat && p.size === selectedSingleSize)) {
+                    let nextSize = selectedSingleSize;
+                    if (newMat && nextSize && !singleAxisParsed.some((p) => p.material === newMat && p.size === nextSize)) {
                       setSelectedSingleSize(null);
+                      nextSize = null;
                     }
+                    // Use the matched variant's full raw label so the
+                    // variant_image_map lookup (which keys on size+material)
+                    // resolves to the right gallery image.
+                    const match = newMat
+                      ? singleAxisParsed.find((p) => p.material === newMat && (!nextSize || p.size === nextSize))
+                      : null;
+                    handleMaterialChange((match?.variant.label || newMat || null) as string | null);
                   }}
+
                   disabledIndices={disabledMaterialIndices}
                   helperText={
                     disabledMaterialIndices.length > 0 && selectedSingleSize
@@ -1184,10 +1193,19 @@ const TradeProductPage: React.FC = () => {
                   onChange={(idx) => {
                     const newSize = singleSizeOptions[idx] ?? null;
                     setSelectedSingleSize(newSize);
-                    if (newSize && selectedSingleMaterial && !singleAxisParsed.some((p) => p.size === newSize && p.material === selectedSingleMaterial)) {
+                    let nextMat = selectedSingleMaterial;
+                    if (newSize && nextMat && !singleAxisParsed.some((p) => p.size === newSize && p.material === nextMat)) {
                       setSelectedSingleMaterial(null);
+                      nextMat = null;
                     }
+                    // Sync the gallery using the matched variant's full raw
+                    // label so size+material combos map to the right image.
+                    const match = newSize
+                      ? singleAxisParsed.find((p) => p.size === newSize && (!nextMat || p.material === nextMat))
+                      : null;
+                    handleMaterialChange((match?.variant.label || nextMat || null) as string | null);
                   }}
+
                   disabledIndices={disabledSizeIndices}
                   helperText={
                     disabledSizeIndices.length > 0 && selectedSingleMaterial
