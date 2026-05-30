@@ -128,10 +128,20 @@ export default function TradeAiUsageDashboard() {
         <style>{`
           @media print {
             @page { size: A4 landscape; margin: 10mm; }
-            html, body, .print-root { background: #ffffff !important; color: #111 !important; min-height: 0 !important; }
+            html, body { background: #ffffff !important; color: #111 !important; }
+            /* Hide all app chrome (nav, sidebars, headers from TradeLayout) */
+            body * { visibility: hidden !important; }
+            .print-root, .print-root * { visibility: visible !important; }
+            .print-root {
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 100% !important;
+              min-height: 0 !important;
+              background: #ffffff !important;
+            }
             .no-print { display: none !important; }
             .print-break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
-            /* Force readable colors */
             .print-root, .print-root * {
               color: #111 !important;
               border-color: #d4d4d4 !important;
@@ -142,15 +152,14 @@ export default function TradeAiUsageDashboard() {
             .print-root .bg-card, .print-root section { background: #ffffff !important; }
             .print-root .bg-muted\\/40 { background: #f5f5f5 !important; }
             .print-root .text-muted-foreground { color: #555 !important; }
-            /* Recharts: keep SVG visible */
             .recharts-wrapper, .recharts-surface { overflow: visible !important; }
             .recharts-cartesian-axis-tick text, .recharts-legend-item-text { fill: #333 !important; color: #333 !important; }
             .recharts-cartesian-grid line { stroke: #e5e5e5 !important; }
-            /* Tables */
             table { font-size: 10px !important; }
             th, td { padding: 4px 8px !important; }
           }
         `}</style>
+
 
       </Helmet>
 
@@ -180,13 +189,23 @@ export default function TradeAiUsageDashboard() {
               </button>
             ))}
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+                const prev = document.title;
+                document.title = `AI Usage Dashboard - ${format(new Date(), "yyyy-MM-dd")}`;
+                const restore = () => {
+                  document.title = prev;
+                  window.removeEventListener("afterprint", restore);
+                };
+                window.addEventListener("afterprint", restore);
+                window.print();
+              }}
               className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
               title="Print or save as PDF"
             >
               <Printer className="h-3.5 w-3.5" />
               Print / PDF
             </button>
+
           </div>
         </header>
 
