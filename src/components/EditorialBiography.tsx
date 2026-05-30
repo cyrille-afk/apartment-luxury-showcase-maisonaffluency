@@ -293,6 +293,10 @@ const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1774856563/Screen_Shot_2026-03-30_at_3.41.52_PM_sezoxs.png",
   "https://www.youtube.com/watch?v=hQ0_HOzRKwI":
     "/images/lbv-dior-poster.jpg",
+  "https://youtu.be/6o-b80DxkzE":
+    "/images/alex-proba-second-studio-poster.jpg",
+  "https://www.youtube.com/watch?v=6o-b80DxkzE":
+    "/images/alex-proba-second-studio-poster.jpg",
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
