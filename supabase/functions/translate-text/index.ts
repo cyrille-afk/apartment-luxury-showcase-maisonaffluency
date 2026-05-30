@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
+import { logAiUsage } from "../_shared/aiUsage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,6 +98,7 @@ RULES:
     }
 
     const data = await response.json();
+    logAiUsage({ feature: "translate-text", model: "google/gemini-2.5-flash", usage: data?.usage }).catch(() => {});
     const translated = data?.choices?.[0]?.message?.content?.trim() ?? "";
     return new Response(JSON.stringify({ translated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
+import { logAiUsage } from "../_shared/aiUsage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -699,6 +700,7 @@ async function classifySentiment(
     });
     if (!resp.ok) return fallback;
     const data = await resp.json();
+    logAiUsage({ feature: "trade-concierge-sentiment", model: "google/gemini-2.5-flash-lite", usage: data?.usage }).catch(() => {});
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     if (!args) return fallback;
     const parsed = JSON.parse(args);
@@ -1445,6 +1447,12 @@ serve(async (req) => {
             } catch (logErr) {
               console.error("usage log insert failed:", logErr);
             }
+            logAiUsage({
+              feature: "trade-concierge",
+              model: usageModel,
+              usage: { prompt_tokens: pt, completion_tokens: ct, total_tokens: tt },
+              userId,
+            }).catch(() => {});
           }
           controller.close();
         }

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
+import { logAiUsage } from "../_shared/aiUsage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -365,6 +366,7 @@ RULES:
     }
 
     const data = await response.json();
+    logAiUsage({ feature: "product-description-writer", model: "google/gemini-3-flash-preview", usage: data?.usage }).catch(() => {});
     const description = data.choices?.[0]?.message?.content || "";
 
     return new Response(

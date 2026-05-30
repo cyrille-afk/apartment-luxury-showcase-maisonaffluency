@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage_events: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          error_code: string | null
+          estimated_cost_usd: number
+          feature: string
+          id: string
+          latency_ms: number | null
+          model: string
+          prompt_tokens: number
+          status: string
+          total_tokens: number
+          user_id: string | null
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          error_code?: string | null
+          estimated_cost_usd?: number
+          feature: string
+          id?: string
+          latency_ms?: number | null
+          model: string
+          prompt_tokens?: number
+          status?: string
+          total_tokens?: number
+          user_id?: string | null
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          error_code?: string | null
+          estimated_cost_usd?: number
+          feature?: string
+          id?: string
+          latency_ms?: number | null
+          model?: string
+          prompt_tokens?: number
+          status?: string
+          total_tokens?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       auction_benchmarks: {
         Row: {
           auction_house: string
@@ -4935,6 +4980,10 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      admin_ai_usage_summary: {
+        Args: { _from: string; _to: string }
+        Returns: Json
       }
       admin_onboarding_stats: {
         Args: never
