@@ -68,6 +68,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [baseIdx, setBaseIdx] = useState<number | null>(null);
   const [topIdx, setTopIdx] = useState<number | null>(null);
   const [sizeIdx, setSizeIdx] = useState<number | null>(null);
+  // Single-axis split (variants encode "size — material" in one label).
+  const [singleSplitMatIdx, setSingleSplitMatIdx] = useState<number | null>(null);
+  const [singleSplitSizeIdx, setSingleSplitSizeIdx] = useState<number | null>(null);
 
   // Reset image + variant states when product changes
   useEffect(() => {
@@ -78,6 +81,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setBaseIdx(null);
     setTopIdx(null);
     setSizeIdx(null);
+    setSingleSplitMatIdx(null);
+    setSingleSplitSizeIdx(null);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
