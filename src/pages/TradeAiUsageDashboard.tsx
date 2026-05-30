@@ -87,7 +87,7 @@ export default function TradeAiUsageDashboard() {
         _to: range.to,
       });
       if (error) throw error;
-      return data as { totals: Totals; daily: DailyRow[]; by_feature: FeatureRow[] };
+      return data as unknown as { totals: Totals; daily: DailyRow[]; by_feature: FeatureRow[] };
     },
   });
 
