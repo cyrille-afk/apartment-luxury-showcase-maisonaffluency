@@ -1145,6 +1145,26 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const location = useLocation();
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  // Restore scroll to originating designer card after returning from the
+  // home-page Gallery lightbox (set via sessionStorage in the thumbnail handler).
+  useEffect(() => {
+    const id = sessionStorage.getItem('pendingDesignerScrollId');
+    if (!id) return;
+    let attempts = 0;
+    const tryScroll = () => {
+      attempts++;
+      const el = document.getElementById(id);
+      if (el) {
+        sessionStorage.removeItem('pendingDesignerScrollId');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (attempts < 20) setTimeout(tryScroll, 150);
+      else sessionStorage.removeItem('pendingDesignerScrollId');
+    };
+    tryScroll();
+  }, [location.pathname]);
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
