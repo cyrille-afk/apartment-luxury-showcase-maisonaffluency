@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, Coins, AlertTriangle, Activity } from "lucide-react";
+import { BarChart3, Coins, AlertTriangle, Activity, Printer } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
