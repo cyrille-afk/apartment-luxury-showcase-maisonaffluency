@@ -185,6 +185,16 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
       if (!base) return null;
       return variants.find(v => (v.base || "").trim() === base) || null;
     }
+    // Single-axis split (size × material encoded in label)
+    if (axes.hasSingleAxisSplit) {
+      const mat = singleSplitMatIdx != null && singleSplitMatIdx >= 0 ? axes.singleMaterialOptions[singleSplitMatIdx] : null;
+      const size = singleSplitSizeIdx != null && singleSplitSizeIdx >= 0 ? axes.singleSizeOptions[singleSplitSizeIdx] : null;
+      if (!mat && !size) return null;
+      const match = axes.singleAxisParsed.find(
+        (p) => (!mat || p.material === mat) && (!size || p.size === size),
+      );
+      return match?.variant || null;
+    }
     // single-axis label
     if (sizeIdx != null && sizeIdx >= 0) {
       return variants[sizeIdx] || null;
@@ -208,6 +218,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         base: effectiveBase,
         top: effectiveTop,
         size: effectiveSize,
+        label: axes.hasSingleAxisSplit ? (selectedVariant?.label || null) : undefined,
         variants: variantsList,
         imageCount: galleryImages.length,
         requireCompletePair: axes.isDualAxis,
