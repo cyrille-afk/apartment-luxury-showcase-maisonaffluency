@@ -879,14 +879,19 @@ const TradeProductPage: React.FC = () => {
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
 
   // When the product has variants but the user hasn't picked one yet, fall back
-  // to the cheapest variant price so we can show "From €X" instead of "Price on request".
-  const minVariantCents = hasVariants && sizeVariants && sizeVariants.length > 0
-    ? Math.min(...sizeVariants.map((v) => v.price_cents))
-    : null;
+  // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
+  // Variants without a price (price_cents = 0 → "Price on Request" finishes) are skipped here.
+  const pricedVariantCents = hasVariants && sizeVariants
+    ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
+    : [];
+  const minVariantCents = pricedVariantCents.length > 0 ? Math.min(...pricedVariantCents) : null;
   const effectiveRrpCents = hasVariants
-    ? (activeVariant ? activeVariant.price_cents : minVariantCents)
+    ? (activeVariant
+      ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : null)
+      : minVariantCents)
     : pricing?.rrp_price_cents ?? null;
   const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
+
 
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
