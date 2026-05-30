@@ -123,7 +123,7 @@ export default function TradeAiUsageDashboard() {
   return (
     <div className="min-h-screen bg-background print-root">
       <Helmet>
-        <title>AI Usage Dashboard — Admin</title>
+        <meta name="robots" content="noindex" />
         <meta name="robots" content="noindex" />
         <style>{`
           @media print {
