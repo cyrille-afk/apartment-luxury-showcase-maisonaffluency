@@ -191,7 +191,7 @@ export default function TradeAiUsageDashboard() {
         {isLoading && <div className="text-sm text-muted-foreground">Loading…</div>}
 
         {/* Daily tokens stacked by feature */}
-        <section className="bg-card border border-border rounded-lg p-4">
+        <section className="bg-card border border-border rounded-lg p-4 print-break-inside-avoid">
           <h2 className="text-sm font-medium mb-3">Daily tokens by feature</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -213,7 +213,7 @@ export default function TradeAiUsageDashboard() {
         </section>
 
         {/* Daily cost line */}
-        <section className="bg-card border border-border rounded-lg p-4">
+        <section className="bg-card border border-border rounded-lg p-4 print-break-inside-avoid">
           <h2 className="text-sm font-medium mb-3">Estimated cost (USD) per day</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -233,7 +233,7 @@ export default function TradeAiUsageDashboard() {
         </section>
 
         {/* Per-feature table */}
-        <section className="bg-card border border-border rounded-lg overflow-hidden">
+        <section className="bg-card border border-border rounded-lg overflow-hidden print-break-inside-avoid">
           <div className="p-4 border-b border-border">
             <h2 className="text-sm font-medium">By feature</h2>
           </div>
