@@ -415,8 +415,15 @@ const VariantSelectors: React.FC<{
           onChange={(idx) => {
             const m = singleMaterialOptions[idx] ?? null;
             setSelMat(m);
-            onMaterialChange?.(m);
-            if (m && selSize && !singleAxisParsed.some((p) => p.material === m && p.size === selSize)) setSelSize(null);
+            let nextSize = selSize;
+            if (m && nextSize && !singleAxisParsed.some((p) => p.material === m && p.size === nextSize)) {
+              setSelSize(null);
+              nextSize = null;
+            }
+            const match = m
+              ? singleAxisParsed.find((p) => p.material === m && (!nextSize || p.size === nextSize))
+              : null;
+            onMaterialChange?.((match?.variant.label || m || null) as string | null);
           }}
           disabledIndices={disabledMatIdx}
           helperText={
@@ -482,7 +489,15 @@ const VariantSelectors: React.FC<{
           onChange={(idx) => {
             const s = singleSizeOptions[idx] ?? null;
             setSelSize(s);
-            if (s && selMat && !singleAxisParsed.some((p) => p.size === s && p.material === selMat)) setSelMat(null);
+            let nextMat = selMat;
+            if (s && nextMat && !singleAxisParsed.some((p) => p.size === s && p.material === nextMat)) {
+              setSelMat(null);
+              nextMat = null;
+            }
+            const match = s
+              ? singleAxisParsed.find((p) => p.size === s && (!nextMat || p.material === nextMat))
+              : null;
+            onMaterialChange?.((match?.variant.label || nextMat || null) as string | null);
           }}
           disabledIndices={disabledSizeIdx}
           helperText={
