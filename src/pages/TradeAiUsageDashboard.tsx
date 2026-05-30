@@ -72,6 +72,15 @@ export default function TradeAiUsageDashboard() {
   const { user, isAdmin, loading } = useAuth();
   const [days, setDays] = useState(30);
 
+  // Set document.title directly (bypass Helmet) so the browser's
+  // "Save as PDF" dialog uses it as the default filename.
+  useEffect(() => {
+    const prev = document.title;
+    document.title = `AI Usage Dashboard - ${format(new Date(), "yyyy-MM-dd")}`;
+    return () => { document.title = prev; };
+  }, []);
+
+
   const range = useMemo(() => {
     const to = new Date();
     const from = subDays(to, days);
