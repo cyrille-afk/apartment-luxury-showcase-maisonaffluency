@@ -62,9 +62,16 @@ function applyRugPerSqmPricing(
 ): { label?: string; base?: string; top?: string; price_cents: number }[] {
   if (!variants?.length) return [];
   if (!isRugCategory(category) || !pricePerSqmCents) {
+    // Keep ALL variants — including those without an explicit price.
+    // Variants with price_cents = 0 surface as "Price on Request" in the UI
+    // (e.g. a White Onyx finish that hasn't been quoted yet should still
+    // appear in the finish dropdown).
     return variants
-      .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0)
-      .map((v) => ({ ...v, price_cents: v.price_cents as number }));
+      .filter((v) => v != null)
+      .map((v) => ({
+        ...v,
+        price_cents: typeof v.price_cents === "number" && v.price_cents > 0 ? v.price_cents : 0,
+      }));
   }
   return variants
     .map((v) => {
@@ -72,10 +79,13 @@ function applyRugPerSqmPricing(
       if (explicit) return { ...v, price_cents: explicit };
       const dimSource = v.base || v.label || "";
       const computed = priceRugVariantFromLabel(dimSource, pricePerSqmCents);
-      return computed ? { ...v, price_cents: computed } : null;
+      // Rug variants without computable pricing still appear; they render as
+      // "Price on Request" via the 0-cents fallback.
+      return { ...v, price_cents: computed ?? 0 };
     })
     .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
 }
+
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
