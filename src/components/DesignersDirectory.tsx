@@ -1170,6 +1170,10 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // Restore scroll to originating designer card after returning from the
   // home-page Gallery lightbox (set via sessionStorage in the thumbnail handler).
   useEffect(() => {
+    // Only the standalone /designers route should consume this scroll-target;
+    // the homepage also mounts DesignersDirectory and would otherwise clear
+    // sessionStorage before the user navigates back from the lightbox.
+    if (!location.pathname.startsWith('/designers')) return;
     const id = sessionStorage.getItem('pendingDesignerScrollId');
     if (!id) return;
     let attempts = 0;
