@@ -284,7 +284,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 type DesignerLink = { type: string; url?: string };
-export type CuratorPick = { image?: string; hoverImage?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string; pdfFilename?: string; pdfUrls?: { label: string; url: string; filename?: string }[] };
+export type CuratorPick = { image?: string; hoverImage?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string; pdfFilename?: string; pdfUrls?: { label: string; url: string; filename?: string }[]; size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null; variant_placeholder?: string | null; base_axis_label?: string | null; top_axis_label?: string | null; gallery_images?: string[] | null; variant_image_map?: Record<string, number> | null };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
