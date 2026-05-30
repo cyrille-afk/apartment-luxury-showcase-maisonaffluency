@@ -198,22 +198,14 @@ export default function TradeAiUsageDashboard() {
               </button>
             ))}
             <button
-              onClick={() => {
-                const prev = document.title;
-                document.title = `AI Usage Dashboard - ${format(new Date(), "yyyy-MM-dd")}`;
-                const restore = () => {
-                  document.title = prev;
-                  window.removeEventListener("afterprint", restore);
-                };
-                window.addEventListener("afterprint", restore);
-                window.print();
-              }}
+              onClick={() => window.print()}
               className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
               title="Print or save as PDF"
             >
               <Printer className="h-3.5 w-3.5" />
               Print / PDF
             </button>
+
 
           </div>
         </header>
