@@ -62,9 +62,16 @@ function applyRugPerSqmPricing(
 ): { label?: string; base?: string; top?: string; price_cents: number }[] {
   if (!variants?.length) return [];
   if (!isRugCategory(category) || !pricePerSqmCents) {
+    // Keep ALL variants — including those without an explicit price.
+    // Variants with price_cents = 0 surface as "Price on Request" in the UI
+    // (e.g. a White Onyx finish that hasn't been quoted yet should still
+    // appear in the finish dropdown).
     return variants
-      .filter((v) => v && typeof v.price_cents === "number" && v.price_cents > 0)
-      .map((v) => ({ ...v, price_cents: v.price_cents as number }));
+      .filter((v) => v != null)
+      .map((v) => ({
+        ...v,
+        price_cents: typeof v.price_cents === "number" && v.price_cents > 0 ? v.price_cents : 0,
+      }));
   }
   return variants
     .map((v) => {
@@ -72,10 +79,13 @@ function applyRugPerSqmPricing(
       if (explicit) return { ...v, price_cents: explicit };
       const dimSource = v.base || v.label || "";
       const computed = priceRugVariantFromLabel(dimSource, pricePerSqmCents);
-      return computed ? { ...v, price_cents: computed } : null;
+      // Rug variants without computable pricing still appear; they render as
+      // "Price on Request" via the 0-cents fallback.
+      return { ...v, price_cents: computed ?? 0 };
     })
     .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
 }
+
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -869,14 +879,19 @@ const TradeProductPage: React.FC = () => {
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
 
   // When the product has variants but the user hasn't picked one yet, fall back
-  // to the cheapest variant price so we can show "From €X" instead of "Price on request".
-  const minVariantCents = hasVariants && sizeVariants && sizeVariants.length > 0
-    ? Math.min(...sizeVariants.map((v) => v.price_cents))
-    : null;
+  // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
+  // Variants without a price (price_cents = 0 → "Price on Request" finishes) are skipped here.
+  const pricedVariantCents = hasVariants && sizeVariants
+    ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
+    : [];
+  const minVariantCents = pricedVariantCents.length > 0 ? Math.min(...pricedVariantCents) : null;
   const effectiveRrpCents = hasVariants
-    ? (activeVariant ? activeVariant.price_cents : minVariantCents)
+    ? (activeVariant
+      ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : null)
+      : minVariantCents)
     : pricing?.rrp_price_cents ?? null;
   const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
+
 
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
