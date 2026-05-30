@@ -45,6 +45,7 @@ const analyticsGroup: AdminCard[] = [
   { title: "Magazine Funnel", description: "Featured issue impressions, clicks, and downloads", url: "/trade/magazine-analytics", icon: BarChart3 },
   { title: "Client Profiles", description: "AI-powered taste profiles and engagement scores", url: "/trade/client-profiles", icon: Sparkles },
   { title: "Concierge Token Usage", description: "AI concierge token consumption per user (last 30 days) with cost estimate", url: "/trade/admin/concierge-usage", icon: Sparkles },
+  { title: "AI Usage Dashboard", description: "Tokens, requests, and estimated cost by feature and day across all AI features", url: "/trade/admin/ai-usage", icon: BarChart3 },
   { title: "Audit Log", description: "Track content changes and admin actions", url: "/trade/audit-log", icon: History },
 ];
 
