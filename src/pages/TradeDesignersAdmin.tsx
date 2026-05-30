@@ -464,6 +464,10 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     Logistics & packing <span className="italic normal-case font-normal">— used to pre-fill shipping on quotes</span>
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="col-span-2 md:col-span-4">
+                      <label className="text-[10px] text-muted-foreground">Packed dimensions (cm) — auto-fills CBM below</label>
+                      <DimsToCbm onCompute={(cbm) => updateField(pick.id, "pack_cbm", cbm)} />
+                    </div>
                     <div>
                       <label className="text-[10px] text-muted-foreground">Packing CBM (m³)</label>
                       <Input
@@ -480,6 +484,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         className="text-xs"
                       />
                     </div>
+
                     <div>
                       <label className="text-[10px] text-muted-foreground">Weight (kg, gross)</label>
                       <Input
