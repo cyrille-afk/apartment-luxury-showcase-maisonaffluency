@@ -597,7 +597,10 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                               }, 600);
                             } else {
                               // Gallery isn't mounted on this route (e.g. /designers).
-                              // Navigate home; Gallery picks up sessionStorage on mount.
+                              // Remember where to return + which card to scroll back to.
+                              const here = `${window.location.pathname}${window.location.search}`;
+                              sessionStorage.setItem('galleryReturnUrl', here);
+                              sessionStorage.setItem('pendingDesignerScrollId', `designer-card-${item.slug}`);
                               navigate('/');
                             }
                           } else {
