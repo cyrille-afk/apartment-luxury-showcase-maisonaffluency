@@ -1431,6 +1431,40 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   const activeLetters = useMemo(() => new Set(alphaGroups.map(([l]) => l)), [alphaGroups]);
 
+  // Restore scroll to the originating designer card after closing a Gallery
+  // lightbox launched from an On View thumbnail on the standalone directory.
+  useEffect(() => {
+    if (!location.pathname.startsWith('/designers')) return;
+    const id = sessionStorage.getItem('pendingDesignerScrollId');
+    if (!id) return;
+
+    const letter = sessionStorage.getItem('pendingDesignerScrollLetter');
+    if (letter && LETTERS.includes(letter)) {
+      setForcedLetters((prev) => new Set(prev).add(letter));
+    }
+
+    let attempts = 0;
+    let cancelled = false;
+    const tryScroll = () => {
+      if (cancelled) return;
+      attempts++;
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        sessionStorage.removeItem('pendingDesignerScrollId');
+        sessionStorage.removeItem('pendingDesignerScrollLetter');
+        return;
+      }
+      if (attempts < 40) setTimeout(tryScroll, 150);
+    };
+
+    const timer = setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(tryScroll)), 120);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [alphaGroups.length, location.pathname]);
+
   const parentDesignerCountByName = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const d of items) {
