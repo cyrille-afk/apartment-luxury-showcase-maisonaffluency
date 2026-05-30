@@ -622,6 +622,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                               const here = `${window.location.pathname}${window.location.search}`;
                               sessionStorage.setItem('galleryReturnUrl', here);
                               sessionStorage.setItem('pendingDesignerScrollId', `designer-card-${item.slug}`);
+                              sessionStorage.setItem('pendingDesignerScrollLetter', (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase() || "#");
                               navigate('/');
                             }
                           } else {
@@ -1167,29 +1168,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
-  // Restore scroll to originating designer card after returning from the
-  // home-page Gallery lightbox (set via sessionStorage in the thumbnail handler).
-  useEffect(() => {
-    // Only the standalone /designers route should consume this scroll-target;
-    // the homepage also mounts DesignersDirectory and would otherwise clear
-    // sessionStorage before the user navigates back from the lightbox.
-    if (!location.pathname.startsWith('/designers')) return;
-    const id = sessionStorage.getItem('pendingDesignerScrollId');
-    if (!id) return;
-    let attempts = 0;
-    const tryScroll = () => {
-      attempts++;
-      const el = document.getElementById(id);
-      if (el) {
-        sessionStorage.removeItem('pendingDesignerScrollId');
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-      if (attempts < 20) setTimeout(tryScroll, 150);
-      else sessionStorage.removeItem('pendingDesignerScrollId');
-    };
-    tryScroll();
-  }, [location.pathname]);
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
@@ -1452,6 +1430,40 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, [filteredItems]);
 
   const activeLetters = useMemo(() => new Set(alphaGroups.map(([l]) => l)), [alphaGroups]);
+
+  // Restore scroll to the originating designer card after closing a Gallery
+  // lightbox launched from an On View thumbnail on the standalone directory.
+  useEffect(() => {
+    if (!location.pathname.startsWith('/designers')) return;
+    const id = sessionStorage.getItem('pendingDesignerScrollId');
+    if (!id) return;
+
+    const letter = sessionStorage.getItem('pendingDesignerScrollLetter');
+    if (letter && LETTERS.includes(letter)) {
+      setForcedLetters((prev) => new Set(prev).add(letter));
+    }
+
+    let attempts = 0;
+    let cancelled = false;
+    const tryScroll = () => {
+      if (cancelled) return;
+      attempts++;
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        sessionStorage.removeItem('pendingDesignerScrollId');
+        sessionStorage.removeItem('pendingDesignerScrollLetter');
+        return;
+      }
+      if (attempts < 40) setTimeout(tryScroll, 150);
+    };
+
+    const timer = setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(tryScroll)), 120);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [alphaGroups.length, location.pathname]);
 
   const parentDesignerCountByName = useMemo(() => {
     const counts: Record<string, number> = {};
