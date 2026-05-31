@@ -765,6 +765,21 @@ async function loadRelevantPieces(
   }
 }
 
+function buildSentimentDirective(c: { sentiment: string; intent: string; escalate: boolean }): string {
+  if (c.sentiment === "frustrated" || c.intent === "complaint") {
+    return "The user appears FRUSTRATED. Open by acknowledging the friction in one sentence ('I hear you — that's not the experience we want'), validate the concern, then offer a concrete next step. Do NOT upsell or pivot to recommendations. Avoid jargon. Keep it human.";
+  }
+  if (c.sentiment === "anxious" || c.sentiment === "confused") {
+    return "The user seems UNCERTAIN. Slow down, confirm what they're trying to achieve, and offer one clear next step rather than several options.";
+  }
+  if (c.sentiment === "delighted") {
+    return "The user is POSITIVE. Match their energy briefly and keep momentum — propose the next logical step (tearsheet, sample, quote) without over-selling.";
+  }
+  return "Tone: warm, refined, helpful. Default register.";
+}
+
+
+
 
 const GENERIC_PRODUCT_TOKENS = new Set([
   "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
