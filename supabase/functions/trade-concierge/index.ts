@@ -1561,7 +1561,17 @@ serve(async (req) => {
           controller.enqueue(encoder.encode(`event: escalation\ndata: ${JSON.stringify(payload)}\n\n`));
         }
         const flushProposal = async () => {
-          for (const tc of toolCallBuffers.values()) {
+          // Deterministic ordering: tearsheets ALWAYS flush before quotes so a
+          // chained turn renders as [tearsheet card → quote card] regardless of
+          // the index the model chose for each tool call.
+          const allBuffers = Array.from(toolCallBuffers.values());
+          const tearsheetBuffers = allBuffers.filter((b) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
+          const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
+          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers];
+          if (tearsheetBuffers.length && quoteBuffers.length) {
+            console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
+          }
+          for (const tc of orderedBuffers) {
             // ====== QUOTE TOOLS ======
             if (tc.name === "draft_quote" || tc.name === "add_to_quote") {
               let parsed: any = null;
