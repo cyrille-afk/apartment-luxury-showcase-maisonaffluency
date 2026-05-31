@@ -83,7 +83,7 @@ RULES:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: TRANSLATE_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: text },
