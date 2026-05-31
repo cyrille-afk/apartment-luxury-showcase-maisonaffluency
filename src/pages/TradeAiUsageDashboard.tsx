@@ -1,11 +1,12 @@
 import { Helmet } from "react-helmet-async";
 import { Navigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, Coins, AlertTriangle, Activity, Download } from "lucide-react";
+import { BarChart3, Coins, AlertTriangle, Activity, Download, Database, Loader2 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   ResponsiveContainer,
   BarChart,
