@@ -215,10 +215,22 @@ export default function TradeDescriptionWriter() {
         {/* Result */}
         {result && (
           <div className="space-y-3">
-            <div className="rounded-lg border border-border bg-card p-5">
-              <div className="prose prose-sm max-w-none font-body text-foreground">
-                <ReactMarkdown>{result}</ReactMarkdown>
-              </div>
+            <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+              <textarea
+                value={result}
+                onChange={(e) => setResult(e.target.value)}
+                rows={Math.min(20, Math.max(6, result.split("\n").length + 2))}
+                className="w-full resize-y rounded-md border border-border bg-background p-3 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                placeholder="Edit the generated description…"
+              />
+              <details className="group">
+                <summary className="cursor-pointer font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
+                  Preview
+                </summary>
+                <div className="prose prose-sm max-w-none font-body text-foreground mt-3 pt-3 border-t border-border">
+                  <ReactMarkdown>{result}</ReactMarkdown>
+                </div>
+              </details>
             </div>
 
             <div className="flex gap-2">
