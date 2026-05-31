@@ -2,9 +2,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
+const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
+const CHAT_MAX_TOKENS = tokenBudget("chat");
+const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -671,6 +674,7 @@ async function classifySentiment(
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: SENTIMENT_MODEL,
+        max_completion_tokens: SENTIMENT_MAX_TOKENS,
         messages: [
           {
             role: "system",
@@ -1175,7 +1179,7 @@ serve(async (req) => {
           messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
           tools: availableTools,
           tool_choice: isExplicitQuoteIntent ? "required" : "auto",
-          max_tokens: 800,
+          max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
           stream: true,
           stream_options: { include_usage: true },
         }),

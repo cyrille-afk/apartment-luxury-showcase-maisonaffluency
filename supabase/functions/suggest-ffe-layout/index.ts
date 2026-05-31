@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
-// Spatial layout reasoning — requires the strong tier.
 const FFE_MODEL = modelFor("strong");
+const FFE_MAX_TOKENS = tokenBudget("reasoning");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -219,6 +219,7 @@ Look at the floor plan image and propose an FF&E layout per room.`;
       },
       body: JSON.stringify({
         model: FFE_MODEL,
+        max_completion_tokens: FFE_MAX_TOKENS,
         messages: [
           { role: "system", content: system },
           {

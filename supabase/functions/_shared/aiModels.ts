@@ -25,3 +25,23 @@ export type ModelTier = keyof typeof MODEL_TIERS;
 export function modelFor(tier: ModelTier): string {
   return MODEL_TIERS[tier];
 }
+
+// Hard caps on completion length per task. Picked to cover the realistic
+// response shape with a small safety margin — keeps spend bounded if the
+// model goes off-rails. Override with the explicit number when needed.
+export const OUTPUT_LIMITS = {
+  classify: 128,      // sentiment / intent JSON
+  extract: 768,       // shipment docs, structured tool outputs
+  rewrite: 600,       // product descriptions
+  translate: 800,     // i18n strings
+  chat: 1200,         // concierge replies
+  reasoning: 2048,    // strong-tier planning (FFE, multi-room briefs)
+  tasteProfile: 1024, // user persona JSON
+} as const;
+
+export type OutputBudget = keyof typeof OUTPUT_LIMITS;
+
+export function tokenBudget(kind: OutputBudget): number {
+  return OUTPUT_LIMITS[kind];
+}
+

@@ -1,9 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdmin } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
 const TASTE_MODEL = modelFor("cheap");
+const TASTE_MAX_TOKENS = tokenBudget("tasteProfile");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -245,6 +246,7 @@ Respond in this exact JSON format:
           },
           body: JSON.stringify({
             model: TASTE_MODEL,
+            max_completion_tokens: TASTE_MAX_TOKENS,
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" },
           }),

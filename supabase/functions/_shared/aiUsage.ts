@@ -57,6 +57,12 @@ export interface LogAiUsageInput {
   errorCode?: string | null;
   userId?: string | null;
   latencyMs?: number | null;
+  /** True when the response was served from `ai_response_cache` (zero upstream cost). */
+  cached?: boolean;
+  /** SHA-256 of the rendered prompt — see `_shared/prompts.ts#hashPrompt`. */
+  promptHash?: string | null;
+  /** Tier label from MODEL_TIERS: 'cheap' | 'balanced' | 'strong' | 'image'. */
+  tier?: string | null;
 }
 
 export async function logAiUsage(input: LogAiUsageInput): Promise<void> {
@@ -68,7 +74,8 @@ export async function logAiUsage(input: LogAiUsageInput): Promise<void> {
     const prompt = input.usage?.prompt_tokens ?? 0;
     const completion = input.usage?.completion_tokens ?? 0;
     const total = input.usage?.total_tokens ?? prompt + completion;
-    const cost = estimateCostUsd(input.model, prompt, completion);
+    // Cached responses cost nothing upstream.
+    const cost = input.cached ? 0 : estimateCostUsd(input.model, prompt, completion);
 
     const sb = createClient(url, key, { auth: { persistSession: false } });
     await sb.from("ai_usage_events").insert({
@@ -82,6 +89,9 @@ export async function logAiUsage(input: LogAiUsageInput): Promise<void> {
       status: input.status ?? "ok",
       error_code: input.errorCode ?? null,
       latency_ms: input.latencyMs ?? null,
+      cached: input.cached ?? false,
+      prompt_hash: input.promptHash ?? null,
+      tier: input.tier ?? null,
     });
   } catch (_e) {
     // Never let logging break the caller.

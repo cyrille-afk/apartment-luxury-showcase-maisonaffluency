@@ -1,9 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
 const TRANSLATE_MODEL = modelFor("cheap");
+const TRANSLATE_MAX_TOKENS = tokenBudget("translate");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,6 +85,7 @@ RULES:
       },
       body: JSON.stringify({
         model: TRANSLATE_MODEL,
+        max_completion_tokens: TRANSLATE_MAX_TOKENS,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: text },
