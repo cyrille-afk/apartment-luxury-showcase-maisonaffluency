@@ -14,8 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_response_cache: {
+        Row: {
+          completion_tokens: number | null
+          created_at: string
+          expires_at: string
+          feature: string
+          hits: number
+          id: string
+          last_hit_at: string | null
+          model: string
+          prompt_hash: string
+          prompt_tokens: number | null
+          response_json: Json
+        }
+        Insert: {
+          completion_tokens?: number | null
+          created_at?: string
+          expires_at: string
+          feature: string
+          hits?: number
+          id?: string
+          last_hit_at?: string | null
+          model: string
+          prompt_hash: string
+          prompt_tokens?: number | null
+          response_json: Json
+        }
+        Update: {
+          completion_tokens?: number | null
+          created_at?: string
+          expires_at?: string
+          feature?: string
+          hits?: number
+          id?: string
+          last_hit_at?: string | null
+          model?: string
+          prompt_hash?: string
+          prompt_tokens?: number | null
+          response_json?: Json
+        }
+        Relationships: []
+      }
       ai_usage_events: {
         Row: {
+          cached: boolean
           completion_tokens: number
           created_at: string
           error_code: string | null
@@ -24,12 +67,15 @@ export type Database = {
           id: string
           latency_ms: number | null
           model: string
+          prompt_hash: string | null
           prompt_tokens: number
           status: string
+          tier: string | null
           total_tokens: number
           user_id: string | null
         }
         Insert: {
+          cached?: boolean
           completion_tokens?: number
           created_at?: string
           error_code?: string | null
@@ -38,12 +84,15 @@ export type Database = {
           id?: string
           latency_ms?: number | null
           model: string
+          prompt_hash?: string | null
           prompt_tokens?: number
           status?: string
+          tier?: string | null
           total_tokens?: number
           user_id?: string | null
         }
         Update: {
+          cached?: boolean
           completion_tokens?: number
           created_at?: string
           error_code?: string | null
@@ -52,8 +101,10 @@ export type Database = {
           id?: string
           latency_ms?: number | null
           model?: string
+          prompt_hash?: string | null
           prompt_tokens?: number
           status?: string
+          tier?: string | null
           total_tokens?: number
           user_id?: string | null
         }
