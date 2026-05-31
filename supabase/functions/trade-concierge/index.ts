@@ -1474,10 +1474,17 @@ serve(async (req) => {
       }
     } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
+    const planDirective = buildPlanDirective(extractedBrief);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes,
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective,
     );
-    const isExplicitQuoteIntent = /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg);
+    // The planner's intent + plan supersede the legacy regex when present. If the planner
+    // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
+    // chained selection_and_quote, expose all tools so the model can emit both calls.
+    const plannerQuoteOnly = extractedBrief.intent === "quote" && extractedBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
+    const isExplicitQuoteIntent = plannerQuoteOnly
+      || (extractedBrief.plan.length === 0
+        && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg));
     const availableTools = isExplicitQuoteIntent
       ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
       : TOOLS;
