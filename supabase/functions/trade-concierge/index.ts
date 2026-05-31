@@ -2,6 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { modelFor } from "../_shared/aiModels.ts";
+
+const SENTIMENT_MODEL = modelFor("cheap");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -324,8 +327,8 @@ function pickModel(text: string, includePieces: boolean): string {
   const complexSignals =
     /\b(curate|art[- ]direct|compose|edit for|mood|narrative|brief:|palette|atmosphere|whole (room|scheme|project)|multi[- ]room|across (the )?(apartment|house|hotel|villa))\b/.test(t);
   const longBrief = len > 600;
-  if (includePieces && (complexSignals || longBrief)) return "google/gemini-2.5-pro";
-  return "google/gemini-2.5-flash";
+  if (includePieces && (complexSignals || longBrief)) return modelFor("strong");
+  return modelFor("balanced");
 }
 
 async function loadCatalogContext(supabase: ReturnType<typeof createClient>, includePieces: boolean) {
@@ -667,7 +670,7 @@ async function classifySentiment(
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: SENTIMENT_MODEL,
         messages: [
           {
             role: "system",
@@ -700,7 +703,7 @@ async function classifySentiment(
     });
     if (!resp.ok) return fallback;
     const data = await resp.json();
-    logAiUsage({ feature: "trade-concierge-sentiment", model: "google/gemini-2.5-flash-lite", usage: data?.usage }).catch(() => {});
+    logAiUsage({ feature: "trade-concierge-sentiment", model: SENTIMENT_MODEL, usage: data?.usage }).catch(() => {});
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     if (!args) return fallback;
     const parsed = JSON.parse(args);

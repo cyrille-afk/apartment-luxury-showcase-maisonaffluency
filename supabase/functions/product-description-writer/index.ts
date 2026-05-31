@@ -2,6 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { modelFor } from "../_shared/aiModels.ts";
+
+const DESCRIPTION_MODEL = modelFor("balanced");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -336,7 +339,7 @@ RULES:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: DESCRIPTION_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
@@ -366,7 +369,7 @@ RULES:
     }
 
     const data = await response.json();
-    logAiUsage({ feature: "product-description-writer", model: "google/gemini-3-flash-preview", usage: data?.usage }).catch(() => {});
+    logAiUsage({ feature: "product-description-writer", model: DESCRIPTION_MODEL, usage: data?.usage }).catch(() => {});
     const description = data.choices?.[0]?.message?.content || "";
 
     return new Response(

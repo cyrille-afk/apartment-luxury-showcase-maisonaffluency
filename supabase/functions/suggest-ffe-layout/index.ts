@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { modelFor } from "../_shared/aiModels.ts";
+
+// Spatial layout reasoning — requires the strong tier.
+const FFE_MODEL = modelFor("strong");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -214,7 +218,7 @@ Look at the floor plan image and propose an FF&E layout per room.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: FFE_MODEL,
         messages: [
           { role: "system", content: system },
           {
@@ -254,7 +258,7 @@ Look at the floor plan image and propose an FF&E layout per room.`;
     }
 
     const aiJson = await aiResp.json();
-    logAiUsage({ feature: "suggest-ffe-layout", model: "google/gemini-2.5-pro", usage: aiJson?.usage }).catch(() => {});
+    logAiUsage({ feature: "suggest-ffe-layout", model: FFE_MODEL, usage: aiJson?.usage }).catch(() => {});
     const toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "AI returned no layout." }), {

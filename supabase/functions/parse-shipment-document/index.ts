@@ -3,6 +3,10 @@
 // structured shipment fields the estimator can pre-fill.
 import { requireUser, rateLimit, clientIp } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { modelFor } from "../_shared/aiModels.ts";
+
+// Vision extraction — flash-tier handles invoices/packing lists well at 1/15th the cost of pro.
+const SHIPMENT_MODEL = modelFor("balanced");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -111,7 +115,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: SHIPMENT_MODEL,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
@@ -139,7 +143,7 @@ Deno.serve(async (req) => {
     }
 
     const aiJson = await aiRes.json();
-    logAiUsage({ feature: "parse-shipment-document", model: "google/gemini-2.5-pro", usage: aiJson?.usage }).catch(() => {});
+    logAiUsage({ feature: "parse-shipment-document", model: SHIPMENT_MODEL, usage: aiJson?.usage }).catch(() => {});
     const toolCall = aiJson.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "AI did not return structured data" }), {

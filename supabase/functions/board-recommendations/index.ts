@@ -2,6 +2,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 
 import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent } from './relevance.ts'
 import { logAiUsage } from '../_shared/aiUsage.ts'
+import { modelFor } from '../_shared/aiModels.ts'
+
+const RECOMMENDATIONS_MODEL = modelFor('balanced')
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -270,7 +273,7 @@ Return a JSON object with a recommendations array:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
+        model: RECOMMENDATIONS_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
@@ -289,7 +292,7 @@ Return a JSON object with a recommendations array:
     }
 
     const aiData = await aiResponse.json()
-    logAiUsage({ feature: 'board-recommendations', model: 'google/gemini-3-flash-preview', usage: aiData?.usage }).catch(() => {})
+    logAiUsage({ feature: 'board-recommendations', model: RECOMMENDATIONS_MODEL, usage: aiData?.usage }).catch(() => {})
     const content = aiData.choices?.[0]?.message?.content || '[]'
     console.log('AI response:', content.substring(0, 500))
 
