@@ -116,6 +116,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: SHIPMENT_MODEL,
+        max_completion_tokens: SHIPMENT_MAX_TOKENS,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
