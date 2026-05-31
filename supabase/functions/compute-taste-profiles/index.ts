@@ -180,19 +180,26 @@ Deno.serve(async (req) => {
       signals.brands[sample.brand_name] = (signals.brands[sample.brand_name] || 0) + 3;
     }
 
-    // 8. For each user with enough data, ask AI to classify
+    // 8. Batch users (up to 8 per AI call) and classify in a single round-trip per batch.
     const results: any[] = [];
+
+    type Enriched = {
+      userId: string;
+      signals: UserSignals;
+      topBrands: string[];
+      topCategories: string[];
+      topMaterials: string[];
+      totalInteractions: number;
+    };
+    const enriched: Enriched[] = [];
 
     for (const [userId, signals] of userSignals) {
       const totalInteractions = signals.total_favorites + signals.total_quotes + signals.total_samples;
-
-      // Sort and take top entries
       const topBrands = Object.entries(signals.brands).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
       const topCategories = Object.entries(signals.categories).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
       const topMaterials = Object.entries(signals.materials).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
 
       if (totalInteractions < 2) {
-        // Not enough data — store minimal profile
         await supabase.from("client_taste_profiles").upsert({
           user_id: userId,
           cluster_label: "New Client",
@@ -213,80 +220,85 @@ Deno.serve(async (req) => {
         results.push({ user_id: userId, label: "New Client", skipped: true });
         continue;
       }
+      enriched.push({ userId, signals, topBrands, topCategories, topMaterials, totalInteractions });
+    }
 
-      // Build AI prompt
-      const prompt = `You are a luxury design taste analyst for Maison Affluency, a curated gallery of collectible furniture and objets d'art.
+    const BATCH_SIZE = 8;
+    for (let i = 0; i < enriched.length; i += BATCH_SIZE) {
+      const batch = enriched.slice(i, i + BATCH_SIZE);
+      const userBlocks = batch.map((e, idx) => `### User ${idx} (id: ${e.userId})
+Name: ${e.signals.first_name} ${e.signals.last_name} (${e.signals.company || "no company"})
+Favorites: ${e.signals.total_favorites} | Quotes: ${e.signals.total_quotes} | Samples: ${e.signals.total_samples}
+Top brands: ${e.topBrands.join(", ") || "none"}
+Top categories: ${e.topCategories.join(", ") || "none"}
+Top materials: ${e.topMaterials.join(", ") || "none"}`).join("\n\n");
 
-Analyze this client's behavioral signals and classify their taste profile.
+      const prompt = `You are a luxury design taste analyst for Maison Affluency. Classify each user below into a taste profile.
 
-Client: ${signals.first_name} ${signals.last_name} (${signals.company})
-Favorites: ${signals.total_favorites} | Quote requests: ${signals.total_quotes} | Sample requests: ${signals.total_samples}
+${userBlocks}
 
-Top brands they engage with: ${topBrands.join(", ") || "none"}
-Top categories: ${topCategories.join(", ") || "none"}
-Top materials: ${topMaterials.join(", ") || "none"}
-
-Raw brand engagement scores: ${JSON.stringify(signals.brands)}
-Raw category scores: ${JSON.stringify(signals.categories)}
-
-Respond in this exact JSON format:
-{
-  "cluster_label": "A short evocative label (e.g. 'Brutalist Minimalist', 'Art Deco Maximalist', 'Organic Modernist', 'French Heritage Collector', 'Material Sensualist')",
-  "cluster_description": "2-3 sentences describing this client's aesthetic sensibility, what drives their choices, and how to curate for them.",
-  "style_keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "top_designers": ["designer names they likely gravitate toward based on brand/category patterns"]
-}`;
+Return JSON: {"profiles":[{"user_index":0,"cluster_label":"...","cluster_description":"2-3 sentences","style_keywords":["k1","k2","k3","k4","k5"],"top_designers":["..."]}, ...]}
+Labels should be evocative (e.g. 'Brutalist Minimalist', 'Art Deco Maximalist', 'Organic Modernist', 'Material Sensualist'). Provide one entry per user_index 0..${batch.length - 1}.`;
 
       try {
         const aiResp = await fetch("https://ai-gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: TASTE_MODEL,
-            max_completion_tokens: TASTE_MAX_TOKENS,
+            max_completion_tokens: TASTE_MAX_TOKENS * Math.min(batch.length, 8),
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" },
           }),
         });
 
         if (!aiResp.ok) {
-          console.error(`AI call failed for ${userId}: ${aiResp.status}`);
-          results.push({ user_id: userId, error: `AI ${aiResp.status}` });
+          console.error(`Batch AI call failed: ${aiResp.status}`);
+          batch.forEach((e) => results.push({ user_id: e.userId, error: `AI ${aiResp.status}` }));
           continue;
         }
 
         const aiData = await aiResp.json();
-        logAiUsage({ feature: "compute-taste-profiles", model: TASTE_MODEL, usage: aiData?.usage, userId }).catch(() => {});
+        logAiUsage({ feature: "compute-taste-profiles", model: TASTE_MODEL, usage: aiData?.usage }).catch(() => {});
         const content = aiData.choices?.[0]?.message?.content;
         const parsed = JSON.parse(content);
+        const profilesArr: any[] = Array.isArray(parsed.profiles) ? parsed.profiles : [];
+        const byIndex = new Map<number, any>();
+        for (const p of profilesArr) {
+          if (typeof p?.user_index === "number") byIndex.set(p.user_index, p);
+        }
 
-        await supabase.from("client_taste_profiles").upsert({
-          user_id: userId,
-          cluster_label: parsed.cluster_label || "Unclassified",
-          cluster_description: parsed.cluster_description || "",
-          top_brands: topBrands,
-          top_categories: topCategories,
-          top_materials: topMaterials,
-          top_designers: parsed.top_designers || [],
-          style_keywords: parsed.style_keywords || [],
-          engagement_score: totalInteractions,
-          total_favorites: signals.total_favorites,
-          total_quotes: signals.total_quotes,
-          total_samples: signals.total_samples,
-          raw_signals: { brands: signals.brands, categories: signals.categories, materials: signals.materials },
-          computed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
-
-        results.push({ user_id: userId, label: parsed.cluster_label });
+        await Promise.all(batch.map(async (e, idx) => {
+          const p = byIndex.get(idx);
+          if (!p) {
+            results.push({ user_id: e.userId, error: "missing in batch response" });
+            return;
+          }
+          await supabase.from("client_taste_profiles").upsert({
+            user_id: e.userId,
+            cluster_label: p.cluster_label || "Unclassified",
+            cluster_description: p.cluster_description || "",
+            top_brands: e.topBrands,
+            top_categories: e.topCategories,
+            top_materials: e.topMaterials,
+            top_designers: p.top_designers || [],
+            style_keywords: p.style_keywords || [],
+            engagement_score: e.totalInteractions,
+            total_favorites: e.signals.total_favorites,
+            total_quotes: e.signals.total_quotes,
+            total_samples: e.signals.total_samples,
+            raw_signals: { brands: e.signals.brands, categories: e.signals.categories, materials: e.signals.materials },
+            computed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "user_id" });
+          results.push({ user_id: e.userId, label: p.cluster_label });
+        }));
       } catch (err) {
-        console.error(`Error processing ${userId}:`, err);
-        results.push({ user_id: userId, error: String(err) });
+        console.error("Batch processing error:", err);
+        batch.forEach((e) => results.push({ user_id: e.userId, error: String(err) }));
       }
     }
+
 
     return new Response(
       JSON.stringify({ processed: results.length, results }),
