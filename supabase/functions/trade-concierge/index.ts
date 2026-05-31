@@ -1177,18 +1177,29 @@ serve(async (req) => {
     const designerNames = (designerNamesRows || [])
       .flatMap((d: any) => [d.name, d.display_name])
       .filter(Boolean) as string[];
-    const includePieces = needsFullCatalog(lastUserMsg, designerNames);
+    const heuristicNeedsPieces = needsFullCatalog(lastUserMsg, designerNames);
 
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
-    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
-      loadCatalogContext(supabase, includePieces),
+    // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
+    const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
+      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, 40)
+      : Promise.resolve(null);
+    const [sentiment, ragPieces, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+      classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
-      classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
     ]);
+
+    // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
+    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
+    const useRag = includePieces && !!ragPieces;
+    const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
+    const piecesList = useRag ? (ragPieces as string) : fullPiecesList;
+
     const resolvedProjectId = activeProjectId || mentionedProjectId;
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     // Resolve trade discount % for this user (defaults to 8%).
