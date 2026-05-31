@@ -2,9 +2,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
+const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
+const CHAT_MAX_TOKENS = tokenBudget("chat");
+const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
