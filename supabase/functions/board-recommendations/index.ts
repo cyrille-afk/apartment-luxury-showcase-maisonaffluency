@@ -275,6 +275,7 @@ Return a JSON object with a recommendations array:
       },
       body: JSON.stringify({
         model: RECOMMENDATIONS_MODEL,
+        max_completion_tokens: RECOMMENDATIONS_MAX_TOKENS,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
