@@ -4,6 +4,7 @@ import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 import { embedQuery } from "../_shared/aiEmbeddings.ts";
+import { withSemanticCache } from "../_shared/aiCache.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
