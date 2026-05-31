@@ -210,6 +210,10 @@ ${userSignals}
 ## EMOTIONAL TONE DIRECTIVE
 ${sentimentDirective}
 
+## EXECUTION PLAN (from upstream brief-extraction pass)
+${planDirective}
+
+
 ## ABSOLUTE RULE — CATALOG-ONLY RESPONSES
 You must ONLY mention designers, ateliers, pieces, brands, and works that appear in the CATALOG DATA sections below.
 - NEVER invent, guess, or recall designer names, piece titles, product names, or brand names from your general training knowledge.
