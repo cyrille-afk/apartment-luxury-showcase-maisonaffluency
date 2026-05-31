@@ -1179,7 +1179,7 @@ serve(async (req) => {
           messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
           tools: availableTools,
           tool_choice: isExplicitQuoteIntent ? "required" : "auto",
-          max_tokens: 800,
+          max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
           stream: true,
           stream_options: { include_usage: true },
         }),
