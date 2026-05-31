@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { modelFor } from "../_shared/aiModels.ts";
+
+const TRANSLATE_MODEL = modelFor("cheap");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
