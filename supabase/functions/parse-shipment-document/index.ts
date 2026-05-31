@@ -3,10 +3,10 @@
 // structured shipment fields the estimator can pre-fill.
 import { requireUser, rateLimit, clientIp } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
-// Vision extraction — flash-tier handles invoices/packing lists well at 1/15th the cost of pro.
 const SHIPMENT_MODEL = modelFor("balanced");
+const SHIPMENT_MAX_TOKENS = tokenBudget("extract");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
