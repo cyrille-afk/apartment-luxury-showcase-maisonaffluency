@@ -674,6 +674,7 @@ async function classifySentiment(
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: SENTIMENT_MODEL,
+        max_completion_tokens: SENTIMENT_MAX_TOKENS,
         messages: [
           {
             role: "system",
