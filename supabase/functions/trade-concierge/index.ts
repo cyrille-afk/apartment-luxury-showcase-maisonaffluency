@@ -703,7 +703,7 @@ async function classifySentiment(
     });
     if (!resp.ok) return fallback;
     const data = await resp.json();
-    logAiUsage({ feature: "trade-concierge-sentiment", model: "google/gemini-2.5-flash-lite", usage: data?.usage }).catch(() => {});
+    logAiUsage({ feature: "trade-concierge-sentiment", model: SENTIMENT_MODEL, usage: data?.usage }).catch(() => {});
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     if (!args) return fallback;
     const parsed = JSON.parse(args);
