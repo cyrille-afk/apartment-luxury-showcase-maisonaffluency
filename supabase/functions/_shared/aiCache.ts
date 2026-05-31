@@ -93,3 +93,116 @@ export async function withCache<T>(
 
   return { value: produced.value, cached: false, promptHash, usage: produced.usage };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Semantic-similarity cache.
+//
+// Use when paraphrased prompts should reuse the same answer (intent
+// classification, short concierge greetings/FAQs, deterministic rewrites).
+// Flow: exact-hash check → embed → vector match above threshold → on miss
+// produce + persist. Tune `threshold` carefully — too low serves wrong
+// answers. 0.92 is a safe default for classification; do NOT use for
+// translation or anything where wording variations matter.
+
+import { embedQuery } from "./aiEmbeddings.ts";
+
+export interface SemanticCacheArgs extends CacheArgs {
+  /** Lovable API key — required to embed the prompt on miss. */
+  apiKey: string;
+  /** Cosine similarity required to count as a hit. Default 0.92. */
+  threshold?: number;
+}
+
+export interface SemanticCacheResult<T> extends CacheResult<T> {
+  /** Similarity of the matched row (1.0 for exact-hash hits). */
+  similarity: number;
+  /** 'exact' = hash matched, 'semantic' = vector matched, 'miss' = fresh produce. */
+  source: "exact" | "semantic" | "miss";
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
+}
+
+export async function withSemanticCache<T>(
+  args: SemanticCacheArgs,
+  produce: () => Promise<{ value: T; usage?: { prompt_tokens?: number; completion_tokens?: number } }>,
+): Promise<SemanticCacheResult<T>> {
+  const promptHash = await hashPrompt(args.prompt);
+  const threshold = args.threshold ?? 0.92;
+  const ttl = args.ttlSec ?? 60 * 60 * 24 * 30;
+  const sb = client();
+
+  // 1. Exact-hash fast path (free, no embedding needed).
+  if (sb) {
+    const { data: exact } = await sb
+      .from("ai_semantic_cache")
+      .select("id, response_json, prompt_tokens, completion_tokens, hits")
+      .eq("feature", args.feature)
+      .eq("model", args.model)
+      .eq("prompt_hash", promptHash)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (exact) {
+      sb.from("ai_semantic_cache")
+        .update({ hits: ((exact as any).hits ?? 0) + 1, last_hit_at: new Date().toISOString() })
+        .eq("id", (exact as any).id).then(() => {});
+      return {
+        value: (exact as any).response_json as T,
+        cached: true, promptHash, similarity: 1, source: "exact",
+        usage: {
+          prompt_tokens: (exact as any).prompt_tokens ?? 0,
+          completion_tokens: (exact as any).completion_tokens ?? 0,
+        },
+      };
+    }
+  }
+
+  // 2. Embed once — reused for lookup + (on miss) insert.
+  const queryEmbedding = await embedQuery(args.apiKey, args.prompt);
+
+  // 3. Semantic lookup via match_semantic_cache RPC.
+  if (sb && queryEmbedding) {
+    const { data: hits, error } = await sb.rpc("match_semantic_cache", {
+      _feature: args.feature,
+      _model: args.model,
+      _query_embedding: queryEmbedding as any,
+      _threshold: threshold,
+      _limit: 1,
+    });
+    if (!error && Array.isArray(hits) && hits.length) {
+      const hit = hits[0] as any;
+      sb.from("ai_semantic_cache")
+        .update({ hits: 1, last_hit_at: new Date().toISOString() })
+        .eq("id", hit.id).then(() => {});
+      return {
+        value: hit.response_json as T,
+        cached: true, promptHash, similarity: hit.similarity, source: "semantic",
+        usage: {
+          prompt_tokens: hit.prompt_tokens ?? 0,
+          completion_tokens: hit.completion_tokens ?? 0,
+        },
+      };
+    }
+  }
+
+  // 4. Miss → produce and persist.
+  const produced = await produce();
+  if (sb) {
+    const expires_at = new Date(Date.now() + ttl * 1000).toISOString();
+    sb.from("ai_semantic_cache").insert({
+      feature: args.feature,
+      model: args.model,
+      prompt: args.prompt.slice(0, 4000),
+      prompt_hash: promptHash,
+      embedding: queryEmbedding as any,
+      response_json: produced.value,
+      prompt_tokens: produced.usage?.prompt_tokens ?? null,
+      completion_tokens: produced.usage?.completion_tokens ?? null,
+      expires_at,
+    }).then(() => {});
+  }
+
+  return {
+    value: produced.value,
+    cached: false, promptHash, similarity: 0, source: "miss",
+    usage: produced.usage,
+  };
+}
