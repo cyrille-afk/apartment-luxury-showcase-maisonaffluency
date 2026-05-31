@@ -469,6 +469,10 @@ export default function TradeAiUsageDashboard() {
           </div>
         </header>
 
+        <EmbedCatalogPanel />
+
+
+
         {/* KPI cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Kpi icon={<Activity className="h-4 w-4" />} label="Requests" value={fmtNum(totals?.requests || 0)} />
