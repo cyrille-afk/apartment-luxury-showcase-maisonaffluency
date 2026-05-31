@@ -670,7 +670,7 @@ async function classifySentiment(
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: SENTIMENT_MODEL,
         messages: [
           {
             role: "system",
