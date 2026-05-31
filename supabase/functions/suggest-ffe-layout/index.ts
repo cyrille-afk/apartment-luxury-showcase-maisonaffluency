@@ -219,6 +219,7 @@ Look at the floor plan image and propose an FF&E layout per room.`;
       },
       body: JSON.stringify({
         model: FFE_MODEL,
+        max_completion_tokens: FFE_MAX_TOKENS,
         messages: [
           { role: "system", content: system },
           {
