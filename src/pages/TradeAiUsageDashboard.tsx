@@ -3,7 +3,8 @@ import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, Coins, AlertTriangle, Activity, Printer } from "lucide-react";
+import { BarChart3, Coins, AlertTriangle, Activity, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer,
@@ -61,11 +62,273 @@ const FEATURE_COLORS = [
   "#4a6741",
 ];
 
+const PDF_FEATURE_COLORS: Array<[number, number, number]> = [
+  [49, 74, 67],
+  [117, 139, 126],
+  [188, 160, 92],
+  [92, 99, 96],
+  [124, 152, 133],
+  [201, 168, 76],
+  [139, 111, 94],
+  [74, 103, 65],
+];
+
 function fmtUSD(n: number) {
   return n.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 }
 function fmtNum(n: number) {
   return (n || 0).toLocaleString();
+}
+
+function exportFilename(date = new Date()) {
+  return `AI Usage Dashboard - ${format(date, "yyyy-MM-dd")}.pdf`;
+}
+
+function downloadPdfBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    a.remove();
+  }, 100);
+}
+
+function drawText(doc: jsPDF, text: string, x: number, y: number, maxWidth: number, lineHeight = 11) {
+  const lines = doc.splitTextToSize(text || "—", maxWidth);
+  doc.text(lines, x, y);
+  return y + lines.length * lineHeight;
+}
+
+function renderAiUsagePdf(args: {
+  days: number;
+  totals?: Totals;
+  byFeature: FeatureRow[];
+  dailyTokens: Array<Record<string, number | string>>;
+  dailyCost: Array<{ day: string; cost_usd: number }>;
+  features: string[];
+}) {
+  const { days, totals, byFeature, dailyTokens, dailyCost, features } = args;
+  const generated = new Date();
+  const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "landscape" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 36;
+  const contentW = pageW - margin * 2;
+  const errorRate = totals && totals.requests > 0 ? (totals.errors / totals.requests) * 100 : 0;
+
+  const addFooter = () => {
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(120, 120, 120);
+      doc.text(`Generated ${format(generated, "MMM d, yyyy HH:mm")} · Page ${i} of ${pageCount}`, margin, pageH - 18);
+    }
+  };
+
+  doc.setFillColor(250, 249, 245);
+  doc.rect(0, 0, pageW, pageH, "F");
+  doc.setTextColor(28, 36, 33);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(24);
+  doc.text("AI Usage Dashboard", margin, 54);
+  doc.setFontSize(9);
+  doc.setTextColor(92, 99, 96);
+  doc.text(`Window: last ${days} days`, margin, 74);
+
+  const kpis = [
+    ["Requests", fmtNum(totals?.requests || 0)],
+    ["Total tokens", fmtNum(totals?.tokens || 0)],
+    ["Estimated cost", fmtUSD(Number(totals?.cost_usd || 0))],
+    ["Error rate", `${errorRate.toFixed(1)}%`],
+  ];
+  const cardW = (contentW - 24) / 4;
+  kpis.forEach(([label, value], i) => {
+    const x = margin + i * (cardW + 8);
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(221, 217, 205);
+    doc.roundedRect(x, 96, cardW, 64, 4, 4, "FD");
+    doc.setFontSize(8);
+    doc.setTextColor(92, 99, 96);
+    doc.text(label, x + 12, 118);
+    doc.setFontSize(18);
+    doc.setTextColor(28, 36, 33);
+    doc.text(value, x + 12, 145);
+  });
+
+  const chartTop = 192;
+  const chartH = 150;
+  const chartW = (contentW - 24) / 2;
+  const chartGap = 24;
+  const maxTokens = Math.max(1, ...dailyTokens.map((row) => features.reduce((sum, f) => sum + Number(row[f] || 0), 0)));
+  const maxCost = Math.max(0.01, ...dailyCost.map((row) => Number(row.cost_usd || 0)));
+
+  doc.setFontSize(11);
+  doc.setTextColor(28, 36, 33);
+  doc.text("Daily tokens by feature", margin, chartTop - 12);
+  doc.text("Estimated cost per day", margin + chartW + chartGap, chartTop - 12);
+
+  const drawChartBox = (x: number) => {
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(221, 217, 205);
+    doc.roundedRect(x, chartTop, chartW, chartH, 4, 4, "FD");
+    doc.setDrawColor(235, 232, 223);
+    for (let i = 1; i < 4; i++) {
+      const y = chartTop + (chartH / 4) * i;
+      doc.line(x + 28, y, x + chartW - 12, y);
+    }
+  };
+  drawChartBox(margin);
+  drawChartBox(margin + chartW + chartGap);
+
+  const plotX = margin + 32;
+  const plotY = chartTop + 16;
+  const plotW = chartW - 48;
+  const plotH = chartH - 34;
+  const barGap = 3;
+  const barW = dailyTokens.length ? Math.max(3, (plotW - barGap * (dailyTokens.length - 1)) / dailyTokens.length) : plotW;
+
+  dailyTokens.forEach((row, idx) => {
+    const x = plotX + idx * (barW + barGap);
+    let stackBase = plotY + plotH;
+    features.forEach((f, featureIdx) => {
+      const value = Number(row[f] || 0);
+      if (!value) return;
+      const h = Math.max(1, (value / maxTokens) * plotH);
+      const [r, g, b] = PDF_FEATURE_COLORS[featureIdx % PDF_FEATURE_COLORS.length];
+      doc.setFillColor(r, g, b);
+      doc.rect(x, stackBase - h, barW, h, "F");
+      stackBase -= h;
+    });
+  });
+
+  if (features.length) {
+    let legendX = margin + 12;
+    let legendY = chartTop + chartH + 18;
+    doc.setFontSize(7);
+    features.slice(0, 8).forEach((f, i) => {
+      const [r, g, b] = PDF_FEATURE_COLORS[i % PDF_FEATURE_COLORS.length];
+      doc.setFillColor(r, g, b);
+      doc.rect(legendX, legendY - 6, 6, 6, "F");
+      doc.setTextColor(92, 99, 96);
+      const label = f.length > 18 ? `${f.slice(0, 17)}…` : f;
+      doc.text(label, legendX + 9, legendY);
+      legendX += 78;
+      if (legendX > margin + chartW - 70) {
+        legendX = margin + 12;
+        legendY += 10;
+      }
+    });
+  }
+
+  const costX = margin + chartW + chartGap + 32;
+  const costY = chartTop + 16;
+  const costW = chartW - 48;
+  const costH = chartH - 34;
+  doc.setDrawColor(49, 74, 67);
+  doc.setLineWidth(1.5);
+  dailyCost.forEach((row, idx) => {
+    if (dailyCost.length < 2) return;
+    const x = costX + (idx / (dailyCost.length - 1)) * costW;
+    const y = costY + costH - (Number(row.cost_usd || 0) / maxCost) * costH;
+    if (idx === 0) doc.moveTo(x, y);
+    else doc.lineTo(x, y);
+  });
+  doc.stroke();
+
+  let y = 390;
+  doc.setFontSize(12);
+  doc.setTextColor(28, 36, 33);
+  doc.text("By feature", margin, y);
+  y += 18;
+
+  const columns = [
+    { label: "Feature", x: margin, w: 175, align: "left" as const },
+    { label: "Requests", x: margin + 185, w: 58, align: "right" as const },
+    { label: "Prompt", x: margin + 253, w: 58, align: "right" as const },
+    { label: "Completion", x: margin + 321, w: 70, align: "right" as const },
+    { label: "Total", x: margin + 401, w: 64, align: "right" as const },
+    { label: "Avg/req", x: margin + 475, w: 58, align: "right" as const },
+    { label: "Errors", x: margin + 543, w: 46, align: "right" as const },
+    { label: "Cost", x: margin + 599, w: 70, align: "right" as const },
+    { label: "Last call", x: margin + 679, w: 88, align: "right" as const },
+  ];
+
+  const drawHeader = () => {
+    doc.setFillColor(235, 232, 223);
+    doc.rect(margin, y - 12, contentW, 20, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(92, 99, 96);
+    columns.forEach((c) => doc.text(c.label, c.align === "right" ? c.x + c.w : c.x + 4, y, { align: c.align }));
+    doc.setFont("helvetica", "normal");
+    y += 18;
+  };
+
+  drawHeader();
+  const rows = byFeature.length ? byFeature : [];
+  if (!rows.length) {
+    doc.setFontSize(8);
+    doc.setTextColor(92, 99, 96);
+    doc.text("No AI usage recorded in this window yet.", margin + 4, y + 8);
+  }
+
+  rows.forEach((r, idx) => {
+    if (y > pageH - 44) {
+      doc.addPage("a4", "landscape");
+      doc.setFillColor(250, 249, 245);
+      doc.rect(0, 0, pageW, pageH, "F");
+      y = margin + 18;
+      drawHeader();
+    }
+    if (idx % 2 === 0) {
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, y - 11, contentW, 18, "F");
+    }
+    doc.setFontSize(7.5);
+    doc.setTextColor(28, 36, 33);
+    const feature = r.feature.length > 38 ? `${r.feature.slice(0, 37)}…` : r.feature;
+    const values = [
+      feature,
+      fmtNum(r.requests),
+      fmtNum(r.prompt_tokens),
+      fmtNum(r.completion_tokens),
+      fmtNum(r.tokens),
+      fmtNum(r.avg_tokens),
+      fmtNum(r.errors),
+      fmtUSD(Number(r.cost_usd || 0)),
+      r.last_call ? format(new Date(r.last_call), "MMM d, HH:mm") : "—",
+    ];
+    columns.forEach((c, i) => doc.text(values[i], c.align === "right" ? c.x + c.w : c.x + 4, y, { align: c.align }));
+    y += 18;
+  });
+
+  y += 12;
+  if (y > pageH - 50) {
+    doc.addPage("a4", "landscape");
+    doc.setFillColor(250, 249, 245);
+    doc.rect(0, 0, pageW, pageH, "F");
+    y = margin;
+  }
+  doc.setFontSize(7.5);
+  doc.setTextColor(120, 120, 120);
+  drawText(
+    doc,
+    "Cost figures are estimates calculated from the maintained model price map. This export is generated directly as a PDF with a fixed filename and does not use the browser print dialog.",
+    margin,
+    y,
+    contentW,
+    10,
+  );
+
+  addFooter();
+  return doc.output("blob");
 }
 
 export default function TradeAiUsageDashboard() {
@@ -198,12 +461,16 @@ export default function TradeAiUsageDashboard() {
               </button>
             ))}
             <button
-              onClick={() => window.print()}
-              className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
-              title="Print or save as PDF"
+              onClick={() => {
+                const blob = renderAiUsagePdf({ days, totals, byFeature, dailyTokens, dailyCost, features });
+                downloadPdfBlob(blob, exportFilename());
+              }}
+              disabled={isLoading}
+              className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Download PDF"
             >
-              <Printer className="h-3.5 w-3.5" />
-              Print / PDF
+              <Download className="h-3.5 w-3.5" />
+              Download PDF
             </button>
 
 
