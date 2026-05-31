@@ -1,11 +1,12 @@
 import { Helmet } from "react-helmet-async";
 import { Navigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, Coins, AlertTriangle, Activity, Download } from "lucide-react";
+import { BarChart3, Coins, AlertTriangle, Activity, Download, Database, Loader2 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   ResponsiveContainer,
   BarChart,
@@ -468,6 +469,10 @@ export default function TradeAiUsageDashboard() {
           </div>
         </header>
 
+        <EmbedCatalogPanel />
+
+
+
         {/* KPI cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Kpi icon={<Activity className="h-4 w-4" />} label="Requests" value={fmtNum(totals?.requests || 0)} />
@@ -603,6 +608,135 @@ function Kpi({
       </div>
       <div className={`mt-2 text-2xl font-light ${tone === "warn" ? "text-destructive" : "text-foreground"}`}>
         {value}
+      </div>
+    </div>
+  );
+}
+
+interface EmbedStats {
+  trade_products: number;
+  designer_curator_picks: number;
+  skipped: number;
+  failed: number;
+}
+
+function EmbedCatalogPanel() {
+  const qc = useQueryClient();
+  const [lastResult, setLastResult] = useState<EmbedStats | null>(null);
+
+  const { data: coverage, isLoading: coverageLoading } = useQuery({
+    queryKey: ["embed-coverage"],
+    queryFn: async () => {
+      const [tpTotal, tpEmbedded, dpTotal, dpEmbedded] = await Promise.all([
+        supabase.from("trade_products").select("id", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("trade_products").select("id", { count: "exact", head: true }).eq("is_active", true).not("embedding", "is", null),
+        supabase.from("designer_curator_picks").select("id", { count: "exact", head: true }),
+        supabase.from("designer_curator_picks").select("id", { count: "exact", head: true }).not("embedding", "is", null),
+      ]);
+      return {
+        tp: { total: tpTotal.count ?? 0, embedded: tpEmbedded.count ?? 0 },
+        dp: { total: dpTotal.count ?? 0, embedded: dpEmbedded.count ?? 0 },
+      };
+    },
+    refetchInterval: (q) => (q.state.data ? false : 30000),
+  });
+
+  const run = useMutation({
+    mutationFn: async (opts: { force: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("embed-catalog", {
+        body: { table: "both", limit: 500, force: opts.force },
+      });
+      if (error) throw error;
+      return data as EmbedStats;
+    },
+    onSuccess: (data) => {
+      setLastResult(data);
+      const written = (data.trade_products || 0) + (data.designer_curator_picks || 0);
+      toast.success(`Embedded ${written} row(s) · skipped ${data.skipped} · failed ${data.failed}`);
+      qc.invalidateQueries({ queryKey: ["embed-coverage"] });
+    },
+    onError: (err: any) => toast.error(err?.message || "Embed run failed"),
+  });
+
+  const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
+  const tp = coverage?.tp;
+  const dp = coverage?.dp;
+  const tpRemaining = tp ? Math.max(0, tp.total - tp.embedded) : 0;
+  const dpRemaining = dp ? Math.max(0, dp.total - dp.embedded) : 0;
+  const totalRemaining = tpRemaining + dpRemaining;
+
+  return (
+    <div className="bg-card border border-border rounded-lg p-4 no-print">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 text-muted-foreground"><Database className="h-4 w-4" /></div>
+          <div>
+            <div className="text-sm font-medium">Catalog embeddings (RAG)</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Backfills semantic vectors for trade products and curator picks. Idempotent — only rows with changed content are re-embedded unless you force.
+            </div>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <CoverageRow
+                label="Trade products"
+                embedded={tp?.embedded ?? 0}
+                total={tp?.total ?? 0}
+                pct={pct(tp?.embedded ?? 0, tp?.total ?? 0)}
+                loading={coverageLoading}
+              />
+              <CoverageRow
+                label="Curator picks"
+                embedded={dp?.embedded ?? 0}
+                total={dp?.total ?? 0}
+                pct={pct(dp?.embedded ?? 0, dp?.total ?? 0)}
+                loading={coverageLoading}
+              />
+            </div>
+            {lastResult && (
+              <div className="mt-3 text-xs text-muted-foreground">
+                Last run: wrote {lastResult.trade_products} trade · {lastResult.designer_curator_picks} picks · skipped {lastResult.skipped} · failed {lastResult.failed}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => run.mutate({ force: false })}
+            disabled={run.isPending}
+            className="px-3 py-1.5 text-xs rounded-md border border-primary bg-primary text-primary-foreground inline-flex items-center gap-1.5 disabled:opacity-50"
+            title={totalRemaining > 0 ? `${totalRemaining} rows pending` : "All rows embedded — nothing to do"}
+          >
+            {run.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Database className="h-3.5 w-3.5" />}
+            {run.isPending ? "Embedding…" : `Run backfill${totalRemaining ? ` (${totalRemaining})` : ""}`}
+          </button>
+          <button
+            onClick={() => {
+              if (confirm("Force re-embed up to 500 rows? This re-runs even if content is unchanged and costs tokens.")) {
+                run.mutate({ force: true });
+              }
+            }}
+            disabled={run.isPending}
+            className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground disabled:opacity-50"
+          >
+            Force re-embed
+          </button>
+        </div>
+      </div>
+      <div className="mt-2 text-[10px] text-muted-foreground">
+        Processes up to 500 rows per click. Re-run until the pending count reaches 0.
+      </div>
+    </div>
+  );
+}
+
+function CoverageRow({ label, embedded, total, pct, loading }: { label: string; embedded: number; total: number; pct: number; loading: boolean }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-mono">{loading ? "…" : `${embedded.toLocaleString()} / ${total.toLocaleString()} (${pct}%)`}</span>
+      </div>
+      <div className="mt-1 h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
