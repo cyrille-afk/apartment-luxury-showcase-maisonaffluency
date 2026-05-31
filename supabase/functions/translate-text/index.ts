@@ -101,7 +101,7 @@ RULES:
     }
 
     const data = await response.json();
-    logAiUsage({ feature: "translate-text", model: "google/gemini-2.5-flash", usage: data?.usage }).catch(() => {});
+    logAiUsage({ feature: "translate-text", model: TRANSLATE_MODEL, usage: data?.usage }).catch(() => {});
     const translated = data?.choices?.[0]?.message?.content?.trim() ?? "";
     return new Response(JSON.stringify({ translated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
