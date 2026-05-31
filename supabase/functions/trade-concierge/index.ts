@@ -1698,6 +1698,104 @@ serve(async (req) => {
           }
         };
 
+        // ----- Inner orchestration loop (Step 4) -----
+        // After the main stream finishes, if the upstream planner asked for a
+        // chained `propose_tearsheet → draft_quote` but the model only emitted
+        // the tearsheet, run a follow-up non-streaming call that forces
+        // `draft_quote` using the SAME pick_ids. Emits a second `event: proposal`
+        // so the client renders one combined plan (tearsheet card + quote card).
+        const runChainIfNeeded = async () => {
+          if (!extractedBrief.plan.includes("draft_quote")) return;
+          if (!extractedBrief.plan.includes("propose_tearsheet") && !extractedBrief.plan.includes("add_to_tearsheet")) return;
+          const hasQuote = Array.from(toolCallBuffers.values()).some((tc) => tc.name === "draft_quote" || tc.name === "add_to_quote");
+          if (hasQuote) return;
+          let tearsheetPickIds: string[] | null = null;
+          let tearsheetTitle: string | null = null;
+          for (const tc of toolCallBuffers.values()) {
+            if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
+            try {
+              const parsed = JSON.parse(tc.argsText || "{}");
+              if (Array.isArray(parsed.pick_ids) && parsed.pick_ids.length > 0) {
+                tearsheetPickIds = parsed.pick_ids.slice(0, 16);
+                tearsheetTitle = typeof parsed.title === "string" ? parsed.title : null;
+              }
+            } catch { /* ignore */ }
+          }
+          if (!tearsheetPickIds || tearsheetPickIds.length === 0) return;
+
+          const qtyHint = extractedBrief.brief.qty_hint || 1;
+          const leadCeiling = extractedBrief.brief.lead_weeks_max || null;
+          const followupSystem = [
+            "You are the Maison Affluency Trade Concierge follow-up step.",
+            `The user's tearsheet pick_ids are: ${tearsheetPickIds.join(", ")}.`,
+            `Active project_id (if any): ${resolvedProjectId || "null"}.`,
+            `Default qty per line: ${qtyHint}.${leadCeiling ? ` Lead-time ceiling: ${leadCeiling} weeks.` : ""}`,
+            "Call draft_quote NOW with one line per pick_id above (use the qty hint unless the brief implies otherwise). Do not output any prose.",
+          ].join("\n");
+
+          try {
+            const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: modelFor("balanced"),
+                max_completion_tokens: CHAT_MAX_TOKENS,
+                messages: [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 800) },
+                ],
+                tools: TOOLS.filter((t: any) => t.function?.name === "draft_quote"),
+                tool_choice: { type: "function", function: { name: "draft_quote" } },
+              }),
+            });
+            if (!resp.ok) { console.error("chain draft_quote http", resp.status); return; }
+            const data = await resp.json();
+            if (data?.usage) {
+              logAiUsage({
+                feature: "trade-concierge-chain-quote",
+                model: modelFor("balanced"),
+                usage: data.usage,
+                userId,
+              }).catch(() => {});
+            }
+            const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+            if (!args) return;
+            const parsed = JSON.parse(args);
+            const rawLines: any[] = Array.isArray(parsed.lines) ? parsed.lines : [];
+            const lines = rawLines
+              .filter((l) => l && typeof l.pick_id === "string" && tearsheetPickIds!.includes(l.pick_id))
+              .slice(0, 24)
+              .map((l) => ({
+                pick_id: l.pick_id,
+                qty: Math.max(1, Math.min(99, Number(l.qty) || qtyHint)),
+                variant: typeof l.variant === "string" ? l.variant : null,
+                lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+                note: typeof l.note === "string" ? l.note : null,
+              }));
+            if (lines.length === 0) return;
+            const requestedCurrency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
+            const preview = await hydrateQuotePreview(supabase, lines, requestedCurrency, tradeDiscountPct);
+            const previewCurrencies = Array.from(new Set(preview.map((l: any) => l.currency).filter(Boolean)));
+            const currency: string | null = requestedCurrency || (previewCurrencies.length === 1 ? previewCurrencies[0] as string : null);
+            const proposal = {
+              tool: "draft_quote",
+              tool_call_id: crypto.randomUUID(),
+              args: {
+                project_id: resolvedProjectId,
+                currency,
+                note: tearsheetTitle ? `Chained quote from "${tearsheetTitle}" tearsheet` : null,
+                lines,
+              },
+              preview,
+            };
+            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+            console.log(`[concierge chain] emitted draft_quote with ${lines.length} lines from tearsheet "${tearsheetTitle}"`);
+          } catch (e) {
+            console.error("chain draft_quote failed:", e);
+          }
+        };
+
+        let sawDone = false;
         try {
           while (true) {
             const { done, value } = await reader.read();
@@ -1722,8 +1820,9 @@ serve(async (req) => {
 
               const payload = line.slice(6).trim();
               if (payload === "[DONE]") {
-                await flushProposal();
-                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                // Defer the terminator: we still need to flush proposals and
+                // possibly emit a chained draft_quote BEFORE the client sees [DONE].
+                sawDone = true;
                 continue;
               }
 
@@ -1754,8 +1853,11 @@ serve(async (req) => {
               }
             }
           }
-          // Stream ended without [DONE] — still flush any pending proposal
+          // Stream fully consumed — flush proposals, then run inner chain, then emit [DONE].
           await flushProposal();
+          await runChainIfNeeded();
+          if (sawDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+
         } catch (e) {
           console.error("stream interceptor error:", e);
         } finally {
