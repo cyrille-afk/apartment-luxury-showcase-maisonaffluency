@@ -327,8 +327,8 @@ function pickModel(text: string, includePieces: boolean): string {
   const complexSignals =
     /\b(curate|art[- ]direct|compose|edit for|mood|narrative|brief:|palette|atmosphere|whole (room|scheme|project)|multi[- ]room|across (the )?(apartment|house|hotel|villa))\b/.test(t);
   const longBrief = len > 600;
-  if (includePieces && (complexSignals || longBrief)) return "google/gemini-2.5-pro";
-  return "google/gemini-2.5-flash";
+  if (includePieces && (complexSignals || longBrief)) return modelFor("strong");
+  return modelFor("balanced");
 }
 
 async function loadCatalogContext(supabase: ReturnType<typeof createClient>, includePieces: boolean) {
