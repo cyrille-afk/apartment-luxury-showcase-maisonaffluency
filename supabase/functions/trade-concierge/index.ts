@@ -761,8 +761,9 @@ async function loadRelevantPieces(
   supabase: ReturnType<typeof createClient>,
   apiKey: string,
   query: string,
+  userId: string | null,
   k = 40,
-): Promise<string | null> {
+): Promise<{ contextText: string; rows: any[] } | null> {
   if (!apiKey || !query?.trim()) return null;
   try {
     const vec = await embedQuery(apiKey, query);
@@ -784,14 +785,51 @@ async function loadRelevantPieces(
       const meta = [r.subcategory || r.category, r.materials].filter(Boolean).join(" · ");
       return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} [id: ${r.id}]`;
     });
-    return [
+    const contextText = [
       "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to widen the search.",
       "",
       lines.join("\n"),
     ].join("\n");
+    return { contextText, rows: data };
   } catch (e) {
     console.error("loadRelevantPieces failed:", e);
     return null;
+  }
+}
+
+async function recordRagTrace(
+  supabase: ReturnType<typeof createClient>,
+  payload: {
+    userId: string | null;
+    query: string;
+    rows: any[];
+    contextText: string;
+    usedInAnswer: boolean;
+  },
+): Promise<void> {
+  try {
+    const matches = (payload.rows || []).slice(0, 25).map((r: any) => ({
+      id: r.id,
+      source: r.source,
+      title: r.title,
+      designer: r.designer,
+      category: r.category,
+      subcategory: r.subcategory,
+      materials: r.materials,
+      similarity: typeof r.similarity === "number" ? Number(r.similarity.toFixed(4)) : null,
+    }));
+    const top = matches[0]?.similarity ?? null;
+    await supabase.from("concierge_rag_traces").insert({
+      user_id: payload.userId,
+      query: payload.query.slice(0, 2000),
+      matches,
+      context_text: payload.contextText.slice(0, 8000),
+      match_count: payload.rows?.length ?? 0,
+      top_similarity: top,
+      used_in_answer: payload.usedInAnswer,
+    });
+  } catch (e) {
+    console.error("recordRagTrace failed:", e);
   }
 }
 
@@ -1212,9 +1250,9 @@ serve(async (req) => {
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
-      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, 40)
+      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, ragPieces, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+    const [sentiment, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
@@ -1226,9 +1264,20 @@ serve(async (req) => {
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
-    const useRag = includePieces && !!ragPieces;
+    const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
-    const piecesList = useRag ? (ragPieces as string) : fullPiecesList;
+    const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
+
+    // Fire-and-forget: persist a debug trace of what RAG retrieved for this turn.
+    if (ragResult) {
+      recordRagTrace(supabase, {
+        userId,
+        query: lastUserMsg,
+        rows: (ragResult as any).rows,
+        contextText: (ragResult as any).contextText,
+        usedInAnswer: useRag,
+      }).catch(() => {});
+    }
 
     const resolvedProjectId = activeProjectId || mentionedProjectId;
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
