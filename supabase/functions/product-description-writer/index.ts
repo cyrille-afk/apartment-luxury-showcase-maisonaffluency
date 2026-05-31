@@ -339,7 +339,7 @@ RULES:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: DESCRIPTION_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
