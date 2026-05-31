@@ -197,6 +197,7 @@ function buildSystemPrompt(
   sentimentDirective: string,
   projectContext: string,
   openQuotes: string,
+  planDirective: string,
 ) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
@@ -208,6 +209,10 @@ ${userSignals}
 
 ## EMOTIONAL TONE DIRECTIVE
 ${sentimentDirective}
+
+## EXECUTION PLAN (from upstream brief-extraction pass)
+${planDirective}
+
 
 ## ABSOLUTE RULE — CATALOG-ONLY RESPONSES
 You must ONLY mention designers, ateliers, pieces, brands, and works that appear in the CATALOG DATA sections below.
@@ -756,8 +761,185 @@ async function classifySentiment(
   }
 }
 
+// =========================================================================
+// STEP 4 — BRIEF EXTRACTION PLANNER PASS
+// Cheap structured pre-call. Returns a normalized brief + the tool plan the
+// main model should execute this turn. Lets us:
+//   1. Ground the main model in a stable structured brief (room, style,
+//      materials, qty hints, lead-time ceiling) rather than re-extracting it.
+//   2. Decide whether the turn needs ONE tool (tearsheet OR quote) or BOTH
+//      chained (tearsheet → quote on the same picks).
+// Semantic-cached on the latest user message so paraphrased briefs hit the
+// same plan without re-spending tokens.
+// =========================================================================
+type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote";
+type ExtractedBrief = {
+  intent: "chitchat" | "discovery" | "selection" | "quote" | "selection_and_quote" | "navigation";
+  brief: {
+    summary: string;
+    room: string | null;
+    style: string | null;
+    materials: string[];
+    categories: string[];
+    designers: string[];
+    qty_hint: number | null;
+    lead_weeks_max: number | null;
+    budget_band: string | null;
+  };
+  plan: BriefPlanTool[];
+};
+
+const EMPTY_BRIEF: ExtractedBrief = {
+  intent: "chitchat",
+  brief: { summary: "", room: null, style: null, materials: [], categories: [], designers: [], qty_hint: null, lead_weeks_max: null, budget_band: null },
+  plan: [],
+};
+
+async function extractBrief(apiKey: string, latestUserMessage: string): Promise<ExtractedBrief> {
+  if (!latestUserMessage || latestUserMessage.length < 4) return EMPTY_BRIEF;
+  try {
+    const result = await withSemanticCache(
+      {
+        feature: "trade-concierge-planner",
+        model: SENTIMENT_MODEL,
+        apiKey,
+        prompt: latestUserMessage.slice(0, 1800),
+        threshold: 0.93,
+        ttlSec: 60 * 60 * 24 * 7,
+      },
+      async () => {
+        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: SENTIMENT_MODEL,
+            max_completion_tokens: 400,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are the upstream planner for a luxury B2B furniture concierge. Read the user's latest message and emit a STRICT structured brief + the minimal tool plan the downstream model should execute this turn.\n\n" +
+                  "Tool catalog the downstream model has access to:\n" +
+                  "- propose_tearsheet — draft a NEW tearsheet of curated pieces\n" +
+                  "- add_to_tearsheet — append pieces to one of the user's existing tearsheets\n" +
+                  "- draft_quote — pre-fill a NEW trade quote with line items\n" +
+                  "- add_to_quote — append lines to one of the user's open draft quotes\n\n" +
+                  "Plan rules:\n" +
+                  "- chitchat / navigation / FAQ: empty plan.\n" +
+                  "- 'show / suggest / curate / mood / room brief' without pricing intent: [propose_tearsheet] (or add_to_tearsheet if they reference an existing board).\n" +
+                  "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
+                  "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
+                  "Be conservative — only emit a tool if the user clearly intends that action this turn.",
+              },
+              { role: "user", content: latestUserMessage.slice(0, 1500) },
+            ],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "plan",
+                  description: "Return the structured brief and tool execution plan.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      intent: { type: "string", enum: ["chitchat", "discovery", "selection", "quote", "selection_and_quote", "navigation"] },
+                      summary: { type: "string", description: "One-sentence restatement of what the user is asking for." },
+                      room: { type: "string" },
+                      style: { type: "string" },
+                      materials: { type: "array", items: { type: "string" } },
+                      categories: { type: "array", items: { type: "string" } },
+                      designers: { type: "array", items: { type: "string" } },
+                      qty_hint: { type: "integer", minimum: 1, maximum: 99 },
+                      lead_weeks_max: { type: "integer", minimum: 1, maximum: 104 },
+                      budget_band: { type: "string" },
+                      plan: {
+                        type: "array",
+                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"] },
+                        maxItems: 3,
+                      },
+                    },
+                    required: ["intent", "plan"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            ],
+            tool_choice: { type: "function", function: { name: "plan" } },
+          }),
+        });
+        if (!resp.ok) throw new Error(`planner http ${resp.status}`);
+        const data = await resp.json();
+        const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+        if (!args) throw new Error("planner missing tool_call");
+        const p = JSON.parse(args);
+        const value: ExtractedBrief = {
+          intent: p.intent || "chitchat",
+          brief: {
+            summary: p.summary || "",
+            room: p.room || null,
+            style: p.style || null,
+            materials: Array.isArray(p.materials) ? p.materials.slice(0, 8) : [],
+            categories: Array.isArray(p.categories) ? p.categories.slice(0, 8) : [],
+            designers: Array.isArray(p.designers) ? p.designers.slice(0, 8) : [],
+            qty_hint: typeof p.qty_hint === "number" ? p.qty_hint : null,
+            lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
+            budget_band: p.budget_band || null,
+          },
+          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"].includes(t)) as BriefPlanTool[] : [],
+        };
+        return { value, usage: data?.usage };
+      },
+    );
+    logAiUsage({
+      feature: "trade-concierge-planner",
+      model: SENTIMENT_MODEL,
+      usage: result.usage,
+      cached: result.cached,
+      promptHash: result.promptHash,
+      tier: "cheap",
+    }).catch(() => {});
+    return result.value;
+  } catch (e) {
+    console.error("brief planner failed:", e);
+    return EMPTY_BRIEF;
+  }
+}
+
+function buildPlanDirective(extracted: ExtractedBrief): string {
+  if (!extracted.plan.length) {
+    return "(No tool calls planned this turn — reply conversationally. Default tone applies.)";
+  }
+  const b = extracted.brief;
+  const parts: string[] = [];
+  if (b.summary) parts.push(`- Summary: ${b.summary}`);
+  if (b.room) parts.push(`- Room: ${b.room}`);
+  if (b.style) parts.push(`- Style: ${b.style}`);
+  if (b.materials.length) parts.push(`- Materials: ${b.materials.join(", ")}`);
+  if (b.categories.length) parts.push(`- Categories: ${b.categories.join(", ")}`);
+  if (b.designers.length) parts.push(`- Designers of interest: ${b.designers.join(", ")}`);
+  if (b.qty_hint) parts.push(`- Quantity hint: ${b.qty_hint}`);
+  if (b.lead_weeks_max) parts.push(`- Lead-time ceiling: ${b.lead_weeks_max} weeks`);
+  if (b.budget_band) parts.push(`- Budget band: ${b.budget_band}`);
+
+  const planStr = extracted.plan.join(" → ");
+  const chained = extracted.plan.includes("propose_tearsheet") && extracted.plan.includes("draft_quote");
+  const tail = chained
+    ? "CHAINED PLAN — call `propose_tearsheet` first, then immediately call `draft_quote` IN THE SAME RESPONSE, using the exact same pick_ids you used in the tearsheet. Both tool calls must appear in this turn. The user expects one combined plan card."
+    : `Call the planned tool${extracted.plan.length > 1 ? "s" : ""}: ${planStr}.`;
+
+  return [
+    `Intent: ${extracted.intent}`,
+    "Structured brief:",
+    parts.length ? parts.join("\n") : "  (no extracted fields)",
+    "",
+    `Execution plan: ${planStr}`,
+    tail,
+  ].join("\n");
+}
+
 /** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
 async function loadRelevantPieces(
+
   supabase: ReturnType<typeof createClient>,
   apiKey: string,
   query: string,
@@ -1252,8 +1434,9 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
@@ -1291,10 +1474,17 @@ serve(async (req) => {
       }
     } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
+    const planDirective = buildPlanDirective(extractedBrief);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes,
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective,
     );
-    const isExplicitQuoteIntent = /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg);
+    // The planner's intent + plan supersede the legacy regex when present. If the planner
+    // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
+    // chained selection_and_quote, expose all tools so the model can emit both calls.
+    const plannerQuoteOnly = extractedBrief.intent === "quote" && extractedBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
+    const isExplicitQuoteIntent = plannerQuoteOnly
+      || (extractedBrief.plan.length === 0
+        && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg));
     const availableTools = isExplicitQuoteIntent
       ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
       : TOOLS;
@@ -1508,6 +1698,104 @@ serve(async (req) => {
           }
         };
 
+        // ----- Inner orchestration loop (Step 4) -----
+        // After the main stream finishes, if the upstream planner asked for a
+        // chained `propose_tearsheet → draft_quote` but the model only emitted
+        // the tearsheet, run a follow-up non-streaming call that forces
+        // `draft_quote` using the SAME pick_ids. Emits a second `event: proposal`
+        // so the client renders one combined plan (tearsheet card + quote card).
+        const runChainIfNeeded = async () => {
+          if (!extractedBrief.plan.includes("draft_quote")) return;
+          if (!extractedBrief.plan.includes("propose_tearsheet") && !extractedBrief.plan.includes("add_to_tearsheet")) return;
+          const hasQuote = Array.from(toolCallBuffers.values()).some((tc) => tc.name === "draft_quote" || tc.name === "add_to_quote");
+          if (hasQuote) return;
+          let tearsheetPickIds: string[] | null = null;
+          let tearsheetTitle: string | null = null;
+          for (const tc of toolCallBuffers.values()) {
+            if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
+            try {
+              const parsed = JSON.parse(tc.argsText || "{}");
+              if (Array.isArray(parsed.pick_ids) && parsed.pick_ids.length > 0) {
+                tearsheetPickIds = parsed.pick_ids.slice(0, 16);
+                tearsheetTitle = typeof parsed.title === "string" ? parsed.title : null;
+              }
+            } catch { /* ignore */ }
+          }
+          if (!tearsheetPickIds || tearsheetPickIds.length === 0) return;
+
+          const qtyHint = extractedBrief.brief.qty_hint || 1;
+          const leadCeiling = extractedBrief.brief.lead_weeks_max || null;
+          const followupSystem = [
+            "You are the Maison Affluency Trade Concierge follow-up step.",
+            `The user's tearsheet pick_ids are: ${tearsheetPickIds.join(", ")}.`,
+            `Active project_id (if any): ${resolvedProjectId || "null"}.`,
+            `Default qty per line: ${qtyHint}.${leadCeiling ? ` Lead-time ceiling: ${leadCeiling} weeks.` : ""}`,
+            "Call draft_quote NOW with one line per pick_id above (use the qty hint unless the brief implies otherwise). Do not output any prose.",
+          ].join("\n");
+
+          try {
+            const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: modelFor("balanced"),
+                max_completion_tokens: CHAT_MAX_TOKENS,
+                messages: [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 800) },
+                ],
+                tools: TOOLS.filter((t: any) => t.function?.name === "draft_quote"),
+                tool_choice: { type: "function", function: { name: "draft_quote" } },
+              }),
+            });
+            if (!resp.ok) { console.error("chain draft_quote http", resp.status); return; }
+            const data = await resp.json();
+            if (data?.usage) {
+              logAiUsage({
+                feature: "trade-concierge-chain-quote",
+                model: modelFor("balanced"),
+                usage: data.usage,
+                userId,
+              }).catch(() => {});
+            }
+            const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+            if (!args) return;
+            const parsed = JSON.parse(args);
+            const rawLines: any[] = Array.isArray(parsed.lines) ? parsed.lines : [];
+            const lines = rawLines
+              .filter((l) => l && typeof l.pick_id === "string" && tearsheetPickIds!.includes(l.pick_id))
+              .slice(0, 24)
+              .map((l) => ({
+                pick_id: l.pick_id,
+                qty: Math.max(1, Math.min(99, Number(l.qty) || qtyHint)),
+                variant: typeof l.variant === "string" ? l.variant : null,
+                lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
+                note: typeof l.note === "string" ? l.note : null,
+              }));
+            if (lines.length === 0) return;
+            const requestedCurrency: string | null = typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
+            const preview = await hydrateQuotePreview(supabase, lines, requestedCurrency, tradeDiscountPct);
+            const previewCurrencies = Array.from(new Set(preview.map((l: any) => l.currency).filter(Boolean)));
+            const currency: string | null = requestedCurrency || (previewCurrencies.length === 1 ? previewCurrencies[0] as string : null);
+            const proposal = {
+              tool: "draft_quote",
+              tool_call_id: crypto.randomUUID(),
+              args: {
+                project_id: resolvedProjectId,
+                currency,
+                note: tearsheetTitle ? `Chained quote from "${tearsheetTitle}" tearsheet` : null,
+                lines,
+              },
+              preview,
+            };
+            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+            console.log(`[concierge chain] emitted draft_quote with ${lines.length} lines from tearsheet "${tearsheetTitle}"`);
+          } catch (e) {
+            console.error("chain draft_quote failed:", e);
+          }
+        };
+
+        let sawDone = false;
         try {
           while (true) {
             const { done, value } = await reader.read();
@@ -1532,8 +1820,9 @@ serve(async (req) => {
 
               const payload = line.slice(6).trim();
               if (payload === "[DONE]") {
-                await flushProposal();
-                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                // Defer the terminator: we still need to flush proposals and
+                // possibly emit a chained draft_quote BEFORE the client sees [DONE].
+                sawDone = true;
                 continue;
               }
 
@@ -1564,8 +1853,11 @@ serve(async (req) => {
               }
             }
           }
-          // Stream ended without [DONE] — still flush any pending proposal
+          // Stream fully consumed — flush proposals, then run inner chain, then emit [DONE].
           await flushProposal();
+          await runChainIfNeeded();
+          if (sawDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+
         } catch (e) {
           console.error("stream interceptor error:", e);
         } finally {
