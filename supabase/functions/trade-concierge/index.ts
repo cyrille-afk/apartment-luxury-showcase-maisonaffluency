@@ -761,8 +761,185 @@ async function classifySentiment(
   }
 }
 
+// =========================================================================
+// STEP 4 — BRIEF EXTRACTION PLANNER PASS
+// Cheap structured pre-call. Returns a normalized brief + the tool plan the
+// main model should execute this turn. Lets us:
+//   1. Ground the main model in a stable structured brief (room, style,
+//      materials, qty hints, lead-time ceiling) rather than re-extracting it.
+//   2. Decide whether the turn needs ONE tool (tearsheet OR quote) or BOTH
+//      chained (tearsheet → quote on the same picks).
+// Semantic-cached on the latest user message so paraphrased briefs hit the
+// same plan without re-spending tokens.
+// =========================================================================
+type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote";
+type ExtractedBrief = {
+  intent: "chitchat" | "discovery" | "selection" | "quote" | "selection_and_quote" | "navigation";
+  brief: {
+    summary: string;
+    room: string | null;
+    style: string | null;
+    materials: string[];
+    categories: string[];
+    designers: string[];
+    qty_hint: number | null;
+    lead_weeks_max: number | null;
+    budget_band: string | null;
+  };
+  plan: BriefPlanTool[];
+};
+
+const EMPTY_BRIEF: ExtractedBrief = {
+  intent: "chitchat",
+  brief: { summary: "", room: null, style: null, materials: [], categories: [], designers: [], qty_hint: null, lead_weeks_max: null, budget_band: null },
+  plan: [],
+};
+
+async function extractBrief(apiKey: string, latestUserMessage: string): Promise<ExtractedBrief> {
+  if (!latestUserMessage || latestUserMessage.length < 4) return EMPTY_BRIEF;
+  try {
+    const result = await withSemanticCache(
+      {
+        feature: "trade-concierge-planner",
+        model: SENTIMENT_MODEL,
+        apiKey,
+        prompt: latestUserMessage.slice(0, 1800),
+        threshold: 0.93,
+        ttlSec: 60 * 60 * 24 * 7,
+      },
+      async () => {
+        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: SENTIMENT_MODEL,
+            max_completion_tokens: 400,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are the upstream planner for a luxury B2B furniture concierge. Read the user's latest message and emit a STRICT structured brief + the minimal tool plan the downstream model should execute this turn.\n\n" +
+                  "Tool catalog the downstream model has access to:\n" +
+                  "- propose_tearsheet — draft a NEW tearsheet of curated pieces\n" +
+                  "- add_to_tearsheet — append pieces to one of the user's existing tearsheets\n" +
+                  "- draft_quote — pre-fill a NEW trade quote with line items\n" +
+                  "- add_to_quote — append lines to one of the user's open draft quotes\n\n" +
+                  "Plan rules:\n" +
+                  "- chitchat / navigation / FAQ: empty plan.\n" +
+                  "- 'show / suggest / curate / mood / room brief' without pricing intent: [propose_tearsheet] (or add_to_tearsheet if they reference an existing board).\n" +
+                  "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
+                  "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
+                  "Be conservative — only emit a tool if the user clearly intends that action this turn.",
+              },
+              { role: "user", content: latestUserMessage.slice(0, 1500) },
+            ],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "plan",
+                  description: "Return the structured brief and tool execution plan.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      intent: { type: "string", enum: ["chitchat", "discovery", "selection", "quote", "selection_and_quote", "navigation"] },
+                      summary: { type: "string", description: "One-sentence restatement of what the user is asking for." },
+                      room: { type: "string" },
+                      style: { type: "string" },
+                      materials: { type: "array", items: { type: "string" } },
+                      categories: { type: "array", items: { type: "string" } },
+                      designers: { type: "array", items: { type: "string" } },
+                      qty_hint: { type: "integer", minimum: 1, maximum: 99 },
+                      lead_weeks_max: { type: "integer", minimum: 1, maximum: 104 },
+                      budget_band: { type: "string" },
+                      plan: {
+                        type: "array",
+                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"] },
+                        maxItems: 3,
+                      },
+                    },
+                    required: ["intent", "plan"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            ],
+            tool_choice: { type: "function", function: { name: "plan" } },
+          }),
+        });
+        if (!resp.ok) throw new Error(`planner http ${resp.status}`);
+        const data = await resp.json();
+        const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+        if (!args) throw new Error("planner missing tool_call");
+        const p = JSON.parse(args);
+        const value: ExtractedBrief = {
+          intent: p.intent || "chitchat",
+          brief: {
+            summary: p.summary || "",
+            room: p.room || null,
+            style: p.style || null,
+            materials: Array.isArray(p.materials) ? p.materials.slice(0, 8) : [],
+            categories: Array.isArray(p.categories) ? p.categories.slice(0, 8) : [],
+            designers: Array.isArray(p.designers) ? p.designers.slice(0, 8) : [],
+            qty_hint: typeof p.qty_hint === "number" ? p.qty_hint : null,
+            lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
+            budget_band: p.budget_band || null,
+          },
+          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"].includes(t)) as BriefPlanTool[] : [],
+        };
+        return { value, usage: data?.usage };
+      },
+    );
+    logAiUsage({
+      feature: "trade-concierge-planner",
+      model: SENTIMENT_MODEL,
+      usage: result.usage,
+      cached: result.cached,
+      promptHash: result.promptHash,
+      tier: "cheap",
+    }).catch(() => {});
+    return result.value;
+  } catch (e) {
+    console.error("brief planner failed:", e);
+    return EMPTY_BRIEF;
+  }
+}
+
+function buildPlanDirective(extracted: ExtractedBrief): string {
+  if (!extracted.plan.length) {
+    return "(No tool calls planned this turn — reply conversationally. Default tone applies.)";
+  }
+  const b = extracted.brief;
+  const parts: string[] = [];
+  if (b.summary) parts.push(`- Summary: ${b.summary}`);
+  if (b.room) parts.push(`- Room: ${b.room}`);
+  if (b.style) parts.push(`- Style: ${b.style}`);
+  if (b.materials.length) parts.push(`- Materials: ${b.materials.join(", ")}`);
+  if (b.categories.length) parts.push(`- Categories: ${b.categories.join(", ")}`);
+  if (b.designers.length) parts.push(`- Designers of interest: ${b.designers.join(", ")}`);
+  if (b.qty_hint) parts.push(`- Quantity hint: ${b.qty_hint}`);
+  if (b.lead_weeks_max) parts.push(`- Lead-time ceiling: ${b.lead_weeks_max} weeks`);
+  if (b.budget_band) parts.push(`- Budget band: ${b.budget_band}`);
+
+  const planStr = extracted.plan.join(" → ");
+  const chained = extracted.plan.includes("propose_tearsheet") && extracted.plan.includes("draft_quote");
+  const tail = chained
+    ? "CHAINED PLAN — call `propose_tearsheet` first, then immediately call `draft_quote` IN THE SAME RESPONSE, using the exact same pick_ids you used in the tearsheet. Both tool calls must appear in this turn. The user expects one combined plan card."
+    : `Call the planned tool${extracted.plan.length > 1 ? "s" : ""}: ${planStr}.`;
+
+  return [
+    `Intent: ${extracted.intent}`,
+    "Structured brief:",
+    parts.length ? parts.join("\n") : "  (no extracted fields)",
+    "",
+    `Execution plan: ${planStr}`,
+    tail,
+  ].join("\n");
+}
+
 /** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
 async function loadRelevantPieces(
+
   supabase: ReturnType<typeof createClient>,
   apiKey: string,
   query: string,
