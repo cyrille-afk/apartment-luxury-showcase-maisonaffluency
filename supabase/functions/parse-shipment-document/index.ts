@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
     }
 
     const aiJson = await aiRes.json();
-    logAiUsage({ feature: "parse-shipment-document", model: "google/gemini-2.5-pro", usage: aiJson?.usage }).catch(() => {});
+    logAiUsage({ feature: "parse-shipment-document", model: SHIPMENT_MODEL, usage: aiJson?.usage }).catch(() => {});
     const toolCall = aiJson.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "AI did not return structured data" }), {
