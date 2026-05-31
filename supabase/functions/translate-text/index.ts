@@ -85,6 +85,7 @@ RULES:
       },
       body: JSON.stringify({
         model: TRANSLATE_MODEL,
+        max_completion_tokens: TRANSLATE_MAX_TOKENS,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: text },
