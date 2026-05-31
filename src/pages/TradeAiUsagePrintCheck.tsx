@@ -81,11 +81,11 @@ export default function TradeAiUsagePrintCheck() {
         <header className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-light tracking-tight">
-              Print / PDF — Automated Check
+              PDF Export — Automated Check
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Verifies <code>document.title</code> before <code>window.print()</code> and
-              logs the expected Save-as-PDF filename per browser.
+              Verifies the explicit PDF download filename and logs the expected
+              Chrome and Safari behavior.
             </p>
           </div>
           <Link
