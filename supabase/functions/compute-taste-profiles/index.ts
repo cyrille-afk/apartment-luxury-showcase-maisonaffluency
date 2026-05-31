@@ -1,6 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdmin } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { modelFor } from "../_shared/aiModels.ts";
+
+const TASTE_MODEL = modelFor("cheap");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
