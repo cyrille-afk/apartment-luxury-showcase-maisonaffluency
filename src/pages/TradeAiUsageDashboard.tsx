@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart3, Coins, AlertTriangle, Activity, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -334,15 +334,6 @@ function renderAiUsagePdf(args: {
 export default function TradeAiUsageDashboard() {
   const { user, isAdmin, loading } = useAuth();
   const [days, setDays] = useState(30);
-
-  // Set document.title directly (bypass Helmet) so the browser's
-  // "Save as PDF" dialog uses it as the default filename.
-  useEffect(() => {
-    const prev = document.title;
-    document.title = `AI Usage Dashboard - ${format(new Date(), "yyyy-MM-dd")}`;
-    return () => { document.title = prev; };
-  }, []);
-
 
   const range = useMemo(() => {
     const to = new Date();
