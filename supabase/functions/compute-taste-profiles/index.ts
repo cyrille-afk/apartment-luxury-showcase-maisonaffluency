@@ -257,7 +257,7 @@ Respond in this exact JSON format:
         }
 
         const aiData = await aiResp.json();
-        logAiUsage({ feature: "compute-taste-profiles", model: "google/gemini-2.5-flash", usage: aiData?.usage, userId }).catch(() => {});
+        logAiUsage({ feature: "compute-taste-profiles", model: TASTE_MODEL, usage: aiData?.usage, userId }).catch(() => {});
         const content = aiData.choices?.[0]?.message?.content;
         const parsed = JSON.parse(content);
 
