@@ -1708,6 +1708,56 @@ serve(async (req) => {
           }
         };
 
+        // ----- Symmetric back-fill (quote-only → synthesize tearsheet) -----
+        // If the planner expected both a tearsheet and a quote but the model only
+        // emitted draft_quote, synthesize a propose_tearsheet tool-call buffer
+        // from the quote's pick_ids. We inject it into `toolCallBuffers` so the
+        // deterministic flushProposal() ordering emits the tearsheet card first,
+        // then the quote card, then [DONE]. No extra LLM call required — the
+        // pick_ids and title are derivable from the quote args and the planner brief.
+        const backfillTearsheetIfNeeded = () => {
+          const wantsTearsheet =
+            extractedBrief.plan.includes("propose_tearsheet") ||
+            extractedBrief.plan.includes("add_to_tearsheet");
+          if (!wantsTearsheet) return;
+          const buffers = Array.from(toolCallBuffers.entries());
+          const hasTearsheet = buffers.some(([, b]) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
+          if (hasTearsheet) return;
+          const quoteEntry = buffers.find(([, b]) => b.name === "draft_quote" || b.name === "add_to_quote");
+          if (!quoteEntry) return;
+          let parsed: any = null;
+          try { parsed = JSON.parse(quoteEntry[1].argsText || "{}"); } catch { return; }
+          const rawLines: any[] = Array.isArray(parsed.lines) ? parsed.lines : [];
+          const pickIds = Array.from(new Set(
+            rawLines
+              .map((l: any) => (l && typeof l.pick_id === "string" ? l.pick_id : null))
+              .filter((id: string | null): id is string => !!id),
+          )).slice(0, 16);
+          if (pickIds.length === 0) return;
+
+          // Derive a tearsheet title from the planner brief; fallback to a generic label.
+          const room = extractedBrief.brief.room;
+          const style = extractedBrief.brief.style;
+          const titleBits = [style, room].filter((s) => typeof s === "string" && s.trim().length > 0);
+          const title = titleBits.length
+            ? `${titleBits.join(" ")} — selected pieces`
+            : "Selected pieces";
+
+          // Allocate a synthetic buffer index that won't collide with existing ones.
+          const maxIdx = buffers.reduce((m, [i]) => (i > m ? i : m), -1);
+          const syntheticIdx = maxIdx + 1;
+          toolCallBuffers.set(syntheticIdx, {
+            id: `synthetic-tearsheet-${crypto.randomUUID()}`,
+            name: "propose_tearsheet",
+            argsText: JSON.stringify({
+              title,
+              pick_ids: pickIds,
+              note: "Auto-generated from quote draft to keep the brief and quote in sync.",
+            }),
+          });
+          console.log(`[concierge backfill] synthesized propose_tearsheet (${pickIds.length} picks) from draft_quote`);
+        };
+
         // ----- Inner orchestration loop (Step 4) -----
         // After the main stream finishes, if the upstream planner asked for a
         // chained `propose_tearsheet → draft_quote` but the model only emitted
