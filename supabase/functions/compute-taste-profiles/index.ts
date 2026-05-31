@@ -246,6 +246,7 @@ Respond in this exact JSON format:
           },
           body: JSON.stringify({
             model: TASTE_MODEL,
+            max_completion_tokens: TASTE_MAX_TOKENS,
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" },
           }),
