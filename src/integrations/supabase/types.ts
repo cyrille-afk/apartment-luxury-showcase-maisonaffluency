@@ -1069,6 +1069,9 @@ export type Database = {
           edition: string | null
           edition_number: string | null
           edition_signing: string | null
+          embedded_at: string | null
+          embedding: string | null
+          embedding_source_hash: string | null
           gallery_images: string[] | null
           hover_image_url: string | null
           id: string
@@ -1112,6 +1115,9 @@ export type Database = {
           edition?: string | null
           edition_number?: string | null
           edition_signing?: string | null
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_source_hash?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string
@@ -1155,6 +1161,9 @@ export type Database = {
           edition?: string | null
           edition_number?: string | null
           edition_signing?: string | null
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_source_hash?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string
@@ -4397,6 +4406,9 @@ export type Database = {
           default_ship_mode: string | null
           description: string | null
           dimensions: string | null
+          embedded_at: string | null
+          embedding: string | null
+          embedding_source_hash: string | null
           gallery_images: string[] | null
           id: string
           image_url: string | null
@@ -4433,6 +4445,9 @@ export type Database = {
           default_ship_mode?: string | null
           description?: string | null
           dimensions?: string | null
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_source_hash?: string | null
           gallery_images?: string[] | null
           id?: string
           image_url?: string | null
@@ -4469,6 +4484,9 @@ export type Database = {
           default_ship_mode?: string | null
           description?: string | null
           dimensions?: string | null
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_source_hash?: string | null
           gallery_images?: string[] | null
           id?: string
           image_url?: string | null
@@ -5219,6 +5237,19 @@ export type Database = {
           _source?: string
         }
         Returns: string
+      }
+      match_catalog: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          category: string
+          designer: string
+          id: string
+          materials: string
+          similarity: number
+          source: string
+          subcategory: string
+          title: string
+        }[]
       }
       move_to_dlq: {
         Args: {

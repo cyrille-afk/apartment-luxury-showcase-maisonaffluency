@@ -3,11 +3,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
+import { embedQuery } from "../_shared/aiEmbeddings.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
 const CHAT_MAX_TOKENS = tokenBudget("chat");
 const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -660,12 +662,12 @@ async function loadUserSignals(
   return lines.length ? lines.join("\n") : "(New user — no engagement signals yet.)";
 }
 
-/** Run a fast classifier on the latest user message to detect sentiment + intent. */
+/** Run a fast classifier on the latest user message: sentiment + intent + needs_catalog gate. */
 async function classifySentiment(
   apiKey: string,
   latestUserMessage: string,
-): Promise<{ sentiment: string; intent: string; escalate: boolean }> {
-  const fallback = { sentiment: "neutral", intent: "question", escalate: false };
+): Promise<{ sentiment: string; intent: string; escalate: boolean; needs_catalog: boolean }> {
+  const fallback = { sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false };
   if (!latestUserMessage || latestUserMessage.length < 2) return fallback;
 
   try {
@@ -679,7 +681,7 @@ async function classifySentiment(
           {
             role: "system",
             content:
-              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Be conservative — only flag escalate=true when the user is clearly frustrated, complains repeatedly, threatens to leave, or explicitly asks for a human.",
+              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Set needs_catalog=true ONLY when the user asks about specific pieces, materials, designers, categories, or product recommendations — false for greetings, navigation, FAQs, or pricing-only questions. Be conservative on escalate.",
           },
           { role: "user", content: latestUserMessage.slice(0, 1500) },
         ],
@@ -688,15 +690,16 @@ async function classifySentiment(
             type: "function",
             function: {
               name: "classify",
-              description: "Return sentiment + intent + escalation flag.",
+              description: "Return sentiment + intent + escalation flag + catalog need.",
               parameters: {
                 type: "object",
                 properties: {
                   sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
                   intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
                   escalate: { type: "boolean", description: "True when a human concierge should step in." },
+                  needs_catalog: { type: "boolean", description: "True when the response requires loading catalog pieces (designer/material/category/recommendation)." },
                 },
-                required: ["sentiment", "intent", "escalate"],
+                required: ["sentiment", "intent", "escalate", "needs_catalog"],
                 additionalProperties: false,
               },
             },
@@ -715,10 +718,50 @@ async function classifySentiment(
       sentiment: parsed.sentiment || "neutral",
       intent: parsed.intent || "question",
       escalate: !!parsed.escalate,
+      needs_catalog: !!parsed.needs_catalog,
     };
   } catch (e) {
     console.error("sentiment classifier failed:", e);
     return fallback;
+  }
+}
+
+/** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
+async function loadRelevantPieces(
+  supabase: ReturnType<typeof createClient>,
+  apiKey: string,
+  query: string,
+  k = 40,
+): Promise<string | null> {
+  if (!apiKey || !query?.trim()) return null;
+  try {
+    const vec = await embedQuery(apiKey, query);
+    if (!vec) return null;
+    logAiUsage({
+      feature: "trade-concierge-rag",
+      model: "openai/text-embedding-3-small",
+      usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
+    }).catch(() => {});
+    const { data, error } = await supabase.rpc("match_catalog", {
+      query_embedding: vec as any,
+      match_count: k,
+    });
+    if (error || !Array.isArray(data) || data.length < 5) {
+      if (error) console.error("match_catalog rpc failed:", error.message);
+      return null;
+    }
+    const lines = data.map((r: any) => {
+      const meta = [r.subcategory || r.category, r.materials].filter(Boolean).join(" · ");
+      return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} [id: ${r.id}]`;
+    });
+    return [
+      "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to widen the search.",
+      "",
+      lines.join("\n"),
+    ].join("\n");
+  } catch (e) {
+    console.error("loadRelevantPieces failed:", e);
+    return null;
   }
 }
 
@@ -734,6 +777,9 @@ function buildSentimentDirective(c: { sentiment: string; intent: string; escalat
   }
   return "Tone: warm, refined, helpful. Default register.";
 }
+
+
+
 
 const GENERIC_PRODUCT_TOKENS = new Set([
   "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
@@ -1131,18 +1177,29 @@ serve(async (req) => {
     const designerNames = (designerNamesRows || [])
       .flatMap((d: any) => [d.name, d.display_name])
       .filter(Boolean) as string[];
-    const includePieces = needsFullCatalog(lastUserMsg, designerNames);
+    const heuristicNeedsPieces = needsFullCatalog(lastUserMsg, designerNames);
 
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
-    const [{ designersList, piecesList, showroomBrands }, userBoards, userSignals, sentiment, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
-      loadCatalogContext(supabase, includePieces),
+    // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
+    const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
+      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, 40)
+      : Promise.resolve(null);
+    const [sentiment, ragPieces, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+      classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
-      classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
     ]);
+
+    // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
+    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
+    const useRag = includePieces && !!ragPieces;
+    const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
+    const piecesList = useRag ? (ragPieces as string) : fullPiecesList;
+
     const resolvedProjectId = activeProjectId || mentionedProjectId;
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
     // Resolve trade discount % for this user (defaults to 8%).
