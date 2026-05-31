@@ -438,7 +438,15 @@ export default function TradeAiUsageDashboard() {
               Window: last {days} days · Generated {format(new Date(), "MMM d, yyyy HH:mm")}
             </p>
           </div>
-          <div className="flex gap-2 no-print">
+          <div className="flex gap-2 no-print items-center">
+            <a
+              href="/trade/admin/rag-debug"
+              className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+              title="RAG Debug — top matched catalog items and injected context per concierge answer"
+            >
+              <Database className="h-3.5 w-3.5" />
+              RAG Debug
+            </a>
             {PRESETS.map((p) => (
               <button
                 key={p.days}
