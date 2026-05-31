@@ -2,9 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
-import { modelFor } from "../_shared/aiModels.ts";
+import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
 const DESCRIPTION_MODEL = modelFor("balanced");
+const DESCRIPTION_MAX_TOKENS = tokenBudget("rewrite");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
