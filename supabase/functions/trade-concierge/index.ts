@@ -1434,8 +1434,9 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
