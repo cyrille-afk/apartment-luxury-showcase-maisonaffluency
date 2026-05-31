@@ -1863,8 +1863,15 @@ serve(async (req) => {
               }
             }
           }
-          // Stream fully consumed — flush proposals, then run inner chain, then emit [DONE].
+          // Stream fully consumed.
+          // (1) Symmetric back-fill: if the model emitted ONLY a quote but the planner
+          //     also expected a tearsheet, synthesize a propose_tearsheet buffer from
+          //     the quote's pick_ids BEFORE flushProposal so deterministic ordering
+          //     (tearsheet → quote) holds without buffering SSE writes.
+          backfillTearsheetIfNeeded();
           await flushProposal();
+          // (2) Reverse back-fill: tearsheet emitted but quote missing — forces a
+          //     draft_quote follow-up and emits it after the tearsheet card.
           await runChainIfNeeded();
           if (sawDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
 
