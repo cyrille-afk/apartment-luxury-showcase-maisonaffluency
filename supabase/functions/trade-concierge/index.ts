@@ -662,12 +662,12 @@ async function loadUserSignals(
   return lines.length ? lines.join("\n") : "(New user — no engagement signals yet.)";
 }
 
-/** Run a fast classifier on the latest user message to detect sentiment + intent. */
+/** Run a fast classifier on the latest user message: sentiment + intent + needs_catalog gate. */
 async function classifySentiment(
   apiKey: string,
   latestUserMessage: string,
-): Promise<{ sentiment: string; intent: string; escalate: boolean }> {
-  const fallback = { sentiment: "neutral", intent: "question", escalate: false };
+): Promise<{ sentiment: string; intent: string; escalate: boolean; needs_catalog: boolean }> {
+  const fallback = { sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false };
   if (!latestUserMessage || latestUserMessage.length < 2) return fallback;
 
   try {
@@ -681,7 +681,7 @@ async function classifySentiment(
           {
             role: "system",
             content:
-              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Be conservative — only flag escalate=true when the user is clearly frustrated, complains repeatedly, threatens to leave, or explicitly asks for a human.",
+              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Set needs_catalog=true ONLY when the user asks about specific pieces, materials, designers, categories, or product recommendations — false for greetings, navigation, FAQs, or pricing-only questions. Be conservative on escalate.",
           },
           { role: "user", content: latestUserMessage.slice(0, 1500) },
         ],
@@ -690,15 +690,16 @@ async function classifySentiment(
             type: "function",
             function: {
               name: "classify",
-              description: "Return sentiment + intent + escalation flag.",
+              description: "Return sentiment + intent + escalation flag + catalog need.",
               parameters: {
                 type: "object",
                 properties: {
                   sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
                   intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
                   escalate: { type: "boolean", description: "True when a human concierge should step in." },
+                  needs_catalog: { type: "boolean", description: "True when the response requires loading catalog pieces (designer/material/category/recommendation)." },
                 },
-                required: ["sentiment", "intent", "escalate"],
+                required: ["sentiment", "intent", "escalate", "needs_catalog"],
                 additionalProperties: false,
               },
             },
@@ -717,6 +718,7 @@ async function classifySentiment(
       sentiment: parsed.sentiment || "neutral",
       intent: parsed.intent || "question",
       escalate: !!parsed.escalate,
+      needs_catalog: !!parsed.needs_catalog,
     };
   } catch (e) {
     console.error("sentiment classifier failed:", e);
@@ -724,18 +726,45 @@ async function classifySentiment(
   }
 }
 
-function buildSentimentDirective(c: { sentiment: string; intent: string; escalate: boolean }): string {
-  if (c.sentiment === "frustrated" || c.intent === "complaint") {
-    return "The user appears FRUSTRATED. Open by acknowledging the friction in one sentence ('I hear you — that's not the experience we want'), validate the concern, then offer a concrete next step. Do NOT upsell or pivot to recommendations. Avoid jargon. Keep it human.";
+/** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
+async function loadRelevantPieces(
+  supabase: ReturnType<typeof createClient>,
+  apiKey: string,
+  query: string,
+  k = 40,
+): Promise<string | null> {
+  if (!apiKey || !query?.trim()) return null;
+  try {
+    const vec = await embedQuery(apiKey, query);
+    if (!vec) return null;
+    logAiUsage({
+      feature: "trade-concierge-rag",
+      model: "openai/text-embedding-3-small",
+      usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
+    }).catch(() => {});
+    const { data, error } = await supabase.rpc("match_catalog", {
+      query_embedding: vec as any,
+      match_count: k,
+    });
+    if (error || !Array.isArray(data) || data.length < 5) {
+      if (error) console.error("match_catalog rpc failed:", error.message);
+      return null;
+    }
+    const lines = data.map((r: any) => {
+      const meta = [r.subcategory || r.category, r.materials].filter(Boolean).join(" · ");
+      return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} [id: ${r.id}]`;
+    });
+    return [
+      "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to widen the search.",
+      "",
+      lines.join("\n"),
+    ].join("\n");
+  } catch (e) {
+    console.error("loadRelevantPieces failed:", e);
+    return null;
   }
-  if (c.sentiment === "anxious" || c.sentiment === "confused") {
-    return "The user seems UNCERTAIN. Slow down, confirm what they're trying to achieve, and offer one clear next step rather than several options.";
-  }
-  if (c.sentiment === "delighted") {
-    return "The user is POSITIVE. Match their energy briefly and keep momentum — propose the next logical step (tearsheet, sample, quote) without over-selling.";
-  }
-  return "Tone: warm, refined, helpful. Default register.";
 }
+
 
 const GENERIC_PRODUCT_TOKENS = new Set([
   "rug", "rugs", "chandelier", "chandeliers", "light", "lighting", "lamp", "lamps",
