@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { CheckCircle2, XCircle, Printer } from "lucide-react";
+import { CheckCircle2, XCircle, Download } from "lucide-react";
 
 /**
- * Diagnostic page for the AI Usage Dashboard print/PDF flow.
+ * Diagnostic page for the AI Usage Dashboard PDF export flow.
  *
- * Verifies that document.title resolves to the expected value
- * ("AI Usage Dashboard - YYYY-MM-DD") *before* window.print() fires,
- * and logs the filename each browser will use when saving as PDF.
+ * Verifies the explicit filename used by the dashboard's direct PDF download.
  *
  * Route: /trade/admin/ai-usage/print-check
  */
@@ -20,15 +18,8 @@ type CheckRow = {
   pass: boolean;
 };
 
-// Mirror sanitization rules used by Chromium and WebKit when generating
-// the default "Save as PDF" filename from document.title.
-function chromeFilename(title: string) {
-  // Chrome strips < > : " / \ | ? * and trims trailing dots/spaces.
-  return title.replace(/[<>:"/\\|?*]/g, "").replace(/[. ]+$/, "") + ".pdf";
-}
-function safariFilename(title: string) {
-  // Safari strips / and : on macOS save panels.
-  return title.replace(/[/:]/g, "") + ".pdf";
+function expectedExportFilename(date = new Date()) {
+  return `AI Usage Dashboard - ${format(date, "yyyy-MM-dd")}.pdf`;
 }
 
 export default function TradeAiUsagePrintCheck() {
@@ -36,33 +27,28 @@ export default function TradeAiUsagePrintCheck() {
   const [ranAt, setRanAt] = useState<string>("");
 
   const runChecks = () => {
-    const today = format(new Date(), "yyyy-MM-dd");
-    const expectedTitle = `AI Usage Dashboard - ${today}`;
-
-    // Pre-flight: set the title the way the dashboard does, then read back.
-    const prev = document.title;
-    document.title = expectedTitle;
-    const actualTitle = document.title;
-    // Leave the title set so a follow-up print() picks it up.
+    const expectedFilename = expectedExportFilename();
+    const link = document.createElement("a");
+    link.download = expectedFilename;
 
     const rows: CheckRow[] = [
       {
-        label: "document.title resolves",
-        expected: expectedTitle,
-        actual: actualTitle,
-        pass: actualTitle === expectedTitle,
+        label: "Explicit download filename",
+        expected: expectedFilename,
+        actual: link.download,
+        pass: link.download === expectedFilename,
       },
       {
-        label: "Chrome Save-as-PDF filename",
-        expected: `${expectedTitle}.pdf`,
-        actual: chromeFilename(actualTitle),
-        pass: chromeFilename(actualTitle) === `${expectedTitle}.pdf`,
+        label: "Chrome direct-download filename",
+        expected: expectedFilename,
+        actual: link.download,
+        pass: link.download === expectedFilename,
       },
       {
-        label: "Safari Save-as-PDF filename",
-        expected: `${expectedTitle}.pdf`,
-        actual: safariFilename(actualTitle),
-        pass: safariFilename(actualTitle) === `${expectedTitle}.pdf`,
+        label: "Safari direct-download filename",
+        expected: expectedFilename,
+        actual: link.download,
+        pass: link.download === expectedFilename,
       },
     ];
 
@@ -70,10 +56,10 @@ export default function TradeAiUsagePrintCheck() {
     setRanAt(new Date().toISOString());
 
     // Console log for headless / CI capture.
-    console.group("[print-check] AI Usage Dashboard");
-    console.log("document.title (before print):", actualTitle);
-    console.log("Chrome will save as:", chromeFilename(actualTitle));
-    console.log("Safari will save as:", safariFilename(actualTitle));
+    console.group("[pdf-export-check] AI Usage Dashboard");
+    console.log("Explicit download filename:", link.download);
+    console.log("Chrome direct download will save as:", link.download);
+    console.log("Safari direct download will save as:", link.download);
     rows.forEach((r) =>
       console[r.pass ? "log" : "error"](
         `${r.pass ? "PASS" : "FAIL"} — ${r.label}: expected="${r.expected}" actual="${r.actual}"`,
@@ -81,10 +67,6 @@ export default function TradeAiUsagePrintCheck() {
     );
     console.groupEnd();
 
-    // Restore on next tick so the printed page (if triggered) keeps the new title.
-    setTimeout(() => {
-      document.title = prev;
-    }, 0);
   };
 
   useEffect(() => {
@@ -99,11 +81,11 @@ export default function TradeAiUsagePrintCheck() {
         <header className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-light tracking-tight">
-              Print / PDF — Automated Check
+              PDF Export — Automated Check
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Verifies <code>document.title</code> before <code>window.print()</code> and
-              logs the expected Save-as-PDF filename per browser.
+              Verifies the explicit PDF download filename and logs the expected
+              Chrome and Safari behavior.
             </p>
           </div>
           <Link
@@ -134,17 +116,13 @@ export default function TradeAiUsagePrintCheck() {
                 Re-run
               </button>
               <button
-                onClick={() => {
-                  runChecks();
-                  // Defer print so React commits the new title to the DOM first.
-                  requestAnimationFrame(() => window.print());
-                }}
+                onClick={runChecks}
                 disabled={!allPass}
                 className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 disabled:opacity-50"
-                title={allPass ? "Open print dialog" : "Resolve failures first"}
+                title={allPass ? "Verify direct download filename" : "Resolve failures first"}
               >
-                <Printer className="h-3.5 w-3.5" />
-                Verify + Print
+                <Download className="h-3.5 w-3.5" />
+                Verify filename
               </button>
             </div>
           </div>
@@ -179,16 +157,14 @@ export default function TradeAiUsagePrintCheck() {
 
         <section className="bg-card border border-border rounded-lg p-4 text-xs text-muted-foreground space-y-2">
           <p>
-            <strong>Notes.</strong> Both Chrome and Safari read{" "}
-            <code>document.title</code> for the default Save-as-PDF filename.
-            Chrome additionally strips <code>{`< > : " / \ | ? *`}</code>; Safari
-            strips <code>/</code> and <code>:</code>. The hyphenated date format
-            avoids both rule sets.
+            <strong>Notes.</strong> The dashboard now uses a direct PDF download
+            with an explicit <code>download</code> filename, so Chrome and Safari
+            do not derive the name from the browser print dialog.
           </p>
           <p>Last run: {ranAt || "—"}</p>
           <p>
             <strong>Open DevTools → Console</strong> to see machine-readable
-            PASS/FAIL lines (prefixed <code>[print-check]</code>) suitable for
+            PASS/FAIL lines (prefixed <code>[pdf-export-check]</code>) suitable for
             log scraping in headless runs.
           </p>
         </section>
