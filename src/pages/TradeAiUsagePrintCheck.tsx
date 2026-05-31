@@ -116,17 +116,13 @@ export default function TradeAiUsagePrintCheck() {
                 Re-run
               </button>
               <button
-                onClick={() => {
-                  runChecks();
-                  // Defer print so React commits the new title to the DOM first.
-                  requestAnimationFrame(() => window.print());
-                }}
+                onClick={runChecks}
                 disabled={!allPass}
                 className="px-3 py-1.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 disabled:opacity-50"
-                title={allPass ? "Open print dialog" : "Resolve failures first"}
+                title={allPass ? "Verify direct download filename" : "Resolve failures first"}
               >
-                <Printer className="h-3.5 w-3.5" />
-                Verify + Print
+                <Download className="h-3.5 w-3.5" />
+                Verify filename
               </button>
             </div>
           </div>
@@ -161,16 +157,14 @@ export default function TradeAiUsagePrintCheck() {
 
         <section className="bg-card border border-border rounded-lg p-4 text-xs text-muted-foreground space-y-2">
           <p>
-            <strong>Notes.</strong> Both Chrome and Safari read{" "}
-            <code>document.title</code> for the default Save-as-PDF filename.
-            Chrome additionally strips <code>{`< > : " / \ | ? *`}</code>; Safari
-            strips <code>/</code> and <code>:</code>. The hyphenated date format
-            avoids both rule sets.
+            <strong>Notes.</strong> The dashboard now uses a direct PDF download
+            with an explicit <code>download</code> filename, so Chrome and Safari
+            do not derive the name from the browser print dialog.
           </p>
           <p>Last run: {ranAt || "—"}</p>
           <p>
             <strong>Open DevTools → Console</strong> to see machine-readable
-            PASS/FAIL lines (prefixed <code>[print-check]</code>) suitable for
+            PASS/FAIL lines (prefixed <code>[pdf-export-check]</code>) suitable for
             log scraping in headless runs.
           </p>
         </section>
