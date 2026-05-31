@@ -56,6 +56,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_semantic_cache: {
+        Row: {
+          completion_tokens: number | null
+          created_at: string
+          embedding: string | null
+          expires_at: string
+          feature: string
+          hits: number
+          id: string
+          last_hit_at: string | null
+          model: string
+          prompt: string
+          prompt_hash: string
+          prompt_tokens: number | null
+          response_json: Json
+        }
+        Insert: {
+          completion_tokens?: number | null
+          created_at?: string
+          embedding?: string | null
+          expires_at: string
+          feature: string
+          hits?: number
+          id?: string
+          last_hit_at?: string | null
+          model: string
+          prompt: string
+          prompt_hash: string
+          prompt_tokens?: number | null
+          response_json: Json
+        }
+        Update: {
+          completion_tokens?: number | null
+          created_at?: string
+          embedding?: string | null
+          expires_at?: string
+          feature?: string
+          hits?: number
+          id?: string
+          last_hit_at?: string | null
+          model?: string
+          prompt?: string
+          prompt_hash?: string
+          prompt_tokens?: number | null
+          response_json?: Json
+        }
+        Relationships: []
+      }
       ai_usage_events: {
         Row: {
           cached: boolean
@@ -5249,6 +5297,23 @@ export type Database = {
           source: string
           subcategory: string
           title: string
+        }[]
+      }
+      match_semantic_cache: {
+        Args: {
+          _feature: string
+          _limit?: number
+          _model: string
+          _query_embedding: string
+          _threshold?: number
+        }
+        Returns: {
+          completion_tokens: number
+          id: string
+          prompt: string
+          prompt_tokens: number
+          response_json: Json
+          similarity: number
         }[]
       }
       move_to_dlq: {

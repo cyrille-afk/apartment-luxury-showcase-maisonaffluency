@@ -4,6 +4,7 @@ import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 import { embedQuery } from "../_shared/aiEmbeddings.ts";
+import { withSemanticCache } from "../_shared/aiCache.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
@@ -670,56 +671,85 @@ async function classifySentiment(
   const fallback = { sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false };
   if (!latestUserMessage || latestUserMessage.length < 2) return fallback;
 
+  // Semantic cache: paraphrased classifier inputs ("show me sofas" /
+  // "what sofas do you have" / "any sofas?") collapse to the same answer.
+  // Threshold 0.93 is intentionally strict — wrong intent flips the whole
+  // downstream pipeline (catalog load vs. smalltalk).
   try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const result = await withSemanticCache(
+      {
+        feature: "trade-concierge-sentiment",
         model: SENTIMENT_MODEL,
-        max_completion_tokens: SENTIMENT_MAX_TOKENS,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Set needs_catalog=true ONLY when the user asks about specific pieces, materials, designers, categories, or product recommendations — false for greetings, navigation, FAQs, or pricing-only questions. Be conservative on escalate.",
-          },
-          { role: "user", content: latestUserMessage.slice(0, 1500) },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "classify",
-              description: "Return sentiment + intent + escalation flag + catalog need.",
-              parameters: {
-                type: "object",
-                properties: {
-                  sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
-                  intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
-                  escalate: { type: "boolean", description: "True when a human concierge should step in." },
-                  needs_catalog: { type: "boolean", description: "True when the response requires loading catalog pieces (designer/material/category/recommendation)." },
-                },
-                required: ["sentiment", "intent", "escalate", "needs_catalog"],
-                additionalProperties: false,
+        apiKey,
+        prompt: latestUserMessage.slice(0, 1500),
+        threshold: 0.93,
+        ttlSec: 60 * 60 * 24 * 14, // 14d — intents are stable
+      },
+      async () => {
+        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: SENTIMENT_MODEL,
+            max_completion_tokens: SENTIMENT_MAX_TOKENS,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Set needs_catalog=true ONLY when the user asks about specific pieces, materials, designers, categories, or product recommendations — false for greetings, navigation, FAQs, or pricing-only questions. Be conservative on escalate.",
               },
-            },
+              { role: "user", content: latestUserMessage.slice(0, 1500) },
+            ],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "classify",
+                  description: "Return sentiment + intent + escalation flag + catalog need.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
+                      intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
+                      escalate: { type: "boolean", description: "True when a human concierge should step in." },
+                      needs_catalog: { type: "boolean", description: "True when the response requires loading catalog pieces (designer/material/category/recommendation)." },
+                    },
+                    required: ["sentiment", "intent", "escalate", "needs_catalog"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            ],
+            tool_choice: { type: "function", function: { name: "classify" } },
+          }),
+        });
+        if (!resp.ok) throw new Error(`classifier http ${resp.status}`);
+        const data = await resp.json();
+        const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+        if (!args) throw new Error("classifier missing tool_call");
+        const parsed = JSON.parse(args);
+        return {
+          value: {
+            sentiment: parsed.sentiment || "neutral",
+            intent: parsed.intent || "question",
+            escalate: !!parsed.escalate,
+            needs_catalog: !!parsed.needs_catalog,
           },
-        ],
-        tool_choice: { type: "function", function: { name: "classify" } },
-      }),
-    });
-    if (!resp.ok) return fallback;
-    const data = await resp.json();
-    logAiUsage({ feature: "trade-concierge-sentiment", model: SENTIMENT_MODEL, usage: data?.usage }).catch(() => {});
-    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) return fallback;
-    const parsed = JSON.parse(args);
-    return {
-      sentiment: parsed.sentiment || "neutral",
-      intent: parsed.intent || "question",
-      escalate: !!parsed.escalate,
-      needs_catalog: !!parsed.needs_catalog,
-    };
+          usage: data?.usage,
+        };
+      },
+    );
+
+    logAiUsage({
+      feature: "trade-concierge-sentiment",
+      model: SENTIMENT_MODEL,
+      usage: result.usage,
+      cached: result.cached,
+      promptHash: result.promptHash,
+      tier: "cheap",
+    }).catch(() => {});
+
+    return result.value;
   } catch (e) {
     console.error("sentiment classifier failed:", e);
     return fallback;
