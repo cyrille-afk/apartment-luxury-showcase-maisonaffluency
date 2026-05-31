@@ -2,9 +2,10 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 
 import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent } from './relevance.ts'
 import { logAiUsage } from '../_shared/aiUsage.ts'
-import { modelFor } from '../_shared/aiModels.ts'
+import { modelFor, tokenBudget } from '../_shared/aiModels.ts'
 
 const RECOMMENDATIONS_MODEL = modelFor('balanced')
+const RECOMMENDATIONS_MAX_TOKENS = tokenBudget('extract')
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
