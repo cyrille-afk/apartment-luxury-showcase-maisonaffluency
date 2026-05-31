@@ -334,46 +334,87 @@ RULES:
 - Write in third person.
 - Output ONLY the description text — no titles, headers, or meta commentary.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    // Semantic cache: paraphrased / near-duplicate spec briefs reuse the prior copy.
+    // Feature key includes tone so editorial/technical/seo never cross-pollute.
+    // Threshold 0.95 keeps wording-precise tones (technical, seo) safe; 14-day TTL.
+    const cachePrompt = `[${tone}]\n${systemPrompt}\n---\n${productContext}`;
+    const cached = await withSemanticCache<{ description: string; usage?: any }>(
+      {
+        feature: `product-description-writer:${tone}`,
         model: DESCRIPTION_MODEL,
-        max_completion_tokens: DESCRIPTION_MAX_TOKENS,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
-        ],
-      }),
+        prompt: cachePrompt,
+        apiKey: LOVABLE_API_KEY,
+        threshold: 0.95,
+        ttlSec: 60 * 60 * 24 * 14,
+      },
+      async () => {
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: DESCRIPTION_MODEL,
+            max_completion_tokens: DESCRIPTION_MAX_TOKENS,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) throw new Error("__RATE_LIMIT__");
+          if (response.status === 402) throw new Error("__CREDITS__");
+          const text = await response.text();
+          console.error("AI gateway error:", response.status, text);
+          throw new Error("__UPSTREAM__");
+        }
+
+        const data = await response.json();
+        const description = data.choices?.[0]?.message?.content || "";
+        return { value: { description, usage: data?.usage }, usage: data?.usage };
+      },
+    ).catch((e: Error) => {
+      if (e.message === "__RATE_LIMIT__") return { __err: 429 } as any;
+      if (e.message === "__CREDITS__") return { __err: 402 } as any;
+      if (e.message === "__UPSTREAM__") return { __err: 500 } as any;
+      throw e;
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please contact your administrator." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
+    if ((cached as any).__err === 429) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if ((cached as any).__err === 402) {
+      return new Response(
+        JSON.stringify({ error: "AI credits exhausted. Please contact your administrator." }),
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if ((cached as any).__err === 500) {
       return new Response(
         JSON.stringify({ error: "AI service temporarily unavailable" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const data = await response.json();
-    logAiUsage({ feature: "product-description-writer", model: DESCRIPTION_MODEL, usage: data?.usage }).catch(() => {});
-    const description = data.choices?.[0]?.message?.content || "";
+    const description = cached.value.description;
+    logAiUsage({
+      feature: "product-description-writer",
+      model: DESCRIPTION_MODEL,
+      usage: cached.usage,
+      cached: cached.cached,
+      promptHash: cached.promptHash,
+    } as any).catch(() => {});
+    console.log("[product-description-writer] cache", {
+      source: cached.source,
+      similarity: cached.similarity.toFixed(3),
+      tone,
+    });
 
     return new Response(
       JSON.stringify({ description, tone, product_id, source }),
