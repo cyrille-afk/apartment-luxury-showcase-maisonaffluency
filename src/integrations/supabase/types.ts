@@ -982,6 +982,42 @@ export type Database = {
           },
         ]
       }
+      concierge_rag_traces: {
+        Row: {
+          context_text: string | null
+          created_at: string
+          id: string
+          match_count: number
+          matches: Json
+          query: string
+          top_similarity: number | null
+          used_in_answer: boolean
+          user_id: string | null
+        }
+        Insert: {
+          context_text?: string | null
+          created_at?: string
+          id?: string
+          match_count?: number
+          matches?: Json
+          query: string
+          top_similarity?: number | null
+          used_in_answer?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          context_text?: string | null
+          created_at?: string
+          id?: string
+          match_count?: number
+          matches?: Json
+          query?: string
+          top_similarity?: number | null
+          used_in_answer?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       content_audit_log: {
         Row: {
           changed_by: string | null
