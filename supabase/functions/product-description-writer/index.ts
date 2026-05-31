@@ -341,6 +341,7 @@ RULES:
       },
       body: JSON.stringify({
         model: DESCRIPTION_MODEL,
+        max_completion_tokens: DESCRIPTION_MAX_TOKENS,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Generate a ${tone} product description using the following data:\n${productContext}` },
