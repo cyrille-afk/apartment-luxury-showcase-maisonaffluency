@@ -1250,9 +1250,9 @@ serve(async (req) => {
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
-      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, 40)
+      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, ragPieces, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+    const [sentiment, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
@@ -1264,9 +1264,20 @@ serve(async (req) => {
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
-    const useRag = includePieces && !!ragPieces;
+    const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
-    const piecesList = useRag ? (ragPieces as string) : fullPiecesList;
+    const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
+
+    // Fire-and-forget: persist a debug trace of what RAG retrieved for this turn.
+    if (ragResult) {
+      recordRagTrace(supabase, {
+        userId,
+        query: lastUserMsg,
+        rows: (ragResult as any).rows,
+        contextText: (ragResult as any).contextText,
+        usedInAnswer: useRag,
+      }).catch(() => {});
+    }
 
     const resolvedProjectId = activeProjectId || mentionedProjectId;
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
