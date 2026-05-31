@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 import { logAiUsage } from "../_shared/aiUsage.ts";
 import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
+import { withSemanticCache } from "../_shared/aiCache.ts";
 
 const DESCRIPTION_MODEL = modelFor("balanced");
 const DESCRIPTION_MAX_TOKENS = tokenBudget("rewrite");
