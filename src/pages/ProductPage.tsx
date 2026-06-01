@@ -9,7 +9,7 @@ import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import ExpandableSpec from "@/components/ExpandableSpec";
-import SpecGlyph from "@/components/SpecGlyph";
+import SpecGlyph from "@/components/product/SpecGlyph";
 import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 import { looksLikeDimension } from "@/lib/rugPricing";
 
