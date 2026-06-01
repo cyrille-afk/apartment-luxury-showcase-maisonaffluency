@@ -1056,7 +1056,7 @@ const TradeProductPage: React.FC = () => {
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("⬗")}
                   text={singleMaterialOptions.join("\n")}
                   placeholder="Select your material choice"
                   emphasized
@@ -1089,7 +1089,7 @@ const TradeProductPage: React.FC = () => {
               )}
               {!isRugSqmActive && isBaseOnly && (
                 <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("⬗")}
                   text={baseOptions.join("\n")}
                   placeholder={getBasePlaceholder(product)}
                   emphasized
@@ -1110,7 +1110,7 @@ const TradeProductPage: React.FC = () => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={product.materials}
                     placeholder="Select your material choice"
                     autoSplit
@@ -1123,7 +1123,7 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isDualAxis && (
                 <>
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={baseOptions.join("\n")}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
@@ -1154,7 +1154,7 @@ const TradeProductPage: React.FC = () => {
                     }
                   />
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={topOptions.join("\n")}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
@@ -1200,7 +1200,7 @@ const TradeProductPage: React.FC = () => {
               {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("📐")}
                   text={singleSizeOptions.join("\n")}
                   emphasized
                   placeholder="Select your size"
@@ -1249,7 +1249,7 @@ const TradeProductPage: React.FC = () => {
                 if (!looksLikeDimension(sizeText)) return null;
                 return (
                   <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("📐")}
                     text={sizeText}
                     emphasized
                     placeholder="Select your size"
@@ -1260,7 +1260,7 @@ const TradeProductPage: React.FC = () => {
               })()}
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("📐")}
                   text={dualSizeOptions.join("\n")}
                   emphasized
                   placeholder="Select your size"
