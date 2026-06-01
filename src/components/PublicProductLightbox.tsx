@@ -652,6 +652,32 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   />
                 ) : null;
               })()}
+              {(() => {
+                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                if (!handcrafted) return null;
+                let originLine = handcrafted;
+                let leadLine: string | null = null;
+                const dotSplit = handcrafted.split(" · ");
+                if (dotSplit.length === 2) {
+                  originLine = dotSplit[0];
+                  leadLine = dotSplit[1];
+                } else {
+                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                  if (m) {
+                    originLine = m[1];
+                    leadLine = `Production lead time: ${m[2]}`;
+                  }
+                }
+                return (
+                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                    {specIcon("✦", "mt-0.5")}
+                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                      <p>{originLine}</p>
+                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
 
