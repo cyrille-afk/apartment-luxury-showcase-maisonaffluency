@@ -858,109 +858,49 @@ const PublicProductPage: React.FC = () => {
               />
             </div>
 
-            <div className="relative flex flex-col">
-              {/* Top utility icon cluster — favorite / pin / spec / share */}
-              <div className="flex justify-end items-center gap-4 mb-3 text-muted-foreground">
-                <button
-                  onClick={() => toggleFavorite(product.id)}
-                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-                  className={cn(
-                    "transition-colors",
-                    favorited ? "text-destructive" : "hover:text-foreground"
-                  )}
-                >
-                  <Heart size={16} className={cn(favorited && "fill-current")} />
-                </button>
-                <button
-                  onClick={() => togglePin(compareItem)}
-                  aria-label={pinned ? "Pinned to selection" : "Pin to selection"}
-                  className={cn(
-                    "transition-colors",
-                    pinned ? "text-[hsl(var(--gold))]" : "hover:text-foreground",
-                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                  )}
-                >
-                  <Scale size={16} />
-                </button>
-                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) && (
-                  <SpecSheetButton
-                    pdfUrl={product.pdf_url}
-                    pdfUrls={product.pdf_urls}
-                    brandName={designerDisplay}
-                    productName={product.title}
-                    variant="icon"
-                    onBeforeOpen={() => {
-                      let allowed = false;
-                      requireAuth(() => { allowed = true; }, "download this spec sheet");
-                      return allowed;
-                    }}
-                  />
-                )}
-                {(() => {
-                  const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                  return (
-                    <ShareMenu
-                      url={shareUrl}
-                      message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                      iconSize="w-4 h-4"
-                      showLabel={false}
-                    />
-                  );
-                })()}
+            <div className="relative flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Link
+                    to={`/designers/${designer.slug}`}
+                    onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                    className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
+                  >
+                    {designerDisplay}
+                  </Link>
+                  <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
+                    {product.title}
+                    {product.subtitle &&
+                      !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
+                      !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
+                      ` by ${product.subtitle}`}
+                  </h1>
+                </div>
+                <div className="shrink-0 mt-1">
+                  {(() => {
+                    const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                    return (
+                      <ShareMenu
+                        url={shareUrl}
+                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                        iconSize="w-4 h-4"
+                        showLabel={false}
+                      />
+                    );
+                  })()}
+                </div>
               </div>
 
-              {/* Brand eyebrow — neutral, like the reference */}
-              <Link
-                to={`/designers/${designer.slug}`}
-                onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {designerDisplay}
-              </Link>
-
-              {/* Large serif title */}
-              <h1 className="font-display text-4xl md:text-5xl mt-3 mb-10 leading-[1.1] tracking-tight">
-                {product.title}
-                {product.subtitle &&
-                  !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                  !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
-                  ` by ${product.subtitle}`}
-              </h1>
-
-              {/* Variant selectors — kept as-is (hairline rows handled inside the component) */}
-              <div className="mb-8">
+              {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
+              <div className="flex flex-col gap-2">
                 <VariantSelectors
                   product={product}
                   onMaterialChange={handleMaterialChange}
                   galleryActiveIndex={galleryActiveIndex}
                   finishMap={productFinishMap}
                 />
-              </div>
 
-              {/* Primary CTA — full-width dark */}
-              <Link
-                to="/trade-program"
-                className="flex items-center justify-center px-5 py-4 font-body text-[11px] uppercase tracking-[0.25em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                Price on Request
-              </Link>
 
-              {/* Secondary CTA — full-width outlined */}
-              <Link
-                to={`/contact?subject=${encodeURIComponent(`Quote / customisation — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I would like to request a quote or a customisation for:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}`)}#contact`}
-                className="mt-3 flex items-center justify-center px-5 py-4 font-body text-[11px] uppercase tracking-[0.25em] transition-all w-full border border-foreground text-foreground hover:bg-foreground/[0.04]"
-              >
-                Request a Quote or a Customisation
-              </Link>
-
-              {/* Descriptive copy block with small gold glyphs */}
-              <div className="mt-12 flex flex-col gap-3 font-body text-[13px] leading-relaxed text-muted-foreground">
-                {product.dimensions && (
-                  <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                    text={product.dimensions}
-                  />
-                )}
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   return handcrafted ? (
@@ -970,23 +910,84 @@ const PublicProductPage: React.FC = () => {
                     />
                   ) : null;
                 })()}
-
-                <p className="pt-3">
-                  For pricing and availability, please{" "}
-                  <Link to="/trade-program" className="underline underline-offset-4 decoration-border hover:decoration-foreground hover:text-foreground transition-colors">
-                    join our Trade Program
-                  </Link>.
-                </p>
-                <p>
-                  Looking for a bespoke version?{" "}
-                  <Link
-                    to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
-                    className="underline underline-offset-4 decoration-border hover:decoration-foreground hover:text-foreground transition-colors"
-                  >
-                    Contact our concierge
-                  </Link>.
-                </p>
               </div>
+
+              {/* Primary CTA — Price on Request */}
+              <Link
+                to="/trade-program"
+                className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                Price on Request
+              </Link>
+
+              {/* Secondary actions: Favorite / Pin / Spec Sheet */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => toggleFavorite(product.id)}
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    favorited
+                      ? "border-destructive/30 text-destructive bg-destructive/10"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  )}
+                >
+                  <Heart size={13} className={cn(favorited && "fill-current")} />
+                  {favorited ? "Favorited" : "Favorite"}
+                </button>
+
+                <button
+                  onClick={() => togglePin(compareItem)}
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    pinned
+                      ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
+                >
+                  <Scale size={13} />
+                  {pinned ? "Pinned" : "Pin to Selection"}
+                </button>
+
+                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
+                  <SpecSheetButton
+                    pdfUrl={product.pdf_url}
+                    pdfUrls={product.pdf_urls}
+                    brandName={designerDisplay}
+                    productName={product.title}
+                    variant="button"
+                    onBeforeOpen={() => {
+                      let allowed = false;
+                      requireAuth(() => { allowed = true; }, "download this spec sheet");
+                      return allowed;
+                    }}
+                  />
+                ) : (
+                  <Link
+                    to="/contact"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  >
+                    Contact Us
+                  </Link>
+                )}
+              </div>
+
+
+              <p className="font-body text-[11px] text-muted-foreground text-center">
+                For pricing and availability, please{" "}
+                <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                  join our Trade Program
+                </Link>.
+              </p>
+              <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
+                Looking for a bespoke version?{" "}
+                <Link
+                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
+                  className="underline underline-offset-2 hover:text-foreground transition-colors"
+                >
+                  Contact our concierge →
+                </Link>
+              </p>
             </div>
           </div>
 
