@@ -34,7 +34,10 @@ interface FavPick {
   image_url: string;
   hover_image_url: string | null;
   materials: string | null;
+  materials_description: string | null;
   dimensions: string | null;
+  lead_time: string | null;
+  origin: string | null;
   description: string | null;
   category: string | null;
   subcategory: string | null;
@@ -68,7 +71,7 @@ const PublicFavorites = () => {
       setLoading(true);
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+        .select("id, title, subtitle, image_url, hover_image_url, materials, materials_description, dimensions, lead_time, origin, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
         .in("id", favIds);
 
       if (!data || data.length === 0) {
