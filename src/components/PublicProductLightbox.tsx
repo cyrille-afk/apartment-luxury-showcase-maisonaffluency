@@ -549,7 +549,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     <>
                       <ExpandableSpec
                         icon={specIcon("⬗")}
-                        text={baseOptions.join("\n")}
+                        text={withImperialPerLine(baseOptions.join("\n"))}
                         placeholder={getBasePlaceholder(product)}
                         singleValueLabel={product.base_axis_label || undefined}
                         emphasized
@@ -564,7 +564,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                       <ExpandableSpec
                         icon={specIcon("⬗")}
-                        text={topOptions.join("\n")}
+                        text={withImperialPerLine(topOptions.join("\n"))}
                         placeholder={getTopPlaceholder(product)}
                         singleValueLabel={product.top_axis_label || undefined}
                         emphasized

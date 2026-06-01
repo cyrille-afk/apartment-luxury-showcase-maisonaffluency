@@ -1098,7 +1098,7 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isBaseOnly && (
                 <ExpandableSpec
                   icon={specIcon("⬗")}
-                  text={baseOptions.join("\n")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
                   emphasized
                   value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
@@ -1132,7 +1132,7 @@ const TradeProductPage: React.FC = () => {
                 <>
                   <ExpandableSpec
                     icon={specIcon("⬗")}
-                    text={baseOptions.join("\n")}
+                    text={withImperialPerLine(baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
@@ -1163,7 +1163,7 @@ const TradeProductPage: React.FC = () => {
                   />
                   <ExpandableSpec
                     icon={specIcon("⬗")}
-                    text={topOptions.join("\n")}
+                    text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : null}
