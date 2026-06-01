@@ -20,7 +20,7 @@ import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDrop
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
