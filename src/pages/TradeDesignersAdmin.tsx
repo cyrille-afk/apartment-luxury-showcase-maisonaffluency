@@ -977,6 +977,19 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                        title="Duplicate this row (then edit frame and/or size)"
+                        onClick={() => {
+                          const updated = [...(pick.size_variants || [])];
+                          updated.splice(idx + 1, 0, { ...variant });
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-7 w-7 shrink-0 text-destructive"
                         onClick={() => {
                           const updated = (pick.size_variants || []).filter((_, i) => i !== idx);
