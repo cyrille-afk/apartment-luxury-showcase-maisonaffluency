@@ -672,12 +672,12 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   </div>
                   <div className="col-span-2 md:col-span-3">
                     <label className="text-[10px] text-muted-foreground">
-                      Variant Dropdown Label <span className="italic">(optional — overrides default "Select your material choice…")</span>
+                      Variant Dropdown Label <span className="italic">(optional — overrides default "Select your finish…")</span>
                     </label>
                     <Input
                       value={pick.variant_placeholder || ""}
                       onChange={(e) => updateField(pick.id, "variant_placeholder", e.target.value || null)}
-                      placeholder='e.g. "Select your fabric choice", "Select your finish"'
+                      placeholder='e.g. "Select your fabric", "Select your finish"'
                       className="text-xs"
                     />
                   </div>
