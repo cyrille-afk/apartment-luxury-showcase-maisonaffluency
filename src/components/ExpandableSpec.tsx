@@ -169,7 +169,7 @@ export default function ExpandableSpec({
               "font-body text-sm text-left",
               "focus:ring-0 focus:ring-offset-0 focus:outline-none",
               "hover:text-foreground transition-colors",
-              "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
+              "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0 [&>span]:line-clamp-none",
               !hasSelection
                 ? "text-muted-foreground"
                 : emphasized
@@ -178,11 +178,11 @@ export default function ExpandableSpec({
             )}
           >
             <span className="shrink-0">{icon}</span>
-            <span className="flex-1 truncate">
+            <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
               {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
             </span>
           </SelectTrigger>
-          <SelectContent className="z-[10050] bg-background border-border">
+          <SelectContent className="z-[10050] bg-background border-border max-w-[min(92vw,42rem)]">
             {hasSelection && (
               <SelectItem
                 value="__clear__"
@@ -199,7 +199,7 @@ export default function ExpandableSpec({
                   value={String(i)}
                   disabled={isDisabled}
                   className={cn(
-                    "font-body text-xs md:text-sm cursor-pointer",
+                    "font-body text-xs md:text-sm cursor-pointer whitespace-normal leading-relaxed pr-4",
                     isDisabled && "line-through text-muted-foreground/50 cursor-not-allowed"
                   )}
                 >

@@ -29,13 +29,27 @@ const cmToInches = (value: string): string => {
   return `${(n / 2.54).toFixed(1)}\"`;
 };
 
+const stripVariantPrefix = (part: string): string => {
+  const cmIdx = part.search(/\bcm\b/i);
+  if (cmIdx < 0) return part;
+
+  const beforeCm = part.slice(0, cmIdx);
+  const pipeIdx = beforeCm.lastIndexOf("|");
+  if (pipeIdx >= 0) return part.slice(pipeIdx + 1).trim();
+
+  const colonIdx = beforeCm.lastIndexOf(":");
+  if (colonIdx >= 0) return part.slice(colonIdx + 1).trim();
+
+  return part;
+};
+
 const toImperialLine = (line: string): string | null => {
   if (!/\bcm\b/i.test(line)) return null;
   const converted = line
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
       if (!/\bcm\b/i.test(part)) return part;
-      return part
+      return stripVariantPrefix(part)
         .replace(/\s*cm\b/gi, "")
         .replace(/\d+(?:[.,]\d+)?/g, cmToInches);
     })
