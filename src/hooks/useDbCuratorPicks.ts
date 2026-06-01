@@ -90,9 +90,68 @@ export function useDbCuratorPicks() {
         });
       }
 
-      return items;
+      // ────────────────────────────────────────────────────────────────
+      // Dedupe parent/child duplicates.
+      // When the SAME product (matched on normalized title) exists under
+      // both a parent brand (e.g. "Marta Sala Éditions") AND one of its
+      // child designers (e.g. "Lazzarini & Pickering", whose `founder`
+      // equals the parent's `name`), keep only the parent's row so the
+      // catalog doesn't show the same sofa twice.
+      // ────────────────────────────────────────────────────────────────
+      const parentNameByDesignerId = new Map<string, string | null>();
+      designers.forEach((d: any) => {
+        const founder = (d.founder || "").trim();
+        const isParent = !founder || founder === d.name;
+        parentNameByDesignerId.set(d.id, isParent ? null : founder);
+      });
+      const designerByName = new Map<string, any>();
+      designers.forEach((d: any) => designerByName.set(d.name.trim().toLowerCase(), d));
+
+      const normalizeTitle = (t: string) =>
+        (t || "")
+          .toLowerCase()
+          // strip trailing " for X" / " by X" / " with X" attribution
+          .replace(/\s+(for|by|with|x)\s+.+$/i, "")
+          .replace(/[^\w\s]/g, " ")
+          .trim()
+          .replace(/\s+/g, " ");
+
+      const groups = new Map<string, DbProductItem[]>();
+      for (const it of items) {
+        const key = normalizeTitle(it.pick.title);
+        if (!key) continue;
+        const arr = groups.get(key) || [];
+        arr.push(it);
+        groups.set(key, arr);
+      }
+
+      const dropped = new Set<DbProductItem>();
+      for (const arr of groups.values()) {
+        if (arr.length < 2) continue;
+        for (const a of arr) {
+          for (const b of arr) {
+            if (a === b || dropped.has(a) || dropped.has(b)) continue;
+            const aParent = parentNameByDesignerId.get(a.designerId === a.designerId ? "" : "") ?? null;
+            // Resolve via name lookup (designerName is display, may differ from .name)
+            const aDesigner = designers.find((d: any) => d.slug === a.designerId || d.id === a.designerId);
+            const bDesigner = designers.find((d: any) => d.slug === b.designerId || d.id === b.designerId);
+            if (!aDesigner || !bDesigner) continue;
+            const aFounder = (aDesigner.founder || "").trim();
+            const bFounder = (bDesigner.founder || "").trim();
+            // b is parent of a → drop a
+            if (aFounder && aFounder.toLowerCase() === bDesigner.name.toLowerCase()) {
+              dropped.add(a);
+            } else if (bFounder && bFounder.toLowerCase() === aDesigner.name.toLowerCase()) {
+              dropped.add(b);
+            }
+          }
+        }
+      }
+
+      return items.filter((it) => !dropped.has(it));
     },
     staleTime: 10 * 60_000, // Cache for 10 minutes
     gcTime: 30 * 60_000,
   });
 }
+
