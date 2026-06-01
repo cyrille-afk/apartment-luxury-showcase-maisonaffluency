@@ -20,9 +20,9 @@ export interface VariantPlaceholderInput {
   top_axis_label?: string | null;
 }
 
-const DEFAULT_BASE_PLACEHOLDER = "Select your base finish";
+const DEFAULT_BASE_PLACEHOLDER = "Select your finish";
 const DEFAULT_TOP_PLACEHOLDER = "Select your top finish";
-const DEFAULT_MATERIAL_PLACEHOLDER = "Select your material choice";
+const DEFAULT_MATERIAL_PLACEHOLDER = "Select your finish";
 
 /** Returns the input string trimmed, or null if empty/whitespace/nullish. */
 function clean(value: string | null | undefined): string | null {
@@ -32,7 +32,7 @@ function clean(value: string | null | undefined): string | null {
 }
 
 function placeholderFromAxisLabel(label: string): string {
-  return `Select your ${label.toLowerCase()} choice`;
+  return `Select your ${label.toLowerCase()}`;
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
