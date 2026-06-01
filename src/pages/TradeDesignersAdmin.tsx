@@ -1091,22 +1091,49 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number; image_url: string | null }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+  const bulkTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   // Persist bulk-import draft per designer so navigating away (or a preview
   // refresh) doesn't wipe URLs the user is still collecting. Cleared on
   // successful import or explicit Cancel.
   const bulkDraftKey = `ig-bulk-draft:${designerId}`;
-  const [bulkMode, setBulkMode] = useState(() => {
-    try { return !!localStorage.getItem(bulkDraftKey); } catch { return false; }
-  });
-  const [bulkText, setBulkText] = useState(() => {
-    try { return localStorage.getItem(bulkDraftKey) || ""; } catch { return ""; }
-  });
-  useEffect(() => {
+  const readBulkDraft = useCallback(() => {
     try {
-      if (bulkText.trim()) localStorage.setItem(bulkDraftKey, bulkText);
-      else localStorage.removeItem(bulkDraftKey);
+      return localStorage.getItem(bulkDraftKey) || sessionStorage.getItem(bulkDraftKey) || "";
+    } catch {
+      return "";
+    }
+  }, [bulkDraftKey]);
+  const writeBulkDraft = useCallback((value: string) => {
+    try {
+      if (value) {
+        localStorage.setItem(bulkDraftKey, value);
+        sessionStorage.setItem(bulkDraftKey, value);
+      } else {
+        localStorage.removeItem(bulkDraftKey);
+        sessionStorage.removeItem(bulkDraftKey);
+      }
     } catch { /* storage full / disabled */ }
-  }, [bulkText, bulkDraftKey]);
+  }, [bulkDraftKey]);
+  const [bulkMode, setBulkMode] = useState(() => {
+    try { return !!(localStorage.getItem(bulkDraftKey) || sessionStorage.getItem(bulkDraftKey)); } catch { return false; }
+  });
+  const [bulkText, setBulkText] = useState(() => readBulkDraft());
+  const updateBulkText = useCallback((value: string) => {
+    setBulkText(value);
+    writeBulkDraft(value);
+  }, [writeBulkDraft]);
+  useEffect(() => {
+    writeBulkDraft(bulkText);
+  }, [bulkText, writeBulkDraft]);
+  useEffect(() => {
+    const persistFromDom = () => writeBulkDraft(bulkTextareaRef.current?.value || bulkText);
+    window.addEventListener("pagehide", persistFromDom);
+    window.addEventListener("beforeunload", persistFromDom);
+    return () => {
+      window.removeEventListener("pagehide", persistFromDom);
+      window.removeEventListener("beforeunload", persistFromDom);
+    };
+  }, [bulkText, writeBulkDraft]);
   const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
   const [fetchingAll, setFetchingAll] = useState(false);
 
@@ -1226,7 +1253,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
     const newPosts = data as any[];
     setPosts((prev) => [...prev, ...newPosts]);
-    setBulkText("");
+    updateBulkText("");
     setBulkMode(false);
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
     toast({ title: `${newPosts.length} posts added — auto-fetching images…` });
@@ -1396,8 +1423,10 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
         {bulkMode ? (
           <div className="space-y-2">
             <textarea
+              ref={bulkTextareaRef}
               value={bulkText}
-              onChange={(e) => setBulkText(e.target.value)}
+              onChange={(e) => updateBulkText(e.target.value)}
+              onInput={(e) => writeBulkDraft(e.currentTarget.value)}
               placeholder={"Paste Instagram post URLs, one per line:\nhttps://www.instagram.com/p/ABC123/\nhttps://www.instagram.com/p/DEF456/"}
               className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
             />
@@ -1406,7 +1435,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
                 {bulkImporting ? <DotCircleLoader size="sm" /> : <Plus className="w-3 h-3" />}
                 {bulkImporting ? "Importing & fetching images…" : "Import & Auto-fetch"}
               </Button>
-              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>
+              <button onClick={() => { setBulkMode(false); updateBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>
                 Cancel
               </button>
             </div>
