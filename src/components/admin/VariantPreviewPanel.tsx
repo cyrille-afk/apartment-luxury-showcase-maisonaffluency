@@ -98,7 +98,7 @@ export default function VariantPreviewPanel({
   const basePh = getBasePlaceholder(placeholderInput);
   const topPh = getTopPlaceholder(placeholderInput);
   const sizePlaceholder = "Select your size";
-  const materialPlaceholder = variantPlaceholder || "Select your material choice";
+  const materialPlaceholder = variantPlaceholder || "Select your finish";
 
   const showSizeDropdown = sizeOptions.length > 1;
   const fallbackDimensions = !showSizeDropdown && dimensions;
@@ -184,7 +184,7 @@ export default function VariantPreviewPanel({
               >
                 <option value="">
                   {variantPlaceholder ||
-                    `Select your ${(baseAxisLabel || "finish").toLowerCase()} choice`}
+                    `Select your ${(baseAxisLabel || "finish").toLowerCase()}`}
                 </option>
                 {baseOptions.map((o) => (
                   <option key={o} value={o}>{o}</option>

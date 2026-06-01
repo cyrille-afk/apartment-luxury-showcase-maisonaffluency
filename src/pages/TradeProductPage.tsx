@@ -1066,7 +1066,7 @@ const TradeProductPage: React.FC = () => {
                 <ExpandableSpec
                   icon={specIcon("⬗")}
                   text={singleMaterialOptions.join("\n")}
-                  placeholder="Select your material choice"
+                  placeholder="Select your finish"
                   emphasized
                   value={selectedSingleMaterial != null ? Math.max(0, singleMaterialOptions.indexOf(selectedSingleMaterial)) : null}
                   onChange={(idx) => {
@@ -1120,7 +1120,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={specIcon("⬗")}
                     text={product.materials}
-                    placeholder="Select your material choice"
+                    placeholder="Select your finish"
                     autoSplit
                     autoDetectedHint
                     onChange={(idx) => handleMaterialChange(parsed[idx] ?? null)}

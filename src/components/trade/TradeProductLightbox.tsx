@@ -552,7 +552,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   <ExpandableSpec
                     icon={specIcon("⬗")}
                     text={axes.singleMaterialOptions.join("\n")}
-                    placeholder="Select your material choice"
+                    placeholder="Select your finish"
                     emphasized
                     value={singleSplitMatIdx}
                     onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
@@ -581,7 +581,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     <ExpandableSpec
                       icon={specIcon("⬗")}
                       text={product.materials}
-                      placeholder="Select your material choice"
+                      placeholder="Select your finish"
                       autoSplit
                     />
                   )}

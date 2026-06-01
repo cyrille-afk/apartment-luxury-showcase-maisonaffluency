@@ -584,7 +584,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   <ExpandableSpec
                     icon={specIcon("⬗")}
                     text={materialOptions.join("\n")}
-                    placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
+                    placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
                     singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
                     autoSplit={!hasAnyBase && !hasSingleAxisSplit}
                     value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
