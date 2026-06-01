@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import { withImperialPerLine } from "@/lib/formatDimensions";
 
 interface Product {
   id: string;
