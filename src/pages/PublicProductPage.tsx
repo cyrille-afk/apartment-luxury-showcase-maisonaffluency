@@ -866,9 +866,10 @@ const PublicProductPage: React.FC = () => {
               />
             </div>
 
-            <div className="relative flex flex-col gap-4">
+            <div className="relative flex flex-col gap-10">
+              {/* Header */}
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-3">
                   <Link
                     to={`/designers/${designer.slug}`}
                     onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
@@ -876,14 +877,14 @@ const PublicProductPage: React.FC = () => {
                   >
                     {designerDisplay}
                   </Link>
-                  <h1 className="font-display text-3xl md:text-4xl mt-2 leading-[1.1] font-normal">
+                  <h1 className="font-display text-4xl md:text-5xl leading-[1.05] font-normal text-foreground">
                     {product.title}
                     {product.subtitle &&
                       !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
                       !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
                       ` by ${product.subtitle}`}
                   </h1>
-                  <p className="font-display italic text-base md:text-lg text-muted-foreground mt-2">
+                  <p className="font-display italic text-lg text-muted-foreground">
                     Price on request
                   </p>
                 </div>
@@ -902,103 +903,109 @@ const PublicProductPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
-              <div className="flex flex-col gap-2">
-                <VariantSelectors
-                  product={product}
-                  onMaterialChange={handleMaterialChange}
-                  galleryActiveIndex={galleryActiveIndex}
-                  finishMap={productFinishMap}
-                />
-
+              {/* Specs + selectors grouped block with hairline dividers */}
+              <div className="divide-y divide-border/60 border-y border-border/60">
+                <div className="py-5">
+                  <VariantSelectors
+                    product={product}
+                    onMaterialChange={handleMaterialChange}
+                    galleryActiveIndex={galleryActiveIndex}
+                    finishMap={productFinishMap}
+                  />
+                </div>
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   return handcrafted ? (
-                    <ExpandableSpec
-                      icon={<Sparkles size={14} className="text-muted-foreground/40" />}
-                      text={handcrafted}
-                    />
+                    <div className="py-5">
+                      <ExpandableSpec
+                        icon={<Sparkles size={14} className="text-muted-foreground/40" />}
+                        text={handcrafted}
+                      />
+                    </div>
                   ) : null;
                 })()}
               </div>
 
-              {/* Primary CTA — Price on Request */}
-              <Link
-                to="/trade-program"
-                className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                Price on Request
-              </Link>
-
-              {/* Secondary actions: Favorite / Pin / Spec Sheet */}
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => toggleFavorite(product.id)}
-                  className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                    favorited
-                      ? "border-destructive/30 text-destructive bg-destructive/10"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  )}
+              {/* CTA + secondary actions */}
+              <div className="space-y-3">
+                <Link
+                  to="/trade-program"
+                  className="flex items-center justify-center gap-2 px-5 py-5 rounded-md font-body text-xs uppercase tracking-[0.2em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                 >
-                  <Heart size={13} className={cn(favorited && "fill-current")} />
-                  {favorited ? "Favorited" : "Favorite"}
-                </button>
+                  Price on Request
+                </Link>
 
-                <button
-                  onClick={() => togglePin(compareItem)}
-                  className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                    pinned
-                      ? "bg-foreground/5 border-foreground text-foreground"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
-                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                  )}
-                >
-                  <Scale size={13} />
-                  {pinned ? "Pinned" : "Pin to Selection"}
-                </button>
-
-                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-                  <SpecSheetButton
-                    pdfUrl={product.pdf_url}
-                    pdfUrls={product.pdf_urls}
-                    brandName={designerDisplay}
-                    productName={product.title}
-                    variant="button"
-                    onBeforeOpen={() => {
-                      let allowed = false;
-                      requireAuth(() => { allowed = true; }, "download this spec sheet");
-                      return allowed;
-                    }}
-                  />
-                ) : (
-                  <Link
-                    to="/contact"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => toggleFavorite(product.id)}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-1.5 px-2 py-3.5 rounded-md font-body text-[10px] uppercase tracking-[0.18em] transition-all border",
+                      favorited
+                        ? "border-destructive/30 text-destructive bg-destructive/10"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                    )}
                   >
-                    Contact Us
-                  </Link>
-                )}
+                    <Heart size={14} className={cn(favorited && "fill-current")} />
+                    {favorited ? "Favorited" : "Favorite"}
+                  </button>
+
+                  <button
+                    onClick={() => togglePin(compareItem)}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-1.5 px-2 py-3.5 rounded-md font-body text-[10px] uppercase tracking-[0.18em] transition-all border",
+                      pinned
+                        ? "bg-foreground/5 border-foreground text-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40",
+                      compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                    )}
+                  >
+                    <Scale size={14} />
+                    {pinned ? "Pinned" : "Pin"}
+                  </button>
+
+                  {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
+                    <SpecSheetButton
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      brandName={designerDisplay}
+                      productName={product.title}
+                      variant="button"
+                      onBeforeOpen={() => {
+                        let allowed = false;
+                        requireAuth(() => { allowed = true; }, "download this spec sheet");
+                        return allowed;
+                      }}
+                    />
+                  ) : (
+                    <Link
+                      to="/contact"
+                      className="flex flex-col items-center justify-center gap-1.5 px-2 py-3.5 rounded-md font-body text-[10px] uppercase tracking-[0.18em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                    >
+                      Contact
+                    </Link>
+                  )}
+                </div>
               </div>
 
-
-              <p className="font-body text-[11px] text-muted-foreground text-center">
-                For pricing and availability, please{" "}
-                <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                  join our Trade Program
-                </Link>.
-              </p>
-              <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
-                Looking for a bespoke version?{" "}
-                <Link
-                  to={`/concierge?product=${encodeURIComponent(product.title)}&designer=${encodeURIComponent(designerDisplay)}&page=${encodeURIComponent(`https://www.maisonaffluency.com${location.pathname}`)}`}
-                  className="underline underline-offset-2 hover:text-foreground transition-colors"
-                >
-                  Contact our concierge →
-                </Link>
-              </p>
+              {/* Footer meta */}
+              <div className="text-center space-y-3">
+                <p className="font-body text-[11px] text-muted-foreground">
+                  For pricing and availability, please{" "}
+                  <Link to="/trade-program" className="text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors">
+                    join our Trade Program
+                  </Link>.
+                </p>
+                <p className="font-body text-[11px] text-muted-foreground">
+                  Looking for a bespoke version?{" "}
+                  <Link
+                    to={`/concierge?product=${encodeURIComponent(product.title)}&designer=${encodeURIComponent(designerDisplay)}&page=${encodeURIComponent(`https://www.maisonaffluency.com${location.pathname}`)}`}
+                    className="text-foreground italic underline underline-offset-4 hover:text-muted-foreground transition-colors"
+                  >
+                    Contact our concierge →
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
 
