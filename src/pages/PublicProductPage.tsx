@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Layers, Ruler, Clock, Globe, Sparkles } from "lucide-react";
+import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -20,7 +20,7 @@ import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDrop
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
-import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
@@ -39,6 +39,12 @@ import { toOgImage } from "@/lib/ogImage";
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
 /* ------------------------------------------------------------------ */
 const LS_KEY = "public_favorites";
+const specIcon = (symbol: string, className = "") => (
+  <span className={cn("inline-flex w-[18px] shrink-0 items-center justify-center text-[hsl(var(--gold))]", className)}>
+    {symbol}
+  </span>
+);
+
 function readFavs(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); }
   catch { return new Set(); }
@@ -60,6 +66,7 @@ interface ProductRow {
   hover_image_url: string | null;
   gallery_images?: string[] | null;
   materials: string | null;
+  materials_description?: string | null;
   dimensions: string | null;
   description: string | null;
   category: string | null;
@@ -90,7 +97,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -322,7 +329,7 @@ const VariantSelectors: React.FC<{
       {isDualAxis ? (
         <>
           <ExpandableSpec
-            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+            icon={specIcon("⬗")}
             text={baseOptions.join("\n")}
             placeholder={getBasePlaceholder(product)}
             singleValueLabel={product.base_axis_label || undefined}
@@ -353,7 +360,7 @@ const VariantSelectors: React.FC<{
             }
           />
           <ExpandableSpec
-            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+            icon={specIcon("⬗")}
             text={topOptions.join("\n")}
             placeholder={getTopPlaceholder(product)}
             singleValueLabel={product.top_axis_label || undefined}
@@ -397,7 +404,7 @@ const VariantSelectors: React.FC<{
         </>
       ) : isBaseOnly ? (
         <ExpandableSpec
-          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("⬗")}
           text={baseOptions.join("\n")}
           placeholder={getBasePlaceholder(product)}
           singleValueLabel={product.base_axis_label || undefined}
@@ -416,7 +423,7 @@ const VariantSelectors: React.FC<{
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
-          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("⬗")}
           text={singleMaterialOptions.join("\n")}
           placeholder={getMaterialPlaceholder(product)}
           emphasized
@@ -446,7 +453,7 @@ const VariantSelectors: React.FC<{
           const parsed = parseMaterialsFallback(product.materials);
           return (
             <ExpandableSpec
-              icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+              icon={specIcon("⬗")}
               text={product.materials}
               placeholder={getMaterialPlaceholder(product)}
               autoSplit
@@ -459,8 +466,9 @@ const VariantSelectors: React.FC<{
       {/* Size dropdown */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
-          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("📐")}
           text={dualSizeOptions.join("\n")}
+          secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
           emphasized
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
@@ -489,8 +497,9 @@ const VariantSelectors: React.FC<{
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
-          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("📐")}
           text={singleSizeOptions.join("\n")}
+          secondaryText={singleSizeOptions.length === 1 ? formatImperialDimensions(singleSizeOptions[0]) : null}
           emphasized
           placeholder="Select your size"
           value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}
@@ -518,17 +527,17 @@ const VariantSelectors: React.FC<{
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
         return labels.length > 1 ? (
           <ExpandableSpec
-            icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+            icon={specIcon("📐")}
             text={labels.join("\n")}
             emphasized
             placeholder="Select your size"
           />
         ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
+          <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
         ) : null;
       })()}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
+        <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
       )}
     </>
   );

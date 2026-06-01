@@ -1,5 +1,4 @@
-import { useState, useId, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
@@ -14,6 +13,8 @@ interface ExpandableSpecProps {
   icon: ReactNode;
   /** Pre-formatted text. Newlines split into options. */
   text: string;
+  /** Optional secondary line for single-value rows, e.g. imperial dimensions. */
+  secondaryText?: string | null;
   /** Override default emphasis (dimensions get foreground/medium; others muted). */
   emphasized?: boolean;
   /**
@@ -64,6 +65,7 @@ interface ExpandableSpecProps {
 export default function ExpandableSpec({
   icon,
   text,
+  secondaryText,
   emphasized = false,
   placeholder,
   autoSplit = false,
@@ -121,7 +123,14 @@ export default function ExpandableSpec({
     return (
       <div className={rowClasses}>
         <span className="shrink-0">{icon}</span>
-        <p className={cn(textClasses, "flex-1")}>{display}</p>
+        <p className={cn(textClasses, "flex-1")}>
+          {display}
+          {secondaryText && (
+            <span className="block text-[11px] mt-0.5 tracking-[0.08em] uppercase text-muted-foreground/80">
+              {secondaryText}
+            </span>
+          )}
+        </p>
       </div>
     );
   }
@@ -220,41 +229,14 @@ export default function ExpandableSpec({
     );
   }
 
-  // Multi, no placeholder → collapsed first line + "+N more" toggle (used by lightbox).
-  const [open, setOpen] = useState(false);
-  const contentId = useId();
-  const extra = lines.length - 1;
+  // Multi, no placeholder → full descriptive copy inside the same hairline row.
   return (
     <div className={cn(rowClasses, "items-start")}>
       <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls={contentId}
-          className="flex items-center gap-1.5 text-left"
-        >
-          <span className={textClasses}>{lines[0]}</span>
-          {extra > 0 && (
-            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 inline-flex items-center gap-0.5">
-              +{extra}
-              <ChevronDown
-                size={12}
-                className={cn("transition-transform", open && "rotate-180")}
-              />
-            </span>
-          )}
-        </button>
-        {open && extra > 0 && (
-          <div id={contentId} className="flex flex-col gap-0.5">
-            {lines.slice(1).map((line, i) => (
-              <p key={i} className={textClasses}>
-                {line}
-              </p>
-            ))}
-          </div>
-        )}
+        {lines.map((line, i) => (
+          <p key={i} className={textClasses}>{line}</p>
+        ))}
       </div>
     </div>
   );
