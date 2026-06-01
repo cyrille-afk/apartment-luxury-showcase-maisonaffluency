@@ -5024,6 +5024,7 @@ export type Database = {
           image_url: string | null
           lead_time: string | null
           materials: string | null
+          materials_description: string | null
           origin: string | null
           pdf_filename: string | null
           pdf_url: string | null
@@ -5056,6 +5057,7 @@ export type Database = {
           image_url?: string | null
           lead_time?: string | null
           materials?: string | null
+          materials_description?: string | null
           origin?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
@@ -5088,6 +5090,7 @@ export type Database = {
           image_url?: string | null
           lead_time?: string | null
           materials?: string | null
+          materials_description?: string | null
           origin?: string | null
           pdf_filename?: string | null
           pdf_url?: string | null
