@@ -1243,7 +1243,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
     }
     const newPosts = data as any[];
     setPosts((prev) => [...prev, ...newPosts]);
-    setBulkText("");
+    updateBulkText("");
     setBulkMode(false);
     queryClient.invalidateQueries({ queryKey: ["designer-instagram-posts", designerId] });
     toast({ title: `${newPosts.length} posts added — auto-fetching images…` });
@@ -1414,7 +1414,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
           <div className="space-y-2">
             <textarea
               value={bulkText}
-              onChange={(e) => setBulkText(e.target.value)}
+              onChange={(e) => updateBulkText(e.target.value)}
               placeholder={"Paste Instagram post URLs, one per line:\nhttps://www.instagram.com/p/ABC123/\nhttps://www.instagram.com/p/DEF456/"}
               className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
             />
@@ -1423,7 +1423,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
                 {bulkImporting ? <DotCircleLoader size="sm" /> : <Plus className="w-3 h-3" />}
                 {bulkImporting ? "Importing & fetching images…" : "Import & Auto-fetch"}
               </Button>
-              <button onClick={() => { setBulkMode(false); setBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>
+              <button onClick={() => { setBulkMode(false); updateBulkText(""); }} className="text-xs text-muted-foreground hover:text-foreground" disabled={bulkImporting}>
                 Cancel
               </button>
             </div>
