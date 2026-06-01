@@ -1210,6 +1210,7 @@ const TradeProductPage: React.FC = () => {
                 <ExpandableSpec
                   icon={specIcon("📐")}
                   text={singleSizeOptions.join("\n")}
+                  secondaryText={singleSizeOptions.length === 1 ? formatImperialDimensions(singleSizeOptions[0]) : null}
                   emphasized
                   placeholder="Select your size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
@@ -1259,6 +1260,7 @@ const TradeProductPage: React.FC = () => {
                   <ExpandableSpec
                     icon={specIcon("📐")}
                     text={sizeText}
+                    secondaryText={formatImperialDimensions(sizeText)}
                     emphasized
                     placeholder="Select your size"
                     value={hasVariants ? selectedVariantIdx : undefined}
@@ -1270,6 +1272,7 @@ const TradeProductPage: React.FC = () => {
                 <ExpandableSpec
                   icon={specIcon("📐")}
                   text={dualSizeOptions.join("\n")}
+                  secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
                   emphasized
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
