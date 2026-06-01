@@ -98,15 +98,6 @@ export function useDbCuratorPicks() {
       // equals the parent's `name`), keep only the parent's row so the
       // catalog doesn't show the same sofa twice.
       // ────────────────────────────────────────────────────────────────
-      const parentNameByDesignerId = new Map<string, string | null>();
-      designers.forEach((d: any) => {
-        const founder = (d.founder || "").trim();
-        const isParent = !founder || founder === d.name;
-        parentNameByDesignerId.set(d.id, isParent ? null : founder);
-      });
-      const designerByName = new Map<string, any>();
-      designers.forEach((d: any) => designerByName.set(d.name.trim().toLowerCase(), d));
-
       const normalizeTitle = (t: string) =>
         (t || "")
           .toLowerCase()
@@ -115,6 +106,7 @@ export function useDbCuratorPicks() {
           .replace(/[^\w\s]/g, " ")
           .trim()
           .replace(/\s+/g, " ");
+
 
       const groups = new Map<string, DbProductItem[]>();
       for (const it of items) {
