@@ -1,5 +1,4 @@
-import { useId, useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import {
@@ -98,7 +97,7 @@ export default function ExpandableSpec({
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
-  const [open, setOpen] = useState(false);
+  // (open state removed — multi/no-placeholder now renders full paragraph)
   const selectedIdx = value !== undefined ? value : internalIdx;
   const showAutoHint = autoDetectedHint && didAutoSplit;
 
@@ -219,48 +218,18 @@ export default function ExpandableSpec({
     );
   }
 
-  // Multi, no placeholder → simple inline expandable (borderless list row)
-  const remaining = lines.length - 1;
-  const panelId = useId();
+  // Multi, no placeholder → render all lines as a full paragraph (no collapse).
+  // The accompanying selector dropdown already exposes choice; the descriptive
+  // row should show the complete spec instead of "first line + N more".
   return (
     <div className={cn(rowClasses, "items-start")}>
       <span className="mt-0.5 shrink-0">{icon}</span>
-      <div className="flex-1 min-w-0">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="group flex items-start gap-1.5 text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm motion-reduce:transition-none"
-          aria-expanded={open}
-          aria-controls={panelId}
-        >
-          <p className={textClasses}>{lines[0]}</p>
-          <span className="flex items-center gap-1 mt-0.5 shrink-0">
-            {!open && (
-              <span className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70">
-                +{remaining}
-              </span>
-            )}
-            <ChevronDown
-              size={13}
-              aria-hidden="true"
-              className={cn(
-                "text-muted-foreground/70 group-hover:text-foreground transition-all motion-reduce:transition-none",
-                open && "rotate-180"
-              )}
-            />
-          </span>
-        </button>
-        <div id={panelId} role="region" hidden={!open}>
-          {open && (
-            <div className="mt-1 flex flex-col gap-0.5">
-              {lines.slice(1).map((line, i) => (
-                <p key={i} className={textClasses}>
-                  {line}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+        {lines.map((line, i) => (
+          <p key={i} className={textClasses}>
+            {line}
+          </p>
+        ))}
       </div>
     </div>
   );

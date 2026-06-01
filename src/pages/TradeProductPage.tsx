@@ -1283,21 +1283,63 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
-                  text={formatDimensionsMultiline(product.dimensions)}
-                  emphasized
-                />
-              )}
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                return handcrafted ? (
-                  <ExpandableSpec
-                    icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
-                    text={handcrafted}
-                  />
-                ) : null;
+                const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions);
+                if (!showDims && !handcrafted) return null;
+                const dimLines = showDims
+                  ? formatDimensionsMultiline(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
+                  : [];
+                const [primaryDim, ...secondaryDims] = dimLines;
+                // Split handcrafted into origin line + lead-time line.
+                // formatHandcrafted returns "Handcrafted in {origin} in {lead}" or "Handcrafted in {origin} · {lead}".
+                let handcraftedPrimary = handcrafted || "";
+                let handcraftedSecondary = "";
+                if (handcrafted) {
+                  const dotSplit = handcrafted.split(" · ");
+                  if (dotSplit.length === 2) {
+                    handcraftedPrimary = dotSplit[0];
+                    handcraftedSecondary = dotSplit[1];
+                  } else {
+                    const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                    if (m) {
+                      handcraftedPrimary = m[1];
+                      handcraftedSecondary = `Production lead time: ${m[2]}`;
+                    }
+                  }
+                }
+                return (
+                  <div className="mt-2 flex flex-col">
+                    {showDims && (
+                      <div className="border-t border-border/60 py-4 flex items-center gap-4">
+                        <span className="flex-shrink-0">
+                          <Ruler size={18} className="text-[hsl(var(--gold))]" strokeWidth={1.5} />
+                        </span>
+                        <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
+                          {primaryDim}
+                          {secondaryDims.length > 0 && (
+                            <span className="block text-muted-foreground/70 text-[11px] mt-0.5 tracking-[0.08em] uppercase">
+                              {secondaryDims.join(" · ")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {handcrafted && (
+                      <div className="border-t border-b border-border/60 py-4 flex items-start gap-4">
+                        <span className="flex-shrink-0 mt-0.5">
+                          <Sparkles size={18} className="text-[hsl(var(--gold))]" strokeWidth={1.5} />
+                        </span>
+                        <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
+                          <div>{handcraftedPrimary}</div>
+                          {handcraftedSecondary && (
+                            <div className="text-muted-foreground/80 mt-0.5">{handcraftedSecondary}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
               })()}
             </div>
 
