@@ -1095,18 +1095,35 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   // refresh) doesn't wipe URLs the user is still collecting. Cleared on
   // successful import or explicit Cancel.
   const bulkDraftKey = `ig-bulk-draft:${designerId}`;
-  const [bulkMode, setBulkMode] = useState(() => {
-    try { return !!localStorage.getItem(bulkDraftKey); } catch { return false; }
-  });
-  const [bulkText, setBulkText] = useState(() => {
-    try { return localStorage.getItem(bulkDraftKey) || ""; } catch { return ""; }
-  });
-  useEffect(() => {
+  const readBulkDraft = useCallback(() => {
     try {
-      if (bulkText.trim()) localStorage.setItem(bulkDraftKey, bulkText);
-      else localStorage.removeItem(bulkDraftKey);
+      return localStorage.getItem(bulkDraftKey) || sessionStorage.getItem(bulkDraftKey) || "";
+    } catch {
+      return "";
+    }
+  }, [bulkDraftKey]);
+  const writeBulkDraft = useCallback((value: string) => {
+    try {
+      if (value) {
+        localStorage.setItem(bulkDraftKey, value);
+        sessionStorage.setItem(bulkDraftKey, value);
+      } else {
+        localStorage.removeItem(bulkDraftKey);
+        sessionStorage.removeItem(bulkDraftKey);
+      }
     } catch { /* storage full / disabled */ }
-  }, [bulkText, bulkDraftKey]);
+  }, [bulkDraftKey]);
+  const [bulkMode, setBulkMode] = useState(() => {
+    try { return !!(localStorage.getItem(bulkDraftKey) || sessionStorage.getItem(bulkDraftKey)); } catch { return false; }
+  });
+  const [bulkText, setBulkText] = useState(() => readBulkDraft());
+  const updateBulkText = useCallback((value: string) => {
+    setBulkText(value);
+    writeBulkDraft(value);
+  }, [writeBulkDraft]);
+  useEffect(() => {
+    writeBulkDraft(bulkText);
+  }, [bulkText, writeBulkDraft]);
   const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
   const [fetchingAll, setFetchingAll] = useState(false);
 
