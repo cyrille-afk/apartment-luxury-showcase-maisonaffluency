@@ -1091,8 +1091,22 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number; image_url: string | null }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
-  const [bulkMode, setBulkMode] = useState(false);
-  const [bulkText, setBulkText] = useState("");
+  // Persist bulk-import draft per designer so navigating away (or a preview
+  // refresh) doesn't wipe URLs the user is still collecting. Cleared on
+  // successful import or explicit Cancel.
+  const bulkDraftKey = `ig-bulk-draft:${designerId}`;
+  const [bulkMode, setBulkMode] = useState(() => {
+    try { return !!localStorage.getItem(bulkDraftKey); } catch { return false; }
+  });
+  const [bulkText, setBulkText] = useState(() => {
+    try { return localStorage.getItem(bulkDraftKey) || ""; } catch { return ""; }
+  });
+  useEffect(() => {
+    try {
+      if (bulkText.trim()) localStorage.setItem(bulkDraftKey, bulkText);
+      else localStorage.removeItem(bulkDraftKey);
+    } catch { /* storage full / disabled */ }
+  }, [bulkText, bulkDraftKey]);
   const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
   const [fetchingAll, setFetchingAll] = useState(false);
 
