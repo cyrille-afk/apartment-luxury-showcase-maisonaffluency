@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import { withImperialPerLine } from "@/lib/formatDimensions";
 
 interface Product {
   id: string;
@@ -287,7 +288,7 @@ const ProductPage = () => {
                     <Ruler className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
                       <p className="font-body text-[11px] text-muted-foreground uppercase tracking-wider mb-0.5">Dimensions</p>
-                      <p className="font-body text-sm text-foreground">{product.dimensions}</p>
+                      <p className="font-body text-sm text-foreground whitespace-pre-line">{withImperialPerLine(product.dimensions)}</p>
                     </div>
                   </div>
                 )}
