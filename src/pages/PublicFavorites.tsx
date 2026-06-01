@@ -34,7 +34,10 @@ interface FavPick {
   image_url: string;
   hover_image_url: string | null;
   materials: string | null;
+  materials_description: string | null;
   dimensions: string | null;
+  lead_time: string | null;
+  origin: string | null;
   description: string | null;
   category: string | null;
   subcategory: string | null;
@@ -68,7 +71,7 @@ const PublicFavorites = () => {
       setLoading(true);
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+        .select("id, title, subtitle, image_url, hover_image_url, materials, materials_description, dimensions, lead_time, origin, description, category, subcategory, pdf_url, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
         .in("id", favIds);
 
       if (!data || data.length === 0) {
@@ -95,7 +98,10 @@ const PublicFavorites = () => {
           image_url: p.image_url,
           hover_image_url: p.hover_image_url,
           materials: p.materials,
+          materials_description: (p as any).materials_description ?? null,
           dimensions: p.dimensions,
+          lead_time: (p as any).lead_time ?? null,
+          origin: (p as any).origin ?? null,
           description: p.description,
           category: p.category,
           subcategory: p.subcategory,
@@ -144,7 +150,10 @@ const PublicFavorites = () => {
         hover_image_url: p.hover_image_url,
         brand_name: p.designer_name || "",
         materials: p.materials,
+        materials_description: p.materials_description,
         dimensions: p.dimensions,
+        lead_time: p.lead_time,
+        origin: p.origin,
         description: p.description,
         category: p.category,
         subcategory: p.subcategory,

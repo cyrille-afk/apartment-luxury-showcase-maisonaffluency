@@ -1,13 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen, Info } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Heart, FolderOpen } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
-import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantImageMap";
@@ -17,6 +18,11 @@ import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import SpecGlyph from "@/components/product/SpecGlyph";
+
+const specIcon = (symbol: string, className = "") => (
+  <SpecGlyph symbol={symbol} className={className} />
+);
 
 export interface TradeProductLightboxItem {
   id: string;
@@ -26,7 +32,10 @@ export interface TradeProductLightboxItem {
   hover_image_url?: string;
   brand_name: string;
   materials?: string | null;
+  materials_description?: string | null;
   dimensions?: string | null;
+  lead_time?: string | null;
+  origin?: string | null;
   description?: string | null;
   category?: string;
   subcategory?: string;
@@ -116,7 +125,10 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         hover_image_url: p.hover_image_url,
         brand_name: p.brand_name,
         materials: p.materials,
+        materials_description: p.materials_description,
         dimensions: p.dimensions,
+        lead_time: p.lead_time,
+        origin: p.origin,
         category: p.category,
         subcategory: p.subcategory,
       } as TradeProductLightboxItem));
@@ -432,10 +444,17 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             </div>
 
             <div className="flex flex-col">
+              {product.materials_description?.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
               {axes.hasVariants && axes.isDualAxis ? (
                 <>
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={axes.baseOptions.join("\n")}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
@@ -467,7 +486,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     disabledIndices={disabledBaseIdx}
                   />
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={axes.topOptions.join("\n")}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
@@ -500,7 +519,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   />
                   {hasDualSize && (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={axes.dualSizeOptions.join("\n")}
                       placeholder="Select your size"
                       emphasized
@@ -521,7 +540,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </>
               ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("⬗")}
                   text={axes.baseOptions.join("\n")}
                   placeholder={getBasePlaceholder(product)}
                   emphasized
@@ -531,7 +550,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : axes.hasVariants && axes.hasSingleAxisSplit ? (
                 <>
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={axes.singleMaterialOptions.join("\n")}
                     placeholder="Select your material choice"
                     emphasized
@@ -539,7 +558,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
                   />
                   <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("📐")}
                     text={axes.singleSizeOptions.join("\n")}
                     placeholder="Select your size"
                     emphasized
@@ -549,7 +568,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </>
               ) : axes.hasVariants ? (
                 <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("📐")}
                   text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
                   placeholder={getMaterialPlaceholder(product)}
                   emphasized
@@ -560,7 +579,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <>
                   {product.materials && (
                     <ExpandableSpec
-                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("⬗")}
                       text={product.materials}
                       placeholder="Select your material choice"
                       autoSplit
@@ -568,14 +587,41 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   )}
                   {product.dimensions && looksLikeDimension(product.dimensions) && (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={formatDimensionsMultiline(product.dimensions)}
+                      secondaryText={formatImperialDimensions(product.dimensions)}
                       emphasized
                       placeholder="Select your size"
                     />
                   )}
                 </>
               )}
+              {(() => {
+                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                if (!handcrafted) return null;
+                let originLine = handcrafted;
+                let leadLine: string | null = null;
+                const dotSplit = handcrafted.split(" · ");
+                if (dotSplit.length === 2) {
+                  originLine = dotSplit[0];
+                  leadLine = dotSplit[1];
+                } else {
+                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                  if (m) {
+                    originLine = m[1];
+                    leadLine = `Production lead time: ${m[2]}`;
+                  }
+                }
+                return (
+                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                    {specIcon("✦", "mt-0.5")}
+                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                      <p>{originLine}</p>
+                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
 

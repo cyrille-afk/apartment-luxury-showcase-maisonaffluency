@@ -25,7 +25,10 @@ interface FavoritedProduct {
   category: string;
   subcategory: string | null;
   materials: string | null;
+  materials_description: string | null;
   dimensions: string | null;
+  lead_time: string | null;
+  origin: string | null;
   trade_price_cents: number | null;
   rrp_price_cents: number | null;
   currency: string;
@@ -55,7 +58,10 @@ export default function TradeFavorites() {
     image_url: fav.image_url,
     brand_name: fav.brand_name,
     materials: fav.materials,
+    materials_description: fav.materials_description,
     dimensions: fav.dimensions,
+    lead_time: fav.lead_time,
+    origin: fav.origin,
     category: fav.category || undefined,
     subcategory: fav.subcategory || undefined,
     price: fav.trade_price_cents ? `€${(fav.trade_price_cents / 100).toLocaleString()}` : undefined,
@@ -109,7 +115,7 @@ export default function TradeFavorites() {
     try {
       const { data, error } = await supabase
         .from("trade_favorites")
-        .select("id, product_id, notes, created_at, trade_products(product_name, brand_name, image_url, category, subcategory, materials, dimensions, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, product_id, notes, created_at, trade_products(product_name, brand_name, image_url, category, subcategory, materials, materials_description, dimensions, lead_time, origin, trade_price_cents, rrp_price_cents, currency)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -124,7 +130,10 @@ export default function TradeFavorites() {
         category: f.trade_products?.category || "",
         subcategory: f.trade_products?.subcategory,
         materials: f.trade_products?.materials,
+        materials_description: f.trade_products?.materials_description,
         dimensions: f.trade_products?.dimensions,
+        lead_time: f.trade_products?.lead_time,
+        origin: f.trade_products?.origin,
         trade_price_cents: f.trade_products?.trade_price_cents,
         rrp_price_cents: f.trade_products?.rrp_price_cents,
         currency: f.trade_products?.currency || "SGD",

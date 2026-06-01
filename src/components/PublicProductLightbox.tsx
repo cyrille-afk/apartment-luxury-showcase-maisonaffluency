@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, Layers, Ruler, FileDown, Heart, Scale, ArrowRight } from "lucide-react";
+import { X, FileDown, Heart, Scale, ArrowRight } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -13,17 +13,22 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
-import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { useDesignerByName } from "@/hooks/useDesigner";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { supabase } from "@/integrations/supabase/client";
+import SpecGlyph from "@/components/product/SpecGlyph";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
   s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const specIcon = (symbol: string, className = "") => (
+  <SpecGlyph symbol={symbol} className={className} />
+);
 
 export interface PublicLightboxItem {
   id: string;
@@ -36,6 +41,8 @@ export interface PublicLightboxItem {
   /** Free-form description that renders as a plain legend (Layers icon) instead of being parsed as a materials dropdown. Takes precedence over `materials` when set. */
   materials_description?: string | null;
   dimensions?: string | null;
+  lead_time?: string | null;
+  origin?: string | null;
   description?: string | null;
   category?: string | null;
   subcategory?: string | null;
@@ -135,11 +142,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     const needsHydration =
       !propProduct.size_variants ||
       !propProduct.gallery_images ||
-      !propProduct.variant_image_map;
+      !propProduct.variant_image_map ||
+      !propProduct.materials_description ||
+      !propProduct.origin ||
+      !propProduct.lead_time;
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -159,6 +169,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       top_axis_label: propProduct.top_axis_label ?? variantPayload.top_axis_label ?? null,
       gallery_images: propProduct.gallery_images ?? variantPayload.gallery_images ?? null,
       variant_image_map: propProduct.variant_image_map ?? variantPayload.variant_image_map ?? null,
+      materials_description: propProduct.materials_description ?? variantPayload.materials_description ?? null,
+      origin: propProduct.origin ?? variantPayload.origin ?? null,
+      lead_time: propProduct.lead_time ?? variantPayload.lead_time ?? null,
     };
   }, [propProduct, variantPayload]);
 
@@ -523,9 +536,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 // description with the Layers icon (no dropdown / no parsing).
                 if (product.materials_description && product.materials_description.trim()) {
                   return (
-                    <ExpandableSpec
-                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      <ExpandableSpec
+                        icon={specIcon("⬗")}
                       text={product.materials_description.trim()}
+                        emphasized
                     />
                   );
                 }
@@ -534,7 +548,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   return (
                     <>
                       <ExpandableSpec
-                        icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                        icon={specIcon("⬗")}
                         text={baseOptions.join("\n")}
                         placeholder={getBasePlaceholder(product)}
                         singleValueLabel={product.base_axis_label || undefined}
@@ -549,7 +563,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                         }}
                       />
                       <ExpandableSpec
-                        icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                        icon={specIcon("⬗")}
                         text={topOptions.join("\n")}
                         placeholder={getTopPlaceholder(product)}
                         singleValueLabel={product.top_axis_label || undefined}
@@ -568,7 +582,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 return materialOptions.length > 0 ? (
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={materialOptions.join("\n")}
                     placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
                     singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
@@ -588,7 +602,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
                   return (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={singleSplitSizes.join("\n")}
                       emphasized
                       placeholder="Select your size"
@@ -605,7 +619,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 if (isDualAxis && dualSizeOptions.length > 0) {
                   return (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={dualSizeOptions.join("\n")}
                       emphasized
                       placeholder="Select your size"
@@ -620,7 +634,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   if (labels.length > 1) {
                     return (
                       <ExpandableSpec
-                        icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                        icon={specIcon("📐")}
                         text={labels.join("\n")}
                         emphasized
                         placeholder="Select your size"
@@ -630,12 +644,39 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 return product.dimensions && looksLikeDimension(product.dimensions) ? (
                   <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("📐")}
                     text={formatDimensionsMultiline(product.dimensions)}
+                    secondaryText={formatImperialDimensions(product.dimensions)}
                     emphasized
                     placeholder="Select your size"
                   />
                 ) : null;
+              })()}
+              {(() => {
+                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                if (!handcrafted) return null;
+                let originLine = handcrafted;
+                let leadLine: string | null = null;
+                const dotSplit = handcrafted.split(" · ");
+                if (dotSplit.length === 2) {
+                  originLine = dotSplit[0];
+                  leadLine = dotSplit[1];
+                } else {
+                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                  if (m) {
+                    originLine = m[1];
+                    leadLine = `Production lead time: ${m[2]}`;
+                  }
+                }
+                return (
+                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                    {specIcon("✦", "mt-0.5")}
+                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                      <p>{originLine}</p>
+                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                    </div>
+                  </div>
+                );
               })()}
             </div>
 

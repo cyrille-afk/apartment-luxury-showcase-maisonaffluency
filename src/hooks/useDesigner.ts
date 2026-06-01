@@ -69,6 +69,8 @@ export interface DesignerCuratorPick {
   materials: string | null;
   materials_description: string | null;
   dimensions: string | null;
+  lead_time: string | null;
+  origin: string | null;
   description: string | null;
   edition: string | null;
   photo_credit: string | null;
