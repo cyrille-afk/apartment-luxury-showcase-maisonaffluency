@@ -60,7 +60,6 @@ interface ProductRow {
   hover_image_url: string | null;
   gallery_images?: string[] | null;
   materials: string | null;
-  materials_description: string | null;
   dimensions: string | null;
   description: string | null;
   category: string | null;
@@ -91,7 +90,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -319,18 +318,11 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
-      {product.materials_description && product.materials_description.trim() && (
-        <ExpandableSpec
-          icon={<Layers size={14} className="text-muted-foreground/40" />}
-          text={product.materials_description.trim()}
-        />
-      )}
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
-
         <>
           <ExpandableSpec
-            icon={<Layers size={14} className="text-muted-foreground/40" />}
+            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
             text={baseOptions.join("\n")}
             placeholder={getBasePlaceholder(product)}
             singleValueLabel={product.base_axis_label || undefined}
@@ -361,7 +353,7 @@ const VariantSelectors: React.FC<{
             }
           />
           <ExpandableSpec
-            icon={<Layers size={14} className="text-muted-foreground/40" />}
+            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
             text={topOptions.join("\n")}
             placeholder={getTopPlaceholder(product)}
             singleValueLabel={product.top_axis_label || undefined}
@@ -405,7 +397,7 @@ const VariantSelectors: React.FC<{
         </>
       ) : isBaseOnly ? (
         <ExpandableSpec
-          icon={<Layers size={14} className="text-muted-foreground/40" />}
+          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
           text={baseOptions.join("\n")}
           placeholder={getBasePlaceholder(product)}
           singleValueLabel={product.base_axis_label || undefined}
@@ -424,7 +416,7 @@ const VariantSelectors: React.FC<{
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
-          icon={<Layers size={14} className="text-muted-foreground/40" />}
+          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
           text={singleMaterialOptions.join("\n")}
           placeholder={getMaterialPlaceholder(product)}
           emphasized
@@ -454,7 +446,7 @@ const VariantSelectors: React.FC<{
           const parsed = parseMaterialsFallback(product.materials);
           return (
             <ExpandableSpec
-              icon={<Layers size={14} className="text-muted-foreground/40" />}
+              icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
               text={product.materials}
               placeholder={getMaterialPlaceholder(product)}
               autoSplit
@@ -467,7 +459,7 @@ const VariantSelectors: React.FC<{
       {/* Size dropdown */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
-          icon={<Ruler size={14} className="text-muted-foreground/40" />}
+          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
           text={dualSizeOptions.join("\n")}
           emphasized
           placeholder="Select your size"
@@ -497,7 +489,7 @@ const VariantSelectors: React.FC<{
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
-          icon={<Ruler size={14} className="text-muted-foreground/40" />}
+          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
           text={singleSizeOptions.join("\n")}
           emphasized
           placeholder="Select your size"
@@ -526,17 +518,17 @@ const VariantSelectors: React.FC<{
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
         return labels.length > 1 ? (
           <ExpandableSpec
-            icon={<Ruler size={14} className="text-muted-foreground/40" />}
+            icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
             text={labels.join("\n")}
             emphasized
             placeholder="Select your size"
           />
         ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={<Ruler size={14} className="text-muted-foreground/40" />} text={product.dimensions} />
+          <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
         ) : null;
       })()}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={<Ruler size={14} className="text-muted-foreground/40" />} text={product.dimensions} />
+        <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
       )}
     </>
   );
@@ -872,20 +864,17 @@ const PublicProductPage: React.FC = () => {
                   <Link
                     to={`/designers/${designer.slug}`}
                     onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                    className="font-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors"
+                    className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                   >
                     {designerDisplay}
                   </Link>
-                  <h1 className="font-display text-3xl md:text-4xl mt-2 leading-[1.1] font-normal">
+                  <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
                     {product.title}
                     {product.subtitle &&
                       !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
                       !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
                       ` by ${product.subtitle}`}
                   </h1>
-                  <p className="font-display italic text-base md:text-lg text-muted-foreground mt-2">
-                    Price on request
-                  </p>
                 </div>
                 <div className="shrink-0 mt-1">
                   {(() => {
@@ -916,7 +905,7 @@ const PublicProductPage: React.FC = () => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   return handcrafted ? (
                     <ExpandableSpec
-                      icon={<Sparkles size={14} className="text-muted-foreground/40" />}
+                      icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
                       text={handcrafted}
                     />
                   ) : null;
@@ -951,7 +940,7 @@ const PublicProductPage: React.FC = () => {
                   className={cn(
                     "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
                     pinned
-                      ? "bg-foreground/5 border-foreground text-foreground"
+                      ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
                     compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                   )}
@@ -983,6 +972,7 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
+
               <p className="font-body text-[11px] text-muted-foreground text-center">
                 For pricing and availability, please{" "}
                 <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
@@ -992,7 +982,7 @@ const PublicProductPage: React.FC = () => {
               <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
                 Looking for a bespoke version?{" "}
                 <Link
-                  to={`/concierge?product=${encodeURIComponent(product.title)}&designer=${encodeURIComponent(designerDisplay)}&page=${encodeURIComponent(`https://www.maisonaffluency.com${location.pathname}`)}`}
+                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
                   className="underline underline-offset-2 hover:text-foreground transition-colors"
                 >
                   Contact our concierge →
