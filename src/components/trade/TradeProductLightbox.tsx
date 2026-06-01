@@ -7,7 +7,7 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
@@ -520,7 +520,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   {hasDualSize && (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={axes.dualSizeOptions.join("\n")}
+                      text={withImperialPerLine(axes.dualSizeOptions.join("\n"))}
                       placeholder="Select your size"
                       emphasized
                       value={sizeIdx}
@@ -559,7 +559,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   />
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={axes.singleSizeOptions.join("\n")}
+                    text={withImperialPerLine(axes.singleSizeOptions.join("\n"))}
                     placeholder="Select your size"
                     emphasized
                     value={singleSplitSizeIdx}
@@ -569,7 +569,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : axes.hasVariants ? (
                 <ExpandableSpec
                   icon={specIcon("📐")}
-                  text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
+                  text={withImperialPerLine((product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n"))}
                   placeholder={getMaterialPlaceholder(product)}
                   emphasized
                   value={sizeIdx}
