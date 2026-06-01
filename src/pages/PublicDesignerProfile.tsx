@@ -404,7 +404,8 @@ const PublicDesignerProfile = () => {
       /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
       /vimeo\.com\//i.test(url) ||
       /youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url) ||
-      /facebook\.com\/plugins\/video/i.test(url)
+      /facebook\.com\/plugins\/video/i.test(url) ||
+      /instagram\.com\/(reel|reels|p|tv)\//i.test(url)
     );
   };
 
