@@ -23,7 +23,10 @@ export interface TradeProduct {
   subcategory?: string;
   tags: string[];
   materials?: string;
+  materials_description?: string | null;
   dimensions?: string;
+  lead_time?: string | null;
+  origin?: string | null;
   description?: string;
   image_url: string | null;
   hover_image_url?: string;
@@ -80,7 +83,10 @@ export function getAllTradeProducts(): TradeProduct[] {
         subcategory: resolvedSubcategory,
         tags: pick.tags || [],
         materials: pick.materials,
+        materials_description: (pick as any).materials_description,
         dimensions: pick.dimensions,
+        lead_time: (pick as any).lead_time,
+        origin: (pick as any).origin,
         description: pick.description,
         image_url: pick.image || null,
         hover_image_url: pick.hoverImage,
