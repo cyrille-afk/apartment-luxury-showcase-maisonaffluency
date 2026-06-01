@@ -324,6 +324,14 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
+      {product.materials_description?.trim() && (
+        <ExpandableSpec
+          icon={specIcon("⬗")}
+          text={product.materials_description.trim()}
+          emphasized
+        />
+      )}
+
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
@@ -451,22 +459,13 @@ const VariantSelectors: React.FC<{
         (() => {
           const parsed = parseMaterialsFallback(product.materials);
           return (
-            <>
-              {product.materials_description?.trim() && (
-                <ExpandableSpec
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                  emphasized
-                />
-              )}
-              <ExpandableSpec
-                icon={specIcon("⬗")}
-                text={product.materials}
-                placeholder={getMaterialPlaceholder(product)}
-                autoSplit
-                onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
-              />
-            </>
+            <ExpandableSpec
+              icon={specIcon("⬗")}
+              text={product.materials}
+              placeholder={getMaterialPlaceholder(product)}
+              autoSplit
+              onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
+            />
           );
         })()
       ) : null}
