@@ -184,7 +184,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           curatorPick = (picks || []).find((p: any) => p.title === (tradeProduct as any).product_name) || null;
@@ -199,6 +199,7 @@ function useTradeProductBySlug(
           hover_image_url: curatorPick?.hover_image_url || null,
           gallery_images: curatorPick?.gallery_images?.length ? curatorPick.gallery_images : (tradeProduct as any).gallery_images || null,
           materials: curatorPick?.materials || (tradeProduct as any).materials || null,
+          materials_description: curatorPick?.materials_description || null,
           dimensions: curatorPick?.dimensions || (tradeProduct as any).dimensions || null,
           description: curatorPick?.description || (tradeProduct as any).description || null,
           category: curatorPick?.category || (tradeProduct as any).category || null,
@@ -264,7 +265,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
