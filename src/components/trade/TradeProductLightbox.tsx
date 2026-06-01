@@ -444,7 +444,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               {axes.hasVariants && axes.isDualAxis ? (
                 <>
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={axes.baseOptions.join("\n")}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
@@ -476,7 +476,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     disabledIndices={disabledBaseIdx}
                   />
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={axes.topOptions.join("\n")}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
@@ -509,7 +509,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   />
                   {hasDualSize && (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={axes.dualSizeOptions.join("\n")}
                       placeholder="Select your size"
                       emphasized
@@ -530,7 +530,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </>
               ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("⬗")}
                   text={axes.baseOptions.join("\n")}
                   placeholder={getBasePlaceholder(product)}
                   emphasized
@@ -540,7 +540,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : axes.hasVariants && axes.hasSingleAxisSplit ? (
                 <>
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={axes.singleMaterialOptions.join("\n")}
                     placeholder="Select your material choice"
                     emphasized
@@ -548,7 +548,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
                   />
                   <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("📐")}
                     text={axes.singleSizeOptions.join("\n")}
                     placeholder="Select your size"
                     emphasized
@@ -558,7 +558,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </>
               ) : axes.hasVariants ? (
                 <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("📐")}
                   text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
                   placeholder={getMaterialPlaceholder(product)}
                   emphasized
@@ -569,7 +569,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <>
                   {product.materials && (
                     <ExpandableSpec
-                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("⬗")}
                       text={product.materials}
                       placeholder="Select your material choice"
                       autoSplit
@@ -577,7 +577,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   )}
                   {product.dimensions && looksLikeDimension(product.dimensions) && (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={formatDimensionsMultiline(product.dimensions)}
                       emphasized
                       placeholder="Select your size"
