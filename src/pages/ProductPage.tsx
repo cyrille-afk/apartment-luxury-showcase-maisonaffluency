@@ -2,13 +2,20 @@ import { useState, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Mail } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
-import { withImperialPerLine } from "@/lib/formatDimensions";
+import ExpandableSpec from "@/components/ExpandableSpec";
+import SpecGlyph from "@/components/SpecGlyph";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { looksLikeDimension } from "@/lib/rugPricing";
+
+const specIcon = (symbol: string, className = "") => (
+  <SpecGlyph symbol={symbol} className={className} />
+);
 
 interface Product {
   id: string;
