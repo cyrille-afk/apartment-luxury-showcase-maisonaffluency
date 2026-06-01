@@ -33,6 +33,8 @@ export interface PublicLightboxItem {
   hover_image_url?: string | null;
   brand_name: string;
   materials?: string | null;
+  /** Free-form description that renders as a plain legend (Layers icon) instead of being parsed as a materials dropdown. Takes precedence over `materials` when set. */
+  materials_description?: string | null;
   dimensions?: string | null;
   description?: string | null;
   category?: string | null;
