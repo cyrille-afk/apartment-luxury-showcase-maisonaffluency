@@ -125,7 +125,10 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         hover_image_url: p.hover_image_url,
         brand_name: p.brand_name,
         materials: p.materials,
+        materials_description: p.materials_description,
         dimensions: p.dimensions,
+        lead_time: p.lead_time,
+        origin: p.origin,
         category: p.category,
         subcategory: p.subcategory,
       } as TradeProductLightboxItem));
