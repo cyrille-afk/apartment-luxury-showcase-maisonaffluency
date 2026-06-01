@@ -795,7 +795,40 @@ function LetterGroup({
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
-  const isRevealed = forceOpen || isInView;
+  // Fallback reveal: framer-motion's useInView occasionally misses the
+  // initial intersection on first paint (scroll restore, fast scroll past,
+  // hydration order). Because it's { once: true }, a missed observation
+  // leaves the letter group stuck as an empty placeholder forever — which
+  // is what produced the "missing A cards / huge gap above B" bug. We
+  // backstop with a manual rect check on mount and again shortly after.
+  const [fallbackRevealed, setFallbackRevealed] = useState(false);
+  useEffect(() => {
+    if (fallbackRevealed) return;
+    let cancelled = false;
+    const check = () => {
+      if (cancelled) return;
+      const el = sentinelRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 0;
+      // Reveal if the sentinel is within (or above) a generous viewport band.
+      if (rect.top < vh + 400) setFallbackRevealed(true);
+    };
+    check();
+    const t1 = setTimeout(check, 250);
+    const t2 = setTimeout(check, 1200);
+    // Also reveal on any scroll — guarantees the group renders before the
+    // user has a chance to notice it's missing.
+    const onScroll = () => check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelled = true;
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [fallbackRevealed]);
+  const isRevealed = forceOpen || isInView || fallbackRevealed;
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
