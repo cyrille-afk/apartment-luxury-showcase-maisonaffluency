@@ -127,6 +127,7 @@ const PublicCollectibles = lazy(() => import("./pages/PublicCollectibles"));
 const PublicGallery = lazy(() => import("./pages/PublicGallery"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ConciergePage = lazy(() => import("./pages/ConciergePage"));
 const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
 const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
 
