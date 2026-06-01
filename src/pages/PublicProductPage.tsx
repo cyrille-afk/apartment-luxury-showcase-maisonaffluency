@@ -450,7 +450,6 @@ const VariantSelectors: React.FC<{
               text={product.materials}
               placeholder={getMaterialPlaceholder(product)}
               autoSplit
-              autoDetectedHint
               onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
             />
           );
