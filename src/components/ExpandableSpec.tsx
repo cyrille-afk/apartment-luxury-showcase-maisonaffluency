@@ -237,6 +237,9 @@ export default function ExpandableSpec({
         {lines.map((line, i) => (
           <p key={i} className={textClasses}>{line}</p>
         ))}
+        {secondaryText && (
+          <p className="text-xs mt-0.5 text-muted-foreground/70">{secondaryText}</p>
+        )}
       </div>
     </div>
   );
