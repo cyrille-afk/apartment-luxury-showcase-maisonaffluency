@@ -555,6 +555,26 @@ function VideoBlock({
               />
               {playOverlay}
             </button>
+          ) : /instagram\.com\//i.test(embedUrl) ? (
+            // Instagram embed: crop out header (username + View profile) and footer (caption + actions)
+            // so only the video frame is visible.
+            <div className="absolute inset-0 overflow-hidden">
+              <iframe
+                src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
+                title={caption || `${designerName} — video`}
+                className="border-0"
+                style={{
+                  position: "absolute",
+                  top: "-54px",
+                  left: "0",
+                  width: "100%",
+                  height: "calc(100% + 240px)",
+                }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                scrolling="no"
+              />
+            </div>
           ) : (
             <iframe
               src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
