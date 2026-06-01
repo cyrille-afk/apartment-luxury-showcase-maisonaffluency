@@ -60,6 +60,7 @@ interface ProductRow {
   hover_image_url: string | null;
   gallery_images?: string[] | null;
   materials: string | null;
+  materials_description: string | null;
   dimensions: string | null;
   description: string | null;
   category: string | null;
@@ -90,7 +91,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -319,7 +320,12 @@ const VariantSelectors: React.FC<{
   return (
     <>
       {/* Material / finish dropdown(s) */}
-      {isDualAxis ? (
+      {product.materials_description && product.materials_description.trim() ? (
+        <ExpandableSpec
+          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          text={product.materials_description.trim()}
+        />
+      ) : isDualAxis ? (
         <>
           <ExpandableSpec
             icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
