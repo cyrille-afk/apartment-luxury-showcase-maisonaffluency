@@ -448,13 +448,22 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Materials</label>
+                    <label className="text-[10px] text-muted-foreground">Materials (each option becomes a dropdown choice — leave empty when using the legend below)</label>
                     <Input value={pick.materials || ""} onChange={(e) => updateField(pick.id, "materials", e.target.value || null)} className="text-xs" />
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground">Dimensions</label>
                     <Input value={pick.dimensions || ""} onChange={(e) => updateField(pick.id, "dimensions", e.target.value || null)} className="text-xs" />
                   </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Product Legend (free-form description — when set, replaces the Materials dropdown and renders as a plain paragraph with the Layers icon)</label>
+                  <Textarea
+                    value={(pick as any).materials_description || ""}
+                    onChange={(e) => updateField(pick.id, "materials_description" as any, e.target.value || null)}
+                    className="text-xs min-h-[60px]"
+                    placeholder="e.g. Frame in solid and multilayer wood with elastic belts and upholstery in different densities polyurethane foam · Slide feet or lacquered solid wood base"
+                  />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
