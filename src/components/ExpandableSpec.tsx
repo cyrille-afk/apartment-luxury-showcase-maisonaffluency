@@ -97,7 +97,7 @@ export default function ExpandableSpec({
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
-  const [open, setOpen] = useState(false);
+  // (open state removed — multi/no-placeholder now renders full paragraph)
   const selectedIdx = value !== undefined ? value : internalIdx;
   const showAutoHint = autoDetectedHint && didAutoSplit;
 
