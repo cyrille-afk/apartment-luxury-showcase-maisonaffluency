@@ -34,15 +34,14 @@ import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
+import SpecGlyph from "@/components/product/SpecGlyph";
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
 /* ------------------------------------------------------------------ */
 const LS_KEY = "public_favorites";
 const specIcon = (symbol: string, className = "") => (
-  <span className={cn("inline-flex w-[18px] shrink-0 items-center justify-center text-[hsl(var(--gold))]", className)}>
-    {symbol}
-  </span>
+  <SpecGlyph symbol={symbol} className={className} />
 );
 
 function readFavs(): Set<string> {
