@@ -928,13 +928,11 @@ const PublicProductPage: React.FC = () => {
                   }
                   return (
                     <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-4">
-                      <span className="flex-shrink-0 mt-0.5">
-                        <Sparkles size={18} className="text-[hsl(var(--gold))]" strokeWidth={1.5} />
-                      </span>
+                      {specIcon("✦", "mt-0.5")}
                       <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
                         <div>{handcraftedPrimary}</div>
                         {handcraftedSecondary && (
-                          <div className="text-muted-foreground/80 mt-0.5">{handcraftedSecondary}</div>
+                          <div className="mt-0.5">{handcraftedSecondary}</div>
                         )}
                       </div>
                     </div>

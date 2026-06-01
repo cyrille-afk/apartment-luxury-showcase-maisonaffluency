@@ -43,7 +43,13 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
-import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+
+const specIcon = (symbol: string, className = "") => (
+  <span className={cn("inline-flex w-[18px] shrink-0 items-center justify-center text-[hsl(var(--gold))]", className)}>
+    {symbol}
+  </span>
+);
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
@@ -1050,7 +1056,7 @@ const TradeProductPage: React.FC = () => {
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("⬗")}
                   text={singleMaterialOptions.join("\n")}
                   placeholder="Select your material choice"
                   emphasized
@@ -1083,7 +1089,7 @@ const TradeProductPage: React.FC = () => {
               )}
               {!isRugSqmActive && isBaseOnly && (
                 <ExpandableSpec
-                  icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("⬗")}
                   text={baseOptions.join("\n")}
                   placeholder={getBasePlaceholder(product)}
                   emphasized
@@ -1104,7 +1110,7 @@ const TradeProductPage: React.FC = () => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={product.materials}
                     placeholder="Select your material choice"
                     autoSplit
@@ -1117,7 +1123,7 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isDualAxis && (
                 <>
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={baseOptions.join("\n")}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
@@ -1148,7 +1154,7 @@ const TradeProductPage: React.FC = () => {
                     }
                   />
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={topOptions.join("\n")}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
@@ -1194,7 +1200,7 @@ const TradeProductPage: React.FC = () => {
               {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("📐")}
                   text={singleSizeOptions.join("\n")}
                   emphasized
                   placeholder="Select your size"
@@ -1243,7 +1249,7 @@ const TradeProductPage: React.FC = () => {
                 if (!looksLikeDimension(sizeText)) return null;
                 return (
                   <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("📐")}
                     text={sizeText}
                     emphasized
                     placeholder="Select your size"
@@ -1254,7 +1260,7 @@ const TradeProductPage: React.FC = () => {
               })()}
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
-                  icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                  icon={specIcon("📐")}
                   text={dualSizeOptions.join("\n")}
                   emphasized
                   placeholder="Select your size"
@@ -1311,29 +1317,23 @@ const TradeProductPage: React.FC = () => {
                 return (
                   <div className="mt-2 flex flex-col">
                     {showDims && (
-                      <div className="border-t border-border/60 py-4 flex items-center gap-4">
-                        <span className="flex-shrink-0">
-                          <Ruler size={18} className="text-[hsl(var(--gold))]" strokeWidth={1.5} />
-                        </span>
+                      <div className="border-t border-border/60 py-4 flex items-start gap-4">
+                        {specIcon("📐", "mt-0.5")}
                         <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
-                          {primaryDim}
+                          <div>{primaryDim}</div>
                           {secondaryDims.length > 0 && (
-                            <span className="block text-muted-foreground/70 text-[11px] mt-0.5 tracking-[0.08em] uppercase">
-                              {secondaryDims.join(" · ")}
-                            </span>
+                            <div className="mt-0.5">{secondaryDims.join(" · ")}</div>
                           )}
                         </div>
                       </div>
                     )}
                     {handcrafted && (
                       <div className="border-t border-b border-border/60 py-4 flex items-start gap-4">
-                        <span className="flex-shrink-0 mt-0.5">
-                          <Sparkles size={18} className="text-[hsl(var(--gold))]" strokeWidth={1.5} />
-                        </span>
+                        {specIcon("✦", "mt-0.5")}
                         <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
                           <div>{handcraftedPrimary}</div>
                           {handcraftedSecondary && (
-                            <div className="text-muted-foreground/80 mt-0.5">{handcraftedSecondary}</div>
+                            <div className="mt-0.5">{handcraftedSecondary}</div>
                           )}
                         </div>
                       </div>
