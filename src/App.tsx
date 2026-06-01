@@ -127,6 +127,7 @@ const PublicCollectibles = lazy(() => import("./pages/PublicCollectibles"));
 const PublicGallery = lazy(() => import("./pages/PublicGallery"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ConciergePage = lazy(() => import("./pages/ConciergePage"));
 const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
 const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
 
@@ -375,6 +376,7 @@ const App = () => {
                   <Route path="/collectibles" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicCollectibles /></Suspense>} />
                   <Route path="/gallery" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicGallery /></Suspense>} />
                   <Route path="/contact" element={<Suspense fallback={<PageLoadingSkeleton />}><ContactPage /></Suspense>} />
+                  <Route path="/concierge" element={<Suspense fallback={<PageLoadingSkeleton />}><ConciergePage /></Suspense>} />
                    <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
                   <Route path="/studios" element={<Suspense fallback={<PageLoadingSkeleton />}><Studios /></Suspense>} />
                   <Route path="/studios/submit" element={<Suspense fallback={<PageLoadingSkeleton />}><StudioSubmit /></Suspense>} />
