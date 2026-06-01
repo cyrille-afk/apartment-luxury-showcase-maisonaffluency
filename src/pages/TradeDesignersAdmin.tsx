@@ -2152,36 +2152,41 @@ const TradeDesignersAdmin = () => {
                         <div className="mt-2 space-y-3">
                           {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((entry: string, idx: number) => {
                             const { url: rawUrl, caption, metadata } = parseBiographyMediaEntry(entry);
-                            const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo/i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
+                            const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo|instagram\.com\/(reel|reels|p|tv)\//i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
 
-                            const updateEntry = (newUrl: string, newCaption: string) => {
+                            const posterMetaIdx = metadata.findIndex((m) => /^poster:/i.test(m));
+                            const posterUrl = posterMetaIdx >= 0 ? metadata[posterMetaIdx].replace(/^poster:/i, "").trim() : "";
+
+                            const writeEntry = (newUrl: string, newCaption: string, newPoster: string) => {
+                              const nextMeta = [...metadata];
+                              if (posterMetaIdx >= 0) nextMeta.splice(posterMetaIdx, 1);
+                              if (newPoster.trim()) nextMeta.push(`poster:${newPoster.trim()}`);
                               const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
-                              const oldSerialized = imgs[idx];
-                              imgs[idx] = serializeBiographyMediaEntry(newUrl, newCaption, metadata);
+                              imgs[idx] = serializeBiographyMediaEntry(newUrl, newCaption, nextMeta);
                               setField(d.id, "biography_images", imgs);
 
                               // Sync inline biography token when caption changes
                               const bioVal = getField(d.id, "biography") || "";
                               if (bioVal && rawUrl) {
-                                // Build old inline token pattern: URL alone or URL | old caption
                                 const escapedUrl = rawUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
                                 const oldInlinePattern = new RegExp(
                                   `(^|\\n)(${escapedUrl})(?:\\s*\\|\\s*${caption.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})?\\s*(?=\\n|$)`,
                                   "m"
                                 );
-                                const newInlineToken = newCaption
-                                  ? `${newUrl} | ${newCaption}`
-                                  : newUrl;
+                                const newInlineToken = newCaption ? `${newUrl} | ${newCaption}` : newUrl;
                                 const updatedBio = bioVal.replace(oldInlinePattern, `$1${newInlineToken}`);
-                                if (updatedBio !== bioVal) {
-                                  setField(d.id, "biography", updatedBio);
-                                }
+                                if (updatedBio !== bioVal) setField(d.id, "biography", updatedBio);
                               }
                             };
 
+                            const updateEntry = (newUrl: string, newCaption: string) => writeEntry(newUrl, newCaption, posterUrl);
+                            const updatePoster = (newPoster: string) => writeEntry(rawUrl, caption, newPoster);
+
                             return (
                               <div key={idx} className="flex items-start gap-2 border border-border/50 rounded-md p-2">
-                                {isVideo ? (
+                                {posterUrl ? (
+                                  <img src={posterUrl} alt="" className="w-16 h-16 object-cover rounded shrink-0 bg-muted" />
+                                ) : isVideo ? (
                                   <div className="w-16 h-16 rounded shrink-0 bg-muted flex items-center justify-center text-muted-foreground text-[9px] font-medium">▶ Video</div>
                                 ) : rawUrl.startsWith("http") ? (
                                   <img src={rawUrl} alt="" className="w-16 h-16 object-cover rounded shrink-0 bg-muted" />
@@ -2204,6 +2209,22 @@ const TradeDesignersAdmin = () => {
                                     className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors"
                                     placeholder="Caption (e.g. Designer Name, 'Title', 2025)"
                                   />
+                                  {isVideo && (
+                                    <div className="flex items-center gap-2">
+                                      <Input
+                                        value={posterUrl}
+                                        onChange={(e) => updatePoster(e.target.value)}
+                                        placeholder="Cover image URL (Instagram/Vimeo/MP4 — shown before play)"
+                                        className="text-[11px] font-mono flex-1"
+                                      />
+                                      <CloudUpload
+                                        folder={`designers/${d.slug || d.id}/covers`}
+                                        accept="image/*"
+                                        label="Upload cover"
+                                        onUpload={(urls) => { if (urls[0]) updatePoster(urls[0]); }}
+                                      />
+                                    </div>
+                                  )}
                                   <button
                                     type="button"
                                     title="Insert this media into biography text at cursor position"
