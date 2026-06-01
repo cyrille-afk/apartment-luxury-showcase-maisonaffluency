@@ -287,7 +287,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 flex-1 md:flex-none md:min-h-[400px] md:h-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
+            className="relative w-full md:w-1/2 flex-1 md:flex-none md:min-h-[400px] md:h-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-8"
             onMouseEnter={() => {
               if (canShowHoverImage) setShowHoverImage(true);
             }}

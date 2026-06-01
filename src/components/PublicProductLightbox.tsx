@@ -399,7 +399,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 h-[42dvh] max-h-[340px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-0 md:min-h-[400px]"
+            className="relative w-full md:w-1/2 h-[42dvh] max-h-[340px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-8 md:min-h-[400px]"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
