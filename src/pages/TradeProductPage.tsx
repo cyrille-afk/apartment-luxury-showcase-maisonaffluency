@@ -43,7 +43,7 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
