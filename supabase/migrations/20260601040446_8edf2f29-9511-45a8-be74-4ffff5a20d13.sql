@@ -1,0 +1,1 @@
+UPDATE designers SET biography = replace(biography, '<a href="/designer/">Marta Sala Éditions</a>', '<a href="/designers/marta-sala-editions">Marta Sala Éditions</a>') WHERE name = 'Lazzarini & Pickering';
