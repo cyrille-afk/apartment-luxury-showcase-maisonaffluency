@@ -569,7 +569,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : axes.hasVariants ? (
                 <ExpandableSpec
                   icon={specIcon("📐")}
-                  text={(product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n")}
+                  text={withImperialPerLine((product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n"))}
                   placeholder={getMaterialPlaceholder(product)}
                   emphasized
                   value={sizeIdx}
