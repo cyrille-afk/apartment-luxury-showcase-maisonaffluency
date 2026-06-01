@@ -876,13 +876,16 @@ const PublicProductPage: React.FC = () => {
                   >
                     {designerDisplay}
                   </Link>
-                  <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
+                  <h1 className="font-display text-3xl md:text-4xl mt-2 leading-[1.1] font-normal">
                     {product.title}
                     {product.subtitle &&
                       !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
                       !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
                       ` by ${product.subtitle}`}
                   </h1>
+                  <p className="font-display italic text-base md:text-lg text-muted-foreground mt-2">
+                    Price on request
+                  </p>
                 </div>
                 <div className="shrink-0 mt-1">
                   {(() => {
