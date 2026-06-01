@@ -60,6 +60,7 @@ interface ProductRow {
   hover_image_url: string | null;
   gallery_images?: string[] | null;
   materials: string | null;
+  materials_description: string | null;
   dimensions: string | null;
   description: string | null;
   category: string | null;
