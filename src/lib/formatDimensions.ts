@@ -22,3 +22,35 @@ export const formatDimensionsMultiline = (raw: string | null | undefined): strin
 
   return trimmed;
 };
+
+const cmToInches = (value: string): string => {
+  const n = Number(value.replace(",", "."));
+  if (!Number.isFinite(n)) return value;
+  return `${(n / 2.54).toFixed(1)}\"`;
+};
+
+const toImperialLine = (line: string): string | null => {
+  if (!/\bcm\b/i.test(line)) return null;
+  const converted = line
+    .split(/(\s+[·•]\s+|\s*;\s*)/)
+    .map((part) => {
+      if (!/\bcm\b/i.test(part)) return part;
+      return part
+        .replace(/\s*cm\b/gi, "")
+        .replace(/\d+(?:[.,]\d+)?/g, cmToInches);
+    })
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+  return converted && converted !== line ? converted : null;
+};
+
+export const formatImperialDimensions = (raw: string | null | undefined): string | null => {
+  const metric = formatDimensionsMultiline(raw);
+  if (!metric) return null;
+  const converted = metric
+    .split("\n")
+    .map((line) => toImperialLine(line.trim()))
+    .filter(Boolean) as string[];
+  return converted.length ? converted.join("\n") : null;
+};
