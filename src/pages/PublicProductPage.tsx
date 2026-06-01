@@ -319,13 +319,15 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
-      {/* Material / finish dropdown(s) */}
-      {product.materials_description && product.materials_description.trim() ? (
+      {product.materials_description && product.materials_description.trim() && (
         <ExpandableSpec
           icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
           text={product.materials_description.trim()}
         />
-      ) : isDualAxis ? (
+      )}
+      {/* Material / finish dropdown(s) */}
+      {isDualAxis ? (
+
         <>
           <ExpandableSpec
             icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
