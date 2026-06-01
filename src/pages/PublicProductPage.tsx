@@ -920,25 +920,30 @@ const PublicProductPage: React.FC = () => {
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
-                  let handcraftedDisplay = handcrafted;
+                  let originLine = handcrafted;
+                  let leadLine: string | null = null;
                   const dotSplit = handcrafted.split(" · ");
                   if (dotSplit.length === 2) {
-                    handcraftedDisplay = `${dotSplit[0]} · ${dotSplit[1]}`;
+                    originLine = dotSplit[0];
+                    leadLine = dotSplit[1];
                   } else {
                     const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
                     if (m) {
-                      handcraftedDisplay = `${m[1]} · Production lead time: ${m[2]}`;
+                      originLine = m[1];
+                      leadLine = `Production lead time: ${m[2]}`;
                     }
                   }
                   return (
                     <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
                       {specIcon("✦", "mt-0.5")}
-                      <p className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                        {handcraftedDisplay}
-                      </p>
+                      <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                        <p>{originLine}</p>
+                        {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                      </div>
                     </div>
                   );
                 })()}
+
               </div>
 
 
