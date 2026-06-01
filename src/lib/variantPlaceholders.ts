@@ -36,26 +36,29 @@ function placeholderFromAxisLabel(label: string): string {
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
-  // Curator override wins — when set, it applies to BOTH dropdowns so the
-  // editor's intent (e.g. "Select Your Finish") is honored verbatim.
-  const override = clean(p.variant_placeholder);
-  if (override) return override;
-
+  // Axis-specific label wins when set — it reads naturally per dropdown
+  // (e.g. "Select your frame choice"). Fall back to the curator override
+  // (which applies to both dropdowns) only when no axis label is defined,
+  // then to the generic default.
   const axis = clean(p.base_axis_label);
   if (axis) return placeholderFromAxisLabel(axis);
+
+  const override = clean(p.variant_placeholder);
+  if (override) return override;
 
   return DEFAULT_BASE_PLACEHOLDER;
 }
 
 export function getTopPlaceholder(p: VariantPlaceholderInput): string {
-  const override = clean(p.variant_placeholder);
-  if (override) return override;
-
   const axis = clean(p.top_axis_label);
   if (axis) return placeholderFromAxisLabel(axis);
 
+  const override = clean(p.variant_placeholder);
+  if (override) return override;
+
   return DEFAULT_TOP_PLACEHOLDER;
 }
+
 
 /** Default placeholder for non-dual-axis material/size dropdowns. */
 export function getMaterialPlaceholder(p: VariantPlaceholderInput): string {
