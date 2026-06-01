@@ -1054,6 +1054,13 @@ const TradeProductPage: React.FC = () => {
                   />
                 );
               })()}
+              {!isRugSqmActive && product.materials_description?.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
@@ -1297,46 +1304,41 @@ const TradeProductPage: React.FC = () => {
                 const dimLines = showDims
                   ? formatDimensionsMultiline(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
                   : [];
+                const dimImperial = showDims ? formatImperialDimensions(product.dimensions!) : null;
                 const [primaryDim, ...secondaryDims] = dimLines;
-                // Split handcrafted into origin line + lead-time line.
-                // formatHandcrafted returns "Handcrafted in {origin} in {lead}" or "Handcrafted in {origin} · {lead}".
-                let handcraftedPrimary = handcrafted || "";
-                let handcraftedSecondary = "";
+                let handcraftedDisplay = handcrafted || "";
                 if (handcrafted) {
                   const dotSplit = handcrafted.split(" · ");
                   if (dotSplit.length === 2) {
-                    handcraftedPrimary = dotSplit[0];
-                    handcraftedSecondary = dotSplit[1];
+                    handcraftedDisplay = `${dotSplit[0]} · ${dotSplit[1]}`;
                   } else {
                     const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
                     if (m) {
-                      handcraftedPrimary = m[1];
-                      handcraftedSecondary = `Production lead time: ${m[2]}`;
+                      handcraftedDisplay = `${m[1]} · Production lead time: ${m[2]}`;
                     }
                   }
                 }
                 return (
                   <div className="mt-2 flex flex-col">
                     {showDims && (
-                      <div className="border-t border-border/60 py-4 flex items-start gap-4">
+                      <div className="border-t border-border/60 py-4 flex items-start gap-5">
                         {specIcon("📐", "mt-0.5")}
-                        <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
+                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                           <div>{primaryDim}</div>
-                          {secondaryDims.length > 0 && (
-                            <div className="mt-0.5">{secondaryDims.join(" · ")}</div>
+                          {dimImperial ? (
+                            <div className="mt-0.5 text-muted-foreground/70">{dimImperial}</div>
+                          ) : secondaryDims.length > 0 && (
+                            <div className="mt-0.5 text-muted-foreground/70">{secondaryDims.join(" · ")}</div>
                           )}
                         </div>
                       </div>
                     )}
                     {handcrafted && (
-                      <div className="border-t border-b border-border/60 py-4 flex items-start gap-4">
+                      <div className="border-t border-b border-border/60 py-4 flex items-start gap-5">
                         {specIcon("✦", "mt-0.5")}
-                        <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
-                          <div>{handcraftedPrimary}</div>
-                          {handcraftedSecondary && (
-                            <div className="mt-0.5">{handcraftedSecondary}</div>
-                          )}
-                        </div>
+                        <p className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                          {handcraftedDisplay}
+                        </p>
                       </div>
                     )}
                   </div>
