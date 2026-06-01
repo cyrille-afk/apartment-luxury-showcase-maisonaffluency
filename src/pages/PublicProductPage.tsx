@@ -329,7 +329,7 @@ const VariantSelectors: React.FC<{
       {isDualAxis ? (
         <>
           <ExpandableSpec
-            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+            icon={specIcon("⬗")}
             text={baseOptions.join("\n")}
             placeholder={getBasePlaceholder(product)}
             singleValueLabel={product.base_axis_label || undefined}
@@ -360,7 +360,7 @@ const VariantSelectors: React.FC<{
             }
           />
           <ExpandableSpec
-            icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+            icon={specIcon("⬗")}
             text={topOptions.join("\n")}
             placeholder={getTopPlaceholder(product)}
             singleValueLabel={product.top_axis_label || undefined}
@@ -404,7 +404,7 @@ const VariantSelectors: React.FC<{
         </>
       ) : isBaseOnly ? (
         <ExpandableSpec
-          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("⬗")}
           text={baseOptions.join("\n")}
           placeholder={getBasePlaceholder(product)}
           singleValueLabel={product.base_axis_label || undefined}
@@ -423,7 +423,7 @@ const VariantSelectors: React.FC<{
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
-          icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("⬗")}
           text={singleMaterialOptions.join("\n")}
           placeholder={getMaterialPlaceholder(product)}
           emphasized
@@ -453,7 +453,7 @@ const VariantSelectors: React.FC<{
           const parsed = parseMaterialsFallback(product.materials);
           return (
             <ExpandableSpec
-              icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+              icon={specIcon("⬗")}
               text={product.materials}
               placeholder={getMaterialPlaceholder(product)}
               autoSplit
@@ -466,8 +466,9 @@ const VariantSelectors: React.FC<{
       {/* Size dropdown */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
-          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("📐")}
           text={dualSizeOptions.join("\n")}
+          secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
           emphasized
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
@@ -496,8 +497,9 @@ const VariantSelectors: React.FC<{
         />
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
-          icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+          icon={specIcon("📐")}
           text={singleSizeOptions.join("\n")}
+          secondaryText={singleSizeOptions.length === 1 ? formatImperialDimensions(singleSizeOptions[0]) : null}
           emphasized
           placeholder="Select your size"
           value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}
@@ -525,17 +527,17 @@ const VariantSelectors: React.FC<{
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
         return labels.length > 1 ? (
           <ExpandableSpec
-            icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+            icon={specIcon("📐")}
             text={labels.join("\n")}
             emphasized
             placeholder="Select your size"
           />
         ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
+          <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
         ) : null;
       })()}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />} text={product.dimensions} />
+        <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
       )}
     </>
   );
