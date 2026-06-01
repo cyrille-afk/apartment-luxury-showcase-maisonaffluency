@@ -474,8 +474,8 @@ const VariantSelectors: React.FC<{
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
           icon={specIcon("📐")}
-          text={dualSizeOptions.join("\n")}
-          secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
+          text={withImperialPerLine(dualSizeOptions.join("\n"))}
+          secondaryText={null}
           emphasized
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
