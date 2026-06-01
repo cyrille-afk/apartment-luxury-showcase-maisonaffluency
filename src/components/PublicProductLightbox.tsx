@@ -620,7 +620,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   return (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={dualSizeOptions.join("\n")}
+                      text={withImperialPerLine(dualSizeOptions.join("\n"))}
                       emphasized
                       placeholder="Select your size"
                     />
