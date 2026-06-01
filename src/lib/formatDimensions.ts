@@ -54,3 +54,22 @@ export const formatImperialDimensions = (raw: string | null | undefined): string
     .filter(Boolean) as string[];
   return converted.length ? converted.join("\n") : null;
 };
+
+/**
+ * For multi-line dimension text, append the imperial conversion inline to
+ * each line, e.g. "Ø 80 × H 60 cm  (Ø 31.5" × H 23.6")".
+ * Lines without convertible units are returned unchanged.
+ */
+export const withImperialPerLine = (raw: string | null | undefined): string => {
+  const metric = formatDimensionsMultiline(raw);
+  if (!metric) return "";
+  return metric
+    .split("\n")
+    .map((line) => {
+      const t = line.trim();
+      const imp = toImperialLine(t);
+      return imp ? `${t}  (${imp})` : t;
+    })
+    .join("\n");
+};
+

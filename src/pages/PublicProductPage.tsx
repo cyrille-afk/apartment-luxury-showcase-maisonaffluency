@@ -20,7 +20,7 @@ import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDrop
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
@@ -474,8 +474,8 @@ const VariantSelectors: React.FC<{
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
           icon={specIcon("📐")}
-          text={dualSizeOptions.join("\n")}
-          secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
+          text={withImperialPerLine(dualSizeOptions.join("\n"))}
+          secondaryText={null}
           emphasized
           placeholder="Select your size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
@@ -505,8 +505,8 @@ const VariantSelectors: React.FC<{
       ) : hasSingleAxisSplit ? (
         <ExpandableSpec
           icon={specIcon("📐")}
-          text={singleSizeOptions.join("\n")}
-          secondaryText={singleSizeOptions.length === 1 ? formatImperialDimensions(singleSizeOptions[0]) : null}
+          text={withImperialPerLine(singleSizeOptions.join("\n"))}
+          secondaryText={null}
           emphasized
           placeholder="Select your size"
           value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}

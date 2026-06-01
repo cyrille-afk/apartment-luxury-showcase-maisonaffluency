@@ -176,11 +176,30 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
   const isDualAxis = hasAnyBase && hasAnyTop;
   const isBaseOnly = hasAnyBase && !hasAnyTop;
 
+  // Dedupe materials with normalization: ignore case AND strip leading
+  // non-letter garbage (stray digits/punctuation like "5Calacatta…") so a
+  // clean duplicate of a polluted value collapses into one option. We keep
+  // the cleanest spelling.
+  const dedupeMaterialOptions = (vals: string[]): string[] => {
+    const map = new Map<string, string>();
+    for (const raw of vals) {
+      const v = raw.trim();
+      if (!v) continue;
+      const cleaned = v.replace(/^[^\p{L}]+/u, "").trim();
+      const key = (cleaned || v).toLocaleLowerCase();
+      const existing = map.get(key);
+      if (!existing || cleaned.length < existing.length) {
+        map.set(key, cleaned || v);
+      }
+    }
+    return Array.from(map.values());
+  };
+
   const baseOptions = isDualAxis || isBaseOnly
-    ? Array.from(new Set(variants.map((v) => (v.base || "").trim()).filter(Boolean)))
+    ? dedupeMaterialOptions(variants.map((v) => v.base || ""))
     : [];
   const topOptions = isDualAxis
-    ? Array.from(new Set(variants.map((v) => (v.top || "").trim()).filter(Boolean)))
+    ? dedupeMaterialOptions(variants.map((v) => v.top || ""))
     : [];
   const dualSizeOptions = isDualAxis
     ? Array.from(new Set(variants.map((v) => (v.label || "").trim()).filter(Boolean)))

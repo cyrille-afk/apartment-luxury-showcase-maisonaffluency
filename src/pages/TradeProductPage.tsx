@@ -43,7 +43,7 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
@@ -1209,8 +1209,8 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
-                  text={singleSizeOptions.join("\n")}
-                  secondaryText={singleSizeOptions.length === 1 ? formatImperialDimensions(singleSizeOptions[0]) : null}
+                  text={withImperialPerLine(singleSizeOptions.join("\n"))}
+                  secondaryText={null}
                   emphasized
                   placeholder="Select your size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
@@ -1271,8 +1271,8 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
-                  text={dualSizeOptions.join("\n")}
-                  secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
+                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
+                  secondaryText={null}
                   emphasized
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
