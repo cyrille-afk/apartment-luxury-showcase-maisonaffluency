@@ -316,6 +316,7 @@ export default function TradeSpecSheet() {
       <Helmet>
         <title>{pageTitle} | Maison Affluency</title>
         <meta name="description" content={pageDescription} />
+        <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
       </Helmet>
       <div className="w-full h-[calc(100vh-4rem)]">
