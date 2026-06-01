@@ -121,7 +121,7 @@ export default function VariantPreviewPanel({
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Layers className="h-3 w-3" /> {baseAxisLabel || "Base"}
+                  {(baseAxisLabel || "").toLowerCase() === "size" ? <Ruler className="h-3 w-3" /> : <Layers className="h-3 w-3" />} {baseAxisLabel || "Base"}
                 </span>
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
@@ -145,7 +145,7 @@ export default function VariantPreviewPanel({
               </label>
               <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Layers className="h-3 w-3" /> {topAxisLabel || "Top"}
+                  {(topAxisLabel || "").toLowerCase() === "size" ? <Ruler className="h-3 w-3" /> : <Layers className="h-3 w-3" />} {topAxisLabel || "Top"}
                 </span>
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
