@@ -1309,15 +1309,18 @@ const TradeProductPage: React.FC = () => {
                   : [];
                 const dimImperial = showDims ? formatImperialDimensions(product.dimensions!) : null;
                 const [primaryDim, ...secondaryDims] = dimLines;
-                let handcraftedDisplay = handcrafted || "";
+                let originLine = handcrafted || "";
+                let leadLine: string | null = null;
                 if (handcrafted) {
                   const dotSplit = handcrafted.split(" · ");
                   if (dotSplit.length === 2) {
-                    handcraftedDisplay = `${dotSplit[0]} · ${dotSplit[1]}`;
+                    originLine = dotSplit[0];
+                    leadLine = dotSplit[1];
                   } else {
                     const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
                     if (m) {
-                      handcraftedDisplay = `${m[1]} · Production lead time: ${m[2]}`;
+                      originLine = m[1];
+                      leadLine = `Production lead time: ${m[2]}`;
                     }
                   }
                 }
@@ -1339,13 +1342,15 @@ const TradeProductPage: React.FC = () => {
                     {handcrafted && (
                       <div className="border-t border-b border-border/60 py-4 flex items-start gap-5">
                         {specIcon("✦", "mt-0.5")}
-                        <p className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                          {handcraftedDisplay}
-                        </p>
+                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                          <p>{originLine}</p>
+                          {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                        </div>
                       </div>
                     )}
                   </div>
                 );
+
               })()}
             </div>
 
