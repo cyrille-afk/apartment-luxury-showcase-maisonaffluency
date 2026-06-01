@@ -931,6 +931,7 @@ const PublicDesignerProfile = () => {
                         hover_image_url: pick.hover_image_url,
                         brand_name: designerLabel || designer.name,
                         materials: pick.materials,
+                        materials_description: (pick as any).materials_description ?? null,
                         dimensions: pick.dimensions,
                         description: pick.description,
                         category: pick.category,
