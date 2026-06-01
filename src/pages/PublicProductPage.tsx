@@ -39,6 +39,12 @@ import { toOgImage } from "@/lib/ogImage";
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
 /* ------------------------------------------------------------------ */
 const LS_KEY = "public_favorites";
+const specIcon = (symbol: string, className = "") => (
+  <span className={cn("inline-flex w-[18px] shrink-0 items-center justify-center text-[hsl(var(--gold))]", className)}>
+    {symbol}
+  </span>
+);
+
 function readFavs(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); }
   catch { return new Set(); }
