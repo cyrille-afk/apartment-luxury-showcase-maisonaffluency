@@ -142,11 +142,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     const needsHydration =
       !propProduct.size_variants ||
       !propProduct.gallery_images ||
-      !propProduct.variant_image_map;
+      !propProduct.variant_image_map ||
+      !propProduct.materials_description ||
+      !propProduct.origin ||
+      !propProduct.lead_time;
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -166,6 +169,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       top_axis_label: propProduct.top_axis_label ?? variantPayload.top_axis_label ?? null,
       gallery_images: propProduct.gallery_images ?? variantPayload.gallery_images ?? null,
       variant_image_map: propProduct.variant_image_map ?? variantPayload.variant_image_map ?? null,
+      materials_description: propProduct.materials_description ?? variantPayload.materials_description ?? null,
+      origin: propProduct.origin ?? variantPayload.origin ?? null,
+      lead_time: propProduct.lead_time ?? variantPayload.lead_time ?? null,
     };
   }, [propProduct, variantPayload]);
 
