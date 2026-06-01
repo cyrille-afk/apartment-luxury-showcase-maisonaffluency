@@ -1209,8 +1209,8 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
-                  text={singleSizeOptions.join("\n")}
-                  secondaryText={singleSizeOptions.length === 1 ? formatImperialDimensions(singleSizeOptions[0]) : null}
+                  text={withImperialPerLine(singleSizeOptions.join("\n"))}
+                  secondaryText={null}
                   emphasized
                   placeholder="Select your size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
