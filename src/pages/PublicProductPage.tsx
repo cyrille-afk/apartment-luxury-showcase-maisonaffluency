@@ -872,7 +872,7 @@ const PublicProductPage: React.FC = () => {
                   <Link
                     to={`/designers/${designer.slug}`}
                     onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                    className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 hover:text-primary hover:underline underline-offset-2 transition-colors"
+                    className="font-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {designerDisplay}
                   </Link>
