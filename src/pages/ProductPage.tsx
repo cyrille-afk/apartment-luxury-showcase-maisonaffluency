@@ -2,13 +2,20 @@ import { useState, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Mail } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
-import { withImperialPerLine } from "@/lib/formatDimensions";
+import ExpandableSpec from "@/components/ExpandableSpec";
+import SpecGlyph from "@/components/product/SpecGlyph";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { looksLikeDimension } from "@/lib/rugPricing";
+
+const specIcon = (symbol: string, className = "") => (
+  <SpecGlyph symbol={symbol} className={className} />
+);
 
 interface Product {
   id: string;
@@ -272,34 +279,26 @@ const ProductPage = () => {
                 <p className="font-body text-sm text-muted-foreground mt-6 leading-relaxed">{product.description}</p>
               )}
 
-              {/* Specifications */}
-              <div className="mt-8 space-y-4 border-t border-border pt-6">
+              {/* Specifications — mirrors PublicProductPage: auto-split finishes + imperial per line */}
+              <div className="mt-8 border-t border-border pt-2">
                 {product.materials && (
-                  <div className="flex items-start gap-3">
-                    <Layers className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-body text-[11px] text-muted-foreground uppercase tracking-wider mb-0.5">Materials</p>
-                      <p className="font-body text-sm text-foreground">{product.materials}</p>
-                    </div>
-                  </div>
+                  <ExpandableSpec
+                    icon={specIcon("⬗")}
+                    text={product.materials}
+                    placeholder="Select your finish"
+                    autoSplit
+                    autoDetectedHint
+                  />
                 )}
-                {product.dimensions && (
-                  <div className="flex items-start gap-3">
-                    <Ruler className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-body text-[11px] text-muted-foreground uppercase tracking-wider mb-0.5">Dimensions</p>
-                      <p className="font-body text-sm text-foreground whitespace-pre-line">{withImperialPerLine(product.dimensions)}</p>
-                    </div>
-                  </div>
+                {product.dimensions && looksLikeDimension(product.dimensions) && (
+                  <ExpandableSpec
+                    icon={specIcon("📐")}
+                    text={formatDimensionsMultiline(product.dimensions)}
+                    secondaryText={formatImperialDimensions(product.dimensions)}
+                  />
                 )}
                 {product.lead_time && (
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-body text-[11px] text-muted-foreground uppercase tracking-wider mb-0.5">Lead Time</p>
-                      <p className="font-body text-sm text-foreground">{product.lead_time}</p>
-                    </div>
-                  </div>
+                  <ExpandableSpec icon={specIcon("✦")} text={`Lead time: ${product.lead_time}`} />
                 )}
               </div>
 
