@@ -123,8 +123,8 @@ export function useDbCuratorPicks() {
         for (const a of arr) {
           for (const b of arr) {
             if (a === b || dropped.has(a) || dropped.has(b)) continue;
-            const aParent = parentNameByDesignerId.get(a.designerId === a.designerId ? "" : "") ?? null;
             // Resolve via name lookup (designerName is display, may differ from .name)
+
             const aDesigner = designers.find((d: any) => d.slug === a.designerId || d.id === a.designerId);
             const bDesigner = designers.find((d: any) => d.slug === b.designerId || d.id === b.designerId);
             if (!aDesigner || !bDesigner) continue;
