@@ -455,7 +455,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <>
                   <ExpandableSpec
                     icon={specIcon("⬗")}
-                    text={axes.baseOptions.join("\n")}
+                    text={withImperialPerLine(axes.baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
                     value={baseIdx}
@@ -487,7 +487,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   />
                   <ExpandableSpec
                     icon={specIcon("⬗")}
-                    text={axes.topOptions.join("\n")}
+                    text={withImperialPerLine(axes.topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
                     value={topIdx}
@@ -541,7 +541,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
                   icon={specIcon("⬗")}
-                  text={axes.baseOptions.join("\n")}
+                  text={withImperialPerLine(axes.baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
                   emphasized
                   value={baseIdx}
