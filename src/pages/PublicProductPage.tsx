@@ -451,13 +451,22 @@ const VariantSelectors: React.FC<{
         (() => {
           const parsed = parseMaterialsFallback(product.materials);
           return (
-            <ExpandableSpec
-              icon={specIcon("⬗")}
-              text={product.materials}
-              placeholder={getMaterialPlaceholder(product)}
-              autoSplit
-              onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
-            />
+            <>
+              {product.materials_description?.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
+              <ExpandableSpec
+                icon={specIcon("⬗")}
+                text={product.materials}
+                placeholder={getMaterialPlaceholder(product)}
+                autoSplit
+                onChange={(idx) => onMaterialChange?.(parsed[idx] ?? null)}
+              />
+            </>
           );
         })()
       ) : null}
@@ -912,28 +921,22 @@ const PublicProductPage: React.FC = () => {
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
-                  let handcraftedPrimary = handcrafted;
-                  let handcraftedSecondary = "";
+                  let handcraftedDisplay = handcrafted;
                   const dotSplit = handcrafted.split(" · ");
                   if (dotSplit.length === 2) {
-                    handcraftedPrimary = dotSplit[0];
-                    handcraftedSecondary = dotSplit[1];
+                    handcraftedDisplay = `${dotSplit[0]} · ${dotSplit[1]}`;
                   } else {
                     const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
                     if (m) {
-                      handcraftedPrimary = m[1];
-                      handcraftedSecondary = `Production lead time: ${m[2]}`;
+                      handcraftedDisplay = `${m[1]} · Production lead time: ${m[2]}`;
                     }
                   }
                   return (
-                    <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-4">
+                    <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
                       {specIcon("✦", "mt-0.5")}
-                      <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
-                        <div>{handcraftedPrimary}</div>
-                        {handcraftedSecondary && (
-                          <div className="mt-0.5">{handcraftedSecondary}</div>
-                        )}
-                      </div>
+                      <p className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                        {handcraftedDisplay}
+                      </p>
                     </div>
                   );
                 })()}
