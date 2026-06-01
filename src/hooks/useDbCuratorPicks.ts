@@ -18,13 +18,14 @@ export function useDbCuratorPicks() {
   return useQuery({
     queryKey: ["db-curator-picks-for-grid"],
     queryFn: async (): Promise<DbProductItem[]> => {
-      // Fetch published designers
+      // Fetch published designers (incl. founder to resolve parent hierarchy)
       const { data: designers } = await supabase
         .from("designers")
-        .select("id, name, slug, display_name, source")
+        .select("id, name, slug, display_name, source, founder")
         .eq("is_published", true);
 
       if (!designers?.length) return [];
+
 
       // Fetch all picks via public view
       const { data: picksRaw } = await applyCuratorPickOrder(
