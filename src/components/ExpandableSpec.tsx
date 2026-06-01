@@ -1,4 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { useState, useId, type ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import {
@@ -218,19 +220,43 @@ export default function ExpandableSpec({
     );
   }
 
-  // Multi, no placeholder → render all lines as a full paragraph (no collapse).
-  // The accompanying selector dropdown already exposes choice; the descriptive
-  // row should show the complete spec instead of "first line + N more".
+  // Multi, no placeholder → collapsed first line + "+N more" toggle (used by lightbox).
+  const [open, setOpen] = useState(false);
+  const contentId = useId();
+  const extra = lines.length - 1;
   return (
     <div className={cn(rowClasses, "items-start")}>
       <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-        {lines.map((line, i) => (
-          <p key={i} className={textClasses}>
-            {line}
-          </p>
-        ))}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={contentId}
+          className="flex items-center gap-1.5 text-left"
+        >
+          <span className={textClasses}>{lines[0]}</span>
+          {extra > 0 && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 inline-flex items-center gap-0.5">
+              +{extra}
+              <ChevronDown
+                size={12}
+                className={cn("transition-transform", open && "rotate-180")}
+              />
+            </span>
+          )}
+        </button>
+        {open && extra > 0 && (
+          <div id={contentId} className="flex flex-col gap-0.5">
+            {lines.slice(1).map((line, i) => (
+              <p key={i} className={textClasses}>
+                {line}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
