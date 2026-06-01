@@ -44,12 +44,6 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
-
-const specIcon = (symbol: string, className = "") => (
-  <span className={cn("inline-flex w-[18px] shrink-0 items-center justify-center text-[hsl(var(--gold))]", className)}>
-    {symbol}
-  </span>
-);
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
@@ -59,6 +53,11 @@ import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
+import SpecGlyph from "@/components/product/SpecGlyph";
+
+const specIcon = (symbol: string, className = "") => (
+  <SpecGlyph symbol={symbol} className={className} />
+);
 
 /** Inject per-sqm prices into rug variants when the pick has a price/m² rate. */
 function applyRugPerSqmPricing(
