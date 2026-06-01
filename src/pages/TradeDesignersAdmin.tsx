@@ -196,7 +196,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     id: string; designer_id: string; image_url: string; hover_image_url: string | null;
     gallery_images: string[] | null;
     title: string; subtitle: string | null; category: string | null; subcategory: string | null;
-    materials: string | null; dimensions: string | null; description: string | null;
+    materials: string | null; materials_description: string | null; dimensions: string | null; description: string | null;
     edition: string | null; photo_credit: string | null; pdf_url: string | null;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
     price_per_sqm_cents: number | null;
