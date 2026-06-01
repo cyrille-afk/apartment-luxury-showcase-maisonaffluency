@@ -538,26 +538,11 @@ function VideoBlock({
             </div>
           )
         ) : embedUrl ? (
-          !playing && currentPosterUrl ? (
-            <button
-              onClick={() => setPlaying(true)}
-              className="w-full h-full relative group cursor-pointer"
-              aria-label={`Play ${caption || "video"}`}
-            >
-              <img
-                src={optimizeImageUrl(currentPosterUrl)}
-                alt={caption || `${designerName} — video cover`}
-                className="w-full h-full object-cover"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                onError={handlePosterError}
-              />
-              {playOverlay}
-            </button>
-          ) : /instagram\.com\//i.test(embedUrl) ? (
-            // Instagram embed: crop out header (username + View profile) and footer (caption + actions)
-            // so only the video frame is visible.
+          /instagram\.com\//i.test(embedUrl) ? (
+            // Instagram embed: IG's own thumbnail already includes a play
+            // arrow, so we skip our poster overlay to avoid two arrows.
+            // Crop out header (username + View profile) and footer (caption
+            // + actions) so only the video frame is visible.
             <div className="absolute inset-0 overflow-hidden">
               <iframe
                 src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
@@ -575,6 +560,23 @@ function VideoBlock({
                 scrolling="no"
               />
             </div>
+          ) : !playing && currentPosterUrl ? (
+            <button
+              onClick={() => setPlaying(true)}
+              className="w-full h-full relative group cursor-pointer"
+              aria-label={`Play ${caption || "video"}`}
+            >
+              <img
+                src={optimizeImageUrl(currentPosterUrl)}
+                alt={caption || `${designerName} — video cover`}
+                className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onError={handlePosterError}
+              />
+              {playOverlay}
+            </button>
           ) : (
             <iframe
               src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
@@ -584,6 +586,7 @@ function VideoBlock({
               allowFullScreen
             />
           )
+
         ) : !playing ? (
           <button
             onClick={() => setPlaying(true)}
