@@ -903,14 +903,36 @@ const PublicProductPage: React.FC = () => {
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                  return handcrafted ? (
-                    <ExpandableSpec
-                      icon={<Sparkles size={14} className="text-[hsl(var(--gold))]" />}
-                      text={handcrafted}
-                    />
-                  ) : null;
+                  if (!handcrafted) return null;
+                  let handcraftedPrimary = handcrafted;
+                  let handcraftedSecondary = "";
+                  const dotSplit = handcrafted.split(" · ");
+                  if (dotSplit.length === 2) {
+                    handcraftedPrimary = dotSplit[0];
+                    handcraftedSecondary = dotSplit[1];
+                  } else {
+                    const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                    if (m) {
+                      handcraftedPrimary = m[1];
+                      handcraftedSecondary = `Production lead time: ${m[2]}`;
+                    }
+                  }
+                  return (
+                    <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-4">
+                      <span className="flex-shrink-0 mt-0.5">
+                        <Sparkles size={18} className="text-[hsl(var(--gold))]" strokeWidth={1.5} />
+                      </span>
+                      <div className="font-body text-[13px] leading-relaxed text-muted-foreground tracking-wide font-light">
+                        <div>{handcraftedPrimary}</div>
+                        {handcraftedSecondary && (
+                          <div className="text-muted-foreground/80 mt-0.5">{handcraftedSecondary}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
                 })()}
               </div>
+
 
               {/* Primary CTA — Price on Request */}
               <Link
