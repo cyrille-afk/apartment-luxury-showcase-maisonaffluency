@@ -535,7 +535,7 @@ const VariantSelectors: React.FC<{
         return labels.length > 1 ? (
           <ExpandableSpec
             icon={specIcon("📐")}
-            text={labels.join("\n")}
+            text={withImperialPerLine(labels.join("\n"))}
             emphasized
             placeholder="Select your size"
           />
