@@ -379,7 +379,8 @@ const PublicDesignerProfile = () => {
       /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
       /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
       /vimeo\.com\//i.test(url) ||
-      /youtube\.com\/watch|youtu\.be\//i.test(url)
+      /youtube\.com\/watch|youtu\.be\//i.test(url) ||
+      /instagram\.com\/(reel|reels|p|tv)\//i.test(url)
     );
   });
   // Skip biography_images interleaving when bio text already has inline media
