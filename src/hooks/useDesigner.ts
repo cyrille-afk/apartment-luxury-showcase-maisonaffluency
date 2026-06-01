@@ -6,10 +6,23 @@ import { formatEditionLabel } from "@/lib/editionLabel";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
-const normalizePickKey = (pick: Pick<DesignerCuratorPick, "title" | "subtitle" | "image_url">) =>
-  [pick.title, pick.subtitle || "", pick.image_url || ""]
-    .map((value) => value.trim().toLowerCase())
-    .join("|");
+/** Strip attribution suffixes ("by X", "for Y", "X Edition", etc.) so the
+ *  same product surfaced under both a parent brand (MSE) and its child designer
+ *  (Lazzarini & Pickering) collapses into a single pick. */
+const stripAttribution = (title: string) =>
+  title
+    .replace(/\s+(?:by|for|x|×|with|edition\s+for|edition\s+by|edited\s+by)\s+.+$/i, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+const normalizePickKey = (pick: Pick<DesignerCuratorPick, "title" | "subtitle" | "image_url">) => {
+  // Prefer image_url as the dedupe key — identical product images are the
+  // strongest signal that two rows are the same piece attributed differently.
+  const img = (pick.image_url || "").trim().toLowerCase();
+  if (img) return `img:${img}`;
+  return `t:${stripAttribution(pick.title || "")}|${(pick.subtitle || "").trim().toLowerCase()}`;
+};
 
 const dedupePicks = <T extends DesignerCuratorPick>(picks: T[]) => {
   const seen = new Set<string>();
