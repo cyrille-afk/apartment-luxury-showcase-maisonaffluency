@@ -1,13 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Heart, FolderOpen, Info } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Heart, FolderOpen } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
-import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantImageMap";
@@ -17,6 +18,11 @@ import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import SpecGlyph from "@/components/product/SpecGlyph";
+
+const specIcon = (symbol: string, className = "") => (
+  <SpecGlyph symbol={symbol} className={className} />
+);
 
 export interface TradeProductLightboxItem {
   id: string;
@@ -26,7 +32,10 @@ export interface TradeProductLightboxItem {
   hover_image_url?: string;
   brand_name: string;
   materials?: string | null;
+  materials_description?: string | null;
   dimensions?: string | null;
+  lead_time?: string | null;
+  origin?: string | null;
   description?: string | null;
   category?: string;
   subcategory?: string;
