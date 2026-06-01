@@ -520,7 +520,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   {hasDualSize && (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={axes.dualSizeOptions.join("\n")}
+                      text={withImperialPerLine(axes.dualSizeOptions.join("\n"))}
                       placeholder="Select your size"
                       emphasized
                       value={sizeIdx}
