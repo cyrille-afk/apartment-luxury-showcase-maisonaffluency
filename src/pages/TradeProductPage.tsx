@@ -1271,8 +1271,8 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
-                  text={dualSizeOptions.join("\n")}
-                  secondaryText={dualSizeOptions.length === 1 ? formatImperialDimensions(dualSizeOptions[0]) : null}
+                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
+                  secondaryText={null}
                   emphasized
                   placeholder="Select your size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
