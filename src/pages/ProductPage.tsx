@@ -282,13 +282,21 @@ const ProductPage = () => {
               {/* Specifications — mirrors PublicProductPage: auto-split finishes + imperial per line */}
               <div className="mt-8 border-t border-border pt-2">
                 {product.materials && (
-                  <ExpandableSpec
-                    icon={specIcon("⬗")}
-                    text={product.materials}
-                    placeholder="Select your finish"
-                    autoSplit
-                    autoDetectedHint
-                  />
+                  looksLikeDimension(product.materials) ? (
+                    <ExpandableSpec
+                      icon={specIcon("📐")}
+                      text={formatDimensionsMultiline(product.materials)}
+                      secondaryText={formatImperialDimensions(product.materials)}
+                    />
+                  ) : (
+                    <ExpandableSpec
+                      icon={specIcon("⬗")}
+                      text={product.materials}
+                      placeholder="Select your finish"
+                      autoSplit
+                      autoDetectedHint
+                    />
+                  )
                 )}
                 {product.dimensions && looksLikeDimension(product.dimensions) && (
                   <ExpandableSpec
