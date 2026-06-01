@@ -536,9 +536,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 // description with the Layers icon (no dropdown / no parsing).
                 if (product.materials_description && product.materials_description.trim()) {
                   return (
-                    <ExpandableSpec
-                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      <ExpandableSpec
+                        icon={specIcon("⬗")}
                       text={product.materials_description.trim()}
+                        emphasized
                     />
                   );
                 }
@@ -547,7 +548,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   return (
                     <>
                       <ExpandableSpec
-                        icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                        icon={specIcon("⬗")}
                         text={baseOptions.join("\n")}
                         placeholder={getBasePlaceholder(product)}
                         singleValueLabel={product.base_axis_label || undefined}
@@ -562,7 +563,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                         }}
                       />
                       <ExpandableSpec
-                        icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                        icon={specIcon("⬗")}
                         text={topOptions.join("\n")}
                         placeholder={getTopPlaceholder(product)}
                         singleValueLabel={product.top_axis_label || undefined}
@@ -581,7 +582,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 return materialOptions.length > 0 ? (
                   <ExpandableSpec
-                    icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("⬗")}
                     text={materialOptions.join("\n")}
                     placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your material choice"}
                     singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
@@ -601,7 +602,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
                   return (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={singleSplitSizes.join("\n")}
                       emphasized
                       placeholder="Select your size"
@@ -618,7 +619,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 if (isDualAxis && dualSizeOptions.length > 0) {
                   return (
                     <ExpandableSpec
-                      icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                      icon={specIcon("📐")}
                       text={dualSizeOptions.join("\n")}
                       emphasized
                       placeholder="Select your size"
@@ -633,7 +634,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   if (labels.length > 1) {
                     return (
                       <ExpandableSpec
-                        icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                        icon={specIcon("📐")}
                         text={labels.join("\n")}
                         emphasized
                         placeholder="Select your size"
@@ -643,8 +644,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 return product.dimensions && looksLikeDimension(product.dimensions) ? (
                   <ExpandableSpec
-                    icon={<Ruler size={14} className="text-[hsl(var(--gold))]" />}
+                    icon={specIcon("📐")}
                     text={formatDimensionsMultiline(product.dimensions)}
+                    secondaryText={formatImperialDimensions(product.dimensions)}
                     emphasized
                     placeholder="Select your size"
                   />
