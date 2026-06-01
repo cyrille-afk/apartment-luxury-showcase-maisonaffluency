@@ -108,13 +108,13 @@ export default function ExpandableSpec({
   if (lines.length === 0) return null;
 
   const textClasses = cn(
-    "font-body text-xs md:text-sm leading-relaxed",
+    "font-body text-sm leading-relaxed",
     emphasized ? "text-foreground font-medium" : "text-muted-foreground"
   );
 
   // Shared row wrapper — borderless list with hairline dividers
   const rowClasses =
-    "flex items-center gap-3 w-full py-3 border-b border-border/60 first:border-t";
+    "flex items-center gap-5 w-full py-4 border-b border-border/60 first:border-t";
 
   // Single value → plain row
   if (lines.length === 1) {
@@ -126,7 +126,7 @@ export default function ExpandableSpec({
         <p className={cn(textClasses, "flex-1")}>
           {display}
           {secondaryText && (
-            <span className="block text-[11px] mt-0.5 tracking-[0.08em] uppercase text-muted-foreground/80">
+            <span className="block text-xs mt-0.5 text-muted-foreground/70">
               {secondaryText}
             </span>
           )}
@@ -166,7 +166,7 @@ export default function ExpandableSpec({
               rowClasses,
               "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
               "border-b border-border/60 first:border-t",
-              "font-body text-xs md:text-sm text-left",
+              "font-body text-sm text-left",
               "focus:ring-0 focus:ring-offset-0 focus:outline-none",
               "hover:text-foreground transition-colors",
               "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0",
