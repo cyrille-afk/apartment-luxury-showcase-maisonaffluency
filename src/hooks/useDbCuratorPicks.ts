@@ -18,13 +18,14 @@ export function useDbCuratorPicks() {
   return useQuery({
     queryKey: ["db-curator-picks-for-grid"],
     queryFn: async (): Promise<DbProductItem[]> => {
-      // Fetch published designers
+      // Fetch published designers (incl. founder to resolve parent hierarchy)
       const { data: designers } = await supabase
         .from("designers")
-        .select("id, name, slug, display_name, source")
+        .select("id, name, slug, display_name, source, founder")
         .eq("is_published", true);
 
       if (!designers?.length) return [];
+
 
       // Fetch all picks via public view
       const { data: picksRaw } = await applyCuratorPickOrder(
@@ -89,9 +90,60 @@ export function useDbCuratorPicks() {
         });
       }
 
-      return items;
+      // ────────────────────────────────────────────────────────────────
+      // Dedupe parent/child duplicates.
+      // When the SAME product (matched on normalized title) exists under
+      // both a parent brand (e.g. "Marta Sala Éditions") AND one of its
+      // child designers (e.g. "Lazzarini & Pickering", whose `founder`
+      // equals the parent's `name`), keep only the parent's row so the
+      // catalog doesn't show the same sofa twice.
+      // ────────────────────────────────────────────────────────────────
+      const normalizeTitle = (t: string) =>
+        (t || "")
+          .toLowerCase()
+          // strip trailing " for X" / " by X" / " with X" attribution
+          .replace(/\s+(for|by|with|x)\s+.+$/i, "")
+          .replace(/[^\w\s]/g, " ")
+          .trim()
+          .replace(/\s+/g, " ");
+
+
+      const groups = new Map<string, DbProductItem[]>();
+      for (const it of items) {
+        const key = normalizeTitle(it.pick.title);
+        if (!key) continue;
+        const arr = groups.get(key) || [];
+        arr.push(it);
+        groups.set(key, arr);
+      }
+
+      const dropped = new Set<DbProductItem>();
+      for (const arr of groups.values()) {
+        if (arr.length < 2) continue;
+        for (const a of arr) {
+          for (const b of arr) {
+            if (a === b || dropped.has(a) || dropped.has(b)) continue;
+            // Resolve via name lookup (designerName is display, may differ from .name)
+
+            const aDesigner = designers.find((d: any) => d.slug === a.designerId || d.id === a.designerId);
+            const bDesigner = designers.find((d: any) => d.slug === b.designerId || d.id === b.designerId);
+            if (!aDesigner || !bDesigner) continue;
+            const aFounder = (aDesigner.founder || "").trim();
+            const bFounder = (bDesigner.founder || "").trim();
+            // b is parent of a → drop a
+            if (aFounder && aFounder.toLowerCase() === bDesigner.name.toLowerCase()) {
+              dropped.add(a);
+            } else if (bFounder && bFounder.toLowerCase() === aDesigner.name.toLowerCase()) {
+              dropped.add(b);
+            }
+          }
+        }
+      }
+
+      return items.filter((it) => !dropped.has(it));
     },
     staleTime: 10 * 60_000, // Cache for 10 minutes
     gcTime: 30 * 60_000,
   });
 }
+
