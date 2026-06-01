@@ -948,7 +948,7 @@ const PublicProductPage: React.FC = () => {
                   className={cn(
                     "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
                     pinned
-                      ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-muted-foreground/40"
+                      ? "bg-foreground/5 border-foreground text-foreground"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
                     compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                   )}
