@@ -1091,6 +1091,7 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   const [posts, setPosts] = useState<{ id: string; post_url: string; caption: string | null; sort_order: number; image_url: string | null }[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+  const bulkTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   // Persist bulk-import draft per designer so navigating away (or a preview
   // refresh) doesn't wipe URLs the user is still collecting. Cleared on
   // successful import or explicit Cancel.
@@ -1123,6 +1124,15 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
   }, [writeBulkDraft]);
   useEffect(() => {
     writeBulkDraft(bulkText);
+  }, [bulkText, writeBulkDraft]);
+  useEffect(() => {
+    const persistFromDom = () => writeBulkDraft(bulkTextareaRef.current?.value || bulkText);
+    window.addEventListener("pagehide", persistFromDom);
+    window.addEventListener("beforeunload", persistFromDom);
+    return () => {
+      window.removeEventListener("pagehide", persistFromDom);
+      window.removeEventListener("beforeunload", persistFromDom);
+    };
   }, [bulkText, writeBulkDraft]);
   const [fetchingIds, setFetchingIds] = useState<Set<string>>(new Set());
   const [fetchingAll, setFetchingAll] = useState(false);
@@ -1413,8 +1423,10 @@ function InstagramPostManager({ designerId, instagramUrls = [] }: { designerId: 
         {bulkMode ? (
           <div className="space-y-2">
             <textarea
+              ref={bulkTextareaRef}
               value={bulkText}
               onChange={(e) => updateBulkText(e.target.value)}
+              onInput={(e) => writeBulkDraft(e.currentTarget.value)}
               placeholder={"Paste Instagram post URLs, one per line:\nhttps://www.instagram.com/p/ABC123/\nhttps://www.instagram.com/p/DEF456/"}
               className="w-full text-xs border rounded-md p-2 h-24 resize-y bg-background text-foreground"
             />
