@@ -67,6 +67,7 @@ export interface DesignerCuratorPick {
   subcategory: string | null;
   tags: string[] | null;
   materials: string | null;
+  materials_description: string | null;
   dimensions: string | null;
   description: string | null;
   edition: string | null;

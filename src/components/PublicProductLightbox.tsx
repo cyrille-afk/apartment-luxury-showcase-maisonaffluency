@@ -33,6 +33,8 @@ export interface PublicLightboxItem {
   hover_image_url?: string | null;
   brand_name: string;
   materials?: string | null;
+  /** Free-form description that renders as a plain legend (Layers icon) instead of being parsed as a materials dropdown. Takes precedence over `materials` when set. */
+  materials_description?: string | null;
   dimensions?: string | null;
   description?: string | null;
   category?: string | null;
@@ -517,6 +519,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             <div className="flex flex-col">
               {(() => {
+                // When an explicit product legend is set, render it as a plain
+                // description with the Layers icon (no dropdown / no parsing).
+                if (product.materials_description && product.materials_description.trim()) {
+                  return (
+                    <ExpandableSpec
+                      icon={<Layers size={14} className="text-[hsl(var(--gold))]" />}
+                      text={product.materials_description.trim()}
+                    />
+                  );
+                }
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
                   return (
