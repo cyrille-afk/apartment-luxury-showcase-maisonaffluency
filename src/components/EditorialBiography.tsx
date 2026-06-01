@@ -589,10 +589,10 @@ function VideoBlock({
             <video
               ref={videoRef}
               src={videoSrc}
-              controls
+              controls={playing}
               playsInline
               preload="metadata"
-              className={`w-full h-full object-contain bg-black ${!playing ? "opacity-0 absolute inset-0" : ""}`}
+              className={`w-full h-full object-contain bg-black ${!playing ? "opacity-0 pointer-events-none absolute inset-0" : ""}`}
               poster={currentPosterUrl}
             />
             {!playing && (
