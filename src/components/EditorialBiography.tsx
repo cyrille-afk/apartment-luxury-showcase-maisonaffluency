@@ -41,6 +41,7 @@ function isVideoUrl(url: string): boolean {
   if (/nowness\.com\/iframe/i.test(normalized)) return true;
   if (/facebook\.com\/plugins\/video/i.test(normalized)) return true;
   if (/facebook\.com\/.+\/videos\//i.test(normalized)) return true;
+  if (/instagram\.com\/(reel|reels|p|tv)\//i.test(normalized)) return true;
   return false;
 }
 
@@ -108,6 +109,11 @@ function getEmbedUrl(url: string): string | null {
   if (/facebook\.com\/.+\/videos\/(\d+)/i.test(normalized)) {
     const fbUrl = encodeURIComponent(normalized);
     return `https://www.facebook.com/plugins/video.php?href=${fbUrl}&show_text=false&width=560`;
+  }
+  const igMatch = normalized.match(/instagram\.com\/(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if (igMatch) {
+    const type = igMatch[1].toLowerCase() === "reels" ? "reel" : igMatch[1].toLowerCase();
+    return `https://www.instagram.com/${type}/${igMatch[2]}/embed/`;
   }
   return null;
 }
