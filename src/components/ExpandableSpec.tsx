@@ -13,6 +13,8 @@ interface ExpandableSpecProps {
   icon: ReactNode;
   /** Pre-formatted text. Newlines split into options. */
   text: string;
+  /** Optional secondary line for single-value rows, e.g. imperial dimensions. */
+  secondaryText?: string | null;
   /** Override default emphasis (dimensions get foreground/medium; others muted). */
   emphasized?: boolean;
   /**
@@ -63,6 +65,7 @@ interface ExpandableSpecProps {
 export default function ExpandableSpec({
   icon,
   text,
+  secondaryText,
   emphasized = false,
   placeholder,
   autoSplit = false,
@@ -120,7 +123,14 @@ export default function ExpandableSpec({
     return (
       <div className={rowClasses}>
         <span className="shrink-0">{icon}</span>
-        <p className={cn(textClasses, "flex-1")}>{display}</p>
+        <p className={cn(textClasses, "flex-1")}>
+          {display}
+          {secondaryText && (
+            <span className="block text-[11px] mt-0.5 tracking-[0.08em] uppercase text-muted-foreground/80">
+              {secondaryText}
+            </span>
+          )}
+        </p>
       </div>
     );
   }
