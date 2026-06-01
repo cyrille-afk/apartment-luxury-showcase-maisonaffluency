@@ -36,24 +36,23 @@ function placeholderFromAxisLabel(label: string): string {
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
-  // Axis-specific labels take precedence in dual-axis mode so each dropdown
-  // reads as its own dimension (e.g. "Select your solid-cast textured legs choice")
-  // rather than both dropdowns inheriting the same generic override.
-  const axis = clean(p.base_axis_label);
-  if (axis) return placeholderFromAxisLabel(axis);
-
+  // Curator override wins — when set, it applies to BOTH dropdowns so the
+  // editor's intent (e.g. "Select Your Finish") is honored verbatim.
   const override = clean(p.variant_placeholder);
   if (override) return override;
+
+  const axis = clean(p.base_axis_label);
+  if (axis) return placeholderFromAxisLabel(axis);
 
   return DEFAULT_BASE_PLACEHOLDER;
 }
 
 export function getTopPlaceholder(p: VariantPlaceholderInput): string {
-  const axis = clean(p.top_axis_label);
-  if (axis) return placeholderFromAxisLabel(axis);
-
   const override = clean(p.variant_placeholder);
   if (override) return override;
+
+  const axis = clean(p.top_axis_label);
+  if (axis) return placeholderFromAxisLabel(axis);
 
   return DEFAULT_TOP_PLACEHOLDER;
 }
