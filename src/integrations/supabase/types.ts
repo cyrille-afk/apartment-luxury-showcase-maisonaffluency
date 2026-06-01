@@ -1163,6 +1163,7 @@ export type Database = {
           is_hidden: boolean
           lead_time: string | null
           materials: string | null
+          materials_description: string | null
           origin: string | null
           pack_carton_count: number | null
           pack_cbm: number | null
@@ -1209,6 +1210,7 @@ export type Database = {
           is_hidden?: boolean
           lead_time?: string | null
           materials?: string | null
+          materials_description?: string | null
           origin?: string | null
           pack_carton_count?: number | null
           pack_cbm?: number | null
@@ -1255,6 +1257,7 @@ export type Database = {
           is_hidden?: boolean
           lead_time?: string | null
           materials?: string | null
+          materials_description?: string | null
           origin?: string | null
           pack_carton_count?: number | null
           pack_cbm?: number | null
@@ -4502,6 +4505,7 @@ export type Database = {
           lead_weeks_max_override: number | null
           lead_weeks_min_override: number | null
           materials: string | null
+          materials_description: string | null
           origin: string | null
           pack_carton_count: number | null
           pack_cbm: number | null
@@ -4541,6 +4545,7 @@ export type Database = {
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
           materials?: string | null
+          materials_description?: string | null
           origin?: string | null
           pack_carton_count?: number | null
           pack_cbm?: number | null
@@ -4580,6 +4585,7 @@ export type Database = {
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
           materials?: string | null
+          materials_description?: string | null
           origin?: string | null
           pack_carton_count?: number | null
           pack_cbm?: number | null
