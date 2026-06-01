@@ -7,7 +7,7 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
