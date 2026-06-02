@@ -29,6 +29,8 @@ import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
+import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
+
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
