@@ -28,6 +28,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
+import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
@@ -715,26 +716,20 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => navigate("/favorites")}
-                        className="relative group p-1 transition-colors"
-                      >
-                        <Heart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
-                        {favCount > 0 && (
-                          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
-                            {favCount}
-                          </span>
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="font-body text-xs uppercase tracking-wider">
-                      Wishlist
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <FavoritesHoverPreview favCount={favCount}>
+                  <button
+                    onClick={() => navigate("/favorites")}
+                    aria-label="Wishlist"
+                    className="relative group p-1 transition-colors"
+                  >
+                    <Heart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
+                    {favCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
+                        {favCount}
+                      </span>
+                    )}
+                  </button>
+                </FavoritesHoverPreview>
               </div>
             </div>
           </div>
