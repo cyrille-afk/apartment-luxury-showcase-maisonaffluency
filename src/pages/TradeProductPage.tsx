@@ -1393,25 +1393,33 @@ const TradeProductPage: React.FC = () => {
 
             {/* Secondary actions: Favorite / Pin / Spec Sheet */}
             <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => toggleFavorite(favoriteId, {
+              <TradeFavoriteFolderPicker
+                productId={favoriteId}
+                meta={{
                   product_name: product.title,
                   brand_name: designerDisplay,
                   category: product.category || undefined,
                   image_url: product.image_url,
                   dimensions: product.dimensions,
                   materials: product.materials,
-                })}
-                className={cn(
-                  "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                  favorited
-                    ? "border-destructive/30 text-destructive bg-destructive/10"
-                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                )}
+                }}
+                align="start"
+                side="top"
               >
-                <Heart size={13} className={cn(favorited && "fill-current")} />
-                {favorited ? "Favorited" : "Favorite"}
-              </button>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className={cn(
+                    "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    favorited
+                      ? "border-destructive/30 text-destructive bg-destructive/10"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  )}
+                >
+                  <Heart size={13} className={cn(favorited && "fill-current")} />
+                  {favorited ? "Saved" : "Favorite"}
+                </button>
+              </TradeFavoriteFolderPicker>
+
 
               <button
                 onClick={() => togglePin(compareItem)}
