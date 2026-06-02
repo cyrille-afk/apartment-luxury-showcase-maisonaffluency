@@ -1126,21 +1126,24 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
         <ProductCardDescriptionOverlay description={pick.description} />
         {/* Hover action icons */}
         <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={(e) => { e.stopPropagation(); onFavorite?.(pick.id); }}
-            className={cn(
-              "p-1.5 rounded-full backdrop-blur-sm transition-colors",
-              isFavorited
-                ? "bg-white text-red-500"
-                : "bg-black/40 text-white hover:bg-black/60"
-            )}
-            title={isFavorited ? "Remove from favorites" : "Save to favorites"}
-          >
-            <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
-          </span>
+          <FavoriteFolderPicker pickId={pick.id} onChange={() => onFavorite?.(pick.id, { silent: true })}>
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                "p-1.5 rounded-full backdrop-blur-sm transition-colors cursor-pointer",
+                isFavorited
+                  ? "bg-white text-red-500"
+                  : "bg-black/40 text-white hover:bg-black/60"
+              )}
+              title={isFavorited ? "Manage folders" : "Save to favorites"}
+            >
+              <Heart className={cn("w-3.5 h-3.5", isFavorited && "fill-current")} />
+            </span>
+          </FavoriteFolderPicker>
         </div>
+
       </div>
       {/* Info below the card */}
       <div className="px-3 py-3 text-center">
