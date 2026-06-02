@@ -168,17 +168,23 @@ export default function TradeFavorites() {
         .order("created_at", { ascending: true });
       const folderList = (fdata || []) as { id: string; name: string }[];
 
+      // Load all assignments for this user to build a map of favoriteId -> folderIds
+      const { data: items } = await supabase
+        .from("favorite_folder_items")
+        .select("folder_id, favorite_id")
+        .in("folder_id", folderList.map((f) => f.id));
+      const assignments: Record<string, string[]> = {};
+      (items || []).forEach((i: any) => {
+        if (!assignments[i.favorite_id]) assignments[i.favorite_id] = [];
+        assignments[i.favorite_id].push(i.folder_id);
+      });
+      setFolderAssignments(assignments);
+
       // Count items per folder
       const counts = new Map<string, number>();
-      if (folderList.length > 0) {
-        const { data: items } = await supabase
-          .from("favorite_folder_items")
-          .select("folder_id")
-          .in("folder_id", folderList.map((f) => f.id));
-        (items || []).forEach((i: any) => {
-          counts.set(i.folder_id, (counts.get(i.folder_id) || 0) + 1);
-        });
-      }
+      (items || []).forEach((i: any) => {
+        counts.set(i.folder_id, (counts.get(i.folder_id) || 0) + 1);
+      });
 
       setFolders(
         folderList.map((f) => ({
@@ -196,10 +202,10 @@ export default function TradeFavorites() {
   useEffect(() => { fetchFolders(); }, [fetchFolders]);
 
   useEffect(() => {
-    const handler = () => { fetchFolders(); };
+    const handler = () => { fetchFolders(); fetchFavorites(); };
     window.addEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
     return () => window.removeEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
-  }, [fetchFolders]);
+  }, [fetchFolders, fetchFavorites]);
 
   const removeFavorite = useCallback(async (favoriteId: string) => {
     setRemoving(favoriteId);
