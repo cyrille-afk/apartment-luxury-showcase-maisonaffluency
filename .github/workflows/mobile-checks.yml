@@ -18,10 +18,14 @@ jobs:
       - name: Cache npm
         uses: actions/cache@v4
         with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: mobile-playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: mobile-playwright-${{ runner.os }}-
       - run: npm ci --prefer-offline --no-audit --no-fund
+      - name: Ensure Chromium is installed
+        run: npx playwright install chromium
       - run: npm run test:e2e:mobile-pwa
         timeout-minutes: 10
         env:
@@ -55,7 +59,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run mobile Lighthouse routes
-        continue-on-error: true
         run: ROUTES="/,/trade/login" LH_AUDIT_TIMEOUT_MS=180000 npm run lighthouse:mobile
         timeout-minutes: 40
       - name: Upload Lighthouse report
