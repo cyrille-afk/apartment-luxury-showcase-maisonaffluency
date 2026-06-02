@@ -5,7 +5,7 @@ import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2, Wand2 } fr
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -47,7 +47,8 @@ export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [favorites, setFavorites] = useState<FavoritedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
@@ -208,19 +209,20 @@ export default function TradeFavorites() {
     return () => window.removeEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
   }, [fetchFolders, fetchFavorites]);
 
-  // Sync folder + search to URL query params
-  const hasSyncedUrl = useRef(false);
+  // Sync folder + search to URL query params (replace, no scroll reset)
+  const lastQsRef = useRef("");
   useEffect(() => {
-    if (!hasSyncedUrl.current) { hasSyncedUrl.current = true; return; }
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (activeFolder) next.set("folder", activeFolder);
-      else next.delete("folder");
-      if (search.trim()) next.set("search", search.trim());
-      else next.delete("search");
-      return next;
-    });
-  }, [activeFolder, search, setSearchParams]);
+    const next = new URLSearchParams();
+    if (activeFolder) next.set("folder", activeFolder);
+    if (search.trim()) next.set("search", search.trim());
+    const qs = next.toString();
+    if (qs === lastQsRef.current) return;
+    lastQsRef.current = qs;
+    navigate(
+      { pathname: location.pathname, search: qs ? `?${qs}` : "" },
+      { replace: true, preventScrollReset: true }
+    );
+  }, [activeFolder, search, navigate, location.pathname]);
 
   const removeFavorite = useCallback(async (favoriteId: string) => {
     setRemoving(favoriteId);
