@@ -367,29 +367,33 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
             {/* Mobile: secondary action icons overlaid on image bottom-left */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
-              <button
-                onClick={async () => {
-                  if (!product) return;
-                  const realId = await toggleFavorite(product.id, {
-                    product_name: product.product_name,
-                    brand_name: product.brand_name,
-                    category: product.category,
-                    image_url: product.image_url,
-                    dimensions: product.dimensions,
-                    materials: product.materials,
-                  });
-                  setLastFavRealId(realId);
+              <TradeFavoriteFolderPicker
+                productId={product.id}
+                meta={{
+                  product_name: product.product_name,
+                  brand_name: product.brand_name,
+                  category: product.category,
+                  image_url: product.image_url,
+                  dimensions: product.dimensions,
+                  materials: product.materials,
                 }}
-                title={product && isFavorited(product.id) ? "Favorited" : "Favorite"}
-                className={cn(
-                  "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
-                  product && isFavorited(product.id)
-                    ? "bg-destructive/80 text-white"
-                    : "bg-background/70 text-muted-foreground hover:text-foreground"
-                )}
+                align="start"
+                side="top"
               >
-                <Heart size={15} className={cn(product && isFavorited(product.id) && "fill-current")} />
-              </button>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  title={product && isFavorited(product.id) ? "Manage folders" : "Favorite"}
+                  className={cn(
+                    "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
+                    product && isFavorited(product.id)
+                      ? "bg-destructive/80 text-white"
+                      : "bg-background/70 text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Heart size={15} className={cn(product && isFavorited(product.id) && "fill-current")} />
+                </button>
+              </TradeFavoriteFolderPicker>
+
 
               {product && isFavorited(product.id) && (
                 <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.product_name}>
