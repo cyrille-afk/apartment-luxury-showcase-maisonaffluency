@@ -1,62 +1,61 @@
-# LLM Cost Optimization Rollout
+## Goal
 
-Goal: apply the 12 techniques to every AI surface in the app (`trade-concierge`, `product-description-writer`, `board-recommendations`, `axonometric-generate`, `suggest-ffe-layout`, `translate-text`, `compute-taste-profiles`, `parse-shipment-document`). Build incrementally — one technique per step, each independently shippable and verifiable via the existing AI Usage Dashboard.
+In `src/components/PublicProductLightbox.tsx`, fix the spec rows so that on every product (including dual-axis ones like Amboseli, Cher, Garda):
 
-## Implementation order
+1. **Finish always renders before dimensions.**
+2. **The dimension row always shows the 📐 icon** (never the ⬗ finish diamond).
+3. **The imperial conversion always renders on its own line below the metric line** (as small muted text, like the Ninfa screenshot) — never inline, so it can't wrap mid-`(W 31.1"`.
+4. **There is always a space between the cm value and the imperial parenthetical** when they do appear together.
 
-Sequenced so cheap wins land first, infrastructure (cache, RAG, monitoring) lands mid-rollout, and orchestration (tiered routing, batching) lands last on top of measurement.
+Only `PublicProductLightbox.tsx` changes. No data edits, no schema changes, no behavior changes to the dropdown / variant-matching logic.
 
-### Step 1 — Choose the Right Model
-Audit current model per function. Downgrade defaults to `google/gemini-3-flash-preview` (or `-flash-lite-preview`) unless reasoning depth is required. Add a single `MODEL_TIERS` map in `supabase/functions/_shared/aiModels.ts` (`cheap`, `balanced`, `strong`, `image`). Each function imports from this map — no more hardcoded model IDs.
+## What's actually wrong today
 
-### Step 2 — Limit Output Tokens
-Add explicit `max_tokens` to every AI call. Defaults: classification 256, extraction 512, descriptions 600, concierge replies 1200. Add to `aiModels.ts` as `OUTPUT_LIMITS`.
+The dual-axis branch (≈ lines 551–587) renders **base first, then top**, both with the ⬗ icon and both using `withImperialPerLine` for the text. For Amboseli / Cher / Garda the data is:
 
-### Step 3 — Reduce Input Tokens
-Pass through each function's system prompt: strip redundant examples, collapse whitespace, replace verbose instructions with terse imperatives. Add `compressContext()` helper that trims catalog JSON to essential fields (id, title, brand, category, materials) before injection.
+- `base_axis_label = "Size"`, base value = the dimension string
+- `top_axis_label = "Finish"`, top value = the finish string
 
-### Step 4 — Function Calling / Structured Output
-Migrate any function that currently parses free-text JSON to the AI SDK `Output.object` API with Zod schemas. Targets: `parse-shipment-document`, `compute-taste-profiles`, `board-recommendations` tool args. Removes "return JSON" prompt boilerplate.
+Each axis collapses to a single value, so `ExpandableSpec` renders them as plain `"{label}: {text}"` rows. Result: Size shows up first with the ⬗ diamond and the imperial inline (wrapping awkwardly), then Finish appears below.
 
-### Step 5 — Prompt Reuse and Templates
-Move all system prompts to `supabase/functions/_shared/prompts.ts` exporting `buildPrompt(template, vars)`. One source of truth, parameterized.
+Ninfa renders correctly only because it has no dual-axis variants and falls through to the dedicated dimensions branch with `secondaryText`.
 
-### Step 6 — Monitor, Measure, Optimize
-Extend existing `ai_usage_events` with `cached` boolean, `prompt_hash` text, `tier` text. Update AI Usage Dashboard with: cache hit rate KPI, per-feature avg input/output tokens, top-10 most expensive prompt hashes.
+## Changes
 
-### Step 7 — Use Caching
-New `ai_response_cache` table keyed by `(feature, model, prompt_hash)` with `response_json`, `expires_at`. Shared `withCache(key, ttl, fn)` wrapper. Apply to deterministic features: `translate-text`, `product-description-writer`, `parse-shipment-document`.
+### 1. Helper inside the component
 
-### Step 8 — Optimize Embeddings Usage
-For step 9 prep: build `embeddings_batch.ts` that dedupes by SHA-256 of normalized text, batches up to 100 inputs per `/v1/embeddings` call, skips items already embedded.
+Add a small `isDimensionText(s: string)` helper (uses the existing `looksLikeDimension` already imported in this file) so we can detect when an axis is actually carrying dimensions rather than a finish/material.
 
-### Step 9 — RAG Done Right
-Enable `pgvector`. Add `embedding vector(1536)` to `trade_products` + `designer_curator_picks` (model: `openai/text-embedding-3-small` for cost). Backfill via one-shot edge function `embed-catalog` using the batch helper from step 8. Create `match_catalog(query_embedding, k, filters)` RPC. Rewrite `trade-concierge` to embed the user turn, retrieve top-12, inject only those (≈80% input-token reduction vs current full-catalog stuffing). Chunks: one row = title + brand + category + materials + short description, ~120 tokens each.
+### 2. Reorder the dual-axis block
 
-### Step 10 — Tiered / Two-Step Approach
-In `trade-concierge`: first pass with `cheap` model classifies intent (chitchat / search / proposal). Only `proposal` escalates to `balanced`. In `board-recommendations`: cheap model drafts shortlist, strong model only ranks final 5.
+In the `if (isDualAxis)` branch:
 
-### Step 11 — Batch Requests
-For `compute-taste-profiles` (currently one call per user): batch up to 20 user signal sets in a single prompt returning a JSON array via `Output.array`. Same pattern for any nightly job processing N items.
+- Build the two `<ExpandableSpec>` nodes as variables (`baseNode`, `topNode`) instead of inlining them.
+- Decide order:
+  - If exactly one axis's text looks like a dimension → render the **non-dimension axis first**, dimension axis second.
+  - Otherwise keep the current base-then-top order.
+- For whichever axis is the dimension one, render that node with:
+  - `icon={specIcon("📐")}` instead of `⬗`
+  - `text={formatDimensionsMultiline(<value>)}` (metric only)
+  - `secondaryText={formatImperialDimensions(<value>)}` (imperial below, small/muted — same pattern as the fallback dimensions branch on line 651)
+  - Drop `withImperialPerLine` for that node so the imperial never appears inline.
+- The non-dimension axis keeps `⬗` and its existing finish/material text.
 
-### Step 12 — Use the Right Pricing and Providers
-Document in `supabase/functions/_shared/aiModels.ts` the current per-1M-token prices alongside each model. Add a quarterly review note. Surface in dashboard as static reference table so model choice is auditable against current rates. (No provider switch — Lovable AI Gateway is the only path.)
+### 3. Same treatment for the single-axis materials branch
 
-## Technical details
+The `materialOptions.length > 0` branch (≈ lines 588–604) can also collapse to a single dimension-like value when a product has one base variant whose label is a size. If `materialOptions.length === 1` and the value looks like a dimension, render it with the 📐 icon + `secondaryText` imperial instead of the ⬗ finish dropdown. Otherwise behavior is unchanged.
 
-- **No breaking changes** to user-facing AI behavior — every step is an internal refactor or additive infra.
-- **Shared module**: `supabase/functions/_shared/{aiModels.ts, prompts.ts, cache.ts, embeddings.ts}` — imported by all 8+ functions.
-- **Migrations**: 3 total — (a) extend `ai_usage_events`, (b) create `ai_response_cache`, (c) enable pgvector + add embedding columns + `match_catalog` RPC.
-- **New edge function**: `embed-catalog` (admin-triggered, idempotent, resumable via `embedding IS NULL` filter).
-- **Dashboard updates**: extend `TradeAiUsageDashboard.tsx` with cache + tier columns and top-prompts table.
-- **Verification per step**: ship, watch AI Usage Dashboard for 24h, confirm cost/req drops without error-rate increase before moving to next step.
+### 4. Guarantee the space between cm and `(`
 
-## Out of scope
+The inline imperial is being removed for the cases that wrap (they move to `secondaryText`). For any remaining `withImperialPerLine` callsites, double-check the helper in `src/lib/formatDimensions.ts` already inserts `"  ("` (two spaces) — it does (`${t}  (${imp})`), so no change needed there. The reported missing-space cases all came from the dual-axis path being fixed in step 2.
 
-- No provider migration (stays on Lovable AI Gateway).
-- No client-side AI calls — all changes server-side.
-- No changes to image-generation functions (`axonometric-generate`) beyond model selection in step 1.
+## Files touched
 
-## Confirm
+- `src/components/PublicProductLightbox.tsx` — only the dual-axis and single-material spec-row JSX (≈ lines 538–605). No other files change.
 
-Reply "go" to start with Step 1 (model audit + `MODEL_TIERS` map). Or name a step to start from.
+## Verification
+
+- Reload the four products from the screenshots in the public lightbox at 1054px width:
+  - Amboseli Armchair, Cher Dining Table, Garda → Finish row first (⬗), then a dimensions row with the 📐 icon, metric on top, imperial as small muted line beneath. No mid-imperial wrapping.
+  - Ninfa Centrepiece → unchanged (already correct).
+- Confirm dual-axis products that legitimately use Base = finish / Top = size (e.g. Mangala) still render in the existing order, with the 📐 icon on the size row.
