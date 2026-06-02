@@ -12,18 +12,22 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Admin-only: this dumps PII tables to storage
-  const auth = await requireAdmin(req);
-  if (!auth.ok) {
-    return new Response(JSON.stringify(auth.body), {
-      status: auth.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  // Allow service-role bearer (used by pg_cron) to bypass admin user check.
+  const bearer = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  if (bearer !== serviceKey) {
+    // Admin-only: this dumps PII tables to storage
+    const auth = await requireAdmin(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const timestamp = new Date().toISOString().split("T")[0];
