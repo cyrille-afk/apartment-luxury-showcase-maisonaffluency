@@ -47,7 +47,8 @@ export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [favorites, setFavorites] = useState<FavoritedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
