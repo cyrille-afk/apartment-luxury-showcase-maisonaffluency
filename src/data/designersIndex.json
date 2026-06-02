@@ -24,10 +24,6 @@
     "name": "Alpange"
   },
   {
-    "slug": "andre-arbus",
-    "name": "André Arbus"
-  },
-  {
     "slug": "andrea-claire-studio",
     "name": "Andrea Claire Studio"
   },
@@ -184,11 +180,11 @@
     "name": "Cocorico Paris"
   },
   {
-    "slug": "cristian-mohaded-cc-tapis",
+    "slug": "cristian-mohaded",
     "name": "Cristián Mohaded"
   },
   {
-    "slug": "cristian-mohaded",
+    "slug": "cristian-mohaded-cc-tapis",
     "name": "Cristián Mohaded"
   },
   {
@@ -202,10 +198,6 @@
   {
     "slug": "dagmar-london",
     "name": "Dagmar London"
-  },
-  {
-    "slug": "damien-ajavon-cc-tapis",
-    "name": "Damien Ajavon"
   },
   {
     "slug": "damien-langlois-meurinne",
@@ -340,11 +332,11 @@
     "name": "Fredie Jochimek"
   },
   {
-    "slug": "gaelle-lauriot-prevost-dominique-perrault-cc-tapis",
+    "slug": "gaelle-lauriot-prevost",
     "name": "Gaëlle Lauriot-Prévost & Dominique Perrault"
   },
   {
-    "slug": "gaelle-lauriot-prevost",
+    "slug": "gaelle-lauriot-prevost-dominique-perrault-cc-tapis",
     "name": "Gaëlle Lauriot-Prévost & Dominique Perrault"
   },
   {
@@ -361,10 +353,6 @@
   },
   {
     "slug": "gilles-boissier",
-    "name": "Gilles & Boissier"
-  },
-  {
-    "slug": "gilles-et-boissier-atelier",
     "name": "Gilles & Boissier"
   },
   {
@@ -776,11 +764,11 @@
     "name": "Overgaard & Dyrman"
   },
   {
-    "slug": "ozone",
+    "slug": "ozone-light",
     "name": "Ozone"
   },
   {
-    "slug": "ozone-light",
+    "slug": "ozone",
     "name": "Ozone"
   },
   {
@@ -1116,7 +1104,7 @@
     "name": "Wendy Andreu"
   },
   {
-    "slug": "yabu-pushelberg-man-of-parts",
+    "slug": "yabu-pushelberg",
     "name": "Yabu Pushelberg"
   },
   {
@@ -1124,7 +1112,7 @@
     "name": "Yabu Pushelberg"
   },
   {
-    "slug": "yabu-pushelberg",
+    "slug": "yabu-pushelberg-man-of-parts",
     "name": "Yabu Pushelberg"
   },
   {
