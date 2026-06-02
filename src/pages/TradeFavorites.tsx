@@ -47,9 +47,10 @@ export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [favorites, setFavorites] = useState<FavoritedProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [currency, setCurrency] = useTradeDisplayCurrency();
   const rates = useFxRates();
@@ -59,7 +60,7 @@ export default function TradeFavorites() {
   const [addingToQuote, setAddingToQuote] = useState(false);
   const [addedToQuote, setAddedToQuote] = useState(false);
   const [folders, setFolders] = useState<FolderItem[]>([]);
-  const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const [activeFolder, setActiveFolder] = useState<string | null>(() => searchParams.get("folder"));
   const [folderAssignments, setFolderAssignments] = useState<Record<string, string[]>>({});
 
   const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
