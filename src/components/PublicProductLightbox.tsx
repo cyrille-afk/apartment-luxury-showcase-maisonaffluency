@@ -468,18 +468,21 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             {/* Mobile: secondary action icons */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
-              <button
-                onClick={() => toggleFavorite(product.id)}
-                title={favorited ? "Favorited" : "Favorite"}
-                className={cn(
-                  "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
-                  favorited
-                    ? "bg-destructive/80 text-white"
-                    : "bg-background/70 text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Heart size={15} className={cn(favorited && "fill-current")} />
-              </button>
+              <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  title={favorited ? "Manage folders" : "Favorite"}
+                  className={cn(
+                    "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
+                    favorited
+                      ? "bg-destructive/80 text-white"
+                      : "bg-background/70 text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Heart size={15} className={cn(favorited && "fill-current")} />
+                </button>
+              </FavoriteFolderPicker>
+
 
               <button
                 onClick={() => togglePin(compareItem)}
