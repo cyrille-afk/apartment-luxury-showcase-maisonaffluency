@@ -157,7 +157,48 @@ export default function TradeFavorites() {
     }
   }, [user]);
 
+  const fetchFolders = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data: fdata } = await supabase
+        .from("favorite_folders")
+        .select("id, name")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      const folderList = (fdata || []) as { id: string; name: string }[];
+
+      // Count items per folder
+      const counts = new Map<string, number>();
+      if (folderList.length > 0) {
+        const { data: items } = await supabase
+          .from("favorite_folder_items")
+          .select("folder_id")
+          .in("folder_id", folderList.map((f) => f.id));
+        (items || []).forEach((i: any) => {
+          counts.set(i.folder_id, (counts.get(i.folder_id) || 0) + 1);
+        });
+      }
+
+      setFolders(
+        folderList.map((f) => ({
+          id: f.id,
+          name: f.name,
+          count: counts.get(f.id) || 0,
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch folders", err);
+    }
+  }, [user]);
+
   useEffect(() => { fetchFavorites(); }, [fetchFavorites]);
+  useEffect(() => { fetchFolders(); }, [fetchFolders]);
+
+  useEffect(() => {
+    const handler = () => { fetchFolders(); };
+    window.addEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
+    return () => window.removeEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
+  }, [fetchFolders]);
 
   const removeFavorite = useCallback(async (favoriteId: string) => {
     setRemoving(favoriteId);
