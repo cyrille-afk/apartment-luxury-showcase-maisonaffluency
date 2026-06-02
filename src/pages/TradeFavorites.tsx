@@ -282,12 +282,21 @@ export default function TradeFavorites() {
     navigate(`/trade/axonometric-requests?favorites=${ids}`);
   }, [selectedFor3D, navigate]);
 
-  const filtered = search.trim()
-    ? favorites.filter((f) => {
-        const q = search.toLowerCase();
-        return f.product_name.toLowerCase().includes(q) || f.brand_name.toLowerCase().includes(q) || f.category.toLowerCase().includes(q);
-      })
-    : favorites;
+  const filtered = (() => {
+    let result = favorites;
+    if (activeFolder) {
+      result = result.filter((f) => (folderAssignments[f.favoriteId] ?? []).includes(activeFolder));
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((f) =>
+        f.product_name.toLowerCase().includes(q) ||
+        f.brand_name.toLowerCase().includes(q) ||
+        f.category.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  })();
 
   return (
     <>
