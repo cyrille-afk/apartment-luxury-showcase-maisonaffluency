@@ -208,6 +208,20 @@ export default function TradeFavorites() {
     return () => window.removeEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
   }, [fetchFolders, fetchFavorites]);
 
+  // Sync folder + search to URL query params
+  const hasSyncedUrl = useRef(false);
+  useEffect(() => {
+    if (!hasSyncedUrl.current) { hasSyncedUrl.current = true; return; }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (activeFolder) next.set("folder", activeFolder);
+      else next.delete("folder");
+      if (search.trim()) next.set("search", search.trim());
+      else next.delete("search");
+      return next;
+    });
+  }, [activeFolder, search, setSearchParams]);
+
   const removeFavorite = useCallback(async (favoriteId: string) => {
     setRemoving(favoriteId);
     try {
