@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2, Wand2 } from "lucide-react";
+import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2, Wand2, Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,7 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
 import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
+import { TRADE_FAVORITE_FOLDERS_EVENT } from "@/components/trade/TradeFavoriteFolderPicker";
 
 interface FavoritedProduct {
   favoriteId: string;
@@ -36,6 +37,12 @@ interface FavoritedProduct {
   created_at: string;
 }
 
+interface FolderItem {
+  id: string;
+  name: string;
+  count: number;
+}
+
 export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -51,6 +58,8 @@ export default function TradeFavorites() {
   const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
   const [addingToQuote, setAddingToQuote] = useState(false);
   const [addedToQuote, setAddedToQuote] = useState(false);
+  const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [activeFolder, setActiveFolder] = useState<string | null>(null);
 
   const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
     id: fav.productId,
