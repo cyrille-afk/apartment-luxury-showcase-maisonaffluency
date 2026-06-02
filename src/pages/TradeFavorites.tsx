@@ -399,10 +399,10 @@ export default function TradeFavorites() {
           <div className="text-center py-16">
             <Heart className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
             <p className="font-display text-sm text-foreground">
-              {search ? "No favorites match your search" : "No saved products yet"}
+              {search ? "No favorites match your search" : activeFolder ? "No pieces in this folder yet" : "No saved products yet"}
             </p>
             <p className="font-body text-xs text-muted-foreground mt-1">
-              {search ? "Try a different search term" : "Browse the Showroom and tap the heart icon to save products here."}
+              {search ? "Try a different search term" : activeFolder ? "Save pieces to this folder using the heart icon." : "Browse the Showroom and tap the heart icon to save products here."}
             </p>
           </div>
         ) : view === "grid" ? (
