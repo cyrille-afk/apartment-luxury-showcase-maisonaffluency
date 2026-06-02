@@ -28,6 +28,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
+import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
