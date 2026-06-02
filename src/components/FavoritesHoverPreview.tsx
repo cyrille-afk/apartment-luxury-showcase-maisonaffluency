@@ -103,7 +103,7 @@ const FavoritesHoverPreview = ({ favCount, children }: Props) => {
               >
                 <div className="aspect-square overflow-hidden rounded bg-muted">
                   <img
-                    src={cloudinaryUrl(p.image_url, "w_240,h_240,c_fill,q_auto,f_auto")}
+                    src={cloudinaryUrl(p.image_url, { width: 240, height: 240, crop: "fill", quality: "auto", format: "auto" })}
                     alt={p.title}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
