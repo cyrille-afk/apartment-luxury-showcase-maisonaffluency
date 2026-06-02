@@ -36,7 +36,6 @@ Allow: /
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
-Disallow: /trade/spec-sheet
 Disallow: /spec-sheets/
 Disallow: /*-og.html$
 Disallow: /*-og-v2.html$
