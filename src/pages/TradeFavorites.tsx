@@ -60,6 +60,7 @@ export default function TradeFavorites() {
   const [addedToQuote, setAddedToQuote] = useState(false);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const [folderAssignments, setFolderAssignments] = useState<Record<string, string[]>>({});
 
   const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
     id: fav.productId,
