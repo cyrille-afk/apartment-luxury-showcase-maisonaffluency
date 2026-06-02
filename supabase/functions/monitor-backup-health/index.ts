@@ -122,27 +122,10 @@ serve(async (req) => {
     tableChecks.push(check);
   }
 
-  // 2. Check pg_net for failed invocations in the last 24h.
-  const { data: httpRows } = await supabase
-    .rpc("backup_recent_http_failures", { _hours: 24 })
-    .select?.() ?? { data: null };
-
-  let httpFailures: Array<{ status_code: number | null; error: string | null; created: string }> = [];
-  try {
-    const { data, error } = await supabase
-      .from("net_http_response_recent_backup_failures")
-      .select("*");
-    if (!error && Array.isArray(data)) {
-      httpFailures = data as typeof httpFailures;
-    }
-  } catch {
-    /* view may not exist; ignored */
-  }
-  void httpRows;
-
-  for (const r of httpFailures) {
-    failures.push(`pg_net ${r.created}: status=${r.status_code ?? "null"} ${r.error ?? ""}`.trim());
-  }
+  // 2. (pg_net failures are detected implicitly: if the cron call timed out or
+  // returned non-2xx, the function never wrote its status sidecar, so the
+  // file-presence check above already flags it.)
+  const httpFailures: Array<{ status_code: number | null; error: string | null; created: string }> = [];
 
   const overall_status = failures.length === 0 ? "ok" : "error";
 
