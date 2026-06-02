@@ -1260,6 +1260,24 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     }, "save pieces to your favorites");
   }, [requireAuth]);
 
+  // Keep favIds in sync with localStorage when other components (e.g. the
+  // folder picker popover) mutate the favorites set.
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = localStorage.getItem("public_favorites");
+        setFavIds(new Set(raw ? JSON.parse(raw) : []));
+      } catch { /* noop */ }
+    };
+    window.addEventListener("public_favorites_changed", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("public_favorites_changed", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+
   const { data: fullPicks = [] } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory));
 
   // In "products" mode, when a filter is active we switch to a product grid view.
