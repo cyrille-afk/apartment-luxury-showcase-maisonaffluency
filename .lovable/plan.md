@@ -1,61 +1,36 @@
 ## Goal
 
-In `src/components/PublicProductLightbox.tsx`, fix the spec rows so that on every product (including dual-axis ones like Amboseli, Cher, Garda):
+Make Delcourt Collection and Collection Particulière invisible across Public and Trade views without deleting any data. Their child designers (Studio Anansi, Flavien Delbergue, Luca Erba, Yabu Pushelberg, Christophe Delcourt) stay visible but lose the parent badge.
 
-1. **Finish always renders before dimensions.**
-2. **The dimension row always shows the 📐 icon** (never the ⬗ finish diamond).
-3. **The imperial conversion always renders on its own line below the metric line** (as small muted text, like the Ninfa screenshot) — never inline, so it can't wrap mid-`(W 31.1"`.
-4. **There is always a space between the cm value and the imperial parenthetical** when they do appear together.
+## Database changes (data only — via insert tool)
 
-Only `PublicProductLightbox.tsx` changes. No data edits, no schema changes, no behavior changes to the dropdown / variant-matching logic.
+1. **`designers`** — confirm `is_published = false` on the two parent rows (already `false`, no-op). Set `founder = NULL` on every child row currently pointing to either name:
+   - Studio Anansi, Flavien Delbergue, Luca Erba, Yabu Pushelberg → was `Collection Particulière`
+   - Christophe Delcourt (`delcourt-collection` slug) → was `Delcourt Collection`
+2. **`designer_curator_picks`** — set `is_hidden = true` on all 32 picks attached to the two parent `designer_id`s.
+3. **`trade_products`** — set `is_hidden = true` AND `is_active = false` on all 35 rows where `brand_name IN ('Delcourt Collection','Collection Particulière')`.
 
-## What's actually wrong today
+## Code changes
 
-The dual-axis branch (≈ lines 551–587) renders **base first, then top**, both with the ⬗ icon and both using `withImperialPerLine` for the text. For Amboseli / Cher / Garda the data is:
+4. **`src/components/BrandsAteliers.tsx`** — remove the two atelier entries (`collection-particuliere` at L805, `delcourt` at L834) from the brands array, and remove their entries from the `dbParentName` registry around L1985–1998 plus the background-image / pill-label maps at L1735, L1770, L1846.
+5. **`src/components/FeaturedDesigners.tsx`** — on the Forest & Giaconia profile, drop the BOB Armchair curator pick (L1227–1236) and clear `notableWorksLink` referencing "BOB Armchair - Delcourt Collection" (L1191). Leave the rest of the profile intact.
+6. **`src/pages/PublicDesignerProfile.tsx`** — remove the two SEO title overrides at L59 and L65 that mention the brand names; the page falls back to the default title format.
+7. **`src/pages/TradeLogin.tsx`** (L269) and **`src/pages/TradeRegister.tsx`** (L284) — remove "Collection Particulière" from the represented-brands marketing copy lists.
+8. **`src/data/designersIndex.json`** — strip any entries keyed to the two slugs (used by directory search/autocomplete).
 
-- `base_axis_label = "Size"`, base value = the dimension string
-- `top_axis_label = "Finish"`, top value = the finish string
+## OG bridge files
 
-Each axis collapses to a single value, so `ExpandableSpec` renders them as plain `"{label}: {text}"` rows. Result: Size shows up first with the ⬗ diamond and the imperial inline (wrapping awkwardly), then Finish appears below.
+9. Delete all OG bridge files under `public/ateliers/`, `public/designers/`, and `public/collectibles/` whose filename starts with `delcourt-collection-` or `collection-particuliere-` (≈40 files, both `-og.html` and `-og-v2.html` variants). They are unindexed redirect shells; removing them prevents social cards from resolving.
 
-Ninfa renders correctly only because it has no dual-axis variants and falls through to the dedicated dimensions branch with `secondaryText`.
+## Out of scope
 
-## Changes
-
-### 1. Helper inside the component
-
-Add a small `isDimensionText(s: string)` helper (uses the existing `looksLikeDimension` already imported in this file) so we can detect when an axis is actually carrying dimensions rather than a finish/material.
-
-### 2. Reorder the dual-axis block
-
-In the `if (isDualAxis)` branch:
-
-- Build the two `<ExpandableSpec>` nodes as variables (`baseNode`, `topNode`) instead of inlining them.
-- Decide order:
-  - If exactly one axis's text looks like a dimension → render the **non-dimension axis first**, dimension axis second.
-  - Otherwise keep the current base-then-top order.
-- For whichever axis is the dimension one, render that node with:
-  - `icon={specIcon("📐")}` instead of `⬗`
-  - `text={formatDimensionsMultiline(<value>)}` (metric only)
-  - `secondaryText={formatImperialDimensions(<value>)}` (imperial below, small/muted — same pattern as the fallback dimensions branch on line 651)
-  - Drop `withImperialPerLine` for that node so the imperial never appears inline.
-- The non-dimension axis keeps `⬗` and its existing finish/material text.
-
-### 3. Same treatment for the single-axis materials branch
-
-The `materialOptions.length > 0` branch (≈ lines 588–604) can also collapse to a single dimension-like value when a product has one base variant whose label is a size. If `materialOptions.length === 1` and the value looks like a dimension, render it with the 📐 icon + `secondaryText` imperial instead of the ⬗ finish dropdown. Otherwise behavior is unchanged.
-
-### 4. Guarantee the space between cm and `(`
-
-The inline imperial is being removed for the cases that wrap (they move to `secondaryText`). For any remaining `withImperialPerLine` callsites, double-check the helper in `src/lib/formatDimensions.ts` already inserts `"  ("` (two spaces) — it does (`${t}  (${imp})`), so no change needed there. The reported missing-space cases all came from the dual-axis path being fixed in step 2.
-
-## Files touched
-
-- `src/components/PublicProductLightbox.tsx` — only the dual-axis and single-material spec-row JSX (≈ lines 538–605). No other files change.
+- No row deletions. Data remains restorable by flipping the flags back.
+- Christophe Delcourt's own designer profile stays visible; only his parent-brand badge is cleared.
+- Sitemap and robots.txt regenerate from DB on next build — no manual edit needed once `is_published`/`is_hidden` flags are set.
 
 ## Verification
 
-- Reload the four products from the screenshots in the public lightbox at 1054px width:
-  - Amboseli Armchair, Cher Dining Table, Garda → Finish row first (⬗), then a dimensions row with the 📐 icon, metric on top, imperial as small muted line beneath. No mid-imperial wrapping.
-  - Ninfa Centrepiece → unchanged (already correct).
-- Confirm dual-axis products that legitimately use Base = finish / Top = size (e.g. Mangala) still render in the existing order, with the 📐 icon on the size row.
+- `/designers` (public + trade): no Delcourt or Collection Particulière cards, child designers still listed without parent pill.
+- `/trade/products` and category grids: no products from these two brands.
+- Tearsheet builder + FF&E: hidden picks excluded automatically (existing filter respects `is_hidden`).
+- Direct visit to `/designers/delcourt-collection` or `/designers/collection-particuliere` falls through to the standard "not found" path because `is_published = false`.
