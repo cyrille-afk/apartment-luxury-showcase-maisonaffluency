@@ -545,19 +545,35 @@ const TradeGallery = () => {
                     </div>
                   )}
                   <ProductCardDescriptionOverlay description={product.description} />
-                   {/* Favorite button */}
-                   <button
-                     onClick={(e) => { e.stopPropagation(); handleFavorite(product); }}
-                     className={cn(
-                       "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
-                       isFavorited(product.id)
-                         ? "bg-background/90 text-destructive shadow-md"
-                         : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90"
-                     )}
-                     aria-label={isFavorited(product.id) ? "Remove from favorites" : "Add to favorites"}
-                   >
-                     <Heart className={cn("h-3.5 w-3.5", isFavorited(product.id) && "fill-current")} />
-                   </button>
+                   <div className="absolute top-2 left-2 z-10">
+                     <TradeFavoriteFolderPicker
+                       productId={product.id}
+                       meta={{
+                         product_name: product.product_name,
+                         brand_name: product.brand_name,
+                         category: product.category,
+                         image_url: product.image_url,
+                         dimensions: product.dimensions,
+                         materials: product.materials,
+                       }}
+                       align="start"
+                       side="bottom"
+                     >
+                       <button
+                         onClick={(e) => e.stopPropagation()}
+                         className={cn(
+                           "p-1.5 rounded-full transition-all",
+                           isFavorited(product.id)
+                             ? "bg-background/90 text-destructive shadow-md"
+                             : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90"
+                         )}
+                         aria-label={isFavorited(product.id) ? "Manage folders" : "Add to favorites"}
+                       >
+                         <Heart className={cn("h-3.5 w-3.5", isFavorited(product.id) && "fill-current")} />
+                       </button>
+                     </TradeFavoriteFolderPicker>
+                   </div>
+
                    {/* Pin button */}
                    <button
                      onClick={(e) => { e.stopPropagation(); togglePin(toCompareItem(product)); }}
