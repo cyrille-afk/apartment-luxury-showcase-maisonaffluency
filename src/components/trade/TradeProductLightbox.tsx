@@ -5,6 +5,8 @@ import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDrop
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
+import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
+
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
