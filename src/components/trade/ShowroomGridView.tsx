@@ -23,6 +23,8 @@ import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { useFavorites } from "@/hooks/useFavorites";
+import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
+
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 /** Local slugify — must match the one used by TradeProductPage / PublicProductPage */
