@@ -398,7 +398,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                 >
                   <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
-                      <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" />
+                      <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="eager" decoding="async" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -475,7 +475,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
         ) : (
           <>
             {(item.hero_image_url || item.image_url) && (
-              <img src={item.hero_image_url || item.image_url} alt={item.name} loading="lazy" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
+              <img src={item.hero_image_url || item.image_url} alt={item.name} loading="eager" decoding="async" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
             )}
             <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
             <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
@@ -543,7 +543,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : item.image_url ? (
-          <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+          <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="eager" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
