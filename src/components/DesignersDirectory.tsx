@@ -28,6 +28,8 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
 import { getCategoryHero } from "@/constants/categoryHeroes";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
