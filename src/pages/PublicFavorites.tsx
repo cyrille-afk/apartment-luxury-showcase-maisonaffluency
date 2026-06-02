@@ -10,6 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
+import {
+  FOLDERS_EVENT,
+  FAV_EVENT,
+  readFolders,
+  readAssignments,
+  type Folder,
+} from "@/lib/favoriteFolders";
+
 
 const LS_KEY = "public_favorites";
 
