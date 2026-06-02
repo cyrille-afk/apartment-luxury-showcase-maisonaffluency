@@ -21,6 +21,7 @@ const TABLES = [
 // We flag a backup as suspect if live has FEWER rows than backup (possible data loss),
 // or if backup is missing > 50% of live rows (stale backup).
 const STALE_RATIO = 0.5;
+const BUCKET = "backups";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,17 +33,16 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // 1. Find the latest backup folder by listing prefixes
+    // 1. Find the latest backup folder at the root of the private `backups` bucket.
     const { data: folders, error: listErr } = await supabase.storage
-      .from("assets")
-      .list("backups", { limit: 100, sortBy: { column: "name", order: "desc" } });
+      .from(BUCKET)
+      .list("", { limit: 1000, sortBy: { column: "name", order: "desc" } });
 
     if (listErr) throw listErr;
     if (!folders || folders.length === 0) {
-      throw new Error("No backups found in assets/backups/");
+      throw new Error(`No backups found in ${BUCKET}/`);
     }
 
-    // Folders are returned as entries with name = date string
     const latest = folders
       .map((f) => f.name)
       .filter((n) => /^\d{4}-\d{2}-\d{2}$/.test(n))
@@ -54,24 +54,27 @@ Deno.serve(async (req) => {
     const report: Record<string, any> = {
       verified_at: new Date().toISOString(),
       backup_date: latest,
+      bucket: BUCKET,
       tables: {} as Record<string, any>,
       overall_status: "ok" as "ok" | "warning" | "error",
     };
 
-    // 2. For each table: download backup JSON, parse, compare to live count
     for (const table of TABLES) {
-      const tableReport: any = { backup_rows: 0, live_rows: 0, status: "ok", issues: [] as string[] };
+      const tableReport: any = {
+        backup_rows: 0,
+        live_rows: 0,
+        status: "ok",
+        issues: [] as string[],
+      };
 
       try {
-        // Download backup file
         const { data: blob, error: dlErr } = await supabase.storage
-          .from("assets")
-          .download(`backups/${latest}/${table}.json`);
+          .from(BUCKET)
+          .download(`${latest}/${table}.json`);
         if (dlErr) throw new Error(`download failed: ${dlErr.message}`);
 
         const text = await blob.text();
 
-        // Validate JSON parses
         let rows: any[];
         try {
           rows = JSON.parse(text);
@@ -81,7 +84,6 @@ Deno.serve(async (req) => {
         if (!Array.isArray(rows)) throw new Error("backup is not an array");
         tableReport.backup_rows = rows.length;
 
-        // Sample integrity: every row should be an object with an id field (if present in schema)
         const sampleSize = Math.min(5, rows.length);
         for (let i = 0; i < sampleSize; i++) {
           if (typeof rows[i] !== "object" || rows[i] === null) {
@@ -89,14 +91,12 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Live row count
         const { count, error: cntErr } = await supabase
           .from(table)
           .select("*", { count: "exact", head: true });
         if (cntErr) throw new Error(`live count failed: ${cntErr.message}`);
         tableReport.live_rows = count ?? 0;
 
-        // Compare
         if (tableReport.backup_rows === 0 && tableReport.live_rows > 0) {
           tableReport.status = "error";
           tableReport.issues.push("backup is empty but live table has rows");
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
         ) {
           tableReport.status = "warning";
           tableReport.issues.push(
-            `backup has ${tableReport.backup_rows} rows vs ${tableReport.live_rows} live (>${(1 - STALE_RATIO) * 100}% drift)`
+            `backup has ${tableReport.backup_rows} rows vs ${tableReport.live_rows} live (>${(1 - STALE_RATIO) * 100}% drift)`,
           );
         }
       } catch (err: any) {
@@ -120,13 +120,12 @@ Deno.serve(async (req) => {
         report.overall_status = "warning";
     }
 
-    // 3. Write verification report next to backup
     await supabase.storage
-      .from("assets")
+      .from(BUCKET)
       .upload(
-        `backups/${latest}/verification.json`,
+        `${latest}/verification.json`,
         new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }),
-        { contentType: "application/json", upsert: true }
+        { contentType: "application/json", upsert: true },
       );
 
     return new Response(JSON.stringify(report, null, 2), {
