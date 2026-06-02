@@ -238,35 +238,90 @@ const PublicFavorites = () => {
             )}
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
-              ))}
-            </div>
-          ) : picks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Heart className="w-12 h-12 text-muted-foreground/30 mb-4" />
-              <h2 className="font-display text-lg tracking-wide mb-2">No favorites yet</h2>
-              <p className="text-sm text-muted-foreground max-w-md">
-                Browse our designers and click the heart icon on any piece to save it here.
-              </p>
-              <Link
-                to="/designers"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          {/* Folder tabs (Artemest-style) */}
+          {(folders.length > 0 || picks.length > 0) && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveFolder(null)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border transition-colors",
+                  activeFolder === null
+                    ? "bg-foreground text-background border-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                )}
               >
-                Explore Designers
-              </Link>
+                All ({picks.length})
+              </button>
+              {folders.map((f) => {
+                const count = picks.filter((p) => (assignments[p.id] ?? []).includes(f.id)).length;
+                const active = activeFolder === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setActiveFolder(f.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border transition-colors",
+                      active
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                    )}
+                  >
+                    {f.name} ({count})
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            <motion.div
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-              initial="hidden"
-              animate="visible"
-              variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-            >
-              <AnimatePresence>
-                {picks.map((pick) => (
+          )}
+
+          {(() => {
+            const visiblePicks = activeFolder
+              ? picks.filter((p) => (assignments[p.id] ?? []).includes(activeFolder))
+              : picks;
+            if (loading) {
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
+                  ))}
+                </div>
+              );
+            }
+            if (picks.length === 0) {
+              return (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <Heart className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                  <h2 className="font-display text-lg tracking-wide mb-2">No favorites yet</h2>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    Browse our designers and click the heart icon on any piece to save it here.
+                  </p>
+                  <Link
+                    to="/designers"
+                    className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    Explore Designers
+                  </Link>
+                </div>
+              );
+            }
+            if (visiblePicks.length === 0) {
+              return (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No pieces in this folder yet. Click the heart on any piece to add it here.
+                  </p>
+                </div>
+              );
+            }
+            return (
+              <motion.div
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                initial="hidden"
+                animate="visible"
+                variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
+              >
+                <AnimatePresence>
+                  {visiblePicks.map((pick) => (
+
                   <motion.div
                     key={pick.id}
                     layout
