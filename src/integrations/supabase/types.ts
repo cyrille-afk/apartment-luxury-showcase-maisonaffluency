@@ -4484,6 +4484,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_product_pricing: {
+        Row: {
+          pick_id: string
+          price_per_sqm_cents: number | null
+          trade_price_cents: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          pick_id: string
+          price_per_sqm_cents?: number | null
+          trade_price_cents?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          pick_id?: string
+          price_per_sqm_cents?: number | null
+          trade_price_cents?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_product_pricing_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_product_pricing_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "designer_curator_picks_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_products: {
         Row: {
           brand_name: string
@@ -5012,6 +5051,7 @@ export type Database = {
           category: string | null
           created_at: string | null
           currency: string | null
+          default_ship_mode: string | null
           description: string | null
           designer_id: string | null
           dimensions: string | null
@@ -5022,14 +5062,22 @@ export type Database = {
           hover_image_url: string | null
           id: string | null
           image_url: string | null
+          is_hidden: boolean | null
           lead_time: string | null
           materials: string | null
           materials_description: string | null
           origin: string | null
+          pack_carton_count: number | null
+          pack_cbm: number | null
+          pack_weight_kg: number | null
           pdf_filename: string | null
           pdf_url: string | null
           pdf_urls: Json | null
           photo_credit: string | null
+          pickup_address: string | null
+          pickup_country: string | null
+          pickup_postcode: string | null
+          price_prefix: string | null
           size_variants: Json | null
           sort_order: number | null
           subcategory: string | null
@@ -5045,6 +5093,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           currency?: string | null
+          default_ship_mode?: string | null
           description?: string | null
           designer_id?: string | null
           dimensions?: string | null
@@ -5055,14 +5104,22 @@ export type Database = {
           hover_image_url?: string | null
           id?: string | null
           image_url?: string | null
+          is_hidden?: boolean | null
           lead_time?: string | null
           materials?: string | null
           materials_description?: string | null
           origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
+          price_prefix?: string | null
           size_variants?: Json | null
           sort_order?: number | null
           subcategory?: string | null
@@ -5078,6 +5135,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           currency?: string | null
+          default_ship_mode?: string | null
           description?: string | null
           designer_id?: string | null
           dimensions?: string | null
@@ -5088,14 +5146,22 @@ export type Database = {
           hover_image_url?: string | null
           id?: string | null
           image_url?: string | null
+          is_hidden?: boolean | null
           lead_time?: string | null
           materials?: string | null
           materials_description?: string | null
           origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
+          price_prefix?: string | null
           size_variants?: Json | null
           sort_order?: number | null
           subcategory?: string | null
