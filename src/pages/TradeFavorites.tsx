@@ -15,6 +15,7 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { cn } from "@/lib/utils";
 import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
+import { TRADE_FAVORITE_FOLDERS_EVENT } from "@/components/trade/TradeFavoriteFolderPicker";
 
 interface FavoritedProduct {
   favoriteId: string;
@@ -36,6 +37,12 @@ interface FavoritedProduct {
   created_at: string;
 }
 
+interface FolderItem {
+  id: string;
+  name: string;
+  count: number;
+}
+
 export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -51,6 +58,9 @@ export default function TradeFavorites() {
   const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
   const [addingToQuote, setAddingToQuote] = useState(false);
   const [addedToQuote, setAddedToQuote] = useState(false);
+  const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const [folderAssignments, setFolderAssignments] = useState<Record<string, string[]>>({});
 
   const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
     id: fav.productId,
@@ -148,7 +158,54 @@ export default function TradeFavorites() {
     }
   }, [user]);
 
+  const fetchFolders = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data: fdata } = await supabase
+        .from("favorite_folders")
+        .select("id, name")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      const folderList = (fdata || []) as { id: string; name: string }[];
+
+      // Load all assignments for this user to build a map of favoriteId -> folderIds
+      const { data: items } = await supabase
+        .from("favorite_folder_items")
+        .select("folder_id, favorite_id")
+        .in("folder_id", folderList.map((f) => f.id));
+      const assignments: Record<string, string[]> = {};
+      (items || []).forEach((i: any) => {
+        if (!assignments[i.favorite_id]) assignments[i.favorite_id] = [];
+        assignments[i.favorite_id].push(i.folder_id);
+      });
+      setFolderAssignments(assignments);
+
+      // Count items per folder
+      const counts = new Map<string, number>();
+      (items || []).forEach((i: any) => {
+        counts.set(i.folder_id, (counts.get(i.folder_id) || 0) + 1);
+      });
+
+      setFolders(
+        folderList.map((f) => ({
+          id: f.id,
+          name: f.name,
+          count: counts.get(f.id) || 0,
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch folders", err);
+    }
+  }, [user]);
+
   useEffect(() => { fetchFavorites(); }, [fetchFavorites]);
+  useEffect(() => { fetchFolders(); }, [fetchFolders]);
+
+  useEffect(() => {
+    const handler = () => { fetchFolders(); fetchFavorites(); };
+    window.addEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
+    return () => window.removeEventListener(TRADE_FAVORITE_FOLDERS_EVENT, handler);
+  }, [fetchFolders, fetchFavorites]);
 
   const removeFavorite = useCallback(async (favoriteId: string) => {
     setRemoving(favoriteId);
@@ -225,12 +282,21 @@ export default function TradeFavorites() {
     navigate(`/trade/axonometric-requests?favorites=${ids}`);
   }, [selectedFor3D, navigate]);
 
-  const filtered = search.trim()
-    ? favorites.filter((f) => {
-        const q = search.toLowerCase();
-        return f.product_name.toLowerCase().includes(q) || f.brand_name.toLowerCase().includes(q) || f.category.toLowerCase().includes(q);
-      })
-    : favorites;
+  const filtered = (() => {
+    let result = favorites;
+    if (activeFolder) {
+      result = result.filter((f) => (folderAssignments[f.favoriteId] ?? []).includes(activeFolder));
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((f) =>
+        f.product_name.toLowerCase().includes(q) ||
+        f.brand_name.toLowerCase().includes(q) ||
+        f.category.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  })();
 
   return (
     <>
@@ -288,6 +354,40 @@ export default function TradeFavorites() {
           </Badge>
         </div>
 
+        {/* Folder tabs (Artemest-style) */}
+        {(folders.length > 0 || favorites.length > 0) && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveFolder(null)}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border transition-colors",
+                activeFolder === null
+                  ? "bg-foreground text-background border-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+              )}
+            >
+              All ({favorites.length})
+            </button>
+            {folders.map((f) => {
+              const active = activeFolder === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setActiveFolder(f.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border transition-colors",
+                    active
+                      ? "bg-foreground text-background border-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                  )}
+                >
+                  {f.name} ({f.count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Content */}
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -299,10 +399,10 @@ export default function TradeFavorites() {
           <div className="text-center py-16">
             <Heart className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
             <p className="font-display text-sm text-foreground">
-              {search ? "No favorites match your search" : "No saved products yet"}
+              {search ? "No favorites match your search" : activeFolder ? "No pieces in this folder yet" : "No saved products yet"}
             </p>
             <p className="font-body text-xs text-muted-foreground mt-1">
-              {search ? "Try a different search term" : "Browse the Showroom and tap the heart icon to save products here."}
+              {search ? "Try a different search term" : activeFolder ? "Save pieces to this folder using the heart icon." : "Browse the Showroom and tap the heart icon to save products here."}
             </p>
           </div>
         ) : view === "grid" ? (
