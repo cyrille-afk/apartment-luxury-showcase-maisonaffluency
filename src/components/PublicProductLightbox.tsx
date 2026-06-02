@@ -550,58 +550,92 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
+                  // Detect which axis (if any) is actually carrying a dimension
+                  // string vs a finish/material — collapsed single-value axes
+                  // with dimensions should render with 📐 + imperial below.
+                  const baseIsDim = baseOptions.length === 1 && looksLikeDimension(baseOptions[0]);
+                  const topIsDim = topOptions.length === 1 && looksLikeDimension(topOptions[0]);
+
+                  const baseNode = (
+                    <ExpandableSpec
+                      key="base"
+                      icon={specIcon(baseIsDim ? "📐" : "⬗")}
+                      text={baseIsDim ? formatDimensionsMultiline(baseOptions[0]) : withImperialPerLine(baseOptions.join("\n"))}
+                      secondaryText={baseIsDim ? formatImperialDimensions(baseOptions[0]) : undefined}
+                      placeholder={getBasePlaceholder(product)}
+                      singleValueLabel={product.base_axis_label || undefined}
+                      emphasized
+                      value={selectedBaseIdx ?? null}
+                      onChange={(idx) => {
+                        if (idx < 0) {
+                          clearAllDualSelections();
+                          return;
+                        }
+                        setSelectedBaseIdx(idx);
+                      }}
+                    />
+                  );
+                  const topNode = (
+                    <ExpandableSpec
+                      key="top"
+                      icon={specIcon(topIsDim ? "📐" : "⬗")}
+                      text={topIsDim ? formatDimensionsMultiline(topOptions[0]) : withImperialPerLine(topOptions.join("\n"))}
+                      secondaryText={topIsDim ? formatImperialDimensions(topOptions[0]) : undefined}
+                      placeholder={getTopPlaceholder(product)}
+                      singleValueLabel={product.top_axis_label || undefined}
+                      emphasized
+                      value={selectedTopIdx ?? null}
+                      onChange={(idx) => {
+                        if (idx < 0) {
+                          clearAllDualSelections();
+                          return;
+                        }
+                        setSelectedTopIdx(idx);
+                      }}
+                    />
+                  );
+                  // Finish/material axis always renders before dimensions axis.
+                  const ordered = baseIsDim && !topIsDim
+                    ? [topNode, baseNode]
+                    : [baseNode, topNode];
+                  return <>{ordered}</>;
+                }
+                if (materialOptions.length > 0) {
+                  // Single collapsed value that's actually a dimension string —
+                  // render with 📐 + imperial as secondaryText (not inline) so
+                  // the imperial parenthetical can't wrap mid-token.
+                  const onlyDim =
+                    materialOptions.length === 1 && looksLikeDimension(materialOptions[0]);
+                  if (onlyDim) {
+                    return (
+                      <ExpandableSpec
+                        icon={specIcon("📐")}
+                        text={formatDimensionsMultiline(materialOptions[0])}
+                        secondaryText={formatImperialDimensions(materialOptions[0])}
+                        emphasized
+                        singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
+                      />
+                    );
+                  }
                   return (
-                    <>
-                      <ExpandableSpec
-                        icon={specIcon("⬗")}
-                        text={withImperialPerLine(baseOptions.join("\n"))}
-                        placeholder={getBasePlaceholder(product)}
-                        singleValueLabel={product.base_axis_label || undefined}
-                        emphasized
-                        value={selectedBaseIdx ?? null}
-                        onChange={(idx) => {
-                          if (idx < 0) {
-                            clearAllDualSelections();
-                            return;
-                          }
-                          setSelectedBaseIdx(idx);
-                        }}
-                      />
-                      <ExpandableSpec
-                        icon={specIcon("⬗")}
-                        text={withImperialPerLine(topOptions.join("\n"))}
-                        placeholder={getTopPlaceholder(product)}
-                        singleValueLabel={product.top_axis_label || undefined}
-                        emphasized
-                        value={selectedTopIdx ?? null}
-                        onChange={(idx) => {
-                          if (idx < 0) {
-                            clearAllDualSelections();
-                            return;
-                          }
-                          setSelectedTopIdx(idx);
-                        }}
-                      />
-                    </>
+                    <ExpandableSpec
+                      icon={specIcon("⬗")}
+                      text={materialOptions.join("\n")}
+                      placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
+                      singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
+                      autoSplit={!hasAnyBase && !hasSingleAxisSplit}
+                      value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
+                      onChange={(idx) => {
+                        if (hasSingleAxisSplit) {
+                          setSelectedSingleMaterialIdx(idx < 0 ? null : idx);
+                        } else {
+                          setSelectedMaterialIdx(idx < 0 ? null : idx);
+                        }
+                      }}
+                    />
                   );
                 }
-                return materialOptions.length > 0 ? (
-                  <ExpandableSpec
-                    icon={specIcon("⬗")}
-                    text={materialOptions.join("\n")}
-                    placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
-                    singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
-                    autoSplit={!hasAnyBase && !hasSingleAxisSplit}
-                    value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
-                    onChange={(idx) => {
-                      if (hasSingleAxisSplit) {
-                        setSelectedSingleMaterialIdx(idx < 0 ? null : idx);
-                      } else {
-                        setSelectedMaterialIdx(idx < 0 ? null : idx);
-                      }
-                    }}
-                  />
-                ) : null;
+                return null;
               })()}
               {(() => {
                 if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
