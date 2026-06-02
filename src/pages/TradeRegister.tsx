@@ -258,6 +258,70 @@ const TradeRegister = () => {
             </>
           )}
         </div>
+
+        {/* Editorial / SEO content — explains the Trade Program and free account */}
+        <section className="w-full max-w-2xl mx-auto mt-16 pt-10 border-t border-border">
+          <h2 className="font-display text-lg text-foreground mb-4">
+            {isPublicSignup ? "About a Maison Affluency Account" : "About the Trade Program"}
+          </h2>
+          <div className="space-y-4 font-body text-sm leading-relaxed text-muted-foreground">
+            {isPublicSignup ? (
+              <>
+                <p>
+                  A free Maison Affluency account is the easiest way to keep
+                  track of the collectible furniture, lighting, rugs and
+                  decorative objects you fall in love with as you browse our
+                  curated rooms and designer profiles. Save favourites into
+                  folders by project or by room, share moodboards with your
+                  architect, and request pricing or availability whenever you
+                  are ready — without re-entering your details each time.
+                </p>
+                <p>
+                  You will be able to download editorial spec sheets, follow
+                  designers and ateliers you are interested in, and receive a
+                  quiet monthly digest of new arrivals from Pouénat, Pierre
+                  Frey, Collection Particulière, Apparatus Studio, Theoreme
+                  Éditions, cc-tapis, Saint-Louis, Veronese and other houses we
+                  represent. We never share your email, never sell data, and you
+                  can unsubscribe with one click. If you later begin a project
+                  with a designer or architect, your favourites travel with you.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  The Maison Affluency Trade Program is reserved for design
+                  professionals — architecture and interior design studios,
+                  hospitality groups, yacht designers, art consultants and
+                  procurement specialists. Approved members receive confidential
+                  trade pricing across our full European catalogue, a dedicated
+                  advisor who knows the makers personally, and access to
+                  workshops that rarely list publicly — from Parisian bronziers
+                  and Florentine lacquer ateliers to Milanese rug-makers and
+                  Murano glass studios.
+                </p>
+                <p>
+                  Membership unlocks the full toolkit: white-labeled tearsheets
+                  and PDF presentations for your clients, multi-currency landed
+                  cost estimators, mood boards, CAD and 3D downloads, sample
+                  ordering, order timelines, and consolidated insured freight
+                  from multiple workshops into a single delivery. Custom
+                  commissions — non-standard dimensions, bespoke finishes,
+                  client COM upholstery — are handled quietly through your
+                  advisor.
+                </p>
+                <p>
+                  Applications are reviewed within two working days. We ask for
+                  a few details about your studio and current projects so we can
+                  match you with the right advisor and the right level of
+                  pricing tier. There is no membership fee, no minimum order,
+                  and no obligation to commit before you have seen samples and
+                  a full landed-cost estimate.
+                </p>
+              </>
+            )}
+          </div>
+        </section>
       </div>
     </>
   );

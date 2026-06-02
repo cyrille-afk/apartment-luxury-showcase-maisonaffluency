@@ -127,7 +127,7 @@ export default function SpecSheetRedirect() {
         <Helmet>
           <title>{designerName} — Spec Sheets | Maison & Ateliers</title>
         </Helmet>
-        <div className="flex flex-col items-center justify-center h-[60vh] gap-6 px-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 px-4 text-center pt-16 pb-8">
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
             <Lock className="w-7 h-7 text-muted-foreground" />
           </div>
@@ -145,6 +145,46 @@ export default function SpecSheetRedirect() {
             Sign in to view
           </Button>
         </div>
+
+        {/* Editorial / SEO content — explains what spec sheets contain */}
+        <section className="max-w-2xl mx-auto px-6 pb-20">
+          <div className="border-t border-border pt-10">
+            <h2 className="font-display text-lg text-foreground mb-4">What's inside a {designerName} spec sheet</h2>
+            <div className="space-y-4 font-body text-sm leading-relaxed text-muted-foreground">
+              <p>
+                Each Maison Affluency spec sheet is a self-contained PDF
+                prepared with the workshop and intended for use in
+                specification, procurement and on-site coordination. Inside you
+                will find precise dimensions in millimetres and inches,
+                tolerances on bespoke or hand-finished pieces, weight, packed
+                volume for freight planning, a full materials breakdown
+                (timbers, metals, stones, leathers, fabrics, finishes) with
+                origin and treatment notes, available finish options and
+                colourways, COM/COL upholstery yardage where relevant, lead
+                times by configuration, and care and maintenance guidance.
+              </p>
+              <p>
+                Lighting spec sheets add electrical specifications — wattage,
+                lamp type, voltage, dimming protocol, IP rating, ceiling
+                attachment detail — as well as canopy and stem options for
+                pendant fittings. Rug spec sheets carry knot count, pile height,
+                yarn composition, edge treatment and the standard custom-size
+                grid. Outdoor and marine-grade items list relevant
+                certifications. Where a piece is part of a collection, you also
+                receive the family overview so coordinating items can be
+                specified consistently.
+              </p>
+              <p>
+                Spec sheets are reserved for registered trade and private
+                clients to keep pricing, lead times and bespoke options
+                confidential. Sign in or create a free account in a moment to
+                download the full {designerName} library — and to request
+                samples, white-labeled tearsheets, CAD/3D files and a landed
+                cost estimate for your project.
+              </p>
+            </div>
+          </div>
+        </section>
         <AuthGateDialog open={gateOpen} onClose={() => setGateOpen(false)} action="view spec sheets" />
       </>
     );

@@ -306,6 +306,48 @@ export default function StudioSubmit() {
             </p>
           </div>
         </form>
+
+        {/* Editorial / SEO content — explains the directory and what we look for */}
+        <section className="mt-16 pt-10 border-t border-border">
+          <h2 className="font-display text-xl text-foreground mb-4">About the Maison Affluency Studios Directory</h2>
+          <div className="space-y-4 font-body text-sm leading-relaxed text-muted-foreground">
+            <p>
+              The Maison Affluency Studios Directory is a small, editorially
+              curated index of architecture and interior design practices we
+              admire and regularly work with on residential, hospitality, yacht
+              and bespoke commissions across Asia, the Middle East and Europe.
+              Featured studios receive a dedicated profile page with hero
+              imagery, a written introduction, disciplines and project-type
+              filters, links to their website and Instagram, and discoverability
+              through our curated journal and designer collaborations. We send
+              qualified enquiries from collectors and clients who are
+              specifically looking for the kind of work each studio does best.
+            </p>
+            <p>
+              We look for practices with a clear point of view and a portfolio
+              of completed work — not size or fame. Independent ateliers,
+              boutique studios and emerging talents are very welcome alongside
+              established firms. Disciplines we feature include architecture,
+              interior design, landscape design, lighting design and bespoke
+              joinery. Project types span private residential, hospitality,
+              retail, yacht and select office or cultural work. There is no
+              listing fee. We do ask that each submission represents the
+              studio's own work, with proper attribution to collaborators where
+              relevant.
+            </p>
+            <p>
+              Our editorial team reviews new submissions within five to ten
+              working days and will reach out by email if your practice is a
+              fit. If you would like to discuss your application before
+              submitting, or if you represent a studio outside the disciplines
+              listed above, write to us directly at{" "}
+              <a href="mailto:hello@maisonaffluency.com" className="text-foreground underline underline-offset-4 hover:opacity-70">
+                hello@maisonaffluency.com
+              </a>
+              . We read every message.
+            </p>
+          </div>
+        </section>
       </section>
     </main>
   );
