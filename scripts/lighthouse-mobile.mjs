@@ -3,8 +3,9 @@
  * Lightweight Lighthouse mobile audit.
  *
  * Runs Lighthouse against a built preview (or PW_BASE_URL) and asserts
- * minimum scores for performance, accessibility, best-practices, SEO,
- * plus PWA-installability checks. Reports are written to ./lighthouse-report
+ * minimum scores for the mobile UX categories we actually request from
+ * Lighthouse. PWA installability is covered by the Playwright manifest test.
+ * Reports are written to ./lighthouse-report
  * so CI can upload them when the job fails.
  *
  * Usage:
@@ -25,8 +26,6 @@ const AUDIT_TIMEOUT_MS = Number(process.env.LH_AUDIT_TIMEOUT_MS || 240_000);
 const THRESHOLDS = {
   performance: 0.6,
   accessibility: 0.9,
-  "best-practices": 0.85,
-  seo: 0.85,
 };
 
 const outDir = join(process.cwd(), "lighthouse-report");
@@ -123,7 +122,12 @@ function assertScores(reportPath, url) {
   const json = JSON.parse(readFileSync(reportPath, "utf8"));
   const failures = [];
   for (const [cat, min] of Object.entries(THRESHOLDS)) {
-    const score = json.categories?.[cat]?.score ?? 0;
+    const category = json.categories?.[cat];
+    if (!category) {
+      failures.push(`${cat}: missing from Lighthouse report`);
+      continue;
+    }
+    const score = category.score ?? 0;
     const status = score >= min ? "✓" : "✗";
     console.log(`  ${status} ${cat.padEnd(16)} ${(score * 100).toFixed(0)}/100 (min ${min * 100})`);
     if (score < min) failures.push(`${cat}: ${score} < ${min}`);
