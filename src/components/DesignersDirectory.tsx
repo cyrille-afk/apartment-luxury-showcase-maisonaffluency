@@ -398,7 +398,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                 >
                   <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
-                      <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" />
+                      <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="eager" decoding="async" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -475,7 +475,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
         ) : (
           <>
             {(item.hero_image_url || item.image_url) && (
-              <img src={item.hero_image_url || item.image_url} alt={item.name} loading="lazy" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
+              <img src={item.hero_image_url || item.image_url} alt={item.name} loading="eager" decoding="async" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
             )}
             <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
             <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
@@ -543,7 +543,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : item.image_url ? (
-          <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+          <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="eager" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
@@ -796,41 +796,10 @@ function LetterGroup({
   designersWithIgPosts?: Set<string>;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
-  // Fallback reveal: framer-motion's useInView occasionally misses the
-  // initial intersection on first paint (scroll restore, fast scroll past,
-  // hydration order). Because it's { once: true }, a missed observation
-  // leaves the letter group stuck as an empty placeholder forever — which
-  // is what produced the "missing A cards / huge gap above B" bug. We
-  // backstop with a manual rect check on mount and again shortly after.
-  const [fallbackRevealed, setFallbackRevealed] = useState(false);
-  useEffect(() => {
-    if (fallbackRevealed) return;
-    let cancelled = false;
-    const check = () => {
-      if (cancelled) return;
-      const el = sentinelRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight || 0;
-      // Reveal if the sentinel is within (or above) a generous viewport band.
-      if (rect.top < vh + 400) setFallbackRevealed(true);
-    };
-    check();
-    const t1 = setTimeout(check, 250);
-    const t2 = setTimeout(check, 1200);
-    // Also reveal on any scroll — guarantees the group renders before the
-    // user has a chance to notice it's missing.
-    const onScroll = () => check();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelled = true;
-      clearTimeout(t1);
-      clearTimeout(t2);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [fallbackRevealed]);
-  const isRevealed = forceOpen || isInView || fallbackRevealed;
+  // Render every desktop letter group immediately. The previous intersection-
+  // based reveal could miss after scroll restoration, leaving blank placeholder
+  // rows and unloaded portraits when scrolling away and back.
+  const isRevealed = true;
   const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
   const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
