@@ -375,8 +375,10 @@ const PublicFavorites = () => {
                 ))}
               </AnimatePresence>
             </motion.div>
-          )}
+            );
+          })()}
         </div>
+
 
         <Footer />
       </div>
