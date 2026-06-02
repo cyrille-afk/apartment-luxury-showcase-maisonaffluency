@@ -719,19 +719,22 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             {/* Desktop secondary actions */}
             <div className="hidden md:grid grid-cols-3 gap-2">
-              <button
-                onClick={() => toggleFavorite(product.id)}
-                title={favorited ? "Favorited" : "Favorite"}
-                className={cn(
-                  "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
-                  favorited
-                    ? "border-destructive/30 text-destructive bg-destructive/10"
-                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                )}
-              >
-                <Heart size={13} className={cn(favorited && "fill-current")} />
-                {favorited ? "Favorited" : "Favorite"}
-              </button>
+              <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  title={favorited ? "Manage folders" : "Favorite"}
+                  className={cn(
+                    "w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                    favorited
+                      ? "border-destructive/30 text-destructive bg-destructive/10"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  )}
+                >
+                  <Heart size={13} className={cn(favorited && "fill-current")} />
+                  {favorited ? "Saved" : "Favorite"}
+                </button>
+              </FavoriteFolderPicker>
+
 
               <button
                 onClick={() => togglePin(compareItem)}
