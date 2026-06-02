@@ -1126,7 +1126,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
         <ProductCardDescriptionOverlay description={pick.description} />
         {/* Hover action icons */}
         <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-          <FavoriteFolderPicker pickId={pick.id} onChange={() => onFavorite?.(pick.id, { silent: true })}>
+          <FavoriteFolderPicker pickId={pick.id}>
             <span
               role="button"
               tabIndex={0}
@@ -1143,6 +1143,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
             </span>
           </FavoriteFolderPicker>
         </div>
+
 
       </div>
       {/* Info below the card */}
