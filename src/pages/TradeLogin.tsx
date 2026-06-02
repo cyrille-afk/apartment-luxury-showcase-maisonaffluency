@@ -266,7 +266,7 @@ const TradeLogin = () => {
               confidential trade pricing across our full catalogue of collectible
               furniture, lighting, rugs and decorative objects from the world's
               leading European ateliers — including Pouénat, Pierre Frey,
-              Collection Particulière, Marta Sala Éditions, cc-tapis, Apparatus
+              Marta Sala Éditions, cc-tapis, Apparatus
               Studio, Saint-Louis, Achille Salvagni, Theoreme Éditions, Ozone,
               Veronese and many more.
             </p>

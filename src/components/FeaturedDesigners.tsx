@@ -1188,7 +1188,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Sans-titre-1_ct3lmz.gif",
     biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
     notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
-    notableWorksLink: { text: "BOB Armchair - Delcourt Collection", galleryIndex: GALLERY.A_RELAXED_SETTING },
+    
     philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
     curatorPicks: [
       {
@@ -1223,16 +1223,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "L 110 × 42 cm",
         edition: "Edition of 10",
         description: "Coffee.03 by Forest & Giaconia for Archimobilier is a geometric coffee table combining wood and lacquer in a modular, grid-inspired design."
-      },
-      {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773191627/Screen_Shot_2026-03-11_at_9.13.19_AM_xvpcuj.png",
-        title: "BOB Armchair",
-        subtitle: "for Delcourt Collection",
-        category: "Seating",
-        tags: ["Seating", "Armchairs"],
-        materials: "Wooden frame (choice of brushed oak tints) upholstered in a choice of fabrics",
-        dimensions: "W 120 x D 89 x H 70 cm",
-        description: "The BOB Armchair by Forest & Giaconia for Delcourt Collection is a generously proportioned lounge chair combining a refined wooden frame in brushed oak with sumptuous upholstery, offering both sculptural presence and deep comfort."
       },
     ],
     links: [
