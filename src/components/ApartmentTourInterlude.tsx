@@ -266,10 +266,9 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             <video
               ref={videoRef}
               src={VIDEO_URL}
-              controls
+              controls={isPlaying}
               playsInline
               preload="none"
-              poster={POSTER_URL}
               className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
             />
           </div>
