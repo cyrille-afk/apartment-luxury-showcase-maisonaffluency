@@ -252,6 +252,46 @@ const TradeLogin = () => {
             </Link>
           </p>
         </div>
+
+        {/* Editorial / SEO content — explains what the Trade Portal offers */}
+        <section className="mt-16 pt-10 border-t border-border max-w-2xl mx-auto">
+          <h2 className="font-display text-lg text-foreground mb-4">The Maison Affluency Trade Portal</h2>
+          <div className="space-y-4 font-body text-sm leading-relaxed text-muted-foreground">
+            <p>
+              The Maison Affluency Trade Portal is a private workspace built for
+              architects, interior designers, hospitality groups and procurement
+              specialists working on residential, hospitality, yacht and bespoke
+              commissions. Once your application is approved you gain access to
+              confidential trade pricing across our full catalogue of collectible
+              furniture, lighting, rugs and decorative objects from the world's
+              leading European ateliers — including Pouénat, Pierre Frey,
+              Collection Particulière, Marta Sala Éditions, cc-tapis, Apparatus
+              Studio, Saint-Louis, Achille Salvagni, Theoreme Éditions, Ozone,
+              Veronese and many more.
+            </p>
+            <p>
+              Inside the portal you can build mood boards, generate white-labeled
+              tearsheets and PDF presentations for your clients, request samples
+              and swatches, download technical spec sheets and CAD files, track
+              orders through production and shipping, and consolidate freight
+              from multiple workshops into a single insured delivery to your
+              project site. Multi-currency pricing (EUR, USD, GBP, SGD, HKD,
+              AED) updates automatically based on your studio location, and
+              landed-cost estimators give you a realistic view of duties and
+              freight before you commit.
+            </p>
+            <p>
+              Every trade account is paired with a dedicated advisor who knows
+              the makers personally — useful when you need a custom finish, a
+              non-standard dimension, an accelerated lead time, or simply a
+              second opinion on the right piece for a difficult brief. We work
+              quietly in the background so your studio remains the single point
+              of contact for your client. If you are new to Maison Affluency,
+              apply for a trade account in a few minutes and we will be in touch
+              within two working days.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
