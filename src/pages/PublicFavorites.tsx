@@ -67,6 +67,30 @@ const PublicFavorites = () => {
   const [loading, setLoading] = useState(true);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
 
+  const [folders, setFolders] = useState<Folder[]>(() => readFolders());
+  const [assignments, setAssignments] = useState<Record<string, string[]>>(() => readAssignments());
+  const [activeFolder, setActiveFolder] = useState<string | null>(null); // null = All
+
+  // Keep folders/assignments in sync with localStorage changes
+  useEffect(() => {
+    const sync = () => {
+      setFolders(readFolders());
+      setAssignments(readAssignments());
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        setFavIds(raw ? JSON.parse(raw) : []);
+      } catch { /* noop */ }
+    };
+    window.addEventListener(FOLDERS_EVENT, sync);
+    window.addEventListener(FAV_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(FOLDERS_EVENT, sync);
+      window.removeEventListener(FAV_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
   // Fetch picks data for the favorited IDs
   useEffect(() => {
     if (favIds.length === 0) {
@@ -74,6 +98,7 @@ const PublicFavorites = () => {
       setLoading(false);
       return;
     }
+
 
     const fetchPicks = async () => {
       setLoading(true);
