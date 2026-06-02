@@ -64,6 +64,9 @@ const DESIGNER_TITLE_OVERRIDES: Record<string, string> = {
   "ozone-light": "Ozone Light — Sculptural Bronze Lighting, Paris",
   "yabu-pushelberg": "Yabu Pushelberg for Collection Particulière",
   "yabu-pushelberg-man-of-parts": "Yabu Pushelberg for Man of Parts — Seating & Tables",
+  "atelier-fevrier": "Atelier Février — Hand-Knotted Luxury Rugs from Nepal",
+  "garnier-linker": "Garnier & Linker — French Furniture & Lighting Design",
+  "rowin-atelier": "RoWin Atelier — Artisan Ceramics & Sculptural Objects",
 };
 
 // Target Google's display bands: title 40-60 chars, description 140-160 chars.
