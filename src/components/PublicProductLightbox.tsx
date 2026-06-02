@@ -656,10 +656,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
                   : [];
                 if (isDualAxis && dualSizeOptions.length > 0) {
+                  const single = dualSizeOptions.length === 1;
                   return (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={withImperialPerLine(dualSizeOptions.join("\n"))}
+                      text={single ? formatDimensionsMultiline(dualSizeOptions[0]) : withImperialPerLine(dualSizeOptions.join("\n"))}
+                      secondaryText={single ? formatImperialDimensions(dualSizeOptions[0]) : undefined}
                       emphasized
                       placeholder="Select your size"
                     />
