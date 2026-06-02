@@ -35,6 +35,8 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+
 
 /* ------------------------------------------------------------------ */
 /*  localStorage-backed favorites (mirrors PublicProductLightbox)       */
@@ -957,18 +959,21 @@ const PublicProductPage: React.FC = () => {
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
               <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => toggleFavorite(product.id)}
-                  className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                    favorited
-                      ? "border-destructive/30 text-destructive bg-destructive/10"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  )}
-                >
-                  <Heart size={13} className={cn(favorited && "fill-current")} />
-                  {favorited ? "Favorited" : "Favorite"}
-                </button>
+                <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className={cn(
+                      "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                      favorited
+                        ? "border-destructive/30 text-destructive bg-destructive/10"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    )}
+                  >
+                    <Heart size={13} className={cn(favorited && "fill-current")} />
+                    {favorited ? "Saved" : "Favorite"}
+                  </button>
+                </FavoriteFolderPicker>
+
 
                 <button
                   onClick={() => togglePin(compareItem)}
