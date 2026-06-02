@@ -183,7 +183,6 @@ export default function TradeSpecSheet() {
         <Helmet>
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
-          <meta name="robots" content="noindex, nofollow" />
           <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
         </Helmet>
         <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
@@ -280,7 +279,6 @@ export default function TradeSpecSheet() {
         <Helmet>
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
-          <meta name="robots" content="noindex, nofollow" />
           <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
         </Helmet>
 
@@ -312,13 +310,12 @@ export default function TradeSpecSheet() {
 
   /* Desktop: native PDF iframe */
   return (
-    <>
-      <Helmet>
-        <title>{pageTitle} | Maison Affluency</title>
-        <meta name="description" content={pageDescription} />
-        <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
-      </Helmet>
+      <>
+        <Helmet>
+          <title>{pageTitle} | Maison Affluency</title>
+          <meta name="description" content={pageDescription} />
+          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
+        </Helmet>
       <div className="w-full h-[calc(100vh-4rem)]">
         <h1 className="sr-only">{pageTitle}</h1>
         <PdfFrame src={pdfUrl} title={pageTitle} />
