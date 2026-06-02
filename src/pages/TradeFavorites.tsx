@@ -354,6 +354,40 @@ export default function TradeFavorites() {
           </Badge>
         </div>
 
+        {/* Folder tabs (Artemest-style) */}
+        {(folders.length > 0 || favorites.length > 0) && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveFolder(null)}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border transition-colors",
+                activeFolder === null
+                  ? "bg-foreground text-background border-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+              )}
+            >
+              All ({favorites.length})
+            </button>
+            {folders.map((f) => {
+              const active = activeFolder === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setActiveFolder(f.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full font-body text-[11px] uppercase tracking-[0.12em] border transition-colors",
+                    active
+                      ? "bg-foreground text-background border-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                  )}
+                >
+                  {f.name} ({f.count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Content */}
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
