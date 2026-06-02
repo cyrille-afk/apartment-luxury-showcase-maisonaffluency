@@ -737,17 +737,22 @@ const ShowroomGridView = ({
                     <Scale className="h-3.5 w-3.5" />
                   </button>
                   {product.trade_product_id && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleFavorite(product.trade_product_id!); }}
-                      className={cn(
-                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all border",
-                        isFavorited(product.trade_product_id) ? "bg-destructive text-destructive-foreground shadow-md border-destructive" : "bg-background/80 text-foreground/60 border-border/50 shadow-sm opacity-0 group-hover:opacity-100 hover:bg-background hover:text-foreground",
-                      )}
-                      aria-label={isFavorited(product.trade_product_id) ? "Remove from favorites" : "Save to favorites"}
-                    >
-                      <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
-                    </button>
+                    <div className="absolute top-2 left-2 z-10">
+                      <TradeFavoriteFolderPicker productId={product.trade_product_id} align="start" side="bottom">
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          className={cn(
+                            "p-1.5 rounded-full transition-all border",
+                            isFavorited(product.trade_product_id) ? "bg-destructive text-destructive-foreground shadow-md border-destructive" : "bg-background/80 text-foreground/60 border-border/50 shadow-sm opacity-0 group-hover:opacity-100 hover:bg-background hover:text-foreground",
+                          )}
+                          aria-label={isFavorited(product.trade_product_id) ? "Manage folders" : "Save to favorites"}
+                        >
+                          <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
+                        </button>
+                      </TradeFavoriteFolderPicker>
+                    </div>
                   )}
+
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}
