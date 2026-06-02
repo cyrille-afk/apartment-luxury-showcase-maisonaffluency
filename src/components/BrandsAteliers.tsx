@@ -802,15 +802,6 @@ const partnerBrands = [
     galleryIndex: GALLERY.A_MASTERFUL_SUITE,
   },
   {
-    id: "collection-particuliere",
-    name: "Collection Particulière",
-    category: "Seating",
-    subcategory: "Sofas & Loveseats",
-    origin: "France",
-    description: "Launched in Paris in 2014 by Jérôme Aumont, Collection Particulière invites renowned designers to create contemporary furniture firmly rooted in French and European craftsmanship, blurring the line between furniture, object and collectible design.",
-    instagram: "https://www.instagram.com/collection_particuliere/",
-  },
-  {
     id: "dagmar",
     name: "Dagmar London",
     category: "Tables",
@@ -829,18 +820,6 @@ const partnerBrands = [
     origin: "Portugal",
     description: "Anglo-Portuguese furniture studio creating refined contemporary pieces rooted in the craft traditions of Portugal, combining natural materials with precise joinery and enduring form.",
     instagram: "https://www.instagram.com/delaespada/",
-  },
-  {
-    id: "delcourt",
-    name: "Delcourt Collection",
-    category: "Seating",
-    subcategory: "Armchairs",
-    seatType: "Armchairs",
-    origin: "France",
-    description: "Prestigious French furniture house known for their refined approach to contemporary seating and upholstery, combining generous proportions with elegant detailing.",
-    featured: "BOB Armchair",
-    instagram: "https://instagram.com/delcourtcollection",
-    galleryIndex: GALLERY.A_RELAXED_SETTING,
   },
   {
     name: "Celso de Lemos",
@@ -1732,7 +1711,7 @@ const brandBgMap: Record<string, string> = {
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
   "Saint-Louis": cristallerieSaintLouisBg,
-  "Delcourt Collection": delcourtBg,
+  
   "Ecart Paris": ecartParisBg,
   "Entrelacs Création": entrelacsBg,
   "Cazes & Conquet": cazesConquetBg,
@@ -1767,7 +1746,7 @@ const brandBgMap: Record<string, string> = {
   "Noom": noomBg,
   "Nicolas Aubagnac": nicolasAubagnacBg,
   "Ozone": ozoneLightBg,
-  "Collection Particulière": collectionParticuliereBg,
+  
   "Bieke Casteleyn": biekeCasteleynBg,
   "Galerie MCDE": galerieMcdeBg,
   "Gilles & Boissier": gillesBoissierBg,
@@ -1843,7 +1822,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Théorème Editions": "theoreme-editions",
   
   "NDL Editions": "noe-duchaufour-lawrance",
-  "Delcourt Collection": "forest-giaconia",
+  
   "Entrelacs Création": "entrelacs-creation",
   "Charles Paris": "felix-agostini",
   "Sé Collections": "se-collections",
@@ -1981,20 +1960,6 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://www.instagram.com/delaespada/",
     profileSlug: "de-la-espada",
     pillLabel: "De La Espada",
-  },
-  {
-    brandName: "Delcourt Collection",
-    dbParentName: "Delcourt Collection",
-    instagram: "https://instagram.com/delcourtcollection",
-    profileSlug: "delcourt-collection",
-    pillLabel: "Delcourt",
-  },
-  {
-    brandName: "Collection Particulière",
-    dbParentName: "Collection Particulière",
-    instagram: "https://www.instagram.com/collection_particuliere/",
-    profileSlug: "collection-particuliere",
-    pillLabel: "Collection Particulière",
   },
   {
     brandName: "Entrelacs Création",
