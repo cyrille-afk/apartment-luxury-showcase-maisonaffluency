@@ -664,30 +664,34 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               {/* Secondary actions — desktop only (mobile icons are on the image) */}
               <div className="hidden md:flex gap-2">
                 {/* Favorite */}
-                <button
-                  onClick={async () => {
-                    if (!product) return;
-                    const realId = await toggleFavorite(product.id, {
-                      product_name: product.product_name,
-                      brand_name: product.brand_name,
-                      category: product.category,
-                      image_url: product.image_url,
-                      dimensions: product.dimensions,
-                      materials: product.materials,
-                    });
-                    setLastFavRealId(realId);
+                <TradeFavoriteFolderPicker
+                  productId={product.id}
+                  meta={{
+                    product_name: product.product_name,
+                    brand_name: product.brand_name,
+                    category: product.category,
+                    image_url: product.image_url,
+                    dimensions: product.dimensions,
+                    materials: product.materials,
                   }}
-                  title={product && isFavorited(product.id) ? "Favorited" : "Favorite"}
-                  className={cn(
-                    "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
-                    product && isFavorited(product.id)
-                      ? "border-destructive/30 text-destructive bg-destructive/10"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  )}
+                  align="start"
+                  side="top"
                 >
-                  <Heart size={13} className={cn(product && isFavorited(product.id) && "fill-current")} />
-                  {product && isFavorited(product.id) ? "Favorited" : "Favorite"}
-                </button>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    title={product && isFavorited(product.id) ? "Manage folders" : "Favorite"}
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                      product && isFavorited(product.id)
+                        ? "border-destructive/30 text-destructive bg-destructive/10"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    )}
+                  >
+                    <Heart size={13} className={cn(product && isFavorited(product.id) && "fill-current")} />
+                    {product && isFavorited(product.id) ? "Saved" : "Favorite"}
+                  </button>
+                </TradeFavoriteFolderPicker>
+
 
                 {/* Add to Project */}
                 {product && isFavorited(product.id) && (
