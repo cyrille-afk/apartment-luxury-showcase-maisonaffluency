@@ -4484,6 +4484,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_product_pricing: {
+        Row: {
+          pick_id: string
+          price_per_sqm_cents: number | null
+          trade_price_cents: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          pick_id: string
+          price_per_sqm_cents?: number | null
+          trade_price_cents?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          pick_id?: string
+          price_per_sqm_cents?: number | null
+          trade_price_cents?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_product_pricing_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_product_pricing_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "designer_curator_picks_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_products: {
         Row: {
           brand_name: string
