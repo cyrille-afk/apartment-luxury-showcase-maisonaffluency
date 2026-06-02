@@ -281,7 +281,7 @@ const TradeRegister = () => {
                   You will be able to download editorial spec sheets, follow
                   designers and ateliers you are interested in, and receive a
                   quiet monthly digest of new arrivals from Pouénat, Pierre
-                  Frey, Collection Particulière, Apparatus Studio, Theoreme
+                  Frey, Apparatus Studio, Theoreme
                   Éditions, cc-tapis, Saint-Louis, Veronese and other houses we
                   represent. We never share your email, never sell data, and you
                   can unsubscribe with one click. If you later begin a project

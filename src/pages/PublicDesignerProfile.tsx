@@ -56,13 +56,13 @@ function displayName(name: string): string {
 // sibling slug or otherwise fails to describe the page uniquely. Keep each
 // override within Google's 40-60 char title band.
 const DESIGNER_TITLE_OVERRIDES: Record<string, string> = {
-  "christophe-delcourt": "Christophe Delcourt — Delcourt Collection Furniture",
+  "christophe-delcourt": "Christophe Delcourt — Sculptural Furniture",
   "christophe-delcourt-cc-tapis": "Christophe Delcourt Rugs for cc-tapis Milan",
   "gaelle-lauriot-prevost": "Lauriot-Prévost & Perrault — Ozone Bronze Lighting",
   "gaelle-lauriot-prevost-dominique-perrault-cc-tapis": "Lauriot-Prévost & Perrault Rugs for cc-tapis Milan",
   "ozone": "Ozone Paris — Bronze Furniture & Lighting Editions",
   "ozone-light": "Ozone Light — Sculptural Bronze Lighting, Paris",
-  "yabu-pushelberg": "Yabu Pushelberg for Collection Particulière",
+  "yabu-pushelberg": "Yabu Pushelberg — Interiors & Furniture Design",
   "yabu-pushelberg-man-of-parts": "Yabu Pushelberg for Man of Parts — Seating & Tables",
   "atelier-fevrier": "Atelier Février — Hand-Knotted Luxury Rugs from Nepal",
   "garnier-linker": "Garnier & Linker Furniture | Maison Affluency",
