@@ -57,13 +57,13 @@ function displayName(name: string): string {
 // override within Google's 40-60 char title band.
 const DESIGNER_TITLE_OVERRIDES: Record<string, string> = {
   "christophe-delcourt": "Christophe Delcourt — Delcourt Collection Furniture",
-  "christophe-delcourt-cc-tapis": "Christophe Delcourt Rugs for CC-Tapis | Maison Affluency",
-  "gaelle-lauriot-prevost": "Gaëlle Lauriot-Prévost & Dominique Perrault for Ozone",
-  "gaelle-lauriot-prevost-dominique-perrault-cc-tapis": "Lauriot-Prévost & Perrault for CC-Tapis — Rugs",
+  "christophe-delcourt-cc-tapis": "Christophe Delcourt Rugs for cc-tapis Milan",
+  "gaelle-lauriot-prevost": "Lauriot-Prévost & Perrault — Ozone Bronze Lighting",
+  "gaelle-lauriot-prevost-dominique-perrault-cc-tapis": "Lauriot-Prévost & Perrault Rugs for cc-tapis Milan",
   "ozone": "Ozone Paris — Bronze Furniture & Lighting Editions",
-  "ozone-light": "Ozone Light — Sculptural Bronze Lighting Collection",
-  "yabu-pushelberg": "Yabu Pushelberg × Collection Particulière Furniture",
-  "yabu-pushelberg-man-of-parts": "Yabu Pushelberg for Man of Parts — Furniture Design",
+  "ozone-light": "Ozone Light — Sculptural Bronze Lighting, Paris",
+  "yabu-pushelberg": "Yabu Pushelberg for Collection Particulière",
+  "yabu-pushelberg-man-of-parts": "Yabu Pushelberg for Man of Parts — Seating & Tables",
 };
 
 // Target Google's display bands: title 40-60 chars, description 140-160 chars.
