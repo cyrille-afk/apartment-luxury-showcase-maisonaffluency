@@ -184,6 +184,7 @@ const TradeRegister = () => {
         <meta property="og:url" content="https://maisonaffluency.com/trade/register" />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="min-h-screen bg-background px-4 py-6 md:py-12">
         <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-6">
