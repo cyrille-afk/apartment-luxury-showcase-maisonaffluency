@@ -545,6 +545,10 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
               Some items priced on request — final total confirmed at quoting.
             </div>
           )}
+          <div className="pt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent/70" aria-hidden="true" />
+            FX rates via Frankfurter · {relativeTime(ratesFetchedAt)}
+          </div>
         </div>
       )}
 
