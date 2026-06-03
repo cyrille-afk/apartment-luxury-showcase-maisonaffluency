@@ -572,6 +572,39 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (!gstUserTouched) setGstEnabled(currency === "SGD");
   }, [currency, gstUserTouched]);
 
+  const [editingQtyId, setEditingQtyId] = useState<string | null>(null);
+  const [editingQtyValue, setEditingQtyValue] = useState<string>("");
+  const [editingQtyError, setEditingQtyError] = useState<string | null>(null);
+  const qtyInputRef = useRef<HTMLInputElement | null>(null);
+
+  const startEditQty = (itemId: string, currentQty: number) => {
+    setEditingQtyId(itemId);
+    setEditingQtyValue(String(currentQty));
+    setEditingQtyError(null);
+    setTimeout(() => qtyInputRef.current?.select(), 0);
+  };
+
+  const commitEditQty = async (itemId: string) => {
+    const raw = editingQtyValue.trim();
+    const num = parseInt(raw, 10);
+    if (Number.isNaN(num) || num < 1) {
+      setEditingQtyError("Quantity must be at least 1");
+      qtyInputRef.current?.select();
+      return;
+    }
+    setEditingQtyError(null);
+    setEditingQtyId(null);
+    if (num !== items.find((i) => i.id === itemId)?.quantity) {
+      await handleUpdateQuantity(itemId, num);
+    }
+  };
+
+  const cancelEditQty = () => {
+    setEditingQtyId(null);
+    setEditingQtyValue("");
+    setEditingQtyError(null);
+  };
+
   const handleCurrencyChange = async (c: Currency) => {
     setCurrency(c);
     setCurrencyOpen(false);
