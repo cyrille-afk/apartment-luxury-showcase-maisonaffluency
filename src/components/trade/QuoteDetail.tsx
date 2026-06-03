@@ -577,6 +577,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [editingQtyError, setEditingQtyError] = useState<string | null>(null);
   const qtyInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
+  const [editingNotesValue, setEditingNotesValue] = useState<string>("");
+  const notesTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
   const startEditQty = (itemId: string, currentQty: number) => {
     setEditingQtyId(itemId);
     setEditingQtyValue(String(currentQty));
@@ -603,6 +607,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setEditingQtyId(null);
     setEditingQtyValue("");
     setEditingQtyError(null);
+  };
+
+  const startEditNotes = (itemId: string, currentNotes: string | null) => {
+    setEditingNotesId(itemId);
+    setEditingNotesValue(currentNotes || "");
+    setTimeout(() => notesTextareaRef.current?.focus(), 0);
+  };
+
+  const commitEditNotes = async (itemId: string) => {
+    const raw = editingNotesValue.trim();
+    const v = raw || null;
+    setEditingNotesId(null);
+    setEditingNotesValue("");
+    const current = items.find((i) => i.id === itemId)?.notes ?? null;
+    if (v !== current) {
+      await updateItemField(itemId, { notes: v });
+    }
+  };
+
+  const cancelEditNotes = () => {
+    setEditingNotesId(null);
+    setEditingNotesValue("");
   };
 
   const handleCurrencyChange = async (c: Currency) => {
@@ -1222,7 +1248,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     itemId: string,
     patch: Partial<Pick<QuoteItemWithProduct,
       "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room"
-      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg"
+      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg" | "notes"
     >>
   ) => {
     if (isReadOnly) return;
@@ -1922,7 +1948,48 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {!item.variant_label && product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.materials}</p>}
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p>}
-                          {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 break-words">{item.notes}</p>}
+                          {editingNotesId === item.id ? (
+                            <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
+                              <textarea
+                                ref={notesTextareaRef}
+                                rows={2}
+                                value={editingNotesValue}
+                                onChange={(e) => setEditingNotesValue(e.target.value)}
+                                onBlur={() => commitEditNotes(item.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                                    e.preventDefault();
+                                    commitEditNotes(item.id);
+                                  } else if (e.key === "Escape") {
+                                    cancelEditNotes();
+                                  }
+                                }}
+                                placeholder="Exception or spec note…"
+                                className="w-full font-body text-[11px] text-foreground bg-background border border-border rounded px-2 py-1.5 focus:border-foreground/50 outline-none resize-y"
+                                autoFocus
+                              />
+                              <span className="font-body text-[9px] text-muted-foreground/60">Ctrl+Enter to save · Esc to cancel</span>
+                            </div>
+                          ) : (
+                            <>
+                              {item.notes ? (
+                                <button
+                                  onClick={() => canEditLines ? startEditNotes(item.id, item.notes) : undefined}
+                                  className={`block text-left w-full font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1 break-words ${canEditLines ? "cursor-text hover:text-muted-foreground" : ""}`}
+                                  title={canEditLines ? "Click to edit notes" : undefined}
+                                >
+                                  {item.notes}
+                                </button>
+                              ) : canEditLines ? (
+                                <button
+                                  onClick={() => startEditNotes(item.id, item.notes)}
+                                  className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground/60 hover:text-muted-foreground mt-1.5 transition-colors"
+                                >
+                                  <Edit3 className="h-3 w-3" /> Add notes
+                                </button>
+                              ) : null}
+                            </>
+                          )}
                           {canEditLines && (
                             <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-1.5 md:mt-2 transition-colors">
                               <Trash2 className="h-3 w-3" /> Remove
