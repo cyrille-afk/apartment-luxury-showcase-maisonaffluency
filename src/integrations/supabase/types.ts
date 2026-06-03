@@ -416,6 +416,24 @@ export type Database = {
         }
         Relationships: []
       }
+      brief_drafts: {
+        Row: {
+          payload: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          payload: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          payload?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cad_asset_downloads: {
         Row: {
           cad_asset_id: string
