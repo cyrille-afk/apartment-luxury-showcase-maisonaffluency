@@ -599,15 +599,22 @@ export function BriefWizard() {
                     type="button"
                     onClick={syncNow}
                     disabled={cloudStatus === "syncing"}
-                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className={cn(
+                      "flex items-center gap-1 text-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                      cloudStatus === "error"
+                        ? "text-destructive hover:text-destructive/80"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
                     title="Push local draft / pull latest cloud draft"
                   >
                     {cloudStatus === "syncing" ? (
                       <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : cloudStatus === "error" ? (
+                      <RefreshCw className="h-2.5 w-2.5" />
                     ) : (
                       <RefreshCw className="h-2.5 w-2.5" />
                     )}
-                    Sync now
+                    {cloudStatus === "error" ? "Try again" : "Sync now"}
                   </button>
                 )}
                 {cloudSync && cloudStatus === "synced" && <Check className="h-2.5 w-2.5 text-accent" />}
