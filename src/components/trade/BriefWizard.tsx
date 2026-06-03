@@ -443,7 +443,7 @@ export function BriefWizard() {
     } finally {
       setSaving(false);
     }
-  }, [answers, user, navigate, allErrors]);
+  }, [answers, user, navigate, allErrors, cloudSync]);
 
   const ErrorMsg = ({ msg }: { msg?: string }) =>
     msg ? (
