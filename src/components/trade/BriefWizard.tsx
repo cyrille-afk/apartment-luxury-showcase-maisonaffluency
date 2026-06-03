@@ -506,13 +506,30 @@ export function BriefWizard() {
               {step.title}
               <span className="font-body text-xs text-muted-foreground ml-2">Step {stepIdx + 1} of {STEPS.length}</span>
             </span>
-            {savedLabel && (
-              <span className="flex items-center gap-1 font-body text-[10px] font-normal text-muted-foreground">
-                <Check className="h-3 w-3 text-accent" /> {savedLabel}
-              </span>
-            )}
+            <span className="flex items-center gap-2 font-body text-[10px] font-normal text-muted-foreground">
+              {savedLabel && (
+                <span className="flex items-center gap-1">
+                  <Check className="h-3 w-3 text-accent" /> {savedLabel}
+                </span>
+              )}
+            </span>
           </DialogTitle>
-          <DialogDescription>{step.description}</DialogDescription>
+          <DialogDescription className="flex items-center justify-between gap-2">
+            <span>{step.description}</span>
+            {user && (
+              <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer shrink-0 ml-2">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 accent-accent cursor-pointer"
+                  checked={cloudSync}
+                  onChange={(e) => toggleCloudSync(e.target.checked)}
+                />
+                Sync across devices
+                {cloudSync && cloudStatus === "syncing" && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                {cloudSync && cloudStatus === "synced" && <Check className="h-2.5 w-2.5 text-accent" />}
+                {cloudSync && cloudStatus === "error" && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
+              </label>
+            )}
         </DialogHeader>
 
         {/* Step-by-step progress indicator */}
