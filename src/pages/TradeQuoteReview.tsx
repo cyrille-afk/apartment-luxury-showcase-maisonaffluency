@@ -36,10 +36,18 @@ interface ItemRow {
   } | null;
 }
 
-const fmt = (cents: number | null | undefined, currency: string, locale = navigator.language) =>
-  cents == null || isNaN(cents)
-    ? "—"
-    : new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+const fmt = (cents: number | null | undefined, currency: string, locale = navigator.language) => {
+  if (cents == null || isNaN(cents)) return "—";
+  const amount = cents / 100;
+  // Show 2 decimals only when the value has a sub-unit component; integers stay clean.
+  const hasFraction = Math.round(amount * 100) % 100 !== 0;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: hasFraction ? 2 : 0,
+    maximumFractionDigits: hasFraction ? 2 : 0,
+  }).format(amount);
+};
 
 interface PriceCellProps {
   value: number | null;
@@ -294,14 +302,19 @@ const TradeQuoteReview = () => {
         )}
 
         {Object.entries(grouped).map(([room, rows]) => {
-          const roomTotalCents = rows.reduce((sum, it) => {
+          const pricedRows = rows.filter((it) => {
+            const eff = it.unit_price_cents ?? it.trade_products?.trade_price_cents ?? it.trade_products?.rrp_price_cents;
+            return eff != null;
+          });
+          const roomTotalCents = pricedRows.reduce((sum, it) => {
             const effective =
               it.unit_price_cents ??
               it.trade_products?.trade_price_cents ??
               it.trade_products?.rrp_price_cents ??
-              null;
-            return sum + (effective ?? 0) * it.quantity;
+              0;
+            return sum + effective * it.quantity;
           }, 0);
+          const roomHasAnyPriced = pricedRows.length > 0;
           return (
             <Card key={room}>
               <CardHeader className="pb-2">
@@ -377,7 +390,7 @@ const TradeQuoteReview = () => {
                         Room subtotal
                       </TableCell>
                       <TableCell className="text-right font-display text-sm text-foreground">
-                        {fmt(roomTotalCents, currency)}
+                        {roomHasAnyPriced ? fmt(roomTotalCents, currency) : "—"}
                       </TableCell>
                       <TableCell />
                     </TableRow>
@@ -390,7 +403,7 @@ const TradeQuoteReview = () => {
 
         <div className="flex items-center justify-end gap-6 border-t border-border pt-4">
           <div className="font-body text-xs text-muted-foreground">Subtotal (priced items)</div>
-          <div className="font-display text-xl text-foreground">{fmt(totalCents, currency)}</div>
+          <div className="font-display text-xl text-foreground">{totalCents > 0 ? fmt(totalCents, currency) : "—"}</div>
         </div>
       </div>
     </>
