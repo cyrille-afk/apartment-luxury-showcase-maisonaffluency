@@ -273,7 +273,9 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       lead_weeks: l.lead_weeks,
       note: l.note,
     }));
-    const quoteCurrency = lineCurrency || currency;
+    // On a brand-new draft the user-picked currency wins; on append we must
+    // keep the existing quote's currency intact.
+    const quoteCurrency = isAppend ? (lineCurrency || currency) : (currency || lineCurrency);
 
     const body =
       proposal.tool === "draft_quote"
