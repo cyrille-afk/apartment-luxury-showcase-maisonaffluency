@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Loader2, Check, AlertCircle, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Check, AlertCircle, Save, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -297,6 +297,54 @@ export function BriefWizard() {
     }
   }, [user]);
 
+  const syncNow = useCallback(async () => {
+    if (!user || !cloudSync) return;
+    setCloudStatus("syncing");
+    const ts = Date.now();
+    try {
+      // 1) Push current local state immediately
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
+      setSavedAt(ts);
+      const { error: upsertErr } = await (supabase as any)
+        .from("brief_drafts")
+        .upsert({
+          user_id: user.id,
+          payload: { answers, stepIdx, lastCompletedStep },
+          updated_at: new Date(ts).toISOString(),
+        }, { onConflict: "user_id" });
+      if (upsertErr) throw upsertErr;
+
+      // 2) Pull latest from cloud to resolve any conflicts (server wins if newer)
+      const { data, error: fetchErr } = await (supabase as any)
+        .from("brief_drafts")
+        .select("payload, updated_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+      if (data?.payload) {
+        const cloudTs = new Date(data.updated_at).getTime();
+        const localTs = ts;
+        if (cloudTs > localTs + 500) {
+          const p = data.payload as any;
+          if (p.answers) setAnswers({ ...initialAnswers, ...p.answers });
+          if (typeof p.stepIdx === "number") setStepIdx(p.stepIdx);
+          if (typeof p.lastCompletedStep === "number") setLastCompletedStep(p.lastCompletedStep);
+          setSavedAt(cloudTs);
+          toast.success("Merged newer cloud draft.");
+        } else {
+          toast.success("Synced to cloud.");
+        }
+      } else {
+        toast.success("Synced to cloud.");
+      }
+      setCloudStatus("synced");
+    } catch (e: any) {
+      console.error(e);
+      setCloudStatus("error");
+      toast.error(e?.message || "Sync failed — try again.");
+    }
+  }, [user, cloudSync, answers, stepIdx, lastCompletedStep]);
+
   // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
     if (!user || prefilled) return;
@@ -517,18 +565,35 @@ export function BriefWizard() {
           <DialogDescription className="flex items-center justify-between gap-2">
             <span>{step.description}</span>
             {user && (
-              <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer shrink-0 ml-2">
-                <input
-                  type="checkbox"
-                  className="h-3 w-3 accent-accent cursor-pointer"
-                  checked={cloudSync}
-                  onChange={(e) => toggleCloudSync(e.target.checked)}
-                />
-                Sync across devices
-                {cloudSync && cloudStatus === "syncing" && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 accent-accent cursor-pointer"
+                    checked={cloudSync}
+                    onChange={(e) => toggleCloudSync(e.target.checked)}
+                  />
+                  Sync across devices
+                </label>
+                {cloudSync && (
+                  <button
+                    type="button"
+                    onClick={syncNow}
+                    disabled={cloudStatus === "syncing"}
+                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Push local draft / pull latest cloud draft"
+                  >
+                    {cloudStatus === "syncing" ? (
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-2.5 w-2.5" />
+                    )}
+                    Sync now
+                  </button>
+                )}
                 {cloudSync && cloudStatus === "synced" && <Check className="h-2.5 w-2.5 text-accent" />}
                 {cloudSync && cloudStatus === "error" && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
-              </label>
+              </div>
             )}
           </DialogDescription>
         </DialogHeader>
