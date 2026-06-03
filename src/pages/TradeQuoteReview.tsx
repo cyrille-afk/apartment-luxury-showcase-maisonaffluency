@@ -381,7 +381,7 @@ const TradeQuoteReview = () => {
       y += 18;
     }
 
-    if (y > pageH - 80) { doc.addPage(); y = 56; }
+    if (y > pageH - 120) { doc.addPage(); y = 56; }
     y += 4;
     doc.setDrawColor(40);
     doc.line(marginX, y, pageW - marginX, y);
@@ -392,6 +392,30 @@ const TradeQuoteReview = () => {
       const tx = c.align === "right" ? c.x + c.w : c.x;
       doc.text(totals[i], tx, y, { align: c.align });
     });
+
+    // Luxury branded footer on last page
+    const footerY = pageH - 56;
+    doc.setDrawColor(180);
+    doc.line(marginX, footerY - 12, pageW - marginX, footerY - 12);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(30);
+    const brandText = "Maison Affluency";
+    doc.text(brandText, pageW / 2, footerY + 2, { align: "center" });
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    const philosophy = "Bespoke curation of the world's finest collectible design — where rarity meets refined taste.";
+    const philosophyLines = doc.splitTextToSize(philosophy, pageW - marginX * 2);
+    doc.text(philosophyLines, pageW / 2, footerY + 18, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(130);
+    const contactLine = "trade@maisonaffluency.com  ·  +44 (0)20 7946 0958  ·  www.mais onaffluency.com";
+    doc.text(contactLine, pageW / 2, footerY + 36, { align: "center" });
 
     const blob = doc.output("blob");
     downloadBlob(blob, `${quoteCode}-breakdown.pdf`);
