@@ -811,7 +811,7 @@ async function classifySentiment(
 // Semantic-cached on the latest user message so paraphrased briefs hit the
 // same plan without re-spending tokens.
 // =========================================================================
-type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote";
+type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote" | "propose_ffe_rows";
 type ExtractedBrief = {
   intent: "chitchat" | "discovery" | "selection" | "quote" | "selection_and_quote" | "navigation";
   brief: {
