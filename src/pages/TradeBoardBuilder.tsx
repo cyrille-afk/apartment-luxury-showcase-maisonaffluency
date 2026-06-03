@@ -548,6 +548,40 @@ const TradeBoardBuilder = () => {
           </div>
         </div>
 
+        {/* Concierge hand-off: Next stage CTA */}
+        {isEditable && items.length > 0 && (
+          <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-body text-[11px] uppercase tracking-[0.18em] text-primary">
+                  Next: draft quote
+                </p>
+                <p className="font-body text-xs text-muted-foreground mt-0.5">
+                  Tearsheet committed. Hand off to the Quote stage to price these {items.length} item{items.length === 1 ? "" : "s"} for {board.client_name || "your client"}.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 sm:shrink-0">
+              {approvedCount > 0 ? (
+                <Button size="sm" className="gap-1.5" onClick={convertToQuote}>
+                  <FileText className="h-3.5 w-3.5" /> Draft quote ({approvedCount} approved)
+                </Button>
+              ) : (
+                <CreateQuoteFromBoard
+                  board={board}
+                  items={items.map((i) => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status }))}
+                  userId={user!.id}
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+
+
         {/* Client Portal white-label settings */}
         {isEditable && (
           <details className="mb-6 rounded-md border border-border bg-card/40 group">
