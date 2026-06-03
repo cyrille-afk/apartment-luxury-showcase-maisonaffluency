@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, Loader2, Pencil, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, Download, Loader2, Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -255,6 +255,60 @@ const TradeQuoteReview = () => {
   const reviewIds = new Set(needsReview.map((r) => r.id));
   const quoteCode = `QU-${quote.id.slice(0, 6).toUpperCase()}`;
 
+  const buildBreakdown = () => {
+    const rooms = Object.entries(grouped).map(([room, rows]) => {
+      let pricedCount = 0;
+      let freeCount = 0;
+      let unpricedCount = 0;
+      let roomTotalCents = 0;
+      for (const it of rows) {
+        const eff = it.unit_price_cents ?? it.trade_products?.trade_price_cents ?? it.trade_products?.rrp_price_cents ?? null;
+        if (eff == null) unpricedCount += it.quantity;
+        else if (eff === 0) freeCount += it.quantity;
+        else { pricedCount += it.quantity; roomTotalCents += eff * it.quantity; }
+      }
+      return { room, pricedCount, freeCount, unpricedCount, roomTotalCents };
+    });
+    return rooms;
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const escapeCsv = (v: string | number) => {
+    const s = String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const exportCsv = () => {
+    const rooms = buildBreakdown();
+    const lines: string[] = [];
+    lines.push(["Room", "Priced items", "Free items", "Unpriced items", `Subtotal (${currency})`].map(escapeCsv).join(","));
+    let totalPriced = 0, totalFree = 0, totalUnpriced = 0, grand = 0;
+    for (const r of rooms) {
+      totalPriced += r.pricedCount;
+      totalFree += r.freeCount;
+      totalUnpriced += r.unpricedCount;
+      grand += r.roomTotalCents;
+      const subtotal = r.pricedCount === 0 && r.freeCount === 0
+        ? "Unpriced"
+        : r.roomTotalCents === 0 ? "Free" : (r.roomTotalCents / 100).toFixed(2);
+      lines.push([r.room, r.pricedCount, r.freeCount, r.unpricedCount, subtotal].map(escapeCsv).join(","));
+    }
+    lines.push(["Total", totalPriced, totalFree, totalUnpriced, (grand / 100).toFixed(2)].map(escapeCsv).join(","));
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, `${quoteCode}-breakdown.csv`);
+  };
+
+
   return (
     <>
       <Helmet>
@@ -271,11 +325,17 @@ const TradeQuoteReview = () => {
               {items.length} items · {Object.keys(grouped).length} rooms · {currency}
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to={`/trade/quotes/${quote.id}`}>
-              <Pencil className="h-3.5 w-3.5" /> Open in editor
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={exportCsv}>
+              <Download className="h-3.5 w-3.5" /> Export CSV
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to={`/trade/quotes/${quote.id}`}>
+                <Pencil className="h-3.5 w-3.5" /> Open in editor
+              </Link>
+            </Button>
+          </div>
+
         </div>
 
         {needsReview.length > 0 ? (
