@@ -308,6 +308,96 @@ const TradeQuoteReview = () => {
     downloadBlob(blob, `${quoteCode}-breakdown.csv`);
   };
 
+  const exportPdf = async () => {
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const rooms = buildBreakdown();
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 48;
+    let y = 56;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(`Quote ${quoteCode} — Per-room breakdown`, marginX, y);
+    y += 18;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(110);
+    doc.text(
+      `${items.length} items · ${rooms.length} rooms · ${currency} · ${new Date().toLocaleDateString()}`,
+      marginX,
+      y,
+    );
+    y += 24;
+    doc.setTextColor(20);
+
+    const cols = [
+      { label: "Room", x: marginX, w: 200, align: "left" as const },
+      { label: "Priced", x: marginX + 200, w: 60, align: "right" as const },
+      { label: "Free", x: marginX + 260, w: 50, align: "right" as const },
+      { label: "Unpriced", x: marginX + 310, w: 70, align: "right" as const },
+      { label: `Subtotal (${currency})`, x: marginX + 380, w: pageW - marginX - (marginX + 380), align: "right" as const },
+    ];
+
+    const drawHeader = () => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      cols.forEach((c) => {
+        const tx = c.align === "right" ? c.x + c.w : c.x;
+        doc.text(c.label, tx, y, { align: c.align });
+      });
+      y += 6;
+      doc.setDrawColor(180);
+      doc.line(marginX, y, pageW - marginX, y);
+      y += 12;
+      doc.setFont("helvetica", "normal");
+    };
+    drawHeader();
+
+    const fmtSubtotal = (r: { pricedCount: number; freeCount: number; roomTotalCents: number }) => {
+      if (r.pricedCount === 0 && r.freeCount === 0) return "Unpriced";
+      if (r.roomTotalCents === 0) return "Free";
+      return fmt(r.roomTotalCents, currency);
+    };
+
+    let totalPriced = 0, totalFree = 0, totalUnpriced = 0, grand = 0;
+    for (const r of rooms) {
+      if (y > pageH - 80) {
+        doc.addPage();
+        y = 56;
+        drawHeader();
+      }
+      totalPriced += r.pricedCount;
+      totalFree += r.freeCount;
+      totalUnpriced += r.unpricedCount;
+      grand += r.roomTotalCents;
+      const values = [r.room, String(r.pricedCount), String(r.freeCount), String(r.unpricedCount), fmtSubtotal(r)];
+      cols.forEach((c, i) => {
+        const tx = c.align === "right" ? c.x + c.w : c.x;
+        const txt = doc.splitTextToSize(values[i], c.w);
+        doc.text(txt, tx, y, { align: c.align });
+      });
+      y += 18;
+    }
+
+    if (y > pageH - 80) { doc.addPage(); y = 56; }
+    y += 4;
+    doc.setDrawColor(40);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 16;
+    doc.setFont("helvetica", "bold");
+    const totals = ["Total", String(totalPriced), String(totalFree), String(totalUnpriced), fmt(grand, currency)];
+    cols.forEach((c, i) => {
+      const tx = c.align === "right" ? c.x + c.w : c.x;
+      doc.text(totals[i], tx, y, { align: c.align });
+    });
+
+    const blob = doc.output("blob");
+    downloadBlob(blob, `${quoteCode}-breakdown.pdf`);
+  };
+
+
 
   return (
     <>
@@ -329,6 +419,10 @@ const TradeQuoteReview = () => {
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="h-3.5 w-3.5" /> Export CSV
             </Button>
+            <Button variant="outline" size="sm" onClick={exportPdf}>
+              <Download className="h-3.5 w-3.5" /> Export PDF
+            </Button>
+
             <Button asChild variant="outline" size="sm">
               <Link to={`/trade/quotes/${quote.id}`}>
                 <Pencil className="h-3.5 w-3.5" /> Open in editor
