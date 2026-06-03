@@ -428,9 +428,16 @@ export function BriefWizard() {
     }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">
-            {step.title}
-            <span className="font-body text-xs text-muted-foreground ml-2">Step {stepIdx + 1} of {STEPS.length}</span>
+          <DialogTitle className="font-display text-xl flex items-center justify-between gap-2">
+            <span>
+              {step.title}
+              <span className="font-body text-xs text-muted-foreground ml-2">Step {stepIdx + 1} of {STEPS.length}</span>
+            </span>
+            {savedLabel && (
+              <span className="flex items-center gap-1 font-body text-[10px] font-normal text-muted-foreground">
+                <Check className="h-3 w-3 text-accent" /> {savedLabel}
+              </span>
+            )}
           </DialogTitle>
           <DialogDescription>{step.description}</DialogDescription>
         </DialogHeader>
