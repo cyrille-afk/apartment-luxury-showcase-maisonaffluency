@@ -310,6 +310,7 @@ export function BriefWizard() {
       return;
     }
     setShowStepErrors(false);
+    setLastCompletedStep((prev) => Math.max(prev, stepIdx));
     setStepIdx((i) => Math.min(STEPS.length - 1, i + 1));
   };
 
