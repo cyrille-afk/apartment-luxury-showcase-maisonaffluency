@@ -428,7 +428,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         {lines.map((l) => {
           const isExcluded = excluded.has(l.pick_id);
           const effectiveUnitPrice = effectiveLineUnitPrice(l);
-          const lineTotal = effectiveUnitPrice != null ? effectiveUnitPrice * l.qty : null;
+          const displayedUnitPrice = convert(effectiveUnitPrice, l.currency);
+          const lineTotal = displayedUnitPrice != null ? displayedUnitPrice * l.qty : null;
           return (
             <li
               key={l.pick_id}
@@ -458,17 +459,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                       <option key={o.label} value={o.label}>
                         {o.label}
                         {o.price_cents != null
-                          ? ` — ${formatPrice(o.price_cents, l.currency)}`
+                          ? ` — ${formatPrice(convert(o.price_cents, l.currency), displayCurrency)}`
                           : ""}
                       </option>
                     ))}
                   </select>
                 )}
                 <div className="mt-0.5 font-body text-[10px] text-muted-foreground">
-                  {formatPrice(effectiveUnitPrice, l.currency)}
+                  {formatPrice(displayedUnitPrice, displayCurrency)}
                   {lineTotal != null && l.qty > 1 && (
                     <span className="ml-1 text-foreground/70">
-                      × {l.qty} = {formatPrice(lineTotal, l.currency)}
+                      × {l.qty} = {formatPrice(lineTotal, displayCurrency)}
                     </span>
                   )}
                   {l.lead_weeks != null && <span className="ml-2">· {l.lead_weeks}w lead</span>}
