@@ -530,6 +530,7 @@ export function BriefWizard() {
                 {cloudSync && cloudStatus === "error" && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
               </label>
             )}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Step-by-step progress indicator */}
