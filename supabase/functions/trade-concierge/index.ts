@@ -1608,7 +1608,8 @@ serve(async (req) => {
           const allBuffers = Array.from(toolCallBuffers.values());
           const tearsheetBuffers = allBuffers.filter((b) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers];
+          const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
+          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers];
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
