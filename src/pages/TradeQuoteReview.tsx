@@ -36,10 +36,18 @@ interface ItemRow {
   } | null;
 }
 
-const fmt = (cents: number | null | undefined, currency: string, locale = navigator.language) =>
-  cents == null || isNaN(cents)
-    ? "—"
-    : new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+const fmt = (cents: number | null | undefined, currency: string, locale = navigator.language) => {
+  if (cents == null || isNaN(cents)) return "—";
+  const amount = cents / 100;
+  // Show 2 decimals only when the value has a sub-unit component; integers stay clean.
+  const hasFraction = Math.round(amount * 100) % 100 !== 0;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: hasFraction ? 2 : 0,
+    maximumFractionDigits: hasFraction ? 2 : 0,
+  }).format(amount);
+};
 
 interface PriceCellProps {
   value: number | null;
