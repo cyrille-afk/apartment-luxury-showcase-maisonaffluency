@@ -1092,6 +1092,28 @@ export function AIConcierge() {
                   />
                 );
               }
+              if (item.kind === "ffe_proposal") {
+                return (
+                  <FfeProposalCard
+                    key={i}
+                    proposal={item.proposal}
+                    onResolved={(outcome, info) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "ffe_proposal") copy[i] = { ...t, resolved: outcome };
+                        const msg =
+                          outcome === "discarded"
+                            ? "Got it — FF&E schedule discarded."
+                            : `✓ FF&E schedule drafted — ${info?.added ?? 0} ${info?.added === 1 ? "row" : "rows"} across ${info?.rooms ?? 0} ${info?.rooms === 1 ? "room" : "rooms"}. Open the quote when you want to refine it.`;
+                        copy.push({ kind: "msg", role: "assistant", content: msg });
+                        return copy;
+                      });
+                    }}
+                  />
+                );
+              }
+              if (item.kind !== "proposal") return null;
               return (
                 <TearsheetProposalCard
                   key={i}
