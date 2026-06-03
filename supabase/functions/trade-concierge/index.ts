@@ -185,7 +185,9 @@ const TOOLS = [
         additionalProperties: false,
       },
     },
+  },
   {
+
     type: "function",
     function: {
       name: "propose_ffe_rows",
