@@ -421,6 +421,9 @@ export function BriefWizard() {
         .single();
       if (error) throw error;
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      if (cloudSync) {
+        try { await (supabase as any).from("brief_drafts").delete().eq("user_id", user.id); } catch {}
+      }
       toast.success("Brief saved as a new project.");
       setOpen(false);
       window.dispatchEvent(new CustomEvent("concierge:stage", {
