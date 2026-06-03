@@ -186,42 +186,6 @@ const TOOLS = [
       },
     },
   },
-  {
-    type: "function",
-    function: {
-      name: "propose_ffe_rows",
-      description:
-        "Draft FF&E (Furniture, Fixtures & Equipment) schedule rows for a specific PROJECT, grouped by ROOM. Use this when the user gives a room-by-room brief (\"drawing room + dining room + primary bedroom\") and wants a schedule — not a single quote. Each row REQUIRES a room label. project_id is REQUIRED and MUST be the active project's UUID. On approval the rows commit as room-tagged line items on a new draft quote so they flow into the FF&E Schedule automatically.",
-      parameters: {
-        type: "object",
-        properties: {
-          project_id: { type: "string", description: "REQUIRED. UUID of the active project (from ACTIVE PROJECT section). Refuse to call this tool if there is no active project." },
-          currency: { type: "string", description: "Three-letter currency the user explicitly asks for. If omitted the schedule uses the catalog item currency." },
-          note: { type: "string", description: "Optional one-line note about the schedule (e.g. 'Mayfair townhouse — bronze / mohair edit')." },
-          rows: {
-            type: "array",
-            minItems: 1,
-            maxItems: 30,
-            items: {
-              type: "object",
-              properties: {
-                pick_id: { type: "string", description: "UUID from CATALOG PIECES." },
-                room: { type: "string", description: "Room label, e.g. 'Drawing Room', 'Primary Bedroom', 'Dining Room', 'Entry'. Use Title Case." },
-                qty: { type: "integer", minimum: 1, maximum: 99 },
-                variant: { type: "string", description: "Variant/finish label when the piece has size_variants." },
-                lead_weeks: { type: "integer", minimum: 1, maximum: 104 },
-                note: { type: "string" },
-              },
-              required: ["pick_id", "room", "qty"],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ["project_id", "rows"],
-        additionalProperties: false,
-      },
-    },
-  },
 ];
 
 function buildSystemPrompt(
