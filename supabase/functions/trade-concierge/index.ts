@@ -471,6 +471,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
     });
   });
   (tradeAll || []).forEach((t: any) => {
+    if (!t || !t.product_name) return;
     const rawBrand = String(t.brand_name || "");
     const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
     const designer =
