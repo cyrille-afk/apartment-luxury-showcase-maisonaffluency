@@ -4671,6 +4671,7 @@ export type Database = {
           created_at: string
           deposit_pct_override: number | null
           id: string
+          internal_notes: string | null
           lead_time_weeks_override: number | null
           notes: string | null
           po_number: string | null
@@ -4691,6 +4692,7 @@ export type Database = {
           created_at?: string
           deposit_pct_override?: number | null
           id?: string
+          internal_notes?: string | null
           lead_time_weeks_override?: number | null
           notes?: string | null
           po_number?: string | null
@@ -4711,6 +4713,7 @@ export type Database = {
           created_at?: string
           deposit_pct_override?: number | null
           id?: string
+          internal_notes?: string | null
           lead_time_weeks_override?: number | null
           notes?: string | null
           po_number?: string | null
