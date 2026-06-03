@@ -29,15 +29,12 @@ const PUBLIC_COLUMNS = [
   "is_published",
   "hero_image_url",
   "tagline",
-  "city",
+  "location",
   "country",
 ] as const;
 
 // Columns anon must NEVER be able to read.
-const SENSITIVE_COLUMNS = [
-  "contact_email",
-  "contact_phone",
-] as const;
+const SENSITIVE_COLUMNS = ["contact_email"] as const;
 
 d("featured_studios — anon column-level access", () => {
   const anon = createClient(SUPABASE_URL!, ANON_KEY!, {
