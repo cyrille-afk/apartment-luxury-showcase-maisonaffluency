@@ -895,7 +895,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                       budget_band: { type: "string" },
                       plan: {
                         type: "array",
-                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"] },
+                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"] },
                         maxItems: 3,
                       },
                     },
