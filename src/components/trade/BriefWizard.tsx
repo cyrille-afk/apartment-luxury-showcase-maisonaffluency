@@ -83,6 +83,7 @@ const initialAnswers: Answers = {
 };
 
 const DRAFT_KEY = "trade_brief_wizard_draft";
+const SYNC_PREF_KEY = "trade_brief_wizard_cloud_sync";
 
 const briefSchema = z.object({
   projectName: z.string().trim().min(2, "Give your project a short name (2+ characters).").max(100, "Keep it under 100 characters."),
@@ -196,6 +197,11 @@ export function BriefWizard() {
   const [lastCompletedStep, setLastCompletedStep] = useState(-1);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [, setSavedTick] = useState(0);
+  const [cloudSync, setCloudSync] = useState<boolean>(() => {
+    try { return localStorage.getItem(SYNC_PREF_KEY) !== "0"; } catch { return true; }
+  });
+  const [cloudStatus, setCloudStatus] = useState<"idle" | "syncing" | "synced" | "error">("idle");
+  const [cloudHydrated, setCloudHydrated] = useState(false);
 
   // Restore draft if any
   useEffect(() => {
@@ -211,17 +217,64 @@ export function BriefWizard() {
     } catch {}
   }, []);
 
-  // Persist draft (debounced) + update "saved" timestamp
+  // Hydrate from cloud once user is known + sync enabled; pick whichever side is newer.
   useEffect(() => {
-    const t = setTimeout(() => {
+    if (!user || !cloudSync || cloudHydrated) return;
+    let cancelled = false;
+    (async () => {
       try {
-        const ts = Date.now();
+        const { data, error } = await (supabase as any)
+          .from("brief_drafts")
+          .select("payload, updated_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) { setCloudHydrated(true); return; }
+        if (data?.payload) {
+          const cloudTs = new Date(data.updated_at).getTime();
+          const localTs = savedAt ?? 0;
+          if (cloudTs > localTs + 1500) {
+            const p = data.payload as any;
+            if (p.answers) setAnswers({ ...initialAnswers, ...p.answers });
+            if (typeof p.stepIdx === "number") setStepIdx(p.stepIdx);
+            if (typeof p.lastCompletedStep === "number") setLastCompletedStep(p.lastCompletedStep);
+            setSavedAt(cloudTs);
+            setPrefilled(true);
+            toast.success("Resumed your brief from another device.");
+          }
+        }
+      } catch {}
+      finally { if (!cancelled) setCloudHydrated(true); }
+    })();
+    return () => { cancelled = true; };
+  }, [user, cloudSync, cloudHydrated, savedAt]);
+
+  // Persist draft (debounced) locally + optionally to cloud
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      const ts = Date.now();
+      try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
         setSavedAt(ts);
       } catch {}
-    }, 400);
+      if (user && cloudSync && cloudHydrated) {
+        setCloudStatus("syncing");
+        try {
+          const { error } = await (supabase as any)
+            .from("brief_drafts")
+            .upsert({
+              user_id: user.id,
+              payload: { answers, stepIdx, lastCompletedStep },
+              updated_at: new Date(ts).toISOString(),
+            }, { onConflict: "user_id" });
+          setCloudStatus(error ? "error" : "synced");
+        } catch {
+          setCloudStatus("error");
+        }
+      }
+    }, 700);
     return () => clearTimeout(t);
-  }, [answers, stepIdx, lastCompletedStep]);
+  }, [answers, stepIdx, lastCompletedStep, user, cloudSync, cloudHydrated]);
 
   // Tick to refresh the "saved Xs ago" label while dialog is open
   useEffect(() => {
@@ -229,6 +282,20 @@ export function BriefWizard() {
     const id = setInterval(() => setSavedTick((n) => n + 1), 15000);
     return () => clearInterval(id);
   }, [open]);
+
+  const toggleCloudSync = useCallback(async (next: boolean) => {
+    setCloudSync(next);
+    try { localStorage.setItem(SYNC_PREF_KEY, next ? "1" : "0"); } catch {}
+    if (!user) return;
+    if (next) {
+      setCloudHydrated(false); // re-hydrate / push current state
+      toast.success("Cloud sync on — your brief will follow you across devices.");
+    } else {
+      try { await (supabase as any).from("brief_drafts").delete().eq("user_id", user.id); } catch {}
+      setCloudStatus("idle");
+      toast.success("Cloud sync off — draft kept only on this device.");
+    }
+  }, [user]);
 
   // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
@@ -354,6 +421,9 @@ export function BriefWizard() {
         .single();
       if (error) throw error;
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      if (cloudSync) {
+        try { await (supabase as any).from("brief_drafts").delete().eq("user_id", user.id); } catch {}
+      }
       toast.success("Brief saved as a new project.");
       setOpen(false);
       window.dispatchEvent(new CustomEvent("concierge:stage", {
@@ -373,7 +443,7 @@ export function BriefWizard() {
     } finally {
       setSaving(false);
     }
-  }, [answers, user, navigate, allErrors]);
+  }, [answers, user, navigate, allErrors, cloudSync]);
 
   const ErrorMsg = ({ msg }: { msg?: string }) =>
     msg ? (
@@ -390,6 +460,9 @@ export function BriefWizard() {
     setLastCompletedStep(-1);
     setSavedAt(null);
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    if (user && cloudSync) {
+      (supabase as any).from("brief_drafts").delete().eq("user_id", user.id).then(() => {});
+    }
     toast.success("Draft cleared — sensible defaults restored.");
   };
 
@@ -433,13 +506,31 @@ export function BriefWizard() {
               {step.title}
               <span className="font-body text-xs text-muted-foreground ml-2">Step {stepIdx + 1} of {STEPS.length}</span>
             </span>
-            {savedLabel && (
-              <span className="flex items-center gap-1 font-body text-[10px] font-normal text-muted-foreground">
-                <Check className="h-3 w-3 text-accent" /> {savedLabel}
-              </span>
-            )}
+            <span className="flex items-center gap-2 font-body text-[10px] font-normal text-muted-foreground">
+              {savedLabel && (
+                <span className="flex items-center gap-1">
+                  <Check className="h-3 w-3 text-accent" /> {savedLabel}
+                </span>
+              )}
+            </span>
           </DialogTitle>
-          <DialogDescription>{step.description}</DialogDescription>
+          <DialogDescription className="flex items-center justify-between gap-2">
+            <span>{step.description}</span>
+            {user && (
+              <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer shrink-0 ml-2">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 accent-accent cursor-pointer"
+                  checked={cloudSync}
+                  onChange={(e) => toggleCloudSync(e.target.checked)}
+                />
+                Sync across devices
+                {cloudSync && cloudStatus === "syncing" && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                {cloudSync && cloudStatus === "synced" && <Check className="h-2.5 w-2.5 text-accent" />}
+                {cloudSync && cloudStatus === "error" && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
+              </label>
+            )}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Step-by-step progress indicator */}
