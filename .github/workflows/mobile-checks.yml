@@ -27,6 +27,7 @@ jobs:
       - name: Ensure Chromium is installed
         run: npx playwright install chromium
       - name: Run mobile Playwright checks
+        shell: bash
         run: |
           set -o pipefail
           npm run test:e2e:mobile-pwa 2>&1 | tee playwright-mobile.log
