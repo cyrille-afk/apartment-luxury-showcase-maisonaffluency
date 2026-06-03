@@ -325,11 +325,17 @@ const TradeQuoteReview = () => {
               {items.length} items · {Object.keys(grouped).length} rooms · {currency}
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to={`/trade/quotes/${quote.id}`}>
-              <Pencil className="h-3.5 w-3.5" /> Open in editor
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={exportCsv}>
+              <Download className="h-3.5 w-3.5" /> Export CSV
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to={`/trade/quotes/${quote.id}`}>
+                <Pencil className="h-3.5 w-3.5" /> Open in editor
+              </Link>
+            </Button>
+          </div>
+
         </div>
 
         {needsReview.length > 0 ? (
