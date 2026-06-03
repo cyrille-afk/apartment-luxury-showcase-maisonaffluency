@@ -403,7 +403,7 @@ const TradeQuoteReview = () => {
 
         <div className="flex items-center justify-end gap-6 border-t border-border pt-4">
           <div className="font-body text-xs text-muted-foreground">Subtotal (priced items)</div>
-          <div className="font-display text-xl text-foreground">{fmt(totalCents, currency)}</div>
+          <div className="font-display text-xl text-foreground">{totalCents > 0 ? fmt(totalCents, currency) : "—"}</div>
         </div>
       </div>
     </>
