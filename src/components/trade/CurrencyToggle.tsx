@@ -78,6 +78,11 @@ export function useFxRates() {
   return rates;
 }
 
+/** Get the timestamp (ms since epoch) of the last successful FX rate fetch, or null */
+export function getFxRatesFetchedAt(): number | null {
+  return _rateCache?.ts ?? null;
+}
+
 /** Convert cents using a rates map */
 export function convertCents(
   cents: number,

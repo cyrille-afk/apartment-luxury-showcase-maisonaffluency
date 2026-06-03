@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { useProjects, type Project } from "@/hooks/useProjects";
-import { useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
+import { useFxRates, convertCents, getFxRatesFetchedAt } from "@/components/trade/CurrencyToggle";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -176,12 +176,24 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
 
   // Live FX rates (Frankfurter, cached). Falls back to bundled rates offline.
   const fxRates = useFxRates();
+  const ratesFetchedAt = getFxRatesFetchedAt();
   const convert = (cents: number | null, fromCurrency: string | null): number | null => {
     if (cents == null) return null;
     const src = fromCurrency || displayCurrency;
     if (!src || src === displayCurrency) return cents;
     return convertCents(cents, src, displayCurrency as any, fxRates);
   };
+
+  function relativeTime(ts: number | null): string {
+    if (!ts) return "fallback rates";
+    const diff = Date.now() - ts;
+    if (diff < 60_000) return "just now";
+    const mins = Math.round(diff / 60_000);
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs} hr ago`;
+    return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
 
   // When appending, keep the dropdown synced to the existing quote currency.
   useEffect(() => {
@@ -533,6 +545,10 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
               Some items priced on request — final total confirmed at quoting.
             </div>
           )}
+          <div className="pt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent/70" aria-hidden="true" />
+            FX rates via Frankfurter · {relativeTime(ratesFetchedAt)}
+          </div>
         </div>
       )}
 
