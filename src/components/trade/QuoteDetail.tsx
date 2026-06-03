@@ -577,6 +577,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [editingQtyError, setEditingQtyError] = useState<string | null>(null);
   const qtyInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
+  const [editingNotesValue, setEditingNotesValue] = useState<string>("");
+  const notesTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
   const startEditQty = (itemId: string, currentQty: number) => {
     setEditingQtyId(itemId);
     setEditingQtyValue(String(currentQty));
@@ -603,6 +607,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setEditingQtyId(null);
     setEditingQtyValue("");
     setEditingQtyError(null);
+  };
+
+  const startEditNotes = (itemId: string, currentNotes: string | null) => {
+    setEditingNotesId(itemId);
+    setEditingNotesValue(currentNotes || "");
+    setTimeout(() => notesTextareaRef.current?.focus(), 0);
+  };
+
+  const commitEditNotes = async (itemId: string) => {
+    const raw = editingNotesValue.trim();
+    const v = raw || null;
+    setEditingNotesId(null);
+    setEditingNotesValue("");
+    const current = items.find((i) => i.id === itemId)?.notes ?? null;
+    if (v !== current) {
+      await updateItemField(itemId, { notes: v });
+    }
+  };
+
+  const cancelEditNotes = () => {
+    setEditingNotesId(null);
+    setEditingNotesValue("");
   };
 
   const handleCurrencyChange = async (c: Currency) => {
@@ -1222,7 +1248,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     itemId: string,
     patch: Partial<Pick<QuoteItemWithProduct,
       "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room"
-      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg"
+      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg" | "notes"
     >>
   ) => {
     if (isReadOnly) return;
