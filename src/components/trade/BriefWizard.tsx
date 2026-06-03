@@ -317,6 +317,7 @@ export function BriefWizard() {
   const syncNow = useCallback(async () => {
     if (!user || !cloudSync) return;
     setCloudStatus("syncing");
+    setSyncRetries(0);
     const ts = Date.now();
     try {
       // 1) Push current local state immediately
@@ -355,6 +356,7 @@ export function BriefWizard() {
         toast.success("Synced to cloud.");
       }
       setCloudStatus("synced");
+      setSyncRetries(0);
     } catch (e: any) {
       console.error(e);
       setCloudStatus("error");
