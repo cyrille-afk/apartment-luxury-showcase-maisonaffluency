@@ -164,11 +164,24 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     const filtered = list.filter((i) => !existing.has(i.product_id));
     if (filtered.length === 0) return { added: 0, byRoom: {} as Record<string, number> };
 
+    // Aggregate duplicate product_ids into single lines with quantity = occurrence count
+    const qtyByProduct = new Map<string, number>();
+    const firstSeen = new Map<string, BoardItemLite>();
+    for (const i of filtered) {
+      qtyByProduct.set(i.product_id, (qtyByProduct.get(i.product_id) || 0) + 1);
+      if (!firstSeen.has(i.product_id)) firstSeen.set(i.product_id, i);
+    }
+
     const byRoom: Record<string, number> = {};
-    const rows = filtered.map((i) => {
+    const rows = Array.from(firstSeen.values()).map((i) => {
       const room = (roomByProductId.get(i.product_id) || "Unassigned").trim() || "Unassigned";
       byRoom[room] = (byRoom[room] || 0) + 1;
-      return { quote_id: quoteId, product_id: i.product_id, quantity: 1, room };
+      return {
+        quote_id: quoteId,
+        product_id: i.product_id,
+        quantity: qtyByProduct.get(i.product_id) || 1,
+        room,
+      };
     });
 
     const { data: inserted, error } = await supabase
