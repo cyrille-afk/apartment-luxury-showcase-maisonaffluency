@@ -149,6 +149,11 @@ const TradeQuoteReview = () => {
     setSavingIds((prev) => ({ ...prev, [id]: v }));
 
   const saveUnitPrice = async (item: ItemRow, newCents: number | null) => {
+    const prev = items.find((it) => it.id === item.id)?.unit_price_cents ?? null;
+    // optimistic
+    setItems((prevItems) =>
+      prevItems.map((it) => (it.id === item.id ? { ...it, unit_price_cents: newCents } : it)),
+    );
     setSaving(item.id, true);
     const { error } = await supabase
       .from("trade_quote_items")
@@ -156,10 +161,13 @@ const TradeQuoteReview = () => {
       .eq("id", item.id);
     setSaving(item.id, false);
     if (error) {
+      // rollback
+      setItems((prevItems) =>
+        prevItems.map((it) => (it.id === item.id ? { ...it, unit_price_cents: prev } : it)),
+      );
       toast({ title: "Failed to update unit price", description: error.message, variant: "destructive" });
       return;
     }
-    setItems((prev) => prev.map((it) => (it.id === item.id ? { ...it, unit_price_cents: newCents } : it)));
     toast({ title: "Unit price updated" });
   };
 
@@ -168,6 +176,17 @@ const TradeQuoteReview = () => {
       toast({ title: "No catalog product linked", variant: "destructive" });
       return;
     }
+    const prevMap = new Map(
+      items.filter((it) => it.product_id === item.product_id).map((it) => [it.id, it.trade_products?.trade_price_cents ?? null]),
+    );
+    // optimistic
+    setItems((prevItems) =>
+      prevItems.map((it) =>
+        it.product_id === item.product_id && it.trade_products
+          ? { ...it, trade_products: { ...it.trade_products, trade_price_cents: newCents } }
+          : it,
+      ),
+    );
     setSaving(`catalog-${item.id}`, true);
     const { error } = await supabase
       .from("trade_products")
@@ -175,16 +194,17 @@ const TradeQuoteReview = () => {
       .eq("id", item.product_id);
     setSaving(`catalog-${item.id}`, false);
     if (error) {
+      // rollback
+      setItems((prevItems) =>
+        prevItems.map((it) => {
+          if (it.product_id !== item.product_id || !it.trade_products) return it;
+          const prevCents = prevMap.get(it.id) ?? it.trade_products.trade_price_cents;
+          return { ...it, trade_products: { ...it.trade_products, trade_price_cents: prevCents } };
+        }),
+      );
       toast({ title: "Failed to update catalog price", description: error.message, variant: "destructive" });
       return;
     }
-    setItems((prev) =>
-      prev.map((it) =>
-        it.product_id === item.product_id && it.trade_products
-          ? { ...it, trade_products: { ...it.trade_products, trade_price_cents: newCents } }
-          : it,
-      ),
-    );
     toast({ title: "Catalog price updated" });
   };
 
