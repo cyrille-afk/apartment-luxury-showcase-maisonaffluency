@@ -1529,9 +1529,43 @@ serve(async (req) => {
     const isExplicitQuoteIntent = plannerQuoteOnly
       || (extractedBrief.plan.length === 0
         && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg));
-    const availableTools = isExplicitQuoteIntent
-      ? TOOLS.filter((tool: any) => ["draft_quote", "add_to_quote"].includes(tool.function?.name))
+
+    // ----- Stage-based tool gating -----
+    // The client prefixes the conversation with a `[Workflow context] Current stage: X.`
+    // message. Each stage restricts which concierge tools the model may call, so the
+    // proposal it returns matches the surface the user is actually on. Quote stage in
+    // particular MUST NOT propose a tearsheet — the user is past curation.
+    const stageMatch = (messages as any[])
+      .map((m) => (typeof m?.content === "string" ? m.content : ""))
+      .reverse()
+      .map((c) => c.match(/\[Workflow context\]\s*Current stage:\s*(Discover|Tearsheet|Quote|Order|Project)/i))
+      .find((m) => !!m);
+    const currentStage = (stageMatch?.[1] || "").toLowerCase() as "" | "discover" | "tearsheet" | "quote" | "order" | "project";
+    const STAGE_GATES: Record<string, string[] | null> = {
+      tearsheet: ["propose_tearsheet", "add_to_tearsheet"],
+      quote: ["draft_quote", "add_to_quote"],
+      project: ["propose_ffe_rows", "draft_quote", "add_to_quote"],
+      // discover / order / unknown → no stage-level restriction
+      discover: null,
+      order: null,
+      "": null,
+    };
+    const stageAllowed = STAGE_GATES[currentStage] ?? null;
+    const stageForcesQuote = currentStage === "quote";
+
+    const baseAllowed = isExplicitQuoteIntent
+      ? ["draft_quote", "add_to_quote"]
+      : null;
+    const allowedNames = stageAllowed && baseAllowed
+      ? stageAllowed.filter((n) => baseAllowed.includes(n))
+      : (stageAllowed ?? baseAllowed);
+    const availableTools = allowedNames
+      ? TOOLS.filter((tool: any) => allowedNames.includes(tool.function?.name))
       : TOOLS;
+    // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
+    // tools rather than sending an empty `tools: []` array to the upstream gateway.
+    const finalTools = availableTools.length > 0 ? availableTools : TOOLS;
+    const forceToolCall = isExplicitQuoteIntent || stageForcesQuote;
 
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
@@ -1547,8 +1581,8 @@ serve(async (req) => {
         body: JSON.stringify({
           model: chosenModel,
           messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
-          tools: availableTools,
-          tool_choice: isExplicitQuoteIntent ? "required" : "auto",
+          tools: finalTools,
+          tool_choice: forceToolCall ? "required" : "auto",
           max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
           stream: true,
           stream_options: { include_usage: true },
@@ -1827,6 +1861,8 @@ serve(async (req) => {
         // then the quote card, then [DONE]. No extra LLM call required — the
         // pick_ids and title are derivable from the quote args and the planner brief.
         const backfillTearsheetIfNeeded = () => {
+          // Stage gate: never synthesize a tearsheet when the user is on the Quote stage.
+          if (stageForcesQuote) return;
           const wantsTearsheet =
             extractedBrief.plan.includes("propose_tearsheet") ||
             extractedBrief.plan.includes("add_to_tearsheet");
