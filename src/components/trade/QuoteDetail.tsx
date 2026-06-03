@@ -581,6 +581,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [editingNotesValue, setEditingNotesValue] = useState<string>("");
   const notesTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const [editingInternalNotesId, setEditingInternalNotesId] = useState<string | null>(null);
+  const [editingInternalNotesValue, setEditingInternalNotesValue] = useState<string>("");
+  const internalNotesTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
   const startEditQty = (itemId: string, currentQty: number) => {
     setEditingQtyId(itemId);
     setEditingQtyValue(String(currentQty));
