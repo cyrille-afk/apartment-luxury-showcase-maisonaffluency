@@ -373,7 +373,13 @@ const TradeQuoteReview = () => {
                             />
                           </TableCell>
                           <TableCell className="text-right font-body text-sm">
-                            {effective == null ? "—" : fmt(effective * it.quantity, currency)}
+                            {effective == null ? (
+                              <span className="text-amber-700 dark:text-amber-300">Unpriced</span>
+                            ) : effective === 0 ? (
+                              <span className="text-foreground">Free</span>
+                            ) : (
+                              fmt(effective * it.quantity, currency)
+                            )}
                           </TableCell>
                           <TableCell>
                             {flagged ? (
