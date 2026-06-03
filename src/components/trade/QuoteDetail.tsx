@@ -2016,6 +2016,61 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               ) : null}
                             </>
                           )}
+                          {(() => {
+                            const internalNotes = (item as any).internal_notes as string | null | undefined;
+                            if (editingInternalNotesId === item.id) {
+                              return (
+                                <div className="mt-1.5 rounded border border-amber-500/30 bg-amber-500/5 p-1.5" onClick={(e) => e.stopPropagation()}>
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Lock className="h-2.5 w-2.5 text-amber-600" />
+                                    <span className="font-body text-[9px] uppercase tracking-wider text-amber-700">Internal note · not shown to client</span>
+                                  </div>
+                                  <textarea
+                                    ref={internalNotesTextareaRef}
+                                    rows={2}
+                                    value={editingInternalNotesValue}
+                                    onChange={(e) => setEditingInternalNotesValue(e.target.value)}
+                                    onBlur={() => commitEditInternalNotes(item.id)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                                        e.preventDefault();
+                                        commitEditInternalNotes(item.id);
+                                      } else if (e.key === "Escape") {
+                                        cancelEditInternalNotes();
+                                      }
+                                    }}
+                                    placeholder="Private exception, margin note, supplier issue…"
+                                    className="w-full font-body text-[11px] text-foreground bg-background border border-amber-500/30 rounded px-2 py-1.5 focus:border-amber-500/60 outline-none resize-y"
+                                    autoFocus
+                                  />
+                                  <span className="font-body text-[9px] text-muted-foreground/60">Ctrl+Enter to save · Esc to cancel</span>
+                                </div>
+                              );
+                            }
+                            if (internalNotes) {
+                              return (
+                                <button
+                                  onClick={() => canEditLines ? startEditInternalNotes(item.id, internalNotes) : undefined}
+                                  className={`mt-1.5 flex items-start gap-1 text-left w-full rounded border border-amber-500/30 bg-amber-500/5 px-1.5 py-1 ${canEditLines ? "cursor-text hover:bg-amber-500/10" : ""}`}
+                                  title={canEditLines ? "Internal note — click to edit" : "Internal note"}
+                                >
+                                  <Lock className="h-2.5 w-2.5 text-amber-600 mt-0.5 shrink-0" />
+                                  <span className="font-body text-[10px] md:text-[11px] text-amber-900/80 italic break-words">{internalNotes}</span>
+                                </button>
+                              );
+                            }
+                            if (canEditLines) {
+                              return (
+                                <button
+                                  onClick={() => startEditInternalNotes(item.id, null)}
+                                  className="inline-flex items-center gap-1 font-body text-[10px] text-amber-700/70 hover:text-amber-700 mt-1.5 transition-colors"
+                                >
+                                  <Lock className="h-3 w-3" /> Add internal note
+                                </button>
+                              );
+                            }
+                            return null;
+                          })()}
                           {canEditLines && (
                             <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-1.5 md:mt-2 transition-colors">
                               <Trash2 className="h-3 w-3" /> Remove
