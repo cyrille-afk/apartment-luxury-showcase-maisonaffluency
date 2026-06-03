@@ -395,22 +395,51 @@ export function BriefWizard() {
           <DialogDescription>{step.description}</DialogDescription>
         </DialogHeader>
 
-        {/* Progress dots — clickable to jump between completed/visited steps */}
-        <div className="flex items-center gap-1.5 mb-2">
+        {/* Step-by-step progress indicator */}
+        <div className="flex items-center gap-0 mb-4">
           {STEPS.map((s, i) => {
             const hasErr = STEP_FIELDS[s.id].some((k) => allErrors[k]);
+            const isCurrent = i === stepIdx;
+            const isPast = i < stepIdx;
+            const isFuture = i > stepIdx;
             return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => { setShowStepErrors(false); setStepIdx(i); }}
-                aria-label={`Go to step ${i + 1}: ${s.title}`}
-                className={cn(
-                  "h-1.5 rounded-full transition-all",
-                  i === stepIdx ? "w-6" : "w-3",
-                  i === stepIdx ? "bg-accent" : i < stepIdx ? (hasErr ? "bg-destructive/70" : "bg-accent") : "bg-muted hover:bg-muted-foreground/30"
+              <div key={s.id} className="flex items-center flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => { setShowStepErrors(false); setStepIdx(i); }}
+                  aria-label={`Go to step ${i + 1}: ${s.title}`}
+                  className={cn(
+                    "flex flex-col items-center gap-1 group min-w-0 flex-1",
+                    isFuture && "cursor-not-allowed opacity-60"
+                  )}
+                  disabled={isFuture}
+                >
+                  <div className={cn(
+                    "flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all border-2 shrink-0",
+                    isCurrent
+                      ? "border-accent bg-accent text-accent-foreground ring-2 ring-accent/20"
+                      : isPast
+                        ? hasErr
+                          ? "border-destructive/70 bg-destructive/10 text-destructive"
+                          : "border-accent bg-accent/10 text-accent"
+                        : "border-muted bg-background text-muted-foreground group-hover:border-muted-foreground/40"
+                  )}>
+                    {isPast && !hasErr ? <Check className="h-3.5 w-3.5" /> : <span>{i + 1}</span>}
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-body leading-tight truncate max-w-full px-0.5",
+                    isCurrent ? "text-foreground font-medium" : "text-muted-foreground"
+                  )}>
+                    {s.title}
+                  </span>
+                </button>
+                {i < STEPS.length - 1 && (
+                  <div className={cn(
+                    "h-0.5 flex-1 mx-1 min-w-[16px] transition-colors",
+                    i < stepIdx ? "bg-accent" : "bg-border"
+                  )} />
                 )}
-              />
+              </div>
             );
           })}
         </div>
