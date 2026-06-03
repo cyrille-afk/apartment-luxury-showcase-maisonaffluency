@@ -185,8 +185,44 @@ const TOOLS = [
         additionalProperties: false,
       },
     },
+  {
+    type: "function",
+    function: {
+      name: "propose_ffe_rows",
+      description:
+        "Draft a ROOM-BY-ROOM FF&E schedule bound to the ACTIVE PROJECT. Every row MUST carry a `room` label (e.g. 'Drawing Room', 'Primary Bedroom'). project_id is REQUIRED — if no active project is set, do NOT call this tool; ask the user which project to bind to first. pick_ids in rows MUST come from CATALOG PIECES. On approval the rows commit as room-tagged lines on a draft quote and populate the project's FF&E Schedule view.",
+      parameters: {
+        type: "object",
+        properties: {
+          project_id: { type: "string", description: "UUID of the active project (REQUIRED — from ACTIVE PROJECT section)." },
+          currency: { type: "string", description: "Three-letter currency the user explicitly asks for (e.g. EUR, GBP, USD, SGD). Omit to keep catalog currency." },
+          note: { type: "string", description: "Optional one-line note about the schedule (e.g. 'Mayfair townhouse — full FF&E, phase 1')." },
+          rows: {
+            type: "array",
+            minItems: 1,
+            maxItems: 60,
+            items: {
+              type: "object",
+              properties: {
+                pick_id: { type: "string", description: "UUID from CATALOG PIECES." },
+                room: { type: "string", description: "Room label this row belongs to (e.g. 'Drawing Room', 'Dining Room', 'Primary Bedroom'). REQUIRED." },
+                qty: { type: "integer", minimum: 1, maximum: 99 },
+                variant: { type: "string", description: "Variant/finish label when the piece has size_variants." },
+                lead_weeks: { type: "integer", minimum: 1, maximum: 104 },
+                note: { type: "string" },
+              },
+              required: ["pick_id", "room", "qty"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["project_id", "rows"],
+        additionalProperties: false,
+      },
+    },
   },
 ];
+
 
 function buildSystemPrompt(
   designersList: string,
