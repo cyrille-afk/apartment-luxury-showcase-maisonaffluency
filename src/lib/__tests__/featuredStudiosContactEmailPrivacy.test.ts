@@ -106,8 +106,9 @@ d("featured_studios — anon column-level access", () => {
 
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);
-    if ((data ?? []).length > 0) {
-      const row = data![0] as Record<string, unknown>;
+    const rows = (data ?? []) as unknown as Array<Record<string, unknown>>;
+    if (rows.length > 0) {
+      const row = rows[0];
       for (const col of PUBLIC_COLUMNS) {
         expect(col in row).toBe(true);
       }
