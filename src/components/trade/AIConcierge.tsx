@@ -542,6 +542,10 @@ export function AIConcierge() {
         setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
         return;
       }
+      if (proposal.tool === "propose_ffe_rows") {
+        setTimeline((prev) => [...prev, { kind: "ffe_proposal", proposal }]);
+        return;
+      }
       // Tearsheet proposal — compute which picks are NEW relative to the
       // previous proposal so the card can highlight rationales for replacements only.
       const prevIds = new Set(
