@@ -396,7 +396,18 @@ const TradeQuoteReview = () => {
                         Room subtotal
                       </TableCell>
                       <TableCell className="text-right font-display text-sm text-foreground">
-                        {roomHasAnyPriced ? fmt(roomTotalCents, currency) : "—"}
+                        <div>
+                          {roomHasAnyPriced
+                            ? roomTotalCents === 0
+                              ? "Free"
+                              : fmt(roomTotalCents, currency)
+                            : <span className="text-amber-700 dark:text-amber-300">Unpriced</span>}
+                        </div>
+                        {unpricedCount > 0 && roomHasAnyPriced && (
+                          <div className="font-body text-[10px] text-amber-700 dark:text-amber-300 mt-0.5">
+                            + {unpricedCount} unpriced
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell />
                     </TableRow>
