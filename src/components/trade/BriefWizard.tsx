@@ -387,9 +387,21 @@ export function BriefWizard() {
     setStepIdx(0);
     setTouched({});
     setShowStepErrors(false);
+    setLastCompletedStep(-1);
+    setSavedAt(null);
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
     toast.success("Draft cleared — sensible defaults restored.");
   };
+
+  const savedLabel = useMemo(() => {
+    if (!savedAt) return null;
+    const diff = Math.max(0, Date.now() - savedAt);
+    if (diff < 5_000) return "Saved just now";
+    if (diff < 60_000) return `Saved ${Math.round(diff / 1000)}s ago`;
+    if (diff < 3_600_000) return `Saved ${Math.round(diff / 60_000)}m ago`;
+    return `Saved ${Math.round(diff / 3_600_000)}h ago`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedAt, open]);
 
   const saveAndExit = () => {
     try {
