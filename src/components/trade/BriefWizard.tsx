@@ -203,6 +203,7 @@ export function BriefWizard() {
   });
   const [cloudStatus, setCloudStatus] = useState<"idle" | "syncing" | "synced" | "error">("idle");
   const [cloudHydrated, setCloudHydrated] = useState(false);
+  const [syncRetries, setSyncRetries] = useState(0);
 
   // Restore draft if any
   useEffect(() => {
