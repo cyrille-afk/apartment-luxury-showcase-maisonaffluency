@@ -1938,7 +1938,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               <button onClick={() => item.quantity <= 1 ? handleRemoveItem(item.id) : handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label={item.quantity <= 1 ? "Remove item" : "Decrease quantity"} title={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}>
                                 {item.quantity <= 1 ? <Trash2 className="h-3 w-3 text-destructive" /> : <Minus className="h-3 w-3" />}
                               </button>
-                              <span className="font-body text-xs text-foreground w-6 text-center">{item.quantity}</span>
+                              {editingQtyId === item.id ? (
+                                <div className="flex flex-col items-center">
+                                  <input
+                                    ref={qtyInputRef}
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={editingQtyValue}
+                                    onChange={(e) => { setEditingQtyValue(e.target.value.replace(/\D/g, "")); setEditingQtyError(null); }}
+                                    onBlur={() => commitEditQty(item.id)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitEditQty(item.id); } else if (e.key === "Escape") { cancelEditQty(); } }}
+                                    className={`font-body text-xs text-foreground w-8 text-center bg-background border rounded px-1 py-0.5 focus:border-foreground/50 outline-none ${editingQtyError ? "border-destructive" : "border-border"}`}
+                                    autoFocus
+                                  />
+                                  {editingQtyError && <span className="font-body text-[9px] text-destructive mt-0.5">{editingQtyError}</span>}
+                                </div>
+                              ) : (
+                                <button onClick={() => startEditQty(item.id, item.quantity)} className="font-body text-xs text-foreground w-6 text-center cursor-text" title="Click to edit quantity">
+                                  {item.quantity}
+                                </button>
+                              )}
                               <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
                                 <Plus className="h-3 w-3" />
                               </button>
