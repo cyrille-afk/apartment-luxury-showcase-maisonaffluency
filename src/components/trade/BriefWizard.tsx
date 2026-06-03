@@ -193,6 +193,9 @@ export function BriefWizard() {
   const [touched, setTouched] = useState<Partial<Record<keyof Answers, boolean>>>({});
   const [showStepErrors, setShowStepErrors] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  const [lastCompletedStep, setLastCompletedStep] = useState(-1);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [, setSavedTick] = useState(0);
 
   // Restore draft if any
   useEffect(() => {
@@ -202,16 +205,30 @@ export function BriefWizard() {
         const parsed = JSON.parse(raw);
         if (parsed?.answers) setAnswers({ ...initialAnswers, ...parsed.answers });
         if (typeof parsed?.stepIdx === "number") setStepIdx(parsed.stepIdx);
+        if (typeof parsed?.lastCompletedStep === "number") setLastCompletedStep(parsed.lastCompletedStep);
+        if (typeof parsed?.savedAt === "number") setSavedAt(parsed.savedAt);
       }
     } catch {}
   }, []);
 
-  // Persist draft
+  // Persist draft (debounced) + update "saved" timestamp
   useEffect(() => {
-    try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx }));
-    } catch {}
-  }, [answers, stepIdx]);
+    const t = setTimeout(() => {
+      try {
+        const ts = Date.now();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
+        setSavedAt(ts);
+      } catch {}
+    }, 400);
+    return () => clearTimeout(t);
+  }, [answers, stepIdx, lastCompletedStep]);
+
+  // Tick to refresh the "saved Xs ago" label while dialog is open
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => setSavedTick((n) => n + 1), 15000);
+    return () => clearInterval(id);
+  }, [open]);
 
   // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
@@ -232,7 +249,17 @@ export function BriefWizard() {
       // keep draft if present, otherwise start fresh with defaults + prefill
       try {
         const raw = localStorage.getItem(DRAFT_KEY);
-        if (!raw) {
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const resumeIdx = Math.min(
+            typeof parsed?.stepIdx === "number" ? parsed.stepIdx : 0,
+            STEPS.length - 1
+          );
+          const lastDone = typeof parsed?.lastCompletedStep === "number" ? parsed.lastCompletedStep : -1;
+          if (lastDone >= 0 && STEPS[resumeIdx]) {
+            toast.success(`Resumed where you left off — “${STEPS[resumeIdx].title}”.`);
+          }
+        } else {
           setStepIdx(0);
           const base = { ...initialAnswers };
           if (user) {
@@ -283,6 +310,7 @@ export function BriefWizard() {
       return;
     }
     setShowStepErrors(false);
+    setLastCompletedStep((prev) => Math.max(prev, stepIdx));
     setStepIdx((i) => Math.min(STEPS.length - 1, i + 1));
   };
 
@@ -359,9 +387,21 @@ export function BriefWizard() {
     setStepIdx(0);
     setTouched({});
     setShowStepErrors(false);
+    setLastCompletedStep(-1);
+    setSavedAt(null);
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
     toast.success("Draft cleared — sensible defaults restored.");
   };
+
+  const savedLabel = useMemo(() => {
+    if (!savedAt) return null;
+    const diff = Math.max(0, Date.now() - savedAt);
+    if (diff < 5_000) return "Saved just now";
+    if (diff < 60_000) return `Saved ${Math.round(diff / 1000)}s ago`;
+    if (diff < 3_600_000) return `Saved ${Math.round(diff / 60_000)}m ago`;
+    return `Saved ${Math.round(diff / 3_600_000)}h ago`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedAt, open]);
 
   const saveAndExit = () => {
     try {
@@ -388,9 +428,16 @@ export function BriefWizard() {
     }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">
-            {step.title}
-            <span className="font-body text-xs text-muted-foreground ml-2">Step {stepIdx + 1} of {STEPS.length}</span>
+          <DialogTitle className="font-display text-xl flex items-center justify-between gap-2">
+            <span>
+              {step.title}
+              <span className="font-body text-xs text-muted-foreground ml-2">Step {stepIdx + 1} of {STEPS.length}</span>
+            </span>
+            {savedLabel && (
+              <span className="flex items-center gap-1 font-body text-[10px] font-normal text-muted-foreground">
+                <Check className="h-3 w-3 text-accent" /> {savedLabel}
+              </span>
+            )}
           </DialogTitle>
           <DialogDescription>{step.description}</DialogDescription>
         </DialogHeader>
