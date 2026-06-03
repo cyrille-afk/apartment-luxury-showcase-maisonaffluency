@@ -84,6 +84,7 @@ const initialAnswers: Answers = {
 
 const DRAFT_KEY = "trade_brief_wizard_draft";
 const SYNC_PREF_KEY = "trade_brief_wizard_cloud_sync";
+const MAX_AUTO_RETRIES = 3;
 
 const briefSchema = z.object({
   projectName: z.string().trim().min(2, "Give your project a short name (2+ characters).").max(100, "Keep it under 100 characters."),
@@ -202,6 +203,7 @@ export function BriefWizard() {
   });
   const [cloudStatus, setCloudStatus] = useState<"idle" | "syncing" | "synced" | "error">("idle");
   const [cloudHydrated, setCloudHydrated] = useState(false);
+  const [syncRetries, setSyncRetries] = useState(0);
 
   // Restore draft if any
   useEffect(() => {
@@ -249,9 +251,13 @@ export function BriefWizard() {
     return () => { cancelled = true; };
   }, [user, cloudSync, cloudHydrated, savedAt]);
 
-  // Persist draft (debounced) locally + optionally to cloud
+  // Persist draft (debounced) locally + optionally to cloud with auto-retry
   useEffect(() => {
-    const t = setTimeout(async () => {
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout>;
+
+    const attempt = async (attemptNum: number) => {
+      if (cancelled) return;
       const ts = Date.now();
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
@@ -267,13 +273,24 @@ export function BriefWizard() {
               payload: { answers, stepIdx, lastCompletedStep },
               updated_at: new Date(ts).toISOString(),
             }, { onConflict: "user_id" });
-          setCloudStatus(error ? "error" : "synced");
+          if (error) throw error;
+          setCloudStatus("synced");
+          setSyncRetries(0);
         } catch {
-          setCloudStatus("error");
+          if (cancelled) return;
+          if (attemptNum < MAX_AUTO_RETRIES) {
+            const delay = 3000 * (attemptNum + 1); // 3s, 6s, 9s
+            retryTimer = setTimeout(() => attempt(attemptNum + 1), delay);
+          } else {
+            setCloudStatus("error");
+            toast.error("Cloud sync failed after retries. Click Try again.");
+          }
         }
       }
-    }, 700);
-    return () => clearTimeout(t);
+    };
+
+    const t = setTimeout(() => attempt(0), 700);
+    return () => { cancelled = true; clearTimeout(t); clearTimeout(retryTimer); };
   }, [answers, stepIdx, lastCompletedStep, user, cloudSync, cloudHydrated]);
 
   // Tick to refresh the "saved Xs ago" label while dialog is open
@@ -300,6 +317,7 @@ export function BriefWizard() {
   const syncNow = useCallback(async () => {
     if (!user || !cloudSync) return;
     setCloudStatus("syncing");
+    setSyncRetries(0);
     const ts = Date.now();
     try {
       // 1) Push current local state immediately
@@ -338,6 +356,7 @@ export function BriefWizard() {
         toast.success("Synced to cloud.");
       }
       setCloudStatus("synced");
+      setSyncRetries(0);
     } catch (e: any) {
       console.error(e);
       setCloudStatus("error");
@@ -580,15 +599,22 @@ export function BriefWizard() {
                     type="button"
                     onClick={syncNow}
                     disabled={cloudStatus === "syncing"}
-                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className={cn(
+                      "flex items-center gap-1 text-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                      cloudStatus === "error"
+                        ? "text-destructive hover:text-destructive/80"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
                     title="Push local draft / pull latest cloud draft"
                   >
                     {cloudStatus === "syncing" ? (
                       <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : cloudStatus === "error" ? (
+                      <RefreshCw className="h-2.5 w-2.5" />
                     ) : (
                       <RefreshCw className="h-2.5 w-2.5" />
                     )}
-                    Sync now
+                    {cloudStatus === "error" ? "Try again" : "Sync now"}
                   </button>
                 )}
                 {cloudSync && cloudStatus === "synced" && <Check className="h-2.5 w-2.5 text-accent" />}
