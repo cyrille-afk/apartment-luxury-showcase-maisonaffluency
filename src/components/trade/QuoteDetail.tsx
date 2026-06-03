@@ -1274,7 +1274,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     itemId: string,
     patch: Partial<Pick<QuoteItemWithProduct,
       "po_number" | "cost_code" | "lead_time_weeks_override" | "deposit_pct_override" | "room"
-      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg" | "notes"
+      | "ship_origin_country" | "ship_mode" | "ship_cbm" | "ship_weight_kg" | "notes" | "internal_notes"
     >>
   ) => {
     if (isReadOnly) return;
