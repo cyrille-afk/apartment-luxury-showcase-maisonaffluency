@@ -3,9 +3,10 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type TearsheetProposal, type QuoteProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type TearsheetProposal, type QuoteProposal, type FfeProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
+import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -25,7 +26,9 @@ type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
+  | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
+
 
 import {
   type Stage,
@@ -537,6 +540,10 @@ export function AIConcierge() {
     const handleProposal = (proposal: ConciergeProposal) => {
       if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
         setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
+        return;
+      }
+      if (proposal.tool === "propose_ffe_rows") {
+        setTimeline((prev) => [...prev, { kind: "ffe_proposal", proposal }]);
         return;
       }
       // Tearsheet proposal — compute which picks are NEW relative to the
@@ -1085,6 +1092,28 @@ export function AIConcierge() {
                   />
                 );
               }
+              if (item.kind === "ffe_proposal") {
+                return (
+                  <FfeProposalCard
+                    key={i}
+                    proposal={item.proposal}
+                    onResolved={(outcome, info) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "ffe_proposal") copy[i] = { ...t, resolved: outcome };
+                        const msg =
+                          outcome === "discarded"
+                            ? "Got it — FF&E schedule discarded."
+                            : `✓ FF&E schedule drafted — ${info?.added ?? 0} ${info?.added === 1 ? "row" : "rows"} across ${info?.rooms ?? 0} ${info?.rooms === 1 ? "room" : "rooms"}. Open the quote when you want to refine it.`;
+                        copy.push({ kind: "msg", role: "assistant", content: msg });
+                        return copy;
+                      });
+                    }}
+                  />
+                );
+              }
+              if (item.kind !== "proposal") return null;
               return (
                 <TearsheetProposalCard
                   key={i}

@@ -67,7 +67,32 @@ export type AddToQuoteProposal = {
 
 export type TearsheetProposal = CreateTearsheetProposal | AddToTearsheetProposal;
 export type QuoteProposal = DraftQuoteProposal | AddToQuoteProposal;
-export type ConciergeProposal = TearsheetProposal | QuoteProposal;
+
+export type FfeRow = {
+  pick_id: string;
+  room: string;
+  qty: number;
+  variant?: string | null;
+  lead_weeks?: number | null;
+  note?: string | null;
+};
+
+export type FfeLinePreview = QuoteLinePreview & { room: string };
+
+export type FfeProposal = {
+  tool: "propose_ffe_rows";
+  tool_call_id: string;
+  args: {
+    project_id: string;
+    project_name: string | null;
+    currency: string | null;
+    note: string | null;
+    rows: FfeRow[];
+  };
+  preview: FfeLinePreview[];
+};
+
+export type ConciergeProposal = TearsheetProposal | QuoteProposal | FfeProposal;
 
 export type EscalationEvent = {
   sentiment: string;
