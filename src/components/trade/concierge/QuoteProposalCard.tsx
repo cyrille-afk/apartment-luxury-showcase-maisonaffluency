@@ -169,11 +169,23 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     () => lines.find((l) => l.currency)?.currency || null,
     [lines],
   );
-  const displayCurrency = isAppend ? lineCurrency : lineCurrency || currency;
+  // For append-to-existing-quote we must keep the existing quote's currency.
+  // For a brand-new draft, the user is free to pick any display currency.
+  const displayCurrency = isAppend ? (lineCurrency || currency) : currency;
   const trade_discount_pct = lines[0]?.trade_discount_pct ?? 0;
 
+  // Live FX rates (Frankfurter, cached). Falls back to bundled rates offline.
+  const fxRates = useFxRates();
+  const convert = (cents: number | null, fromCurrency: string | null): number | null => {
+    if (cents == null) return null;
+    const src = fromCurrency || displayCurrency;
+    if (!src || src === displayCurrency) return cents;
+    return convertCents(cents, src, displayCurrency as any, fxRates);
+  };
+
+  // When appending, keep the dropdown synced to the existing quote currency.
   useEffect(() => {
-    if (!isAppend && lineCurrency && currency !== lineCurrency) {
+    if (isAppend && lineCurrency && currency !== lineCurrency) {
       setCurrencyState(lineCurrency);
     }
   }, [currency, isAppend, lineCurrency]);
@@ -191,7 +203,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const subtotalCents = visibleLines.reduce((sum, l) => {
     const unitPrice = effectiveLineUnitPrice(l);
     if (unitPrice == null) return sum;
-    return sum + unitPrice * l.qty;
+    const converted = convert(unitPrice, l.currency) ?? unitPrice;
+    return sum + converted * l.qty;
   }, 0);
   const discountCents = Math.round((subtotalCents * trade_discount_pct) / 100);
   const totalCents = subtotalCents - discountCents;
