@@ -1861,6 +1861,8 @@ serve(async (req) => {
         // then the quote card, then [DONE]. No extra LLM call required — the
         // pick_ids and title are derivable from the quote args and the planner brief.
         const backfillTearsheetIfNeeded = () => {
+          // Stage gate: never synthesize a tearsheet when the user is on the Quote stage.
+          if (stageForcesQuote) return;
           const wantsTearsheet =
             extractedBrief.plan.includes("propose_tearsheet") ||
             extractedBrief.plan.includes("add_to_tearsheet");
