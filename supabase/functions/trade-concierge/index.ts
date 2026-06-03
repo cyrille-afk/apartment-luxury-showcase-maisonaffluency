@@ -455,7 +455,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
   };
   const merged = new Map<string, Line>();
   const keyOf = (designer: string, title: string) =>
-    `${designer.trim().toLowerCase()}::${title.trim().toLowerCase()}`;
+    `${String(designer || "").trim().toLowerCase()}::${String(title || "").trim().toLowerCase()}`;
 
   (picks || []).forEach((p: any) => {
     const designer = designerMap.get(p.designer_id) || "Unknown";
