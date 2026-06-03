@@ -100,16 +100,23 @@ test.describe("Mobile PWA & accessibility", () => {
 
   test("html applies text-size-adjust and touch-action: manipulation", async ({ page }) => {
     await page.goto("/");
-    const { tsa, ta } = await page.evaluate(() => {
+    const { hasTextSizeAdjustRule, ta } = await page.evaluate(() => {
       const cs = getComputedStyle(document.documentElement);
+      const cssText = Array.from(document.styleSheets)
+        .flatMap((sheet) => {
+          try {
+            return Array.from(sheet.cssRules).map((rule) => rule.cssText);
+          } catch {
+            return [];
+          }
+        })
+        .join("\n");
       return {
-        tsa:
-          cs.getPropertyValue("-webkit-text-size-adjust") ||
-          cs.getPropertyValue("text-size-adjust"),
+        hasTextSizeAdjustRule: /(?:-webkit-)?text-size-adjust\s*:\s*100%/.test(cssText),
         ta: cs.getPropertyValue("touch-action"),
       };
     });
-    expect(tsa).toMatch(/100%/);
+    expect(hasTextSizeAdjustRule).toBeTruthy();
     expect(ta).toMatch(/manipulation/);
   });
 
