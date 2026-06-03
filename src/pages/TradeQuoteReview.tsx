@@ -303,18 +303,21 @@ const TradeQuoteReview = () => {
 
         {Object.entries(grouped).map(([room, rows]) => {
           let pricedCount = 0;
+          let freeCount = 0;
           let unpricedCount = 0;
           let roomTotalCents = 0;
           for (const it of rows) {
             const eff = it.unit_price_cents ?? it.trade_products?.trade_price_cents ?? it.trade_products?.rrp_price_cents ?? null;
             if (eff == null) {
               unpricedCount += it.quantity;
+            } else if (eff === 0) {
+              freeCount += it.quantity;
             } else {
               pricedCount += it.quantity;
               roomTotalCents += eff * it.quantity;
             }
           }
-          const roomHasAnyPriced = pricedCount > 0;
+          const roomHasAnyPriced = pricedCount > 0 || freeCount > 0;
           return (
             <Card key={room}>
               <CardHeader className="pb-2">
