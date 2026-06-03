@@ -193,6 +193,9 @@ export function BriefWizard() {
   const [touched, setTouched] = useState<Partial<Record<keyof Answers, boolean>>>({});
   const [showStepErrors, setShowStepErrors] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  const [lastCompletedStep, setLastCompletedStep] = useState(-1);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [, setSavedTick] = useState(0);
 
   // Restore draft if any
   useEffect(() => {
@@ -202,16 +205,30 @@ export function BriefWizard() {
         const parsed = JSON.parse(raw);
         if (parsed?.answers) setAnswers({ ...initialAnswers, ...parsed.answers });
         if (typeof parsed?.stepIdx === "number") setStepIdx(parsed.stepIdx);
+        if (typeof parsed?.lastCompletedStep === "number") setLastCompletedStep(parsed.lastCompletedStep);
+        if (typeof parsed?.savedAt === "number") setSavedAt(parsed.savedAt);
       }
     } catch {}
   }, []);
 
-  // Persist draft
+  // Persist draft (debounced) + update "saved" timestamp
   useEffect(() => {
-    try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx }));
-    } catch {}
-  }, [answers, stepIdx]);
+    const t = setTimeout(() => {
+      try {
+        const ts = Date.now();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
+        setSavedAt(ts);
+      } catch {}
+    }, 400);
+    return () => clearTimeout(t);
+  }, [answers, stepIdx, lastCompletedStep]);
+
+  // Tick to refresh the "saved Xs ago" label while dialog is open
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => setSavedTick((n) => n + 1), 15000);
+    return () => clearInterval(id);
+  }, [open]);
 
   // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
@@ -232,7 +249,17 @@ export function BriefWizard() {
       // keep draft if present, otherwise start fresh with defaults + prefill
       try {
         const raw = localStorage.getItem(DRAFT_KEY);
-        if (!raw) {
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const resumeIdx = Math.min(
+            typeof parsed?.stepIdx === "number" ? parsed.stepIdx : 0,
+            STEPS.length - 1
+          );
+          const lastDone = typeof parsed?.lastCompletedStep === "number" ? parsed.lastCompletedStep : -1;
+          if (lastDone >= 0 && STEPS[resumeIdx]) {
+            toast.success(`Resumed where you left off — “${STEPS[resumeIdx].title}”.`);
+          }
+        } else {
           setStepIdx(0);
           const base = { ...initialAnswers };
           if (user) {
