@@ -406,6 +406,7 @@ const App = () => {
                     <Route path="gallery" element={<TradeGallery />} />
                     <Route path="gallery/:slug" element={<TradeGallery />} />
                     <Route path="quotes" element={<TradeQuotes />} />
+                    <Route path="quotes/:quoteId/review" element={<TradeQuoteReview />} />
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
                     <Route path="showroom" element={<TradeShowroom />} />
