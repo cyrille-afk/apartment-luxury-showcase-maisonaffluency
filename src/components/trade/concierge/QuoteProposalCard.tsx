@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { useProjects, type Project } from "@/hooks/useProjects";
-import { useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
+import { useFxRates, convertCents, getFxRatesFetchedAt } from "@/components/trade/CurrencyToggle";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
