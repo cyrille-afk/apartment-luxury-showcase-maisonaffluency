@@ -926,7 +926,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
             lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
             budget_band: p.budget_band || null,
           },
-          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"].includes(t)) as BriefPlanTool[] : [],
+          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"].includes(t)) as BriefPlanTool[] : [],
         };
         return { value, usage: data?.usage };
       },
