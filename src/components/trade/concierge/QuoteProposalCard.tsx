@@ -176,12 +176,24 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
 
   // Live FX rates (Frankfurter, cached). Falls back to bundled rates offline.
   const fxRates = useFxRates();
+  const ratesFetchedAt = getFxRatesFetchedAt();
   const convert = (cents: number | null, fromCurrency: string | null): number | null => {
     if (cents == null) return null;
     const src = fromCurrency || displayCurrency;
     if (!src || src === displayCurrency) return cents;
     return convertCents(cents, src, displayCurrency as any, fxRates);
   };
+
+  function relativeTime(ts: number | null): string {
+    if (!ts) return "fallback rates";
+    const diff = Date.now() - ts;
+    if (diff < 60_000) return "just now";
+    const mins = Math.round(diff / 60_000);
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs} hr ago`;
+    return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
 
   // When appending, keep the dropdown synced to the existing quote currency.
   useEffect(() => {
