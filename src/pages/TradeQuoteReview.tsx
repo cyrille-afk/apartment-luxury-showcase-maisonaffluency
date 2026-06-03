@@ -36,10 +36,10 @@ interface ItemRow {
   } | null;
 }
 
-const fmt = (cents: number | null | undefined, currency: string) =>
-  cents == null
+const fmt = (cents: number | null | undefined, currency: string, locale = navigator.language) =>
+  cents == null || isNaN(cents)
     ? "—"
-    : new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+    : new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
 
 interface PriceCellProps {
   value: number | null;
