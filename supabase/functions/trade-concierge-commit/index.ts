@@ -514,6 +514,151 @@ serve(async (req) => {
     }
 
     // ============================================================
+    // FF&E TOOL: propose_ffe_rows  → create a draft quote with
+    // room-tagged line items so the project's FF&E Schedule view
+    // picks them up automatically.
+    // ============================================================
+    if (tool === "propose_ffe_rows") {
+      const projectId: string | null =
+        typeof args.project_id === "string" && args.project_id ? args.project_id : null;
+      if (!projectId) return json(400, { error: "project_id is required" });
+
+      const { data: proj } = await supabase
+        .from("projects")
+        .select("id, user_id, studio_id, name")
+        .eq("id", projectId)
+        .maybeSingle();
+      if (!proj || (proj as any).user_id !== userId) {
+        return json(404, { error: "Project not found or you don't have access" });
+      }
+      const studioId: string | null = (proj as any).studio_id || null;
+      const projectName: string = (proj as any).name || "FF&E";
+
+      const rawRows: any[] = Array.isArray(args.rows) ? args.rows : [];
+      const cleanRows = rawRows
+        .filter((r) => r && typeof r.pick_id === "string" && typeof r.room === "string" && r.room.trim())
+        .slice(0, 60)
+        .map((r) => ({
+          pick_id: r.pick_id as string,
+          room: String(r.room).trim().slice(0, 120),
+          qty: Math.max(1, Math.min(99, Number(r.qty) || 1)),
+          variant: typeof r.variant === "string" && r.variant.trim() ? r.variant.trim() : null,
+          lead_weeks: typeof r.lead_weeks === "number" ? r.lead_weeks : null,
+          note: typeof r.note === "string" && r.note.trim() ? r.note.trim() : null,
+        }));
+      if (cleanRows.length === 0) {
+        return json(400, { error: "At least one FF&E row with pick_id + room is required" });
+      }
+
+      const quoteCurrency: string =
+        typeof args.currency === "string" && args.currency.trim()
+          ? args.currency.trim().toUpperCase().slice(0, 8)
+          : "EUR";
+      const quoteNotes: string | null =
+        typeof args.note === "string" ? args.note.slice(0, 500) : null;
+
+      // Resolve every row's pick_id → trade_products.id (allow duplicates across rooms).
+      const resolutions = await Promise.all(
+        cleanRows.map(async (row) => {
+          const { tradeProductId, pick } = await resolvePickToTradeProduct(supabase, row.pick_id);
+          return { row, tradeProductId, pick };
+        })
+      );
+      const resolved = resolutions.filter((r) => r.tradeProductId) as Array<{
+        row: typeof cleanRows[number];
+        tradeProductId: string;
+        pick: any | null;
+      }>;
+      const skipped = resolutions
+        .filter((r) => !r.tradeProductId)
+        .map((r) => ({ pickId: r.row.pick_id, reason: "could not resolve to trade product" }));
+      if (resolved.length === 0) {
+        return json(422, { error: "None of the FF&E rows could be resolved to a product", skipped });
+      }
+
+      const productIds = Array.from(new Set(resolved.map((r) => r.tradeProductId)));
+      const { data: priced } = await supabase
+        .from("trade_products")
+        .select("id, trade_price_cents, rrp_price_cents, currency")
+        .in("id", productIds);
+      const priceById = new Map<string, { cents: number | null; currency: string }>();
+      (priced || []).forEach((p: any) => {
+        priceById.set(p.id, {
+          cents: p.trade_price_cents ?? p.rrp_price_cents ?? null,
+          currency: (p.currency || "EUR").toUpperCase(),
+        });
+      });
+
+      const { data: quote, error: quoteErr } = await supabase
+        .from("trade_quotes")
+        .insert({
+          user_id: userId,
+          status: "draft",
+          notes: quoteNotes || `FF&E — ${projectName}`,
+          currency: quoteCurrency,
+          project_id: projectId,
+          studio_id: studioId,
+        })
+        .select("id")
+        .single();
+      if (quoteErr || !quote) {
+        console.error("FF&E quote insert failed:", quoteErr);
+        return json(500, { error: "Could not create FF&E draft quote" });
+      }
+
+      const lineSources = resolved.map((r) => {
+        const variantCents = resolveVariantPriceFromPick(r.pick, r.row.variant);
+        const fallback = priceById.get(r.tradeProductId) || { cents: null, currency: "EUR" };
+        const sourceCurrency = (variantCents != null
+          ? (r.pick?.currency || fallback.currency || "EUR")
+          : fallback.currency) || "EUR";
+        const sourceCents = variantCents ?? fallback.cents;
+        return { r, sourceCents, sourceCurrency: String(sourceCurrency).toUpperCase() };
+      });
+      const fxRates = await fetchFxRates(lineSources.map((s) => s.sourceCurrency), quoteCurrency);
+      const itemsPayload = lineSources.map(({ r, sourceCents, sourceCurrency }) => ({
+        quote_id: quote.id,
+        product_id: r.tradeProductId,
+        quantity: r.row.qty,
+        unit_price_cents: fxConvertCents(sourceCents, sourceCurrency, quoteCurrency, fxRates),
+        variant_label: r.row.variant,
+        lead_time_weeks_override: r.row.lead_weeks,
+        notes: r.row.note,
+        room: r.row.room,
+      }));
+      const { error: itemsErr } = await supabase.from("trade_quote_items").insert(itemsPayload);
+      if (itemsErr) {
+        console.error("FF&E items insert failed:", itemsErr);
+        await supabase.from("trade_quotes").delete().eq("id", quote.id);
+        return json(500, { error: "Could not add FF&E rows to draft quote" });
+      }
+
+      await supabase.from("trade_concierge_actions").insert({
+        user_id: userId,
+        tool: "propose_ffe_rows",
+        args: {
+          project_id: projectId,
+          currency: quoteCurrency,
+          note: quoteNotes,
+          rows: cleanRows,
+          added: resolved.length,
+          skipped,
+        },
+        status: "approved",
+        resulting_resource_id: quote.id,
+        resulting_resource_type: "trade_quote",
+      });
+
+      return json(200, {
+        ok: true,
+        quote_id: quote.id,
+        url: `/trade/projects/${projectId}?tab=ffe`,
+        added: resolved.length,
+        skipped,
+      });
+    }
+
+    // ============================================================
     // TEARSHEET TOOLS (existing): require pick_ids
     // ============================================================
     const note: string | null = typeof args.note === "string" ? args.note.slice(0, 500) : null;
