@@ -297,6 +297,54 @@ export function BriefWizard() {
     }
   }, [user]);
 
+  const syncNow = useCallback(async () => {
+    if (!user || !cloudSync) return;
+    setCloudStatus("syncing");
+    const ts = Date.now();
+    try {
+      // 1) Push current local state immediately
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
+      setSavedAt(ts);
+      const { error: upsertErr } = await (supabase as any)
+        .from("brief_drafts")
+        .upsert({
+          user_id: user.id,
+          payload: { answers, stepIdx, lastCompletedStep },
+          updated_at: new Date(ts).toISOString(),
+        }, { onConflict: "user_id" });
+      if (upsertErr) throw upsertErr;
+
+      // 2) Pull latest from cloud to resolve any conflicts (server wins if newer)
+      const { data, error: fetchErr } = await (supabase as any)
+        .from("brief_drafts")
+        .select("payload, updated_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+      if (data?.payload) {
+        const cloudTs = new Date(data.updated_at).getTime();
+        const localTs = ts;
+        if (cloudTs > localTs + 500) {
+          const p = data.payload as any;
+          if (p.answers) setAnswers({ ...initialAnswers, ...p.answers });
+          if (typeof p.stepIdx === "number") setStepIdx(p.stepIdx);
+          if (typeof p.lastCompletedStep === "number") setLastCompletedStep(p.lastCompletedStep);
+          setSavedAt(cloudTs);
+          toast.success("Merged newer cloud draft.");
+        } else {
+          toast.success("Synced to cloud.");
+        }
+      } else {
+        toast.success("Synced to cloud.");
+      }
+      setCloudStatus("synced");
+    } catch (e: any) {
+      console.error(e);
+      setCloudStatus("error");
+      toast.error(e?.message || "Sync failed — try again.");
+    }
+  }, [user, cloudSync, answers, stepIdx, lastCompletedStep]);
+
   // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
     if (!user || prefilled) return;
