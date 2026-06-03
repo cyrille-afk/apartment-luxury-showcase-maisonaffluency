@@ -14,6 +14,10 @@ import { test, expect, devices } from "@playwright/test";
  */
 
 const ROUTES = ["/", "/trade/login"];
+const waitForAppReady = async (page: import("@playwright/test").Page) => {
+  await page.waitForLoadState("domcontentloaded");
+  await page.locator("body").waitFor({ state: "visible" });
+};
 
 // Keep this aligned with playwright.config.ts; CI runs inside the official
 // Playwright image so Chromium and its Linux shared libraries are present.
@@ -49,7 +53,7 @@ test.describe("Mobile PWA & accessibility", () => {
   for (const route of ROUTES) {
     test(`no horizontal overflow on ${route}`, async ({ page }) => {
       await page.goto(route);
-      await page.waitForLoadState("networkidle");
+      await waitForAppReady(page);
       const { scrollW, clientW } = await page.evaluate(() => ({
         scrollW: document.documentElement.scrollWidth,
         clientW: document.documentElement.clientWidth,
@@ -60,7 +64,7 @@ test.describe("Mobile PWA & accessibility", () => {
 
     test(`primary tap targets are ≥40px on ${route}`, async ({ page }) => {
       await page.goto(route);
-      await page.waitForLoadState("networkidle");
+      await waitForAppReady(page);
       // Sample interactive elements visible above the fold.
       const undersized = await page.evaluate(() => {
         const MIN = 40; // WCAG 2.5.5 recommends 44; allow 40 for icon buttons.
@@ -111,7 +115,7 @@ test.describe("Mobile PWA & accessibility", () => {
 
   test("header respects safe-area-inset-top", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await waitForAppReady(page);
     // Force a non-zero safe-area inset to simulate notch devices.
     await page.addStyleTag({
       content: `:root { --sat: 47px; } 
