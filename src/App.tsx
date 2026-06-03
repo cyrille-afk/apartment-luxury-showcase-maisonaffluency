@@ -46,6 +46,7 @@ const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeDownloadsByCountry = lazy(() => import("./pages/TradeDownloadsByCountry"));
 const TradeMagazineAnalytics = lazy(() => import("./pages/TradeMagazineAnalytics"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
+const TradeQuoteReview = lazy(() => import("./pages/TradeQuoteReview"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeStudioSettings = lazy(() => import("./pages/TradeStudioSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
@@ -405,6 +406,7 @@ const App = () => {
                     <Route path="gallery" element={<TradeGallery />} />
                     <Route path="gallery/:slug" element={<TradeGallery />} />
                     <Route path="quotes" element={<TradeQuotes />} />
+                    <Route path="quotes/:quoteId/review" element={<TradeQuoteReview />} />
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
                     <Route path="showroom" element={<TradeShowroom />} />
