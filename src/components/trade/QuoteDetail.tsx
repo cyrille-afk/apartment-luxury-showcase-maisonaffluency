@@ -635,6 +635,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     setEditingNotesValue("");
   };
 
+  const startEditInternalNotes = (itemId: string, currentNotes: string | null) => {
+    setEditingInternalNotesId(itemId);
+    setEditingInternalNotesValue(currentNotes || "");
+    setTimeout(() => internalNotesTextareaRef.current?.focus(), 0);
+  };
+
+  const commitEditInternalNotes = async (itemId: string) => {
+    const raw = editingInternalNotesValue.trim();
+    const v = raw || null;
+    setEditingInternalNotesId(null);
+    setEditingInternalNotesValue("");
+    const current = (items.find((i) => i.id === itemId) as any)?.internal_notes ?? null;
+    if (v !== current) {
+      await updateItemField(itemId, { internal_notes: v } as any);
+    }
+  };
+
+  const cancelEditInternalNotes = () => {
+    setEditingInternalNotesId(null);
+    setEditingInternalNotesValue("");
+  };
+
   const handleCurrencyChange = async (c: Currency) => {
     setCurrency(c);
     setCurrencyOpen(false);
