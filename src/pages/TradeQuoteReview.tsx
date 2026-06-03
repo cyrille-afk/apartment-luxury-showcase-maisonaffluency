@@ -419,6 +419,10 @@ const TradeQuoteReview = () => {
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="h-3.5 w-3.5" /> Export CSV
             </Button>
+            <Button variant="outline" size="sm" onClick={exportPdf}>
+              <Download className="h-3.5 w-3.5" /> Export PDF
+            </Button>
+
             <Button asChild variant="outline" size="sm">
               <Link to={`/trade/quotes/${quote.id}`}>
                 <Pencil className="h-3.5 w-3.5" /> Open in editor
