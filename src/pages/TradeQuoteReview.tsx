@@ -302,19 +302,19 @@ const TradeQuoteReview = () => {
         )}
 
         {Object.entries(grouped).map(([room, rows]) => {
-          const pricedRows = rows.filter((it) => {
-            const eff = it.unit_price_cents ?? it.trade_products?.trade_price_cents ?? it.trade_products?.rrp_price_cents;
-            return eff != null;
-          });
-          const roomTotalCents = pricedRows.reduce((sum, it) => {
-            const effective =
-              it.unit_price_cents ??
-              it.trade_products?.trade_price_cents ??
-              it.trade_products?.rrp_price_cents ??
-              0;
-            return sum + effective * it.quantity;
-          }, 0);
-          const roomHasAnyPriced = pricedRows.length > 0;
+          let pricedCount = 0;
+          let unpricedCount = 0;
+          let roomTotalCents = 0;
+          for (const it of rows) {
+            const eff = it.unit_price_cents ?? it.trade_products?.trade_price_cents ?? it.trade_products?.rrp_price_cents ?? null;
+            if (eff == null) {
+              unpricedCount += it.quantity;
+            } else {
+              pricedCount += it.quantity;
+              roomTotalCents += eff * it.quantity;
+            }
+          }
+          const roomHasAnyPriced = pricedCount > 0;
           return (
             <Card key={room}>
               <CardHeader className="pb-2">
@@ -373,7 +373,13 @@ const TradeQuoteReview = () => {
                             />
                           </TableCell>
                           <TableCell className="text-right font-body text-sm">
-                            {effective == null ? "—" : fmt(effective * it.quantity, currency)}
+                            {effective == null ? (
+                              <span className="text-amber-700 dark:text-amber-300">Unpriced</span>
+                            ) : effective === 0 ? (
+                              <span className="text-foreground">Free</span>
+                            ) : (
+                              fmt(effective * it.quantity, currency)
+                            )}
                           </TableCell>
                           <TableCell>
                             {flagged ? (
@@ -390,7 +396,18 @@ const TradeQuoteReview = () => {
                         Room subtotal
                       </TableCell>
                       <TableCell className="text-right font-display text-sm text-foreground">
-                        {roomHasAnyPriced ? fmt(roomTotalCents, currency) : "—"}
+                        <div>
+                          {roomHasAnyPriced
+                            ? roomTotalCents === 0
+                              ? "Free"
+                              : fmt(roomTotalCents, currency)
+                            : <span className="text-amber-700 dark:text-amber-300">Unpriced</span>}
+                        </div>
+                        {unpricedCount > 0 && roomHasAnyPriced && (
+                          <div className="font-body text-[10px] text-amber-700 dark:text-amber-300 mt-0.5">
+                            + {unpricedCount} unpriced
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell />
                     </TableRow>
@@ -401,9 +418,22 @@ const TradeQuoteReview = () => {
           );
         })}
 
-        <div className="flex items-center justify-end gap-6 border-t border-border pt-4">
-          <div className="font-body text-xs text-muted-foreground">Subtotal (priced items)</div>
-          <div className="font-display text-xl text-foreground">{totalCents > 0 ? fmt(totalCents, currency) : "—"}</div>
+        <div className="flex items-start justify-end gap-6 border-t border-border pt-4">
+          <div className="font-body text-xs text-muted-foreground pt-2">Subtotal</div>
+          <div className="text-right">
+            <div className="font-display text-xl text-foreground">
+              {totalCents > 0
+                ? fmt(totalCents, currency)
+                : needsReview.length === items.length
+                  ? <span className="text-amber-700 dark:text-amber-300">Unpriced</span>
+                  : "Free"}
+            </div>
+            {needsReview.length > 0 && totalCents > 0 && (
+              <div className="font-body text-xs text-amber-700 dark:text-amber-300 mt-1">
+                + {needsReview.reduce((s, it) => s + it.quantity, 0)} unpriced item{needsReview.length === 1 ? "" : "s"} pending
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
