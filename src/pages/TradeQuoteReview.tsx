@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Pencil } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, Loader2, Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuoteRow {
   id: string;
@@ -40,11 +41,84 @@ const fmt = (cents: number | null | undefined, currency: string) =>
     ? "—"
     : new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
 
+interface PriceCellProps {
+  value: number | null;
+  currency: string;
+  saving: boolean;
+  onSave: (newCents: number | null) => Promise<void>;
+  placeholder?: string;
+}
+
+const PriceCell = ({ value, currency, saving, onSave, placeholder }: PriceCellProps) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  const start = () => {
+    setDraft(value != null ? (value / 100).toString() : "");
+    setEditing(true);
+  };
+
+  const commit = async () => {
+    const trimmed = draft.trim();
+    if (trimmed === "") {
+      await onSave(null);
+    } else {
+      const num = parseFloat(trimmed.replace(/[^0-9.]/g, ""));
+      if (isNaN(num) || num < 0) {
+        setEditing(false);
+        return;
+      }
+      await onSave(Math.round(num * 100));
+    }
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center justify-end gap-1">
+        <span className="font-body text-[10px] text-muted-foreground">{currency}</span>
+        <input
+          autoFocus
+          type="text"
+          inputMode="decimal"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commit();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="w-24 px-1.5 py-0.5 border border-border rounded text-xs font-body bg-background text-foreground outline-none focus:ring-1 focus:ring-accent text-right"
+          placeholder={placeholder ?? "0"}
+        />
+        <button onClick={commit} disabled={saving} className="p-0.5 text-emerald-600 hover:text-emerald-700">
+          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+        </button>
+        <button onClick={() => setEditing(false)} className="p-0.5 text-muted-foreground hover:text-foreground">
+          <X className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={start}
+      className="group/price inline-flex items-center justify-end gap-1.5 cursor-pointer hover:text-accent transition-colors"
+      title="Edit price"
+    >
+      <span>{value == null ? (placeholder ?? "—") : fmt(value, currency)}</span>
+      <Pencil className="h-2.5 w-2.5 text-muted-foreground/40 opacity-0 group-hover/price:opacity-100 transition-opacity" />
+    </button>
+  );
+};
+
 const TradeQuoteReview = () => {
   const { quoteId } = useParams<{ quoteId: string }>();
+  const { toast } = useToast();
   const [quote, setQuote] = useState<QuoteRow | null>(null);
   const [items, setItems] = useState<ItemRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!quoteId) return;
@@ -71,9 +145,52 @@ const TradeQuoteReview = () => {
 
   const currency = quote?.currency || "EUR";
 
+  const setSaving = (id: string, v: boolean) =>
+    setSavingIds((prev) => ({ ...prev, [id]: v }));
+
+  const saveUnitPrice = async (item: ItemRow, newCents: number | null) => {
+    setSaving(item.id, true);
+    const { error } = await supabase
+      .from("trade_quote_items")
+      .update({ unit_price_cents: newCents })
+      .eq("id", item.id);
+    setSaving(item.id, false);
+    if (error) {
+      toast({ title: "Failed to update unit price", description: error.message, variant: "destructive" });
+      return;
+    }
+    setItems((prev) => prev.map((it) => (it.id === item.id ? { ...it, unit_price_cents: newCents } : it)));
+    toast({ title: "Unit price updated" });
+  };
+
+  const saveCatalogPrice = async (item: ItemRow, newCents: number | null) => {
+    if (!item.product_id) {
+      toast({ title: "No catalog product linked", variant: "destructive" });
+      return;
+    }
+    setSaving(`catalog-${item.id}`, true);
+    const { error } = await supabase
+      .from("trade_products")
+      .update({ trade_price_cents: newCents })
+      .eq("id", item.product_id);
+    setSaving(`catalog-${item.id}`, false);
+    if (error) {
+      toast({ title: "Failed to update catalog price", description: error.message, variant: "destructive" });
+      return;
+    }
+    setItems((prev) =>
+      prev.map((it) =>
+        it.product_id === item.product_id && it.trade_products
+          ? { ...it, trade_products: { ...it.trade_products, trade_price_cents: newCents } }
+          : it,
+      ),
+    );
+    toast({ title: "Catalog price updated" });
+  };
+
   const { grouped, needsReview, totalCents } = useMemo(() => {
     const groups: Record<string, ItemRow[]> = {};
-    let review: ItemRow[] = [];
+    const review: ItemRow[] = [];
     let total = 0;
     for (const it of items) {
       const key = it.room?.trim() || "Unassigned";
@@ -142,7 +259,7 @@ const TradeQuoteReview = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="font-body text-xs text-muted-foreground">
-              No catalog price was found for these items. Set a unit price in the editor before sending the quote to your client.
+              No catalog price was found for these items. Click any price below to edit inline — unit prices save to this quote, catalog prices update the product.
             </CardContent>
           </Card>
         ) : (
@@ -168,6 +285,7 @@ const TradeQuoteReview = () => {
                     <TableHead>Product</TableHead>
                     <TableHead>Variant</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
+                    <TableHead className="text-right">Catalog</TableHead>
                     <TableHead className="text-right">Unit</TableHead>
                     <TableHead className="text-right">Line</TableHead>
                     <TableHead></TableHead>
@@ -175,9 +293,10 @@ const TradeQuoteReview = () => {
                 </TableHeader>
                 <TableBody>
                   {rows.map((it) => {
+                    const catalog = it.trade_products?.trade_price_cents ?? null;
                     const effective =
                       it.unit_price_cents ??
-                      it.trade_products?.trade_price_cents ??
+                      catalog ??
                       it.trade_products?.rrp_price_cents ??
                       null;
                     const flagged = reviewIds.has(it.id);
@@ -189,7 +308,28 @@ const TradeQuoteReview = () => {
                         </TableCell>
                         <TableCell className="font-body text-xs text-muted-foreground">{it.variant_label || "—"}</TableCell>
                         <TableCell className="text-right font-body text-sm">{it.quantity}</TableCell>
-                        <TableCell className="text-right font-body text-sm">{fmt(effective, currency)}</TableCell>
+                        <TableCell className="text-right font-body text-sm">
+                          {it.product_id ? (
+                            <PriceCell
+                              value={catalog}
+                              currency={it.trade_products?.currency || currency}
+                              saving={!!savingIds[`catalog-${it.id}`]}
+                              onSave={(v) => saveCatalogPrice(it, v)}
+                              placeholder="Set"
+                            />
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-body text-sm">
+                          <PriceCell
+                            value={it.unit_price_cents}
+                            currency={currency}
+                            saving={!!savingIds[it.id]}
+                            onSave={(v) => saveUnitPrice(it, v)}
+                            placeholder="Override"
+                          />
+                        </TableCell>
                         <TableCell className="text-right font-body text-sm">
                           {effective == null ? "—" : fmt(effective * it.quantity, currency)}
                         </TableCell>
