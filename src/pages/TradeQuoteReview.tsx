@@ -149,6 +149,11 @@ const TradeQuoteReview = () => {
     setSavingIds((prev) => ({ ...prev, [id]: v }));
 
   const saveUnitPrice = async (item: ItemRow, newCents: number | null) => {
+    const prev = items.find((it) => it.id === item.id)?.unit_price_cents ?? null;
+    // optimistic
+    setItems((prevItems) =>
+      prevItems.map((it) => (it.id === item.id ? { ...it, unit_price_cents: newCents } : it)),
+    );
     setSaving(item.id, true);
     const { error } = await supabase
       .from("trade_quote_items")
@@ -156,10 +161,13 @@ const TradeQuoteReview = () => {
       .eq("id", item.id);
     setSaving(item.id, false);
     if (error) {
+      // rollback
+      setItems((prevItems) =>
+        prevItems.map((it) => (it.id === item.id ? { ...it, unit_price_cents: prev } : it)),
+      );
       toast({ title: "Failed to update unit price", description: error.message, variant: "destructive" });
       return;
     }
-    setItems((prev) => prev.map((it) => (it.id === item.id ? { ...it, unit_price_cents: newCents } : it)));
     toast({ title: "Unit price updated" });
   };
 
@@ -168,6 +176,17 @@ const TradeQuoteReview = () => {
       toast({ title: "No catalog product linked", variant: "destructive" });
       return;
     }
+    const prevMap = new Map(
+      items.filter((it) => it.product_id === item.product_id).map((it) => [it.id, it.trade_products?.trade_price_cents ?? null]),
+    );
+    // optimistic
+    setItems((prevItems) =>
+      prevItems.map((it) =>
+        it.product_id === item.product_id && it.trade_products
+          ? { ...it, trade_products: { ...it.trade_products, trade_price_cents: newCents } }
+          : it,
+      ),
+    );
     setSaving(`catalog-${item.id}`, true);
     const { error } = await supabase
       .from("trade_products")
@@ -175,16 +194,17 @@ const TradeQuoteReview = () => {
       .eq("id", item.product_id);
     setSaving(`catalog-${item.id}`, false);
     if (error) {
+      // rollback
+      setItems((prevItems) =>
+        prevItems.map((it) => {
+          if (it.product_id !== item.product_id || !it.trade_products) return it;
+          const prevCents = prevMap.get(it.id) ?? it.trade_products.trade_price_cents;
+          return { ...it, trade_products: { ...it.trade_products, trade_price_cents: prevCents } };
+        }),
+      );
       toast({ title: "Failed to update catalog price", description: error.message, variant: "destructive" });
       return;
     }
-    setItems((prev) =>
-      prev.map((it) =>
-        it.product_id === item.product_id && it.trade_products
-          ? { ...it, trade_products: { ...it.trade_products, trade_price_cents: newCents } }
-          : it,
-      ),
-    );
     toast({ title: "Catalog price updated" });
   };
 
@@ -273,81 +293,100 @@ const TradeQuoteReview = () => {
           </Card>
         )}
 
-        {Object.entries(grouped).map(([room, rows]) => (
-          <Card key={room}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-display">{room}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Variant</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">Catalog</TableHead>
-                    <TableHead className="text-right">Unit</TableHead>
-                    <TableHead className="text-right">Line</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.map((it) => {
-                    const catalog = it.trade_products?.trade_price_cents ?? null;
-                    const effective =
-                      it.unit_price_cents ??
-                      catalog ??
-                      it.trade_products?.rrp_price_cents ??
-                      null;
-                    const flagged = reviewIds.has(it.id);
-                    return (
-                      <TableRow key={it.id} className={flagged ? "bg-amber-50/40 dark:bg-amber-950/20" : ""}>
-                        <TableCell>
-                          <div className="font-body text-sm text-foreground">{it.trade_products?.product_name || "—"}</div>
-                          <div className="font-body text-xs text-muted-foreground">{it.trade_products?.brand_name || ""}</div>
-                        </TableCell>
-                        <TableCell className="font-body text-xs text-muted-foreground">{it.variant_label || "—"}</TableCell>
-                        <TableCell className="text-right font-body text-sm">{it.quantity}</TableCell>
-                        <TableCell className="text-right font-body text-sm">
-                          {it.product_id ? (
+        {Object.entries(grouped).map(([room, rows]) => {
+          const roomTotalCents = rows.reduce((sum, it) => {
+            const effective =
+              it.unit_price_cents ??
+              it.trade_products?.trade_price_cents ??
+              it.trade_products?.rrp_price_cents ??
+              null;
+            return sum + (effective ?? 0) * it.quantity;
+          }, 0);
+          return (
+            <Card key={room}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">{room}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Variant</TableHead>
+                      <TableHead className="text-right">Qty</TableHead>
+                      <TableHead className="text-right">Catalog</TableHead>
+                      <TableHead className="text-right">Unit</TableHead>
+                      <TableHead className="text-right">Line</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((it) => {
+                      const catalog = it.trade_products?.trade_price_cents ?? null;
+                      const effective =
+                        it.unit_price_cents ??
+                        catalog ??
+                        it.trade_products?.rrp_price_cents ??
+                        null;
+                      const flagged = reviewIds.has(it.id);
+                      return (
+                        <TableRow key={it.id} className={flagged ? "bg-amber-50/40 dark:bg-amber-950/20" : ""}>
+                          <TableCell>
+                            <div className="font-body text-sm text-foreground">{it.trade_products?.product_name || "—"}</div>
+                            <div className="font-body text-xs text-muted-foreground">{it.trade_products?.brand_name || ""}</div>
+                          </TableCell>
+                          <TableCell className="font-body text-xs text-muted-foreground">{it.variant_label || "—"}</TableCell>
+                          <TableCell className="text-right font-body text-sm">{it.quantity}</TableCell>
+                          <TableCell className="text-right font-body text-sm">
+                            {it.product_id ? (
+                              <PriceCell
+                                value={catalog}
+                                currency={it.trade_products?.currency || currency}
+                                saving={!!savingIds[`catalog-${it.id}`]}
+                                onSave={(v) => saveCatalogPrice(it, v)}
+                                placeholder="Set"
+                              />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-body text-sm">
                             <PriceCell
-                              value={catalog}
-                              currency={it.trade_products?.currency || currency}
-                              saving={!!savingIds[`catalog-${it.id}`]}
-                              onSave={(v) => saveCatalogPrice(it, v)}
-                              placeholder="Set"
+                              value={it.unit_price_cents}
+                              currency={currency}
+                              saving={!!savingIds[it.id]}
+                              onSave={(v) => saveUnitPrice(it, v)}
+                              placeholder="Override"
                             />
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right font-body text-sm">
-                          <PriceCell
-                            value={it.unit_price_cents}
-                            currency={currency}
-                            saving={!!savingIds[it.id]}
-                            onSave={(v) => saveUnitPrice(it, v)}
-                            placeholder="Override"
-                          />
-                        </TableCell>
-                        <TableCell className="text-right font-body text-sm">
-                          {effective == null ? "—" : fmt(effective * it.quantity, currency)}
-                        </TableCell>
-                        <TableCell>
-                          {flagged ? (
-                            <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-300">
-                              Price required
-                            </Badge>
-                          ) : null}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        ))}
+                          </TableCell>
+                          <TableCell className="text-right font-body text-sm">
+                            {effective == null ? "—" : fmt(effective * it.quantity, currency)}
+                          </TableCell>
+                          <TableCell>
+                            {flagged ? (
+                              <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-300">
+                                Price required
+                              </Badge>
+                            ) : null}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    <TableRow className="border-t-2 border-border">
+                      <TableCell colSpan={5} className="text-right font-body text-xs text-muted-foreground">
+                        Room subtotal
+                      </TableCell>
+                      <TableCell className="text-right font-display text-sm text-foreground">
+                        {fmt(roomTotalCents, currency)}
+                      </TableCell>
+                      <TableCell />
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          );
+        })}
 
         <div className="flex items-center justify-end gap-6 border-t border-border pt-4">
           <div className="font-body text-xs text-muted-foreground">Subtotal (priced items)</div>
