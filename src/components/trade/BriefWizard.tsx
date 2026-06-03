@@ -460,6 +460,9 @@ export function BriefWizard() {
     setLastCompletedStep(-1);
     setSavedAt(null);
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    if (user && cloudSync) {
+      (supabase as any).from("brief_drafts").delete().eq("user_id", user.id).then(() => {});
+    }
     toast.success("Draft cleared — sensible defaults restored.");
   };
 
