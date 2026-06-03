@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { useProjects, type Project } from "@/hooks/useProjects";
+import { useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -168,11 +169,23 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
     () => lines.find((l) => l.currency)?.currency || null,
     [lines],
   );
-  const displayCurrency = isAppend ? lineCurrency : lineCurrency || currency;
+  // For append-to-existing-quote we must keep the existing quote's currency.
+  // For a brand-new draft, the user is free to pick any display currency.
+  const displayCurrency = isAppend ? (lineCurrency || currency) : currency;
   const trade_discount_pct = lines[0]?.trade_discount_pct ?? 0;
 
+  // Live FX rates (Frankfurter, cached). Falls back to bundled rates offline.
+  const fxRates = useFxRates();
+  const convert = (cents: number | null, fromCurrency: string | null): number | null => {
+    if (cents == null) return null;
+    const src = fromCurrency || displayCurrency;
+    if (!src || src === displayCurrency) return cents;
+    return convertCents(cents, src, displayCurrency as any, fxRates);
+  };
+
+  // When appending, keep the dropdown synced to the existing quote currency.
   useEffect(() => {
-    if (!isAppend && lineCurrency && currency !== lineCurrency) {
+    if (isAppend && lineCurrency && currency !== lineCurrency) {
       setCurrencyState(lineCurrency);
     }
   }, [currency, isAppend, lineCurrency]);
@@ -190,7 +203,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const subtotalCents = visibleLines.reduce((sum, l) => {
     const unitPrice = effectiveLineUnitPrice(l);
     if (unitPrice == null) return sum;
-    return sum + unitPrice * l.qty;
+    const converted = convert(unitPrice, l.currency) ?? unitPrice;
+    return sum + converted * l.qty;
   }, 0);
   const discountCents = Math.round((subtotalCents * trade_discount_pct) / 100);
   const totalCents = subtotalCents - discountCents;
@@ -259,7 +273,9 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
       lead_weeks: l.lead_weeks,
       note: l.note,
     }));
-    const quoteCurrency = lineCurrency || currency;
+    // On a brand-new draft the user-picked currency wins; on append we must
+    // keep the existing quote's currency intact.
+    const quoteCurrency = isAppend ? (lineCurrency || currency) : (currency || lineCurrency);
 
     const body =
       proposal.tool === "draft_quote"
@@ -414,7 +430,8 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         {lines.map((l) => {
           const isExcluded = excluded.has(l.pick_id);
           const effectiveUnitPrice = effectiveLineUnitPrice(l);
-          const lineTotal = effectiveUnitPrice != null ? effectiveUnitPrice * l.qty : null;
+          const displayedUnitPrice = convert(effectiveUnitPrice, l.currency);
+          const lineTotal = displayedUnitPrice != null ? displayedUnitPrice * l.qty : null;
           return (
             <li
               key={l.pick_id}
@@ -444,17 +461,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                       <option key={o.label} value={o.label}>
                         {o.label}
                         {o.price_cents != null
-                          ? ` — ${formatPrice(o.price_cents, l.currency)}`
+                          ? ` — ${formatPrice(convert(o.price_cents, l.currency), displayCurrency)}`
                           : ""}
                       </option>
                     ))}
                   </select>
                 )}
                 <div className="mt-0.5 font-body text-[10px] text-muted-foreground">
-                  {formatPrice(effectiveUnitPrice, l.currency)}
+                  {formatPrice(displayedUnitPrice, displayCurrency)}
                   {lineTotal != null && l.qty > 1 && (
                     <span className="ml-1 text-foreground/70">
-                      × {l.qty} = {formatPrice(lineTotal, l.currency)}
+                      × {l.qty} = {formatPrice(lineTotal, displayCurrency)}
                     </span>
                   )}
                   {l.lead_weeks != null && <span className="ml-2">· {l.lead_weeks}w lead</span>}
