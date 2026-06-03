@@ -197,6 +197,11 @@ export function BriefWizard() {
   const [lastCompletedStep, setLastCompletedStep] = useState(-1);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [, setSavedTick] = useState(0);
+  const [cloudSync, setCloudSync] = useState<boolean>(() => {
+    try { return localStorage.getItem(SYNC_PREF_KEY) !== "0"; } catch { return true; }
+  });
+  const [cloudStatus, setCloudStatus] = useState<"idle" | "syncing" | "synced" | "error">("idle");
+  const [cloudHydrated, setCloudHydrated] = useState(false);
 
   // Restore draft if any
   useEffect(() => {
@@ -212,17 +217,64 @@ export function BriefWizard() {
     } catch {}
   }, []);
 
-  // Persist draft (debounced) + update "saved" timestamp
+  // Hydrate from cloud once user is known + sync enabled; pick whichever side is newer.
   useEffect(() => {
-    const t = setTimeout(() => {
+    if (!user || !cloudSync || cloudHydrated) return;
+    let cancelled = false;
+    (async () => {
       try {
-        const ts = Date.now();
+        const { data, error } = await (supabase as any)
+          .from("brief_drafts")
+          .select("payload, updated_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) { setCloudHydrated(true); return; }
+        if (data?.payload) {
+          const cloudTs = new Date(data.updated_at).getTime();
+          const localTs = savedAt ?? 0;
+          if (cloudTs > localTs + 1500) {
+            const p = data.payload as any;
+            if (p.answers) setAnswers({ ...initialAnswers, ...p.answers });
+            if (typeof p.stepIdx === "number") setStepIdx(p.stepIdx);
+            if (typeof p.lastCompletedStep === "number") setLastCompletedStep(p.lastCompletedStep);
+            setSavedAt(cloudTs);
+            setPrefilled(true);
+            toast.success("Resumed your brief from another device.");
+          }
+        }
+      } catch {}
+      finally { if (!cancelled) setCloudHydrated(true); }
+    })();
+    return () => { cancelled = true; };
+  }, [user, cloudSync, cloudHydrated, savedAt]);
+
+  // Persist draft (debounced) locally + optionally to cloud
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      const ts = Date.now();
+      try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
         setSavedAt(ts);
       } catch {}
-    }, 400);
+      if (user && cloudSync && cloudHydrated) {
+        setCloudStatus("syncing");
+        try {
+          const { error } = await (supabase as any)
+            .from("brief_drafts")
+            .upsert({
+              user_id: user.id,
+              payload: { answers, stepIdx, lastCompletedStep },
+              updated_at: new Date(ts).toISOString(),
+            }, { onConflict: "user_id" });
+          setCloudStatus(error ? "error" : "synced");
+        } catch {
+          setCloudStatus("error");
+        }
+      }
+    }, 700);
     return () => clearTimeout(t);
-  }, [answers, stepIdx, lastCompletedStep]);
+  }, [answers, stepIdx, lastCompletedStep, user, cloudSync, cloudHydrated]);
 
   // Tick to refresh the "saved Xs ago" label while dialog is open
   useEffect(() => {
@@ -230,6 +282,20 @@ export function BriefWizard() {
     const id = setInterval(() => setSavedTick((n) => n + 1), 15000);
     return () => clearInterval(id);
   }, [open]);
+
+  const toggleCloudSync = useCallback(async (next: boolean) => {
+    setCloudSync(next);
+    try { localStorage.setItem(SYNC_PREF_KEY, next ? "1" : "0"); } catch {}
+    if (!user) return;
+    if (next) {
+      setCloudHydrated(false); // re-hydrate / push current state
+      toast.success("Cloud sync on — your brief will follow you across devices.");
+    } else {
+      try { await (supabase as any).from("brief_drafts").delete().eq("user_id", user.id); } catch {}
+      setCloudStatus("idle");
+      toast.success("Cloud sync off — draft kept only on this device.");
+    }
+  }, [user]);
 
   // One-time profile/last-project prefill applied to defaults (only if no draft exists yet).
   useEffect(() => {
