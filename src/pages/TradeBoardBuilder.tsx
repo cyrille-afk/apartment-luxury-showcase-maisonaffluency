@@ -372,15 +372,20 @@ const TradeBoardBuilder = () => {
       toast({ title: "Error", description: error?.message, variant: "destructive" });
       return;
     }
-    const quoteItems = approvedItems.map(item => ({
+    // Aggregate duplicate product_ids into a single quote line with quantity = count
+    const qtyByProduct = new Map<string, number>();
+    for (const item of approvedItems) {
+      qtyByProduct.set(item.product_id, (qtyByProduct.get(item.product_id) || 0) + 1);
+    }
+    const quoteItems = Array.from(qtyByProduct.entries()).map(([product_id, quantity]) => ({
       quote_id: quote.id,
-      product_id: item.product_id,
-      quantity: 1,
+      product_id,
+      quantity,
     }));
     await supabase.from("trade_quote_items").insert(quoteItems);
     await supabase.from("client_boards").update({ status: "converted" }).eq("id", board.id);
-    toast({ title: "Quote created", description: `${approvedItems.length} approved items added to new quote` });
-    navigate("/trade/quotes");
+    toast({ title: "Quote created", description: `${quoteItems.length} item${quoteItems.length === 1 ? "" : "s"} pre-filled (${approvedItems.length} unit${approvedItems.length === 1 ? "" : "s"})` });
+    navigate(`/trade/quotes?quote=${quote.id}`);
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><DotCircleLoader size="sm" /></div>;
