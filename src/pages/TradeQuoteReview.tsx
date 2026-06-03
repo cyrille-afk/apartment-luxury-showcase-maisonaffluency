@@ -390,7 +390,7 @@ const TradeQuoteReview = () => {
                         Room subtotal
                       </TableCell>
                       <TableCell className="text-right font-display text-sm text-foreground">
-                        {fmt(roomTotalCents, currency)}
+                        {roomHasAnyPriced ? fmt(roomTotalCents, currency) : "—"}
                       </TableCell>
                       <TableCell />
                     </TableRow>
