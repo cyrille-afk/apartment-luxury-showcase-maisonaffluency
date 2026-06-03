@@ -862,11 +862,13 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- propose_tearsheet — draft a NEW tearsheet of curated pieces\n" +
                   "- add_to_tearsheet — append pieces to one of the user's existing tearsheets\n" +
                   "- draft_quote — pre-fill a NEW trade quote with line items\n" +
-                  "- add_to_quote — append lines to one of the user's open draft quotes\n\n" +
+                  "- add_to_quote — append lines to one of the user's open draft quotes\n" +
+                  "- propose_ffe_rows — draft a ROOM-BY-ROOM FF&E schedule bound to the active project (every row has a `room` label)\n\n" +
                   "Plan rules:\n" +
                   "- chitchat / navigation / FAQ: empty plan.\n" +
                   "- 'show / suggest / curate / mood / room brief' without pricing intent: [propose_tearsheet] (or add_to_tearsheet if they reference an existing board).\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
+                  "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
                   "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
                   "Be conservative — only emit a tool if the user clearly intends that action this turn.",
               },
