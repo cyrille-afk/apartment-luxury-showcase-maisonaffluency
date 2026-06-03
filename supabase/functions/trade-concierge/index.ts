@@ -1684,6 +1684,72 @@ serve(async (req) => {
               continue;
             }
 
+            // ====== FF&E ROWS (room-tagged schedule) ======
+            if (tc.name === "propose_ffe_rows") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse propose_ffe_rows args:", tc.argsText, e);
+                continue;
+              }
+              const projectId: string | null =
+                typeof parsed.project_id === "string" && parsed.project_id ? parsed.project_id : resolvedProjectId;
+              if (!projectId) {
+                console.warn("[concierge] propose_ffe_rows skipped — no project_id resolvable");
+                continue;
+              }
+              const rawRows: any[] = Array.isArray(parsed.rows) ? parsed.rows : [];
+              const rows = rawRows
+                .filter((r) => r && typeof r.pick_id === "string" && typeof r.room === "string" && r.room.trim().length > 0)
+                .slice(0, 60)
+                .map((r) => ({
+                  pick_id: r.pick_id,
+                  room: r.room.trim(),
+                  qty: Math.max(1, Math.min(99, Number(r.qty) || 1)),
+                  variant: typeof r.variant === "string" ? r.variant : null,
+                  lead_weeks: typeof r.lead_weeks === "number" ? r.lead_weeks : null,
+                  note: typeof r.note === "string" ? r.note : null,
+                }));
+              if (rows.length === 0) continue;
+
+              const requestedCurrency: string | null =
+                typeof parsed.currency === "string" ? parsed.currency.toUpperCase() : null;
+              const lineShape = rows.map((r) => ({
+                pick_id: r.pick_id, qty: r.qty, variant: r.variant, lead_weeks: r.lead_weeks, note: r.note,
+              }));
+              const linePreviews = await hydrateQuotePreview(supabase, lineShape, requestedCurrency, tradeDiscountPct);
+              const previewById = new Map<string, any>(linePreviews.map((p: any) => [p.pick_id, p]));
+              const preview = rows.map((r) => ({
+                ...(previewById.get(r.pick_id) || { pick_id: r.pick_id, title: r.pick_id, qty: r.qty }),
+                room: r.room,
+              }));
+              const previewCurrencies = Array.from(new Set(preview.map((p: any) => p.currency).filter(Boolean)));
+              const currency: string | null =
+                requestedCurrency || (previewCurrencies.length === 1 ? (previewCurrencies[0] as string) : null);
+
+              let projectName: string | null = null;
+              if (userId) {
+                const { data: proj } = await supabase
+                  .from("projects").select("name").eq("id", projectId).eq("user_id", userId).maybeSingle();
+                projectName = (proj as any)?.name || null;
+              }
+
+              const proposal = {
+                tool: "propose_ffe_rows",
+                tool_call_id: tc.id || crypto.randomUUID(),
+                args: {
+                  project_id: projectId,
+                  project_name: projectName,
+                  currency,
+                  note: typeof parsed.note === "string" ? parsed.note : null,
+                  rows,
+                },
+                preview,
+              };
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              console.log(`[concierge] emitted propose_ffe_rows proposal: ${rows.length} rows across ${new Set(rows.map((r) => r.room)).size} room(s) for project ${projectId}`);
+              continue;
+            }
+
             if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
             let parsed: any = null;
             try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
