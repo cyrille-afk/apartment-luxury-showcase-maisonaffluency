@@ -565,18 +565,35 @@ export function BriefWizard() {
           <DialogDescription className="flex items-center justify-between gap-2">
             <span>{step.description}</span>
             {user && (
-              <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer shrink-0 ml-2">
-                <input
-                  type="checkbox"
-                  className="h-3 w-3 accent-accent cursor-pointer"
-                  checked={cloudSync}
-                  onChange={(e) => toggleCloudSync(e.target.checked)}
-                />
-                Sync across devices
-                {cloudSync && cloudStatus === "syncing" && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 accent-accent cursor-pointer"
+                    checked={cloudSync}
+                    onChange={(e) => toggleCloudSync(e.target.checked)}
+                  />
+                  Sync across devices
+                </label>
+                {cloudSync && (
+                  <button
+                    type="button"
+                    onClick={syncNow}
+                    disabled={cloudStatus === "syncing"}
+                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Push local draft / pull latest cloud draft"
+                  >
+                    {cloudStatus === "syncing" ? (
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-2.5 w-2.5" />
+                    )}
+                    Sync now
+                  </button>
+                )}
                 {cloudSync && cloudStatus === "synced" && <Check className="h-2.5 w-2.5 text-accent" />}
                 {cloudSync && cloudStatus === "error" && <AlertCircle className="h-2.5 w-2.5 text-destructive" />}
-              </label>
+              </div>
             )}
           </DialogDescription>
         </DialogHeader>
