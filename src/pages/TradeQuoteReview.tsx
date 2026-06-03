@@ -395,10 +395,10 @@ const TradeQuoteReview = () => {
                       );
                     })}
                     <TableRow className="border-t-2 border-border">
-                      <TableCell colSpan={5} className="text-right font-body text-xs text-muted-foreground">
+                      <TableCell colSpan={4} className="text-right font-body text-xs text-muted-foreground">
                         Room subtotal
                       </TableCell>
-                      <TableCell className="text-right font-display text-sm text-foreground">
+                      <TableCell colSpan={2} className="text-right font-display text-sm text-foreground">
                         <div>
                           {roomHasAnyPriced
                             ? roomTotalCents === 0
@@ -406,11 +406,23 @@ const TradeQuoteReview = () => {
                               : fmt(roomTotalCents, currency)
                             : <span className="text-amber-700 dark:text-amber-300">Unpriced</span>}
                         </div>
-                        {unpricedCount > 0 && roomHasAnyPriced && (
-                          <div className="font-body text-[10px] text-amber-700 dark:text-amber-300 mt-0.5">
-                            + {unpricedCount} unpriced
-                          </div>
-                        )}
+                        <div className="flex items-center justify-end gap-1.5 mt-1">
+                          {pricedCount > 0 && (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-950/40 px-2 py-0.5 font-body text-[10px] text-emerald-700 dark:text-emerald-300">
+                              {pricedCount} priced
+                            </span>
+                          )}
+                          {freeCount > 0 && (
+                            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 font-body text-[10px] text-slate-600 dark:text-slate-300">
+                              {freeCount} free
+                            </span>
+                          )}
+                          {unpricedCount > 0 && (
+                            <span className="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-950/40 px-2 py-0.5 font-body text-[10px] text-amber-700 dark:text-amber-300">
+                              {unpricedCount} unpriced
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell />
                     </TableRow>
