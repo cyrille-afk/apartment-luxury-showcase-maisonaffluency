@@ -251,9 +251,13 @@ export function BriefWizard() {
     return () => { cancelled = true; };
   }, [user, cloudSync, cloudHydrated, savedAt]);
 
-  // Persist draft (debounced) locally + optionally to cloud
+  // Persist draft (debounced) locally + optionally to cloud with auto-retry
   useEffect(() => {
-    const t = setTimeout(async () => {
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout>;
+
+    const attempt = async (attemptNum: number) => {
+      if (cancelled) return;
       const ts = Date.now();
       try {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIdx, lastCompletedStep, savedAt: ts }));
@@ -269,13 +273,24 @@ export function BriefWizard() {
               payload: { answers, stepIdx, lastCompletedStep },
               updated_at: new Date(ts).toISOString(),
             }, { onConflict: "user_id" });
-          setCloudStatus(error ? "error" : "synced");
+          if (error) throw error;
+          setCloudStatus("synced");
+          setSyncRetries(0);
         } catch {
-          setCloudStatus("error");
+          if (cancelled) return;
+          if (attemptNum < MAX_AUTO_RETRIES) {
+            const delay = 3000 * (attemptNum + 1); // 3s, 6s, 9s
+            retryTimer = setTimeout(() => attempt(attemptNum + 1), delay);
+          } else {
+            setCloudStatus("error");
+            toast.error("Cloud sync failed after retries. Click Try again.");
+          }
         }
       }
-    }, 700);
-    return () => clearTimeout(t);
+    };
+
+    const t = setTimeout(() => attempt(0), 700);
+    return () => { cancelled = true; clearTimeout(t); clearTimeout(retryTimer); };
   }, [answers, stepIdx, lastCompletedStep, user, cloudSync, cloudHydrated]);
 
   // Tick to refresh the "saved Xs ago" label while dialog is open
