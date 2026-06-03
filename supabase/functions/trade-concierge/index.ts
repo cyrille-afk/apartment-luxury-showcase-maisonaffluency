@@ -239,6 +239,9 @@ Rules for both tools:
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
 - If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
 
+## TOOL USE — FF&E SCHEDULE (ROOM-BY-ROOM BRIEFS)
+Use \`propose_ffe_rows\` instead of \`draft_quote\` when the user asks for a SCHEDULE organised by room ("FF&E for the Mayfair townhouse", "drawing-room, dining-room and bedroom edit", "full apartment schedule"). Every row MUST carry a \`room\` label. \`project_id\` is REQUIRED — if there is no ACTIVE PROJECT, ask the user which project to bind to before calling the tool. On approval the rows commit as room-tagged lines on a draft quote and automatically populate the FF&E Schedule view.
+
 ## ACTIVE PROJECT
 ${projectContext}
 
@@ -772,7 +775,7 @@ async function classifySentiment(
 // Semantic-cached on the latest user message so paraphrased briefs hit the
 // same plan without re-spending tokens.
 // =========================================================================
-type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote";
+type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote" | "propose_ffe_rows";
 type ExtractedBrief = {
   intent: "chitchat" | "discovery" | "selection" | "quote" | "selection_and_quote" | "navigation";
   brief: {
@@ -823,11 +826,13 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- propose_tearsheet — draft a NEW tearsheet of curated pieces\n" +
                   "- add_to_tearsheet — append pieces to one of the user's existing tearsheets\n" +
                   "- draft_quote — pre-fill a NEW trade quote with line items\n" +
-                  "- add_to_quote — append lines to one of the user's open draft quotes\n\n" +
+                  "- add_to_quote — append lines to one of the user's open draft quotes\n" +
+                  "- propose_ffe_rows — draft a ROOM-BY-ROOM FF&E schedule bound to the active project (every row has a `room` label)\n\n" +
                   "Plan rules:\n" +
                   "- chitchat / navigation / FAQ: empty plan.\n" +
                   "- 'show / suggest / curate / mood / room brief' without pricing intent: [propose_tearsheet] (or add_to_tearsheet if they reference an existing board).\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
+                  "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
                   "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
                   "Be conservative — only emit a tool if the user clearly intends that action this turn.",
               },
@@ -854,7 +859,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                       budget_band: { type: "string" },
                       plan: {
                         type: "array",
-                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"] },
+                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"] },
                         maxItems: 3,
                       },
                     },
@@ -885,7 +890,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
             lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
             budget_band: p.budget_band || null,
           },
-          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote"].includes(t)) as BriefPlanTool[] : [],
+          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"].includes(t)) as BriefPlanTool[] : [],
         };
         return { value, usage: data?.usage };
       },
@@ -1567,7 +1572,8 @@ serve(async (req) => {
           const allBuffers = Array.from(toolCallBuffers.values());
           const tearsheetBuffers = allBuffers.filter((b) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers];
+          const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
+          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers];
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
