@@ -302,14 +302,19 @@ const TradeQuoteReview = () => {
         )}
 
         {Object.entries(grouped).map(([room, rows]) => {
-          const roomTotalCents = rows.reduce((sum, it) => {
+          const pricedRows = rows.filter((it) => {
+            const eff = it.unit_price_cents ?? it.trade_products?.trade_price_cents ?? it.trade_products?.rrp_price_cents;
+            return eff != null;
+          });
+          const roomTotalCents = pricedRows.reduce((sum, it) => {
             const effective =
               it.unit_price_cents ??
               it.trade_products?.trade_price_cents ??
               it.trade_products?.rrp_price_cents ??
-              null;
-            return sum + (effective ?? 0) * it.quantity;
+              0;
+            return sum + effective * it.quantity;
           }, 0);
+          const roomHasAnyPriced = pricedRows.length > 0;
           return (
             <Card key={room}>
               <CardHeader className="pb-2">
