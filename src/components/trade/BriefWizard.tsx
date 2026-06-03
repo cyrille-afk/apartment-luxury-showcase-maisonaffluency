@@ -83,6 +83,7 @@ const initialAnswers: Answers = {
 };
 
 const DRAFT_KEY = "trade_brief_wizard_draft";
+const SYNC_PREF_KEY = "trade_brief_wizard_cloud_sync";
 
 const briefSchema = z.object({
   projectName: z.string().trim().min(2, "Give your project a short name (2+ characters).").max(100, "Keep it under 100 characters."),
