@@ -1941,6 +1941,88 @@ serve(async (req) => {
               continue;
             }
 
+            // ====== SHIPPING ESTIMATE ======
+            // Runs the live rate matrix server-side, then makes a follow-up
+            // non-streaming gateway call so the AI writes prose with the real
+            // numbers. We stream the resulting text out as synthetic SSE deltas
+            // so the existing client-side `onDelta` handler renders it.
+            if (tc.name === "estimate_shipping") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse estimate_shipping args:", tc.argsText, e);
+                continue;
+              }
+              let result: any;
+              try {
+                result = await runShippingEstimate(supabase, parsed);
+              } catch (e) {
+                console.error("[concierge] estimate_shipping failed:", e);
+                result = { available: false, reason: "Estimator error — please try again." };
+              }
+              console.log(`[concierge shipping] ${parsed.origin_country}→${parsed.dest_country} ${parsed.preferred_mode || "auto"} → total ${result.total_cents}`);
+
+              // Follow-up: ask the model to summarise the breakdown in prose,
+              // in the user's currency, citing the carrier / mode / transit.
+              try {
+                const followupSystem = [
+                  "You are the Maison Affluency Trade Concierge — shipping desk follow-up.",
+                  "The user just asked for a shipping/landed-cost estimate. The TOOL_RESULT below is the AUTHORITATIVE figure from our live rate matrix (carriers, brackets, surcharges, duty, VAT). DO NOT recompute or second-guess the numbers — quote them verbatim.",
+                  "Write a concise breakdown (max ~120 words) listing: freight, fuel surcharge, insurance, customs/handling, last-mile, duty (with %), VAT/GST (with %), and the TOTAL. Mention the selected carrier, mode and transit-day window. All money values are in CENTS — divide by 100 and format as the currency shown. If `available: false`, apologise and offer a manual quote — do not invent numbers.",
+                ].join("\n");
+                const followupMessages = [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 600) },
+                  {
+                    role: "assistant",
+                    content: null,
+                    tool_calls: [{
+                      id: tc.id || "call_shipping",
+                      type: "function",
+                      function: { name: "estimate_shipping", arguments: tc.argsText || "{}" },
+                    }],
+                  },
+                  {
+                    role: "tool",
+                    tool_call_id: tc.id || "call_shipping",
+                    name: "estimate_shipping",
+                    content: JSON.stringify(result),
+                  },
+                ];
+                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    model: modelFor("balanced"),
+                    max_completion_tokens: CHAT_MAX_TOKENS,
+                    messages: followupMessages,
+                  }),
+                });
+                if (resp.ok) {
+                  const data = await resp.json();
+                  if (data?.usage) {
+                    logAiUsage({
+                      feature: "trade-concierge-shipping",
+                      model: modelFor("balanced"),
+                      usage: data.usage,
+                      userId,
+                    }).catch(() => {});
+                  }
+                  const text: string = data?.choices?.[0]?.message?.content || "";
+                  if (text) {
+                    // Stream as a single synthetic delta so the existing
+                    // client handler renders it inline with the assistant bubble.
+                    const synthetic = { choices: [{ delta: { content: text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  }
+                } else {
+                  console.error("[concierge shipping] follow-up http", resp.status, await resp.text());
+                }
+              } catch (e) {
+                console.error("[concierge shipping] follow-up failed:", e);
+              }
+              continue;
+            }
+
             if (tc.name !== "propose_tearsheet" && tc.name !== "add_to_tearsheet") continue;
             let parsed: any = null;
             try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
