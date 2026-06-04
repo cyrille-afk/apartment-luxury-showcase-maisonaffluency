@@ -49,6 +49,11 @@ interface Props {
     totalKg: number;
     eurCents: number;
   }> | null;
+  /** Sum of all `trade_quote_extras` rows for this quote, in quote currency cents.
+   *  Converted to HKD (via fxQuoteEur + fxEurHkd + FX buffer) and added to the
+   *  displayed total. No duty / VAT applied — services are out of scope of
+   *  the goods-based DAP calculation. */
+  extrasQuoteCents?: number;
 }
 
 export const HkLandedCostPanel = ({
