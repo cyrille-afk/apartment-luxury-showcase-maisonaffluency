@@ -50,6 +50,88 @@ test.describe("Mobile PWA & accessibility", () => {
     expect(Array.isArray(json.icons) && json.icons.length).toBeTruthy();
   });
 
+  test("manifest passes installability rules (display, scope, icons ≥192 + maskable)", async ({ page, request }) => {
+    await page.goto("/");
+    const href = await page.locator('link[rel="manifest"]').getAttribute("href");
+    const json = await (await request.get(href!)).json();
+
+    // Installability: display must be standalone (or fullscreen/minimal-ui)
+    expect(["standalone", "fullscreen", "minimal-ui"]).toContain(json.display);
+    // start_url + scope must be same-origin paths
+    expect(String(json.start_url)).toMatch(/^\//);
+    expect(String(json.scope ?? "/")).toMatch(/^\//);
+    // Chrome installability needs ≥192px PNG icon and a maskable variant.
+    const sizesPx = (icon: any) =>
+      String(icon.sizes || "")
+        .split(/\s+/)
+        .map((s) => parseInt(s.split("x")[0], 10))
+        .filter((n) => !Number.isNaN(n));
+    const has192Png = json.icons.some(
+      (i: any) => i.type === "image/png" && sizesPx(i).some((n) => n >= 192),
+    );
+    const hasMaskable = json.icons.some((i: any) =>
+      String(i.purpose || "").split(/\s+/).includes("maskable"),
+    );
+    expect(has192Png, "needs ≥192px PNG icon").toBe(true);
+    expect(hasMaskable, "needs at least one maskable icon").toBe(true);
+
+    // Every declared icon must actually resolve.
+    for (const icon of json.icons) {
+      const r = await request.get(new URL(icon.src, page.url()).toString());
+      expect(r.ok(), `icon ${icon.src} → ${r.status()}`).toBe(true);
+    }
+
+    // Apple touch icon for iOS home-screen install.
+    const appleHref = await page
+      .locator('link[rel="apple-touch-icon"]')
+      .first()
+      .getAttribute("href");
+    expect(appleHref, "apple-touch-icon link required for iOS install").toBeTruthy();
+    const appleRes = await request.get(new URL(appleHref!, page.url()).toString());
+    expect(appleRes.ok()).toBe(true);
+
+    // theme-color helps Chrome treat the site as installable on Android.
+    const themeColor = await page
+      .locator('meta[name="theme-color"]')
+      .first()
+      .getAttribute("content");
+    expect(themeColor).toBeTruthy();
+  });
+
+  test("service worker is a self-unregistering kill-switch (no stale app SW persists)", async ({ page, request }) => {
+    // This project is intentionally manifest-only PWA. public/sw.js exists only
+    // to evict any worker installed by an older release. It MUST unregister
+    // itself on activate so returning visitors don't get a stale shell.
+    const swRes = await request.get("/sw.js");
+    expect(swRes.ok(), "/sw.js must be served").toBe(true);
+    const body = await swRes.text();
+    expect(body, "sw.js must call self.registration.unregister()").toMatch(
+      /self\.registration\.unregister\s*\(/,
+    );
+
+    await page.goto("/");
+    await waitForAppReady(page);
+
+    // Give the activate handler a moment to run if anything registered it.
+    const remaining = await page.evaluate(async () => {
+      if (!("serviceWorker" in navigator)) return [];
+      // Wait up to 3s for any in-flight unregister() from activate.
+      const deadline = Date.now() + 3000;
+      while (Date.now() < deadline) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        const appRegs = regs.filter((r) =>
+          /\/(sw|service-worker)\.js(\?|$)/.test(r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || ""),
+        );
+        if (appRegs.length === 0) return [];
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      const regs = await navigator.serviceWorker.getRegistrations();
+      return regs.map((r) => r.active?.scriptURL || r.scope);
+    });
+    expect(remaining, "kill-switch SW left a stale registration").toEqual([]);
+  });
+
+
   for (const route of ROUTES) {
     test(`no horizontal overflow on ${route}`, async ({ page }) => {
       await page.goto(route);
