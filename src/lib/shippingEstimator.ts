@@ -84,15 +84,21 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
   if (brErr) throw brErr;
 
   const cbm = Math.max(0.01, input.total_volume_cbm);
-  const kg = Math.max(0, input.total_weight_kg);
+  const actualKg = Math.max(0, input.total_weight_kg);
+  // IATA volumetric weight for air = cbm × 167. Chargeable weight = max(actual, volumetric).
+  // For non-air modes we bill on actual weight.
+  const isAir = (mode: string) => mode === "air";
+  const chargeableKgFor = (mode: string) =>
+    isAir(mode) ? Math.max(actualKg, cbm * 167) : actualKg;
 
   // For each lane, compute freight, pick cheapest
-  let best: { lane: any; bracket: any; freight: number } | null = null;
+  let best: { lane: any; bracket: any; freight: number; chargeableKg: number } | null = null;
   for (const lane of lanes) {
+    const laneKg = chargeableKgFor(lane.mode);
     const candidates = (brackets || []).filter(b =>
       b.lane_id === lane.id &&
       Number(b.min_volume_cbm) <= cbm && Number(b.max_volume_cbm) >= cbm &&
-      Number(b.min_weight_kg) <= kg && Number(b.max_weight_kg) >= kg &&
+      Number(b.min_weight_kg) <= laneKg && Number(b.max_weight_kg) >= laneKg &&
       (!b.valid_to || b.valid_to >= today)
     );
     if (candidates.length === 0) continue;
@@ -100,9 +106,9 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     const computed =
       Number(b.base_rate_cents) +
       Number(b.rate_per_cbm_cents) * cbm +
-      Number(b.rate_per_kg_cents) * kg;
+      Number(b.rate_per_kg_cents) * laneKg;
     const freight = Math.max(computed, Number(b.min_charge_cents));
-    if (!best || freight < best.freight) best = { lane, bracket: b, freight };
+    if (!best || freight < best.freight) best = { lane, bracket: b, freight, chargeableKg: laneKg };
   }
 
   if (!best) {
