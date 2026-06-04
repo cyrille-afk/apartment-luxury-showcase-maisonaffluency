@@ -952,6 +952,18 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
+  // Additional charges (crating, hand-loading, surcharges) — listed before
+  // the shipping estimate so the freight line stays adjacent to the goods
+  // total. Folded into the grand total below.
+  const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
+  const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
+  extrasList.forEach((e) => {
+    rows.push({
+      label: e.label || "Additional charge",
+      value: `+ ${fmtMoney(e.amountCents, args.currency)}`,
+      muted: true,
+    });
+  });
   const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
   if (shippingEstimateCents > 0) {
     const baseLabel = args.shippingModeLabel
@@ -977,7 +989,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       });
     }
   }
-  const grand = baseForGst + gstCents + shippingEstimateCents;
+  const grand = baseForGst + gstCents + shippingEstimateCents + extrasTotalCents;
   const depositPct = Math.max(0, Math.min(1, args.depositPct ?? 0.6));
   const deposit = Math.round(grand * depositPct);
   const balance = grand - deposit;
