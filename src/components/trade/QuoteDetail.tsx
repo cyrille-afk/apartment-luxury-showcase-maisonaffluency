@@ -270,6 +270,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [insuranceEnabled, setInsuranceEnabled] = useState(false);
   const [insuranceTier, setInsuranceTier] = useState<InsuranceTier>("standard");
   const [insuranceRateBps, setInsuranceRateBps] = useState<number>(50);
+  /** Sum of all rows in `trade_quote_extras` for this quote, in quote currency (cents). */
+  const [extrasTotalCents, setExtrasTotalCents] = useState<number>(0);
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [respondedAt, setRespondedAt] = useState<string | null>(null);
