@@ -47,6 +47,11 @@ interface Props {
     totalCbm?: number;
     totalKg?: number;
   } | null;
+  /** Sum of all `trade_quote_extras` rows for this quote, in quote currency cents.
+   *  Converted to GBP via fxQuoteEur + fxEurGbp + FX buffer and added to the
+   *  displayed total. No duty / VAT applied — services are out of scope of
+   *  the goods-based DDP calculation. */
+  extrasQuoteCents?: number;
 }
 
 export const UkLandedCostPanel = ({
