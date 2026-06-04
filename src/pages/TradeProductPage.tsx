@@ -1121,6 +1121,7 @@ const TradeProductPage: React.FC = () => {
                   icon={specIcon("⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                   emphasized
                   value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
                   onChange={(idx) => {
@@ -1155,6 +1156,7 @@ const TradeProductPage: React.FC = () => {
                     icon={specIcon("⬗")}
                     text={withImperialPerLine(baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
+                      singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
                     onChange={(idx) => {
@@ -1186,6 +1188,7 @@ const TradeProductPage: React.FC = () => {
                     icon={specIcon("⬗")}
                     text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
+                      singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : null}
                     onChange={(idx) => {
