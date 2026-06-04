@@ -49,6 +49,11 @@ interface Props {
     totalKg: number;
     eurCents: number;
   }> | null;
+  /** Sum of all `trade_quote_extras` rows for this quote, in quote currency cents.
+   *  Converted to HKD (via fxQuoteEur + fxEurHkd + FX buffer) and added to the
+   *  displayed total. No duty / VAT applied — services are out of scope of
+   *  the goods-based DAP calculation. */
+  extrasQuoteCents?: number;
 }
 
 export const HkLandedCostPanel = ({
@@ -65,6 +70,7 @@ export const HkLandedCostPanel = ({
   onSettingsChange,
   overrideShipping = null,
   shipmentOrigins = null,
+  extrasQuoteCents = 0,
 }: Props) => {
   const useOverride = !!overrideShipping;
   const resolvedInitialMode: HkMode = initialMode ?? "sea_lcl";
@@ -89,13 +95,19 @@ export const HkLandedCostPanel = ({
 
   const hkd = useHkdLandedCost({ goodsAfterDiscountCents, quoteCurrency, cbm, kg, mode, category, overrideShipping });
   const {
-    ready: ratesReady, loading, fxEurHkd, fxIsFallback,
+    ready: ratesReady, loading, fxEurHkd, fxQuoteEur, fxIsFallback,
     goodsHkdCents: goodsHkd, freightHkdCents: freightHkd, fuelHkdCents: fuelHkd,
     insuranceHkdCents: insuranceHkd, customsHkdCents: customsHkd, handlingHkdCents: handlingHkd,
     lastMileHkdCents: lastMileHkd, shippingHkdCents: shippingHkd,
-    dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: totalHkd, breakdown,
-    shippingEurCents: shippingEur, totalEurCents: totalEur,
+    dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: baseTotalHkd, breakdown,
+    shippingEurCents: shippingEur, totalEurCents: baseTotalEur,
   } = hkd;
+  // Convert "additional charges" (e.g. crating) from quote currency → EUR → HKD
+  // with the same FX buffer used elsewhere on this panel.
+  const extrasEurCents = fxQuoteEur ? Math.round(extrasQuoteCents * fxQuoteEur) : 0;
+  const extrasHkdCents = fxEurHkd ? Math.round(extrasEurCents * fxEurHkd * (1 + FX_BUFFER)) : 0;
+  const totalHkd = baseTotalHkd + extrasHkdCents;
+  const totalEur = baseTotalEur + extrasEurCents;
   const fmtEur = (cents: number) =>
     new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format((cents || 0) / 100);
 
@@ -231,6 +243,22 @@ export const HkLandedCostPanel = ({
                 <Row label="· Import duty (Hong Kong free port — 0%)" value={fmtHkd(dutyHkd)} indent />
                 <Row label="· Sales tax / VAT (none in Hong Kong)" value={fmtHkd(vatHkd)} indent />
               </div>
+
+              {extrasQuoteCents > 0 && (
+                <div className="space-y-1 border-t border-border/40 pt-2">
+                  <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                    <span>Additional charges</span>
+                    <span className="tabular-nums">
+                      {fmtHkd(extrasHkdCents)}
+                      <span className="ml-2 normal-case tracking-normal text-muted-foreground">≈ {fmtEur(extrasEurCents)}</span>
+                    </span>
+                  </div>
+                  <p className="pl-2 font-body text-[10px] text-muted-foreground/80 leading-snug">
+                    Crating, hand-loading, or other manual fees added on the quote. Not subject to duty or VAT.
+                  </p>
+                </div>
+              )}
+
 
               <div className="flex justify-between border-t-2 border-foreground/20 pt-2 mt-1 font-display text-sm uppercase tracking-wider text-foreground">
                 <span>DAP delivered Hong Kong — all in</span>

@@ -47,6 +47,11 @@ interface Props {
     totalCbm?: number;
     totalKg?: number;
   } | null;
+  /** Sum of all `trade_quote_extras` rows for this quote, in quote currency cents.
+   *  Converted to GBP via fxQuoteEur + fxEurGbp + FX buffer and added to the
+   *  displayed total. No duty / VAT applied — services are out of scope of
+   *  the goods-based DDP calculation. */
+  extrasQuoteCents?: number;
 }
 
 export const UkLandedCostPanel = ({
@@ -62,6 +67,7 @@ export const UkLandedCostPanel = ({
   initialMode,
   onSettingsChange,
   overrideShipping = null,
+  extrasQuoteCents = 0,
 }: Props) => {
   const useOverride = !!overrideShipping;
   const resolvedInitialMode = initialMode ?? "road";
@@ -99,6 +105,7 @@ export const UkLandedCostPanel = ({
     ready: ratesReady,
     loading,
     fxEurGbp,
+    fxQuoteEur,
     fxIsFallback,
     goodsGbpCents: goodsGbp,
     freightGbpCents: freightGbp,
@@ -110,10 +117,15 @@ export const UkLandedCostPanel = ({
     shippingGbpCents: shippingGbp,
     dutyGbpCents: dutyGbp,
     vatGbpCents: vatGbp,
-    totalGbpCents: totalGbp,
+    totalGbpCents: baseTotalGbp,
     breakdown,
     goodsEurCents,
   } = gbp;
+  // Convert "additional charges" (e.g. crating) from quote currency → EUR → GBP
+  // with the same FX buffer used elsewhere on this panel.
+  const extrasEurCents = fxQuoteEur ? Math.round(extrasQuoteCents * fxQuoteEur) : 0;
+  const extrasGbpCents = fxEurGbp ? Math.round(extrasEurCents * fxEurGbp * (1 + FX_BUFFER)) : 0;
+  const totalGbp = baseTotalGbp + extrasGbpCents;
 
   return (
     <div className="border border-border rounded-md bg-background/40 print:bg-white">
@@ -266,6 +278,18 @@ export const UkLandedCostPanel = ({
                 />
 
               </div>
+
+              {extrasQuoteCents > 0 && (
+                <div className="space-y-1 border-t border-border/40 pt-2">
+                  <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                    <span>Additional charges</span>
+                    <span className="tabular-nums">{fmtGbp(extrasGbpCents)}</span>
+                  </div>
+                  <p className="pl-2 font-body text-[10px] text-muted-foreground/80 leading-snug">
+                    Crating, hand-loading, or other manual fees added on the quote. Not subject to duty or VAT.
+                  </p>
+                </div>
+              )}
 
               {/* Total */}
               <div className="flex justify-between border-t-2 border-foreground/20 pt-2 mt-1 font-display text-sm uppercase tracking-wider text-foreground">

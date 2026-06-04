@@ -16,6 +16,7 @@ import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from 
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
+import QuoteExtrasEditor from "@/components/trade/QuoteExtrasEditor";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
@@ -269,6 +270,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [insuranceEnabled, setInsuranceEnabled] = useState(false);
   const [insuranceTier, setInsuranceTier] = useState<InsuranceTier>("standard");
   const [insuranceRateBps, setInsuranceRateBps] = useState<number>(50);
+  /** Sum of all rows in `trade_quote_extras` for this quote, in quote currency (cents). */
+  const [extrasTotalCents, setExtrasTotalCents] = useState<number>(0);
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [respondedAt, setRespondedAt] = useState<string | null>(null);
@@ -2460,6 +2463,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 )}
               </div>
 
+              {/* Additional charges (crating, surcharges, manual fees) */}
+              <QuoteExtrasEditor
+                quoteId={quoteId}
+                currency={currency}
+                isReadOnly={isReadOnly}
+                onTotalChange={setExtrasTotalCents}
+              />
+
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
                 {subtotalCents > 0 && isUkDestination && (
@@ -2549,7 +2560,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
                         ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
                         : 0;
-                      const total = goodsTotal + shippingQuoteCents;
+                      const total = goodsTotal + shippingQuoteCents + extrasTotalCents;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
                       return (
@@ -2558,6 +2569,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <div className="flex justify-between font-body text-xs text-muted-foreground">
                               <span>Shipping (estimate, {perLine.shipments.length} shipment{perLine.shipments.length > 1 ? "s" : ""})</span>
                               <span>{formatPriceRaw(shippingQuoteCents, currency)}</span>
+                            </div>
+                          )}
+                          {extrasTotalCents > 0 && (
+                            <div className="flex justify-between font-body text-xs text-muted-foreground">
+                              <span>Additional charges</span>
+                              <span>{formatPriceRaw(extrasTotalCents, currency)}</span>
                             </div>
                           )}
                           <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
@@ -2629,6 +2646,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialMode={landedCostSettings.mode}
                       onSettingsChange={handleLandedCostSettingsChange}
                       overrideShipping={overrideShipping}
+                      extrasQuoteCents={extrasTotalCents}
                     />
                   </div>
                 )}
@@ -2649,6 +2667,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialMode={hkLandedSettings.mode}
                       onSettingsChange={handleHkLandedSettingsChange}
                       overrideShipping={overrideShipping}
+                      extrasQuoteCents={extrasTotalCents}
                       shipmentOrigins={perLine.shipments.map((s) => ({
                         country: s.origin,
                         modeLabel: labelForMode(s.mode),
