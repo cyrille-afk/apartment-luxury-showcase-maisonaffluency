@@ -1214,13 +1214,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
   };
 
-  /** Insurance premium in cents, calculated on (subtotal − trade discount). */
+  /** Insured goods base: subtotal − trade discount (used by GBP/HK landed-cost panels). */
   const insuredBaseCents = tradeDiscount && subtotalCents > 0
     ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
     : subtotalCents;
-  const insurancePremiumCents = insuranceEnabled && insuredBaseCents > 0
-    ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
-    : 0;
 
   /**
    * Per-line shipping: groups quote lines by (origin, mode), runs the
