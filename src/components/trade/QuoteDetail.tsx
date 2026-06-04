@@ -1016,6 +1016,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       gstEnabled,
       gstRate,
       insurancePremiumCents: insurancePremiumCents || 0,
+      depositPct: (() => {
+        // Weighted deposit % across line items. Lead-time = 0 (in stock) defaults to 100%
+        // unless an explicit per-line deposit override is set.
+        let weight = 0;
+        let weighted = 0;
+        for (const it of items) {
+          const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
+          const fromCur = it.unit_price_cents != null ? currency : (it.trade_products?.currency || currency);
+          const lineCents = (convertCents(rawPrice, fromCur, currency) ?? 0) * it.quantity;
+          if (lineCents <= 0) continue;
+          const leadOverride = getLeadWeeksOverride(it.lead_time_weeks_override);
+          const pct = it.deposit_pct_override != null
+            ? it.deposit_pct_override
+            : (leadOverride === 0 ? 1 : 0.6);
+          weight += lineCents;
+          weighted += lineCents * pct;
+        }
+        return weight > 0 ? weighted / weight : 0.6;
+      })(),
       shippingEstimateCents,
       shippingShipmentCount: perLine.shipments.length,
       shippingModeLabel,
