@@ -56,6 +56,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -91,16 +92,6 @@ function applyRugPerSqmPricing(
       return { ...v, price_cents: computed ?? 0 };
     })
     .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
-}
-
-function firstPublicVariantDimensionLabel(
-  variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null | undefined,
-): string | null {
-  for (const variant of variants || []) {
-    const label = (variant?.label || "").trim();
-    if (label && looksLikeDimension(label)) return label;
-  }
-  return null;
 }
 
 
