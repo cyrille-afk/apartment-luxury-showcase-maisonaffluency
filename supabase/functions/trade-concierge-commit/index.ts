@@ -746,6 +746,7 @@ serve(async (req) => {
       if (resolved.length === 0) {
         return json(422, { error: "None of the picks could be resolved to a product", skipped });
       }
+      await backfillTradeProductImages(supabase, resolved.map((r) => r.tradeProductId));
 
       // Dedupe against items already on the board
       const productIds = resolved.map((r) => r.tradeProductId);
