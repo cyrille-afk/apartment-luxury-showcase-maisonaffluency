@@ -512,13 +512,15 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
   emit({ stage: "cover", ratio: 0.18, label: "Cover ready" });
 
   if (heroLoaded) {
-    // Full-bleed hero covering the entire cover page (mirrors website hero)
+    // Editorial cover: hero image in the top band, cream identity block below.
+    // The personalised "Prepared for …" line must live on the cream block for
+    // contrast; snapshot tests assert it stays below the hero boundary.
+    const heroBandH = pageHeight * 0.62;
     const ratio = heroLoaded.width / heroLoaded.height;
-    const pageRatio = pageWidth / pageHeight;
+    const bandRatio = pageWidth / heroBandH;
     let drawW: number, drawH: number, offsetX: number, offsetY: number;
-    if (ratio > pageRatio) {
-      // Image wider than page — fit height, center horizontally
-      drawH = pageHeight;
+    if (ratio > bandRatio) {
+      drawH = heroBandH;
       drawW = drawH * ratio;
       offsetX = -(drawW - pageWidth) / 2;
       offsetY = 0;
@@ -526,57 +528,41 @@ export async function generateDesignerBiographyPdf(input: DesignerBiographyPdfIn
       drawW = pageWidth;
       drawH = drawW / ratio;
       offsetX = 0;
-      offsetY = -(drawH - pageHeight) / 2;
+      offsetY = -(drawH - heroBandH) / 2;
     }
     doc.addImage(heroLoaded.dataUrl, heroLoaded.format, offsetX, offsetY, drawW, drawH, undefined, "FAST");
 
-    // Soft dark gradient at bottom for legibility (simulated by stacked translucent bands)
-    const gradH = pageHeight * 0.42;
-    const bands = 24;
-    for (let i = 0; i < bands; i++) {
-      const y = pageHeight - gradH + (gradH * i) / bands;
-      const alpha = (i / bands) * 0.55;
-      doc.setFillColor(0, 0, 0);
-      doc.setGState(doc.GState({ opacity: alpha }));
-      doc.rect(0, y, pageWidth, gradH / bands + 0.5, "F");
-    }
-    doc.setGState(doc.GState({ opacity: 1 }));
+    doc.setFillColor(252, 250, 246);
+    doc.rect(0, heroBandH, pageWidth, pageHeight - heroBandH, "F");
 
-    // Top-right "Prepared for …" pill
+    const blockTop = heroBandH + 34;
     if (recipient || input.downloadedAt) {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(9);
-      doc.setTextColor(255, 255, 255);
-      doc.setGState(doc.GState({ opacity: 0.92 }));
-      doc.text(preparedLine, pageWidth - marginX, marginTop, { align: "right" });
-      doc.setGState(doc.GState({ opacity: 1 }));
+      doc.setTextColor(...inkSoft);
+      doc.text(preparedLine, pageWidth - marginX, blockTop, { align: "right" });
     }
 
-    // Eyebrow + title overlaid bottom-left, in white (mirrors site hero)
-    const baseY = pageHeight - marginBottom - 8;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    doc.setGState(doc.GState({ opacity: 0.85 }));
+    doc.setTextColor(...muted);
     doc.setCharSpace(2.4);
-    doc.text("MAISON AFFLUENCY  ·  DESIGNER BIOGRAPHY", marginX, baseY - 86);
+    doc.text("MAISON AFFLUENCY  ·  DESIGNER BIOGRAPHY", marginX, blockTop);
     doc.setCharSpace(0);
-    doc.setGState(doc.GState({ opacity: 1 }));
+    doc.setDrawColor(...rule);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, blockTop + 10, marginX + 56, blockTop + 10);
 
-    // Designer name (brand) — large display serif in white
     doc.setFont("times", "normal");
     doc.setFontSize(48);
-    doc.setTextColor(255, 255, 255);
-    doc.text(input.designerName, marginX, baseY - 36, { maxWidth: contentWidth });
+    doc.setTextColor(...ink);
+    doc.text(input.designerName, marginX, blockTop + 58, { maxWidth: contentWidth });
 
-    // Specialty subtitle in soft white
     if (input.specialty) {
       doc.setFont("times", "italic");
       doc.setFontSize(14);
-      doc.setTextColor(255, 255, 255);
-      doc.setGState(doc.GState({ opacity: 0.9 }));
-      doc.text(input.specialty, marginX, baseY - 12, { maxWidth: contentWidth });
-      doc.setGState(doc.GState({ opacity: 1 }));
+      doc.setTextColor(...inkSoft);
+      doc.text(input.specialty, marginX, blockTop + 86, { maxWidth: contentWidth });
     }
   } else {
     // Fallback (no hero image) — cream cover with dark text
