@@ -7,6 +7,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  vitest-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Guards PDF/quote business logic — including the 100%-upfront flip when
+    # stock_status_override or lead_weeks_max_override changes (see
+    # src/lib/__tests__/computeDepositPct.test.ts).
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - name: Run vitest unit suite
+        run: npx vitest run
+
   playwright-mobile:
     runs-on: ubuntu-latest
     container:
