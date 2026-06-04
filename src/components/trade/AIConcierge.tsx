@@ -62,8 +62,15 @@ export function AIConcierge() {
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
   const isDashboard = pathname === "/trade";
-  const [open, setOpen] = useState(false);
-  const [minimized, setMinimized] = useState(false);
+  // Persist open/minimized/timeline in sessionStorage so the conversation
+  // survives route changes (e.g. when Felix auto-navigates to a freshly
+  // created tearsheet) and any tab-internal remounts.
+  const [open, setOpen] = useState(() => {
+    try { return sessionStorage.getItem("concierge:open") === "1"; } catch { return false; }
+  });
+  const [minimized, setMinimized] = useState(() => {
+    try { return sessionStorage.getItem("concierge:minimized") === "1"; } catch { return false; }
+  });
   const [tone, setTone] = useState<Tone>(() => loadTone());
   const [lang, setLang] = useState<Lang>(() => loadLang());
   const [name, setName] = useState<string>(() => loadName());
@@ -71,9 +78,18 @@ export function AIConcierge() {
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [timeline, setTimeline] = useState<TimelineItem[]>(() => [
-    { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
-  ]);
+  const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
+    try {
+      const raw = sessionStorage.getItem("concierge:timeline");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed as TimelineItem[];
+      }
+    } catch {}
+    return [
+      { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
+    ];
+  });
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
@@ -180,6 +196,17 @@ export function AIConcierge() {
       try { localStorage.setItem("concierge:pos", JSON.stringify(pos)); } catch {}
     }
   };
+
+  // Persist concierge open/minimized/timeline so it survives navigation.
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:open", open ? "1" : "0"); } catch {}
+  }, [open]);
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:minimized", minimized ? "1" : "0"); } catch {}
+  }, [minimized]);
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:timeline", JSON.stringify(timeline)); } catch {}
+  }, [timeline]);
 
   // Keep panel inside viewport on resize
   useEffect(() => {
