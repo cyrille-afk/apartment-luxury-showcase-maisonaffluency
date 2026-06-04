@@ -916,9 +916,21 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFillColor(250, 249, 246);
   // dynamic height based on rows we're showing
   const rows: { label: string; value: string; strong?: boolean; muted?: boolean }[] = [];
-  rows.push({ label: "Subtotal", value: fmtMoney(args.subtotalCents, args.currency) });
+  // Additional charges (crating, hand-loading, surcharges) — rendered as
+  // full lines before the Subtotal and folded into the subtotal figure so
+  // discounts/GST apply on the combined goods + charges base.
+  const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
+  const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
+  extrasList.forEach((e) => {
+    rows.push({
+      label: e.label || "Additional charge",
+      value: `+ ${fmtMoney(e.amountCents, args.currency)}`,
+    });
+  });
+  const subtotalWithExtras = args.subtotalCents + extrasTotalCents;
+  rows.push({ label: "Subtotal", value: fmtMoney(subtotalWithExtras, args.currency) });
   const discountCents = args.tradeDiscountApplied
-    ? Math.round(args.subtotalCents * args.tradeDiscountPct)
+    ? Math.round(subtotalWithExtras * args.tradeDiscountPct)
     : 0;
   if (discountCents > 0) {
     const pctTxt = `${(args.tradeDiscountPct * 100).toFixed(args.tradeDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
@@ -930,7 +942,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const afterDiscount = args.subtotalCents - discountCents;
+  const afterDiscount = subtotalWithExtras - discountCents;
   if (discountCents > 0) {
     rows.push({ label: "Net subtotal", value: fmtMoney(afterDiscount, args.currency) });
   }
@@ -952,18 +964,6 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  // Additional charges (crating, hand-loading, surcharges) — listed before
-  // the shipping estimate so the freight line stays adjacent to the goods
-  // total. Folded into the grand total below.
-  const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
-  const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
-  extrasList.forEach((e) => {
-    rows.push({
-      label: e.label || "Additional charge",
-      value: `+ ${fmtMoney(e.amountCents, args.currency)}`,
-      muted: true,
-    });
-  });
   const shippingEstimateCents = Math.max(0, Math.round(args.shippingEstimateCents || 0));
   if (shippingEstimateCents > 0) {
     const baseLabel = args.shippingModeLabel
