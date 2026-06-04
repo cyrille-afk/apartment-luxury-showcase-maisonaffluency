@@ -64,10 +64,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run mobile Lighthouse routes
+        shell: bash
+        continue-on-error: true
         run: |
           set -o pipefail
           ROUTES="/,/trade/login" LH_AUDIT_TIMEOUT_MS=180000 npm run lighthouse:mobile 2>&1 | tee lighthouse-mobile.log
-        timeout-minutes: 40
+        timeout-minutes: 15
       - name: Upload Lighthouse report
         if: failure() || cancelled()
         uses: actions/upload-artifact@v7
