@@ -2233,26 +2233,47 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
-                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks)</span>
-                          <input
-                            type="number"
-                            min={1}
-                            step={1}
-                            defaultValue={getLeadWeeksOverride(item.lead_time_weeks_override) ?? ""}
-                            placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
-                            disabled={isReadOnly}
-                            readOnly={isReadOnly}
-                            tabIndex={isReadOnly ? -1 : 0}
-                            aria-disabled={isReadOnly}
-                            onBlur={(e) => {
-                              if (isReadOnly) return;
-                              const raw = e.target.value.trim();
-                              const parsed = raw === "" ? null : parseInt(raw, 10);
-                              const v = parsed && parsed > 0 ? parsed : null;
-                              if (v !== getLeadWeeksOverride(item.lead_time_weeks_override)) updateItemField(item.id, { lead_time_weeks_override: v });
-                            }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
-                          />
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks · 0 = stock)</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              key={`lead-${item.id}-${item.lead_time_weeks_override ?? "none"}`}
+                              defaultValue={getLeadWeeksOverride(item.lead_time_weeks_override) ?? ""}
+                              placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
+                              disabled={isReadOnly}
+                              readOnly={isReadOnly}
+                              tabIndex={isReadOnly ? -1 : 0}
+                              aria-disabled={isReadOnly}
+                              onBlur={(e) => {
+                                if (isReadOnly) return;
+                                const raw = e.target.value.trim();
+                                const parsed = raw === "" ? null : parseInt(raw, 10);
+                                const v = parsed != null && parsed >= 0 ? parsed : null;
+                                if (v !== getLeadWeeksOverride(item.lead_time_weeks_override)) updateItemField(item.id, { lead_time_weeks_override: v });
+                              }}
+                              className="flex-1 min-w-0 font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
+                            />
+                            <button
+                              type="button"
+                              disabled={isReadOnly}
+                              onClick={() => {
+                                if (isReadOnly) return;
+                                const next = item.lead_time_weeks_override === 0 ? null : 0;
+                                updateItemField(item.id, { lead_time_weeks_override: next });
+                              }}
+                              title="Mark as in stock"
+                              className={cn(
+                                "shrink-0 font-body text-[9px] uppercase tracking-widest px-1.5 py-1 rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                                item.lead_time_weeks_override === 0
+                                  ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                                  : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground",
+                              )}
+                            >
+                              Stock
+                            </button>
+                          </div>
                         </label>
                         <label className="flex flex-col gap-0.5">
                           <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Deposit %</span>
