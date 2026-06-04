@@ -70,6 +70,7 @@ export const HkLandedCostPanel = ({
   onSettingsChange,
   overrideShipping = null,
   shipmentOrigins = null,
+  extrasQuoteCents = 0,
 }: Props) => {
   const useOverride = !!overrideShipping;
   const resolvedInitialMode: HkMode = initialMode ?? "sea_lcl";
