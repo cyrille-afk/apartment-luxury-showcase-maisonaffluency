@@ -44,7 +44,7 @@ import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -91,6 +91,16 @@ function applyRugPerSqmPricing(
       return { ...v, price_cents: computed ?? 0 };
     })
     .filter((v): v is { label?: string; base?: string; top?: string; price_cents: number } => v !== null);
+}
+
+function firstPublicVariantDimensionLabel(
+  variants: { label?: string; base?: string; top?: string; price_cents?: number }[] | null | undefined,
+): string | null {
+  for (const variant of variants || []) {
+    const label = (variant?.label || "").trim();
+    if (label && looksLikeDimension(label)) return label;
+  }
+  return null;
 }
 
 
