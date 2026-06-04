@@ -100,22 +100,24 @@ test.describe("Mobile PWA & accessibility", () => {
 
   test("html applies text-size-adjust and touch-action: manipulation", async ({ page }) => {
     await page.goto("/");
-    const { hasTextSizeAdjustRule, ta } = await page.evaluate(() => {
+    const { cssText, ta } = await page.evaluate(async () => {
       const cs = getComputedStyle(document.documentElement);
-      const cssText = Array.from(document.styleSheets)
-        .flatMap((sheet) => {
-          try {
-            return Array.from(sheet.cssRules).map((rule) => rule.cssText);
-          } catch {
-            return [];
-          }
-        })
-        .join("\n");
+
+      const linkedCss = await Promise.all(
+        Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][href]')).map(
+          async (link) => fetch(link.href).then((res) => res.text()).catch(() => ""),
+        ),
+      );
+
       return {
-        hasTextSizeAdjustRule: /(?:-webkit-)?text-size-adjust\s*:\s*100%/.test(cssText),
+        cssText: [
+          ...Array.from(document.querySelectorAll<HTMLStyleElement>("style")).map((style) => style.textContent || ""),
+          ...linkedCss,
+        ].join("\n"),
         ta: cs.getPropertyValue("touch-action"),
       };
     });
+    const hasTextSizeAdjustRule = /(?:-webkit-)?text-size-adjust\s*:\s*100%/.test(cssText);
     expect(hasTextSizeAdjustRule).toBeTruthy();
     expect(ta).toMatch(/manipulation/);
   });
