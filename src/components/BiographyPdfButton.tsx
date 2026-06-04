@@ -82,9 +82,8 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
         downloadedAt: new Date(),
         onProgress: (p) => setProgress(p),
       });
-      const url = URL.createObjectURL(blob);
       setPreviewBlob(blob);
-      setPreviewUrl(url);
+      setPreviewUrl(typeof URL.createObjectURL === "function" ? URL.createObjectURL(blob) : null);
     } catch (err) {
       console.error("[BiographyPdfButton] failed:", err);
       toast({
@@ -117,7 +116,7 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
           onClick={handleClick}
           disabled={loading}
           className="group inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 disabled:opacity-70 disabled:cursor-wait"
-          aria-label={`Download ${input.designerName} biography PDF`}
+          aria-label={`Preview ${input.designerName} biography PDF before downloading`}
           aria-busy={loading}
         >
           {loading ? (
