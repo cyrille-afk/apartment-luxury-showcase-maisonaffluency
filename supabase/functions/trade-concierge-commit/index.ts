@@ -823,6 +823,7 @@ serve(async (req) => {
       if (resolved.length === 0) {
         return json(422, { error: "None of the picks could be resolved to a product", skipped });
       }
+      await backfillTradeProductImages(supabase, resolved.map((r) => r.tradeProductId));
 
       const { data: board, error: boardErr } = await supabase
         .from("client_boards")
