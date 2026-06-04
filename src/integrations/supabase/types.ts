@@ -4664,6 +4664,44 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_quote_extras: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          label: string
+          quote_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          label: string
+          quote_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          label?: string
+          quote_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_quote_extras_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_quote_items: {
         Row: {
           axonometric_image_url: string | null
