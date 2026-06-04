@@ -105,6 +105,7 @@ export const UkLandedCostPanel = ({
     ready: ratesReady,
     loading,
     fxEurGbp,
+    fxQuoteEur,
     fxIsFallback,
     goodsGbpCents: goodsGbp,
     freightGbpCents: freightGbp,
@@ -116,10 +117,15 @@ export const UkLandedCostPanel = ({
     shippingGbpCents: shippingGbp,
     dutyGbpCents: dutyGbp,
     vatGbpCents: vatGbp,
-    totalGbpCents: totalGbp,
+    totalGbpCents: baseTotalGbp,
     breakdown,
     goodsEurCents,
   } = gbp;
+  // Convert "additional charges" (e.g. crating) from quote currency → EUR → GBP
+  // with the same FX buffer used elsewhere on this panel.
+  const extrasEurCents = fxQuoteEur ? Math.round(extrasQuoteCents * fxQuoteEur) : 0;
+  const extrasGbpCents = fxEurGbp ? Math.round(extrasEurCents * fxEurGbp * (1 + FX_BUFFER)) : 0;
+  const totalGbp = baseTotalGbp + extrasGbpCents;
 
   return (
     <div className="border border-border rounded-md bg-background/40 print:bg-white">
