@@ -934,10 +934,17 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const afterDiscount = subtotalWithExtras - discountCents;
+  const afterDiscount = args.subtotalCents - discountCents;
   if (discountCents > 0) {
     rows.push({ label: "Net subtotal", value: fmtMoney(afterDiscount, args.currency) });
   }
+  // Additional charges (non-discountable) — rendered after Net subtotal as full lines.
+  extrasList.forEach((e) => {
+    rows.push({
+      label: e.label || "Additional charge",
+      value: `+ ${fmtMoney(e.amountCents, args.currency)}`,
+    });
+  });
   if ((args.insurancePremiumCents || 0) > 0) {
     rows.push({
       label: args.insuranceLabel
@@ -947,7 +954,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       muted: true,
     });
   }
-  const baseForGst = afterDiscount + (args.insurancePremiumCents || 0);
+  const baseForGst = afterDiscount + extrasTotalCents + (args.insurancePremiumCents || 0);
   const gstCents = args.gstEnabled ? Math.round(baseForGst * args.gstRate / 100) : 0;
   if (args.gstEnabled) {
     rows.push({
