@@ -1037,8 +1037,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
       })(),
       depositPct: (() => {
-        // Weighted deposit % across line items. Lead-time = 0 (in stock) defaults to 100%
-        // unless an explicit per-line deposit override is set.
+        // Weighted deposit % across line items. In-stock items (or lead-time = 0)
+        // default to 100% upfront unless an explicit per-line deposit override is set.
         let weight = 0;
         let weighted = 0;
         for (const it of items) {
@@ -1047,9 +1047,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const lineCents = (convertCents(rawPrice, fromCur, currency) ?? 0) * it.quantity;
           if (lineCents <= 0) continue;
           const leadOverride = getLeadWeeksOverride(it.lead_time_weeks_override);
+          const p = it.trade_products as any;
+          const isInStock =
+            p?.stock_status_override === "in_stock" ||
+            p?.lead_weeks_max_override === 0 ||
+            leadOverride === 0;
           const pct = it.deposit_pct_override != null
             ? it.deposit_pct_override
-            : (leadOverride === 0 ? 1 : 0.6);
+            : (isInStock ? 1 : 0.6);
           weight += lineCents;
           weighted += lineCents * pct;
         }
