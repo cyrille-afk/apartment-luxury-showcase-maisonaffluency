@@ -1262,6 +1262,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     totalKg: perLine.shipments.reduce((s, x) => s + x.totalKg, 0),
   } : null;
 
+  /**
+   * Insurance premium — calculated on CIF value (goods after discount + freight),
+   * per the user's policy. Freight is converted from EUR to the quote currency.
+   */
+  const freightInQuoteCcyCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+    ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+    : 0;
+  const insuranceBaseCents = insuredBaseCents + freightInQuoteCcyCents;
+  const insurancePremiumCents = insuranceEnabled && insuranceBaseCents > 0
+    ? Math.round(insuranceBaseCents * insuranceRateBps / 10000)
+    : 0;
+
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? insuredBaseCents : 0,
