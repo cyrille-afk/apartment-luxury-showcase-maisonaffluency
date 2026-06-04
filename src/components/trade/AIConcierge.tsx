@@ -197,6 +197,17 @@ export function AIConcierge() {
     }
   };
 
+  // Persist concierge open/minimized/timeline so it survives navigation.
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:open", open ? "1" : "0"); } catch {}
+  }, [open]);
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:minimized", minimized ? "1" : "0"); } catch {}
+  }, [minimized]);
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:timeline", JSON.stringify(timeline)); } catch {}
+  }, [timeline]);
+
   // Keep panel inside viewport on resize
   useEffect(() => {
     if (!pos) return;
