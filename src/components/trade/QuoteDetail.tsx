@@ -2646,6 +2646,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialMode={landedCostSettings.mode}
                       onSettingsChange={handleLandedCostSettingsChange}
                       overrideShipping={overrideShipping}
+                      extrasQuoteCents={extrasTotalCents}
                     />
                   </div>
                 )}
