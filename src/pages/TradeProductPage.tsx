@@ -307,7 +307,7 @@ function useTradeProductBySlug(
       // Pull trade pricing + extra images from trade_products
       let tradeQuery = supabase
         .from("trade_products")
-        .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url")
+        .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, dimensions, materials, lead_time, origin, description")
         .eq("product_name", (product as any).title)
         .eq("is_active", true)
         .limit(1);
@@ -357,6 +357,14 @@ function useTradeProductBySlug(
           gallery_images: (product as any).gallery_images?.length
             ? (product as any).gallery_images
             : tradeProduct?.gallery_images || null,
+          // Fall back to trade_products for spec fields the curator pick
+          // may have left blank — otherwise the trade sheet shows fewer
+          // data points than the public page (which reads trade_products).
+          dimensions: (product as any).dimensions || tradeProduct?.dimensions || null,
+          materials: (product as any).materials || tradeProduct?.materials || null,
+          lead_time: (product as any).lead_time || tradeProduct?.lead_time || null,
+          origin: (product as any).origin || tradeProduct?.origin || null,
+          description: (product as any).description || tradeProduct?.description || null,
           size_variants: (product as any).size_variants || null,
         },
         designer: {
