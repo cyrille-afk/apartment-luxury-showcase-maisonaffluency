@@ -142,7 +142,7 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
         break;
       case "flat": amount = v; break;
       case "per_cbm": amount = v * cbm; break;
-      case "per_kg": amount = v * kg; break;
+      case "per_kg": amount = v * best.chargeableKg; break;
     }
     amount = Math.round(amount);
     detail.push({ label: prettyType(s.surcharge_type), value_cents: amount, method: s.calc_method });
