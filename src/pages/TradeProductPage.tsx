@@ -1242,7 +1242,7 @@ const TradeProductPage: React.FC = () => {
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
               {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
-                const sizeText = sizeVariants && sizeVariants.length > 0
+                const variantSizeText = sizeVariants && sizeVariants.length > 0
                   ? sizeVariants
                       .map((v) => {
                         let label = (v.label || "").trim();
@@ -1256,20 +1256,29 @@ const TradeProductPage: React.FC = () => {
                         return label;
                       })
                       .join("\n")
+                  : null;
+                // If variants are dimensional, use them as a size picker.
+                // Otherwise (finish/material-only variants), fall back to the
+                // product's raw dimensions so the row is never dropped.
+                const variantsAreDimensional = variantSizeText && looksLikeDimension(variantSizeText);
+                const sizeText = variantsAreDimensional
+                  ? variantSizeText!
                   : formatDimensionsMultiline(product.dimensions);
                 if (!looksLikeDimension(sizeText)) return null;
+                const interactive = variantsAreDimensional && hasVariants;
                 return (
                   <ExpandableSpec
                     icon={specIcon("📐")}
                     text={sizeText}
                     secondaryText={formatImperialDimensions(sizeText)}
                     emphasized
-                    placeholder="Select your size"
-                    value={hasVariants ? selectedVariantIdx : undefined}
-                    onChange={hasVariants ? setSelectedVariantIdx : undefined}
+                    placeholder={interactive ? "Select your size" : undefined}
+                    value={interactive ? selectedVariantIdx : undefined}
+                    onChange={interactive ? setSelectedVariantIdx : undefined}
                   />
                 );
               })()}
+
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
