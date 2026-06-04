@@ -989,7 +989,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
       });
     }
   }
-  const grand = baseForGst + gstCents + shippingEstimateCents + extrasTotalCents;
+  const grand = baseForGst + gstCents + shippingEstimateCents;
   const depositPct = Math.max(0, Math.min(1, args.depositPct ?? 0.6));
   const deposit = Math.round(grand * depositPct);
   const balance = grand - deposit;
