@@ -1,36 +1,76 @@
-## Goal
+# BIM/CAD Reasoning Agent
 
-Make Delcourt Collection and Collection Particulière invisible across Public and Trade views without deleting any data. Their child designers (Studio Anansi, Flavien Delbergue, Luca Erba, Yabu Pushelberg, Christophe Delcourt) stay visible but lose the parent badge.
+Honest framing: "full spatial reasoning on DWG + DXF" is a 3-phase build, not one shot. DWG is a closed Autodesk format — no open-source parser produces reliable geometry from it. The realistic path is DXF natively + DWG via a server-side converter (LibreDWG or ODA File Converter on an edge worker), then layer spatial logic on top of the extracted geometry. I'll ship in phases so you see value after each.
 
-## Database changes (data only — via insert tool)
+## Architecture
 
-1. **`designers`** — confirm `is_published = false` on the two parent rows (already `false`, no-op). Set `founder = NULL` on every child row currently pointing to either name:
-   - Studio Anansi, Flavien Delbergue, Luca Erba, Yabu Pushelberg → was `Collection Particulière`
-   - Christophe Delcourt (`delcourt-collection` slug) → was `Delcourt Collection`
-2. **`designer_curator_picks`** — set `is_hidden = true` on all 32 picks attached to the two parent `designer_id`s.
-3. **`trade_products`** — set `is_hidden = true` AND `is_active = false` on all 35 rows where `brand_name IN ('Delcourt Collection','Collection Particulière')`.
+```text
+User uploads .dwg/.dxf
+        │
+        ▼
+┌──────────────────────────┐
+│ /trade/spatial-fit page  │  ← dedicated uploader + 2D viewer
+│  OR concierge attachment │  ← same backend, invoked as tool
+└──────────────────────────┘
+        │ multipart upload
+        ▼
+Supabase Storage: cad-uploads/ (private, 60s signed URLs)
+        │
+        ▼
+Edge Function: cad-parse
+  - DXF: parse text directly (dxf-parser, npm)
+  - DWG: convert → DXF via LibreDWG WASM, then parse
+  - Extract: layers, blocks, polylines, rooms (closed polylines),
+             ceiling heights (from text/attributes), doors, walls
+  - Returns normalized JSON: rooms[], openings[], constraints
+        │
+        ▼
+Supabase table: cad_documents (parsed geometry cached)
+        │
+        ▼
+Edge Function: cad-spatial-reason (LLM + deterministic checks)
+  - Input: room id + product id (or catalog filter)
+  - Deterministic: bbox fit, clearance zones, door swing arcs,
+                   ceiling clearance, sightlines
+  - LLM layer: style/material match, suggest alternates,
+               multi-product layout reasoning, conflict narration
+        │
+        ▼
+Returned to UI:
+  - 2D plan with product footprints overlaid
+  - Per-room fit report (pass/warn/fail + reasons)
+  - "Suggest alternates" CTA (queries catalog by dim constraints)
+  - "Open as tearsheet" / "Open quote draft" (reuse existing flow)
+```
 
-## Code changes
+## Phase 1 — Foundation (DXF + dimensional fit + concierge tool)
 
-4. **`src/components/BrandsAteliers.tsx`** — remove the two atelier entries (`collection-particuliere` at L805, `delcourt` at L834) from the brands array, and remove their entries from the `dbParentName` registry around L1985–1998 plus the background-image / pill-label maps at L1735, L1770, L1846.
-5. **`src/components/FeaturedDesigners.tsx`** — on the Forest & Giaconia profile, drop the BOB Armchair curator pick (L1227–1236) and clear `notableWorksLink` referencing "BOB Armchair - Delcourt Collection" (L1191). Leave the rest of the profile intact.
-6. **`src/pages/PublicDesignerProfile.tsx`** — remove the two SEO title overrides at L59 and L65 that mention the brand names; the page falls back to the default title format.
-7. **`src/pages/TradeLogin.tsx`** (L269) and **`src/pages/TradeRegister.tsx`** (L284) — remove "Collection Particulière" from the represented-brands marketing copy lists.
-8. **`src/data/designersIndex.json`** — strip any entries keyed to the two slugs (used by directory search/autocomplete).
+- New private Storage bucket `cad-uploads` with RLS (studio-scoped).
+- New tables:
+  - `cad_documents` (id, studio_id, user_id, file_path, format, parsed_geometry JSONB, status, error, created_at)
+  - `cad_fit_reports` (id, cad_document_id, room_id, product_id, verdict, reasons JSONB, created_at)
+- Edge function `cad-parse` — DXF only in phase 1, using `dxf-parser` (npm). Extracts rooms (closed LWPOLYLINE on layer matching `ROOM|SPACE|A-AREA`), text labels, basic openings.
+- Edge function `cad-spatial-reason` — deterministic bbox/clearance only in phase 1, LLM narrates the result.
+- `/trade/spatial-fit` page: uploader, room list with detected dims, "Check fit" against any catalog product or category.
+- Concierge tool: `cad_check_fit({ cad_document_id, room_label, product_id? })` — returns same JSON, agent narrates.
+- 2D viewer: simple SVG of room polygons + product footprint overlay (no full CAD renderer needed in phase 1).
 
-## OG bridge files
+## Phase 2 — DWG support + clearance/swing logic
 
-9. Delete all OG bridge files under `public/ateliers/`, `public/designers/`, and `public/collectibles/` whose filename starts with `delcourt-collection-` or `collection-particuliere-` (≈40 files, both `-og.html` and `-og-v2.html` variants). They are unindexed redirect shells; removing them prevents social cards from resolving.
+- Add LibreDWG WASM (or shell out to ODA File Converter on a dedicated worker if WASM perf is poor) inside `cad-parse` to convert .dwg → .dxf in-function, then reuse phase 1 parser.
+- Spatial rules: door swing arcs, walking clearance (≥600mm around seating, ≥900mm primary circulation), ceiling void clearance for pendants, sightline checks.
+- Verdict upgraded to pass / warn / fail with structured reasons.
 
-## Out of scope
+## Phase 3 — Multi-product layout + style/material match
 
-- No row deletions. Data remains restorable by flipping the flags back.
-- Christophe Delcourt's own designer profile stays visible; only his parent-brand badge is cleared.
-- Sitemap and robots.txt regenerate from DB on next build — no manual edit needed once `is_published`/`is_hidden` flags are set.
+- Concierge gets `cad_propose_layout({ cad_document_id, room_label, brief })` — agent calls catalog search + spatial checker in a loop, returns a draft FF&E for the room, opens tearsheet draft (reuses existing tearsheet builder).
+- Style/material match: ceiling finish, wall finish, existing palette tags (parsed from DXF text/attributes or supplied by user) cross-referenced with curator pick material tags.
+- "Compliance/spec validation" cross-link: lead time vs project deadline, budget vs RRP — surfaces as warnings in the same fit report (this is item #5 from the article, but slots in naturally here).
 
-## Verification
+## What I need from you before coding
 
-- `/designers` (public + trade): no Delcourt or Collection Particulière cards, child designers still listed without parent pill.
-- `/trade/products` and category grids: no products from these two brands.
-- Tearsheet builder + FF&E: hidden picks excluded automatically (existing filter respects `is_hidden`).
-- Direct visit to `/designers/delcourt-collection` or `/designers/collection-particuliere` falls through to the standard "not found" path because `is_published = false`.
+1. **Phase 1 scope confirmation** — ship phase 1 first (DXF + dimensional fit + concierge tool + dedicated page), get it working in production, then phase 2/3? Or do you want all three planned and stubbed up-front?
+2. **DWG strategy** — LibreDWG WASM (free, ~10MB, sometimes flaky on complex files) vs an ODA File Converter worker (more reliable, requires hosting). Recommend WASM for phase 2 and only move to a worker if real files fail.
+3. **Studio access** — you mentioned multi-user studios aren't fine-tuned yet. CAD uploads are per-user or per-studio-shared? Recommend per-studio-shared from day 1 (matches the "real account manager" framing).
+
+You said "1/" — assuming more is coming. I'll wait for your follow-ups + the answers above before touching code.
