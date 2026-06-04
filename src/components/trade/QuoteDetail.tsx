@@ -22,7 +22,7 @@ import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type H
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
-import { toIsoCountry } from "@/lib/perLineShipping";
+import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
