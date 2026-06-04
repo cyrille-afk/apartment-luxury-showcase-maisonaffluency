@@ -25,7 +25,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
@@ -341,7 +341,7 @@ const VariantSelectors: React.FC<{
             icon={specIcon("⬗")}
             text={withImperialPerLine(baseOptions.join("\n"))}
             placeholder={getBasePlaceholder(product)}
-            singleValueLabel={product.base_axis_label || undefined}
+            singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
             emphasized
             value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
             onChange={(idx) => {
@@ -372,7 +372,7 @@ const VariantSelectors: React.FC<{
             icon={specIcon("⬗")}
             text={withImperialPerLine(topOptions.join("\n"))}
             placeholder={getTopPlaceholder(product)}
-            singleValueLabel={product.top_axis_label || undefined}
+            singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
             emphasized
             value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : null}
             onChange={(idx) => {
@@ -416,7 +416,7 @@ const VariantSelectors: React.FC<{
           icon={specIcon("⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
           placeholder={getBasePlaceholder(product)}
-          singleValueLabel={product.base_axis_label || undefined}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
           emphasized
           value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
           onChange={(idx) => {

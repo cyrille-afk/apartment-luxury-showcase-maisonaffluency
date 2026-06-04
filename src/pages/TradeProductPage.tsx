@@ -44,7 +44,7 @@ import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -56,6 +56,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -193,6 +194,7 @@ function useTradeProductBySlug(
           relatedPicks = ((picks || []) as unknown as ProductRow[]).filter((p) => p.id !== curatorPick?.id);
         }
 
+        const publicVariantDimension = firstPublicVariantDimensionLabel(curatorPick?.size_variants);
         const product: ProductRow = {
           id: curatorPick?.id || (tradeProduct as any).id,
           title: curatorPick?.title || (tradeProduct as any).product_name,
@@ -202,7 +204,7 @@ function useTradeProductBySlug(
           gallery_images: curatorPick?.gallery_images?.length ? curatorPick.gallery_images : (tradeProduct as any).gallery_images || null,
           materials: curatorPick?.materials || (tradeProduct as any).materials || null,
           materials_description: curatorPick?.materials_description || null,
-          dimensions: curatorPick?.dimensions || (tradeProduct as any).dimensions || null,
+          dimensions: publicVariantDimension || curatorPick?.dimensions || (tradeProduct as any).dimensions || null,
           description: curatorPick?.description || (tradeProduct as any).description || null,
           category: curatorPick?.category || (tradeProduct as any).category || null,
           subcategory: curatorPick?.subcategory || (tradeProduct as any).subcategory || null,
@@ -360,7 +362,7 @@ function useTradeProductBySlug(
           // Fall back to trade_products for spec fields the curator pick
           // may have left blank — otherwise the trade sheet shows fewer
           // data points than the public page (which reads trade_products).
-          dimensions: (product as any).dimensions || tradeProduct?.dimensions || null,
+          dimensions: firstPublicVariantDimensionLabel((product as any).size_variants) || (product as any).dimensions || tradeProduct?.dimensions || null,
           materials: (product as any).materials || tradeProduct?.materials || null,
           lead_time: (product as any).lead_time || tradeProduct?.lead_time || null,
           origin: (product as any).origin || tradeProduct?.origin || null,
@@ -1110,6 +1112,7 @@ const TradeProductPage: React.FC = () => {
                   icon={specIcon("⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                   emphasized
                   value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
                   onChange={(idx) => {
@@ -1144,6 +1147,7 @@ const TradeProductPage: React.FC = () => {
                     icon={specIcon("⬗")}
                     text={withImperialPerLine(baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
+                      singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                     emphasized
                     value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
                     onChange={(idx) => {
@@ -1175,6 +1179,7 @@ const TradeProductPage: React.FC = () => {
                     icon={specIcon("⬗")}
                     text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
+                      singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
                     emphasized
                     value={selectedTop != null ? Math.max(0, topOptions.indexOf(selectedTop)) : null}
                     onChange={(idx) => {
