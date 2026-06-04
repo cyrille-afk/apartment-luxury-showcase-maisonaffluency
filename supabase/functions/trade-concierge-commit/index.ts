@@ -241,6 +241,62 @@ async function resolvePickIds(
   return { resolved, skipped };
 }
 
+/**
+ * For each resolved trade_products id, ensure image_url is populated. Some
+ * curator picks (notably rugs and other products whose only photo lives on a
+ * gallery hotspot) land in trade_products with a NULL image_url, which means
+ * tearsheets and quotes render without a thumbnail even though the concierge
+ * preview shows one (the preview is enriched client-side via
+ * fillHotspotImages). Mirror that fallback server-side and patch the row so
+ * the board, quote, and FF&E surfaces all show the image.
+ */
+async function backfillTradeProductImages(
+  supabase: ReturnType<typeof createClient>,
+  tradeProductIds: string[],
+): Promise<void> {
+  if (tradeProductIds.length === 0) return;
+  const { data: rows } = await supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, image_url")
+    .in("id", tradeProductIds);
+  const missing = (rows || []).filter((r: any) => !r.image_url);
+  if (missing.length === 0) return;
+
+  const normName = (s: string) =>
+    String(s || "").toLowerCase().replace(/\s*\(.*?\)\s*/g, "").replace(/[^a-z0-9]+/g, "").trim();
+  const normBrand = (s: string) =>
+    String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+
+  const { data: hotspots } = await supabase
+    .from("gallery_hotspots")
+    .select("product_name, designer_name, product_image_url")
+    .not("product_image_url", "is", null);
+
+  if (!hotspots || hotspots.length === 0) return;
+
+  const byName = new Map<string, string>();
+  const byBrandName = new Map<string, string>();
+  for (const h of hotspots as any[]) {
+    const n = normName(h.product_name);
+    if (!n) continue;
+    if (!byName.has(n)) byName.set(n, h.product_image_url);
+    const bKey = `${normBrand(h.designer_name)}|${n}`;
+    if (!byBrandName.has(bKey)) byBrandName.set(bKey, h.product_image_url);
+  }
+
+  for (const row of missing as any[]) {
+    const n = normName(row.product_name);
+    if (!n) continue;
+    const hit =
+      (row.brand_name && byBrandName.get(`${normBrand(row.brand_name)}|${n}`)) ||
+      byName.get(n) ||
+      null;
+    if (hit) {
+      await supabase.from("trade_products").update({ image_url: hit }).eq("id", row.id);
+    }
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
