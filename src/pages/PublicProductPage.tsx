@@ -416,7 +416,7 @@ const VariantSelectors: React.FC<{
           icon={specIcon("⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
           placeholder={getBasePlaceholder(product)}
-          singleValueLabel={product.base_axis_label || undefined}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
           emphasized
           value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
           onChange={(idx) => {
