@@ -149,6 +149,8 @@ export interface QuotePdfArgs {
   hkDapPage?: HkDapPageArgs | null;
   /** Full UK DDP estimate appended as a dedicated final page when provided. */
   ukDdpPage?: UkDdpPageArgs | null;
+  /** Weighted deposit fraction (0..1). Defaults to 0.6. When 1, balance row is hidden. */
+  depositPct?: number;
 }
 
 
