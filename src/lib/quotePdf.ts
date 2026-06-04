@@ -974,15 +974,19 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
     }
   }
   const grand = baseForGst + gstCents + shippingEstimateCents;
-  const deposit = Math.round(grand * 0.6);
+  const depositPct = Math.max(0, Math.min(1, args.depositPct ?? 0.6));
+  const deposit = Math.round(grand * depositPct);
   const balance = grand - deposit;
+  const depositPctLabel = `${Math.round(depositPct * 100)}%`;
+  const balancePctLabel = `${Math.round((1 - depositPct) * 100)}%`;
+  const showBalanceRow = balance > 0;
 
   const rowH = 18;
   const disclaimer = shippingEstimateCents > 0
     ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
     : "";
   const disclaimerLines = disclaimer ? doc.splitTextToSize(disclaimer, blockW - 28) : [];
-  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0);
+  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0) - (showBalanceRow ? 0 : 14);
   doc.rect(x, cy, blockW, totalH, "F");
 
   cy += 16;
