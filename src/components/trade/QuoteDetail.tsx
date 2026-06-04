@@ -1214,13 +1214,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
   };
 
-  /** Insurance premium in cents, calculated on (subtotal − trade discount). */
+  /** Insured goods base: subtotal − trade discount (used by GBP/HK landed-cost panels). */
   const insuredBaseCents = tradeDiscount && subtotalCents > 0
     ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
     : subtotalCents;
-  const insurancePremiumCents = insuranceEnabled && insuredBaseCents > 0
-    ? Math.round(insuredBaseCents * insuranceRateBps / 10000)
-    : 0;
 
   /**
    * Per-line shipping: groups quote lines by (origin, mode), runs the
@@ -1264,6 +1261,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     totalCbm: perLine.shipments.reduce((s, x) => s + x.totalCbm, 0),
     totalKg: perLine.shipments.reduce((s, x) => s + x.totalKg, 0),
   } : null;
+
+  /**
+   * Insurance premium — calculated on CIF value (goods after discount + freight),
+   * per the user's policy. Freight is converted from EUR to the quote currency.
+   */
+  const freightInQuoteCcyCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
+    ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+    : 0;
+  const insuranceBaseCents = insuredBaseCents + freightInQuoteCcyCents;
+  const insurancePremiumCents = insuranceEnabled && insuranceBaseCents > 0
+    ? Math.round(insuranceBaseCents * insuranceRateBps / 10000)
+    : 0;
 
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
   const gbp = useGbpLandedCost({
