@@ -983,7 +983,9 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
 
   const rowH = 18;
   const disclaimer = shippingEstimateCents > 0
-    ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
+    ? (showBalanceRow
+        ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
+        : "Shipping & FX are estimates. As 100% is due now, any freight/FX variance at shipment will be settled via a separate adjustment invoice.")
     : "";
   const disclaimerLines = disclaimer ? doc.splitTextToSize(disclaimer, blockW - 28) : [];
   const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0) - (showBalanceRow ? 0 : 14);
