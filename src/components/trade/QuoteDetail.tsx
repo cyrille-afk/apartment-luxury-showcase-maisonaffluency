@@ -369,7 +369,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
@@ -1037,8 +1037,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
       })(),
       depositPct: (() => {
-        // Weighted deposit % across line items. Lead-time = 0 (in stock) defaults to 100%
-        // unless an explicit per-line deposit override is set.
+        // Weighted deposit % across line items. In-stock items (or lead-time = 0)
+        // default to 100% upfront unless an explicit per-line deposit override is set.
         let weight = 0;
         let weighted = 0;
         for (const it of items) {
@@ -1047,9 +1047,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const lineCents = (convertCents(rawPrice, fromCur, currency) ?? 0) * it.quantity;
           if (lineCents <= 0) continue;
           const leadOverride = getLeadWeeksOverride(it.lead_time_weeks_override);
+          const p = it.trade_products as any;
+          const isInStock =
+            p?.stock_status_override === "in_stock" ||
+            p?.lead_weeks_max_override === 0 ||
+            leadOverride === 0;
           const pct = it.deposit_pct_override != null
             ? it.deposit_pct_override
-            : (leadOverride === 0 ? 1 : 0.6);
+            : (isInStock ? 1 : 0.6);
           weight += lineCents;
           weighted += lineCents * pct;
         }
