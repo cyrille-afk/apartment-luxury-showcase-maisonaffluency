@@ -223,7 +223,144 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "estimate_shipping",
+      description:
+        "Compute a live shipping estimate from Maison Affluency's rate matrix (DHL/forwarder lanes, brackets, surcharges, duty, VAT). USE THIS TOOL whenever the user asks about freight cost, shipping cost, air freight, sea freight, duty, VAT, or landed-cost for a route — never guess shipping numbers from general knowledge. Returns freight, fuel, insurance, customs, handling, last-mile, duty, VAT and total in cents.",
+      parameters: {
+        type: "object",
+        properties: {
+          origin_country: { type: "string", description: "ISO-2 origin country code (e.g. FR, IT, GB)." },
+          dest_country: { type: "string", description: "ISO-2 destination country code (e.g. HK, US, SG)." },
+          total_volume_cbm: { type: "number", description: "Total shipment volume in cubic meters." },
+          total_weight_kg: { type: "number", description: "Total actual gross weight in kilograms." },
+          declared_value_cents: { type: "integer", description: "Declared/insured value in CENTS (commercial invoice value)." },
+          currency: { type: "string", description: "Currency of declared_value_cents — defaults to EUR." },
+          preferred_mode: { type: "string", enum: ["sea_lcl", "sea_fcl", "air", "road", "courier"], description: "Optional mode filter. Omit to let the matrix pick the cheapest available." },
+          category: { type: "string", enum: ["furniture", "lighting", "art", "textile", "accessory", "other"], description: "Product category for duty lookup. Defaults to furniture." },
+        },
+        required: ["origin_country", "dest_country", "total_volume_cbm", "total_weight_kg", "declared_value_cents"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
+
+/** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
+async function runShippingEstimate(
+  supabase: ReturnType<typeof createClient>,
+  args: {
+    origin_country: string;
+    dest_country: string;
+    total_volume_cbm: number;
+    total_weight_kg: number;
+    declared_value_cents: number;
+    currency?: string;
+    preferred_mode?: string;
+    category?: string;
+  },
+): Promise<any> {
+  const currency = (args.currency || "EUR").toUpperCase();
+  const category = args.category || "furniture";
+  let lanesQuery = supabase
+    .from("shipping_lanes").select("*")
+    .eq("origin_country", args.origin_country)
+    .eq("dest_country", args.dest_country)
+    .eq("active", true);
+  if (args.preferred_mode) lanesQuery = lanesQuery.eq("mode", args.preferred_mode);
+  const { data: lanes } = await lanesQuery;
+  if (!lanes || lanes.length === 0) {
+    return { available: false, reason: "No lane configured for this route — contact the team for a manual quote.", currency };
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: brackets } = await supabase
+    .from("shipping_rate_brackets").select("*")
+    .in("lane_id", lanes.map((l: any) => l.id))
+    .lte("valid_from", today);
+
+  const cbm = Math.max(0.01, Number(args.total_volume_cbm));
+  const actualKg = Math.max(0, Number(args.total_weight_kg));
+  const chargeableKgFor = (mode: string) =>
+    mode === "air" ? Math.max(actualKg, cbm * 167) : actualKg;
+
+  let best: any = null;
+  for (const lane of lanes) {
+    const laneKg = chargeableKgFor(lane.mode);
+    const candidates = (brackets || []).filter((b: any) =>
+      b.lane_id === lane.id &&
+      Number(b.min_volume_cbm) <= cbm && Number(b.max_volume_cbm) >= cbm &&
+      Number(b.min_weight_kg) <= laneKg && Number(b.max_weight_kg) >= laneKg &&
+      (!b.valid_to || b.valid_to >= today));
+    if (candidates.length === 0) continue;
+    const b = candidates[0];
+    const freight = Math.max(
+      Number(b.base_rate_cents) + Number(b.rate_per_cbm_cents) * cbm + Number(b.rate_per_kg_cents) * laneKg,
+      Number(b.min_charge_cents),
+    );
+    if (!best || freight < best.freight) best = { lane, bracket: b, freight, chargeableKg: laneKg };
+  }
+  if (!best) {
+    return { available: false, reason: "No rate bracket matches this volume/weight on the configured lanes.", currency };
+  }
+
+  const { data: surcharges } = await supabase.from("shipping_surcharges").select("*").eq("active", true);
+  let fuel = 0, insurance = 0, customs = 0, handling = 0, lastMile = 0;
+  for (const s of surcharges || []) {
+    if (s.scope === "lane" && s.lane_id !== best.lane.id) continue;
+    if (s.scope === "carrier" && s.carrier_name !== best.lane.carrier_name) continue;
+    if (s.scope === "dest_zone" && s.dest_country !== args.dest_country) continue;
+    let amount = 0;
+    const v = Number(s.value_numeric);
+    if (s.calc_method === "percent") {
+      amount = s.surcharge_type === "insurance"
+        ? (Number(args.declared_value_cents) + best.freight) * (v / 100)
+        : best.freight * (v / 100);
+    } else if (s.calc_method === "flat") amount = v;
+    else if (s.calc_method === "per_cbm") amount = v * cbm;
+    else if (s.calc_method === "per_kg") amount = v * best.chargeableKg;
+    amount = Math.round(amount);
+    if (s.surcharge_type === "fuel") fuel += amount;
+    else if (s.surcharge_type === "insurance") insurance += amount;
+    else if (s.surcharge_type === "customs") customs += amount;
+    else if (s.surcharge_type === "last_mile") lastMile += amount;
+    else handling += amount;
+  }
+
+  const { data: duties } = await supabase
+    .from("shipping_duty_rates").select("*")
+    .eq("dest_country", args.dest_country).eq("category", category).eq("active", true).limit(1);
+  let duty = 0, vat = 0, dutyPct = 0, vatPct = 0;
+  if (duties && duties[0]) {
+    dutyPct = Number(duties[0].duty_percent);
+    vatPct = Number(duties[0].vat_percent);
+    duty = Math.round(Number(args.declared_value_cents) * (dutyPct / 100));
+    vat = Math.round((Number(args.declared_value_cents) + duty + best.freight) * (vatPct / 100));
+  }
+  const total = Math.round(best.freight + fuel + insurance + customs + handling + lastMile + duty + vat);
+  return {
+    available: true,
+    currency,
+    carrier: best.lane.carrier_name,
+    mode: best.lane.mode,
+    transit_days_min: best.lane.transit_days_min,
+    transit_days_max: best.lane.transit_days_max,
+    chargeable_weight_kg: Math.round(best.chargeableKg),
+    cbm,
+    freight_cents: Math.round(best.freight),
+    fuel_cents: fuel,
+    insurance_cents: insurance,
+    customs_cents: customs,
+    handling_cents: handling,
+    last_mile_cents: lastMile,
+    duty_cents: duty,
+    duty_percent: dutyPct,
+    vat_cents: vat,
+    vat_percent: vatPct,
+    total_cents: total,
+  };
+}
 
 
 function buildSystemPrompt(
@@ -279,6 +416,18 @@ Rules for both tools:
 
 ## TOOL USE — FF&E SCHEDULE (ROOM-BY-ROOM BRIEFS)
 Use \`propose_ffe_rows\` instead of \`draft_quote\` when the user asks for a SCHEDULE organised by room ("FF&E for the Mayfair townhouse", "drawing-room, dining-room and bedroom edit", "full apartment schedule"). Every row MUST carry a \`room\` label. \`project_id\` is REQUIRED — if there is no ACTIVE PROJECT, ask the user which project to bind to before calling the tool. On approval the rows commit as room-tagged lines on a draft quote and automatically populate the FF&E Schedule view.
+
+## TOOL USE — SHIPPING ESTIMATES (MANDATORY FOR FREIGHT/LANDED-COST QUESTIONS)
+Whenever the user asks about freight cost, shipping cost, air/sea/road freight, customs duty, VAT/GST, or landed-cost for a specific route — you MUST call the \`estimate_shipping\` tool. NEVER invent or recall shipping numbers from general knowledge — Maison Affluency's rate matrix is the single source of truth.
+
+Required arguments:
+- \`origin_country\` / \`dest_country\` — ISO-2 codes (FR, IT, GB, HK, US, SG, AE, …). If the user names a city, infer the country.
+- \`total_volume_cbm\` and \`total_weight_kg\` — packed shipment volume and gross weight. If the user does not state them, ask for them OR use a sensible default for the piece type (small object 0.05 cbm / 8 kg, side table 0.15 / 25 kg, lounge chair 0.5 / 35 kg, sofa 1.2 / 80 kg).
+- \`declared_value_cents\` — commercial invoice value in CENTS (multiply EUR/USD by 100). Use the catalog trade price if quoting a specific piece.
+- \`preferred_mode\` — pass only when the user names one ("by air", "sea LCL"). Otherwise omit so the matrix picks the cheapest lane.
+
+After the tool returns, write a concise breakdown in the user's currency: freight, fuel, insurance, customs/handling, last-mile, duty %, VAT %, and the total. Mention the selected carrier and mode. If \`available: false\`, tell the user the lane isn't configured and offer a manual quote.
+
 
 ## ACTIVE PROJECT
 ${projectContext}
@@ -1560,8 +1709,13 @@ serve(async (req) => {
     const allowedNames = stageAllowed && baseAllowed
       ? stageAllowed.filter((n) => baseAllowed.includes(n))
       : (stageAllowed ?? baseAllowed);
-    const availableTools = allowedNames
-      ? TOOLS.filter((tool: any) => allowedNames.includes(tool.function?.name))
+    // `estimate_shipping` is always allowed regardless of stage — shipping
+    // questions can come up on any surface and must always hit the live rate matrix.
+    const allowedWithShipping = allowedNames
+      ? Array.from(new Set([...allowedNames, "estimate_shipping"]))
+      : null;
+    const availableTools = allowedWithShipping
+      ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
       : TOOLS;
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
@@ -1647,7 +1801,8 @@ serve(async (req) => {
           const tearsheetBuffers = allBuffers.filter((b) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
           const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers];
+          const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
+          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers];
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
@@ -1783,6 +1938,88 @@ serve(async (req) => {
               };
               controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
               console.log(`[concierge] emitted propose_ffe_rows proposal: ${rows.length} rows across ${new Set(rows.map((r) => r.room)).size} room(s) for project ${projectId}`);
+              continue;
+            }
+
+            // ====== SHIPPING ESTIMATE ======
+            // Runs the live rate matrix server-side, then makes a follow-up
+            // non-streaming gateway call so the AI writes prose with the real
+            // numbers. We stream the resulting text out as synthetic SSE deltas
+            // so the existing client-side `onDelta` handler renders it.
+            if (tc.name === "estimate_shipping") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse estimate_shipping args:", tc.argsText, e);
+                continue;
+              }
+              let result: any;
+              try {
+                result = await runShippingEstimate(supabase, parsed);
+              } catch (e) {
+                console.error("[concierge] estimate_shipping failed:", e);
+                result = { available: false, reason: "Estimator error — please try again." };
+              }
+              console.log(`[concierge shipping] ${parsed.origin_country}→${parsed.dest_country} ${parsed.preferred_mode || "auto"} → total ${result.total_cents}`);
+
+              // Follow-up: ask the model to summarise the breakdown in prose,
+              // in the user's currency, citing the carrier / mode / transit.
+              try {
+                const followupSystem = [
+                  "You are the Maison Affluency Trade Concierge — shipping desk follow-up.",
+                  "The user just asked for a shipping/landed-cost estimate. The TOOL_RESULT below is the AUTHORITATIVE figure from our live rate matrix (carriers, brackets, surcharges, duty, VAT). DO NOT recompute or second-guess the numbers — quote them verbatim.",
+                  "Write a concise breakdown (max ~120 words) listing: freight, fuel surcharge, insurance, customs/handling, last-mile, duty (with %), VAT/GST (with %), and the TOTAL. Mention the selected carrier, mode and transit-day window. All money values are in CENTS — divide by 100 and format as the currency shown. If `available: false`, apologise and offer a manual quote — do not invent numbers.",
+                ].join("\n");
+                const followupMessages = [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 600) },
+                  {
+                    role: "assistant",
+                    content: null,
+                    tool_calls: [{
+                      id: tc.id || "call_shipping",
+                      type: "function",
+                      function: { name: "estimate_shipping", arguments: tc.argsText || "{}" },
+                    }],
+                  },
+                  {
+                    role: "tool",
+                    tool_call_id: tc.id || "call_shipping",
+                    name: "estimate_shipping",
+                    content: JSON.stringify(result),
+                  },
+                ];
+                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    model: modelFor("balanced"),
+                    max_completion_tokens: CHAT_MAX_TOKENS,
+                    messages: followupMessages,
+                  }),
+                });
+                if (resp.ok) {
+                  const data = await resp.json();
+                  if (data?.usage) {
+                    logAiUsage({
+                      feature: "trade-concierge-shipping",
+                      model: modelFor("balanced"),
+                      usage: data.usage,
+                      userId,
+                    }).catch(() => {});
+                  }
+                  const text: string = data?.choices?.[0]?.message?.content || "";
+                  if (text) {
+                    // Stream as a single synthetic delta so the existing
+                    // client handler renders it inline with the assistant bubble.
+                    const synthetic = { choices: [{ delta: { content: text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  }
+                } else {
+                  console.error("[concierge shipping] follow-up http", resp.status, await resp.text());
+                }
+              } catch (e) {
+                console.error("[concierge shipping] follow-up failed:", e);
+              }
               continue;
             }
 
