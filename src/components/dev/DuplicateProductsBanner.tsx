@@ -64,7 +64,10 @@ export default function DuplicateProductsBanner({
     console.groupEnd();
   }, [safeGroups, hiddenIds]);
 
-  if (!import.meta.env.DEV && !forceVisible) return null;
+  const devParamOn =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("devdupes") === "1";
+  if (!forceVisible && !devParamOn) return null;
 
   // Always show a floating pill in dev so the banner can be re-opened at any
   // time, even when no duplicates are currently detected (so the dev can also
