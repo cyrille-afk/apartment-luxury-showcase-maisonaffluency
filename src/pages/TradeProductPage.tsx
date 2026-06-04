@@ -203,6 +203,7 @@ function useTradeProductBySlug(
           relatedPicks = ((picks || []) as unknown as ProductRow[]).filter((p) => p.id !== curatorPick?.id);
         }
 
+        const publicVariantDimension = firstPublicVariantDimensionLabel(curatorPick?.size_variants);
         const product: ProductRow = {
           id: curatorPick?.id || (tradeProduct as any).id,
           title: curatorPick?.title || (tradeProduct as any).product_name,
@@ -212,7 +213,7 @@ function useTradeProductBySlug(
           gallery_images: curatorPick?.gallery_images?.length ? curatorPick.gallery_images : (tradeProduct as any).gallery_images || null,
           materials: curatorPick?.materials || (tradeProduct as any).materials || null,
           materials_description: curatorPick?.materials_description || null,
-          dimensions: curatorPick?.dimensions || (tradeProduct as any).dimensions || null,
+          dimensions: publicVariantDimension || curatorPick?.dimensions || (tradeProduct as any).dimensions || null,
           description: curatorPick?.description || (tradeProduct as any).description || null,
           category: curatorPick?.category || (tradeProduct as any).category || null,
           subcategory: curatorPick?.subcategory || (tradeProduct as any).subcategory || null,
@@ -370,7 +371,7 @@ function useTradeProductBySlug(
           // Fall back to trade_products for spec fields the curator pick
           // may have left blank — otherwise the trade sheet shows fewer
           // data points than the public page (which reads trade_products).
-          dimensions: (product as any).dimensions || tradeProduct?.dimensions || null,
+          dimensions: firstPublicVariantDimensionLabel((product as any).size_variants) || (product as any).dimensions || tradeProduct?.dimensions || null,
           materials: (product as any).materials || tradeProduct?.materials || null,
           lead_time: (product as any).lead_time || tradeProduct?.lead_time || null,
           origin: (product as any).origin || tradeProduct?.origin || null,
