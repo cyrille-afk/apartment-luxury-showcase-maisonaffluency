@@ -307,7 +307,7 @@ function useTradeProductBySlug(
       // Pull trade pricing + extra images from trade_products
       let tradeQuery = supabase
         .from("trade_products")
-        .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url")
+        .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, dimensions, materials, lead_time, origin, description")
         .eq("product_name", (product as any).title)
         .eq("is_active", true)
         .limit(1);
