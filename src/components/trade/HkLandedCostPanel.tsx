@@ -95,13 +95,19 @@ export const HkLandedCostPanel = ({
 
   const hkd = useHkdLandedCost({ goodsAfterDiscountCents, quoteCurrency, cbm, kg, mode, category, overrideShipping });
   const {
-    ready: ratesReady, loading, fxEurHkd, fxIsFallback,
+    ready: ratesReady, loading, fxEurHkd, fxQuoteEur, fxIsFallback,
     goodsHkdCents: goodsHkd, freightHkdCents: freightHkd, fuelHkdCents: fuelHkd,
     insuranceHkdCents: insuranceHkd, customsHkdCents: customsHkd, handlingHkdCents: handlingHkd,
     lastMileHkdCents: lastMileHkd, shippingHkdCents: shippingHkd,
-    dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: totalHkd, breakdown,
-    shippingEurCents: shippingEur, totalEurCents: totalEur,
+    dutyHkdCents: dutyHkd, vatHkdCents: vatHkd, totalHkdCents: baseTotalHkd, breakdown,
+    shippingEurCents: shippingEur, totalEurCents: baseTotalEur,
   } = hkd;
+  // Convert "additional charges" (e.g. crating) from quote currency → EUR → HKD
+  // with the same FX buffer used elsewhere on this panel.
+  const extrasEurCents = fxQuoteEur ? Math.round(extrasQuoteCents * fxQuoteEur) : 0;
+  const extrasHkdCents = fxEurHkd ? Math.round(extrasEurCents * fxEurHkd * (1 + FX_BUFFER)) : 0;
+  const totalHkd = baseTotalHkd + extrasHkdCents;
+  const totalEur = baseTotalEur + extrasEurCents;
   const fmtEur = (cents: number) =>
     new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format((cents || 0) / 100);
 
