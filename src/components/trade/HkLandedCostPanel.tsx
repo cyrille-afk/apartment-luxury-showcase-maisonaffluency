@@ -244,6 +244,22 @@ export const HkLandedCostPanel = ({
                 <Row label="· Sales tax / VAT (none in Hong Kong)" value={fmtHkd(vatHkd)} indent />
               </div>
 
+              {extrasQuoteCents > 0 && (
+                <div className="space-y-1 border-t border-border/40 pt-2">
+                  <div className="flex justify-between font-body text-[11px] uppercase tracking-wider text-foreground/70">
+                    <span>Additional charges</span>
+                    <span className="tabular-nums">
+                      {fmtHkd(extrasHkdCents)}
+                      <span className="ml-2 normal-case tracking-normal text-muted-foreground">≈ {fmtEur(extrasEurCents)}</span>
+                    </span>
+                  </div>
+                  <p className="pl-2 font-body text-[10px] text-muted-foreground/80 leading-snug">
+                    Crating, hand-loading, or other manual fees added on the quote. Not subject to duty or VAT.
+                  </p>
+                </div>
+              )}
+
+
               <div className="flex justify-between border-t-2 border-foreground/20 pt-2 mt-1 font-display text-sm uppercase tracking-wider text-foreground">
                 <span>DAP delivered Hong Kong — all in</span>
                 <span className="font-medium tabular-nums">
