@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       const v = Number(s.value_numeric);
       if (s.calc_method === "percent") {
         amount = s.surcharge_type === "insurance"
-          ? Number(quote.declared_value_cents) * (v / 100)
+          ? (Number(quote.declared_value_cents) + best.freight) * (v / 100) // CIF basis
           : best.freight * (v / 100);
       } else if (s.calc_method === "flat") amount = v;
       else if (s.calc_method === "per_cbm") amount = v * cbm;
