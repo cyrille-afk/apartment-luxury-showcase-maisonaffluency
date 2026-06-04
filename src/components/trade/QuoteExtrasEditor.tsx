@@ -16,7 +16,15 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { currencySymbol, formatPriceRaw } from "@/lib/tradeProducts";
+const formatPriceRaw = (cents: number, currency: string) => {
+  const v = (cents || 0) / 100;
+  try {
+    return new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  } catch {
+    return v.toFixed(2);
+  }
+};
+const currencySymbol = (c: string) => ({ EUR: "€", USD: "$", GBP: "£", SGD: "S$", HKD: "HK$" }[c.toUpperCase()] ?? c);
 
 type Extra = {
   id: string;
