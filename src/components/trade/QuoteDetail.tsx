@@ -1296,8 +1296,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return single ? parseInt(single[0], 10) : null;
   };
 
+  // null = no override (fall back to product default); 0 = In Stock; >0 = explicit weeks
   const getLeadWeeksOverride = (value: number | null): number | null =>
-    value && value > 0 ? value : null;
+    value != null && value >= 0 ? value : null;
 
   const [exportingExcel, setExportingExcel] = useState(false);
   const handleExportExcel = async () => {
