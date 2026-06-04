@@ -311,7 +311,7 @@ export default function TradeFFESchedule() {
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.quantity}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground font-medium">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(2)}` : "TBD"}</td>
-                        <td className="px-4 py-3 font-body text-xs text-muted-foreground">{lead != null ? `${lead} wks` : "—"}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
                       </tr>
                     );
                   })}
