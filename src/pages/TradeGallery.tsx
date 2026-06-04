@@ -73,6 +73,13 @@ const TradeGallery = () => {
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
 
   const openProductSheet = useCallback((product: TradeProduct) => {
+    if (product.trade_product_id) {
+      navigate(`/trade/products/${product.trade_product_id}`, {
+        state: { from: location.pathname + location.search },
+      });
+      return;
+    }
+
     const brand = product.brand_name.includes(" - ")
       ? product.brand_name.split(" - ")[0].trim()
       : product.brand_name;

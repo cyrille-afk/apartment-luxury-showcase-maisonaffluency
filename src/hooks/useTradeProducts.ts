@@ -29,37 +29,61 @@ type LiveTradeProduct = TradeProduct & {
 };
 
 async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
-  const { data, error } = await supabase
-    .from("designer_curator_picks")
-    .select(`
-      id,
-      title,
-      subtitle,
-      image_url,
-      hover_image_url,
-      materials,
-      materials_description,
-      dimensions,
-      lead_time,
-      origin,
-      description,
-      edition,
-      edition_number,
-      edition_signing,
-      pdf_url,
-      pdf_urls,
-      category,
-      subcategory,
-      tags,
-      trade_price_cents,
-      currency,
-      price_prefix,
-      designers(name, founder)
-    `)
-    .eq("is_hidden", false)
-    .order("sort_order", { ascending: true });
+  const [{ data, error }, { data: tradeRows, error: tradeError }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select(`
+        id,
+        title,
+        subtitle,
+        image_url,
+        hover_image_url,
+        materials,
+        materials_description,
+        dimensions,
+        lead_time,
+        origin,
+        description,
+        edition,
+        edition_number,
+        edition_signing,
+        pdf_url,
+        pdf_urls,
+        category,
+        subcategory,
+        tags,
+        trade_price_cents,
+        currency,
+        price_prefix,
+        designers(name, founder)
+      `)
+      .eq("is_hidden", false)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, lead_time, origin, description, category, subcategory")
+      .eq("is_active", true)
+      .eq("is_hidden", false),
+  ]);
 
   if (error) throw error;
+  if (tradeError) throw tradeError;
+
+  const normalizeKeyPart = (value: string | null | undefined) =>
+    (value || "").trim().toLowerCase();
+  const tradeByKey = new Map<string, Record<string, any>>();
+  for (const row of (tradeRows ?? []) as Array<Record<string, any>>) {
+    const productName = normalizeKeyPart(row.product_name);
+    const rawBrand = (row.brand_name || "").trim();
+    const brands = Array.from(new Set([
+      rawBrand,
+      rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand,
+      normalizeBrandToParent(rawBrand),
+    ].filter(Boolean)));
+    for (const brand of brands) {
+      tradeByKey.set(`${normalizeKeyPart(brand)}::${productName}`, row);
+    }
+  }
 
   return ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
     const designer = Array.isArray(pick.designers)
@@ -69,12 +93,15 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
     if (!childName || !pick.title) return [];
     const founderName = (designer as any)?.founder?.trim();
     const brandName = normalizeBrandToParent(childName);
+    const tradeProduct = tradeByKey.get(`${brandName.trim().toLowerCase()}::${pick.title.trim().toLowerCase()}`)
+      || tradeByKey.get(`${childName.trim().toLowerCase()}::${pick.title.trim().toLowerCase()}`)
+      || null;
     const reeditionBy = founderName && founderName.toLowerCase() !== childName.toLowerCase() && founderName.toLowerCase() !== brandName.toLowerCase() ? founderName : undefined;
 
-    const hasExplicitCategory = Boolean(pick.category?.trim?.());
-    const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.());
-    const rawCategory = pick.category?.trim() || pick.tags?.[0] || undefined;
-    const rawSubcategory = pick.subcategory?.trim() || pick.tags?.[1] || undefined;
+    const hasExplicitCategory = Boolean(pick.category?.trim?.() || tradeProduct?.category?.trim?.());
+    const hasExplicitSubcategory = Boolean(pick.subcategory?.trim?.() || tradeProduct?.subcategory?.trim?.());
+    const rawCategory = pick.category?.trim() || tradeProduct?.category?.trim?.() || pick.tags?.[0] || undefined;
+    const rawSubcategory = pick.subcategory?.trim() || tradeProduct?.subcategory?.trim?.() || pick.tags?.[1] || undefined;
     const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
     const resolvedSubcategory = inferSubcategory(rawCategory, rawSubcategory, inferenceText);
     const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";
@@ -82,19 +109,20 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
     return [
       {
         id: pick.id,
+        trade_product_id: tradeProduct?.id ?? null,
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle ?? undefined,
         category: resolvedCategory,
         subcategory: resolvedSubcategory,
         tags: pick.tags || [],
-        materials: pick.materials ?? undefined,
+        materials: pick.materials ?? tradeProduct?.materials ?? undefined,
         materials_description: pick.materials_description ?? undefined,
-        dimensions: pick.dimensions ?? undefined,
-        lead_time: pick.lead_time ?? undefined,
-        origin: pick.origin ?? undefined,
-        description: resolveCuratorPickDescription({ description: pick.description }) ?? undefined,
-        image_url: pick.image_url || null,
+        dimensions: pick.dimensions ?? tradeProduct?.dimensions ?? undefined,
+        lead_time: pick.lead_time ?? tradeProduct?.lead_time ?? undefined,
+        origin: pick.origin ?? tradeProduct?.origin ?? undefined,
+        description: resolveCuratorPickDescription({ description: pick.description }) ?? tradeProduct?.description ?? undefined,
+        image_url: pick.image_url || tradeProduct?.image_url || null,
         hover_image_url: pick.hover_image_url ?? undefined,
         edition: formatEditionLabel({
           edition: pick.edition,
