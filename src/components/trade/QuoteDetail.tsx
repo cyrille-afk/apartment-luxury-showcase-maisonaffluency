@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -1296,8 +1297,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return single ? parseInt(single[0], 10) : null;
   };
 
+  // null = no override (fall back to product default); 0 = In Stock; >0 = explicit weeks
   const getLeadWeeksOverride = (value: number | null): number | null =>
-    value && value > 0 ? value : null;
+    value != null && value >= 0 ? value : null;
 
   const [exportingExcel, setExportingExcel] = useState(false);
   const handleExportExcel = async () => {
@@ -1976,7 +1978,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {product?.dimensions && !(item.variant_label && item.variant_label.toLowerCase().includes(String(product.dimensions).toLowerCase().slice(0, 8))) && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">{product.dimensions}</p>}
                           {!item.variant_label && product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.materials}</p>}
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
-                          {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p>}
+                          {(() => {
+                            const ov = getLeadWeeksOverride(item.lead_time_weeks_override);
+                            if (ov === 0) return <p className="font-body text-[10px] md:text-[11px] text-emerald-700 font-medium break-words">In stock</p>;
+                            if (ov && ov > 0) return <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{ov} weeks</p>;
+                            return product?.lead_time ? <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p> : null;
+                          })()}
                           {editingNotesId === item.id ? (
                             <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
                               <textarea
@@ -2227,26 +2234,47 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
-                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks)</span>
-                          <input
-                            type="number"
-                            min={1}
-                            step={1}
-                            defaultValue={getLeadWeeksOverride(item.lead_time_weeks_override) ?? ""}
-                            placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
-                            disabled={isReadOnly}
-                            readOnly={isReadOnly}
-                            tabIndex={isReadOnly ? -1 : 0}
-                            aria-disabled={isReadOnly}
-                            onBlur={(e) => {
-                              if (isReadOnly) return;
-                              const raw = e.target.value.trim();
-                              const parsed = raw === "" ? null : parseInt(raw, 10);
-                              const v = parsed && parsed > 0 ? parsed : null;
-                              if (v !== getLeadWeeksOverride(item.lead_time_weeks_override)) updateItemField(item.id, { lead_time_weeks_override: v });
-                            }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
-                          />
+                          <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Lead (wks · 0 = stock)</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              key={`lead-${item.id}-${item.lead_time_weeks_override ?? "none"}`}
+                              defaultValue={getLeadWeeksOverride(item.lead_time_weeks_override) ?? ""}
+                              placeholder={parseLeadWeeks(product?.lead_time || null)?.toString() ?? "—"}
+                              disabled={isReadOnly}
+                              readOnly={isReadOnly}
+                              tabIndex={isReadOnly ? -1 : 0}
+                              aria-disabled={isReadOnly}
+                              onBlur={(e) => {
+                                if (isReadOnly) return;
+                                const raw = e.target.value.trim();
+                                const parsed = raw === "" ? null : parseInt(raw, 10);
+                                const v = parsed != null && parsed >= 0 ? parsed : null;
+                                if (v !== getLeadWeeksOverride(item.lead_time_weeks_override)) updateItemField(item.id, { lead_time_weeks_override: v });
+                              }}
+                              className="flex-1 min-w-0 font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
+                            />
+                            <button
+                              type="button"
+                              disabled={isReadOnly}
+                              onClick={() => {
+                                if (isReadOnly) return;
+                                const next = item.lead_time_weeks_override === 0 ? null : 0;
+                                updateItemField(item.id, { lead_time_weeks_override: next });
+                              }}
+                              title="Mark as in stock"
+                              className={cn(
+                                "shrink-0 font-body text-[9px] uppercase tracking-widest px-1.5 py-1 rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                                item.lead_time_weeks_override === 0
+                                  ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                                  : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground",
+                              )}
+                            >
+                              Stock
+                            </button>
+                          </div>
                         </label>
                         <label className="flex flex-col gap-0.5">
                           <span className="font-body text-[9px] text-muted-foreground/70 uppercase tracking-widest">Deposit %</span>
