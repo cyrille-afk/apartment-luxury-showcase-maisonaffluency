@@ -82,9 +82,8 @@ export default function BiographyPdfButton({ className, ...input }: BiographyPdf
         downloadedAt: new Date(),
         onProgress: (p) => setProgress(p),
       });
-      const url = URL.createObjectURL(blob);
       setPreviewBlob(blob);
-      setPreviewUrl(url);
+      setPreviewUrl(typeof URL.createObjectURL === "function" ? URL.createObjectURL(blob) : null);
     } catch (err) {
       console.error("[BiographyPdfButton] failed:", err);
       toast({
