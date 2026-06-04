@@ -76,17 +76,21 @@ Deno.serve(async (req) => {
       .lte("valid_from", today);
 
     const cbm = Math.max(0.01, Number(quote.total_volume_cbm));
-    const kg = Math.max(0, Number(quote.total_weight_kg));
+    const actualKg = Math.max(0, Number(quote.total_weight_kg));
+    // IATA volumetric weight for air = cbm × 167; chargeable = max(actual, volumetric).
+    const chargeableKgFor = (mode: string) =>
+      mode === "air" ? Math.max(actualKg, cbm * 167) : actualKg;
     let best: any = null;
     for (const lane of lanes) {
+      const laneKg = chargeableKgFor(lane.mode);
       const b = (brackets || []).find((x: any) => x.lane_id === lane.id
         && Number(x.min_volume_cbm) <= cbm && Number(x.max_volume_cbm) >= cbm);
       if (!b) continue;
       const freight = Math.max(
-        Number(b.base_rate_cents) + Number(b.rate_per_cbm_cents) * cbm + Number(b.rate_per_kg_cents) * kg,
+        Number(b.base_rate_cents) + Number(b.rate_per_cbm_cents) * cbm + Number(b.rate_per_kg_cents) * laneKg,
         Number(b.min_charge_cents)
       );
-      if (!best || freight < best.freight) best = { lane, bracket: b, freight };
+      if (!best || freight < best.freight) best = { lane, bracket: b, freight, chargeableKg: laneKg };
     }
     if (!best) throw new Error("No bracket matches");
 
@@ -104,7 +108,7 @@ Deno.serve(async (req) => {
           : best.freight * (v / 100);
       } else if (s.calc_method === "flat") amount = v;
       else if (s.calc_method === "per_cbm") amount = v * cbm;
-      else if (s.calc_method === "per_kg") amount = v * kg;
+      else if (s.calc_method === "per_kg") amount = v * best.chargeableKg;
       amount = Math.round(amount);
       if (s.surcharge_type === "fuel") fuel += amount;
       else if (s.surcharge_type === "insurance") insurance += amount;
