@@ -149,6 +149,8 @@ export interface QuotePdfArgs {
   hkDapPage?: HkDapPageArgs | null;
   /** Full UK DDP estimate appended as a dedicated final page when provided. */
   ukDdpPage?: UkDdpPageArgs | null;
+  /** Weighted deposit fraction (0..1). Defaults to 0.6. When 1, balance row is hidden. */
+  depositPct?: number;
 }
 
 
@@ -972,15 +974,19 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
     }
   }
   const grand = baseForGst + gstCents + shippingEstimateCents;
-  const deposit = Math.round(grand * 0.6);
+  const depositPct = Math.max(0, Math.min(1, args.depositPct ?? 0.6));
+  const deposit = Math.round(grand * depositPct);
   const balance = grand - deposit;
+  const depositPctLabel = `${Math.round(depositPct * 100)}%`;
+  const balancePctLabel = `${Math.round((1 - depositPct) * 100)}%`;
+  const showBalanceRow = balance > 0;
 
   const rowH = 18;
   const disclaimer = shippingEstimateCents > 0
     ? "Shipping & FX are estimates. Freight is re-quoted around 2 weeks before delivery using live carrier rates and FX; any variance is settled with the balance invoice."
     : "";
   const disclaimerLines = disclaimer ? doc.splitTextToSize(disclaimer, blockW - 28) : [];
-  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0);
+  const totalH = rows.length * rowH + 80 + disclaimerLines.length * 9 + (disclaimerLines.length ? 10 : 0) - (showBalanceRow ? 0 : 14);
   doc.rect(x, cy, blockW, totalH, "F");
 
   cy += 16;
@@ -1010,12 +1016,16 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text("60% deposit due now", x + 14, cy);
+  doc.text(`${depositPctLabel} deposit due now`, x + 14, cy);
   doc.text(fmtMoney(deposit, args.currency), x + blockW - 14, cy, { align: "right" });
   cy += 14;
-  doc.text("40% balance before shipment", x + 14, cy);
-  doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
-  cy += 16;
+  if (showBalanceRow) {
+    doc.text(`${balancePctLabel} balance before shipment`, x + 14, cy);
+    doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
+    cy += 16;
+  } else {
+    cy += 2;
+  }
 
   if (disclaimerLines.length) {
     doc.setFont("helvetica", "italic");
