@@ -1320,9 +1320,17 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(FG[0], FG[1], FG[2]);
+  const depositPct = Math.max(0, Math.min(1, args.depositPct ?? 0.6));
+  const depositLabel = `${Math.round(depositPct * 100)}%`;
+  const balanceLabel = `${Math.round((1 - depositPct) * 100)}%`;
+  const isFullUpfront = depositPct >= 0.999;
   const terms = [
-    "60% deposit due on order confirmation; 40% balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.",
-    "Shipping and FX are estimates at quote date. Around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.",
+    isFullUpfront
+      ? "100% payment is due on order confirmation (applies to in-stock items, or when the admin overrides the schedule). The order total includes the current shipping estimate."
+      : `${depositLabel} deposit due on order confirmation; ${balanceLabel} balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.`,
+    isFullUpfront
+      ? "Shipping and FX shown are estimates at quote date and are locked in if payment is received within 7 days of issue. After that, freight is re-quoted at live carrier rates and FX before dispatch, and any variance is settled via a separate adjustment invoice."
+      : "Shipping and FX are estimates at quote date and are locked in if the deposit is received within 7 days of issue. Otherwise, around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.",
     "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
     "Lead times start from receipt of cleared deposit and finalised specifications.",
     `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
