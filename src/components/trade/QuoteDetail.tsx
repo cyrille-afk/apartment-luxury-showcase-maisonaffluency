@@ -1026,7 +1026,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         : undefined,
       gstEnabled,
       gstRate,
-      insurancePremiumCents: insurancePremiumCents || 0,
+      insurancePremiumCents: (() => {
+        // Recompute insurance premium fresh at PDF time so deposit/stock/shipping
+        // changes are always reflected. CIF basis = (goods after discount) + freight.
+        if (!insuranceEnabled) return 0;
+        const liveFreightCents = (fxQuoteEur && livePerLine.totalShippingEurCents > 0)
+          ? Math.round(livePerLine.totalShippingEurCents / fxQuoteEur)
+          : 0;
+        const cifBase = insuredBaseCents + liveFreightCents;
+        return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
+      })(),
       depositPct: (() => {
         // Weighted deposit % across line items. Lead-time = 0 (in stock) defaults to 100%
         // unless an explicit per-line deposit override is set.
