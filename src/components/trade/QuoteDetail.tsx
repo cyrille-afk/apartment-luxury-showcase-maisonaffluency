@@ -2667,6 +2667,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       initialMode={hkLandedSettings.mode}
                       onSettingsChange={handleHkLandedSettingsChange}
                       overrideShipping={overrideShipping}
+                      extrasQuoteCents={extrasTotalCents}
                       shipmentOrigins={perLine.shipments.map((s) => ({
                         country: s.origin,
                         modeLabel: labelForMode(s.mode),
