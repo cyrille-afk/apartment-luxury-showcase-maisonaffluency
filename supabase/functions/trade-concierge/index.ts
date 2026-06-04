@@ -1709,8 +1709,13 @@ serve(async (req) => {
     const allowedNames = stageAllowed && baseAllowed
       ? stageAllowed.filter((n) => baseAllowed.includes(n))
       : (stageAllowed ?? baseAllowed);
-    const availableTools = allowedNames
-      ? TOOLS.filter((tool: any) => allowedNames.includes(tool.function?.name))
+    // `estimate_shipping` is always allowed regardless of stage — shipping
+    // questions can come up on any surface and must always hit the live rate matrix.
+    const allowedWithShipping = allowedNames
+      ? Array.from(new Set([...allowedNames, "estimate_shipping"]))
+      : null;
+    const availableTools = allowedWithShipping
+      ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
       : TOOLS;
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
