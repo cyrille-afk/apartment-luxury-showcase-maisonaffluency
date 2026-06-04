@@ -2560,7 +2560,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
                         ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
                         : 0;
-                      const total = goodsTotal + shippingQuoteCents;
+                      const total = goodsTotal + shippingQuoteCents + extrasTotalCents;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
                       return (
@@ -2569,6 +2569,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <div className="flex justify-between font-body text-xs text-muted-foreground">
                               <span>Shipping (estimate, {perLine.shipments.length} shipment{perLine.shipments.length > 1 ? "s" : ""})</span>
                               <span>{formatPriceRaw(shippingQuoteCents, currency)}</span>
+                            </div>
+                          )}
+                          {extrasTotalCents > 0 && (
+                            <div className="flex justify-between font-body text-xs text-muted-foreground">
+                              <span>Additional charges</span>
+                              <span>{formatPriceRaw(extrasTotalCents, currency)}</span>
                             </div>
                           )}
                           <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
