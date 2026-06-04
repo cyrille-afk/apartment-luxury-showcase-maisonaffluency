@@ -99,6 +99,10 @@ export interface QuotePdfArgs {
   insuranceLabel?: string | null;
   insuranceRateBps?: number;
   insuranceEnabled?: boolean;
+  /** Additional fixed charges (crating, hand-loading, surcharges) from
+   *  trade_quote_extras. Rendered as muted "+ amount" lines just before the
+   *  shipping estimate and folded into the Order total. */
+  extras?: Array<{ label: string; amountCents: number }>;
   notes?: string | null;
   /** Optional ship-to block (only rendered when shipToSameAsBill === false). */
   shipToSameAsBill?: boolean;
