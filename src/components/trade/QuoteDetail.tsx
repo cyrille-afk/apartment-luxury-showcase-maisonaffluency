@@ -2625,7 +2625,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <>
                           {shippingQuoteCents > 0 && (
                             <div className="flex justify-between font-body text-xs text-muted-foreground">
-                              <span>Shipping (estimate, {livePerLine.shipments.length} shipment{livePerLine.shipments.length > 1 ? "s" : ""})</span>
+                              <span>Shipping (estimate, {perLine.shipments.length} shipment{perLine.shipments.length > 1 ? "s" : ""})</span>
                               <span>{formatPriceRaw(shippingQuoteCents, currency)}</span>
                             </div>
                           )}
@@ -2675,7 +2675,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                   )}
                 </div>
-                {subtotalCents > 0 && destIso && livePerLine.shipments.length > 0 && (
+                {subtotalCents > 0 && destIso && perLine.shipments.length > 0 && (
                   <div className="mt-4">
                     <PerOriginShippingRecap
                       result={perLine}
@@ -2726,7 +2726,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       onSettingsChange={handleHkLandedSettingsChange}
                       overrideShipping={overrideShipping}
                       extrasQuoteCents={extrasTotalCents}
-                      shipmentOrigins={livePerLine.shipments.map((s) => ({
+                      shipmentOrigins={perLine.shipments.map((s) => ({
                         country: s.origin,
                         modeLabel: labelForMode(s.mode),
                         totalCbm: s.totalCbm,
@@ -2943,7 +2943,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <Row label={`GST (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
                       {shippingQuoteCents > 0 && (
-                        <Row label={`Shipping estimate (${livePerLine.shipments.length} shipment${livePerLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
+                        <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
                       )}
                       <div className="border-t border-border my-1.5" />
                       <Row label="Order total" value={`${fmt(orderTotal)} ${currency}`} strong />
