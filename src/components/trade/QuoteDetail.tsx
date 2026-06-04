@@ -1059,6 +1059,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       insuranceLabel: insuranceEnabled ? insLabel : null,
       insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
       insuranceEnabled,
+      extras: await (async () => {
+        const { data } = await supabase
+          .from("trade_quote_extras" as any)
+          .select("label, amount_cents, sort_order")
+          .eq("quote_id", quoteId)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true });
+        return ((data as any[]) || []).map((e) => ({
+          label: e.label as string,
+          amountCents: Number(e.amount_cents) || 0,
+        }));
+      })(),
       notes: notes || null,
       shipToSameAsBill,
       incoterm: incoterm || null,
