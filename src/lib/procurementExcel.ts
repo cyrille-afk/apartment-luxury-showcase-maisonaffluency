@@ -139,7 +139,7 @@ export async function buildProcurementWorkbook(input: ExportInput): Promise<Blob
       unitTrade: l.unit_trade_cents != null ? l.unit_trade_cents / 100 : null,
       // Live formulas — qty × unit-trade
       extTrade: { formula: `IF(AND(ISNUMBER(H${r}),ISNUMBER(J${r})),H${r}*J${r},"")` } as any,
-      lead: l.lead_time_weeks,
+      lead: l.lead_time_weeks === 0 ? "In stock" : l.lead_time_weeks,
       // ETA = TODAY() + (lead × 7) when lead is numeric
       eta: { formula: `IF(ISNUMBER(L${r}),TODAY()+L${r}*7,"")` } as any,
       depPct: l.deposit_pct,
