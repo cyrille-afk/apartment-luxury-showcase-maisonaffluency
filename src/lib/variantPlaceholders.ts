@@ -31,8 +31,14 @@ function clean(value: string | null | undefined): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+export function formatVariantAxisLabel(label: string | null | undefined): string | null {
+  const axis = clean(label);
+  if (!axis) return null;
+  return axis.replace(/\buphostery\b/gi, "Upholstery");
+}
+
 function placeholderFromAxisLabel(label: string): string {
-  return `Select your ${label.toLowerCase()}`;
+  return `Select your ${formatVariantAxisLabel(label)!.toLowerCase()}`;
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
@@ -40,7 +46,7 @@ export function getBasePlaceholder(p: VariantPlaceholderInput): string {
   // (e.g. "Select your frame choice"). Fall back to the curator override
   // (which applies to both dropdowns) only when no axis label is defined,
   // then to the generic default.
-  const axis = clean(p.base_axis_label);
+  const axis = formatVariantAxisLabel(p.base_axis_label);
   if (axis) return placeholderFromAxisLabel(axis);
 
   const override = clean(p.variant_placeholder);
@@ -50,7 +56,7 @@ export function getBasePlaceholder(p: VariantPlaceholderInput): string {
 }
 
 export function getTopPlaceholder(p: VariantPlaceholderInput): string {
-  const axis = clean(p.top_axis_label);
+  const axis = formatVariantAxisLabel(p.top_axis_label);
   if (axis) return placeholderFromAxisLabel(axis);
 
   const override = clean(p.variant_placeholder);
