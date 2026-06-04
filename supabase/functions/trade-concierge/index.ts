@@ -869,11 +869,12 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- propose_ffe_rows — draft a ROOM-BY-ROOM FF&E schedule bound to the active project (every row has a `room` label)\n\n" +
                   "Plan rules:\n" +
                   "- chitchat / navigation / FAQ: empty plan.\n" +
+                  "- EXPLANATORY follow-ups about pieces already discussed ('why the X?', 'tell me more about X', 'what is X?', 'how does it compare', 'what materials', 'lead time?', 'who designed it'): EMPTY PLAN — the downstream model must answer conversationally in prose. Do NOT re-propose tearsheets or quotes.\n" +
                   "- 'show / suggest / curate / mood / room brief' without pricing intent: [propose_tearsheet] (or add_to_tearsheet if they reference an existing board).\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
                   "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
                   "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
-                  "Be conservative — only emit a tool if the user clearly intends that action this turn.",
+                  "Be conservative — only emit a tool if the user clearly intends that action this turn. When in doubt between 'reply in prose' and 'emit a tool', prefer empty plan.",
               },
               { role: "user", content: latestUserMessage.slice(0, 1500) },
             ],
