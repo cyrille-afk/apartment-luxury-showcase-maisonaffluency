@@ -130,7 +130,8 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     switch (s.calc_method) {
       case "percent":
         if (s.surcharge_type === "fuel") amount = best.freight * (v / 100);
-        else if (s.surcharge_type === "insurance") amount = input.declared_value_cents * (v / 100);
+        // Insurance is calculated on CIF value (declared value + freight)
+        else if (s.surcharge_type === "insurance") amount = (input.declared_value_cents + best.freight) * (v / 100);
         else amount = best.freight * (v / 100);
         break;
       case "flat": amount = v; break;
