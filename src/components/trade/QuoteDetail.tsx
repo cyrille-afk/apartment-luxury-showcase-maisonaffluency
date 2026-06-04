@@ -1977,7 +1977,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {product?.dimensions && !(item.variant_label && item.variant_label.toLowerCase().includes(String(product.dimensions).toLowerCase().slice(0, 8))) && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">{product.dimensions}</p>}
                           {!item.variant_label && product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.materials}</p>}
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
-                          {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p>}
+                          {(() => {
+                            const ov = getLeadWeeksOverride(item.lead_time_weeks_override);
+                            if (ov === 0) return <p className="font-body text-[10px] md:text-[11px] text-emerald-700 font-medium break-words">In stock</p>;
+                            if (ov && ov > 0) return <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{ov} weeks</p>;
+                            return product?.lead_time ? <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p> : null;
+                          })()}
                           {editingNotesId === item.id ? (
                             <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
                               <textarea
