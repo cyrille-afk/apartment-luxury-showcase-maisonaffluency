@@ -67,6 +67,7 @@ export const UkLandedCostPanel = ({
   initialMode,
   onSettingsChange,
   overrideShipping = null,
+  extrasQuoteCents = 0,
 }: Props) => {
   const useOverride = !!overrideShipping;
   const resolvedInitialMode = initialMode ?? "road";
