@@ -16,6 +16,7 @@ import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from 
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
+import QuoteExtrasEditor from "@/components/trade/QuoteExtrasEditor";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
