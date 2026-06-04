@@ -14,7 +14,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 
-import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
@@ -563,7 +563,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       text={baseIsDim ? formatDimensionsMultiline(baseOptions[0]) : withImperialPerLine(baseOptions.join("\n"))}
                       secondaryText={baseIsDim ? formatImperialDimensions(baseOptions[0]) : undefined}
                       placeholder={getBasePlaceholder(product)}
-                      singleValueLabel={product.base_axis_label || undefined}
+                      singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                       emphasized
                       value={selectedBaseIdx ?? null}
                       onChange={(idx) => {
@@ -582,7 +582,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       text={topIsDim ? formatDimensionsMultiline(topOptions[0]) : withImperialPerLine(topOptions.join("\n"))}
                       secondaryText={topIsDim ? formatImperialDimensions(topOptions[0]) : undefined}
                       placeholder={getTopPlaceholder(product)}
-                      singleValueLabel={product.top_axis_label || undefined}
+                      singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
                       emphasized
                       value={selectedTopIdx ?? null}
                       onChange={(idx) => {
@@ -613,7 +613,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                         text={formatDimensionsMultiline(materialOptions[0])}
                         secondaryText={formatImperialDimensions(materialOptions[0])}
                         emphasized
-                        singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
+                        singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
                       />
                     );
                   }
@@ -622,7 +622,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       icon={specIcon("⬗")}
                       text={materialOptions.join("\n")}
                       placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
-                      singleValueLabel={hasAnyBase ? (product.base_axis_label || undefined) : undefined}
+                      singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
                       autoSplit={!hasAnyBase && !hasSingleAxisSplit}
                       value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
                       onChange={(idx) => {
