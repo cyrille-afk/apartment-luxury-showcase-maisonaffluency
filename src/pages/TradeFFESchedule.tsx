@@ -52,7 +52,7 @@ function parseLeadWeeks(text: string | null): number | null {
 }
 
 function leadOverride(value: number | null): number | null {
-  return value && value > 0 ? value : null;
+  return value != null && value >= 0 ? value : null;
 }
 
 export default function TradeFFESchedule() {
