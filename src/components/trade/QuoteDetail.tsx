@@ -1256,13 +1256,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     fxQuoteEur,
     !!destIso && !!fxQuoteEur && items.length > 0,
   );
-  const overrideShipping = livePerLine.shipments.length > 0 ? {
+  const overrideShipping = perLine.shipments.length > 0 ? {
     shippingEurCents: perLine.totalShippingEurCents,
     dutyEurCents: perLine.totalDutyEurCents,
     vatEurCents: perLine.totalVatEurCents,
-    shipmentCount: livePerLine.shipments.length,
-    totalCbm: livePerLine.shipments.reduce((s, x) => s + x.totalCbm, 0),
-    totalKg: livePerLine.shipments.reduce((s, x) => s + x.totalKg, 0),
+    shipmentCount: perLine.shipments.length,
+    totalCbm: perLine.shipments.reduce((s, x) => s + x.totalCbm, 0),
+    totalKg: perLine.shipments.reduce((s, x) => s + x.totalKg, 0),
   } : null;
 
   /** GBP DDP landed-cost amounts for the totals toggle (Paris → London). */
