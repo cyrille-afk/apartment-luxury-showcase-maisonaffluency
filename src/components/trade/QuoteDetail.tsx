@@ -2463,6 +2463,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 )}
               </div>
 
+              {/* Additional charges (crating, surcharges, manual fees) */}
+              <QuoteExtrasEditor
+                quoteId={quoteId}
+                currency={currency}
+                isReadOnly={isReadOnly}
+                onTotalChange={setExtrasTotalCents}
+              />
+
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
                 {subtotalCents > 0 && isUkDestination && (
