@@ -1016,12 +1016,16 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text("60% deposit due now", x + 14, cy);
+  doc.text(`${depositPctLabel} deposit due now`, x + 14, cy);
   doc.text(fmtMoney(deposit, args.currency), x + blockW - 14, cy, { align: "right" });
   cy += 14;
-  doc.text("40% balance before shipment", x + 14, cy);
-  doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
-  cy += 16;
+  if (showBalanceRow) {
+    doc.text(`${balancePctLabel} balance before shipment`, x + 14, cy);
+    doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
+    cy += 16;
+  } else {
+    cy += 2;
+  }
 
   if (disclaimerLines.length) {
     doc.setFont("helvetica", "italic");
