@@ -223,7 +223,144 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "estimate_shipping",
+      description:
+        "Compute a live shipping estimate from Maison Affluency's rate matrix (DHL/forwarder lanes, brackets, surcharges, duty, VAT). USE THIS TOOL whenever the user asks about freight cost, shipping cost, air freight, sea freight, duty, VAT, or landed-cost for a route — never guess shipping numbers from general knowledge. Returns freight, fuel, insurance, customs, handling, last-mile, duty, VAT and total in cents.",
+      parameters: {
+        type: "object",
+        properties: {
+          origin_country: { type: "string", description: "ISO-2 origin country code (e.g. FR, IT, GB)." },
+          dest_country: { type: "string", description: "ISO-2 destination country code (e.g. HK, US, SG)." },
+          total_volume_cbm: { type: "number", description: "Total shipment volume in cubic meters." },
+          total_weight_kg: { type: "number", description: "Total actual gross weight in kilograms." },
+          declared_value_cents: { type: "integer", description: "Declared/insured value in CENTS (commercial invoice value)." },
+          currency: { type: "string", description: "Currency of declared_value_cents — defaults to EUR." },
+          preferred_mode: { type: "string", enum: ["sea_lcl", "sea_fcl", "air", "road", "courier"], description: "Optional mode filter. Omit to let the matrix pick the cheapest available." },
+          category: { type: "string", enum: ["furniture", "lighting", "art", "textile", "accessory", "other"], description: "Product category for duty lookup. Defaults to furniture." },
+        },
+        required: ["origin_country", "dest_country", "total_volume_cbm", "total_weight_kg", "declared_value_cents"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
+
+/** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
+async function runShippingEstimate(
+  supabase: ReturnType<typeof createClient>,
+  args: {
+    origin_country: string;
+    dest_country: string;
+    total_volume_cbm: number;
+    total_weight_kg: number;
+    declared_value_cents: number;
+    currency?: string;
+    preferred_mode?: string;
+    category?: string;
+  },
+): Promise<any> {
+  const currency = (args.currency || "EUR").toUpperCase();
+  const category = args.category || "furniture";
+  let lanesQuery = supabase
+    .from("shipping_lanes").select("*")
+    .eq("origin_country", args.origin_country)
+    .eq("dest_country", args.dest_country)
+    .eq("active", true);
+  if (args.preferred_mode) lanesQuery = lanesQuery.eq("mode", args.preferred_mode);
+  const { data: lanes } = await lanesQuery;
+  if (!lanes || lanes.length === 0) {
+    return { available: false, reason: "No lane configured for this route — contact the team for a manual quote.", currency };
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: brackets } = await supabase
+    .from("shipping_rate_brackets").select("*")
+    .in("lane_id", lanes.map((l: any) => l.id))
+    .lte("valid_from", today);
+
+  const cbm = Math.max(0.01, Number(args.total_volume_cbm));
+  const actualKg = Math.max(0, Number(args.total_weight_kg));
+  const chargeableKgFor = (mode: string) =>
+    mode === "air" ? Math.max(actualKg, cbm * 167) : actualKg;
+
+  let best: any = null;
+  for (const lane of lanes) {
+    const laneKg = chargeableKgFor(lane.mode);
+    const candidates = (brackets || []).filter((b: any) =>
+      b.lane_id === lane.id &&
+      Number(b.min_volume_cbm) <= cbm && Number(b.max_volume_cbm) >= cbm &&
+      Number(b.min_weight_kg) <= laneKg && Number(b.max_weight_kg) >= laneKg &&
+      (!b.valid_to || b.valid_to >= today));
+    if (candidates.length === 0) continue;
+    const b = candidates[0];
+    const freight = Math.max(
+      Number(b.base_rate_cents) + Number(b.rate_per_cbm_cents) * cbm + Number(b.rate_per_kg_cents) * laneKg,
+      Number(b.min_charge_cents),
+    );
+    if (!best || freight < best.freight) best = { lane, bracket: b, freight, chargeableKg: laneKg };
+  }
+  if (!best) {
+    return { available: false, reason: "No rate bracket matches this volume/weight on the configured lanes.", currency };
+  }
+
+  const { data: surcharges } = await supabase.from("shipping_surcharges").select("*").eq("active", true);
+  let fuel = 0, insurance = 0, customs = 0, handling = 0, lastMile = 0;
+  for (const s of surcharges || []) {
+    if (s.scope === "lane" && s.lane_id !== best.lane.id) continue;
+    if (s.scope === "carrier" && s.carrier_name !== best.lane.carrier_name) continue;
+    if (s.scope === "dest_zone" && s.dest_country !== args.dest_country) continue;
+    let amount = 0;
+    const v = Number(s.value_numeric);
+    if (s.calc_method === "percent") {
+      amount = s.surcharge_type === "insurance"
+        ? (Number(args.declared_value_cents) + best.freight) * (v / 100)
+        : best.freight * (v / 100);
+    } else if (s.calc_method === "flat") amount = v;
+    else if (s.calc_method === "per_cbm") amount = v * cbm;
+    else if (s.calc_method === "per_kg") amount = v * best.chargeableKg;
+    amount = Math.round(amount);
+    if (s.surcharge_type === "fuel") fuel += amount;
+    else if (s.surcharge_type === "insurance") insurance += amount;
+    else if (s.surcharge_type === "customs") customs += amount;
+    else if (s.surcharge_type === "last_mile") lastMile += amount;
+    else handling += amount;
+  }
+
+  const { data: duties } = await supabase
+    .from("shipping_duty_rates").select("*")
+    .eq("dest_country", args.dest_country).eq("category", category).eq("active", true).limit(1);
+  let duty = 0, vat = 0, dutyPct = 0, vatPct = 0;
+  if (duties && duties[0]) {
+    dutyPct = Number(duties[0].duty_percent);
+    vatPct = Number(duties[0].vat_percent);
+    duty = Math.round(Number(args.declared_value_cents) * (dutyPct / 100));
+    vat = Math.round((Number(args.declared_value_cents) + duty + best.freight) * (vatPct / 100));
+  }
+  const total = Math.round(best.freight + fuel + insurance + customs + handling + lastMile + duty + vat);
+  return {
+    available: true,
+    currency,
+    carrier: best.lane.carrier_name,
+    mode: best.lane.mode,
+    transit_days_min: best.lane.transit_days_min,
+    transit_days_max: best.lane.transit_days_max,
+    chargeable_weight_kg: Math.round(best.chargeableKg),
+    cbm,
+    freight_cents: Math.round(best.freight),
+    fuel_cents: fuel,
+    insurance_cents: insurance,
+    customs_cents: customs,
+    handling_cents: handling,
+    last_mile_cents: lastMile,
+    duty_cents: duty,
+    duty_percent: dutyPct,
+    vat_cents: vat,
+    vat_percent: vatPct,
+    total_cents: total,
+  };
+}
 
 
 function buildSystemPrompt(
