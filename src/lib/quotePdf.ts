@@ -916,21 +916,13 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, conten
   doc.setFillColor(250, 249, 246);
   // dynamic height based on rows we're showing
   const rows: { label: string; value: string; strong?: boolean; muted?: boolean }[] = [];
-  // Additional charges (crating, hand-loading, surcharges) — rendered as
-  // full lines before the Subtotal and folded into the subtotal figure so
-  // discounts/GST apply on the combined goods + charges base.
+  // Additional charges (crating, hand-loading, surcharges) are NOT discountable.
+  // They render as full lines after the Net subtotal / before shipping.
   const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
   const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
-  extrasList.forEach((e) => {
-    rows.push({
-      label: e.label || "Additional charge",
-      value: `+ ${fmtMoney(e.amountCents, args.currency)}`,
-    });
-  });
-  const subtotalWithExtras = args.subtotalCents + extrasTotalCents;
-  rows.push({ label: "Subtotal", value: fmtMoney(subtotalWithExtras, args.currency) });
+  rows.push({ label: "Subtotal", value: fmtMoney(args.subtotalCents, args.currency) });
   const discountCents = args.tradeDiscountApplied
-    ? Math.round(subtotalWithExtras * args.tradeDiscountPct)
+    ? Math.round(args.subtotalCents * args.tradeDiscountPct)
     : 0;
   if (discountCents > 0) {
     const pctTxt = `${(args.tradeDiscountPct * 100).toFixed(args.tradeDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
