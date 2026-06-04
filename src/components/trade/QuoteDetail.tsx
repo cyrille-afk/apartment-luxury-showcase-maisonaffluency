@@ -925,14 +925,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     });
     const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
     const insLabel = INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label ?? null;
-    const shippingEstimateCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-      ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+
+    // Compute shipping fresh at build time — avoids race where React state
+    // is briefly empty after an item edit (perLine resets while async runs).
+    let livePerLine = perLine;
+    if (destIso && fxQuoteEur && perLineRawLines.length > 0) {
+      try {
+        livePerLine = await computePerLineShipments(perLineRawLines, destIso, fxQuoteEur);
+      } catch {
+        /* keep stale perLine */
+      }
+    }
+    const shippingEstimateCents = (fxQuoteEur && livePerLine.totalShippingEurCents > 0)
+      ? Math.round(livePerLine.totalShippingEurCents / fxQuoteEur)
       : 0;
-    const uniqueModes = Array.from(new Set(perLine.shipments.map((s) => s.mode)));
+    const uniqueModes = Array.from(new Set(livePerLine.shipments.map((s) => s.mode)));
     const shippingModeLabel = uniqueModes.length === 1 ? labelForMode(uniqueModes[0]) : null;
     const shippingModeBreakdown = uniqueModes.length > 1 && fxQuoteEur
       ? uniqueModes.map((mode) => {
-          const group = perLine.shipments.filter((s) => s.mode === mode);
+          const group = livePerLine.shipments.filter((s) => s.mode === mode);
           const eurCents = group.reduce((sum, s) => sum + s.shippingEurCents, 0);
           return {
             modeLabel: labelForMode(mode),
