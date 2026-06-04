@@ -22,7 +22,7 @@ import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type H
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
-import { toIsoCountry } from "@/lib/perLineShipping";
+import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
@@ -925,14 +925,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     });
     const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
     const insLabel = INSURANCE_TIERS.find((t) => t.value === insuranceTier)?.label ?? null;
-    const shippingEstimateCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-      ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
+
+    // Compute shipping fresh at build time — avoids race where React state
+    // is briefly empty after an item edit (perLine resets while async runs).
+    let livePerLine = perLine;
+    if (destIso && fxQuoteEur && perLineRawLines.length > 0) {
+      try {
+        livePerLine = await computePerLineShipments(perLineRawLines, destIso, fxQuoteEur);
+      } catch {
+        /* keep stale perLine */
+      }
+    }
+    const shippingEstimateCents = (fxQuoteEur && livePerLine.totalShippingEurCents > 0)
+      ? Math.round(livePerLine.totalShippingEurCents / fxQuoteEur)
       : 0;
-    const uniqueModes = Array.from(new Set(perLine.shipments.map((s) => s.mode)));
+    const uniqueModes = Array.from(new Set(livePerLine.shipments.map((s) => s.mode)));
     const shippingModeLabel = uniqueModes.length === 1 ? labelForMode(uniqueModes[0]) : null;
     const shippingModeBreakdown = uniqueModes.length > 1 && fxQuoteEur
       ? uniqueModes.map((mode) => {
-          const group = perLine.shipments.filter((s) => s.mode === mode);
+          const group = livePerLine.shipments.filter((s) => s.mode === mode);
           const eurCents = group.reduce((sum, s) => sum + s.shippingEurCents, 0);
           return {
             modeLabel: labelForMode(mode),
@@ -1036,7 +1047,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         return weight > 0 ? weighted / weight : 0.6;
       })(),
       shippingEstimateCents,
-      shippingShipmentCount: perLine.shipments.length,
+      shippingShipmentCount: livePerLine.shipments.length,
       shippingModeLabel,
       shippingModeBreakdown,
       insuranceLabel: insuranceEnabled ? insLabel : null,
@@ -1069,8 +1080,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             vatGbpCents: gbp.vatGbpCents,
             totalGbpCents: gbp.totalGbpCents,
             // Per-origin so the PDF can show shipping mode (air / sea LCL / etc.) per consolidation.
-            origins: perLine.shipments.length && gbp.fxEurGbp
-              ? perLine.shipments.map((s) => ({
+            origins: livePerLine.shipments.length && gbp.fxEurGbp
+              ? livePerLine.shipments.map((s) => ({
                   country: s.origin,
                   modeLabel: labelForMode(s.mode),
                   gbpCents: Math.round((s.shippingEurCents + s.dutyEurCents + s.vatEurCents) * (gbp.fxEurGbp || 0)),
@@ -1092,8 +1103,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             shippingEurCents: hkd.shippingEurCents,
             totalEurCents: hkd.totalEurCents,
             // Per-origin so the PDF can show shipping mode (air / sea LCL / etc.) per consolidation.
-            origins: perLine.shipments.length && hkd.fxEurHkd
-              ? perLine.shipments.map((s) => {
+            origins: livePerLine.shipments.length && hkd.fxEurHkd
+              ? livePerLine.shipments.map((s) => {
                   const eurCents = s.shippingEurCents + s.dutyEurCents + s.vatEurCents;
                   return {
                     country: s.origin,
@@ -1138,8 +1149,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               max: hkd.breakdown?.transit_days_max ?? null,
             },
             hkd,
-            origins: perLine.shipments.length && hkd.fxEurHkd
-              ? perLine.shipments.map((s) => {
+            origins: livePerLine.shipments.length && hkd.fxEurHkd
+              ? livePerLine.shipments.map((s) => {
                   const eurCents = s.shippingEurCents + s.dutyEurCents + s.vatEurCents;
                   return {
                     country: s.origin,
