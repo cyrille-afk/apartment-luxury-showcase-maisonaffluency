@@ -12,6 +12,7 @@ export type ResultFailedValidation =
   | PreflightCode
   | "service_unreachable"
   | "no_verdict"
+  | "rate_limited"
   | "other";
 
 /**
