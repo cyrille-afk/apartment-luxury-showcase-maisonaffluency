@@ -289,10 +289,18 @@ const TradeSpatialFitAudit = () => {
                 className="border border-border rounded-lg p-4 bg-card"
               >
                 <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-border">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                     <span>Session started {formatDistanceToNow(new Date(session.startedAt), { addSuffix: true })}</span>
                     <span>•</span>
                     <span>{session.rows.length} {session.rows.length === 1 ? "step" : "steps"}</span>
+                    {session.batchId && session.batchSize > 1 && (
+                      <>
+                        <span>•</span>
+                        <Badge variant="secondary" className="text-[10px] font-mono">
+                          batch ×{session.batchSize}
+                        </Badge>
+                      </>
+                    )}
                   </div>
                   {session.finalVerdict ? (
                     <VerdictBadge verdict={session.finalVerdict} />
