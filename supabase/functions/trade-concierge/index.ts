@@ -2287,6 +2287,31 @@ serve(async (req) => {
                     preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'.`;
                   }
                 }
+                if (!preflightError && parsed.cad_asset_id) {
+                  const { data: assetRow } = await supabase
+                    .from("trade_product_cad_assets")
+                    .select("id, product_id, file_format, is_active")
+                    .eq("id", parsed.cad_asset_id)
+                    .maybeSingle();
+                  if (!assetRow || assetRow.product_id !== parsed.product_id || assetRow.is_active !== true) {
+                    preflightCode = "piece_not_found";
+                    preflightError = `Attached CAD asset ${parsed.cad_asset_id} was not found for product ${parsed.product_id}.`;
+                  } else {
+                    try {
+                      await fetch(`${supabaseUrl}/functions/v1/cad-parse-product-asset`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: auth.authHeader,
+                          apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                        },
+                        body: JSON.stringify({ cad_asset_id: parsed.cad_asset_id }),
+                      });
+                    } catch (e) {
+                      console.warn("[concierge spatial-fit] product CAD ingestion preflight failed:", e);
+                    }
+                  }
+                }
               } catch (e) {
                 console.error("[concierge spatial-fit] preflight failed:", e);
               }
