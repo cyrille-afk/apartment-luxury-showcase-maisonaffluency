@@ -268,9 +268,25 @@ export default function TradeSpatialFit() {
             </div>
 
             {activeDoc.status === "unsupported" && (
-              <p className="text-sm text-amber-700 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded p-3">
-                {activeDoc.error || "Format not supported in Phase 1."}
-              </p>
+              <div className="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded p-3 space-y-2">
+                <p className="font-medium">
+                  {activeDoc.error || `.${activeDoc.format?.toUpperCase()} isn't parsed in this phase.`}
+                </p>
+                <p className="text-xs">
+                  Spatial Fit currently reads <strong>DXF</strong> (2D floor plans) and <strong>OBJ</strong> (3D meshes) only.
+                  Native DWG/FBX/SKP/STEP parsing is on the roadmap.
+                </p>
+                <details className="text-xs">
+                  <summary className="cursor-pointer underline underline-offset-2">How to convert your file</summary>
+                  <ul className="mt-2 list-disc pl-5 space-y-1">
+                    <li><strong>AutoCAD / BricsCAD</strong> (.dwg): <em>File → Save As → AutoCAD DXF (*.dxf)</em>. Pick AutoCAD 2018 DXF for best compatibility.</li>
+                    <li><strong>SketchUp</strong> (.skp): <em>File → Export → 3D Model → OBJ File (*.obj)</em>, or export the plan view as DXF.</li>
+                    <li><strong>Revit</strong> (.rvt/.rfa): <em>File → Export → CAD Formats → DXF</em>.</li>
+                    <li><strong>Rhino</strong> (.3dm): <em>File → Export Selected → .dxf or .obj</em>.</li>
+                    <li><strong>Free option</strong>: open the DWG in <a href="https://www.autodesk.com/viewers" target="_blank" rel="noreferrer" className="underline">Autodesk Viewer</a> or ODA File Converter and export to DXF.</li>
+                  </ul>
+                </details>
+              </div>
             )}
             {activeDoc.status === "failed" && (
               <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded p-3">
