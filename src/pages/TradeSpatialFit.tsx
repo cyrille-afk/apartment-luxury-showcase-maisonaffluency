@@ -205,6 +205,8 @@ export default function TradeSpatialFit() {
         cad_document_id: activeDoc.id,
         room_label: room?.label || undefined,
         product_id: productId,
+        cad_asset_id: selectedCadAssetId || undefined,
+        variant_label: selectedCadAsset?.variant_label || undefined,
         clearance_mm: clearance,
       },
     });
@@ -214,6 +216,24 @@ export default function TradeSpatialFit() {
       return;
     }
     setFitResult(data);
+  };
+
+  const handleParseProductAsset = async (asset: ProductCadAsset) => {
+    setParsingAssetId(asset.id);
+    const { data, error } = await supabase.functions.invoke("cad-parse-product-asset", {
+      body: { cad_asset_id: asset.id },
+    });
+    setParsingAssetId(null);
+    if (error) {
+      toast({ title: "CAD ingestion failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    if ((data as any)?.ok === false) {
+      toast({ title: "CAD asset stored, not parsed", description: (data as any)?.error || `.${asset.file_format.toUpperCase()} is not parseable yet.` });
+    } else {
+      toast({ title: "Product CAD ingested", description: "Geometry is ready for Spatial Fit." });
+    }
+    if (productId) await loadProductAssets(productId);
   };
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
