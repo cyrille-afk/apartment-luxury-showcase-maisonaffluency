@@ -2388,7 +2388,131 @@ serve(async (req) => {
                 console.error("[concierge spatial-fit audit] insert failed:", e);
               }
               continue;
+
+
+            // ====== CAD ASSET SUMMARY ======
+            if (tc.name === "get_cad_summary") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch {}
+              const assetId = typeof parsed.cad_asset_id === "string" ? parsed.cad_asset_id.trim() : "";
+              if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assetId)) {
+                controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify({ tool: "get_cad_summary", ok: false, error: "Missing or invalid cad_asset_id." })}\n\n`));
+                continue;
+              }
+              // Trigger ingest if not yet parsed (idempotent).
+              try {
+                await fetch(`${supabaseUrl}/functions/v1/cad-parse-product-asset`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: auth.authHeader,
+                    apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                  },
+                  body: JSON.stringify({ cad_asset_id: assetId }),
+                });
+              } catch (e) {
+                console.warn("[concierge get_cad_summary] ingest preflight failed:", e);
+              }
+              const { data: asset } = await supabase
+                .from("trade_product_cad_assets")
+                .select("id, product_id, variant_label, file_format, version")
+                .eq("id", assetId)
+                .maybeSingle();
+              const { data: geom } = await supabase
+                .from("product_cad_asset_geometry")
+                .select("status, bbox_mm, units, metrics, error, parsed_at")
+                .eq("cad_asset_id", assetId)
+                .maybeSingle();
+              const payload = {
+                tool: "get_cad_summary",
+                ok: !!asset,
+                asset: asset || null,
+                geometry: geom || { status: "pending" },
+              };
+              controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify(payload)}\n\n`));
+              console.log(`[concierge get_cad_summary] asset=${assetId} status=${geom?.status || "pending"}`);
+              continue;
             }
+
+            // ====== ARBITRARY VOID FIT ======
+            if (tc.name === "check_void_fit") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch {}
+              const assetId = typeof parsed.cad_asset_id === "string" ? parsed.cad_asset_id.trim() : "";
+              const vw = Math.round(Number(parsed.void_w_mm));
+              const vd = Math.round(Number(parsed.void_d_mm));
+              const vh = Math.round(Number(parsed.void_h_mm));
+              const clr = Number.isFinite(Number(parsed.clearance_mm)) ? Math.max(0, Math.round(Number(parsed.clearance_mm))) : 0;
+              if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assetId) || !Number.isFinite(vw) || !Number.isFinite(vd) || !Number.isFinite(vh) || vw <= 0 || vd <= 0 || vh <= 0) {
+                controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify({ tool: "check_void_fit", ok: false, verdict: "unknown", error: "Need cad_asset_id and positive void_w_mm/void_d_mm/void_h_mm." })}\n\n`));
+                continue;
+              }
+              // Ensure geometry is parsed (idempotent).
+              try {
+                await fetch(`${supabaseUrl}/functions/v1/cad-parse-product-asset`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: auth.authHeader,
+                    apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                  },
+                  body: JSON.stringify({ cad_asset_id: assetId }),
+                });
+              } catch (e) {
+                console.warn("[concierge check_void_fit] ingest preflight failed:", e);
+              }
+              const { data: geom } = await supabase
+                .from("product_cad_asset_geometry")
+                .select("status, bbox_mm, units, error")
+                .eq("cad_asset_id", assetId)
+                .maybeSingle();
+              if (!geom || geom.status !== "ready" || !geom.bbox_mm) {
+                const reason = geom?.status === "unsupported"
+                  ? `Asset format isn't parseable yet (status: unsupported). Re-attach as OBJ/DXF for a fit check.`
+                  : geom?.status === "failed"
+                    ? `Parsing failed: ${geom.error || "unknown error"}.`
+                    : `Asset geometry isn't ready (status: ${geom?.status || "missing"}).`;
+                controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify({ tool: "check_void_fit", ok: false, verdict: "unknown", reasons: [reason] })}\n\n`));
+                continue;
+              }
+              const bbox = geom.bbox_mm as { w: number; d: number; h: number };
+              // Effective void after clearance per axis.
+              const ew = Math.max(0, vw - clr);
+              const ed = Math.max(0, vd - clr);
+              const eh = Math.max(0, vh - clr);
+              // Try the product's footprint flat (w×d), with both rotations on the floor plane.
+              const fitsAxisAligned = bbox.w <= ew && bbox.d <= ed && bbox.h <= eh;
+              const fitsRotated = bbox.d <= ew && bbox.w <= ed && bbox.h <= eh;
+              const verdict = (fitsAxisAligned || fitsRotated) ? "pass" : "fail";
+              const clearances = {
+                w_mm: ew - Math.min(bbox.w, bbox.d),
+                d_mm: ed - Math.min(bbox.w, bbox.d),
+                h_mm: eh - bbox.h,
+              };
+              const reasons: string[] = [];
+              if (verdict === "fail") {
+                if (bbox.w > ew && bbox.d > ew) reasons.push(`Footprint min ${Math.min(bbox.w, bbox.d)}mm exceeds void width ${ew}mm.`);
+                if (bbox.h > eh) reasons.push(`Height ${bbox.h}mm exceeds void height ${eh}mm (overshoot ${bbox.h - eh}mm).`);
+                if (reasons.length === 0) reasons.push(`Footprint doesn't fit either orientation inside ${ew}×${ed}mm.`);
+              } else {
+                reasons.push(fitsAxisAligned ? "Fits axis-aligned." : "Fits when rotated 90°.");
+              }
+              const payload = {
+                tool: "check_void_fit",
+                ok: true,
+                verdict,
+                reasons,
+                product_bbox_mm: bbox,
+                void_mm: { w: vw, d: vd, h: vh },
+                clearance_mm: clr,
+                clearances_mm: clearances,
+              };
+              controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify(payload)}\n\n`));
+              console.log(`[concierge check_void_fit] asset=${assetId} verdict=${verdict} bbox=${bbox.w}×${bbox.d}×${bbox.h} void=${vw}×${vd}×${vh} clr=${clr}`);
+              continue;
+            }
+
+
 
 
             // ---- Shared spatial-fit runner: clearance coercion + preflight + invoke + audit row ----
