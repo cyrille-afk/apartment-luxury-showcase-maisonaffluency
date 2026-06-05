@@ -545,6 +545,8 @@ const TradeSettings = () => {
         </div>
       </div>
 
+      <StudioMemoryCard />
+
     </div>
     </>
   );
