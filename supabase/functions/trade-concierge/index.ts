@@ -1696,7 +1696,7 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow, cadDocuments] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
@@ -1705,6 +1705,7 @@ serve(async (req) => {
       mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
+      loadCadDocuments(supabase, userId),
     ]);
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
