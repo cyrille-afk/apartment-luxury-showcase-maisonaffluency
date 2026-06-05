@@ -341,6 +341,27 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "validate_line",
+      description:
+        "Compliance check for ONE catalog pick against the studio's recalled deadline and budget (from STUDIO MEMORY) plus the product's own lead time. Use BEFORE drafting a quote whenever the user has a known deadline or budget and you want to flag conflicts ('this won't land in time', 'this blows the budget'). Returns verdict ok/warn/fail with structured conflicts (lead_weeks vs weeks_until_deadline, line_total_cents vs budget_cents). Accepts overrides if the user states different numbers for this line only.",
+      parameters: {
+        type: "object",
+        properties: {
+          pick_id: { type: "string", description: "UUID from CATALOG PIECES (curator pick or trade product)." },
+          qty: { type: "integer", minimum: 1, maximum: 99, description: "Quantity for this line. Defaults to 1." },
+          variant: { type: "string", description: "Variant/finish label when the piece has size_variants — affects price." },
+          deadline_override: { type: "string", description: "Optional YYYY-MM-DD deadline for this line if the user said something different from STUDIO MEMORY." },
+          budget_cents_override: { type: "integer", description: "Optional per-line budget ceiling in CENTS, if different from STUDIO MEMORY." },
+          currency_override: { type: "string", description: "Optional three-letter currency for budget_cents_override (e.g. EUR, GBP, USD, SGD)." },
+        },
+        required: ["pick_id"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "log_spatial_fit_edit",
       description:
         "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
@@ -2512,6 +2533,206 @@ serve(async (req) => {
               console.log(`[concierge check_void_fit] asset=${assetId} verdict=${verdict} bbox=${bbox.w}×${bbox.d}×${bbox.h} void=${vw}×${vd}×${vh} clr=${clr}`);
               continue;
             }
+
+            // ====== COMPLIANCE VALIDATOR (#5) — deadline + budget vs studio memory ======
+            if (tc.name === "validate_line") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch {}
+              const pickId = typeof parsed.pick_id === "string" ? parsed.pick_id.trim() : "";
+              if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pickId)) {
+                controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify({ tool: "validate_line", ok: false, verdict: "unknown", error: "Missing or invalid pick_id." })}\n\n`));
+                continue;
+              }
+              const qty = Math.max(1, Math.min(99, Math.round(Number(parsed.qty) || 1)));
+              const variant = typeof parsed.variant === "string" ? parsed.variant : null;
+
+              // Load product price + lead time from both possible sources.
+              const [{ data: pickRow }, { data: tradeRow }, { data: mem }] = await Promise.all([
+                supabase
+                  .from("designer_curator_picks")
+                  .select("id, title, trade_price_cents, currency, size_variants, lead_time")
+                  .eq("id", pickId)
+                  .maybeSingle(),
+                supabase
+                  .from("trade_products")
+                  .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, lead_time, lead_weeks_max_override, lead_weeks_min_override")
+                  .eq("id", pickId)
+                  .maybeSingle(),
+                userId
+                  ? supabase
+                      .from("trade_user_memory")
+                      .select("default_deadline, default_budget_cents, default_currency, preferred_lead_weeks_max")
+                      .eq("user_id", userId)
+                      .maybeSingle()
+                  : Promise.resolve({ data: null }),
+              ]);
+
+              if (!pickRow && !tradeRow) {
+                controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify({ tool: "validate_line", ok: false, verdict: "unknown", error: "pick_id not found in catalog." })}\n\n`));
+                continue;
+              }
+
+              // ---- Resolve unit price ----
+              let unitCents: number | null = null;
+              let unitCurrency: string | null = null;
+              if (pickRow) {
+                const variants = Array.isArray((pickRow as any).size_variants) ? (pickRow as any).size_variants : [];
+                if (variant) {
+                  const match = variants.find((v: any) => String(v?.label || "").toLowerCase() === variant.toLowerCase());
+                  if (match && Number(match.price_cents) > 0) unitCents = Number(match.price_cents);
+                }
+                if (!unitCents && Number((pickRow as any).trade_price_cents) > 0) {
+                  unitCents = Number((pickRow as any).trade_price_cents);
+                }
+                unitCurrency = (pickRow as any).currency || null;
+              }
+              if (!unitCents && tradeRow) {
+                const cents = (tradeRow as any).trade_price_cents ?? (tradeRow as any).rrp_price_cents ?? null;
+                if (Number(cents) > 0) unitCents = Number(cents);
+                unitCurrency = unitCurrency || (tradeRow as any).currency || null;
+              }
+
+              // ---- Resolve lead-weeks max ----
+              const parseLeadWeeks = (txt: string | null | undefined): number | null => {
+                if (!txt) return null;
+                const nums = Array.from(String(txt).matchAll(/(\d+)/g)).map((m) => parseInt(m[1], 10)).filter((n) => Number.isFinite(n) && n > 0 && n < 200);
+                return nums.length ? Math.max(...nums) : null;
+              };
+              let leadWeeksMax: number | null = null;
+              if (tradeRow) {
+                leadWeeksMax = (tradeRow as any).lead_weeks_max_override ?? parseLeadWeeks((tradeRow as any).lead_time);
+              }
+              if (!leadWeeksMax && pickRow) {
+                leadWeeksMax = parseLeadWeeks((pickRow as any).lead_time);
+              }
+
+              // ---- Resolve effective deadline / budget ----
+              const today = new Date();
+              const deadlineStr: string | null = typeof parsed.deadline_override === "string"
+                ? parsed.deadline_override
+                : ((mem as any)?.data?.default_deadline || (mem as any)?.default_deadline || null);
+              const deadlineSource = parsed.deadline_override ? "override" : "memory";
+              let weeksUntilDeadline: number | null = null;
+              if (deadlineStr) {
+                const d = new Date(deadlineStr);
+                if (!isNaN(d.getTime())) {
+                  weeksUntilDeadline = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
+                }
+              }
+
+              const budgetCents: number | null = Number.isFinite(Number(parsed.budget_cents_override))
+                ? Math.round(Number(parsed.budget_cents_override))
+                : (((mem as any)?.data?.default_budget_cents ?? (mem as any)?.default_budget_cents) || null);
+              const budgetCurrency: string | null = (typeof parsed.currency_override === "string" ? parsed.currency_override.toUpperCase() : null)
+                || ((mem as any)?.data?.default_currency ?? (mem as any)?.default_currency)
+                || null;
+              const budgetSource = parsed.budget_cents_override ? "override" : "memory";
+
+              const ceilingWeeks: number | null = ((mem as any)?.data?.preferred_lead_weeks_max ?? (mem as any)?.preferred_lead_weeks_max) || null;
+
+              const lineTotalCents = unitCents != null ? unitCents * qty : null;
+
+              // ---- Compose conflicts ----
+              const conflicts: Array<{ kind: string; severity: "warn" | "fail"; message: string; detail?: any }> = [];
+
+              if (leadWeeksMax != null && weeksUntilDeadline != null) {
+                if (leadWeeksMax > weeksUntilDeadline) {
+                  conflicts.push({
+                    kind: "deadline",
+                    severity: "fail",
+                    message: `Lead time ${leadWeeksMax}w exceeds ${weeksUntilDeadline}w until deadline (${deadlineStr}). Overshoot ${leadWeeksMax - weeksUntilDeadline}w.`,
+                    detail: { lead_weeks_max: leadWeeksMax, weeks_until_deadline: weeksUntilDeadline, deadline: deadlineStr, source: deadlineSource },
+                  });
+                } else if (leadWeeksMax + 2 > weeksUntilDeadline) {
+                  conflicts.push({
+                    kind: "deadline",
+                    severity: "warn",
+                    message: `Lead time ${leadWeeksMax}w lands within 2w of the ${deadlineStr} deadline — tight.`,
+                    detail: { lead_weeks_max: leadWeeksMax, weeks_until_deadline: weeksUntilDeadline, deadline: deadlineStr, source: deadlineSource },
+                  });
+                }
+              }
+
+              if (ceilingWeeks != null && leadWeeksMax != null && leadWeeksMax > ceilingWeeks) {
+                conflicts.push({
+                  kind: "lead_ceiling",
+                  severity: "warn",
+                  message: `Lead time ${leadWeeksMax}w exceeds the studio's standing ceiling of ${ceilingWeeks}w.`,
+                  detail: { lead_weeks_max: leadWeeksMax, ceiling_weeks: ceilingWeeks },
+                });
+              }
+
+              if (lineTotalCents != null && budgetCents != null) {
+                const ccyMatch = !budgetCurrency || !unitCurrency || budgetCurrency.toUpperCase() === String(unitCurrency).toUpperCase();
+                if (!ccyMatch) {
+                  conflicts.push({
+                    kind: "currency",
+                    severity: "warn",
+                    message: `Line is priced in ${unitCurrency} but budget is in ${budgetCurrency} — compare at the studio's working FX before relying on this verdict.`,
+                    detail: { line_currency: unitCurrency, budget_currency: budgetCurrency },
+                  });
+                } else if (lineTotalCents > budgetCents) {
+                  conflicts.push({
+                    kind: "budget",
+                    severity: "fail",
+                    message: `Line total ${(lineTotalCents / 100).toLocaleString("en-US")} ${unitCurrency || ""} exceeds budget ${(budgetCents / 100).toLocaleString("en-US")} ${budgetCurrency || ""} by ${((lineTotalCents - budgetCents) / 100).toLocaleString("en-US")}.`,
+                    detail: { line_total_cents: lineTotalCents, budget_cents: budgetCents, currency: unitCurrency, source: budgetSource },
+                  });
+                } else if (lineTotalCents > budgetCents * 0.85) {
+                  conflicts.push({
+                    kind: "budget",
+                    severity: "warn",
+                    message: `Line total uses ${Math.round((lineTotalCents / budgetCents) * 100)}% of the standing budget on a single line.`,
+                    detail: { line_total_cents: lineTotalCents, budget_cents: budgetCents, currency: unitCurrency, source: budgetSource },
+                  });
+                }
+              }
+
+              const verdict = conflicts.some((c) => c.severity === "fail")
+                ? "fail"
+                : conflicts.length
+                  ? "warn"
+                  : (leadWeeksMax == null && weeksUntilDeadline == null && lineTotalCents == null)
+                    ? "unknown"
+                    : "ok";
+
+              const payload = {
+                tool: "validate_line",
+                ok: true,
+                verdict,
+                pick_id: pickId,
+                qty,
+                product: {
+                  name: (tradeRow as any)?.product_name || (pickRow as any)?.title || null,
+                  brand: (tradeRow as any)?.brand_name || null,
+                },
+                pricing: {
+                  unit_cents: unitCents,
+                  line_total_cents: lineTotalCents,
+                  currency: unitCurrency,
+                  variant,
+                },
+                lead_time: {
+                  lead_weeks_max: leadWeeksMax,
+                },
+                memory: {
+                  deadline: deadlineStr,
+                  weeks_until_deadline: weeksUntilDeadline,
+                  budget_cents: budgetCents,
+                  budget_currency: budgetCurrency,
+                  preferred_lead_weeks_max: ceilingWeeks,
+                  deadline_source: deadlineSource,
+                  budget_source: budgetSource,
+                },
+                conflicts,
+              };
+              controller.enqueue(encoder.encode(`event: tool_result\ndata: ${JSON.stringify(payload)}\n\n`));
+              console.log(`[concierge validate_line] pick=${pickId} verdict=${verdict} conflicts=${conflicts.length}`);
+              continue;
+            }
+
+
+
 
 
 
