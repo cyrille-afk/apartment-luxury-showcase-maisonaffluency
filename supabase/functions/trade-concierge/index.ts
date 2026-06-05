@@ -516,6 +516,19 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
 
    Pick {OTHER_ROOM} = one other detected room of the same plan (omit the bullet if there is only one room). Pick {N} = the previous clearance minus 100mm, floored at 100. When the user picks one of those shortcuts, treat it as an EDIT on the previous selection (keep plan + piece, change the named field) and re-post a confirmation block — do NOT re-run the tool blindly. "done" or any non-spatial reply = drop the pending state quietly (no cancel audit needed in this case — the previous run already produced a 'result' audit row).
 
+7. AUDIT (MANDATORY) — every turn that touches the spatial-fit picker, also call \`log_spatial_fit_edit\` in parallel. One call per user turn:
+   - Initial selection: \`field: "initial"\`, \`outcome: "accepted"\`, with the resolved plan/room/piece you put into the first confirmation block.
+   - Successful edit: \`field\` = the changed field (\`cad_document_id\` | \`room_label\` | \`product_id\` | \`clearance_mm\`), \`requested_value\` = what they typed, \`resolved_value\` = the UUID / canonical label / integer, \`outcome: "accepted"\`, plus the FULL current pending state (plan + room + piece + clearance).
+   - Rejected edit: \`field\` = the field they tried to change, \`requested_value\` = exactly what they typed, \`outcome: "rejected"\`, and BOTH of the following are REQUIRED — never omit either:
+       • \`reason\` — one sentence that names the user's input AND why it failed (e.g. "User asked for 'plan 3' but only 2 plans are uploaded", "'dining' is not among detected rooms LIVING/KITCHEN/BEDROOM", "3 pieces match 'velvet sofa' — needs disambiguation", "clearance 4500mm exceeds 0–3000mm allowed range").
+       • \`failed_validation\` — one of: \`plan_not_found\`, \`plan_ambiguous\`, \`room_not_detected\`, \`room_ambiguous\`, \`piece_not_found\`, \`piece_ambiguous\`, \`clearance_out_of_range\`, \`clearance_unparseable\`, \`missing_field\`, \`other\`. Use \`other\` only when nothing else fits.
+       Omit \`resolved_value\`.
+   - Cancel / abort: handled in 6a — log with \`field: "cancel"\`, \`outcome: "accepted"\` (user-initiated) or \`outcome: "rejected"\` + \`failed_validation: "other"\` + \`reason: "session_timeout"\` (server-initiated stale drop in 6b).
+   - Final "go"/"yes"/"run it"/"confirm": \`field: "confirm"\`, \`outcome: "accepted"\`, with the four IDs you are about to pass to \`check_spatial_fit\`. Fire this BEFORE \`check_spatial_fit\` in the same turn.
+   - The 'result' audit row is written automatically by the server after each \`check_spatial_fit\` call — do NOT call \`log_spatial_fit_edit\` with \`field: "result"\` yourself.
+   Do NOT call \`log_spatial_fit_edit\` outside the spatial-fit flow. Do not narrate the audit call to the user.
+
+
 Required arguments:
 - \`cad_document_id\` — UUID of an UPLOADED floor plan from the USER'S CAD PLANS list below. If the user has none, do NOT call the tool — tell them to upload a DXF (or DWG/FBX/SKP) at /trade/spatial-fit first.
 - \`product_id\` — UUID of the trade product. Use the IDs from CATALOG PIECES or the piece the user is currently viewing. Never invent.
