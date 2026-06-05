@@ -2183,6 +2183,32 @@ serve(async (req) => {
               }
               console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}`);
 
+              // Auto-write 'result' audit row so reviewers can trace edits → outcome.
+              try {
+                const toUuid = (v: unknown) => {
+                  const s = typeof v === "string" ? v.trim() : "";
+                  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
+                };
+                const verdict = typeof result?.verdict === "string" ? result.verdict.slice(0, 32) : null;
+                const isError = result?.ok === false || !verdict;
+                await supabase.from("cad_fit_edit_audit").insert({
+                  user_id: userId,
+                  field: "result",
+                  outcome: isError ? "rejected" : "accepted",
+                  reason: isError ? String(result?.error || "spatial-fit returned no verdict").slice(0, 500) : null,
+                  failed_validation: isError ? "other" : null,
+                  cad_document_id: toUuid(parsed?.cad_document_id),
+                  room_label: parsed?.room_label ? String(parsed.room_label).slice(0, 120) : null,
+                  product_id: toUuid(parsed?.product_id),
+                  clearance_mm: Number.isFinite(Number(parsed?.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
+                  verdict,
+                });
+              } catch (e) {
+                console.error("[concierge spatial-fit audit] result insert failed:", e);
+              }
+
+
+
               try {
                 const followupSystem = [
                   "You are the Maison Affluency Trade Concierge — spatial-fit follow-up.",
