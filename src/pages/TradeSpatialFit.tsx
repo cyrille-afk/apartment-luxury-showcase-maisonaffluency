@@ -275,20 +275,18 @@ export default function TradeSpatialFit() {
                 <p className="font-medium">
                   {activeDoc.error || `.${activeDoc.format?.toUpperCase()} isn't parsed in this phase.`}
                 </p>
-                <p className="text-xs">
-                  Spatial Fit currently reads <strong>DXF</strong> (2D floor plans) and <strong>OBJ</strong> (3D meshes) only.
-                  Native DWG/FBX/SKP/STEP parsing is on the roadmap.
-                </p>
-                <details className="text-xs">
-                  <summary className="cursor-pointer underline underline-offset-2">How to convert your file</summary>
-                  <ul className="mt-2 list-disc pl-5 space-y-1">
-                    <li><strong>AutoCAD / BricsCAD</strong> (.dwg): <em>File → Save As → AutoCAD DXF (*.dxf)</em>. Pick AutoCAD 2018 DXF for best compatibility.</li>
-                    <li><strong>SketchUp</strong> (.skp): <em>File → Export → 3D Model → OBJ File (*.obj)</em>, or export the plan view as DXF.</li>
-                    <li><strong>Revit</strong> (.rvt/.rfa): <em>File → Export → CAD Formats → DXF</em>.</li>
-                    <li><strong>Rhino</strong> (.3dm): <em>File → Export Selected → .dxf or .obj</em>.</li>
-                    <li><strong>Free option</strong>: open the DWG in <a href="https://www.autodesk.com/viewers" target="_blank" rel="noreferrer" className="underline">Autodesk Viewer</a> or ODA File Converter and export to DXF.</li>
-                  </ul>
-                </details>
+                {activeDoc.format === "dwg" ? (
+                  <p className="text-xs">
+                    Native <strong>DWG</strong> parsing is Phase 2 — a LibreDWG WebAssembly converter will run inside <code>cad-parse</code>, no manual export required.
+                    The file is safely stored against this project and will re-parse automatically once Phase 2 ships.
+                    If you need a fit check today, export the plan as <strong>DXF</strong> (AutoCAD 2018 DXF is most reliable) and re-upload.
+                  </p>
+                ) : (
+                  <p className="text-xs">
+                    Spatial Fit currently parses <strong>DXF</strong> and <strong>OBJ</strong>. DWG is next (Phase 2, LibreDWG WASM); FBX/SKP/STEP/IGES/RFA are on the roadmap after that.
+                    The file is kept against this project — re-upload as DXF or OBJ if you need a fit check now.
+                  </p>
+                )}
               </div>
             )}
             {activeDoc.status === "failed" && (
