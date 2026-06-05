@@ -179,9 +179,15 @@ export default function TradeSpatialFit() {
             </Link>
           </div>
           <p className="font-body text-sm text-muted-foreground max-w-2xl">
-            Upload a floor plan (DXF best supported) and we'll extract the rooms, then check whether a product fits with circulation clearance.
-            DWG, FBX and SKP are accepted but fall back to the product's declared dimensions in this phase.
+            Upload a floor plan and we'll extract the rooms, then check whether a product fits with circulation clearance.
           </p>
+          <div className="mt-3 max-w-2xl rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
+            <p className="font-medium">Supported formats in this phase: <strong>DXF</strong> and <strong>OBJ</strong> only.</p>
+            <p className="mt-1">
+              DWG, FBX, SKP, STEP, IGES, 3DS and RFA files can be uploaded but won't be parsed — they'll be marked <em>unsupported</em>.
+              Re-export your plan as DXF (preferred for 2D floor plans) or OBJ (for 3D meshes) and upload again.
+            </p>
+          </div>
         </header>
 
 
