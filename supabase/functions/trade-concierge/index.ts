@@ -2266,13 +2266,12 @@ serve(async (req) => {
                 };
                 const verdict = typeof result?.verdict === "string" ? result.verdict.slice(0, 32) : null;
                 const isError = result?.ok === false || !verdict;
-                let resultFailedValidation: string | null = null;
-                if (isError) {
-                  if (preflightCode) resultFailedValidation = preflightCode;
-                  else if (transportError) resultFailedValidation = "service_unreachable";
-                  else if (!verdict) resultFailedValidation = "no_verdict";
-                  else resultFailedValidation = "other";
-                }
+                const resultFailedValidation = classifyResultFailure({
+                  preflightCode: preflightCode as any,
+                  transportError,
+                  verdict,
+                  ok: result?.ok !== false,
+                });
                 await supabase.from("cad_fit_edit_audit").insert({
                   user_id: userId,
                   field: "result",
