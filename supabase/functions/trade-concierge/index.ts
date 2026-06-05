@@ -5,6 +5,7 @@ import { logAiUsage } from "../_shared/aiUsage.ts";
 import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 import { embedQuery } from "../_shared/aiEmbeddings.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
+import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
@@ -280,7 +281,7 @@ const TOOLS = [
           resolved_value: { type: "string", description: "The value after resolution (UUID, canonical room label, integer mm). Omit if it could not be resolved." },
           outcome: { type: "string", enum: ["accepted","rejected"], description: "'accepted' if the edit/selection/cancel passed; 'rejected' if it failed validation or was dropped due to staleness." },
           reason: { type: "string", description: "Short human-readable explanation. REQUIRED when outcome is 'rejected'. For cancels, optionally say why ('user typed cancel', 'session_timeout', 'user pivoted topic')." },
-          failed_validation: { type: "string", enum: ["plan_not_found","plan_ambiguous","room_not_detected","room_ambiguous","piece_not_found","piece_ambiguous","clearance_out_of_range","clearance_unparseable","missing_field","other"], description: "REQUIRED when outcome is 'rejected'. The specific validation rule that failed. Pick the closest enum value; use 'other' for cancels or session timeouts and explain in `reason`." },
+          failed_validation: { type: "string", enum: ["plan_not_found","plan_not_ready","plan_ambiguous","room_not_detected","room_ambiguous","piece_not_found","piece_ambiguous","missing_dimensions","clearance_out_of_range","clearance_unparseable","missing_field","service_unreachable","no_verdict","other"], description: "REQUIRED when outcome is 'rejected'. The specific validation rule that failed. Pick the closest enum value; use 'other' for cancels or session timeouts and explain in `reason`. Server-only codes ('service_unreachable', 'no_verdict', 'plan_not_ready', 'missing_dimensions') are written automatically — you should not emit them." },
           cad_document_id: { type: "string", description: "Current pending selection state." },
           room_label: { type: "string", description: "Current pending selection state." },
           product_id: { type: "string", description: "Current pending selection state." },
@@ -2171,23 +2172,7 @@ serve(async (req) => {
               }
 
               // --- Clearance unit coercion (accepts "50cm", "0.6m", "2in", "600mm", numbers) ---
-              const coerceClearance = (raw: unknown): number | null => {
-                if (raw == null || raw === "") return null;
-                if (typeof raw === "number" && Number.isFinite(raw)) return Math.round(raw);
-                const s = String(raw).trim().toLowerCase().replace(/\s+/g, "");
-                const m = s.match(/^(-?\d+(?:\.\d+)?)(mm|cm|m|in|"|')?$/);
-                if (!m) return null;
-                const n = parseFloat(m[1]);
-                if (!Number.isFinite(n)) return null;
-                switch (m[2]) {
-                  case "cm": return Math.round(n * 10);
-                  case "m":  return Math.round(n * 1000);
-                  case "in":
-                  case "\"": return Math.round(n * 25.4);
-                  case "'":  return Math.round(n * 304.8);
-                  default:   return Math.round(n); // mm or bare number
-                }
-              };
+              // coerceClearance is imported from _shared/spatialFitValidation.ts
               if (parsed.clearance_mm !== undefined) {
                 const c = coerceClearance(parsed.clearance_mm);
                 if (c == null || c < 0 || c > 3000) {
@@ -2199,7 +2184,9 @@ serve(async (req) => {
               }
 
               // --- Preflight: short-circuit if plan has no rooms or product has no dims ---
+              // Emits a structured { code, message } so the audit row carries a typed failed_validation.
               let preflightError: string | null = null;
+              let preflightCode: string | null = null;
               try {
                 if (parsed.cad_document_id) {
                   const { data: planRow } = await supabase
@@ -2208,9 +2195,14 @@ serve(async (req) => {
                     .eq("id", parsed.cad_document_id)
                     .maybeSingle();
                   const rooms = (planRow?.parsed_geometry as any)?.rooms || [];
-                  if (!planRow || planRow.status !== "ready") {
-                    preflightError = `Floor plan isn't ready (status: ${planRow?.status || "missing"}). Re-upload at /trade/spatial-fit.`;
+                  if (!planRow) {
+                    preflightCode = "plan_not_found";
+                    preflightError = `Floor plan ${parsed.cad_document_id} not found. Re-upload at /trade/spatial-fit.`;
+                  } else if (planRow.status !== "ready") {
+                    preflightCode = "plan_not_ready";
+                    preflightError = `Floor plan isn't ready (status: ${planRow.status || "missing"}). Re-upload at /trade/spatial-fit.`;
                   } else if (!rooms.length) {
+                    preflightCode = "room_not_detected";
                     preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it. Pick a different plan or re-parse it.`;
                   }
                 }
@@ -2220,12 +2212,12 @@ serve(async (req) => {
                     .select("title, dimensions")
                     .eq("id", parsed.product_id)
                     .maybeSingle();
-                  const dimsText = String(prodRow?.dimensions || "").trim();
-                  // Cheap heuristic: must contain at least two numbers (W and D).
-                  const numCount = (dimsText.match(/\d+(?:\.\d+)?/g) || []).length;
+                  const numCount = countDimensionNumbers(prodRow?.dimensions as any);
                   if (!prodRow) {
+                    preflightCode = "piece_not_found";
                     preflightError = `Product ${parsed.product_id} not found in the catalog.`;
                   } else if (numCount < 2) {
+                    preflightCode = "missing_dimensions";
                     preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'. Try a different piece, or have the team add W×D×H to the product sheet.`;
                   }
                 }
@@ -2235,6 +2227,7 @@ serve(async (req) => {
               }
 
               let result: any;
+              let transportError: string | null = null;
               if (preflightError) {
                 result = { ok: false, verdict: "unknown", reasons: [preflightError], error: preflightError };
               } else {
@@ -2248,16 +2241,24 @@ serve(async (req) => {
                     },
                     body: JSON.stringify(parsed),
                   });
-                  result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
+                  if (!resp.ok) {
+                    transportError = `HTTP ${resp.status}`;
+                  }
+                  result = await resp.json().catch(() => {
+                    transportError = transportError || `non-JSON response (HTTP ${resp.status})`;
+                    return { ok: false, error: transportError };
+                  });
                 } catch (e) {
                   console.error("[concierge spatial-fit] invoke failed:", e);
-                  result = { ok: false, error: "Spatial-fit service unreachable." };
+                  transportError = "Spatial-fit service unreachable.";
+                  result = { ok: false, error: transportError };
                 }
               }
-              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}`);
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}${transportError ? " (transport error)" : ""}`);
 
 
               // Auto-write 'result' audit row so reviewers can trace edits → outcome.
+              // Uses structured failed_validation codes so the audit log is filterable by error class.
               try {
                 const toUuid = (v: unknown) => {
                   const s = typeof v === "string" ? v.trim() : "";
@@ -2265,12 +2266,18 @@ serve(async (req) => {
                 };
                 const verdict = typeof result?.verdict === "string" ? result.verdict.slice(0, 32) : null;
                 const isError = result?.ok === false || !verdict;
+                const resultFailedValidation = classifyResultFailure({
+                  preflightCode: preflightCode as any,
+                  transportError,
+                  verdict,
+                  ok: result?.ok !== false,
+                });
                 await supabase.from("cad_fit_edit_audit").insert({
                   user_id: userId,
                   field: "result",
                   outcome: isError ? "rejected" : "accepted",
-                  reason: isError ? String(result?.error || "spatial-fit returned no verdict").slice(0, 500) : null,
-                  failed_validation: isError ? "other" : null,
+                  reason: isError ? String(preflightError || transportError || result?.error || "spatial-fit returned no verdict").slice(0, 500) : null,
+                  failed_validation: resultFailedValidation,
                   cad_document_id: toUuid(parsed?.cad_document_id),
                   room_label: parsed?.room_label ? String(parsed.room_label).slice(0, 120) : null,
                   product_id: toUuid(parsed?.product_id),
