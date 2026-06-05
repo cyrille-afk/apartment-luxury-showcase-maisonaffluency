@@ -124,9 +124,10 @@ Deno.serve(async (req) => {
   if (!productBbox) {
     const { data: prod } = await svc
       .from("trade_products")
-      .select("width_mm, depth_mm, height_mm")
+      .select("dimensions")
       .eq("id", product_id).maybeSingle();
-    if (prod) productBbox = bboxFromDims(prod as ProductDims);
+    const parsed = parseDimensionsText((prod as any)?.dimensions);
+    if (parsed) productBbox = bboxFromDims(parsed);
   }
 
   const { verdict, reasons } = checkBboxFit(productBbox, room.bbox_mm as Bbox, clearance);
