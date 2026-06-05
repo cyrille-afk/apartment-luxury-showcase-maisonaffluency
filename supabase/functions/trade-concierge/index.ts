@@ -279,7 +279,8 @@ const TOOLS = [
           requested_value: { type: "string", description: "The raw value the user typed (e.g. 'the dining room', 'Velvet sofa', 'plan 3')." },
           resolved_value: { type: "string", description: "The value after resolution (UUID, canonical room label, integer mm). Omit if it could not be resolved." },
           outcome: { type: "string", enum: ["accepted","rejected"], description: "'accepted' if the edit/selection passed validation and went into the next confirmation; 'rejected' if it failed (unknown, ambiguous, out of range)." },
-          reason: { type: "string", description: "Short human reason — required when outcome is 'rejected' (e.g. 'no plan named X', 'room not detected', 'ambiguous: 3 matches', 'clearance out of 0–3000mm range')." },
+          reason: { type: "string", description: "Short human-readable explanation. REQUIRED when outcome is 'rejected'. Must quote what the user typed and why it failed (e.g. \"User asked for 'plan 3' — only 2 plans uploaded\", \"'dining' not among detected rooms LIVING/KITCHEN/BEDROOM\", \"3 pieces match 'velvet sofa' — needs disambiguation\", \"clearance 4500mm exceeds the 0–3000mm allowed range\")." },
+          failed_validation: { type: "string", enum: ["plan_not_found","plan_ambiguous","room_not_detected","room_ambiguous","piece_not_found","piece_ambiguous","clearance_out_of_range","clearance_unparseable","missing_field","other"], description: "REQUIRED when outcome is 'rejected'. The specific validation rule that failed. Pick the closest enum value; use 'other' only when none fit and explain in `reason`." },
           cad_document_id: { type: "string", description: "Current pending selection state." },
           room_label: { type: "string", description: "Current pending selection state." },
           product_id: { type: "string", description: "Current pending selection state." },
@@ -506,7 +507,10 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
 7. AUDIT (MANDATORY) — every turn that touches the spatial-fit picker, also call \`log_spatial_fit_edit\` in parallel. One call per user turn:
    - Initial selection: \`field: "initial"\`, \`outcome: "accepted"\`, with the resolved plan/room/piece you put into the first confirmation block.
    - Successful edit: \`field\` = the changed field (\`cad_document_id\` | \`room_label\` | \`product_id\` | \`clearance_mm\`), \`requested_value\` = what they typed, \`resolved_value\` = the UUID / canonical label / integer, \`outcome: "accepted"\`, plus the FULL current pending state (plan + room + piece + clearance).
-   - Rejected edit (unknown plan/room, ambiguous or missing piece, clearance out of range): \`field\` = field they tried to change, \`requested_value\` = what they typed, \`outcome: "rejected"\`, \`reason\` = the short reason you told them. Omit \`resolved_value\`.
+   - Rejected edit: \`field\` = the field they tried to change, \`requested_value\` = exactly what they typed, \`outcome: "rejected"\`, and BOTH of the following are REQUIRED — never omit either:
+       • \`reason\` — one sentence that names the user's input AND why it failed (e.g. "User asked for 'plan 3' but only 2 plans are uploaded", "'dining' is not among detected rooms LIVING/KITCHEN/BEDROOM", "3 pieces match 'velvet sofa' — needs disambiguation", "clearance 4500mm exceeds 0–3000mm allowed range").
+       • \`failed_validation\` — one of: \`plan_not_found\`, \`plan_ambiguous\`, \`room_not_detected\`, \`room_ambiguous\`, \`piece_not_found\`, \`piece_ambiguous\`, \`clearance_out_of_range\`, \`clearance_unparseable\`, \`missing_field\`, \`other\`. Use \`other\` only when nothing else fits.
+       Omit \`resolved_value\`.
    - Final "go"/"yes"/"run it"/"confirm": \`field: "confirm"\`, \`outcome: "accepted"\`, with the four IDs you are about to pass to \`check_spatial_fit\`. Fire this BEFORE \`check_spatial_fit\` in the same turn.
    Do NOT call \`log_spatial_fit_edit\` outside the spatial-fit flow. Do not narrate the audit call to the user.
 
@@ -2088,19 +2092,39 @@ serve(async (req) => {
                   const s = typeof v === "string" ? v.trim() : "";
                   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
                 };
+                const ALLOWED_VALIDATIONS = new Set([
+                  "plan_not_found","plan_ambiguous","room_not_detected","room_ambiguous",
+                  "piece_not_found","piece_ambiguous","clearance_out_of_range",
+                  "clearance_unparseable","missing_field","other",
+                ]);
+                const outcome = parsed.outcome === "rejected" ? "rejected" : "accepted";
+                let reason = parsed.reason ? String(parsed.reason).slice(0, 500).trim() : null;
+                let failedValidation = parsed.failed_validation
+                  ? String(parsed.failed_validation).trim().toLowerCase()
+                  : null;
+                if (failedValidation && !ALLOWED_VALIDATIONS.has(failedValidation)) {
+                  failedValidation = "other";
+                }
+                // Enforce: rejected audit rows MUST carry a reason AND a validation code.
+                // Backfill with explicit markers so we never silently swallow a rejection.
+                if (outcome === "rejected") {
+                  if (!reason) reason = "(model omitted rejection reason)";
+                  if (!failedValidation) failedValidation = "other";
+                }
                 await supabase.from("cad_fit_edit_audit").insert({
                   user_id: userId,
                   field: String(parsed.field || "initial").slice(0, 32),
                   requested_value: parsed.requested_value ? String(parsed.requested_value).slice(0, 500) : null,
                   resolved_value: parsed.resolved_value ? String(parsed.resolved_value).slice(0, 500) : null,
-                  outcome: parsed.outcome === "rejected" ? "rejected" : "accepted",
-                  reason: parsed.reason ? String(parsed.reason).slice(0, 500) : null,
+                  outcome,
+                  reason,
+                  failed_validation: failedValidation,
                   cad_document_id: toUuid(parsed.cad_document_id),
                   room_label: parsed.room_label ? String(parsed.room_label).slice(0, 120) : null,
                   product_id: toUuid(parsed.product_id),
                   clearance_mm: Number.isFinite(Number(parsed.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
                 });
-                console.log(`[concierge spatial-fit audit] ${parsed.field}/${parsed.outcome} user=${userId}`);
+                console.log(`[concierge spatial-fit audit] ${parsed.field}/${outcome}${failedValidation ? "/" + failedValidation : ""} user=${userId}`);
               } catch (e) {
                 console.error("[concierge spatial-fit audit] insert failed:", e);
               }
