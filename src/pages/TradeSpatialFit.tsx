@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Upload, Loader2, FileBox, Ruler, AlertTriangle, CheckCircle2, XCircle, Info } from "lucide-react";
+import { Upload, Loader2, FileBox, Ruler, AlertTriangle, CheckCircle2, XCircle, Info, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -32,11 +32,28 @@ type FitResult = {
   verdict: "pass" | "warn" | "fail" | "unknown";
   reasons: Array<{ code: string; severity: string; message: string }>;
   room: Room;
-  product: { id: string; bbox_mm: { w: number; d: number; h: number } | null; source: string };
+  product: { id: string; cad_asset_id?: string | null; bbox_mm: { w: number; d: number; h: number } | null; source: string };
   clearance_mm: number;
 };
 
+type ProductCadAsset = {
+  id: string;
+  variant_label: string | null;
+  file_url: string;
+  file_format: string;
+  file_size_bytes: number | null;
+  version: string | null;
+};
+
+type ProductCadGeometry = {
+  cad_asset_id: string;
+  status: "pending" | "parsing" | "ready" | "failed" | "unsupported";
+  bbox_mm: { w: number; d: number; h: number } | null;
+  error: string | null;
+};
+
 const ACCEPTED = ".dxf,.dwg,.obj,.fbx,.skp,.step,.iges,.3ds,.rfa";
+const PRODUCT_CAD_FORMATS = ["dwg", "fbx", "obj", "skp"];
 
 export default function TradeSpatialFit() {
   const { user, loading: authLoading } = useAuth();
@@ -52,6 +69,10 @@ export default function TradeSpatialFit() {
   const [fitting, setFitting] = useState(false);
   const [fitResult, setFitResult] = useState<FitResult | null>(null);
   const [selectedRoomLabel, setSelectedRoomLabel] = useState<string | null>(null);
+  const [productAssets, setProductAssets] = useState<ProductCadAsset[]>([]);
+  const [productGeometry, setProductGeometry] = useState<Record<string, ProductCadGeometry>>({});
+  const [selectedCadAssetId, setSelectedCadAssetId] = useState<string>("");
+  const [parsingAssetId, setParsingAssetId] = useState<string | null>(null);
 
   const fetchDocs = async () => {
     setLoading(true);
@@ -71,8 +92,50 @@ export default function TradeSpatialFit() {
     if (!authLoading && user) fetchDocs();
   }, [user, authLoading, currentStudio?.id]);
 
+  const loadProductAssets = async (pid: string) => {
+    const { data: assets } = await supabase
+      .from("trade_product_cad_assets")
+      .select("id, variant_label, file_url, file_format, file_size_bytes, version")
+      .eq("product_id", pid)
+      .eq("is_active", true)
+      .in("file_format", PRODUCT_CAD_FORMATS)
+      .order("variant_label", { ascending: true, nullsFirst: true })
+      .order("file_format", { ascending: true });
+    const list = (assets as ProductCadAsset[]) || [];
+    setProductAssets(list);
+    setSelectedCadAssetId((prev) => (prev && list.some((a) => a.id === prev) ? prev : list[0]?.id || ""));
+
+    if (list.length) {
+      const { data: geometry } = await supabase
+        .from("product_cad_asset_geometry")
+        .select("cad_asset_id, status, bbox_mm, error")
+        .in("cad_asset_id", list.map((a) => a.id));
+      const map: Record<string, ProductCadGeometry> = {};
+      for (const row of (geometry as ProductCadGeometry[]) || []) map[row.cad_asset_id] = row;
+      setProductGeometry(map);
+    } else {
+      setProductGeometry({});
+      setSelectedCadAssetId("");
+    }
+  };
+
+  useEffect(() => {
+    const pid = productId.trim();
+    if (!pid) {
+      setProductAssets([]);
+      setProductGeometry({});
+      setSelectedCadAssetId("");
+      return;
+    }
+    loadProductAssets(pid);
+  }, [productId]);
+
   const activeDoc = useMemo(() => docs.find((d) => d.id === activeDocId) || null, [docs, activeDocId]);
   const rooms: Room[] = useMemo(() => activeDoc?.parsed_geometry?.rooms || [], [activeDoc]);
+  const selectedCadAsset = useMemo(
+    () => productAssets.find((asset) => asset.id === selectedCadAssetId) || null,
+    [productAssets, selectedCadAssetId],
+  );
 
   useEffect(() => {
     if (rooms.length && !selectedRoomLabel) setSelectedRoomLabel(rooms[0].label || "__first__");
@@ -144,6 +207,8 @@ export default function TradeSpatialFit() {
         cad_document_id: activeDoc.id,
         room_label: room?.label || undefined,
         product_id: productId,
+        cad_asset_id: selectedCadAssetId || undefined,
+        variant_label: selectedCadAsset?.variant_label || undefined,
         clearance_mm: clearance,
       },
     });
@@ -153,6 +218,24 @@ export default function TradeSpatialFit() {
       return;
     }
     setFitResult(data);
+  };
+
+  const handleParseProductAsset = async (asset: ProductCadAsset) => {
+    setParsingAssetId(asset.id);
+    const { data, error } = await supabase.functions.invoke("cad-parse-product-asset", {
+      body: { cad_asset_id: asset.id },
+    });
+    setParsingAssetId(null);
+    if (error) {
+      toast({ title: "CAD ingestion failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    if ((data as any)?.ok === false) {
+      toast({ title: "CAD asset stored, not parsed", description: (data as any)?.error || `.${asset.file_format.toUpperCase()} is not parseable yet.` });
+    } else {
+      toast({ title: "Product CAD ingested", description: "Geometry is ready for Spatial Fit." });
+    }
+    if (productId) await loadProductAssets(productId);
   };
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
@@ -179,16 +262,15 @@ export default function TradeSpatialFit() {
             </Link>
           </div>
           <p className="font-body text-sm text-muted-foreground max-w-2xl">
-            Upload a floor plan and we'll extract the rooms, then check whether a product fits with circulation clearance.
+            Select a parsed floor plan, then ingest the CAD/3D file already attached to the product and run a clearance check against the chosen room.
           </p>
           <div className="mt-3 max-w-2xl rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
-            <p className="font-medium">Phase 1: <strong>DXF</strong> and <strong>OBJ</strong> are parsed today.</p>
+            <p className="font-medium">Product CAD ingestion uses the product's attached <strong>DWG / FBX / OBJ / SKP</strong> assets.</p>
             <p className="mt-1">
-              <strong>DWG</strong> support ships in Phase 2 via an in-house LibreDWG converter — you won't need to export anything manually.
-              FBX, SKP, STEP, IGES, 3DS and RFA can still be uploaded and stored against the project; they'll be marked <em>unsupported</em> until their parser lands.
+              Only <strong>OBJ</strong> currently parses into geometry. DWG, FBX and SKP are listed, stored and selected here, but return an unsupported status until their converters land.
             </p>
             <p className="mt-1">
-              Need a fit check today? Export the plan as DXF (AutoCAD 2018 DXF works best) or OBJ and re-upload.
+              Floor plans still need detected rooms from DXF/OBJ; product dimensions are used only as a fallback when attached CAD is not parseable yet.
             </p>
           </div>
         </header>
@@ -198,7 +280,7 @@ export default function TradeSpatialFit() {
         <Card className="p-5 space-y-3">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-base">Upload floor plan</h2>
+            <h2 className="font-display text-base">Upload floor plan for room detection</h2>
           </div>
           <input
             type="file"
@@ -219,6 +301,72 @@ export default function TradeSpatialFit() {
           <p className="text-[11px] text-muted-foreground">
             Visible to {currentStudio ? <strong>{currentStudio.name}</strong> : "you only"}. Files are private.
           </p>
+        </Card>
+
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Box className="h-4 w-4 text-primary" />
+            <h2 className="font-display text-base">Product-attached CAD assets</h2>
+          </div>
+          <div>
+            <Label className="text-xs">Trade product ID</Label>
+            <Input
+              placeholder="UUID of the trade_product to ingest"
+              value={productId}
+              onChange={(e) => { setProductId(e.target.value); setFitResult(null); }}
+              className="mt-1 font-mono text-xs"
+            />
+            {productName && <p className="text-[11px] text-muted-foreground mt-1">{productName}</p>}
+          </div>
+          {!productId ? (
+            <p className="text-sm text-muted-foreground">Open Spatial Fit from a trade product sheet, or paste a trade product ID above.</p>
+          ) : productAssets.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No active DWG / FBX / OBJ / SKP assets are attached to this product yet.</p>
+          ) : (
+            <ul className="divide-y divide-border/60 border border-border/60 rounded">
+              {productAssets.map((asset) => {
+                const geometry = productGeometry[asset.id];
+                const selected = selectedCadAssetId === asset.id;
+                return (
+                  <li key={asset.id} className={selected ? "bg-muted/60" : "bg-background"}>
+                    <div className="flex items-center justify-between gap-3 px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedCadAssetId(asset.id); setFitResult(null); }}
+                        className="flex-1 text-left min-w-0"
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className="font-body text-sm text-foreground uppercase tracking-wide">.{asset.file_format}</span>
+                          <span className="font-body text-xs text-muted-foreground truncate">
+                            {asset.variant_label || "Default asset"}{asset.version ? ` · ${asset.version}` : ""}
+                          </span>
+                        </span>
+                        <span className="block text-[11px] text-muted-foreground mt-0.5">
+                          {geometry?.status === "ready" && geometry.bbox_mm
+                            ? `Ready · ${geometry.bbox_mm.w}×${geometry.bbox_mm.d}×${geometry.bbox_mm.h} mm`
+                            : geometry?.status === "unsupported"
+                              ? geometry.error || `.${asset.file_format.toUpperCase()} is stored but not parseable yet.`
+                              : geometry?.status === "failed"
+                                ? geometry.error || "Parse failed."
+                                : geometry?.status || "Not ingested yet"}
+                        </span>
+                      </button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleParseProductAsset(asset)}
+                        disabled={parsingAssetId === asset.id}
+                      >
+                        {parsingAssetId === asset.id ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Ruler className="h-3.5 w-3.5 mr-2" />}
+                        Ingest
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </Card>
 
         {/* Existing docs */}
@@ -330,19 +478,15 @@ export default function TradeSpatialFit() {
                 </div>
 
                 <div className="border-t border-border pt-4 space-y-3">
-                  <div>
-                    <Label className="text-xs">Trade product ID</Label>
-                    <Input
-                      placeholder="UUID of the trade_product to test"
-                      value={productId}
-                      onChange={(e) => setProductId(e.target.value)}
-                      className="mt-1 font-mono text-xs"
-                    />
-                    {productName && <p className="text-[11px] text-muted-foreground mt-1">{productName}</p>}
+                  <div className="text-xs text-muted-foreground">
+                    Product asset: {selectedCadAsset
+                      ? <span className="text-foreground uppercase">.{selectedCadAsset.file_format}</span>
+                      : "No attached CAD asset selected"}
+                    {selectedCadAsset?.variant_label ? ` · ${selectedCadAsset.variant_label}` : ""}
                   </div>
                   <Button onClick={handleCheckFit} disabled={fitting || !productId}>
                     {fitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Ruler className="h-4 w-4 mr-2" />}
-                    Check fit
+                    Check fit with selected product CAD
                   </Button>
                 </div>
               </>
@@ -357,7 +501,7 @@ export default function TradeSpatialFit() {
         {fitResult && <FitResultCard r={fitResult} />}
 
         <p className="text-[11px] text-muted-foreground">
-          Looking for CAD files attached to a product? Open any product page in the Trade portal — the <Link to="/trade" className="underline">Trade product sheet</Link> exposes downloads, and Spatial Fit reads their geometry automatically.
+          Product CAD assets are managed in <Link to="/trade/admin/cad-assets" className="underline">CAD &amp; 3D Assets</Link>; Spatial Fit ingests the selected attached asset here before checking room clearance.
         </p>
       </div>
     </div>

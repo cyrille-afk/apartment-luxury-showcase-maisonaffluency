@@ -259,6 +259,7 @@ const TOOLS = [
           cad_document_id: { type: "string", description: "UUID of the cad_documents row (uploaded floor plan)." },
           room_label: { type: "string", description: "Optional room label from the parsed plan (e.g. 'LIVING'). Omit to use the largest detected room." },
           product_id: { type: "string", description: "UUID of the trade_product to test." },
+          cad_asset_id: { type: "string", description: "Optional UUID of the trade_product_cad_assets row to ingest and use for product geometry." },
           variant_label: { type: "string", description: "Optional product variant label, if the product has CAD geometry per variant." },
           clearance_mm: { type: "integer", description: "Walking clearance to leave around the product on every side, in millimetres. Defaults to 600." },
         },
@@ -287,6 +288,7 @@ const TOOLS = [
               type: "object",
               properties: {
                 product_id: { type: "string", description: "UUID of the trade_product to test." },
+                cad_asset_id: { type: "string", description: "Optional UUID of the attached CAD/3D asset to ingest and use." },
                 variant_label: { type: "string", description: "Optional variant label." },
                 clearance_mm: { type: "integer", description: "Walking clearance in mm. Defaults to 600." },
               },
@@ -455,6 +457,7 @@ function buildSystemPrompt(
   openQuotes: string,
   planDirective: string,
   cadDocuments: string,
+  productCadAssets: string,
 ) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
@@ -511,18 +514,20 @@ Required arguments:
 After the tool returns, write a concise breakdown in the user's currency: freight, fuel, insurance, customs/handling, last-mile, duty %, VAT %, and the total. Mention the selected carrier and mode. ALWAYS state the declared value you used and where it came from (e.g. "based on a declared value of €4,200 — the trade price of the Pouénat sconce" or "based on the €18,500 subtotal of your Mayfair quote"), so the client can correct it if wrong. If \`available: false\`, tell the user the lane isn't configured and offer a manual quote.
 
 ## TOOL USE — SPATIAL FIT (MANDATORY FOR "DOES IT FIT?" QUESTIONS)
-Whenever the user asks whether a specific piece fits in a room, has enough clearance, can be placed, or "works" against their plan — you MUST call \`check_spatial_fit\`. Never eyeball it from the product's dimensions — the deterministic checker accounts for rotation, walking clearance, and ceiling height.
+Whenever the user asks whether a specific piece fits in a room, has enough clearance, can be placed, or "works" against their plan — you MUST call \`check_spatial_fit\`. The intended workflow is: room geometry from the uploaded floor plan + product geometry from the CAD/3D file already attached to the product (DWG / FBX / OBJ / SKP). Never eyeball it from dimensions alone.
 
 CONVERSATIONAL SELECTION — the user can pick the room and product entirely in chat:
 1. If the user has more than one uploaded plan (see USER'S CAD PLANS), ask which plan; otherwise default to the only one.
 2. List the detected rooms of that plan (label + footprint in m) and ask which room to test. If they name a room ("the living room", "dining"), match it case-insensitively to a \`room_label\` from the plan.
 3. Ask which piece to check, or use the piece the user is currently discussing. If they describe it by name/designer rather than ID, resolve it against CATALOG PIECES below.
-4. CONFIRMATION STEP (MANDATORY) — once you have a resolved plan + room + piece, do NOT call the tool yet. Reply with a single short confirmation message in this exact format, then stop and wait for the user:
+4. Product CAD asset: after resolving \`product_id\`, inspect USER'S PRODUCT-ATTACHED CAD ASSETS. If that product has one or more assets, choose the matching variant when possible and include \`cad_asset_id\` in \`check_spatial_fit\`; prefer OBJ when multiple formats exist because it parses today. If the product only has DWG/FBX/SKP, still pass the \`cad_asset_id\`; the checker will record that the asset is attached but unsupported and fall back to declared dimensions until the converter ships. If the product has no attached CAD asset, say so explicitly before confirming and proceed only with declared dimensions.
+5. CONFIRMATION STEP (MANDATORY) — once you have a resolved plan + room + piece + product CAD asset status, do NOT call the tool yet. Reply with a single short confirmation message in this exact format, then stop and wait for the user:
 
    > **Ready to run spatial fit check:**
    > • Floor plan: "{file_name}" \`[cad_document_id: {uuid}]\`
    > • Room: **{ROOM_LABEL}**
    > • Piece: {title} — {designer} \`[product_id: {uuid}]\`
+   > • Product CAD: {format/variant or "none attached"} {optional \`[cad_asset_id: {uuid}]\`}
    > • Clearance: {clearance_mm} mm
    >
    > Reply **"go"** to run, or edit any field:
@@ -532,26 +537,26 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
    > — **"clearance {N}mm"** → override \`clearance_mm\`
    > — **"cancel"** → drop the check entirely.
 
-5. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, then VALIDATE each updated field before re-posting:
+6. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, then VALIDATE each updated field before re-posting:
    - **cad_document_id** — MUST match a \`[cad_document_id: ...]\` in USER'S CAD PLANS. If the user names a plan that isn't there, reply: "I can't find a plan called '{X}'. Your uploaded plans are: {list of file_name + id}. Which one should I use?" and stop — do NOT post a new confirmation until they pick a valid one. ALSO: if the matched plan is tagged ⚠️ NOT READY (no rooms detected), refuse and reply: "'{file_name}' isn't parsed yet — no rooms detected. Pick a plan with detected rooms, or open /trade/spatial-fit to re-parse." Log this as \`failed_validation: "room_not_detected"\`, \`reason: "plan {id} parsed but contains no rooms"\`.
    - **room_label** — MUST case-insensitively match a room label of the currently selected plan. If not, reply: "'{X}' isn't a detected room on '{plan file_name}'. Detected rooms: {comma-separated labels with m footprints}. Which one?" and stop.
-   - **product_id** — MUST resolve to a UUID present in CATALOG PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved. PRODUCT DIMS: if CATALOG PIECES shows the piece has no usable dimensions (no W×D in the listing), warn the user before confirming: "{title} has no published dimensions — the fit-check will return 'unknown'. Want to pick a different piece, or run it anyway?" Only proceed if they confirm.
+   - **product_id** — MUST resolve to a UUID present in CATALOG PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved. Then resolve the attached product CAD asset from USER'S PRODUCT-ATTACHED CAD ASSETS; if none exists and dimensions are missing, warn: "{title} has no attached CAD asset and no published dimensions — the fit-check will return 'unknown'. Want to pick a different piece, or run it anyway?" Only proceed if they confirm.
    - **clearance_mm** — MUST be a positive integer between 0 and 3000 MILLIMETRES. Accept and convert common units: "50cm"/"50 cm" → 500, "0.6m"/"0.6 m" → 600, "2in"/"2 in"/"2\"" → 51 (round to nearest mm). Strip whitespace and unit suffix before validating. If unparseable, out of range, or zero/negative, ask for a value in mm and stop with \`failed_validation: "clearance_unparseable"\` or \`"clearance_out_of_range"\` as appropriate.
 
-   Only once every changed field passes validation, re-post a fresh confirmation block with ALL four fields (plan, room, piece, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm". When the plan changes, also re-validate the previously selected room against the NEW plan's rooms — if it no longer matches, ask the user to pick a room from the new plan before re-posting.
-6. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation. Re-validate the IDs against USER'S CAD PLANS and CATALOG PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. Never call the tool on the same turn as a confirmation or edit.
+   Only once every changed field passes validation, re-post a fresh confirmation block with ALL fields (plan, room, piece, product CAD asset, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm". When the plan changes, also re-validate the previously selected room against the NEW plan's rooms — if it no longer matches, ask the user to pick a room from the new plan before re-posting.
+7. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation, including \`cad_asset_id\` when an attached product CAD asset exists. Re-validate the IDs against USER'S CAD PLANS, USER'S PRODUCT-ATTACHED CAD ASSETS and CATALOG PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. Never call the tool on the same turn as a confirmation or edit.
 
-6a. CANCEL / ABORT — if the user types "cancel", "stop", "never mind", "drop it", "forget it", or otherwise abandons the pending check, do NOT call \`check_spatial_fit\`. Reply with a single short line: "Cancelled — let me know when you'd like to try again." Then call \`log_spatial_fit_edit\` with \`field: "cancel"\`, \`outcome: "accepted"\`, \`requested_value\` = exactly what they typed, plus the pending plan/room/piece/clearance you were about to run. Do not re-post the confirmation block.
+7a. CANCEL / ABORT — if the user types "cancel", "stop", "never mind", "drop it", "forget it", or otherwise abandons the pending check, do NOT call \`check_spatial_fit\`. Reply with a single short line: "Cancelled — let me know when you'd like to try again." Then call \`log_spatial_fit_edit\` with \`field: "cancel"\`, \`outcome: "accepted"\`, \`requested_value\` = exactly what they typed, plus the pending plan/room/piece/clearance you were about to run. Do not re-post the confirmation block.
 
-6b. SESSION TIMEOUT — a confirmation block is STALE if more than 8 user turns have passed since you posted it without a "go"/edit/cancel reply, OR if the user has clearly pivoted to an unrelated topic (different product family, shipping question, tearsheet work). When you detect staleness: drop the pending check silently, do NOT re-post the old confirmation. If the user comes back to spatial-fit later, start a fresh selection from step 1. Log the stale drop once with \`log_spatial_fit_edit\` \`field: "cancel"\`, \`outcome: "rejected"\`, \`failed_validation: "other"\`, \`reason: "session_timeout"\`, \`turns_since_confirm\`: your best estimate.
+7b. SESSION TIMEOUT — a confirmation block is STALE if more than 8 user turns have passed since you posted it without a "go"/edit/cancel reply, OR if the user has clearly pivoted to an unrelated topic (different product family, shipping question, tearsheet work). When you detect staleness: drop the pending check silently, do NOT re-post the old confirmation. If the user comes back to spatial-fit later, start a fresh selection from step 1. Log the stale drop once with \`log_spatial_fit_edit\` \`field: "cancel"\`, \`outcome: "rejected"\`, \`failed_validation: "other"\`, \`reason: "session_timeout"\`, \`turns_since_confirm\`: your best estimate.
 
-6c. POST-RESULT ACTIONS — after \`check_spatial_fit\` returns and you've written the verdict prose, ALWAYS append a single-line footer offering follow-ups, formatted exactly:
+7c. POST-RESULT ACTIONS — after \`check_spatial_fit\` returns and you've written the verdict prose, ALWAYS append a single-line footer offering follow-ups, formatted exactly:
 
    > **Next:** "try {OTHER_ROOM}" • "try another piece" • "tighter clearance ({N}mm)" • "done"
 
    Pick {OTHER_ROOM} = one other detected room of the same plan (omit the bullet if there is only one room). Pick {N} = the previous clearance minus 100mm, floored at 100. When the user picks one of those shortcuts, treat it as an EDIT on the previous selection (keep plan + piece, change the named field) and re-post a confirmation block — do NOT re-run the tool blindly. "done" or any non-spatial reply = drop the pending state quietly (no cancel audit needed in this case — the previous run already produced a 'result' audit row).
 
-7. AUDIT (MANDATORY) — every turn that touches the spatial-fit picker, also call \`log_spatial_fit_edit\` in parallel. One call per user turn:
+8. AUDIT (MANDATORY) — every turn that touches the spatial-fit picker, also call \`log_spatial_fit_edit\` in parallel. One call per user turn:
    - Initial selection: \`field: "initial"\`, \`outcome: "accepted"\`, with the resolved plan/room/piece you put into the first confirmation block.
    - Successful edit: \`field\` = the changed field (\`cad_document_id\` | \`room_label\` | \`product_id\` | \`clearance_mm\`), \`requested_value\` = what they typed, \`resolved_value\` = the UUID / canonical label / integer, \`outcome: "accepted"\`, plus the FULL current pending state (plan + room + piece + clearance).
    - Rejected edit: \`field\` = the field they tried to change, \`requested_value\` = exactly what they typed, \`outcome: "rejected"\`, and BOTH of the following are REQUIRED — never omit either:
@@ -567,6 +572,7 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
 Required arguments:
 - \`cad_document_id\` — UUID of an UPLOADED floor plan from the USER'S CAD PLANS list below. If the user has none, do NOT call the tool — tell them to upload a DXF (or DWG/FBX/SKP) at /trade/spatial-fit first.
 - \`product_id\` — UUID of the trade product. Use the IDs from CATALOG PIECES or the piece the user is currently viewing. Never invent.
+- \`cad_asset_id\` — UUID of the selected attached product CAD/3D asset from USER'S PRODUCT-ATTACHED CAD ASSETS. Pass it whenever available; do not ask the user to upload the product model as a floor plan.
 - \`room_label\` — optional; pass the room name the user picked (e.g. "LIVING", "DINING") so the checker uses the right space. Omit to default to the largest detected room.
 - \`clearance_mm\` — optional override; default 600mm. Tighten only when the user explicitly asks (e.g. "ignore clearance").
 
@@ -585,6 +591,9 @@ The server enforces 20 fit-checks per user per minute (each piece in a batch cou
 
 ## USER'S CAD PLANS (uploaded floor plans)
 ${cadDocuments}
+
+## USER'S PRODUCT-ATTACHED CAD ASSETS (DWG / FBX / OBJ / SKP)
+${productCadAssets}
 
 
 ## ACTIVE PROJECT
@@ -864,6 +873,26 @@ async function loadCadDocuments(
     return `- "${d.file_name}" [cad_document_id: ${d.id}]${flag} · rooms: ${roomSummary}`;
   }).join("\n");
 
+}
+
+/** Product-attached CAD/3D assets available to Spatial Fit. */
+async function loadProductCadAssets(
+  supabase: ReturnType<typeof createClient>,
+): Promise<string> {
+  const { data } = await supabase
+    .from("trade_product_cad_assets")
+    .select("id, product_id, variant_label, file_format, version, is_active")
+    .eq("is_active", true)
+    .in("file_format", ["dwg", "fbx", "obj", "skp"])
+    .limit(120);
+  if (!data || data.length === 0) {
+    return "(No active product-attached DWG/FBX/OBJ/SKP CAD assets are available yet. Use product dimensions as fallback only after saying no product CAD is attached.)";
+  }
+  return data.map((a: any) => {
+    const label = [a.variant_label, a.version].filter(Boolean).join(" · ");
+    const parseNote = a.file_format === "obj" ? "parseable now" : "stored, converter pending";
+    return `- product_id ${a.product_id} · .${a.file_format}${label ? ` · ${label}` : ""} [cad_asset_id: ${a.id}] · ${parseNote}`;
+  }).join("\n");
 }
 
 
@@ -1825,7 +1854,7 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow, cadDocuments] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
@@ -1835,6 +1864,7 @@ serve(async (req) => {
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
       loadCadDocuments(supabase, userId),
+      loadProductCadAssets(supabase),
     ]);
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
@@ -1868,7 +1898,7 @@ serve(async (req) => {
     const sentimentDirective = buildSentimentDirective(sentiment);
     const planDirective = buildPlanDirective(extractedBrief);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments,
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments, productCadAssets,
     );
     // The planner's intent + plan supersede the legacy regex when present. If the planner
     // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
@@ -2242,6 +2272,33 @@ serve(async (req) => {
                     preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it.`;
                   }
                 }
+                let productHasCadAsset = false;
+                if (!preflightError && parsed.cad_asset_id) {
+                  const { data: assetRow } = await supabase
+                    .from("trade_product_cad_assets")
+                    .select("id, product_id, file_format, is_active")
+                    .eq("id", parsed.cad_asset_id)
+                    .maybeSingle();
+                  if (!assetRow || assetRow.product_id !== parsed.product_id || assetRow.is_active !== true) {
+                    preflightCode = "piece_not_found";
+                    preflightError = `Attached CAD asset ${parsed.cad_asset_id} was not found for product ${parsed.product_id}.`;
+                  } else {
+                    productHasCadAsset = true;
+                    try {
+                      await fetch(`${supabaseUrl}/functions/v1/cad-parse-product-asset`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: auth.authHeader,
+                          apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                        },
+                        body: JSON.stringify({ cad_asset_id: parsed.cad_asset_id }),
+                      });
+                    } catch (e) {
+                      console.warn("[concierge spatial-fit] product CAD ingestion preflight failed:", e);
+                    }
+                  }
+                }
                 if (!preflightError && parsed.product_id) {
                   const { data: prodRow } = await supabase
                     .from("trade_products")
@@ -2252,7 +2309,7 @@ serve(async (req) => {
                   if (!prodRow) {
                     preflightCode = "piece_not_found";
                     preflightError = `Product ${parsed.product_id} not found in the catalog.`;
-                  } else if (numCount < 2) {
+                  } else if (!productHasCadAsset && numCount < 2) {
                     preflightCode = "missing_dimensions";
                     preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'.`;
                   }
@@ -2449,6 +2506,7 @@ serve(async (req) => {
                   cad_document_id: parsed.cad_document_id,
                   room_label: parsed.room_label,
                   product_id: piece?.product_id,
+                  cad_asset_id: piece?.cad_asset_id,
                   variant_label: piece?.variant_label,
                   clearance_mm: piece?.clearance_mm,
                 };
@@ -2463,6 +2521,7 @@ serve(async (req) => {
                 room_label: parsed.room_label || null,
                 results: perPiece.map((p) => ({
                   product_id: p.input?.product_id,
+                  cad_asset_id: p.input?.cad_asset_id || null,
                   variant_label: p.input?.variant_label || null,
                   clearance_mm: p.input?.clearance_mm ?? null,
                   verdict: p.result?.verdict || "unknown",
