@@ -2244,6 +2244,7 @@ serve(async (req) => {
               }
 
               let result: any;
+              let transportError: string | null = null;
               if (preflightError) {
                 result = { ok: false, verdict: "unknown", reasons: [preflightError], error: preflightError };
               } else {
@@ -2257,16 +2258,24 @@ serve(async (req) => {
                     },
                     body: JSON.stringify(parsed),
                   });
-                  result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
+                  if (!resp.ok) {
+                    transportError = `HTTP ${resp.status}`;
+                  }
+                  result = await resp.json().catch(() => {
+                    transportError = transportError || `non-JSON response (HTTP ${resp.status})`;
+                    return { ok: false, error: transportError };
+                  });
                 } catch (e) {
                   console.error("[concierge spatial-fit] invoke failed:", e);
-                  result = { ok: false, error: "Spatial-fit service unreachable." };
+                  transportError = "Spatial-fit service unreachable.";
+                  result = { ok: false, error: transportError };
                 }
               }
-              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}`);
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}${transportError ? " (transport error)" : ""}`);
 
 
               // Auto-write 'result' audit row so reviewers can trace edits → outcome.
+              // Uses structured failed_validation codes so the audit log is filterable by error class.
               try {
                 const toUuid = (v: unknown) => {
                   const s = typeof v === "string" ? v.trim() : "";
@@ -2274,12 +2283,19 @@ serve(async (req) => {
                 };
                 const verdict = typeof result?.verdict === "string" ? result.verdict.slice(0, 32) : null;
                 const isError = result?.ok === false || !verdict;
+                let resultFailedValidation: string | null = null;
+                if (isError) {
+                  if (preflightCode) resultFailedValidation = preflightCode;
+                  else if (transportError) resultFailedValidation = "service_unreachable";
+                  else if (!verdict) resultFailedValidation = "no_verdict";
+                  else resultFailedValidation = "other";
+                }
                 await supabase.from("cad_fit_edit_audit").insert({
                   user_id: userId,
                   field: "result",
                   outcome: isError ? "rejected" : "accepted",
-                  reason: isError ? String(result?.error || "spatial-fit returned no verdict").slice(0, 500) : null,
-                  failed_validation: isError ? "other" : null,
+                  reason: isError ? String(preflightError || transportError || result?.error || "spatial-fit returned no verdict").slice(0, 500) : null,
+                  failed_validation: resultFailedValidation,
                   cad_document_id: toUuid(parsed?.cad_document_id),
                   room_label: parsed?.room_label ? String(parsed.room_label).slice(0, 120) : null,
                   product_id: toUuid(parsed?.product_id),
