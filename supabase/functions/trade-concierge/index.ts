@@ -266,6 +266,30 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "log_spatial_fit_edit",
+      description:
+        "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
+      parameters: {
+        type: "object",
+        properties: {
+          field: { type: "string", enum: ["cad_document_id","room_label","product_id","clearance_mm","initial","confirm"], description: "Which field the user was changing (or 'initial' for the first selection, 'confirm' for the final go)." },
+          requested_value: { type: "string", description: "The raw value the user typed (e.g. 'the dining room', 'Velvet sofa', 'plan 3')." },
+          resolved_value: { type: "string", description: "The value after resolution (UUID, canonical room label, integer mm). Omit if it could not be resolved." },
+          outcome: { type: "string", enum: ["accepted","rejected"], description: "'accepted' if the edit/selection passed validation and went into the next confirmation; 'rejected' if it failed (unknown, ambiguous, out of range)." },
+          reason: { type: "string", description: "Short human reason — required when outcome is 'rejected' (e.g. 'no plan named X', 'room not detected', 'ambiguous: 3 matches', 'clearance out of 0–3000mm range')." },
+          cad_document_id: { type: "string", description: "Current pending selection state." },
+          room_label: { type: "string", description: "Current pending selection state." },
+          product_id: { type: "string", description: "Current pending selection state." },
+          clearance_mm: { type: "integer", description: "Current pending selection state." },
+        },
+        required: ["field", "outcome"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
