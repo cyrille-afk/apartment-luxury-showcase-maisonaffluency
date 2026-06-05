@@ -246,6 +246,26 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "check_spatial_fit",
+      description:
+        "Run a deterministic bounding-box + clearance fit check for ONE trade product against a room from a CAD floor plan the studio has already uploaded to Spatial Fit. USE THIS TOOL whenever the user asks whether a piece fits in a room, can be placed, has enough clearance, or whether it 'works' spatially against their plan — never guess from dimensions alone. Returns verdict (pass/warn/fail/unknown) with structured reasons, plus the room and product bounding boxes in mm.",
+      parameters: {
+        type: "object",
+        properties: {
+          cad_document_id: { type: "string", description: "UUID of the cad_documents row (uploaded floor plan)." },
+          room_label: { type: "string", description: "Optional room label from the parsed plan (e.g. 'LIVING'). Omit to use the largest detected room." },
+          product_id: { type: "string", description: "UUID of the trade_product to test." },
+          variant_label: { type: "string", description: "Optional product variant label, if the product has CAD geometry per variant." },
+          clearance_mm: { type: "integer", description: "Walking clearance to leave around the product on every side, in millimetres. Defaults to 600." },
+        },
+        required: ["cad_document_id", "product_id"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
@@ -373,6 +393,7 @@ function buildSystemPrompt(
   projectContext: string,
   openQuotes: string,
   planDirective: string,
+  cadDocuments: string,
 ) {
   return `You are the Maison Affluency Trade Concierge — a knowledgeable, refined assistant for professional interior designers, architects, and specifiers sourcing collectible and limited-edition furniture, lighting, and objets d'art.
 
@@ -427,6 +448,20 @@ Required arguments:
 - \`preferred_mode\` — pass only when the user names one ("by air", "sea LCL"). Otherwise omit so the matrix picks the cheapest lane.
 
 After the tool returns, write a concise breakdown in the user's currency: freight, fuel, insurance, customs/handling, last-mile, duty %, VAT %, and the total. Mention the selected carrier and mode. ALWAYS state the declared value you used and where it came from (e.g. "based on a declared value of €4,200 — the trade price of the Pouénat sconce" or "based on the €18,500 subtotal of your Mayfair quote"), so the client can correct it if wrong. If \`available: false\`, tell the user the lane isn't configured and offer a manual quote.
+
+## TOOL USE — SPATIAL FIT (MANDATORY FOR "DOES IT FIT?" QUESTIONS)
+Whenever the user asks whether a specific piece fits in a room, has enough clearance, can be placed, or "works" against their plan — you MUST call \`check_spatial_fit\`. Never eyeball it from the product's dimensions — the deterministic checker accounts for rotation, walking clearance, and ceiling height.
+
+Required arguments:
+- \`cad_document_id\` — UUID of an UPLOADED floor plan from the USER'S CAD PLANS list below. If the user has none, do NOT call the tool — tell them to upload a DXF (or DWG/FBX/SKP) at /trade/spatial-fit first.
+- \`product_id\` — UUID of the trade product. Use the IDs from CATALOG PIECES or the piece the user is currently viewing. Never invent.
+- \`room_label\` — optional; pass the room name the user mentioned (e.g. "LIVING", "DINING") so the checker picks the right space.
+- \`clearance_mm\` — optional override; default 600mm. Tighten only when the user explicitly asks (e.g. "ignore clearance").
+
+After the tool returns, lead with the verdict (Fits / Tight / Doesn't fit), state the product footprint vs the room footprint in mm with a metres conversion, then list each reason in plain English. If the verdict is \`fail\`, suggest a smaller variant or a different room. If \`unknown\`, say the geometry is missing and point the user to /trade/spatial-fit.
+
+## USER'S CAD PLANS (uploaded floor plans)
+${cadDocuments}
 
 
 ## ACTIVE PROJECT
@@ -670,6 +705,39 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
     showroomBrands: showroomBrandLines.join("\n") || "No showroom brands currently loaded.",
   };
 }
+
+/** Recent CAD floor plans the user (or any of their studios) has uploaded. */
+async function loadCadDocuments(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "(No user session — Spatial Fit unavailable.)";
+  // Studio memberships
+  const { data: mems } = await supabase
+    .from("studio_members").select("studio_id").eq("user_id", userId);
+  const studioIds = (mems || []).map((m: any) => m.studio_id).filter(Boolean);
+  let query = supabase
+    .from("cad_documents")
+    .select("id, file_name, status, parsed_geometry, created_at")
+    .eq("status", "ready")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (studioIds.length) {
+    query = query.or(`uploaded_by.eq.${userId},studio_id.in.(${studioIds.join(",")})`);
+  } else {
+    query = query.eq("uploaded_by", userId);
+  }
+  const { data } = await query;
+  if (!data || data.length === 0) {
+    return "(No floor plans uploaded yet — direct the user to /trade/spatial-fit to upload a DXF before calling `check_spatial_fit`.)";
+  }
+  return data.map((d: any) => {
+    const rooms = (d.parsed_geometry?.rooms || []) as any[];
+    const roomSummary = rooms.length
+      ? rooms.slice(0, 6).map((r) => `${r.label || "unlabelled"} (${r.bbox_mm?.w}×${r.bbox_mm?.d}mm)`).join(", ")
+      : "no rooms detected";
+    return `- "${d.file_name}" [cad_document_id: ${d.id}] · rooms: ${roomSummary}`;
+  }).join("\n");
 
 /** Load the signed-in user's existing tearsheets for tool grounding. */
 async function loadUserBoards(
@@ -1628,7 +1696,7 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow, cadDocuments] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
@@ -1637,6 +1705,7 @@ serve(async (req) => {
       mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
+      loadCadDocuments(supabase, userId),
     ]);
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
@@ -1670,7 +1739,7 @@ serve(async (req) => {
     const sentimentDirective = buildSentimentDirective(sentiment);
     const planDirective = buildPlanDirective(extractedBrief);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective,
+      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments,
     );
     // The planner's intent + plan supersede the legacy regex when present. If the planner
     // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
@@ -1709,10 +1778,11 @@ serve(async (req) => {
     const allowedNames = stageAllowed && baseAllowed
       ? stageAllowed.filter((n) => baseAllowed.includes(n))
       : (stageAllowed ?? baseAllowed);
-    // `estimate_shipping` is always allowed regardless of stage — shipping
-    // questions can come up on any surface and must always hit the live rate matrix.
+    // `estimate_shipping` and `check_spatial_fit` are always allowed regardless
+    // of stage — shipping and spatial-fit questions can come up on any surface
+    // and must always hit the live rate matrix / CAD parser.
     const allowedWithShipping = allowedNames
-      ? Array.from(new Set([...allowedNames, "estimate_shipping"]))
+      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit"]))
       : null;
     const availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
@@ -1938,6 +2008,91 @@ serve(async (req) => {
               };
               controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
               console.log(`[concierge] emitted propose_ffe_rows proposal: ${rows.length} rows across ${new Set(rows.map((r) => r.room)).size} room(s) for project ${projectId}`);
+              continue;
+            }
+
+            // ====== SPATIAL FIT ======
+            // Invokes the `cad-check-fit` edge function with the user's bearer
+            // token so RLS sees the right identity, then narrates the verdict.
+            if (tc.name === "check_spatial_fit") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse check_spatial_fit args:", tc.argsText, e);
+                continue;
+              }
+              let result: any;
+              try {
+                const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: auth.authHeader,
+                    apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                  },
+                  body: JSON.stringify(parsed),
+                });
+                result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
+              } catch (e) {
+                console.error("[concierge spatial-fit] invoke failed:", e);
+                result = { ok: false, error: "Spatial-fit service unreachable." };
+              }
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}`);
+
+              try {
+                const followupSystem = [
+                  "You are the Maison Affluency Trade Concierge — spatial-fit follow-up.",
+                  "The user just asked whether a piece fits a room. The TOOL_RESULT below is the AUTHORITATIVE verdict from our deterministic CAD/clearance checker. DO NOT recompute the geometry — quote the verdict, room dims, product dims, and reasons verbatim.",
+                  "Write ~80–120 words: lead with the verdict (Fits / Tight / Doesn't fit), state the product footprint vs the room footprint in millimetres (and a metres conversion in parentheses), then list each reason in plain English. If the verdict is `fail`, suggest the user try a smaller variant or a different room. If `unknown`, say the floor plan or product geometry is missing and point them to Spatial Fit (/trade/spatial-fit). Never invent dimensions.",
+                ].join("\n");
+                const followupMessages = [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 600) },
+                  {
+                    role: "assistant",
+                    content: null,
+                    tool_calls: [{
+                      id: tc.id || "call_spatial_fit",
+                      type: "function",
+                      function: { name: "check_spatial_fit", arguments: tc.argsText || "{}" },
+                    }],
+                  },
+                  {
+                    role: "tool",
+                    tool_call_id: tc.id || "call_spatial_fit",
+                    name: "check_spatial_fit",
+                    content: JSON.stringify(result),
+                  },
+                ];
+                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    model: modelFor("balanced"),
+                    max_completion_tokens: CHAT_MAX_TOKENS,
+                    messages: followupMessages,
+                  }),
+                });
+                if (resp.ok) {
+                  const data = await resp.json();
+                  if (data?.usage) {
+                    logAiUsage({
+                      feature: "trade-concierge-spatial-fit",
+                      model: modelFor("balanced"),
+                      usage: data.usage,
+                      userId,
+                    }).catch(() => {});
+                  }
+                  const text: string = data?.choices?.[0]?.message?.content || "";
+                  if (text) {
+                    const synthetic = { choices: [{ delta: { content: text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  }
+                } else {
+                  console.error("[concierge spatial-fit] follow-up http", resp.status, await resp.text());
+                }
+              } catch (e) {
+                console.error("[concierge spatial-fit] follow-up failed:", e);
+              }
               continue;
             }
 
