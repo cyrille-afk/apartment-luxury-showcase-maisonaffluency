@@ -182,10 +182,13 @@ export default function TradeSpatialFit() {
             Upload a floor plan and we'll extract the rooms, then check whether a product fits with circulation clearance.
           </p>
           <div className="mt-3 max-w-2xl rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
-            <p className="font-medium">Supported formats in this phase: <strong>DXF</strong> and <strong>OBJ</strong> only.</p>
+            <p className="font-medium">Phase 1: <strong>DXF</strong> and <strong>OBJ</strong> are parsed today.</p>
             <p className="mt-1">
-              DWG, FBX, SKP, STEP, IGES, 3DS and RFA files can be uploaded but won't be parsed — they'll be marked <em>unsupported</em>.
-              Re-export your plan as DXF (preferred for 2D floor plans) or OBJ (for 3D meshes) and upload again.
+              <strong>DWG</strong> support ships in Phase 2 via an in-house LibreDWG converter — you won't need to export anything manually.
+              FBX, SKP, STEP, IGES, 3DS and RFA can still be uploaded and stored against the project; they'll be marked <em>unsupported</em> until their parser lands.
+            </p>
+            <p className="mt-1">
+              Need a fit check today? Export the plan as DXF (AutoCAD 2018 DXF works best) or OBJ and re-upload.
             </p>
           </div>
         </header>
