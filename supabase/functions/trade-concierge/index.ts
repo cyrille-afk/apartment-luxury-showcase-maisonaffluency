@@ -2169,23 +2169,93 @@ serve(async (req) => {
                 console.error("Could not parse check_spatial_fit args:", tc.argsText, e);
                 continue;
               }
-              let result: any;
-              try {
-                const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: auth.authHeader,
-                    apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
-                  },
-                  body: JSON.stringify(parsed),
-                });
-                result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
-              } catch (e) {
-                console.error("[concierge spatial-fit] invoke failed:", e);
-                result = { ok: false, error: "Spatial-fit service unreachable." };
+
+              // --- Clearance unit coercion (accepts "50cm", "0.6m", "2in", "600mm", numbers) ---
+              const coerceClearance = (raw: unknown): number | null => {
+                if (raw == null || raw === "") return null;
+                if (typeof raw === "number" && Number.isFinite(raw)) return Math.round(raw);
+                const s = String(raw).trim().toLowerCase().replace(/\s+/g, "");
+                const m = s.match(/^(-?\d+(?:\.\d+)?)(mm|cm|m|in|"|')?$/);
+                if (!m) return null;
+                const n = parseFloat(m[1]);
+                if (!Number.isFinite(n)) return null;
+                switch (m[2]) {
+                  case "cm": return Math.round(n * 10);
+                  case "m":  return Math.round(n * 1000);
+                  case "in":
+                  case "\"": return Math.round(n * 25.4);
+                  case "'":  return Math.round(n * 304.8);
+                  default:   return Math.round(n); // mm or bare number
+                }
+              };
+              if (parsed.clearance_mm !== undefined) {
+                const c = coerceClearance(parsed.clearance_mm);
+                if (c == null || c < 0 || c > 3000) {
+                  parsed.clearance_mm = 600; // fall back to default, log a result row
+                  console.warn("[concierge spatial-fit] clearance fallback to 600mm; raw:", tc.argsText);
+                } else {
+                  parsed.clearance_mm = c;
+                }
               }
-              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}`);
+
+              // --- Preflight: short-circuit if plan has no rooms or product has no dims ---
+              let preflightError: string | null = null;
+              try {
+                if (parsed.cad_document_id) {
+                  const { data: planRow } = await supabase
+                    .from("cad_documents")
+                    .select("file_name, status, parsed_geometry")
+                    .eq("id", parsed.cad_document_id)
+                    .maybeSingle();
+                  const rooms = (planRow?.parsed_geometry as any)?.rooms || [];
+                  if (!planRow || planRow.status !== "ready") {
+                    preflightError = `Floor plan isn't ready (status: ${planRow?.status || "missing"}). Re-upload at /trade/spatial-fit.`;
+                  } else if (!rooms.length) {
+                    preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it. Pick a different plan or re-parse it.`;
+                  }
+                }
+                if (!preflightError && parsed.product_id) {
+                  const { data: prodRow } = await supabase
+                    .from("trade_products")
+                    .select("title, dimensions")
+                    .eq("id", parsed.product_id)
+                    .maybeSingle();
+                  const dimsText = String(prodRow?.dimensions || "").trim();
+                  // Cheap heuristic: must contain at least two numbers (W and D).
+                  const numCount = (dimsText.match(/\d+(?:\.\d+)?/g) || []).length;
+                  if (!prodRow) {
+                    preflightError = `Product ${parsed.product_id} not found in the catalog.`;
+                  } else if (numCount < 2) {
+                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'. Try a different piece, or have the team add W×D×H to the product sheet.`;
+                  }
+                }
+              } catch (e) {
+                console.error("[concierge spatial-fit] preflight failed:", e);
+                // Fall through and let cad-check-fit return its own verdict.
+              }
+
+              let result: any;
+              if (preflightError) {
+                result = { ok: false, verdict: "unknown", reasons: [preflightError], error: preflightError };
+              } else {
+                try {
+                  const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: auth.authHeader,
+                      apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                    },
+                    body: JSON.stringify(parsed),
+                  });
+                  result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
+                } catch (e) {
+                  console.error("[concierge spatial-fit] invoke failed:", e);
+                  result = { ok: false, error: "Spatial-fit service unreachable." };
+                }
+              }
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}`);
+
 
               // Auto-write 'result' audit row so reviewers can trace edits → outcome.
               try {
