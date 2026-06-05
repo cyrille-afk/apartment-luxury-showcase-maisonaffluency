@@ -179,9 +179,15 @@ export default function TradeSpatialFit() {
             </Link>
           </div>
           <p className="font-body text-sm text-muted-foreground max-w-2xl">
-            Upload a floor plan (DXF best supported) and we'll extract the rooms, then check whether a product fits with circulation clearance.
-            DWG, FBX and SKP are accepted but fall back to the product's declared dimensions in this phase.
+            Upload a floor plan and we'll extract the rooms, then check whether a product fits with circulation clearance.
           </p>
+          <div className="mt-3 max-w-2xl rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
+            <p className="font-medium">Supported formats in this phase: <strong>DXF</strong> and <strong>OBJ</strong> only.</p>
+            <p className="mt-1">
+              DWG, FBX, SKP, STEP, IGES, 3DS and RFA files can be uploaded but won't be parsed — they'll be marked <em>unsupported</em>.
+              Re-export your plan as DXF (preferred for 2D floor plans) or OBJ (for 3D meshes) and upload again.
+            </p>
+          </div>
         </header>
 
 
@@ -262,9 +268,25 @@ export default function TradeSpatialFit() {
             </div>
 
             {activeDoc.status === "unsupported" && (
-              <p className="text-sm text-amber-700 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded p-3">
-                {activeDoc.error || "Format not supported in Phase 1."}
-              </p>
+              <div className="text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded p-3 space-y-2">
+                <p className="font-medium">
+                  {activeDoc.error || `.${activeDoc.format?.toUpperCase()} isn't parsed in this phase.`}
+                </p>
+                <p className="text-xs">
+                  Spatial Fit currently reads <strong>DXF</strong> (2D floor plans) and <strong>OBJ</strong> (3D meshes) only.
+                  Native DWG/FBX/SKP/STEP parsing is on the roadmap.
+                </p>
+                <details className="text-xs">
+                  <summary className="cursor-pointer underline underline-offset-2">How to convert your file</summary>
+                  <ul className="mt-2 list-disc pl-5 space-y-1">
+                    <li><strong>AutoCAD / BricsCAD</strong> (.dwg): <em>File → Save As → AutoCAD DXF (*.dxf)</em>. Pick AutoCAD 2018 DXF for best compatibility.</li>
+                    <li><strong>SketchUp</strong> (.skp): <em>File → Export → 3D Model → OBJ File (*.obj)</em>, or export the plan view as DXF.</li>
+                    <li><strong>Revit</strong> (.rvt/.rfa): <em>File → Export → CAD Formats → DXF</em>.</li>
+                    <li><strong>Rhino</strong> (.3dm): <em>File → Export Selected → .dxf or .obj</em>.</li>
+                    <li><strong>Free option</strong>: open the DWG in <a href="https://www.autodesk.com/viewers" target="_blank" rel="noreferrer" className="underline">Autodesk Viewer</a> or ODA File Converter and export to DXF.</li>
+                  </ul>
+                </details>
+              </div>
             )}
             {activeDoc.status === "failed" && (
               <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded p-3">
