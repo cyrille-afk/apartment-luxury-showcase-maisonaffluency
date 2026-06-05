@@ -266,6 +266,30 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "log_spatial_fit_edit",
+      description:
+        "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
+      parameters: {
+        type: "object",
+        properties: {
+          field: { type: "string", enum: ["cad_document_id","room_label","product_id","clearance_mm","initial","confirm"], description: "Which field the user was changing (or 'initial' for the first selection, 'confirm' for the final go)." },
+          requested_value: { type: "string", description: "The raw value the user typed (e.g. 'the dining room', 'Velvet sofa', 'plan 3')." },
+          resolved_value: { type: "string", description: "The value after resolution (UUID, canonical room label, integer mm). Omit if it could not be resolved." },
+          outcome: { type: "string", enum: ["accepted","rejected"], description: "'accepted' if the edit/selection passed validation and went into the next confirmation; 'rejected' if it failed (unknown, ambiguous, out of range)." },
+          reason: { type: "string", description: "Short human reason — required when outcome is 'rejected' (e.g. 'no plan named X', 'room not detected', 'ambiguous: 3 matches', 'clearance out of 0–3000mm range')." },
+          cad_document_id: { type: "string", description: "Current pending selection state." },
+          room_label: { type: "string", description: "Current pending selection state." },
+          product_id: { type: "string", description: "Current pending selection state." },
+          clearance_mm: { type: "integer", description: "Current pending selection state." },
+        },
+        required: ["field", "outcome"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
@@ -478,6 +502,15 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
    - **clearance_mm** — MUST be a positive integer between 0 and 3000. If out of range or unparseable, ask for a value in mm and stop.
    Only once every changed field passes validation, re-post a fresh confirmation block with ALL four fields (plan, room, piece, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm". When the plan changes, also re-validate the previously selected room against the NEW plan's rooms — if it no longer matches, ask the user to pick a room from the new plan before re-posting.
 6. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation. Re-validate the IDs against USER'S CAD PLANS and CATALOG PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. If the user replies "cancel" or pivots away, drop the pending check silently. Never call the tool on the same turn as a confirmation or edit.
+
+7. AUDIT (MANDATORY) — every turn that touches the spatial-fit picker, also call \`log_spatial_fit_edit\` in parallel. One call per user turn:
+   - Initial selection: \`field: "initial"\`, \`outcome: "accepted"\`, with the resolved plan/room/piece you put into the first confirmation block.
+   - Successful edit: \`field\` = the changed field (\`cad_document_id\` | \`room_label\` | \`product_id\` | \`clearance_mm\`), \`requested_value\` = what they typed, \`resolved_value\` = the UUID / canonical label / integer, \`outcome: "accepted"\`, plus the FULL current pending state (plan + room + piece + clearance).
+   - Rejected edit (unknown plan/room, ambiguous or missing piece, clearance out of range): \`field\` = field they tried to change, \`requested_value\` = what they typed, \`outcome: "rejected"\`, \`reason\` = the short reason you told them. Omit \`resolved_value\`.
+   - Final "go"/"yes"/"run it"/"confirm": \`field: "confirm"\`, \`outcome: "accepted"\`, with the four IDs you are about to pass to \`check_spatial_fit\`. Fire this BEFORE \`check_spatial_fit\` in the same turn.
+   Do NOT call \`log_spatial_fit_edit\` outside the spatial-fit flow. Do not narrate the audit call to the user.
+
+
 
 
 Required arguments:
@@ -2046,6 +2079,34 @@ serve(async (req) => {
             // ====== SPATIAL FIT ======
             // Invokes the `cad-check-fit` edge function with the user's bearer
             // token so RLS sees the right identity, then narrates the verdict.
+            // ====== AUDIT: SPATIAL-FIT EDIT LOG ======
+            if (tc.name === "log_spatial_fit_edit") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch { /* keep empty */ }
+              try {
+                const toUuid = (v: unknown) => {
+                  const s = typeof v === "string" ? v.trim() : "";
+                  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
+                };
+                await supabase.from("cad_fit_edit_audit").insert({
+                  user_id: userId,
+                  field: String(parsed.field || "initial").slice(0, 32),
+                  requested_value: parsed.requested_value ? String(parsed.requested_value).slice(0, 500) : null,
+                  resolved_value: parsed.resolved_value ? String(parsed.resolved_value).slice(0, 500) : null,
+                  outcome: parsed.outcome === "rejected" ? "rejected" : "accepted",
+                  reason: parsed.reason ? String(parsed.reason).slice(0, 500) : null,
+                  cad_document_id: toUuid(parsed.cad_document_id),
+                  room_label: parsed.room_label ? String(parsed.room_label).slice(0, 120) : null,
+                  product_id: toUuid(parsed.product_id),
+                  clearance_mm: Number.isFinite(Number(parsed.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
+                });
+                console.log(`[concierge spatial-fit audit] ${parsed.field}/${parsed.outcome} user=${userId}`);
+              } catch (e) {
+                console.error("[concierge spatial-fit audit] insert failed:", e);
+              }
+              continue;
+            }
+
             if (tc.name === "check_spatial_fit") {
               let parsed: any = null;
               try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {

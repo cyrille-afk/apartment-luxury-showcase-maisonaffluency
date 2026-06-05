@@ -520,6 +520,54 @@ export type Database = {
           },
         ]
       }
+      cad_fit_edit_audit: {
+        Row: {
+          cad_document_id: string | null
+          clearance_mm: number | null
+          created_at: string
+          field: string
+          id: string
+          outcome: string
+          product_id: string | null
+          reason: string | null
+          requested_value: string | null
+          resolved_value: string | null
+          room_label: string | null
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          cad_document_id?: string | null
+          clearance_mm?: number | null
+          created_at?: string
+          field: string
+          id?: string
+          outcome: string
+          product_id?: string | null
+          reason?: string | null
+          requested_value?: string | null
+          resolved_value?: string | null
+          room_label?: string | null
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          cad_document_id?: string | null
+          clearance_mm?: number | null
+          created_at?: string
+          field?: string
+          id?: string
+          outcome?: string
+          product_id?: string | null
+          reason?: string | null
+          requested_value?: string | null
+          resolved_value?: string | null
+          room_label?: string | null
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cad_fit_reports: {
         Row: {
           cad_document_id: string
