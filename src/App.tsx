@@ -97,6 +97,7 @@ const TradeFavorites = lazy(() => import("./pages/TradeFavorites"));
 const TradeMyDashboard = lazy(() => import("./pages/TradeMyDashboard"));
 const TradeFavoriteFolderDetail = lazy(() => import("./pages/TradeFavoriteFolderDetail"));
 const TradeFfeTool = lazy(() => import("./pages/TradeFfeTool"));
+const TradeSpatialFit = lazy(() => import("./pages/TradeSpatialFit"));
 const TradeBoards = lazy(() => import("./pages/TradeBoards"));
 const TradeBoardBuilder = lazy(() => import("./pages/TradeBoardBuilder"));
 const TradeProjects = lazy(() => import("./pages/TradeProjects"));
