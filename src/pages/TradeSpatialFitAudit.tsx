@@ -25,6 +25,7 @@ interface AuditRow {
   clearance_mm: number | null;
   verdict: string | null;
   turns_since_confirm: number | null;
+  batch_id: string | null;
   created_at: string;
 }
 
