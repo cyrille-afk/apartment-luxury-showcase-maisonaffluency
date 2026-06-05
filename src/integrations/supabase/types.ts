@@ -5270,6 +5270,57 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_user_memory: {
+        Row: {
+          created_at: string
+          default_budget_cents: number | null
+          default_currency: string | null
+          default_deadline: string | null
+          last_brief_summary: string | null
+          preferred_categories: string[]
+          preferred_designers: string[]
+          preferred_lead_weeks_max: number | null
+          preferred_materials: string[]
+          source: string
+          studio_style_notes: string | null
+          style_tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_budget_cents?: number | null
+          default_currency?: string | null
+          default_deadline?: string | null
+          last_brief_summary?: string | null
+          preferred_categories?: string[]
+          preferred_designers?: string[]
+          preferred_lead_weeks_max?: number | null
+          preferred_materials?: string[]
+          source?: string
+          studio_style_notes?: string | null
+          style_tags?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_budget_cents?: number | null
+          default_currency?: string | null
+          default_deadline?: string | null
+          last_brief_summary?: string | null
+          preferred_categories?: string[]
+          preferred_designers?: string[]
+          preferred_lead_weeks_max?: number | null
+          preferred_materials?: string[]
+          source?: string
+          studio_style_notes?: string | null
+          style_tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

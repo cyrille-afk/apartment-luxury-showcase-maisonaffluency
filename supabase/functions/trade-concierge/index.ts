@@ -1085,6 +1085,119 @@ async function loadUserSignals(
   return lines.length ? lines.join("\n") : "(New user — no engagement signals yet.)";
 }
 
+/**
+ * Load the user's persistent memory — recurring defaults the concierge has learned
+ * (deadline, budget, currency, lead-time ceiling, studio style notes, preferred
+ * materials/categories/designers). Returns "" when nothing is on file so the
+ * caller can decide whether to render a section.
+ */
+async function loadUserMemory(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "";
+  const { data, error } = await supabase
+    .from("trade_user_memory")
+    .select("default_deadline, default_budget_cents, default_currency, preferred_lead_weeks_max, studio_style_notes, style_tags, preferred_materials, preferred_categories, preferred_designers, last_brief_summary, updated_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error || !data) return "";
+  const m: any = data;
+  const fmtMoney = (cents: number, ccy: string | null) => {
+    const amt = Math.round(cents / 100);
+    const c = (ccy || "EUR").toUpperCase();
+    return `${c} ${amt.toLocaleString("en-US")}`;
+  };
+  const out: string[] = [];
+  if (m.default_deadline) out.push(`- Standing deadline: ${m.default_deadline}`);
+  if (m.default_budget_cents) out.push(`- Standing budget: ${fmtMoney(m.default_budget_cents, m.default_currency)}`);
+  if (m.preferred_lead_weeks_max) out.push(`- Lead-time ceiling: ${m.preferred_lead_weeks_max} weeks`);
+  if (m.studio_style_notes) out.push(`- Studio style: ${String(m.studio_style_notes).slice(0, 400)}`);
+  if (Array.isArray(m.style_tags) && m.style_tags.length) out.push(`- Style tags: ${m.style_tags.slice(0, 8).join(", ")}`);
+  if (Array.isArray(m.preferred_materials) && m.preferred_materials.length) out.push(`- Preferred materials: ${m.preferred_materials.slice(0, 8).join(", ")}`);
+  if (Array.isArray(m.preferred_categories) && m.preferred_categories.length) out.push(`- Preferred categories: ${m.preferred_categories.slice(0, 8).join(", ")}`);
+  if (Array.isArray(m.preferred_designers) && m.preferred_designers.length) out.push(`- Preferred designers: ${m.preferred_designers.slice(0, 8).join(", ")}`);
+  if (m.last_brief_summary) out.push(`- Last brief recalled: ${String(m.last_brief_summary).slice(0, 240)}`);
+  if (!out.length) return "";
+  return ["## STUDIO MEMORY (auto-recalled defaults — use unless this turn overrides them)", ...out].join("\n");
+}
+
+/**
+ * Map a fuzzy budget_band ("under €5k", "€50k-€100k", "€250000") into a cents
+ * upper bound. Conservative — only persists when we can extract a concrete
+ * number, so we never overwrite real numbers with vague text.
+ */
+function budgetBandToCents(band: string | null | undefined): { cents: number | null; currency: string | null } {
+  if (!band) return { cents: null, currency: null };
+  const s = String(band).toLowerCase().replace(/[,\s]/g, "");
+  const ccy = s.includes("$") ? "USD" : s.includes("£") ? "GBP" : s.includes("€") ? "EUR" : null;
+  // Match patterns like 50k, 250000, 1.2m
+  const nums = Array.from(s.matchAll(/(\d+(?:\.\d+)?)(k|m)?/g)).map((m) => {
+    let n = parseFloat(m[1]);
+    if (m[2] === "k") n *= 1_000;
+    else if (m[2] === "m") n *= 1_000_000;
+    return n;
+  });
+  if (!nums.length) return { cents: null, currency: ccy };
+  // Use the largest number (upper bound of a range).
+  const top = Math.max(...nums);
+  if (!Number.isFinite(top) || top <= 0) return { cents: null, currency: ccy };
+  return { cents: Math.round(top * 100), currency: ccy };
+}
+
+/**
+ * Fire-and-forget upsert of inferred defaults extracted from the user's turn.
+ * We only persist concrete signals (no nulls) so casual mentions don't wipe
+ * out previously-learned values. Arrays are unioned with existing values.
+ */
+async function persistInferredMemory(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+  brief: any,
+): Promise<void> {
+  if (!userId || !brief) return;
+  try {
+    const { data: prev } = await supabase
+      .from("trade_user_memory")
+      .select("default_budget_cents, default_currency, preferred_lead_weeks_max, style_tags, preferred_materials, preferred_categories, preferred_designers")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const patch: Record<string, unknown> = { user_id: userId, source: "concierge" };
+    const { cents, currency } = budgetBandToCents(brief.budget_band);
+    if (cents) patch.default_budget_cents = cents;
+    if (currency) patch.default_currency = currency;
+    if (typeof brief.lead_weeks_max === "number" && brief.lead_weeks_max > 0) {
+      patch.preferred_lead_weeks_max = brief.lead_weeks_max;
+    }
+    const unionArr = (a: any, b: any): string[] => {
+      const prevArr = Array.isArray(a) ? a.map(String) : [];
+      const nextArr = Array.isArray(b) ? b.map(String) : [];
+      const merged = Array.from(new Set([...prevArr, ...nextArr].map((s) => s.trim()).filter(Boolean)));
+      return merged.slice(0, 24);
+    };
+    if (Array.isArray(brief.materials) && brief.materials.length) {
+      patch.preferred_materials = unionArr(prev?.preferred_materials, brief.materials);
+    }
+    if (Array.isArray(brief.categories) && brief.categories.length) {
+      patch.preferred_categories = unionArr(prev?.preferred_categories, brief.categories);
+    }
+    if (Array.isArray(brief.designers) && brief.designers.length) {
+      patch.preferred_designers = unionArr(prev?.preferred_designers, brief.designers);
+    }
+    if (brief.style && typeof brief.style === "string") {
+      patch.style_tags = unionArr(prev?.style_tags, [brief.style]);
+    }
+    if (brief.summary && typeof brief.summary === "string") {
+      patch.last_brief_summary = String(brief.summary).slice(0, 600);
+    }
+    // Only one meaningful key beyond user_id/source means nothing to learn.
+    if (Object.keys(patch).length <= 2) return;
+    await supabase.from("trade_user_memory").upsert(patch, { onConflict: "user_id" });
+  } catch (e) {
+    console.warn("persistInferredMemory failed:", e);
+  }
+}
+
 /** Run a fast classifier on the latest user message: sentiment + intent + needs_catalog gate. */
 async function classifySentiment(
   apiKey: string,
@@ -1854,18 +1967,25 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
+      loadUserMemory(supabase, userId),
       mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
       loadCadDocuments(supabase, userId),
       loadProductCadAssets(supabase),
     ]);
+
+    // Fire-and-forget: learn from this turn's extracted brief so the next turn recalls it.
+    persistInferredMemory(supabase, userId, extractedBrief?.brief).catch(() => {});
+    // Compose the signals block: live engagement signals first, then the persistent
+    // studio memory layer so the model sees recurring defaults right next to current activity.
+    const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
@@ -1898,7 +2018,7 @@ serve(async (req) => {
     const sentimentDirective = buildSentimentDirective(sentiment);
     const planDirective = buildPlanDirective(extractedBrief);
     const systemPrompt = buildSystemPrompt(
-      designersList, piecesList, showroomBrands, userBoards, userSignals, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments, productCadAssets,
+      designersList, piecesList, showroomBrands, userBoards, userSignalsBlock, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments, productCadAssets,
     );
     // The planner's intent + plan supersede the legacy regex when present. If the planner
     // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
