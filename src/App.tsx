@@ -98,6 +98,7 @@ const TradeMyDashboard = lazy(() => import("./pages/TradeMyDashboard"));
 const TradeFavoriteFolderDetail = lazy(() => import("./pages/TradeFavoriteFolderDetail"));
 const TradeFfeTool = lazy(() => import("./pages/TradeFfeTool"));
 const TradeSpatialFit = lazy(() => import("./pages/TradeSpatialFit"));
+const TradeSpatialFitAudit = lazy(() => import("./pages/TradeSpatialFitAudit"));
 const TradeBoards = lazy(() => import("./pages/TradeBoards"));
 const TradeBoardBuilder = lazy(() => import("./pages/TradeBoardBuilder"));
 const TradeProjects = lazy(() => import("./pages/TradeProjects"));
@@ -428,6 +429,7 @@ const App = () => {
                     <Route path="favorites/folders/:id" element={<TradeFavoriteFolderDetail />} />
                     <Route path="tools/ffe" element={<TradeFfeTool />} />
                     <Route path="spatial-fit" element={<TradeSpatialFit />} />
+                    <Route path="spatial-fit/audit" element={<TradeSpatialFitAudit />} />
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="downloads-by-country" element={<TradeDownloadsByCountry />} />
                     <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
