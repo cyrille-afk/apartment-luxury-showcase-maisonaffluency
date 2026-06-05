@@ -8,6 +8,7 @@ import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Com
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import StudioMemoryCard from "@/components/trade/StudioMemoryCard";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
