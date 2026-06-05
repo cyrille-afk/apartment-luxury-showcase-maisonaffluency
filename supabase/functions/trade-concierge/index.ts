@@ -2106,11 +2106,22 @@ serve(async (req) => {
                   const s = typeof v === "string" ? v.trim() : "";
                   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
                 };
+                const ALLOWED_FIELDS = new Set([
+                  "cad_document_id","room_label","product_id","clearance_mm",
+                  "initial","confirm","cancel","result",
+                ]);
                 const ALLOWED_VALIDATIONS = new Set([
                   "plan_not_found","plan_ambiguous","room_not_detected","room_ambiguous",
                   "piece_not_found","piece_ambiguous","clearance_out_of_range",
                   "clearance_unparseable","missing_field","other",
                 ]);
+                let field = String(parsed.field || "initial").slice(0, 32);
+                if (!ALLOWED_FIELDS.has(field)) field = "other" as any;
+                // 'result' is server-written only — strip if the model tries.
+                if (field === "result") {
+                  console.log("[concierge spatial-fit audit] dropping model-written 'result' row");
+                  continue;
+                }
                 const outcome = parsed.outcome === "rejected" ? "rejected" : "accepted";
                 let reason = parsed.reason ? String(parsed.reason).slice(0, 500).trim() : null;
                 let failedValidation = parsed.failed_validation
@@ -2119,15 +2130,16 @@ serve(async (req) => {
                 if (failedValidation && !ALLOWED_VALIDATIONS.has(failedValidation)) {
                   failedValidation = "other";
                 }
-                // Enforce: rejected audit rows MUST carry a reason AND a validation code.
-                // Backfill with explicit markers so we never silently swallow a rejection.
                 if (outcome === "rejected") {
                   if (!reason) reason = "(model omitted rejection reason)";
                   if (!failedValidation) failedValidation = "other";
                 }
+                const turnsSinceConfirm = Number.isFinite(Number(parsed.turns_since_confirm))
+                  ? Math.max(0, Math.round(Number(parsed.turns_since_confirm)))
+                  : null;
                 await supabase.from("cad_fit_edit_audit").insert({
                   user_id: userId,
-                  field: String(parsed.field || "initial").slice(0, 32),
+                  field,
                   requested_value: parsed.requested_value ? String(parsed.requested_value).slice(0, 500) : null,
                   resolved_value: parsed.resolved_value ? String(parsed.resolved_value).slice(0, 500) : null,
                   outcome,
@@ -2137,13 +2149,15 @@ serve(async (req) => {
                   room_label: parsed.room_label ? String(parsed.room_label).slice(0, 120) : null,
                   product_id: toUuid(parsed.product_id),
                   clearance_mm: Number.isFinite(Number(parsed.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
+                  turns_since_confirm: turnsSinceConfirm,
                 });
-                console.log(`[concierge spatial-fit audit] ${parsed.field}/${outcome}${failedValidation ? "/" + failedValidation : ""} user=${userId}`);
+                console.log(`[concierge spatial-fit audit] ${field}/${outcome}${failedValidation ? "/" + failedValidation : ""} user=${userId}`);
               } catch (e) {
                 console.error("[concierge spatial-fit audit] insert failed:", e);
               }
               continue;
             }
+
 
             if (tc.name === "check_spatial_fit") {
               let parsed: any = null;
