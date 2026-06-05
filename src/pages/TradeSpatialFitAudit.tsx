@@ -6,10 +6,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, History, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, History, CheckCircle2, XCircle, AlertTriangle, Download } from "lucide-react";
+import { format } from "date-fns";
+import jsPDF from "jspdf";
 
 interface AuditRow {
   id: string;
@@ -206,6 +212,71 @@ const TradeSpatialFitAudit = () => {
 
   const sessions = useMemo(() => groupIntoSessions(filtered), [filtered]);
 
+  const exportCSV = () => {
+    const cols: (keyof AuditRow)[] = [
+      "created_at", "field", "outcome", "requested_value", "resolved_value",
+      "verdict", "failed_validation", "reason", "cad_document_id", "room_label",
+      "product_id", "clearance_mm", "turns_since_confirm", "batch_id", "id",
+    ];
+    const esc = (v: unknown) => {
+      if (v == null) return "";
+      const s = String(v).replace(/"/g, '""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    };
+    const lines = [cols.join(",")];
+    filtered.forEach((r) => lines.push(cols.map((c) => esc(r[c])).join(",")));
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `spatial-fit-audit-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    let y = margin;
+    const line = (text: string, size = 9, bold = false, color: [number, number, number] = [30, 30, 30]) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      const wrapped = doc.splitTextToSize(text, pageW - margin * 2);
+      wrapped.forEach((ln: string) => {
+        if (y > pageH - margin) { doc.addPage(); y = margin; }
+        doc.text(ln, margin, y);
+        y += size + 2;
+      });
+    };
+    line("Spatial-Fit Audit Log", 16, true);
+    line(`Exported ${format(new Date(), "PPpp")} — ${filtered.length} rows, ${sessions.length} sessions`, 9, false, [120, 120, 120]);
+    y += 8;
+    sessions.forEach((s, i) => {
+      if (y > pageH - margin - 60) { doc.addPage(); y = margin; }
+      const status = s.finalVerdict || (s.rows.some((r) => r.field === "cancel") ? "cancelled" : "in progress");
+      line(`Session ${sessions.length - i} — ${format(new Date(s.startedAt), "PPpp")} — ${status.toUpperCase()}${s.batchId && s.batchSize > 1 ? ` — batch ×${s.batchSize}` : ""}`, 10, true);
+      s.rows.forEach((r) => {
+        const parts = [
+          format(new Date(r.created_at), "HH:mm:ss"),
+          `[${r.field}]`,
+          r.outcome,
+          r.verdict ? `verdict=${r.verdict}` : "",
+          r.failed_validation ? `fail=${r.failed_validation}` : "",
+          r.requested_value ? `req=${r.requested_value}` : "",
+          r.resolved_value && r.resolved_value !== r.requested_value ? `→ ${r.resolved_value}` : "",
+          r.clearance_mm != null ? `clr=${r.clearance_mm}mm` : "",
+        ].filter(Boolean).join(" ");
+        line(parts, 9);
+        if (r.reason) line(`  ${r.reason}`, 8, false, [120, 120, 120]);
+      });
+      y += 6;
+    });
+    doc.save(`spatial-fit-audit-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+  };
+
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
@@ -263,6 +334,18 @@ const TradeSpatialFitAudit = () => {
           <span className="text-xs text-muted-foreground ml-auto">
             {filtered.length} {filtered.length === 1 ? "row" : "rows"} • {sessions.length} sessions
           </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={!filtered.length}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportCSV}>Download CSV</DropdownMenuItem>
+              <DropdownMenuItem onClick={exportPDF}>Download PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {fetching ? (
