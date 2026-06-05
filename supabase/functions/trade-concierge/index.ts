@@ -1729,10 +1729,11 @@ serve(async (req) => {
     const allowedNames = stageAllowed && baseAllowed
       ? stageAllowed.filter((n) => baseAllowed.includes(n))
       : (stageAllowed ?? baseAllowed);
-    // `estimate_shipping` is always allowed regardless of stage — shipping
-    // questions can come up on any surface and must always hit the live rate matrix.
+    // `estimate_shipping` and `check_spatial_fit` are always allowed regardless
+    // of stage — shipping and spatial-fit questions can come up on any surface
+    // and must always hit the live rate matrix / CAD parser.
     const allowedWithShipping = allowedNames
-      ? Array.from(new Set([...allowedNames, "estimate_shipping"]))
+      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit"]))
       : null;
     const availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
