@@ -109,6 +109,7 @@ Deno.serve(async (req) => {
 
   // Prefer the selected product-attached CAD/3D asset geometry; fall back to any ready geometry, then declared dims.
   let productBbox: Bbox | null = null;
+  let productSource = "missing";
   const { data: geomRows } = await svc
     .from("product_cad_asset_geometry")
     .select("cad_asset_id, bbox_mm, variant_label, status")
@@ -123,6 +124,7 @@ Deno.serve(async (req) => {
       : null;
     const pick = assetMatch || variantMatch || geomRows[0];
     productBbox = pick.bbox_mm as Bbox;
+    productSource = assetMatch ? "selected_cad_asset" : variantMatch ? "variant_cad_asset" : "cad_asset";
   }
   if (!productBbox) {
     const { data: prod } = await svc
@@ -130,7 +132,10 @@ Deno.serve(async (req) => {
       .select("dimensions")
       .eq("id", product_id).maybeSingle();
     const parsed = parseDimensionsText((prod as any)?.dimensions);
-    if (parsed) productBbox = bboxFromDims(parsed);
+    if (parsed) {
+      productBbox = bboxFromDims(parsed);
+      productSource = "declared_dimensions";
+    }
   }
 
   const { verdict, reasons } = checkBboxFit(productBbox, room.bbox_mm as Bbox, clearance);
@@ -155,7 +160,7 @@ Deno.serve(async (req) => {
     verdict,
     reasons,
     room: { label: room.label, bbox_mm: room.bbox_mm, area_m2: room.area_m2 },
-    product: { id: product_id, cad_asset_id: cad_asset_id || null, bbox_mm: productBbox, source: productBbox ? "cad_or_dims" : "missing" },
+    product: { id: product_id, cad_asset_id: cad_asset_id || null, bbox_mm: productBbox, source: productSource },
     clearance_mm: clearance,
   }), {
     status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
