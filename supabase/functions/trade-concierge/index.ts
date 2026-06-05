@@ -2212,9 +2212,7 @@ serve(async (req) => {
                     .select("title, dimensions")
                     .eq("id", parsed.product_id)
                     .maybeSingle();
-                  const dimsText = String(prodRow?.dimensions || "").trim();
-                  // Cheap heuristic: must contain at least two numbers (W and D).
-                  const numCount = (dimsText.match(/\d+(?:\.\d+)?/g) || []).length;
+                  const numCount = countDimensionNumbers(prodRow?.dimensions as any);
                   if (!prodRow) {
                     preflightCode = "piece_not_found";
                     preflightError = `Product ${parsed.product_id} not found in the catalog.`;
