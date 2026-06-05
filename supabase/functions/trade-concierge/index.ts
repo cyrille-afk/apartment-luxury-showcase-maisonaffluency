@@ -259,6 +259,7 @@ const TOOLS = [
           cad_document_id: { type: "string", description: "UUID of the cad_documents row (uploaded floor plan)." },
           room_label: { type: "string", description: "Optional room label from the parsed plan (e.g. 'LIVING'). Omit to use the largest detected room." },
           product_id: { type: "string", description: "UUID of the trade_product to test." },
+          cad_asset_id: { type: "string", description: "Optional UUID of the trade_product_cad_assets row to ingest and use for product geometry." },
           variant_label: { type: "string", description: "Optional product variant label, if the product has CAD geometry per variant." },
           clearance_mm: { type: "integer", description: "Walking clearance to leave around the product on every side, in millimetres. Defaults to 600." },
         },
@@ -287,6 +288,7 @@ const TOOLS = [
               type: "object",
               properties: {
                 product_id: { type: "string", description: "UUID of the trade_product to test." },
+                cad_asset_id: { type: "string", description: "Optional UUID of the attached CAD/3D asset to ingest and use." },
                 variant_label: { type: "string", description: "Optional variant label." },
                 clearance_mm: { type: "integer", description: "Walking clearance in mm. Defaults to 600." },
               },
