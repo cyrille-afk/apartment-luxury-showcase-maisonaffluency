@@ -270,6 +270,39 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "check_spatial_fit_batch",
+      description:
+        "Run the deterministic fit-check against MULTIPLE trade products in one go, all against the SAME room of the SAME plan. Use this when the user asks 'do any of these fit', 'which of these works in the dining room', or wants to compare a small set (2–8) of candidates. For a single piece, prefer check_spatial_fit. Returns one verdict per piece plus a shared batch_id you can quote when summarising.",
+      parameters: {
+        type: "object",
+        properties: {
+          cad_document_id: { type: "string", description: "UUID of the cad_documents row (uploaded floor plan)." },
+          room_label: { type: "string", description: "Optional room label. Omit to use the largest detected room." },
+          pieces: {
+            type: "array",
+            description: "Pieces to test against the same room. 2–8 entries.",
+            minItems: 1,
+            maxItems: 8,
+            items: {
+              type: "object",
+              properties: {
+                product_id: { type: "string", description: "UUID of the trade_product to test." },
+                variant_label: { type: "string", description: "Optional variant label." },
+                clearance_mm: { type: "integer", description: "Walking clearance in mm. Defaults to 600." },
+              },
+              required: ["product_id"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["cad_document_id", "pieces"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "log_spatial_fit_edit",
       description:
         "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
@@ -538,6 +571,14 @@ Required arguments:
 - \`clearance_mm\` — optional override; default 600mm. Tighten only when the user explicitly asks (e.g. "ignore clearance").
 
 After the tool returns, lead with the verdict (Fits / Tight / Doesn't fit), state the product footprint vs the room footprint in mm with a metres conversion, then list each reason in plain English. If the verdict is \`fail\`, suggest a smaller variant or a different room. If \`unknown\`, say the geometry is missing and point the user to /trade/spatial-fit. Then append the **Next:** footer described in 6c.
+
+### MULTI-PIECE BATCH (\`check_spatial_fit_batch\`)
+When the user asks whether ANY of 2–8 specific pieces fits a single room ("do any of these work in the dining room", "which of these three sofas fits"), call \`check_spatial_fit_batch\` ONCE with all pieces instead of calling \`check_spatial_fit\` repeatedly. Same confirmation rules (steps 1–6) apply: confirm the plan + room + list of pieces before firing. Never mix this with \`check_spatial_fit\` in the same turn.
+
+### RATE LIMIT
+The server enforces 20 fit-checks per user per minute (each piece in a batch counts as one). If you get a rate-limit message, tell the user to wait the indicated number of seconds before retrying — do NOT immediately re-call the tool.
+
+
 
 
 
@@ -1870,7 +1911,7 @@ serve(async (req) => {
     // of stage — shipping and spatial-fit questions can come up on any surface
     // and must always hit the live rate matrix / CAD parser.
     const allowedWithShipping = allowedNames
-      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit"]))
+      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch"]))
       : null;
     const availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
@@ -2164,27 +2205,22 @@ serve(async (req) => {
             }
 
 
-            if (tc.name === "check_spatial_fit") {
-              let parsed: any = null;
-              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
-                console.error("Could not parse check_spatial_fit args:", tc.argsText, e);
-                continue;
-              }
-
-              // --- Clearance unit coercion (accepts "50cm", "0.6m", "2in", "600mm", numbers) ---
-              // coerceClearance is imported from _shared/spatialFitValidation.ts
+            // ---- Shared spatial-fit runner: clearance coercion + preflight + invoke + audit row ----
+            // Used by both check_spatial_fit (single piece) and check_spatial_fit_batch (multi).
+            const runSingleFitCheck = async (
+              rawArgs: any,
+              batchId: string | null,
+            ): Promise<{ result: any; parsed: any; preflightError: string | null }> => {
+              const parsed: any = { ...rawArgs };
               if (parsed.clearance_mm !== undefined) {
                 const c = coerceClearance(parsed.clearance_mm);
                 if (c == null || c < 0 || c > 3000) {
-                  parsed.clearance_mm = 600; // fall back to default, log a result row
-                  console.warn("[concierge spatial-fit] clearance fallback to 600mm; raw:", tc.argsText);
+                  parsed.clearance_mm = 600;
+                  console.warn("[concierge spatial-fit] clearance fallback to 600mm; raw:", rawArgs?.clearance_mm);
                 } else {
                   parsed.clearance_mm = c;
                 }
               }
-
-              // --- Preflight: short-circuit if plan has no rooms or product has no dims ---
-              // Emits a structured { code, message } so the audit row carries a typed failed_validation.
               let preflightError: string | null = null;
               let preflightCode: string | null = null;
               try {
@@ -2203,7 +2239,7 @@ serve(async (req) => {
                     preflightError = `Floor plan isn't ready (status: ${planRow.status || "missing"}). Re-upload at /trade/spatial-fit.`;
                   } else if (!rooms.length) {
                     preflightCode = "room_not_detected";
-                    preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it. Pick a different plan or re-parse it.`;
+                    preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it.`;
                   }
                 }
                 if (!preflightError && parsed.product_id) {
@@ -2218,12 +2254,11 @@ serve(async (req) => {
                     preflightError = `Product ${parsed.product_id} not found in the catalog.`;
                   } else if (numCount < 2) {
                     preflightCode = "missing_dimensions";
-                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'. Try a different piece, or have the team add W×D×H to the product sheet.`;
+                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'.`;
                   }
                 }
               } catch (e) {
                 console.error("[concierge spatial-fit] preflight failed:", e);
-                // Fall through and let cad-check-fit return its own verdict.
               }
 
               let result: any;
@@ -2241,9 +2276,7 @@ serve(async (req) => {
                     },
                     body: JSON.stringify(parsed),
                   });
-                  if (!resp.ok) {
-                    transportError = `HTTP ${resp.status}`;
-                  }
+                  if (!resp.ok) transportError = `HTTP ${resp.status}`;
                   result = await resp.json().catch(() => {
                     transportError = transportError || `non-JSON response (HTTP ${resp.status})`;
                     return { ok: false, error: transportError };
@@ -2254,11 +2287,7 @@ serve(async (req) => {
                   result = { ok: false, error: transportError };
                 }
               }
-              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}${transportError ? " (transport error)" : ""}`);
 
-
-              // Auto-write 'result' audit row so reviewers can trace edits → outcome.
-              // Uses structured failed_validation codes so the audit log is filterable by error class.
               try {
                 const toUuid = (v: unknown) => {
                   const s = typeof v === "string" ? v.trim() : "";
@@ -2283,12 +2312,55 @@ serve(async (req) => {
                   product_id: toUuid(parsed?.product_id),
                   clearance_mm: Number.isFinite(Number(parsed?.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
                   verdict,
+                  batch_id: batchId,
                 });
               } catch (e) {
                 console.error("[concierge spatial-fit audit] result insert failed:", e);
               }
 
+              return { result, parsed, preflightError };
+            };
 
+            // ---- Rate-limit gate shared by single + batch tools ----
+            // 20 fit-checks per user per minute (best-effort, edge-instance scoped).
+            const guardSpatialFitRate = async (toolName: string, cost = 1): Promise<boolean> => {
+              for (let i = 0; i < cost; i++) {
+                const rl = rateLimit(`spatial_fit:${userId}`, 20, 60_000);
+                if (!rl.ok) {
+                  try {
+                    await supabase.from("cad_fit_edit_audit").insert({
+                      user_id: userId,
+                      field: "result",
+                      outcome: "rejected",
+                      reason: `rate_limited: retry in ~${rl.retryInSec}s`,
+                      failed_validation: "rate_limited",
+                    });
+                  } catch (_) { /* swallow */ }
+                  const msg = `You've hit the fit-check rate limit (20/min). Try again in about ${rl.retryInSec}s.`;
+                  const synthetic = { choices: [{ delta: { content: msg } }] };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  console.warn(`[concierge ${toolName}] rate-limited user ${userId}, retry ${rl.retryInSec}s`);
+                  return false;
+                }
+              }
+              return true;
+            };
+
+            if (tc.name === "check_spatial_fit") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse check_spatial_fit args:", tc.argsText, e);
+                continue;
+              }
+
+              // #11: Rate-limit before any DB / network work.
+              if (!(await guardSpatialFitRate("check_spatial_fit"))) {
+                continue;
+              }
+
+              const { result, parsed: coerced, preflightError } = await runSingleFitCheck(parsed, null);
+              const transportFlag = result?.ok === false && !preflightError ? " (transport error)" : "";
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}${transportFlag}`);
 
               try {
                 const followupSystem = [
@@ -2305,7 +2377,7 @@ serve(async (req) => {
                     tool_calls: [{
                       id: tc.id || "call_spatial_fit",
                       type: "function",
-                      function: { name: "check_spatial_fit", arguments: tc.argsText || "{}" },
+                      function: { name: "check_spatial_fit", arguments: JSON.stringify(coerced) },
                     }],
                   },
                   {
@@ -2347,6 +2419,118 @@ serve(async (req) => {
               }
               continue;
             }
+
+            // ====== MULTI-PIECE BATCH ======
+            // Runs the deterministic fit-check against 2–8 pieces in one user turn,
+            // all against the same plan + room. Each piece gets its own audit row
+            // sharing a batch_id; the model then writes a single comparison summary.
+            if (tc.name === "check_spatial_fit_batch") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse check_spatial_fit_batch args:", tc.argsText, e);
+                continue;
+              }
+              const pieces: any[] = Array.isArray(parsed?.pieces) ? parsed.pieces.slice(0, 8) : [];
+              if (pieces.length === 0) {
+                const msg = "Batch fit-check needs at least one piece.";
+                const synthetic = { choices: [{ delta: { content: msg } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                continue;
+              }
+              // #11: Rate-limit accounts for every piece in the batch.
+              if (!(await guardSpatialFitRate("check_spatial_fit_batch", pieces.length))) {
+                continue;
+              }
+
+              const batchId = crypto.randomUUID();
+              const perPiece: Array<{ input: any; result: any; preflightError: string | null }> = [];
+              for (const piece of pieces) {
+                const merged = {
+                  cad_document_id: parsed.cad_document_id,
+                  room_label: parsed.room_label,
+                  product_id: piece?.product_id,
+                  variant_label: piece?.variant_label,
+                  clearance_mm: piece?.clearance_mm,
+                };
+                const { result, parsed: coerced, preflightError } = await runSingleFitCheck(merged, batchId);
+                perPiece.push({ input: coerced, result, preflightError });
+              }
+              console.log(`[concierge spatial-fit-batch] batch=${batchId} pieces=${perPiece.length} verdicts=${perPiece.map((p) => p.result?.verdict || "n/a").join(",")}`);
+
+              const toolPayload = {
+                batch_id: batchId,
+                cad_document_id: parsed.cad_document_id,
+                room_label: parsed.room_label || null,
+                results: perPiece.map((p) => ({
+                  product_id: p.input?.product_id,
+                  variant_label: p.input?.variant_label || null,
+                  clearance_mm: p.input?.clearance_mm ?? null,
+                  verdict: p.result?.verdict || "unknown",
+                  reasons: p.result?.reasons || [],
+                  product_bbox_mm: p.result?.product_bbox_mm || null,
+                  room_bbox_mm: p.result?.room_bbox_mm || null,
+                  error: p.preflightError || p.result?.error || null,
+                })),
+              };
+
+              try {
+                const followupSystem = [
+                  "You are the Maison Affluency Trade Concierge — spatial-fit batch follow-up.",
+                  "The user asked whether several pieces fit the same room. TOOL_RESULT is the AUTHORITATIVE verdict per piece from the deterministic CAD/clearance checker. DO NOT recompute.",
+                  "Write a tight comparison (≤200 words): a one-line summary of the room, then a bulleted list — one bullet per piece — leading with the verdict tag (Fits / Tight / Doesn't fit / Unknown), the footprint in mm (with m in parentheses), and the single most decisive reason. Close with one sentence recommending which piece(s) to pursue and which to drop. If every verdict is unknown, point the user to /trade/spatial-fit and ask them to verify the plan or dimensions. Never invent numbers.",
+                ].join("\n");
+                const followupMessages = [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 600) },
+                  {
+                    role: "assistant",
+                    content: null,
+                    tool_calls: [{
+                      id: tc.id || "call_spatial_fit_batch",
+                      type: "function",
+                      function: { name: "check_spatial_fit_batch", arguments: tc.argsText || "{}" },
+                    }],
+                  },
+                  {
+                    role: "tool",
+                    tool_call_id: tc.id || "call_spatial_fit_batch",
+                    name: "check_spatial_fit_batch",
+                    content: JSON.stringify(toolPayload),
+                  },
+                ];
+                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    model: modelFor("balanced"),
+                    max_completion_tokens: CHAT_MAX_TOKENS,
+                    messages: followupMessages,
+                  }),
+                });
+                if (resp.ok) {
+                  const data = await resp.json();
+                  if (data?.usage) {
+                    logAiUsage({
+                      feature: "trade-concierge-spatial-fit-batch",
+                      model: modelFor("balanced"),
+                      usage: data.usage,
+                      userId,
+                    }).catch(() => {});
+                  }
+                  const text: string = data?.choices?.[0]?.message?.content || "";
+                  if (text) {
+                    const synthetic = { choices: [{ delta: { content: text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  }
+                } else {
+                  console.error("[concierge spatial-fit-batch] follow-up http", resp.status, await resp.text());
+                }
+              } catch (e) {
+                console.error("[concierge spatial-fit-batch] follow-up failed:", e);
+              }
+              continue;
+            }
+
 
             // ====== SHIPPING ESTIMATE ======
             // Runs the live rate matrix server-side, then makes a follow-up

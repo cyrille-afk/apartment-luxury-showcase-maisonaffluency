@@ -25,6 +25,7 @@ interface AuditRow {
   clearance_mm: number | null;
   verdict: string | null;
   turns_since_confirm: number | null;
+  batch_id: string | null;
   created_at: string;
 }
 
@@ -34,6 +35,8 @@ type SessionGroup = {
   rows: AuditRow[];
   finalVerdict: string | null;
   resultOutcome: "accepted" | "rejected" | null;
+  batchId: string | null;
+  batchSize: number; // number of result rows sharing batchId in this session
 };
 
 const FIELD_BADGE: Record<string, string> = {
@@ -48,7 +51,8 @@ const FIELD_BADGE: Record<string, string> = {
 };
 
 // Group consecutive rows into "sessions": every `result` row caps a session,
-// and gaps > 30 minutes also start a new one.
+// and gaps > 30 minutes also start a new one. Multi-piece batches (rows sharing
+// a `batch_id`) stay together as one session even though they contain N result rows.
 function groupIntoSessions(rows: AuditRow[]): SessionGroup[] {
   const sorted = [...rows].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -57,13 +61,18 @@ function groupIntoSessions(rows: AuditRow[]): SessionGroup[] {
   let current: AuditRow[] = [];
   const flush = () => {
     if (!current.length) return;
-    const resultRow = [...current].reverse().find((r) => r.field === "result") || null;
+    const resultRows = current.filter((r) => r.field === "result");
+    const lastResult = resultRows[resultRows.length - 1] || null;
+    const batchIds = Array.from(new Set(current.map((r) => r.batch_id).filter(Boolean) as string[]));
+    const batchId = batchIds.length === 1 ? batchIds[0] : null;
     groups.push({
       key: current[0].id,
       startedAt: current[0].created_at,
       rows: current,
-      finalVerdict: resultRow?.verdict || null,
-      resultOutcome: resultRow?.outcome || null,
+      finalVerdict: lastResult?.verdict || null,
+      resultOutcome: lastResult?.outcome || null,
+      batchId,
+      batchSize: batchId ? resultRows.filter((r) => r.batch_id === batchId).length : (lastResult ? 1 : 0),
     });
     current = [];
   };
@@ -73,7 +82,14 @@ function groupIntoSessions(rows: AuditRow[]): SessionGroup[] {
     const gapMs = prev ? new Date(r.created_at).getTime() - new Date(prev.created_at).getTime() : 0;
     if (prev && gapMs > 30 * 60 * 1000) flush();
     current.push(r);
-    if (r.field === "result" || r.field === "cancel") flush();
+    // A `cancel` always caps. A `result` caps only when the NEXT row isn't part of the same batch.
+    if (r.field === "cancel") {
+      flush();
+    } else if (r.field === "result") {
+      const next = sorted[i + 1];
+      const sameBatch = next && r.batch_id && next.batch_id === r.batch_id;
+      if (!sameBatch) flush();
+    }
   }
   flush();
   return groups.reverse(); // newest session first
@@ -273,10 +289,18 @@ const TradeSpatialFitAudit = () => {
                 className="border border-border rounded-lg p-4 bg-card"
               >
                 <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-border">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                     <span>Session started {formatDistanceToNow(new Date(session.startedAt), { addSuffix: true })}</span>
                     <span>•</span>
                     <span>{session.rows.length} {session.rows.length === 1 ? "step" : "steps"}</span>
+                    {session.batchId && session.batchSize > 1 && (
+                      <>
+                        <span>•</span>
+                        <Badge variant="secondary" className="text-[10px] font-mono">
+                          batch ×{session.batchSize}
+                        </Badge>
+                      </>
+                    )}
                   </div>
                   {session.finalVerdict ? (
                     <VerdictBadge verdict={session.finalVerdict} />
