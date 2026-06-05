@@ -522,6 +522,7 @@ export type Database = {
       }
       cad_fit_edit_audit: {
         Row: {
+          batch_id: string | null
           cad_document_id: string | null
           clearance_mm: number | null
           created_at: string
@@ -540,6 +541,7 @@ export type Database = {
           verdict: string | null
         }
         Insert: {
+          batch_id?: string | null
           cad_document_id?: string | null
           clearance_mm?: number | null
           created_at?: string
@@ -558,6 +560,7 @@ export type Database = {
           verdict?: string | null
         }
         Update: {
+          batch_id?: string | null
           cad_document_id?: string | null
           clearance_mm?: number | null
           created_at?: string
