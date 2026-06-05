@@ -499,10 +499,11 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
    > — **"cancel"** → drop the check entirely.
 
 5. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, then VALIDATE each updated field before re-posting:
-   - **cad_document_id** — MUST match a \`[cad_document_id: ...]\` in USER'S CAD PLANS. If the user names a plan that isn't there, reply: "I can't find a plan called '{X}'. Your uploaded plans are: {list of file_name + id}. Which one should I use?" and stop — do NOT post a new confirmation until they pick a valid one.
+   - **cad_document_id** — MUST match a \`[cad_document_id: ...]\` in USER'S CAD PLANS. If the user names a plan that isn't there, reply: "I can't find a plan called '{X}'. Your uploaded plans are: {list of file_name + id}. Which one should I use?" and stop — do NOT post a new confirmation until they pick a valid one. ALSO: if the matched plan is tagged ⚠️ NOT READY (no rooms detected), refuse and reply: "'{file_name}' isn't parsed yet — no rooms detected. Pick a plan with detected rooms, or open /trade/spatial-fit to re-parse." Log this as \`failed_validation: "room_not_detected"\`, \`reason: "plan {id} parsed but contains no rooms"\`.
    - **room_label** — MUST case-insensitively match a room label of the currently selected plan. If not, reply: "'{X}' isn't a detected room on '{plan file_name}'. Detected rooms: {comma-separated labels with m footprints}. Which one?" and stop.
-   - **product_id** — MUST resolve to a UUID present in CATALOG PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved.
-   - **clearance_mm** — MUST be a positive integer between 0 and 3000. If out of range or unparseable, ask for a value in mm and stop.
+   - **product_id** — MUST resolve to a UUID present in CATALOG PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved. PRODUCT DIMS: if CATALOG PIECES shows the piece has no usable dimensions (no W×D in the listing), warn the user before confirming: "{title} has no published dimensions — the fit-check will return 'unknown'. Want to pick a different piece, or run it anyway?" Only proceed if they confirm.
+   - **clearance_mm** — MUST be a positive integer between 0 and 3000 MILLIMETRES. Accept and convert common units: "50cm"/"50 cm" → 500, "0.6m"/"0.6 m" → 600, "2in"/"2 in"/"2\"" → 51 (round to nearest mm). Strip whitespace and unit suffix before validating. If unparseable, out of range, or zero/negative, ask for a value in mm and stop with \`failed_validation: "clearance_unparseable"\` or \`"clearance_out_of_range"\` as appropriate.
+
    Only once every changed field passes validation, re-post a fresh confirmation block with ALL four fields (plan, room, piece, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm". When the plan changes, also re-validate the previously selected room against the NEW plan's rooms — if it no longer matches, ask the user to pick a room from the new plan before re-posting.
 6. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation. Re-validate the IDs against USER'S CAD PLANS and CATALOG PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. Never call the tool on the same turn as a confirmation or edit.
 
@@ -813,11 +814,14 @@ async function loadCadDocuments(
   }
   return data.map((d: any) => {
     const rooms = (d.parsed_geometry?.rooms || []) as any[];
-    const roomSummary = rooms.length
+    const ready = rooms.length > 0;
+    const roomSummary = ready
       ? rooms.slice(0, 6).map((r) => `${r.label || "unlabelled"} (${r.bbox_mm?.w}×${r.bbox_mm?.d}mm)`).join(", ")
-      : "no rooms detected";
-    return `- "${d.file_name}" [cad_document_id: ${d.id}] · rooms: ${roomSummary}`;
+      : "NO ROOMS DETECTED — plan not ready for fit-check";
+    const flag = ready ? "" : " ⚠️ NOT READY";
+    return `- "${d.file_name}" [cad_document_id: ${d.id}]${flag} · rooms: ${roomSummary}`;
   }).join("\n");
+
 }
 
 
@@ -2165,23 +2169,93 @@ serve(async (req) => {
                 console.error("Could not parse check_spatial_fit args:", tc.argsText, e);
                 continue;
               }
-              let result: any;
-              try {
-                const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: auth.authHeader,
-                    apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
-                  },
-                  body: JSON.stringify(parsed),
-                });
-                result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
-              } catch (e) {
-                console.error("[concierge spatial-fit] invoke failed:", e);
-                result = { ok: false, error: "Spatial-fit service unreachable." };
+
+              // --- Clearance unit coercion (accepts "50cm", "0.6m", "2in", "600mm", numbers) ---
+              const coerceClearance = (raw: unknown): number | null => {
+                if (raw == null || raw === "") return null;
+                if (typeof raw === "number" && Number.isFinite(raw)) return Math.round(raw);
+                const s = String(raw).trim().toLowerCase().replace(/\s+/g, "");
+                const m = s.match(/^(-?\d+(?:\.\d+)?)(mm|cm|m|in|"|')?$/);
+                if (!m) return null;
+                const n = parseFloat(m[1]);
+                if (!Number.isFinite(n)) return null;
+                switch (m[2]) {
+                  case "cm": return Math.round(n * 10);
+                  case "m":  return Math.round(n * 1000);
+                  case "in":
+                  case "\"": return Math.round(n * 25.4);
+                  case "'":  return Math.round(n * 304.8);
+                  default:   return Math.round(n); // mm or bare number
+                }
+              };
+              if (parsed.clearance_mm !== undefined) {
+                const c = coerceClearance(parsed.clearance_mm);
+                if (c == null || c < 0 || c > 3000) {
+                  parsed.clearance_mm = 600; // fall back to default, log a result row
+                  console.warn("[concierge spatial-fit] clearance fallback to 600mm; raw:", tc.argsText);
+                } else {
+                  parsed.clearance_mm = c;
+                }
               }
-              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}`);
+
+              // --- Preflight: short-circuit if plan has no rooms or product has no dims ---
+              let preflightError: string | null = null;
+              try {
+                if (parsed.cad_document_id) {
+                  const { data: planRow } = await supabase
+                    .from("cad_documents")
+                    .select("file_name, status, parsed_geometry")
+                    .eq("id", parsed.cad_document_id)
+                    .maybeSingle();
+                  const rooms = (planRow?.parsed_geometry as any)?.rooms || [];
+                  if (!planRow || planRow.status !== "ready") {
+                    preflightError = `Floor plan isn't ready (status: ${planRow?.status || "missing"}). Re-upload at /trade/spatial-fit.`;
+                  } else if (!rooms.length) {
+                    preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it. Pick a different plan or re-parse it.`;
+                  }
+                }
+                if (!preflightError && parsed.product_id) {
+                  const { data: prodRow } = await supabase
+                    .from("trade_products")
+                    .select("title, dimensions")
+                    .eq("id", parsed.product_id)
+                    .maybeSingle();
+                  const dimsText = String(prodRow?.dimensions || "").trim();
+                  // Cheap heuristic: must contain at least two numbers (W and D).
+                  const numCount = (dimsText.match(/\d+(?:\.\d+)?/g) || []).length;
+                  if (!prodRow) {
+                    preflightError = `Product ${parsed.product_id} not found in the catalog.`;
+                  } else if (numCount < 2) {
+                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'. Try a different piece, or have the team add W×D×H to the product sheet.`;
+                  }
+                }
+              } catch (e) {
+                console.error("[concierge spatial-fit] preflight failed:", e);
+                // Fall through and let cad-check-fit return its own verdict.
+              }
+
+              let result: any;
+              if (preflightError) {
+                result = { ok: false, verdict: "unknown", reasons: [preflightError], error: preflightError };
+              } else {
+                try {
+                  const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: auth.authHeader,
+                      apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                    },
+                    body: JSON.stringify(parsed),
+                  });
+                  result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
+                } catch (e) {
+                  console.error("[concierge spatial-fit] invoke failed:", e);
+                  result = { ok: false, error: "Spatial-fit service unreachable." };
+                }
+              }
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}${preflightError ? " (preflight blocked)" : ""}`);
+
 
               // Auto-write 'result' audit row so reviewers can trace edits → outcome.
               try {
