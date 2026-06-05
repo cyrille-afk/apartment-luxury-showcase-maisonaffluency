@@ -2603,7 +2603,7 @@ serve(async (req) => {
                 leadWeeksMax = (tradeRow as any).lead_weeks_max_override ?? parseLeadWeeks((tradeRow as any).lead_time);
               }
               if (!leadWeeksMax && pickRow) {
-                leadWeeksMax = (pickRow as any).lead_time_weeks_max ?? null;
+                leadWeeksMax = parseLeadWeeks((pickRow as any).lead_time);
               }
 
               // ---- Resolve effective deadline / budget ----
