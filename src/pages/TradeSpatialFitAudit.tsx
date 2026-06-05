@@ -334,6 +334,18 @@ const TradeSpatialFitAudit = () => {
           <span className="text-xs text-muted-foreground ml-auto">
             {filtered.length} {filtered.length === 1 ? "row" : "rows"} • {sessions.length} sessions
           </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={!filtered.length}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportCSV}>Download CSV</DropdownMenuItem>
+              <DropdownMenuItem onClick={exportPDF}>Download PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {fetching ? (
