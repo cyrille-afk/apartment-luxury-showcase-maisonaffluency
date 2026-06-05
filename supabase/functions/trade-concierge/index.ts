@@ -1962,6 +1962,91 @@ serve(async (req) => {
               continue;
             }
 
+            // ====== SPATIAL FIT ======
+            // Invokes the `cad-check-fit` edge function with the user's bearer
+            // token so RLS sees the right identity, then narrates the verdict.
+            if (tc.name === "check_spatial_fit") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse check_spatial_fit args:", tc.argsText, e);
+                continue;
+              }
+              let result: any;
+              try {
+                const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: auth.authHeader,
+                    apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                  },
+                  body: JSON.stringify(parsed),
+                });
+                result = await resp.json().catch(() => ({ ok: false, error: `HTTP ${resp.status}` }));
+              } catch (e) {
+                console.error("[concierge spatial-fit] invoke failed:", e);
+                result = { ok: false, error: "Spatial-fit service unreachable." };
+              }
+              console.log(`[concierge spatial-fit] verdict=${result?.verdict || "n/a"} reasons=${(result?.reasons || []).length}`);
+
+              try {
+                const followupSystem = [
+                  "You are the Maison Affluency Trade Concierge — spatial-fit follow-up.",
+                  "The user just asked whether a piece fits a room. The TOOL_RESULT below is the AUTHORITATIVE verdict from our deterministic CAD/clearance checker. DO NOT recompute the geometry — quote the verdict, room dims, product dims, and reasons verbatim.",
+                  "Write ~80–120 words: lead with the verdict (Fits / Tight / Doesn't fit), state the product footprint vs the room footprint in millimetres (and a metres conversion in parentheses), then list each reason in plain English. If the verdict is `fail`, suggest the user try a smaller variant or a different room. If `unknown`, say the floor plan or product geometry is missing and point them to Spatial Fit (/trade/spatial-fit). Never invent dimensions.",
+                ].join("\n");
+                const followupMessages = [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: lastUserMsg.slice(0, 600) },
+                  {
+                    role: "assistant",
+                    content: null,
+                    tool_calls: [{
+                      id: tc.id || "call_spatial_fit",
+                      type: "function",
+                      function: { name: "check_spatial_fit", arguments: tc.argsText || "{}" },
+                    }],
+                  },
+                  {
+                    role: "tool",
+                    tool_call_id: tc.id || "call_spatial_fit",
+                    name: "check_spatial_fit",
+                    content: JSON.stringify(result),
+                  },
+                ];
+                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    model: modelFor("balanced"),
+                    max_completion_tokens: CHAT_MAX_TOKENS,
+                    messages: followupMessages,
+                  }),
+                });
+                if (resp.ok) {
+                  const data = await resp.json();
+                  if (data?.usage) {
+                    logAiUsage({
+                      feature: "trade-concierge-spatial-fit",
+                      model: modelFor("balanced"),
+                      usage: data.usage,
+                      userId,
+                    }).catch(() => {});
+                  }
+                  const text: string = data?.choices?.[0]?.message?.content || "";
+                  if (text) {
+                    const synthetic = { choices: [{ delta: { content: text } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  }
+                } else {
+                  console.error("[concierge spatial-fit] follow-up http", resp.status, await resp.text());
+                }
+              } catch (e) {
+                console.error("[concierge spatial-fit] follow-up failed:", e);
+              }
+              continue;
+            }
+
             // ====== SHIPPING ESTIMATE ======
             // Runs the live rate matrix server-side, then makes a follow-up
             // non-streaming gateway call so the AI writes prose with the real
