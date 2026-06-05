@@ -706,6 +706,39 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
   };
 }
 
+/** Recent CAD floor plans the user (or any of their studios) has uploaded. */
+async function loadCadDocuments(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+): Promise<string> {
+  if (!userId) return "(No user session — Spatial Fit unavailable.)";
+  // Studio memberships
+  const { data: mems } = await supabase
+    .from("studio_members").select("studio_id").eq("user_id", userId);
+  const studioIds = (mems || []).map((m: any) => m.studio_id).filter(Boolean);
+  let query = supabase
+    .from("cad_documents")
+    .select("id, file_name, status, parsed_geometry, created_at")
+    .eq("status", "ready")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (studioIds.length) {
+    query = query.or(`uploaded_by.eq.${userId},studio_id.in.(${studioIds.join(",")})`);
+  } else {
+    query = query.eq("uploaded_by", userId);
+  }
+  const { data } = await query;
+  if (!data || data.length === 0) {
+    return "(No floor plans uploaded yet — direct the user to /trade/spatial-fit to upload a DXF before calling `check_spatial_fit`.)";
+  }
+  return data.map((d: any) => {
+    const rooms = (d.parsed_geometry?.rooms || []) as any[];
+    const roomSummary = rooms.length
+      ? rooms.slice(0, 6).map((r) => `${r.label || "unlabelled"} (${r.bbox_mm?.w}×${r.bbox_mm?.d}mm)`).join(", ")
+      : "no rooms detected";
+    return `- "${d.file_name}" [cad_document_id: ${d.id}] · rooms: ${roomSummary}`;
+  }).join("\n");
+
 /** Load the signed-in user's existing tearsheets for tool grounding. */
 async function loadUserBoards(
   supabase: ReturnType<typeof createClient>,
