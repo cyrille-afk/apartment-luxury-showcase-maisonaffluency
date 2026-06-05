@@ -471,8 +471,13 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
    > — **"clearance {N}mm"** → override \`clearance_mm\`
    > — **"cancel"** → drop the check entirely.
 
-5. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, re-resolve the relevant ID against USER'S CAD PLANS / CATALOG PIECES, and re-post a fresh confirmation block with ALL four fields (plan, room, piece, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm".
-6. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation. If the user replies "cancel" or pivots away, drop the pending check silently. Never call the tool on the same turn as a confirmation or edit.
+5. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, then VALIDATE each updated field before re-posting:
+   - **cad_document_id** — MUST match a \`[cad_document_id: ...]\` in USER'S CAD PLANS. If the user names a plan that isn't there, reply: "I can't find a plan called '{X}'. Your uploaded plans are: {list of file_name + id}. Which one should I use?" and stop — do NOT post a new confirmation until they pick a valid one.
+   - **room_label** — MUST case-insensitively match a room label of the currently selected plan. If not, reply: "'{X}' isn't a detected room on '{plan file_name}'. Detected rooms: {comma-separated labels with m footprints}. Which one?" and stop.
+   - **product_id** — MUST resolve to a UUID present in CATALOG PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved.
+   - **clearance_mm** — MUST be a positive integer between 0 and 3000. If out of range or unparseable, ask for a value in mm and stop.
+   Only once every changed field passes validation, re-post a fresh confirmation block with ALL four fields (plan, room, piece, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm". When the plan changes, also re-validate the previously selected room against the NEW plan's rooms — if it no longer matches, ask the user to pick a room from the new plan before re-posting.
+6. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation. Re-validate the IDs against USER'S CAD PLANS and CATALOG PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. If the user replies "cancel" or pivots away, drop the pending check silently. Never call the tool on the same turn as a confirmation or edit.
 
 
 Required arguments:
