@@ -246,6 +246,26 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "check_spatial_fit",
+      description:
+        "Run a deterministic bounding-box + clearance fit check for ONE trade product against a room from a CAD floor plan the studio has already uploaded to Spatial Fit. USE THIS TOOL whenever the user asks whether a piece fits in a room, can be placed, has enough clearance, or whether it 'works' spatially against their plan — never guess from dimensions alone. Returns verdict (pass/warn/fail/unknown) with structured reasons, plus the room and product bounding boxes in mm.",
+      parameters: {
+        type: "object",
+        properties: {
+          cad_document_id: { type: "string", description: "UUID of the cad_documents row (uploaded floor plan)." },
+          room_label: { type: "string", description: "Optional room label from the parsed plan (e.g. 'LIVING'). Omit to use the largest detected room." },
+          product_id: { type: "string", description: "UUID of the trade_product to test." },
+          variant_label: { type: "string", description: "Optional product variant label, if the product has CAD geometry per variant." },
+          clearance_mm: { type: "integer", description: "Walking clearance to leave around the product on every side, in millimetres. Defaults to 600." },
+        },
+        required: ["cad_document_id", "product_id"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
