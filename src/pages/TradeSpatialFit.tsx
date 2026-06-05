@@ -182,10 +182,13 @@ export default function TradeSpatialFit() {
             Upload a floor plan and we'll extract the rooms, then check whether a product fits with circulation clearance.
           </p>
           <div className="mt-3 max-w-2xl rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
-            <p className="font-medium">Supported formats in this phase: <strong>DXF</strong> and <strong>OBJ</strong> only.</p>
+            <p className="font-medium">Phase 1: <strong>DXF</strong> and <strong>OBJ</strong> are parsed today.</p>
             <p className="mt-1">
-              DWG, FBX, SKP, STEP, IGES, 3DS and RFA files can be uploaded but won't be parsed — they'll be marked <em>unsupported</em>.
-              Re-export your plan as DXF (preferred for 2D floor plans) or OBJ (for 3D meshes) and upload again.
+              <strong>DWG</strong> support ships in Phase 2 via an in-house LibreDWG converter — you won't need to export anything manually.
+              FBX, SKP, STEP, IGES, 3DS and RFA can still be uploaded and stored against the project; they'll be marked <em>unsupported</em> until their parser lands.
+            </p>
+            <p className="mt-1">
+              Need a fit check today? Export the plan as DXF (AutoCAD 2018 DXF works best) or OBJ and re-upload.
             </p>
           </div>
         </header>
@@ -272,20 +275,18 @@ export default function TradeSpatialFit() {
                 <p className="font-medium">
                   {activeDoc.error || `.${activeDoc.format?.toUpperCase()} isn't parsed in this phase.`}
                 </p>
-                <p className="text-xs">
-                  Spatial Fit currently reads <strong>DXF</strong> (2D floor plans) and <strong>OBJ</strong> (3D meshes) only.
-                  Native DWG/FBX/SKP/STEP parsing is on the roadmap.
-                </p>
-                <details className="text-xs">
-                  <summary className="cursor-pointer underline underline-offset-2">How to convert your file</summary>
-                  <ul className="mt-2 list-disc pl-5 space-y-1">
-                    <li><strong>AutoCAD / BricsCAD</strong> (.dwg): <em>File → Save As → AutoCAD DXF (*.dxf)</em>. Pick AutoCAD 2018 DXF for best compatibility.</li>
-                    <li><strong>SketchUp</strong> (.skp): <em>File → Export → 3D Model → OBJ File (*.obj)</em>, or export the plan view as DXF.</li>
-                    <li><strong>Revit</strong> (.rvt/.rfa): <em>File → Export → CAD Formats → DXF</em>.</li>
-                    <li><strong>Rhino</strong> (.3dm): <em>File → Export Selected → .dxf or .obj</em>.</li>
-                    <li><strong>Free option</strong>: open the DWG in <a href="https://www.autodesk.com/viewers" target="_blank" rel="noreferrer" className="underline">Autodesk Viewer</a> or ODA File Converter and export to DXF.</li>
-                  </ul>
-                </details>
+                {activeDoc.format === "dwg" ? (
+                  <p className="text-xs">
+                    Native <strong>DWG</strong> parsing is Phase 2 — a LibreDWG WebAssembly converter will run inside <code>cad-parse</code>, no manual export required.
+                    The file is safely stored against this project and will re-parse automatically once Phase 2 ships.
+                    If you need a fit check today, export the plan as <strong>DXF</strong> (AutoCAD 2018 DXF is most reliable) and re-upload.
+                  </p>
+                ) : (
+                  <p className="text-xs">
+                    Spatial Fit currently parses <strong>DXF</strong> and <strong>OBJ</strong>. DWG is next (Phase 2, LibreDWG WASM); FBX/SKP/STEP/IGES/RFA are on the roadmap after that.
+                    The file is kept against this project — re-upload as DXF or OBJ if you need a fit check now.
+                  </p>
+                )}
               </div>
             )}
             {activeDoc.status === "failed" && (
