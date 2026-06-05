@@ -427,6 +427,7 @@ const App = () => {
                     <Route path="me" element={<TradeMyDashboard />} />
                     <Route path="favorites/folders/:id" element={<TradeFavoriteFolderDetail />} />
                     <Route path="tools/ffe" element={<TradeFfeTool />} />
+                    <Route path="spatial-fit" element={<TradeSpatialFit />} />
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="downloads-by-country" element={<TradeDownloadsByCountry />} />
                     <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
