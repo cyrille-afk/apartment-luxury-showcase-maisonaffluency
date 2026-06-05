@@ -738,6 +738,9 @@ async function loadCadDocuments(
       : "no rooms detected";
     return `- "${d.file_name}" [cad_document_id: ${d.id}] · rooms: ${roomSummary}`;
   }).join("\n");
+}
+
+
 
 /** Load the signed-in user's existing tearsheets for tool grounding. */
 async function loadUserBoards(
