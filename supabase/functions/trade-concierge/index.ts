@@ -2388,6 +2388,7 @@ serve(async (req) => {
                 console.error("[concierge spatial-fit audit] insert failed:", e);
               }
               continue;
+            }
 
 
             // ====== CAD ASSET SUMMARY ======
