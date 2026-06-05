@@ -2197,6 +2197,147 @@ serve(async (req) => {
             }
 
 
+            // ---- Shared spatial-fit runner: clearance coercion + preflight + invoke + audit row ----
+            // Used by both check_spatial_fit (single piece) and check_spatial_fit_batch (multi).
+            const runSingleFitCheck = async (
+              rawArgs: any,
+              batchId: string | null,
+            ): Promise<{ result: any; parsed: any; preflightError: string | null }> => {
+              const parsed: any = { ...rawArgs };
+              if (parsed.clearance_mm !== undefined) {
+                const c = coerceClearance(parsed.clearance_mm);
+                if (c == null || c < 0 || c > 3000) {
+                  parsed.clearance_mm = 600;
+                  console.warn("[concierge spatial-fit] clearance fallback to 600mm; raw:", rawArgs?.clearance_mm);
+                } else {
+                  parsed.clearance_mm = c;
+                }
+              }
+              let preflightError: string | null = null;
+              let preflightCode: string | null = null;
+              try {
+                if (parsed.cad_document_id) {
+                  const { data: planRow } = await supabase
+                    .from("cad_documents")
+                    .select("file_name, status, parsed_geometry")
+                    .eq("id", parsed.cad_document_id)
+                    .maybeSingle();
+                  const rooms = (planRow?.parsed_geometry as any)?.rooms || [];
+                  if (!planRow) {
+                    preflightCode = "plan_not_found";
+                    preflightError = `Floor plan ${parsed.cad_document_id} not found. Re-upload at /trade/spatial-fit.`;
+                  } else if (planRow.status !== "ready") {
+                    preflightCode = "plan_not_ready";
+                    preflightError = `Floor plan isn't ready (status: ${planRow.status || "missing"}). Re-upload at /trade/spatial-fit.`;
+                  } else if (!rooms.length) {
+                    preflightCode = "room_not_detected";
+                    preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it.`;
+                  }
+                }
+                if (!preflightError && parsed.product_id) {
+                  const { data: prodRow } = await supabase
+                    .from("trade_products")
+                    .select("title, dimensions")
+                    .eq("id", parsed.product_id)
+                    .maybeSingle();
+                  const numCount = countDimensionNumbers(prodRow?.dimensions as any);
+                  if (!prodRow) {
+                    preflightCode = "piece_not_found";
+                    preflightError = `Product ${parsed.product_id} not found in the catalog.`;
+                  } else if (numCount < 2) {
+                    preflightCode = "missing_dimensions";
+                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'.`;
+                  }
+                }
+              } catch (e) {
+                console.error("[concierge spatial-fit] preflight failed:", e);
+              }
+
+              let result: any;
+              let transportError: string | null = null;
+              if (preflightError) {
+                result = { ok: false, verdict: "unknown", reasons: [preflightError], error: preflightError };
+              } else {
+                try {
+                  const resp = await fetch(`${supabaseUrl}/functions/v1/cad-check-fit`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: auth.authHeader,
+                      apikey: Deno.env.get("SUPABASE_ANON_KEY") || "",
+                    },
+                    body: JSON.stringify(parsed),
+                  });
+                  if (!resp.ok) transportError = `HTTP ${resp.status}`;
+                  result = await resp.json().catch(() => {
+                    transportError = transportError || `non-JSON response (HTTP ${resp.status})`;
+                    return { ok: false, error: transportError };
+                  });
+                } catch (e) {
+                  console.error("[concierge spatial-fit] invoke failed:", e);
+                  transportError = "Spatial-fit service unreachable.";
+                  result = { ok: false, error: transportError };
+                }
+              }
+
+              try {
+                const toUuid = (v: unknown) => {
+                  const s = typeof v === "string" ? v.trim() : "";
+                  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
+                };
+                const verdict = typeof result?.verdict === "string" ? result.verdict.slice(0, 32) : null;
+                const isError = result?.ok === false || !verdict;
+                const resultFailedValidation = classifyResultFailure({
+                  preflightCode: preflightCode as any,
+                  transportError,
+                  verdict,
+                  ok: result?.ok !== false,
+                });
+                await supabase.from("cad_fit_edit_audit").insert({
+                  user_id: userId,
+                  field: "result",
+                  outcome: isError ? "rejected" : "accepted",
+                  reason: isError ? String(preflightError || transportError || result?.error || "spatial-fit returned no verdict").slice(0, 500) : null,
+                  failed_validation: resultFailedValidation,
+                  cad_document_id: toUuid(parsed?.cad_document_id),
+                  room_label: parsed?.room_label ? String(parsed.room_label).slice(0, 120) : null,
+                  product_id: toUuid(parsed?.product_id),
+                  clearance_mm: Number.isFinite(Number(parsed?.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
+                  verdict,
+                  batch_id: batchId,
+                });
+              } catch (e) {
+                console.error("[concierge spatial-fit audit] result insert failed:", e);
+              }
+
+              return { result, parsed, preflightError };
+            };
+
+            // ---- Rate-limit gate shared by single + batch tools ----
+            // 20 fit-checks per user per minute (best-effort, edge-instance scoped).
+            const guardSpatialFitRate = async (toolName: string, cost = 1): Promise<boolean> => {
+              for (let i = 0; i < cost; i++) {
+                const rl = rateLimit(`spatial_fit:${userId}`, 20, 60_000);
+                if (!rl.ok) {
+                  try {
+                    await supabase.from("cad_fit_edit_audit").insert({
+                      user_id: userId,
+                      field: "result",
+                      outcome: "rejected",
+                      reason: `rate_limited: retry in ~${rl.retryInSec}s`,
+                      failed_validation: "rate_limited",
+                    });
+                  } catch (_) { /* swallow */ }
+                  const msg = `You've hit the fit-check rate limit (20/min). Try again in about ${rl.retryInSec}s.`;
+                  const synthetic = { choices: [{ delta: { content: msg } }] };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(synthetic)}\n\n`));
+                  console.warn(`[concierge ${toolName}] rate-limited user ${userId}, retry ${rl.retryInSec}s`);
+                  return false;
+                }
+              }
+              return true;
+            };
+
             if (tc.name === "check_spatial_fit") {
               let parsed: any = null;
               try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
