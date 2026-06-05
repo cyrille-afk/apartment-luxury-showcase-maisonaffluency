@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Download, FileBox, Ruler } from "lucide-react";
+import { Box, Download, FileBox, MessageSquare, Ruler } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/lib/analytics";
@@ -126,31 +126,49 @@ export default function CadAssetsSection({ productId, productName }: Props) {
               </p>
             )}
             <ul className="divide-y divide-border/60 rounded-md border border-border/60 overflow-hidden">
-              {list.map((asset) => (
-                <li key={asset.id}>
-                  <button
-                    type="button"
-                    onClick={() => handleDownload(asset)}
-                    className="w-full flex items-center justify-between gap-3 px-3 py-2 bg-background hover:bg-muted/40 transition-colors text-left"
-                  >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <Box className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-                      <span className="font-body text-xs text-foreground truncate">
-                        {FORMAT_LABELS[asset.file_format] || asset.file_format.toUpperCase()}
-                        {asset.version ? <span className="text-muted-foreground"> · {asset.version}</span> : null}
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-2 shrink-0">
-                      {asset.file_size_bytes ? (
-                        <span className="font-body text-[10px] text-muted-foreground">
-                          {formatBytes(asset.file_size_bytes)}
+              {list.map((asset) => {
+                const askConcierge = () => {
+                  const variantSuffix = asset.variant_label ? ` (${asset.variant_label})` : "";
+                  const prefill = `What are the dimensions of the .${asset.file_format} file for ${productName || "this product"}${variantSuffix}? [cad_asset_id: ${asset.id}]`;
+                  window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true, prefill } }));
+                };
+                return (
+                  <li key={asset.id} className="flex items-stretch bg-background">
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(asset)}
+                      className="flex-1 flex items-center justify-between gap-3 px-3 py-2 hover:bg-muted/40 transition-colors text-left"
+                    >
+                      <span className="flex items-center gap-2 min-w-0">
+                        <Box className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                        <span className="font-body text-xs text-foreground truncate">
+                          {FORMAT_LABELS[asset.file_format] || asset.file_format.toUpperCase()}
+                          {asset.version ? <span className="text-muted-foreground"> · {asset.version}</span> : null}
                         </span>
-                      ) : null}
-                      <Download className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                    </span>
-                  </button>
-                </li>
-              ))}
+                      </span>
+                      <span className="flex items-center gap-2 shrink-0">
+                        {asset.file_size_bytes ? (
+                          <span className="font-body text-[10px] text-muted-foreground">
+                            {formatBytes(asset.file_size_bytes)}
+                          </span>
+                        ) : null}
+                        <Download className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                      </span>
+                    </button>
+                    {asset.file_format === "obj" ? (
+                      <button
+                        type="button"
+                        onClick={askConcierge}
+                        title="Ask the concierge about this file"
+                        aria-label="Ask the concierge about this file"
+                        className="px-3 border-l border-border/60 hover:bg-muted/40 transition-colors"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
