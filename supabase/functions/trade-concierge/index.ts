@@ -270,6 +270,39 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "check_spatial_fit_batch",
+      description:
+        "Run the deterministic fit-check against MULTIPLE trade products in one go, all against the SAME room of the SAME plan. Use this when the user asks 'do any of these fit', 'which of these works in the dining room', or wants to compare a small set (2–8) of candidates. For a single piece, prefer check_spatial_fit. Returns one verdict per piece plus a shared batch_id you can quote when summarising.",
+      parameters: {
+        type: "object",
+        properties: {
+          cad_document_id: { type: "string", description: "UUID of the cad_documents row (uploaded floor plan)." },
+          room_label: { type: "string", description: "Optional room label. Omit to use the largest detected room." },
+          pieces: {
+            type: "array",
+            description: "Pieces to test against the same room. 2–8 entries.",
+            minItems: 1,
+            maxItems: 8,
+            items: {
+              type: "object",
+              properties: {
+                product_id: { type: "string", description: "UUID of the trade_product to test." },
+                variant_label: { type: "string", description: "Optional variant label." },
+                clearance_mm: { type: "integer", description: "Walking clearance in mm. Defaults to 600." },
+              },
+              required: ["product_id"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["cad_document_id", "pieces"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "log_spatial_fit_edit",
       description:
         "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
