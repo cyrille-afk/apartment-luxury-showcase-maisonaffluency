@@ -229,6 +229,9 @@ export async function parseDxf(text: string): Promise<ParseResult> {
 // ---------------- OBJ ----------------
 
 export function parseObj(text: string): ParseResult {
+  // OBJ has no native unit. We detect axis convention (Y-up vs Z-up) and units
+  // heuristically from extent magnitude. Furniture products are the dominant
+  // case for this codebase.
   const acc = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
   let vertexCount = 0;
   let faceCount = 0;
@@ -245,10 +248,41 @@ export function parseObj(text: string): ParseResult {
       faceCount++;
     }
   }
-  // OBJ is unitless by convention. Most product exports are mm.
-  const units: Units = "mm";
-  const bbox = finaliseBbox(acc, units);
-  if (!bbox) return { ok: false, error: "OBJ contained no vertices" };
+  if (!Number.isFinite(acc.min[0])) {
+    return { ok: false, error: "OBJ contained no vertices" };
+  }
+
+  const dx = acc.max[0] - acc.min[0];
+  const dy = acc.max[1] - acc.min[1];
+  const dz = acc.max[2] - acc.min[2];
+  const maxExtent = Math.max(dx, dy, dz);
+
+  // Unit heuristic: < 10 → meters (Blender/Maya default), 10–1000 → cm, > 1000 → mm.
+  let units: Units;
+  if (maxExtent < 10) units = "m";
+  else if (maxExtent < 1000) units = "cm";
+  else units = "mm";
+
+  // Axis heuristic: assume the floor-resting axis has min ~= 0. Pick whichever
+  // of Y or Z has the smaller |min| as the vertical axis. Defaults to Y-up
+  // (Blender / Maya OBJ convention) when ambiguous.
+  const yUp = Math.abs(acc.min[1]) <= Math.abs(acc.min[2]);
+
+  const oneMm = unitToMm(1, units);
+  const min: [number, number, number] = yUp
+    ? [acc.min[0] * oneMm, acc.min[2] * oneMm, acc.min[1] * oneMm]
+    : [acc.min[0] * oneMm, acc.min[1] * oneMm, acc.min[2] * oneMm];
+  const max: [number, number, number] = yUp
+    ? [acc.max[0] * oneMm, acc.max[2] * oneMm, acc.max[1] * oneMm]
+    : [acc.max[0] * oneMm, acc.max[1] * oneMm, acc.max[2] * oneMm];
+  const bbox: Bbox = {
+    min,
+    max,
+    w: Math.round(max[0] - min[0]),
+    d: Math.round(max[1] - min[1]),
+    h: Math.round(max[2] - min[2]),
+  };
+
   return {
     ok: true,
     format: "obj",
