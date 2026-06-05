@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Upload, Loader2, FileBox, Ruler, AlertTriangle, CheckCircle2, XCircle, Info } from "lucide-react";
+import { Upload, Loader2, FileBox, Ruler, AlertTriangle, CheckCircle2, XCircle, Info, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -32,8 +32,24 @@ type FitResult = {
   verdict: "pass" | "warn" | "fail" | "unknown";
   reasons: Array<{ code: string; severity: string; message: string }>;
   room: Room;
-  product: { id: string; bbox_mm: { w: number; d: number; h: number } | null; source: string };
+  product: { id: string; cad_asset_id?: string | null; bbox_mm: { w: number; d: number; h: number } | null; source: string };
   clearance_mm: number;
+};
+
+type ProductCadAsset = {
+  id: string;
+  variant_label: string | null;
+  file_url: string;
+  file_format: string;
+  file_size_bytes: number | null;
+  version: string | null;
+};
+
+type ProductCadGeometry = {
+  cad_asset_id: string;
+  status: "pending" | "parsing" | "ready" | "failed" | "unsupported";
+  bbox_mm: { w: number; d: number; h: number } | null;
+  error: string | null;
 };
 
 const ACCEPTED = ".dxf,.dwg,.obj,.fbx,.skp,.step,.iges,.3ds,.rfa";
@@ -52,6 +68,10 @@ export default function TradeSpatialFit() {
   const [fitting, setFitting] = useState(false);
   const [fitResult, setFitResult] = useState<FitResult | null>(null);
   const [selectedRoomLabel, setSelectedRoomLabel] = useState<string | null>(null);
+  const [productAssets, setProductAssets] = useState<ProductCadAsset[]>([]);
+  const [productGeometry, setProductGeometry] = useState<Record<string, ProductCadGeometry>>({});
+  const [selectedCadAssetId, setSelectedCadAssetId] = useState<string>("");
+  const [parsingAssetId, setParsingAssetId] = useState<string | null>(null);
 
   const fetchDocs = async () => {
     setLoading(true);
