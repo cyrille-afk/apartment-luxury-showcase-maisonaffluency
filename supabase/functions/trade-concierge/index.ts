@@ -2172,23 +2172,7 @@ serve(async (req) => {
               }
 
               // --- Clearance unit coercion (accepts "50cm", "0.6m", "2in", "600mm", numbers) ---
-              const coerceClearance = (raw: unknown): number | null => {
-                if (raw == null || raw === "") return null;
-                if (typeof raw === "number" && Number.isFinite(raw)) return Math.round(raw);
-                const s = String(raw).trim().toLowerCase().replace(/\s+/g, "");
-                const m = s.match(/^(-?\d+(?:\.\d+)?)(mm|cm|m|in|"|')?$/);
-                if (!m) return null;
-                const n = parseFloat(m[1]);
-                if (!Number.isFinite(n)) return null;
-                switch (m[2]) {
-                  case "cm": return Math.round(n * 10);
-                  case "m":  return Math.round(n * 1000);
-                  case "in":
-                  case "\"": return Math.round(n * 25.4);
-                  case "'":  return Math.round(n * 304.8);
-                  default:   return Math.round(n); // mm or bare number
-                }
-              };
+              // coerceClearance is imported from _shared/spatialFitValidation.ts
               if (parsed.clearance_mm !== undefined) {
                 const c = coerceClearance(parsed.clearance_mm);
                 if (c == null || c < 0 || c > 3000) {
