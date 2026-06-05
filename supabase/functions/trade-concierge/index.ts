@@ -2550,7 +2550,7 @@ serve(async (req) => {
               const [{ data: pickRow }, { data: tradeRow }, { data: mem }] = await Promise.all([
                 supabase
                   .from("designer_curator_picks")
-                  .select("id, title, trade_price_cents, currency, size_variants, lead_time_weeks_min, lead_time_weeks_max")
+                  .select("id, title, trade_price_cents, currency, size_variants, lead_time")
                   .eq("id", pickId)
                   .maybeSingle(),
                 supabase
