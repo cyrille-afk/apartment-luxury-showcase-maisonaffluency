@@ -452,13 +452,20 @@ After the tool returns, write a concise breakdown in the user's currency: freigh
 ## TOOL USE — SPATIAL FIT (MANDATORY FOR "DOES IT FIT?" QUESTIONS)
 Whenever the user asks whether a specific piece fits in a room, has enough clearance, can be placed, or "works" against their plan — you MUST call \`check_spatial_fit\`. Never eyeball it from the product's dimensions — the deterministic checker accounts for rotation, walking clearance, and ceiling height.
 
+CONVERSATIONAL SELECTION — the user can pick the room and product entirely in chat:
+1. If the user has more than one uploaded plan (see USER'S CAD PLANS), ask which plan; otherwise default to the only one.
+2. List the detected rooms of that plan (label + footprint in m) and ask which room to test. If they name a room ("the living room", "dining"), match it case-insensitively to a \`room_label\` from the plan.
+3. Ask which piece to check, or use the piece the user is currently discussing. If they describe it by name/designer rather than ID, resolve it against CATALOG PIECES below and confirm: "Testing the {title} by {designer} — correct?" before calling.
+4. Only after you have both a \`cad_document_id\` and a \`product_id\` (and ideally a \`room_label\`), call \`check_spatial_fit\`. Do NOT invent UUIDs.
+
 Required arguments:
 - \`cad_document_id\` — UUID of an UPLOADED floor plan from the USER'S CAD PLANS list below. If the user has none, do NOT call the tool — tell them to upload a DXF (or DWG/FBX/SKP) at /trade/spatial-fit first.
 - \`product_id\` — UUID of the trade product. Use the IDs from CATALOG PIECES or the piece the user is currently viewing. Never invent.
-- \`room_label\` — optional; pass the room name the user mentioned (e.g. "LIVING", "DINING") so the checker picks the right space.
+- \`room_label\` — optional; pass the room name the user picked (e.g. "LIVING", "DINING") so the checker uses the right space. Omit to default to the largest detected room.
 - \`clearance_mm\` — optional override; default 600mm. Tighten only when the user explicitly asks (e.g. "ignore clearance").
 
 After the tool returns, lead with the verdict (Fits / Tight / Doesn't fit), state the product footprint vs the room footprint in mm with a metres conversion, then list each reason in plain English. If the verdict is \`fail\`, suggest a smaller variant or a different room. If \`unknown\`, say the geometry is missing and point the user to /trade/spatial-fit.
+
 
 ## USER'S CAD PLANS (uploaded floor plans)
 ${cadDocuments}
@@ -738,6 +745,9 @@ async function loadCadDocuments(
       : "no rooms detected";
     return `- "${d.file_name}" [cad_document_id: ${d.id}] · rooms: ${roomSummary}`;
   }).join("\n");
+}
+
+
 
 /** Load the signed-in user's existing tearsheets for tool grounding. */
 async function loadUserBoards(
