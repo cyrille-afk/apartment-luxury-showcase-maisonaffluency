@@ -868,6 +868,26 @@ async function loadCadDocuments(
 
 }
 
+/** Product-attached CAD/3D assets available to Spatial Fit. */
+async function loadProductCadAssets(
+  supabase: ReturnType<typeof createClient>,
+): Promise<string> {
+  const { data } = await supabase
+    .from("trade_product_cad_assets")
+    .select("id, product_id, variant_label, file_format, version, is_active")
+    .eq("is_active", true)
+    .in("file_format", ["dwg", "fbx", "obj", "skp"])
+    .limit(120);
+  if (!data || data.length === 0) {
+    return "(No active product-attached DWG/FBX/OBJ/SKP CAD assets are available yet. Use product dimensions as fallback only after saying no product CAD is attached.)";
+  }
+  return data.map((a: any) => {
+    const label = [a.variant_label, a.version].filter(Boolean).join(" · ");
+    const parseNote = a.file_format === "obj" ? "parseable now" : "stored, converter pending";
+    return `- product_id ${a.product_id} · .${a.file_format}${label ? ` · ${label}` : ""} [cad_asset_id: ${a.id}] · ${parseNote}`;
+  }).join("\n");
+}
+
 
 
 /** Load the signed-in user's existing tearsheets for tool grounding. */
