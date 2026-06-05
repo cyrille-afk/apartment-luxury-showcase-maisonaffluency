@@ -1967,18 +1967,25 @@ serve(async (req) => {
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
-    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
+    const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       classifySentiment(LOVABLE_API_KEY, lastUserMsg),
       extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
+      loadUserMemory(supabase, userId),
       mentionedProjectIdPromise,
       loadOpenQuotes(supabase, userId),
       supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
       loadCadDocuments(supabase, userId),
       loadProductCadAssets(supabase),
     ]);
+
+    // Fire-and-forget: learn from this turn's extracted brief so the next turn recalls it.
+    persistInferredMemory(supabase, userId, extractedBrief?.brief).catch(() => {});
+    // Compose the signals block: live engagement signals first, then the persistent
+    // studio memory layer so the model sees recurring defaults right next to current activity.
+    const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
