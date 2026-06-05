@@ -2070,6 +2070,34 @@ serve(async (req) => {
             // ====== SPATIAL FIT ======
             // Invokes the `cad-check-fit` edge function with the user's bearer
             // token so RLS sees the right identity, then narrates the verdict.
+            // ====== AUDIT: SPATIAL-FIT EDIT LOG ======
+            if (tc.name === "log_spatial_fit_edit") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch { /* keep empty */ }
+              try {
+                const toUuid = (v: unknown) => {
+                  const s = typeof v === "string" ? v.trim() : "";
+                  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
+                };
+                await supabase.from("cad_fit_edit_audit").insert({
+                  user_id: userId,
+                  field: String(parsed.field || "initial").slice(0, 32),
+                  requested_value: parsed.requested_value ? String(parsed.requested_value).slice(0, 500) : null,
+                  resolved_value: parsed.resolved_value ? String(parsed.resolved_value).slice(0, 500) : null,
+                  outcome: parsed.outcome === "rejected" ? "rejected" : "accepted",
+                  reason: parsed.reason ? String(parsed.reason).slice(0, 500) : null,
+                  cad_document_id: toUuid(parsed.cad_document_id),
+                  room_label: parsed.room_label ? String(parsed.room_label).slice(0, 120) : null,
+                  product_id: toUuid(parsed.product_id),
+                  clearance_mm: Number.isFinite(Number(parsed.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
+                });
+                console.log(`[concierge spatial-fit audit] ${parsed.field}/${parsed.outcome} user=${userId}`);
+              } catch (e) {
+                console.error("[concierge spatial-fit audit] insert failed:", e);
+              }
+              continue;
+            }
+
             if (tc.name === "check_spatial_fit") {
               let parsed: any = null;
               try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
