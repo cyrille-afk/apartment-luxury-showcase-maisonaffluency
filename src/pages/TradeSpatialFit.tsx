@@ -166,13 +166,24 @@ export default function TradeSpatialFit() {
     <div className="min-h-screen bg-background py-10 px-4">
       <div className="max-w-5xl mx-auto space-y-6">
         <header className="space-y-2">
-          <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Trade Tools</p>
-          <h1 className="font-display text-3xl text-foreground">Spatial Fit</h1>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Trade Tools</p>
+              <h1 className="font-display text-3xl text-foreground">Spatial Fit</h1>
+            </div>
+            <Link
+              to="/trade/spatial-fit/audit"
+              className="font-body text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 mt-2"
+            >
+              View audit log →
+            </Link>
+          </div>
           <p className="font-body text-sm text-muted-foreground max-w-2xl">
             Upload a floor plan (DXF best supported) and we'll extract the rooms, then check whether a product fits with circulation clearance.
             DWG, FBX and SKP are accepted but fall back to the product's declared dimensions in this phase.
           </p>
         </header>
+
 
         {/* Upload */}
         <Card className="p-5 space-y-3">
