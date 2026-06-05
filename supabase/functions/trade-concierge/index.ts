@@ -305,6 +305,42 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "get_cad_summary",
+      description:
+        "Return the parsed geometry summary for a single uploaded product CAD/3D asset: bounding box in mm (w/d/h), source units, vertex/face counts, and parse status. Use whenever the user asks 'how big is this OBJ', 'what are the dimensions of the file I uploaded', or wants to confirm a parse succeeded — without needing a floor plan. Currently OBJ and DXF assets parse; other formats return status='unsupported'.",
+      parameters: {
+        type: "object",
+        properties: {
+          cad_asset_id: { type: "string", description: "UUID of the trade_product_cad_assets row." },
+        },
+        required: ["cad_asset_id"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "check_void_fit",
+      description:
+        "Deterministic fit check of ONE parsed product CAD asset against an arbitrary rectangular void (e.g. a ceiling void, a niche, a shelf). Use when the user gives ad-hoc dimensions instead of a parsed floor plan ('does this fit a 900×900×450 void?'). Returns verdict pass/fail/unknown, clearances per axis in mm, and the product bbox in mm. For room layouts on an uploaded plan, prefer check_spatial_fit.",
+      parameters: {
+        type: "object",
+        properties: {
+          cad_asset_id: { type: "string", description: "UUID of the trade_product_cad_assets row (must be parsed)." },
+          void_w_mm: { type: "integer", description: "Void width in millimetres." },
+          void_d_mm: { type: "integer", description: "Void depth in millimetres." },
+          void_h_mm: { type: "integer", description: "Void height in millimetres." },
+          clearance_mm: { type: "integer", description: "Clearance to subtract from each void axis. Defaults to 0 (snug fit)." },
+        },
+        required: ["cad_asset_id", "void_w_mm", "void_d_mm", "void_h_mm"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "log_spatial_fit_edit",
       description:
         "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
