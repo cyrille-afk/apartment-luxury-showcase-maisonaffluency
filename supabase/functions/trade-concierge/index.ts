@@ -2272,21 +2272,7 @@ serve(async (req) => {
                     preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it.`;
                   }
                 }
-                if (!preflightError && parsed.product_id) {
-                  const { data: prodRow } = await supabase
-                    .from("trade_products")
-                    .select("title, dimensions")
-                    .eq("id", parsed.product_id)
-                    .maybeSingle();
-                  const numCount = countDimensionNumbers(prodRow?.dimensions as any);
-                  if (!prodRow) {
-                    preflightCode = "piece_not_found";
-                    preflightError = `Product ${parsed.product_id} not found in the catalog.`;
-                  } else if (numCount < 2) {
-                    preflightCode = "missing_dimensions";
-                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'.`;
-                  }
-                }
+                let productHasCadAsset = false;
                 if (!preflightError && parsed.cad_asset_id) {
                   const { data: assetRow } = await supabase
                     .from("trade_product_cad_assets")
@@ -2297,6 +2283,7 @@ serve(async (req) => {
                     preflightCode = "piece_not_found";
                     preflightError = `Attached CAD asset ${parsed.cad_asset_id} was not found for product ${parsed.product_id}.`;
                   } else {
+                    productHasCadAsset = true;
                     try {
                       await fetch(`${supabaseUrl}/functions/v1/cad-parse-product-asset`, {
                         method: "POST",
@@ -2310,6 +2297,21 @@ serve(async (req) => {
                     } catch (e) {
                       console.warn("[concierge spatial-fit] product CAD ingestion preflight failed:", e);
                     }
+                  }
+                }
+                if (!preflightError && parsed.product_id) {
+                  const { data: prodRow } = await supabase
+                    .from("trade_products")
+                    .select("title, dimensions")
+                    .eq("id", parsed.product_id)
+                    .maybeSingle();
+                  const numCount = countDimensionNumbers(prodRow?.dimensions as any);
+                  if (!prodRow) {
+                    preflightCode = "piece_not_found";
+                    preflightError = `Product ${parsed.product_id} not found in the catalog.`;
+                  } else if (!productHasCadAsset && numCount < 2) {
+                    preflightCode = "missing_dimensions";
+                    preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'.`;
                   }
                 }
               } catch (e) {
