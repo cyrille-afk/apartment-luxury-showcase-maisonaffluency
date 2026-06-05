@@ -2506,6 +2506,7 @@ serve(async (req) => {
                   cad_document_id: parsed.cad_document_id,
                   room_label: parsed.room_label,
                   product_id: piece?.product_id,
+                  cad_asset_id: piece?.cad_asset_id,
                   variant_label: piece?.variant_label,
                   clearance_mm: piece?.clearance_mm,
                 };
@@ -2520,6 +2521,7 @@ serve(async (req) => {
                 room_label: parsed.room_label || null,
                 results: perPiece.map((p) => ({
                   product_id: p.input?.product_id,
+                  cad_asset_id: p.input?.cad_asset_id || null,
                   variant_label: p.input?.variant_label || null,
                   clearance_mm: p.input?.clearance_mm ?? null,
                   verdict: p.result?.verdict || "unknown",
