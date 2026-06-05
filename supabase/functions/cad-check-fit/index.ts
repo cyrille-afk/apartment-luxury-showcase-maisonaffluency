@@ -17,6 +17,38 @@ function bboxFromDims(d: ProductDims): Bbox | null {
   };
 }
 
+// Best-effort parser for free-text dimension strings:
+// "H85 × W140 × D40 cm" / "W102 x D66 cm" / "DIA22 x H85 cm" / "570 × 110 × 80 mm"
+function parseDimensionsText(text: string | null | undefined): ProductDims | null {
+  if (!text) return null;
+  const clean = text.replace(/[×✕]/g, "x");
+  const unit = /\bmm\b/i.test(clean) ? "mm" : /\bcm\b/i.test(clean) ? "cm" : /\bin\b|"/i.test(clean) ? "in" : "cm";
+  const toMm = (n: number) => unit === "mm" ? n : unit === "cm" ? n * 10 : n * 25.4;
+  const grab = (re: RegExp) => {
+    const m = clean.match(re);
+    return m ? toMm(parseFloat(m[1])) : null;
+  };
+  const W = grab(/(?:^|[^A-Za-z])W\s*([\d.]+)/i);
+  const D = grab(/(?:^|[^A-Za-z])D\s*([\d.]+)/i);
+  const H = grab(/(?:^|[^A-Za-z])H\s*([\d.]+)/i);
+  const DIA = grab(/DIA\s*([\d.]+)/i);
+  if (W || D || H || DIA) {
+    return {
+      width_mm: W ?? DIA ?? null,
+      depth_mm: D ?? DIA ?? null,
+      height_mm: H ?? null,
+    };
+  }
+  const nums = clean.match(/([\d.]+)\s*x\s*([\d.]+)(?:\s*x\s*([\d.]+))?/i);
+  if (nums) {
+    const a = toMm(parseFloat(nums[1]));
+    const b = toMm(parseFloat(nums[2]));
+    const c = nums[3] ? toMm(parseFloat(nums[3])) : null;
+    return { width_mm: a, depth_mm: b, height_mm: c };
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
