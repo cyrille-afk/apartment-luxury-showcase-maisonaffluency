@@ -53,6 +53,7 @@ type ProductCadGeometry = {
 };
 
 const ACCEPTED = ".dxf,.dwg,.obj,.fbx,.skp,.step,.iges,.3ds,.rfa";
+const PRODUCT_CAD_FORMATS = ["dwg", "fbx", "obj", "skp"];
 
 export default function TradeSpatialFit() {
   const { user, loading: authLoading } = useAuth();
@@ -97,6 +98,7 @@ export default function TradeSpatialFit() {
       .select("id, variant_label, file_url, file_format, file_size_bytes, version")
       .eq("product_id", pid)
       .eq("is_active", true)
+      .in("file_format", PRODUCT_CAD_FORMATS)
       .order("variant_label", { ascending: true, nullsFirst: true })
       .order("file_format", { ascending: true });
     const list = (assets as ProductCadAsset[]) || [];
