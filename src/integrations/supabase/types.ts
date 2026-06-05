@@ -525,6 +525,7 @@ export type Database = {
           cad_document_id: string | null
           clearance_mm: number | null
           created_at: string
+          failed_validation: string | null
           field: string
           id: string
           outcome: string
@@ -540,6 +541,7 @@ export type Database = {
           cad_document_id?: string | null
           clearance_mm?: number | null
           created_at?: string
+          failed_validation?: string | null
           field: string
           id?: string
           outcome: string
@@ -555,6 +557,7 @@ export type Database = {
           cad_document_id?: string | null
           clearance_mm?: number | null
           created_at?: string
+          failed_validation?: string | null
           field?: string
           id?: string
           outcome?: string
