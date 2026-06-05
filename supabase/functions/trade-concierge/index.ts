@@ -2089,19 +2089,39 @@ serve(async (req) => {
                   const s = typeof v === "string" ? v.trim() : "";
                   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) ? s : null;
                 };
+                const ALLOWED_VALIDATIONS = new Set([
+                  "plan_not_found","plan_ambiguous","room_not_detected","room_ambiguous",
+                  "piece_not_found","piece_ambiguous","clearance_out_of_range",
+                  "clearance_unparseable","missing_field","other",
+                ]);
+                const outcome = parsed.outcome === "rejected" ? "rejected" : "accepted";
+                let reason = parsed.reason ? String(parsed.reason).slice(0, 500).trim() : null;
+                let failedValidation = parsed.failed_validation
+                  ? String(parsed.failed_validation).trim().toLowerCase()
+                  : null;
+                if (failedValidation && !ALLOWED_VALIDATIONS.has(failedValidation)) {
+                  failedValidation = "other";
+                }
+                // Enforce: rejected audit rows MUST carry a reason AND a validation code.
+                // Backfill with explicit markers so we never silently swallow a rejection.
+                if (outcome === "rejected") {
+                  if (!reason) reason = "(model omitted rejection reason)";
+                  if (!failedValidation) failedValidation = "other";
+                }
                 await supabase.from("cad_fit_edit_audit").insert({
                   user_id: userId,
                   field: String(parsed.field || "initial").slice(0, 32),
                   requested_value: parsed.requested_value ? String(parsed.requested_value).slice(0, 500) : null,
                   resolved_value: parsed.resolved_value ? String(parsed.resolved_value).slice(0, 500) : null,
-                  outcome: parsed.outcome === "rejected" ? "rejected" : "accepted",
-                  reason: parsed.reason ? String(parsed.reason).slice(0, 500) : null,
+                  outcome,
+                  reason,
+                  failed_validation: failedValidation,
                   cad_document_id: toUuid(parsed.cad_document_id),
                   room_label: parsed.room_label ? String(parsed.room_label).slice(0, 120) : null,
                   product_id: toUuid(parsed.product_id),
                   clearance_mm: Number.isFinite(Number(parsed.clearance_mm)) ? Math.round(Number(parsed.clearance_mm)) : null,
                 });
-                console.log(`[concierge spatial-fit audit] ${parsed.field}/${parsed.outcome} user=${userId}`);
+                console.log(`[concierge spatial-fit audit] ${parsed.field}/${outcome}${failedValidation ? "/" + failedValidation : ""} user=${userId}`);
               } catch (e) {
                 console.error("[concierge spatial-fit audit] insert failed:", e);
               }
