@@ -476,19 +476,15 @@ export default function TradeSpatialFit() {
                 </div>
 
                 <div className="border-t border-border pt-4 space-y-3">
-                  <div>
-                    <Label className="text-xs">Trade product ID</Label>
-                    <Input
-                      placeholder="UUID of the trade_product to test"
-                      value={productId}
-                      onChange={(e) => setProductId(e.target.value)}
-                      className="mt-1 font-mono text-xs"
-                    />
-                    {productName && <p className="text-[11px] text-muted-foreground mt-1">{productName}</p>}
+                  <div className="text-xs text-muted-foreground">
+                    Product asset: {selectedCadAsset
+                      ? <span className="text-foreground uppercase">.{selectedCadAsset.file_format}</span>
+                      : "No attached CAD asset selected"}
+                    {selectedCadAsset?.variant_label ? ` · ${selectedCadAsset.variant_label}` : ""}
                   </div>
                   <Button onClick={handleCheckFit} disabled={fitting || !productId}>
                     {fitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Ruler className="h-4 w-4 mr-2" />}
-                    Check fit
+                    Check fit with selected product CAD
                   </Button>
                 </div>
               </>
@@ -503,7 +499,7 @@ export default function TradeSpatialFit() {
         {fitResult && <FitResultCard r={fitResult} />}
 
         <p className="text-[11px] text-muted-foreground">
-          Looking for CAD files attached to a product? Open any product page in the Trade portal — the <Link to="/trade" className="underline">Trade product sheet</Link> exposes downloads, and Spatial Fit reads their geometry automatically.
+          Product CAD assets are managed in <Link to="/trade/admin/cad-assets" className="underline">CAD &amp; 3D Assets</Link>; Spatial Fit ingests the selected attached asset here before checking room clearance.
         </p>
       </div>
     </div>
