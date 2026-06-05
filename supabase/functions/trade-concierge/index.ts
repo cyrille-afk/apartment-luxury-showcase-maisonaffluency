@@ -464,9 +464,16 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
    > • Piece: {title} — {designer} \`[product_id: {uuid}]\`
    > • Clearance: {clearance_mm} mm
    >
-   > Reply **"go"** (or "yes" / "run it") to execute, or tell me what to change.
+   > Reply **"go"** to run, or edit any field:
+   > — **"change plan"** / "use plan X" → swap \`cad_document_id\`
+   > — **"change room to {label}"** → swap \`room_label\`
+   > — **"change piece to {name/designer}"** → swap \`product_id\`
+   > — **"clearance {N}mm"** → override \`clearance_mm\`
+   > — **"cancel"** → drop the check entirely.
 
-5. Only after the user replies affirmatively ("go", "yes", "run it", "confirm", etc.) call \`check_spatial_fit\` with the exact IDs from the confirmation. If the user corrects anything, re-issue a fresh confirmation block with the updated values — never call the tool on the same turn as the confirmation.
+5. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, re-resolve the relevant ID against USER'S CAD PLANS / CATALOG PIECES, and re-post a fresh confirmation block with ALL four fields (plan, room, piece, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm".
+6. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation. If the user replies "cancel" or pivots away, drop the pending check silently. Never call the tool on the same turn as a confirmation or edit.
+
 
 Required arguments:
 - \`cad_document_id\` — UUID of an UPLOADED floor plan from the USER'S CAD PLANS list below. If the user has none, do NOT call the tool — tell them to upload a DXF (or DWG/FBX/SKP) at /trade/spatial-fit first.
