@@ -572,6 +572,14 @@ Required arguments:
 
 After the tool returns, lead with the verdict (Fits / Tight / Doesn't fit), state the product footprint vs the room footprint in mm with a metres conversion, then list each reason in plain English. If the verdict is \`fail\`, suggest a smaller variant or a different room. If \`unknown\`, say the geometry is missing and point the user to /trade/spatial-fit. Then append the **Next:** footer described in 6c.
 
+### MULTI-PIECE BATCH (\`check_spatial_fit_batch\`)
+When the user asks whether ANY of 2–8 specific pieces fits a single room ("do any of these work in the dining room", "which of these three sofas fits"), call \`check_spatial_fit_batch\` ONCE with all pieces instead of calling \`check_spatial_fit\` repeatedly. Same confirmation rules (steps 1–6) apply: confirm the plan + room + list of pieces before firing. Never mix this with \`check_spatial_fit\` in the same turn.
+
+### RATE LIMIT
+The server enforces 20 fit-checks per user per minute (each piece in a batch counts as one). If you get a rate-limit message, tell the user to wait the indicated number of seconds before retrying — do NOT immediately re-call the tool.
+
+
+
 
 
 
