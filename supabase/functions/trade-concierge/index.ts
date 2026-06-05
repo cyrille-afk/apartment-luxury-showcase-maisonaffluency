@@ -2199,7 +2199,9 @@ serve(async (req) => {
               }
 
               // --- Preflight: short-circuit if plan has no rooms or product has no dims ---
+              // Emits a structured { code, message } so the audit row carries a typed failed_validation.
               let preflightError: string | null = null;
+              let preflightCode: string | null = null;
               try {
                 if (parsed.cad_document_id) {
                   const { data: planRow } = await supabase
@@ -2208,9 +2210,14 @@ serve(async (req) => {
                     .eq("id", parsed.cad_document_id)
                     .maybeSingle();
                   const rooms = (planRow?.parsed_geometry as any)?.rooms || [];
-                  if (!planRow || planRow.status !== "ready") {
-                    preflightError = `Floor plan isn't ready (status: ${planRow?.status || "missing"}). Re-upload at /trade/spatial-fit.`;
+                  if (!planRow) {
+                    preflightCode = "plan_not_found";
+                    preflightError = `Floor plan ${parsed.cad_document_id} not found. Re-upload at /trade/spatial-fit.`;
+                  } else if (planRow.status !== "ready") {
+                    preflightCode = "plan_not_ready";
+                    preflightError = `Floor plan isn't ready (status: ${planRow.status || "missing"}). Re-upload at /trade/spatial-fit.`;
                   } else if (!rooms.length) {
+                    preflightCode = "room_not_detected";
                     preflightError = `"${planRow.file_name}" has no detected rooms — can't run a fit-check against it. Pick a different plan or re-parse it.`;
                   }
                 }
@@ -2224,8 +2231,10 @@ serve(async (req) => {
                   // Cheap heuristic: must contain at least two numbers (W and D).
                   const numCount = (dimsText.match(/\d+(?:\.\d+)?/g) || []).length;
                   if (!prodRow) {
+                    preflightCode = "piece_not_found";
                     preflightError = `Product ${parsed.product_id} not found in the catalog.`;
                   } else if (numCount < 2) {
+                    preflightCode = "missing_dimensions";
                     preflightError = `"${prodRow.title}" has no published dimensions — fit-check would return 'unknown'. Try a different piece, or have the team add W×D×H to the product sheet.`;
                   }
                 }
