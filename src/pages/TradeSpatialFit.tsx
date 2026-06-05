@@ -91,8 +91,49 @@ export default function TradeSpatialFit() {
     if (!authLoading && user) fetchDocs();
   }, [user, authLoading, currentStudio?.id]);
 
+  const loadProductAssets = async (pid: string) => {
+    const { data: assets } = await supabase
+      .from("trade_product_cad_assets")
+      .select("id, variant_label, file_url, file_format, file_size_bytes, version")
+      .eq("product_id", pid)
+      .eq("is_active", true)
+      .order("variant_label", { ascending: true, nullsFirst: true })
+      .order("file_format", { ascending: true });
+    const list = (assets as ProductCadAsset[]) || [];
+    setProductAssets(list);
+    setSelectedCadAssetId((prev) => (prev && list.some((a) => a.id === prev) ? prev : list[0]?.id || ""));
+
+    if (list.length) {
+      const { data: geometry } = await supabase
+        .from("product_cad_asset_geometry")
+        .select("cad_asset_id, status, bbox_mm, error")
+        .in("cad_asset_id", list.map((a) => a.id));
+      const map: Record<string, ProductCadGeometry> = {};
+      for (const row of (geometry as ProductCadGeometry[]) || []) map[row.cad_asset_id] = row;
+      setProductGeometry(map);
+    } else {
+      setProductGeometry({});
+      setSelectedCadAssetId("");
+    }
+  };
+
+  useEffect(() => {
+    const pid = productId.trim();
+    if (!pid) {
+      setProductAssets([]);
+      setProductGeometry({});
+      setSelectedCadAssetId("");
+      return;
+    }
+    loadProductAssets(pid);
+  }, [productId]);
+
   const activeDoc = useMemo(() => docs.find((d) => d.id === activeDocId) || null, [docs, activeDocId]);
   const rooms: Room[] = useMemo(() => activeDoc?.parsed_geometry?.rooms || [], [activeDoc]);
+  const selectedCadAsset = useMemo(
+    () => productAssets.find((asset) => asset.id === selectedCadAssetId) || null,
+    [productAssets, selectedCadAssetId],
+  );
 
   useEffect(() => {
     if (rooms.length && !selectedRoomLabel) setSelectedRoomLabel(rooms[0].label || "__first__");
