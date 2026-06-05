@@ -260,16 +260,15 @@ export default function TradeSpatialFit() {
             </Link>
           </div>
           <p className="font-body text-sm text-muted-foreground max-w-2xl">
-            Upload a floor plan and we'll extract the rooms, then check whether a product fits with circulation clearance.
+            Select a parsed floor plan, then ingest the CAD/3D file already attached to the product and run a clearance check against the chosen room.
           </p>
           <div className="mt-3 max-w-2xl rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
-            <p className="font-medium">Phase 1: <strong>DXF</strong> and <strong>OBJ</strong> are parsed today.</p>
+            <p className="font-medium">Product CAD ingestion uses the product's attached <strong>DWG / FBX / OBJ / SKP</strong> assets.</p>
             <p className="mt-1">
-              <strong>DWG</strong> support ships in Phase 2 via an in-house LibreDWG converter — you won't need to export anything manually.
-              FBX, SKP, STEP, IGES, 3DS and RFA can still be uploaded and stored against the project; they'll be marked <em>unsupported</em> until their parser lands.
+              Only <strong>OBJ</strong> currently parses into geometry. DWG, FBX and SKP are listed, stored and selected here, but return an unsupported status until their converters land.
             </p>
             <p className="mt-1">
-              Need a fit check today? Export the plan as DXF (AutoCAD 2018 DXF works best) or OBJ and re-upload.
+              Floor plans still need detected rooms from DXF/OBJ; product dimensions are used only as a fallback when attached CAD is not parseable yet.
             </p>
           </div>
         </header>
@@ -279,7 +278,7 @@ export default function TradeSpatialFit() {
         <Card className="p-5 space-y-3">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-base">Upload floor plan</h2>
+            <h2 className="font-display text-base">Upload floor plan for room detection</h2>
           </div>
           <input
             type="file"
@@ -300,6 +299,72 @@ export default function TradeSpatialFit() {
           <p className="text-[11px] text-muted-foreground">
             Visible to {currentStudio ? <strong>{currentStudio.name}</strong> : "you only"}. Files are private.
           </p>
+        </Card>
+
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Box className="h-4 w-4 text-primary" />
+            <h2 className="font-display text-base">Product-attached CAD assets</h2>
+          </div>
+          <div>
+            <Label className="text-xs">Trade product ID</Label>
+            <Input
+              placeholder="UUID of the trade_product to ingest"
+              value={productId}
+              onChange={(e) => { setProductId(e.target.value); setFitResult(null); }}
+              className="mt-1 font-mono text-xs"
+            />
+            {productName && <p className="text-[11px] text-muted-foreground mt-1">{productName}</p>}
+          </div>
+          {!productId ? (
+            <p className="text-sm text-muted-foreground">Open Spatial Fit from a trade product sheet, or paste a trade product ID above.</p>
+          ) : productAssets.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No active DWG / FBX / OBJ / SKP assets are attached to this product yet.</p>
+          ) : (
+            <ul className="divide-y divide-border/60 border border-border/60 rounded">
+              {productAssets.map((asset) => {
+                const geometry = productGeometry[asset.id];
+                const selected = selectedCadAssetId === asset.id;
+                return (
+                  <li key={asset.id} className={selected ? "bg-muted/60" : "bg-background"}>
+                    <div className="flex items-center justify-between gap-3 px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedCadAssetId(asset.id); setFitResult(null); }}
+                        className="flex-1 text-left min-w-0"
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className="font-body text-sm text-foreground uppercase tracking-wide">.{asset.file_format}</span>
+                          <span className="font-body text-xs text-muted-foreground truncate">
+                            {asset.variant_label || "Default asset"}{asset.version ? ` · ${asset.version}` : ""}
+                          </span>
+                        </span>
+                        <span className="block text-[11px] text-muted-foreground mt-0.5">
+                          {geometry?.status === "ready" && geometry.bbox_mm
+                            ? `Ready · ${geometry.bbox_mm.w}×${geometry.bbox_mm.d}×${geometry.bbox_mm.h} mm`
+                            : geometry?.status === "unsupported"
+                              ? geometry.error || `.${asset.file_format.toUpperCase()} is stored but not parseable yet.`
+                              : geometry?.status === "failed"
+                                ? geometry.error || "Parse failed."
+                                : geometry?.status || "Not ingested yet"}
+                        </span>
+                      </button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleParseProductAsset(asset)}
+                        disabled={parsingAssetId === asset.id}
+                      >
+                        {parsingAssetId === asset.id ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Ruler className="h-3.5 w-3.5 mr-2" />}
+                        Ingest
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </Card>
 
         {/* Existing docs */}
