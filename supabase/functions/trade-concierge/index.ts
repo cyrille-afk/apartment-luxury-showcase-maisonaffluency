@@ -813,11 +813,14 @@ async function loadCadDocuments(
   }
   return data.map((d: any) => {
     const rooms = (d.parsed_geometry?.rooms || []) as any[];
-    const roomSummary = rooms.length
+    const ready = rooms.length > 0;
+    const roomSummary = ready
       ? rooms.slice(0, 6).map((r) => `${r.label || "unlabelled"} (${r.bbox_mm?.w}×${r.bbox_mm?.d}mm)`).join(", ")
-      : "no rooms detected";
-    return `- "${d.file_name}" [cad_document_id: ${d.id}] · rooms: ${roomSummary}`;
+      : "NO ROOMS DETECTED — plan not ready for fit-check";
+    const flag = ready ? "" : " ⚠️ NOT READY";
+    return `- "${d.file_name}" [cad_document_id: ${d.id}]${flag} · rooms: ${roomSummary}`;
   }).join("\n");
+
 }
 
 
