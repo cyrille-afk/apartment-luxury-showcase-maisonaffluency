@@ -535,7 +535,9 @@ export type Database = {
           resolved_value: string | null
           room_label: string | null
           session_id: string | null
+          turns_since_confirm: number | null
           user_id: string
+          verdict: string | null
         }
         Insert: {
           cad_document_id?: string | null
@@ -551,7 +553,9 @@ export type Database = {
           resolved_value?: string | null
           room_label?: string | null
           session_id?: string | null
+          turns_since_confirm?: number | null
           user_id: string
+          verdict?: string | null
         }
         Update: {
           cad_document_id?: string | null
@@ -567,7 +571,9 @@ export type Database = {
           resolved_value?: string | null
           room_label?: string | null
           session_id?: string | null
+          turns_since_confirm?: number | null
           user_id?: string
+          verdict?: string | null
         }
         Relationships: []
       }
