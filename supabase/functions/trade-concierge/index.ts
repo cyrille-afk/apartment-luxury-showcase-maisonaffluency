@@ -1903,7 +1903,7 @@ serve(async (req) => {
     // of stage — shipping and spatial-fit questions can come up on any surface
     // and must always hit the live rate matrix / CAD parser.
     const allowedWithShipping = allowedNames
-      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit"]))
+      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch"]))
       : null;
     const availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
