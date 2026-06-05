@@ -464,6 +464,112 @@ export type Database = {
         }
         Relationships: []
       }
+      cad_documents: {
+        Row: {
+          created_at: string
+          error: string | null
+          file_name: string
+          file_path: string
+          file_size_bytes: number | null
+          format: string
+          id: string
+          parsed_at: string | null
+          parsed_geometry: Json | null
+          status: string
+          studio_id: string | null
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          file_name: string
+          file_path: string
+          file_size_bytes?: number | null
+          format: string
+          id?: string
+          parsed_at?: string | null
+          parsed_geometry?: Json | null
+          status?: string
+          studio_id?: string | null
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number | null
+          format?: string
+          id?: string
+          parsed_at?: string | null
+          parsed_geometry?: Json | null
+          status?: string
+          studio_id?: string | null
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cad_documents_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cad_fit_reports: {
+        Row: {
+          cad_document_id: string
+          created_at: string
+          created_by: string
+          id: string
+          product_bbox_mm: Json | null
+          product_id: string
+          reasons: Json | null
+          room_bbox_mm: Json | null
+          room_label: string | null
+          variant_label: string | null
+          verdict: string
+        }
+        Insert: {
+          cad_document_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          product_bbox_mm?: Json | null
+          product_id: string
+          reasons?: Json | null
+          room_bbox_mm?: Json | null
+          room_label?: string | null
+          variant_label?: string | null
+          verdict: string
+        }
+        Update: {
+          cad_document_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          product_bbox_mm?: Json | null
+          product_id?: string
+          reasons?: Json | null
+          room_bbox_mm?: Json | null
+          room_label?: string | null
+          variant_label?: string | null
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cad_fit_reports_cad_document_id_fkey"
+            columns: ["cad_document_id"]
+            isOneToOne: false
+            referencedRelation: "cad_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_board_comments: {
         Row: {
           author_name: string
@@ -2615,6 +2721,62 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      product_cad_asset_geometry: {
+        Row: {
+          bbox_mm: Json | null
+          cad_asset_id: string
+          created_at: string
+          error: string | null
+          file_format: string
+          id: string
+          metrics: Json | null
+          parsed_at: string | null
+          product_id: string
+          status: string
+          units: string | null
+          updated_at: string
+          variant_label: string | null
+        }
+        Insert: {
+          bbox_mm?: Json | null
+          cad_asset_id: string
+          created_at?: string
+          error?: string | null
+          file_format: string
+          id?: string
+          metrics?: Json | null
+          parsed_at?: string | null
+          product_id: string
+          status?: string
+          units?: string | null
+          updated_at?: string
+          variant_label?: string | null
+        }
+        Update: {
+          bbox_mm?: Json | null
+          cad_asset_id?: string
+          created_at?: string
+          error?: string | null
+          file_format?: string
+          id?: string
+          metrics?: Json | null
+          parsed_at?: string | null
+          product_id?: string
+          status?: string
+          units?: string | null
+          updated_at?: string
+          variant_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_cad_asset_geometry_cad_asset_id_fkey"
+            columns: ["cad_asset_id"]
+            isOneToOne: true
+            referencedRelation: "trade_product_cad_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
