@@ -90,11 +90,11 @@ const TradeAdminGlbModels: React.FC = () => {
           contentType,
           cacheControl: "31536000",
           upsert: false,
-          onUploadProgress: (evt) => {
+          onUploadProgress: (evt: { loaded?: number; total?: number }) => {
             const pct = Math.round(((evt.loaded || 0) / (evt.total || file.size)) * 100);
             setUploadProgress(pct);
           },
-        });
+        } as any);
       if (upErr) throw upErr;
 
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
