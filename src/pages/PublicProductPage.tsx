@@ -540,6 +540,19 @@ const VariantSelectors: React.FC<{
             text={withImperialPerLine(labels.join("\n"))}
             emphasized
             placeholder="Select your size"
+            value={selSize != null ? Math.max(0, labels.indexOf(selSize)) : null}
+            onChange={(idx) => {
+              const s = labels[idx] ?? null;
+              setSelSize(s);
+              // Map back to the full variant label so variant_image_map lookups
+              // (which key on the normalized label) resolve through the
+              // single-axis fallback in resolveVariantImageIndex.
+              const variant = s
+                ? singleAxisParsed.find((p) => p.size === s)?.variant
+                : null;
+              const fullLabel = variant?.label || s || null;
+              onMaterialChange?.(fullLabel, { size: fullLabel });
+            }}
           />
         ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
           <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
