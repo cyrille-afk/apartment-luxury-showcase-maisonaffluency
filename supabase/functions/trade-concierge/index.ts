@@ -305,63 +305,6 @@ const TOOLS = [
   {
     type: "function",
     function: {
-      name: "get_cad_summary",
-      description:
-        "Return the parsed geometry summary for a single uploaded product CAD/3D asset: bounding box in mm (w/d/h), source units, vertex/face counts, and parse status. Use whenever the user asks 'how big is this OBJ', 'what are the dimensions of the file I uploaded', or wants to confirm a parse succeeded — without needing a floor plan. Currently OBJ and DXF assets parse; other formats return status='unsupported'.",
-      parameters: {
-        type: "object",
-        properties: {
-          cad_asset_id: { type: "string", description: "UUID of the trade_product_cad_assets row." },
-        },
-        required: ["cad_asset_id"],
-        additionalProperties: false,
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "check_void_fit",
-      description:
-        "Deterministic fit check of ONE parsed product CAD asset against an arbitrary rectangular void (e.g. a ceiling void, a niche, a shelf). Use when the user gives ad-hoc dimensions instead of a parsed floor plan ('does this fit a 900×900×450 void?'). Returns verdict pass/fail/unknown, clearances per axis in mm, and the product bbox in mm. For room layouts on an uploaded plan, prefer check_spatial_fit.",
-      parameters: {
-        type: "object",
-        properties: {
-          cad_asset_id: { type: "string", description: "UUID of the trade_product_cad_assets row (must be parsed)." },
-          void_w_mm: { type: "integer", description: "Void width in millimetres." },
-          void_d_mm: { type: "integer", description: "Void depth in millimetres." },
-          void_h_mm: { type: "integer", description: "Void height in millimetres." },
-          clearance_mm: { type: "integer", description: "Clearance to subtract from each void axis. Defaults to 0 (snug fit)." },
-        },
-        required: ["cad_asset_id", "void_w_mm", "void_d_mm", "void_h_mm"],
-        additionalProperties: false,
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "validate_line",
-      description:
-        "Compliance check for ONE catalog pick against the studio's recalled deadline and budget (from STUDIO MEMORY) plus the product's own lead time. Use BEFORE drafting a quote whenever the user has a known deadline or budget and you want to flag conflicts ('this won't land in time', 'this blows the budget'). Returns verdict ok/warn/fail with structured conflicts (lead_weeks vs weeks_until_deadline, line_total_cents vs budget_cents). Accepts overrides if the user states different numbers for this line only.",
-      parameters: {
-        type: "object",
-        properties: {
-          pick_id: { type: "string", description: "UUID from CATALOG PIECES (curator pick or trade product)." },
-          qty: { type: "integer", minimum: 1, maximum: 99, description: "Quantity for this line. Defaults to 1." },
-          variant: { type: "string", description: "Variant/finish label when the piece has size_variants — affects price." },
-          deadline_override: { type: "string", description: "Optional YYYY-MM-DD deadline for this line if the user said something different from STUDIO MEMORY." },
-          budget_cents_override: { type: "integer", description: "Optional per-line budget ceiling in CENTS, if different from STUDIO MEMORY." },
-          currency_override: { type: "string", description: "Optional three-letter currency for budget_cents_override (e.g. EUR, GBP, USD, SGD)." },
-        },
-        required: ["pick_id"],
-        additionalProperties: false,
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
       name: "log_spatial_fit_edit",
       description:
         "Record one spatial-fit selection or edit attempt to the audit log. CALL THIS once per user turn during the spatial-fit conversational flow — for the initial pick, every edit (plan/room/piece/clearance), every rejection (unknown plan, unknown room, ambiguous piece, bad clearance), and the final 'go' confirmation. Fire-and-forget: it returns nothing visible to the user.",
