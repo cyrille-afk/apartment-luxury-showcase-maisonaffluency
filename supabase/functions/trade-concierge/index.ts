@@ -2141,25 +2141,22 @@ serve(async (req) => {
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
 
-    const upstream = await fetch(
-      CHAT_COMPLETIONS_URL,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: aiModel(chosenModel),
-          messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
-          tools: finalTools,
-          tool_choice: forceToolCall ? "required" : "auto",
-          max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
-          stream: true,
-          stream_options: { include_usage: true },
-        }),
-      }
-    );
+    const upstream = await chatFetch({
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: aiModel(chosenModel),
+        messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
+        tools: finalTools,
+        tool_choice: forceToolCall ? "required" : "auto",
+        max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
+        stream: true,
+        stream_options: { include_usage: true },
+      }),
+    });
 
     if (!upstream.ok) {
       if (upstream.status === 429) {
