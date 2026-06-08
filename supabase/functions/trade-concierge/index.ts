@@ -44,13 +44,13 @@ function shouldFallback(status: number): boolean {
 }
 
 /**
- * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with automatic
+ * Drop-in replacement for `chatFetch( init)` with automatic
  * Cloudflare Workers AI fallback when the primary backend is rate-limited or
  * out of quota. On fallback, swaps the auth header and rewrites `model` in
  * the JSON body to Cloudflare's catalog.
  */
 async function chatFetch(init: RequestInit): Promise<Response> {
-  const primary = await fetch(CHAT_COMPLETIONS_URL, init);
+  const primary = await chatFetch( init);
   if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
     return primary;
   }
@@ -1288,7 +1288,7 @@ async function classifySentiment(
         ttlSec: 60 * 60 * 24 * 14, // 14d — intents are stable
       },
       async () => {
-        const resp = await fetch(CHAT_COMPLETIONS_URL, {
+        const resp = await chatFetch( {
           method: "POST",
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1405,7 +1405,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
         ttlSec: 60 * 60 * 24 * 7,
       },
       async () => {
-        const resp = await fetch(CHAT_COMPLETIONS_URL, {
+        const resp = await chatFetch( {
           method: "POST",
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2631,7 +2631,7 @@ serve(async (req) => {
                     content: JSON.stringify(result),
                   },
                 ];
-                const resp = await fetch(CHAT_COMPLETIONS_URL, {
+                const resp = await chatFetch( {
                   method: "POST",
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -2744,7 +2744,7 @@ serve(async (req) => {
                     content: JSON.stringify(toolPayload),
                   },
                 ];
-                const resp = await fetch(CHAT_COMPLETIONS_URL, {
+                const resp = await chatFetch( {
                   method: "POST",
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -2825,7 +2825,7 @@ serve(async (req) => {
                     content: JSON.stringify(result),
                   },
                 ];
-                const resp = await fetch(CHAT_COMPLETIONS_URL, {
+                const resp = await chatFetch( {
                   method: "POST",
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -3016,7 +3016,7 @@ serve(async (req) => {
           ].join("\n");
 
           try {
-            const resp = await fetch(CHAT_COMPLETIONS_URL, {
+            const resp = await chatFetch( {
               method: "POST",
               headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
               body: JSON.stringify({
