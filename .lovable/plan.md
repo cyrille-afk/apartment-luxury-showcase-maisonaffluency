@@ -1,76 +1,68 @@
-# BIM/CAD Reasoning Agent
+# FurniMesh Integration Plan
 
-Honest framing: "full spatial reasoning on DWG + DXF" is a 3-phase build, not one shot. DWG is a closed Autodesk format — no open-source parser produces reliable geometry from it. The realistic path is DXF natively + DWG via a server-side converter (LibreDWG or ODA File Converter on an edge worker), then layer spatial logic on top of the extracted geometry. I'll ship in phases so you see value after each.
+Goal: turn any product image into a textured `.glb`, store it alongside existing CAD assets, and let trade + public users orbit/AR-view it in the browser.
 
-## Architecture
+## 1. Secret + schema prep
 
-```text
-User uploads .dwg/.dxf
-        │
-        ▼
-┌──────────────────────────┐
-│ /trade/spatial-fit page  │  ← dedicated uploader + 2D viewer
-│  OR concierge attachment │  ← same backend, invoked as tool
-└──────────────────────────┘
-        │ multipart upload
-        ▼
-Supabase Storage: cad-uploads/ (private, 60s signed URLs)
-        │
-        ▼
-Edge Function: cad-parse
-  - DXF: parse text directly (dxf-parser, npm)
-  - DWG: convert → DXF via LibreDWG WASM, then parse
-  - Extract: layers, blocks, polylines, rooms (closed polylines),
-             ceiling heights (from text/attributes), doors, walls
-  - Returns normalized JSON: rooms[], openings[], constraints
-        │
-        ▼
-Supabase table: cad_documents (parsed geometry cached)
-        │
-        ▼
-Edge Function: cad-spatial-reason (LLM + deterministic checks)
-  - Input: room id + product id (or catalog filter)
-  - Deterministic: bbox fit, clearance zones, door swing arcs,
-                   ceiling clearance, sightlines
-  - LLM layer: style/material match, suggest alternates,
-               multi-product layout reasoning, conflict narration
-        │
-        ▼
-Returned to UI:
-  - 2D plan with product footprints overlaid
-  - Per-room fit report (pass/warn/fail + reasons)
-  - "Suggest alternates" CTA (queries catalog by dim constraints)
-  - "Open as tearsheet" / "Open quote draft" (reuse existing flow)
-```
+- Add `FURNIMESH_API_KEY` via the secrets tool (user provides it).
+- Extend the existing `trade_product_cad_assets.file_format` check constraint to allow `'glb'`, `'gltf'`, `'usdz'`.
+- Add two nullable columns:
+  - `source_image_url text` — image sent to FurniMesh.
+  - `generation_status text` (`pending|ready|failed`) + `generation_job_id text`.
+- Storage: create a public bucket `product-3d` for generated GLB/USDZ (small files, served with long cache). RLS: public read, service-role write.
 
-## Phase 1 — Foundation (DXF + dimensional fit + concierge tool)
+## 2. Edge functions
 
-- New private Storage bucket `cad-uploads` with RLS (studio-scoped).
-- New tables:
-  - `cad_documents` (id, studio_id, user_id, file_path, format, parsed_geometry JSONB, status, error, created_at)
-  - `cad_fit_reports` (id, cad_document_id, room_id, product_id, verdict, reasons JSONB, created_at)
-- Edge function `cad-parse` — DXF only in phase 1, using `dxf-parser` (npm). Extracts rooms (closed LWPOLYLINE on layer matching `ROOM|SPACE|A-AREA`), text labels, basic openings.
-- Edge function `cad-spatial-reason` — deterministic bbox/clearance only in phase 1, LLM narrates the result.
-- `/trade/spatial-fit` page: uploader, room list with detected dims, "Check fit" against any catalog product or category.
-- Concierge tool: `cad_check_fit({ cad_document_id, room_label, product_id? })` — returns same JSON, agent narrates.
-- 2D viewer: simple SVG of room polygons + product footprint overlay (no full CAD renderer needed in phase 1).
+- **`furnimesh-generate`** (POST, JWT-verified, admin only)
+  Input: `{ product_id, image_url, variant_label? }`.
+  Flow: insert a `pending` row in `trade_product_cad_assets`, call FurniMesh API with the image URL, store returned `job_id`. Returns the row id.
+- **`furnimesh-webhook`** (public, signature-verified)
+  On `job.completed`: download the `.glb` (and `.usdz` if returned), upload to `product-3d` bucket under `{product_id}/{asset_id}.glb`, update the row to `ready` with `file_url`, `file_size_bytes`. On failure: mark `failed` with error message.
+  *Fallback if FurniMesh has no webhook*: a `furnimesh-poll` cron job that scans `pending` rows every minute.
+- **USDZ derivation**: if FurniMesh returns only GLB, queue a second job using their GLB→USDZ converter; otherwise skip (iOS Quick Look will fall back to GLB via model-viewer's auto-conversion not being available — see step 4 note).
 
-## Phase 2 — DWG support + clearance/swing logic
+## 3. Admin UI — generation entry point
 
-- Add LibreDWG WASM (or shell out to ODA File Converter on a dedicated worker if WASM perf is poor) inside `cad-parse` to convert .dwg → .dxf in-function, then reuse phase 1 parser.
-- Spatial rules: door swing arcs, walking clearance (≥600mm around seating, ≥900mm primary circulation), ceiling void clearance for pendants, sightline checks.
-- Verdict upgraded to pass / warn / fail with structured reasons.
+In `src/pages/TradeAdminCadAssets.tsx` (and inline on `TradeProductPage` admin tools):
+- "Generate 3D from image" button next to each product image. Opens a small dialog: pick which image, optional variant label, submit → calls `furnimesh-generate`.
+- Status badge on the asset row (`pending` spinner, `ready` ✓, `failed` ✗ with retry).
 
-## Phase 3 — Multi-product layout + style/material match
+## 4. Viewer — `<model-viewer>` embed
 
-- Concierge gets `cad_propose_layout({ cad_document_id, room_label, brief })` — agent calls catalog search + spatial checker in a loop, returns a draft FF&E for the room, opens tearsheet draft (reuses existing tearsheet builder).
-- Style/material match: ceiling finish, wall finish, existing palette tags (parsed from DXF text/attributes or supplied by user) cross-referenced with curator pick material tags.
-- "Compliance/spec validation" cross-link: lead time vs project deadline, budget vs RRP — surfaces as warnings in the same fit report (this is item #5 from the article, but slots in naturally here).
+- Add `@google/model-viewer` (web component, ~80 KB gz, lazy-loaded only on product pages that have a `.glb`).
+- New component `src/components/trade/Product3DViewer.tsx`:
+  ```
+  <model-viewer src={glb.url} ios-src={usdz?.url} ar ar-modes="webxr scene-viewer quick-look"
+                camera-controls auto-rotate shadow-intensity="1" exposure="1" />
+  ```
+- Mounted on `TradeProductPage.tsx` as a new tab/section "3D & AR" — visible whenever an active `glb` row exists for the product (or current variant).
+- Public product page (`/product/...`) gets the same viewer (no pricing implications). Trade discount logic unaffected.
+- USDZ note: if no `.usdz` exists, AR still works on Android via Scene Viewer; iOS Quick Look needs USDZ — show "AR available on Android, generating iOS version…" until USDZ row lands.
 
-## What I need from you before coding
+## 5. Variant awareness
 
-1. **Phase 1 scope confirmation** — ship phase 1 first (DXF + dimensional fit + concierge tool + dedicated page), get it working in production, then phase 2/3? Or do you want all three planned and stubbed up-front?
-2. **DWG strategy** — LibreDWG WASM (free, ~10MB, sometimes flaky on complex files) vs an ODA File Converter worker (more reliable, requires hosting). Recommend WASM for phase 2 and only move to a worker if real files fail.
-3. **Studio access** — you mentioned multi-user studios aren't fine-tuned yet. CAD uploads are per-user or per-studio-shared? Recommend per-studio-shared from day 1 (matches the "real account manager" framing).
+Reuse the existing variant-image map: when the user picks a finish/variant on the product page that has a matching `variant_label` GLB, swap the `src` on `<model-viewer>`. Falls back to the default (no-variant) GLB.
 
-You said "1/" — assuming more is coming. I'll wait for your follow-ups + the answers above before touching code.
+## 6. Cleanup of leftover OBJ scaffolding
+
+- Drop `'obj'` from the format check constraint (no production rows use it — confirm with a `select count(*)` first; if any exist, keep it).
+- Leave `cad-parse-product-asset` + DXF spatial-fit page intact (still useful for floor plans).
+
+## 7. Out of scope (explicit)
+
+- No re-introduction of AI concierge tools for 3D. Viewer is pure UI.
+- No client-side mesh editing.
+- No mobile-app code (React Native / Flutter) — web only for now; the same `.glb` URLs will work later if you build a native app.
+
+## Technical details
+
+- FurniMesh API: assumed REST endpoint `POST /v1/jobs` with `{ image_url, output: ['glb','usdz'] }` returning `{ job_id }`, plus webhook `POST <our-url>` with `{ job_id, status, assets: [{format,url}] }`. Exact paths confirmed against FurniMesh docs at implementation time; if the API is sync-only, collapse step 2 into a single function.
+- Storage path: `product-3d/{product_id}/{asset_id}.{glb|usdz}`. CDN URL stored directly in `file_url`.
+- model-viewer loaded via dynamic `import('@google/model-viewer')` to keep the main bundle untouched.
+- Edge functions follow project rules: `supabase.auth.getClaims`, CORS headers from `npm:@supabase/supabase-js@2/cors`, Zod validation on inputs.
+
+## Open questions before build
+
+1. Do you already have a FurniMesh account + API key, or should I add the secret request after you sign up?
+2. Should generation be **admin-triggered only** (manual button per product), or **auto-batched** across the catalog (cron that picks N products/day)?
+3. Should the 3D viewer appear on the **public** product page too, or **trade-only** for now?
