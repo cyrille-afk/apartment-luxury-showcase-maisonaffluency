@@ -43,6 +43,17 @@ function shouldFallback(status: number): boolean {
   return status === 429 || status === 402 || status === 403;
 }
 
+function extractRequestId(res: Response): string {
+  return (
+    res.headers.get("x-request-id") ||
+    res.headers.get("cf-ray") ||
+    res.headers.get("x-google-request-id") ||
+    res.headers.get("x-cloud-trace-context") ||
+    res.headers.get("request-id") ||
+    "none"
+  );
+}
+
 /**
  * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with automatic
  * Cloudflare Workers AI fallback when the primary backend is rate-limited or
@@ -54,19 +65,33 @@ async function chatFetch(init: RequestInit): Promise<Response> {
   if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
     return primary;
   }
+
+  const primaryReqId = extractRequestId(primary);
+  let errBody = "";
   try {
-    const errText = await primary.clone().text();
-    console.warn(`[concierge] primary ${primary.status}; falling back to Cloudflare Workers AI. err=${errText.slice(0, 300)}`);
+    errBody = await primary.clone().text();
   } catch (_) { /* noop */ }
+
+  console.error(
+    `[concierge] PRIMARY_BACKEND_FAILURE backend=${USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway"} status=${primary.status} requestId=${primaryReqId} bodyPreview=${errBody.slice(0, 500).replace(/\s+/g, " ")}`
+  );
+
   let cfBodyStr: string;
+  let originalModel = "unknown";
   try {
     const parsed = JSON.parse(String(init.body ?? "{}"));
+    originalModel = parsed.model || "unknown";
     parsed.model = CLOUDFLARE_FALLBACK_MODEL;
     cfBodyStr = JSON.stringify(parsed);
   } catch (_) {
     cfBodyStr = String(init.body ?? "{}");
   }
-  return await fetch(CLOUDFLARE_CHAT_URL, {
+
+  console.warn(
+    `[concierge] CLOUDFLARE_FALLBACK_INIT originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primary.status} primaryRequestId=${primaryReqId}`
+  );
+
+  const cfRes = await fetch(CLOUDFLARE_CHAT_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${CLOUDFLARE_WORKERS_AI_TOKEN}`,
@@ -74,6 +99,13 @@ async function chatFetch(init: RequestInit): Promise<Response> {
     },
     body: cfBodyStr,
   });
+
+  const cfReqId = extractRequestId(cfRes);
+  console.warn(
+    `[concierge] CLOUDFLARE_FALLBACK_RESULT status=${cfRes.status} ok=${cfRes.ok} requestId=${cfReqId}`
+  );
+
+  return cfRes;
 }
 
 console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}; cloudflare-fallback: ${CLOUDFLARE_ENABLED ? "on" : "off"}`);
