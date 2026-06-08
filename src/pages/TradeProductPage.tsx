@@ -1077,6 +1077,111 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                 />
               )}
+              {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
+              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(singleSizeOptions.join("\n"))}
+                  secondaryText={null}
+                  emphasized
+                  placeholder="Select your size"
+                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
+                  onChange={(idx) => {
+                    const newSize = singleSizeOptions[idx] ?? null;
+                    setSelectedSingleSize(newSize);
+                    let nextMat = selectedSingleMaterial;
+                    if (newSize && nextMat && !singleAxisParsed.some((p) => p.size === newSize && p.material === nextMat)) {
+                      setSelectedSingleMaterial(null);
+                      nextMat = null;
+                    }
+                    // Sync the gallery using the matched variant's full raw
+                    // label so size+material combos map to the right image.
+                    const match = newSize
+                      ? singleAxisParsed.find((p) => p.size === newSize && (!nextMat || p.material === nextMat))
+                      : null;
+                    handleMaterialChange((match?.variant.label || nextMat || null) as string | null);
+                  }}
+
+                  disabledIndices={disabledSizeIndices}
+                  helperText={
+                    disabledSizeIndices.length > 0 && selectedSingleMaterial
+                      ? `Some sizes aren't available in ${selectedSingleMaterial} — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+              {/* Single-axis (no material split): show stripped size labels indexed by variant */}
+              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
+                const variantSizeText = sizeVariants && sizeVariants.length > 0
+                  ? sizeVariants
+                      .map((v) => {
+                        let label = (v.label || "").trim();
+                        const colonIdx = label.indexOf(":");
+                        if (colonIdx > -1 && colonIdx < 60) {
+                          label = label.slice(colonIdx + 1).trim();
+                        }
+                        const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
+                          || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
+                        if (dimMatch) label = dimMatch[1].trim();
+                        return label;
+                      })
+                      .join("\n")
+                  : null;
+                // If variants are dimensional, use them as a size picker.
+                // Otherwise (finish/material-only variants), fall back to the
+                // product's raw dimensions so the row is never dropped.
+                const variantsAreDimensional = variantSizeText && looksLikeDimension(variantSizeText);
+                const sizeText = variantsAreDimensional
+                  ? variantSizeText!
+                  : formatDimensionsMultiline(product.dimensions);
+                if (!looksLikeDimension(sizeText)) return null;
+                const interactive = variantsAreDimensional && hasVariants;
+                return (
+                  <ExpandableSpec
+                    icon={specIcon("📐")}
+                    text={sizeText}
+                    secondaryText={formatImperialDimensions(sizeText)}
+                    emphasized
+                    placeholder={interactive ? "Select your size" : undefined}
+                    value={interactive ? selectedVariantIdx : undefined}
+                    onChange={interactive ? setSelectedVariantIdx : undefined}
+                  />
+                );
+              })()}
+
+              {!isRugSqmActive && isDualAxis && hasDualSize && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
+                  secondaryText={null}
+                  emphasized
+                  placeholder="Select your size"
+                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
+                    const s = dualSizeOptions[idx] ?? null;
+                    setSelectedDualSize(s);
+                    let nextBase = selectedBase;
+                    let nextTop = selectedTop;
+                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedBase(null); nextBase = null; }
+                    if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedTop(null); nextTop = null; }
+                    // Re-sync the gallery to the canonical key for the
+                    // (base, top, size) triple — same resolver as the
+                    // Base/Top dropdowns, so all three axes stay aligned.
+                    handleMaterialChange(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
+                  }}
+                  disabledIndices={disabledDualSizeIdx}
+                  helperText={
+                    disabledDualSizeIdx.length > 0 && (selectedBase || selectedTop)
+                      ? `Some sizes aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
@@ -1224,110 +1329,7 @@ const TradeProductPage: React.FC = () => {
                   )}
                 </>
               )}
-              {/* Single-axis split: dedicated size dropdown driven by unique sizes */}
-              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(singleSizeOptions.join("\n"))}
-                  secondaryText={null}
-                  emphasized
-                  placeholder="Select your size"
-                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
-                  onChange={(idx) => {
-                    const newSize = singleSizeOptions[idx] ?? null;
-                    setSelectedSingleSize(newSize);
-                    let nextMat = selectedSingleMaterial;
-                    if (newSize && nextMat && !singleAxisParsed.some((p) => p.size === newSize && p.material === nextMat)) {
-                      setSelectedSingleMaterial(null);
-                      nextMat = null;
-                    }
-                    // Sync the gallery using the matched variant's full raw
-                    // label so size+material combos map to the right image.
-                    const match = newSize
-                      ? singleAxisParsed.find((p) => p.size === newSize && (!nextMat || p.material === nextMat))
-                      : null;
-                    handleMaterialChange((match?.variant.label || nextMat || null) as string | null);
-                  }}
 
-                  disabledIndices={disabledSizeIndices}
-                  helperText={
-                    disabledSizeIndices.length > 0 && selectedSingleMaterial
-                      ? `Some sizes aren't available in ${selectedSingleMaterial} — greyed out.`
-                      : undefined
-                  }
-                />
-              )}
-              {/* Single-axis (no material split): show stripped size labels indexed by variant */}
-              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
-                const variantSizeText = sizeVariants && sizeVariants.length > 0
-                  ? sizeVariants
-                      .map((v) => {
-                        let label = (v.label || "").trim();
-                        const colonIdx = label.indexOf(":");
-                        if (colonIdx > -1 && colonIdx < 60) {
-                          label = label.slice(colonIdx + 1).trim();
-                        }
-                        const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
-                          || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
-                        if (dimMatch) label = dimMatch[1].trim();
-                        return label;
-                      })
-                      .join("\n")
-                  : null;
-                // If variants are dimensional, use them as a size picker.
-                // Otherwise (finish/material-only variants), fall back to the
-                // product's raw dimensions so the row is never dropped.
-                const variantsAreDimensional = variantSizeText && looksLikeDimension(variantSizeText);
-                const sizeText = variantsAreDimensional
-                  ? variantSizeText!
-                  : formatDimensionsMultiline(product.dimensions);
-                if (!looksLikeDimension(sizeText)) return null;
-                const interactive = variantsAreDimensional && hasVariants;
-                return (
-                  <ExpandableSpec
-                    icon={specIcon("📐")}
-                    text={sizeText}
-                    secondaryText={formatImperialDimensions(sizeText)}
-                    emphasized
-                    placeholder={interactive ? "Select your size" : undefined}
-                    value={interactive ? selectedVariantIdx : undefined}
-                    onChange={interactive ? setSelectedVariantIdx : undefined}
-                  />
-                );
-              })()}
-
-              {!isRugSqmActive && isDualAxis && hasDualSize && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
-                  secondaryText={null}
-                  emphasized
-                  placeholder="Select your size"
-                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      clearAllDualSelections();
-                      return;
-                    }
-                    const s = dualSizeOptions[idx] ?? null;
-                    setSelectedDualSize(s);
-                    let nextBase = selectedBase;
-                    let nextTop = selectedTop;
-                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedBase(null); nextBase = null; }
-                    if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedTop(null); nextTop = null; }
-                    // Re-sync the gallery to the canonical key for the
-                    // (base, top, size) triple — same resolver as the
-                    // Base/Top dropdowns, so all three axes stay aligned.
-                    handleMaterialChange(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
-                  }}
-                  disabledIndices={disabledDualSizeIdx}
-                  helperText={
-                    disabledDualSizeIdx.length > 0 && (selectedBase || selectedTop)
-                      ? `Some sizes aren't available with the current selection — greyed out.`
-                      : undefined
-                  }
-                />
-              )}
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions);

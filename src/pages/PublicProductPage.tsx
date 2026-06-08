@@ -334,6 +334,93 @@ const VariantSelectors: React.FC<{
         />
       )}
 
+      {/* Size dropdown — shown FIRST so users pick dimensions before finishes */}
+      {isDualAxis && dualSizeOptions.length > 0 ? (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(dualSizeOptions.join("\n"))}
+          secondaryText={null}
+          emphasized
+          placeholder="Select your size"
+          value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              clearAllDualSelections();
+              return;
+            }
+            const s = dualSizeOptions[idx] ?? null;
+            setSelDualSize(s);
+            let nextBase = selBase;
+            let nextTop = selTop;
+            if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelBase(null); nextBase = null; }
+            if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelTop(null); nextTop = null; }
+            // Re-sync the gallery using the canonical (base, top, size)
+            // composite — keeps the hero image aligned with the current
+            // selection no matter which axis was just changed.
+            onMaterialChange?.(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
+          }}
+          disabledIndices={disabledDualSizeIdx}
+          helperText={
+            disabledDualSizeIdx.length > 0 && (selBase || selTop)
+              ? `Some sizes aren't available with the current finish selection — greyed out.`
+              : undefined
+          }
+        />
+      ) : hasSingleAxisSplit ? (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(singleSizeOptions.join("\n"))}
+          secondaryText={null}
+          emphasized
+          placeholder="Select your size"
+          value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}
+          onChange={(idx) => {
+            const s = singleSizeOptions[idx] ?? null;
+            setSelSize(s);
+            let nextMat = selMat;
+            if (s && nextMat && !singleAxisParsed.some((p) => p.size === s && p.material === nextMat)) {
+              setSelMat(null);
+              nextMat = null;
+            }
+            const match = s
+              ? singleAxisParsed.find((p) => p.size === s && (!nextMat || p.material === nextMat))
+              : null;
+            onMaterialChange?.((match?.variant.label || nextMat || null) as string | null);
+          }}
+          disabledIndices={disabledSizeIdx}
+          helperText={
+            disabledSizeIdx.length > 0 && selMat
+              ? `Some sizes aren't available in ${selMat} — greyed out.`
+              : undefined
+          }
+        />
+      ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
+        const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
+        return labels.length > 1 ? (
+          <ExpandableSpec
+            icon={specIcon("📐")}
+            text={withImperialPerLine(labels.join("\n"))}
+            emphasized
+            placeholder="Select your size"
+            value={selSize != null ? Math.max(0, labels.indexOf(selSize)) : null}
+            onChange={(idx) => {
+              const s = labels[idx] ?? null;
+              setSelSize(s);
+              // Map back to the full variant label so variant_image_map lookups
+              // (which key on the normalized label) resolve through the
+              // single-axis fallback in resolveVariantImageIndex.
+              const variant = s
+                ? singleAxisParsed.find((p) => p.size === s)?.variant
+                : null;
+              const fullLabel = variant?.label || s || null;
+              onMaterialChange?.(fullLabel, { size: fullLabel });
+            }}
+          />
+        ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
+          <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
+        ) : null;
+      })()}
+
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
@@ -472,92 +559,6 @@ const VariantSelectors: React.FC<{
         })()
       ) : null}
 
-      {/* Size dropdown */}
-      {isDualAxis && dualSizeOptions.length > 0 ? (
-        <ExpandableSpec
-          icon={specIcon("📐")}
-          text={withImperialPerLine(dualSizeOptions.join("\n"))}
-          secondaryText={null}
-          emphasized
-          placeholder="Select your size"
-          value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
-          onChange={(idx) => {
-            if (idx < 0) {
-              clearAllDualSelections();
-              return;
-            }
-            const s = dualSizeOptions[idx] ?? null;
-            setSelDualSize(s);
-            let nextBase = selBase;
-            let nextTop = selTop;
-            if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelBase(null); nextBase = null; }
-            if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelTop(null); nextTop = null; }
-            // Re-sync the gallery using the canonical (base, top, size)
-            // composite — keeps the hero image aligned with the current
-            // selection no matter which axis was just changed.
-            onMaterialChange?.(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
-          }}
-          disabledIndices={disabledDualSizeIdx}
-          helperText={
-            disabledDualSizeIdx.length > 0 && (selBase || selTop)
-              ? `Some sizes aren't available with the current finish selection — greyed out.`
-              : undefined
-          }
-        />
-      ) : hasSingleAxisSplit ? (
-        <ExpandableSpec
-          icon={specIcon("📐")}
-          text={withImperialPerLine(singleSizeOptions.join("\n"))}
-          secondaryText={null}
-          emphasized
-          placeholder="Select your size"
-          value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}
-          onChange={(idx) => {
-            const s = singleSizeOptions[idx] ?? null;
-            setSelSize(s);
-            let nextMat = selMat;
-            if (s && nextMat && !singleAxisParsed.some((p) => p.size === s && p.material === nextMat)) {
-              setSelMat(null);
-              nextMat = null;
-            }
-            const match = s
-              ? singleAxisParsed.find((p) => p.size === s && (!nextMat || p.material === nextMat))
-              : null;
-            onMaterialChange?.((match?.variant.label || nextMat || null) as string | null);
-          }}
-          disabledIndices={disabledSizeIdx}
-          helperText={
-            disabledSizeIdx.length > 0 && selMat
-              ? `Some sizes aren't available in ${selMat} — greyed out.`
-              : undefined
-          }
-        />
-      ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
-        const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
-        return labels.length > 1 ? (
-          <ExpandableSpec
-            icon={specIcon("📐")}
-            text={withImperialPerLine(labels.join("\n"))}
-            emphasized
-            placeholder="Select your size"
-            value={selSize != null ? Math.max(0, labels.indexOf(selSize)) : null}
-            onChange={(idx) => {
-              const s = labels[idx] ?? null;
-              setSelSize(s);
-              // Map back to the full variant label so variant_image_map lookups
-              // (which key on the normalized label) resolve through the
-              // single-axis fallback in resolveVariantImageIndex.
-              const variant = s
-                ? singleAxisParsed.find((p) => p.size === s)?.variant
-                : null;
-              const fullLabel = variant?.label || s || null;
-              onMaterialChange?.(fullLabel, { size: fullLabel });
-            }}
-          />
-        ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
-        ) : null;
-      })()}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
         <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
       )}
