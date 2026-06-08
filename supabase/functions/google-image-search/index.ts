@@ -35,6 +35,24 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Require admin/super_admin/trade_user — prevents any signed-up account
+  // from burning paid Google CSE credits.
+  const userId = claimsData.claims.sub as string;
+  const svc = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+  const { data: roles } = await svc.from("user_roles").select("role").eq("user_id", userId);
+  const allowed = roles?.some((r: any) =>
+    ["admin", "super_admin", "trade_user"].includes(r.role),
+  );
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { query, start = 1 } = await req.json();
 
