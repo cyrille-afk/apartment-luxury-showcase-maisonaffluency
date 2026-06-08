@@ -298,20 +298,58 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
 function CameraAnglePreview({
   views,
   sourceImageUrl,
+  onChange,
 }: {
   views: View[];
   sourceImageUrl: string | null;
+  onChange: (index: number, patch: Partial<View>) => void;
 }) {
   const size = 200;
   const cx = size / 2;
   const cy = size / 2;
   const radius = size / 2 - 24;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [dragging, setDragging] = useState<number | null>(null);
 
   const toXY = (azimuthDeg: number, elevationDeg: number) => {
-    // Azimuth 0° = north (up); elevation pulls the camera toward the center.
     const rad = ((azimuthDeg - 90) * Math.PI) / 180;
-    const r = radius * (1 - clampInt(elevationDeg, 0, 90) / 120); // 0° → full radius, 90° → ~25%
+    const r = radius * (1 - clampInt(elevationDeg, 0, 90) / 120);
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  };
+
+  const pointToView = (clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    const px = ((clientX - rect.left) / rect.width) * size;
+    const py = ((clientY - rect.top) / rect.height) * size;
+    const dx = px - cx;
+    const dy = py - cy;
+    const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI; // -180..180, 0 = east
+    const azimuth = Math.round((angleDeg + 90 + 360) % 360);
+    const r = Math.min(radius, Math.hypot(dx, dy));
+    const elevation = clampInt((1 - r / radius) * 120, 0, 90);
+    return { azimuth, elevation };
+  };
+
+  const onDotPointerDown = (i: number) => (e: React.PointerEvent<SVGGElement>) => {
+    e.preventDefault();
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    setDragging(i);
+    const next = pointToView(e.clientX, e.clientY);
+    if (next) onChange(i, next);
+  };
+
+  const onDotPointerMove = (i: number) => (e: React.PointerEvent<SVGGElement>) => {
+    if (dragging !== i) return;
+    const next = pointToView(e.clientX, e.clientY);
+    if (next) onChange(i, next);
+  };
+
+  const onDotPointerUp = (i: number) => (e: React.PointerEvent<SVGGElement>) => {
+    if (dragging !== i) return;
+    (e.target as Element).releasePointerCapture?.(e.pointerId);
+    setDragging(null);
   };
 
   return (
@@ -320,19 +358,16 @@ function CameraAnglePreview({
         <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
           Camera placement preview
         </Label>
-        <span className="text-[10px] text-muted-foreground">Top-down · subject centered</span>
+        <span className="text-[10px] text-muted-foreground">Drag any dot to adjust</span>
       </div>
       <div className="grid grid-cols-[200px_1fr] gap-3 items-start">
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="bg-background rounded">
-          {/* compass rings */}
+        <svg ref={svgRef} width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="bg-background rounded touch-none select-none">
           <circle cx={cx} cy={cy} r={radius} fill="none" stroke="hsl(var(--border))" strokeDasharray="3 3" />
           <circle cx={cx} cy={cy} r={radius * 0.5} fill="none" stroke="hsl(var(--border))" strokeDasharray="2 4" opacity={0.6} />
-          {/* compass labels */}
           <text x={cx} y={14} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">N 0°</text>
           <text x={size - 4} y={cy + 3} textAnchor="end" fontSize="9" fill="hsl(var(--muted-foreground))">E 90°</text>
           <text x={cx} y={size - 4} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">S 180°</text>
           <text x={4} y={cy + 3} fontSize="9" fill="hsl(var(--muted-foreground))">W 270°</text>
-          {/* subject thumbnail */}
           {sourceImageUrl ? (
             <image
               href={sourceImageUrl}
@@ -346,15 +381,32 @@ function CameraAnglePreview({
           ) : (
             <circle cx={cx} cy={cy} r={10} fill="hsl(var(--primary))" opacity={0.7} />
           )}
-          {/* camera dots */}
           {views.map((v, i) => {
             const { x, y } = toXY(v.azimuth, v.elevation);
             const opacity = 0.45 + (1 - clampInt(v.elevation, 0, 90) / 90) * 0.55;
+            const active = dragging === i;
             return (
-              <g key={i}>
+              <g
+                key={i}
+                onPointerDown={onDotPointerDown(i)}
+                onPointerMove={onDotPointerMove(i)}
+                onPointerUp={onDotPointerUp(i)}
+                onPointerCancel={onDotPointerUp(i)}
+                style={{ cursor: active ? "grabbing" : "grab" }}
+              >
                 <line x1={cx} y1={cy} x2={x} y2={y} stroke="hsl(var(--primary))" strokeWidth={0.8} opacity={0.35} />
-                <circle cx={x} cy={y} r={7} fill="hsl(var(--primary))" opacity={opacity} />
-                <text x={x} y={y + 3} textAnchor="middle" fontSize="9" fontWeight={600} fill="hsl(var(--primary-foreground))">
+                {/* invisible larger hit target */}
+                <circle cx={x} cy={y} r={14} fill="transparent" />
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={active ? 9 : 7}
+                  fill="hsl(var(--primary))"
+                  opacity={opacity}
+                  stroke={active ? "hsl(var(--primary-foreground))" : "none"}
+                  strokeWidth={active ? 1.5 : 0}
+                />
+                <text x={x} y={y + 3} textAnchor="middle" fontSize="9" fontWeight={600} fill="hsl(var(--primary-foreground))" pointerEvents="none">
                   {i + 1}
                 </text>
               </g>
