@@ -113,6 +113,36 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
+  // Require admin/super_admin/trade_user — prevents arbitrary signed-up
+  // accounts from polluting the public assets bucket.
+  const userId = auth.userId;
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  const allowed = roles?.some((r: any) =>
+    ["admin", "super_admin", "trade_user"].includes(r.role),
+  );
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  const allowed = roles?.some((r: any) =>
+    ["admin", "super_admin", "trade_user"].includes(r.role),
+  );
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { url, fallbackUrl } = await req.json();
 
