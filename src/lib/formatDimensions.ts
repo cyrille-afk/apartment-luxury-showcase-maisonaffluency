@@ -86,8 +86,24 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
     .map((line) => {
       const t = line.trim();
       const imp = toImperialLine(t);
-      return imp ? `${t}  (${imp})` : t;
+      if (!imp) return t;
+      // Strip any leading label words shared with the metric line so the
+      // imperial parenthetical doesn't repeat "Sofa Double Depth" etc.
+      const metricWords = t.split(/\s+/);
+      const impWords = imp.split(/\s+/);
+      let i = 0;
+      while (
+        i < metricWords.length &&
+        i < impWords.length &&
+        metricWords[i] === impWords[i] &&
+        !/[\d"Ø⌀×x]/.test(impWords[i])
+      ) {
+        i++;
+      }
+      const trimmedImp = impWords.slice(i).join(" ").trim();
+      return trimmedImp ? `${t}  (${trimmedImp})` : t;
     })
     .join("\n");
 };
+
 
