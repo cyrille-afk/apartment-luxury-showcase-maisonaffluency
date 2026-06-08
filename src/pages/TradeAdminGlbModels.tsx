@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
 import { ChevronLeft, Search, Upload, Loader2, Trash2, ExternalLink, Box } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 
 interface ProductRow {
@@ -19,7 +19,6 @@ const MAX_MB = 50;
 
 const TradeAdminGlbModels: React.FC = () => {
   const { isAdmin, loading } = useAuth();
-  const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [search, setSearch] = useState("");
@@ -28,6 +27,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
 
   // Load products that already have a GLB
@@ -69,19 +69,16 @@ const TradeAdminGlbModels: React.FC = () => {
     if (!selected) return;
     const name = file.name.toLowerCase();
     if (!(name.endsWith(".glb") || name.endsWith(".gltf"))) {
-      toast({ title: "Wrong file type", description: "Please upload a .glb or .gltf model.", variant: "destructive" });
+      toast.error("Please upload a .glb or .gltf model.");
       return;
     }
     if (file.size > MAX_MB * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: `${(file.size / 1024 / 1024).toFixed(1)} MB — max is ${MAX_MB} MB.`,
-        variant: "destructive",
-      });
+      toast.error(`${(file.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
       return;
     }
 
     setUploading(true);
+    setUploadProgress(0);
     try {
       const ext = name.endsWith(".gltf") ? "gltf" : "glb";
       const contentType = ext === "glb" ? "model/gltf-binary" : "model/gltf+json";
@@ -89,7 +86,15 @@ const TradeAdminGlbModels: React.FC = () => {
 
       const { error: upErr } = await supabase.storage
         .from("assets")
-        .upload(path, file, { contentType, cacheControl: "31536000", upsert: false });
+        .upload(path, file, {
+          contentType,
+          cacheControl: "31536000",
+          upsert: false,
+          onUploadProgress: (evt: { loaded?: number; total?: number }) => {
+            const pct = Math.round(((evt.loaded || 0) / (evt.total || file.size)) * 100);
+            setUploadProgress(pct);
+          },
+        } as any);
       if (upErr) throw upErr;
 
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
@@ -101,13 +106,14 @@ const TradeAdminGlbModels: React.FC = () => {
         .eq("id", selected.id);
       if (updErr) throw updErr;
 
-      toast({ title: "3D model saved", description: selected.product_name });
+      toast.success(`3D model saved for "${selected.product_name}"`);
       setSelected({ ...selected, glb_url: publicUrl });
       setReloadKey((k) => k + 1);
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e?.message || String(e), variant: "destructive" });
+      toast.error(e?.message || "Upload failed");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
       if (inputRef.current) inputRef.current.value = "";
     }
   };
@@ -119,10 +125,10 @@ const TradeAdminGlbModels: React.FC = () => {
       .update({ glb_url: null })
       .eq("id", row.id);
     if (error) {
-      toast({ title: "Could not remove", description: error.message, variant: "destructive" });
+      toast.error(error.message);
       return;
     }
-    toast({ title: "Removed" });
+    toast.success("3D model removed");
     if (selected?.id === row.id) setSelected({ ...row, glb_url: null });
     setReloadKey((k) => k + 1);
   };
@@ -232,6 +238,19 @@ const TradeAdminGlbModels: React.FC = () => {
                     <span className="font-body text-sm">
                       {uploading ? "Uploading…" : selected.glb_url ? "Replace 3D model" : "Upload .glb or .gltf"}
                     </span>
+                    {uploading && (
+                      <div className="w-full max-w-[200px]">
+                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-foreground transition-all duration-200"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                        <div className="text-center font-body text-[10px] text-muted-foreground mt-1">
+                          {uploadProgress}%
+                        </div>
+                      </div>
+                    )}
                     <span className="font-body text-[11px] text-muted-foreground">Max {MAX_MB} MB</span>
                     <input
                       ref={inputRef}
