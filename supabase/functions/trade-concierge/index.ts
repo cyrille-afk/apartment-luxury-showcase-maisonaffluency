@@ -12,6 +12,25 @@ const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
 const CHAT_MAX_TOKENS = tokenBudget("chat");
 const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
 
+// Route chat completions to Google AI Studio (Gemini direct) when a key is
+// present; otherwise fall back to the Lovable AI Gateway. Embeddings continue
+// to use the Lovable Gateway via `_shared/aiEmbeddings.ts`.
+const GOOGLE_AI_STUDIO_API_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
+const USE_GEMINI_DIRECT = !!GOOGLE_AI_STUDIO_API_KEY;
+const CHAT_COMPLETIONS_URL = USE_GEMINI_DIRECT
+  ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+  : "https://ai.gateway.lovable.dev/v1/chat/completions";
+function aiAuthKey(lovableKey: string): string {
+  return USE_GEMINI_DIRECT ? GOOGLE_AI_STUDIO_API_KEY! : lovableKey;
+}
+// Lovable Gateway model IDs are prefixed `google/`; Google AI Studio expects
+// the bare model name (e.g. `gemini-3-flash-preview`).
+function aiModel(m: string): string {
+  return USE_GEMINI_DIRECT ? m.replace(/^google\//, "") : m;
+}
+console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}`);
+
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
