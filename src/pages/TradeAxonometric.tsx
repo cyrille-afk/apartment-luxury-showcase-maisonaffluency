@@ -26,6 +26,7 @@ import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inb
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
+import { MultiViewTurntable } from "@/components/trade/MultiViewTurntable";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
