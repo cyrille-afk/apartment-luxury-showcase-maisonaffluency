@@ -63,7 +63,32 @@ interface MultiViewTurntableProps {
 
 export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View" }: MultiViewTurntableProps) {
   const [open, setOpen] = useState(false);
-  const [views, setViews] = useState<View[]>(PRESETS[0].views);
+
+  // Undo/redo history stack
+  const [history, setHistory] = useState<View[][]>([PRESETS[0].views]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const views = history[historyIndex];
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  const pushHistory = (nextViews: View[]) => {
+    setHistory((prev) => {
+      const trimmed = prev.slice(0, historyIndex + 1);
+      // avoid duplicate states
+      const last = trimmed[trimmed.length - 1];
+      if (last && JSON.stringify(last) === JSON.stringify(nextViews)) return trimmed;
+      return [...trimmed, nextViews];
+    });
+    setHistoryIndex((i) => i + 1);
+  };
+
+  const setViews = (nextViews: View[]) => pushHistory(nextViews.map((v) => ({ ...v })));
+
+  const undo = () => setHistoryIndex((i) => Math.max(0, i - 1));
+  const redo = () => setHistoryIndex((i) => Math.min(history.length - 1, i + 1));
+  const reset = () => setViews(PRESETS[0].views);
+
   const [loading, setLoading] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
 
@@ -73,16 +98,16 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
   };
 
   const updateView = (i: number, patch: Partial<View>) => {
-    setViews((prev) => prev.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
+    setViews(views.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
   };
 
   const addView = () => {
     if (views.length >= 6) return;
-    setViews((prev) => [...prev, { label: `View ${prev.length + 1}`, azimuth: 45, elevation: 30 }]);
+    setViews([...views, { label: `View ${views.length + 1}`, azimuth: 45, elevation: 30 }]);
   };
 
   const removeView = (i: number) => {
-    setViews((prev) => prev.filter((_, idx) => idx !== i));
+    setViews(views.filter((_, idx) => idx !== i));
   };
 
   const generate = async () => {
