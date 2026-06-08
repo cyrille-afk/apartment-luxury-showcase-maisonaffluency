@@ -44,13 +44,13 @@ function shouldFallback(status: number): boolean {
 }
 
 /**
- * Drop-in replacement for `chatFetch( init)` with automatic
+ * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with automatic
  * Cloudflare Workers AI fallback when the primary backend is rate-limited or
  * out of quota. On fallback, swaps the auth header and rewrites `model` in
  * the JSON body to Cloudflare's catalog.
  */
 async function chatFetch(init: RequestInit): Promise<Response> {
-  const primary = await chatFetch( init);
+  const primary = await fetch(CHAT_COMPLETIONS_URL, init);
   if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
     return primary;
   }
