@@ -180,6 +180,18 @@ function InstagramAuditCard() {
         </div>
       </Link>
 
+      {/* 3D Models (GLB) uploader */}
+      <Link
+        to="/trade/admin/glb-models"
+        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+      >
+        <FileBox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <div className="flex-1">
+          <span className="font-display text-sm text-foreground">3D Models (GLB)</span>
+          <p className="font-body text-[10px] text-muted-foreground">Upload a .glb/.gltf to a product — auto-saves the URL and shows the interactive viewer on the trade page</p>
+        </div>
+      </Link>
+
       {/* Onboarding flow editor */}
       <Link
         to="/trade/admin/onboarding"
