@@ -1070,13 +1070,6 @@ const TradeProductPage: React.FC = () => {
                   />
                 );
               })()}
-              {!isRugSqmActive && product.materials_description?.trim() && (
-                <ExpandableSpec
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                  emphasized
-                />
-              )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
