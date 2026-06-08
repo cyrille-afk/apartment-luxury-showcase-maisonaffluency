@@ -333,16 +333,6 @@ export function AIConcierge() {
       }
       if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
-      if (typeof detail?.prefill === "string") {
-        setInput(detail.prefill);
-        setTimeout(() => {
-          const el = inputRef.current;
-          if (el) {
-            el.focus();
-            try { el.setSelectionRange(el.value.length, el.value.length); } catch {}
-          }
-        }, 250);
-      }
     };
     window.addEventListener("concierge:stage", handler as EventListener);
     return () => window.removeEventListener("concierge:stage", handler as EventListener);

@@ -64,10 +64,6 @@
     "name": "Atelier BdM - Bruno de Maistre"
   },
   {
-    "slug": "atelier-de-troupe-cc-tapis",
-    "name": "De Troupe"
-  },
-  {
     "slug": "atelier-demichelis",
     "name": "Atelier Demichelis"
   },
@@ -156,11 +152,11 @@
     "name": "Chiara Andreatti"
   },
   {
-    "slug": "christophe-delcourt",
+    "slug": "christophe-delcourt-cc-tapis",
     "name": "Christophe Delcourt"
   },
   {
-    "slug": "christophe-delcourt-cc-tapis",
+    "slug": "christophe-delcourt",
     "name": "Christophe Delcourt"
   },
   {
@@ -180,11 +176,11 @@
     "name": "Cocorico Paris"
   },
   {
-    "slug": "cristian-mohaded",
+    "slug": "cristian-mohaded-cc-tapis",
     "name": "Cristián Mohaded"
   },
   {
-    "slug": "cristian-mohaded-cc-tapis",
+    "slug": "cristian-mohaded",
     "name": "Cristián Mohaded"
   },
   {
@@ -218,6 +214,10 @@
   {
     "slug": "de-la-espada",
     "name": "De La Espada"
+  },
+  {
+    "slug": "atelier-de-troupe-cc-tapis",
+    "name": "De Troupe"
   },
   {
     "slug": "destroyers-builders-cc-tapis",
@@ -764,11 +764,11 @@
     "name": "Overgaard & Dyrman"
   },
   {
-    "slug": "ozone-light",
+    "slug": "ozone",
     "name": "Ozone"
   },
   {
-    "slug": "ozone",
+    "slug": "ozone-light",
     "name": "Ozone"
   },
   {
@@ -1104,11 +1104,11 @@
     "name": "Wendy Andreu"
   },
   {
-    "slug": "yabu-pushelberg",
+    "slug": "yabu-pushelberg-cc-tapis",
     "name": "Yabu Pushelberg"
   },
   {
-    "slug": "yabu-pushelberg-cc-tapis",
+    "slug": "yabu-pushelberg",
     "name": "Yabu Pushelberg"
   },
   {
