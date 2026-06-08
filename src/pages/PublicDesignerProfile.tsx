@@ -843,51 +843,12 @@ const PublicDesignerProfile = () => {
               transition={{ ...transition, delay: 0.25 }}
               className="mt-12 md:mt-16 pt-10 md:pt-14 border-t border-border/40"
             >
-              <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5">
                     <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h2>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    if (isMobile) {
-                      setMobileCols((prev) => (prev === 2 ? 1 : 2));
-                    } else {
-                      setGridColsTouched(true);
-                      setGridCols((prev) => (prev === 3 ? 4 : 3));
-                    }
-                  }}
-                  className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
-                  aria-label={isMobile ? `Switch to ${mobileCols === 2 ? 1 : 2} column grid` : `Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-                  title={isMobile ? (mobileCols === 2 ? "Display 1" : "Display 2") : (gridCols === 3 ? "Display 4" : "Display 3")}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    {isMobile ? (
-                      mobileCols === 2 ? (
-                        <>
-                          <rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" />
-                          <rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" />
-                        </>
-                      ) : (
-                        <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />
-                      )
-                    ) : gridCols === 3 ? (
-                      <>
-                        <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                        <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                        <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                        <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" opacity={0.35} />
-                      </>
-                    ) : (
-                      <>
-                        <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                        <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                        <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" opacity={0.35} />
-                      </>
-                    )}
-                  </svg>
-                </button>
               </div>
 
               {(() => {
