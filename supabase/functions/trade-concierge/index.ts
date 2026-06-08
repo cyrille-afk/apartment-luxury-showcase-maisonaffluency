@@ -43,6 +43,37 @@ function shouldFallback(status: number): boolean {
   return status === 429 || status === 402 || status === 403;
 }
 
+function isRetryable(status: number): boolean {
+  // Transient errors worth retrying on the primary backend before falling back
+  return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+}
+
+const PRIMARY_MAX_RETRIES = Number(Deno.env.get("PRIMARY_MAX_RETRIES") ?? "3");
+const PRIMARY_BASE_DELAY_MS = Number(Deno.env.get("PRIMARY_BASE_DELAY_MS") ?? "500");
+const PRIMARY_MAX_DELAY_MS = Number(Deno.env.get("PRIMARY_MAX_DELAY_MS") ?? "8000");
+
+function backoffDelayMs(attempt: number, retryAfterHeader: string | null): number {
+  // Honor Retry-After header (seconds or HTTP-date) when present
+  if (retryAfterHeader) {
+    const secs = Number(retryAfterHeader);
+    if (!Number.isNaN(secs) && secs > 0) {
+      return Math.min(secs * 1000, PRIMARY_MAX_DELAY_MS);
+    }
+    const dateMs = Date.parse(retryAfterHeader);
+    if (!Number.isNaN(dateMs)) {
+      const diff = dateMs - Date.now();
+      if (diff > 0) return Math.min(diff, PRIMARY_MAX_DELAY_MS);
+    }
+  }
+  const exp = Math.min(PRIMARY_BASE_DELAY_MS * 2 ** attempt, PRIMARY_MAX_DELAY_MS);
+  const jitter = Math.random() * (exp * 0.3); // up to 30% jitter
+  return Math.floor(exp + jitter);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 function extractRequestId(res: Response): string {
   return (
     res.headers.get("x-request-id") ||
@@ -55,26 +86,81 @@ function extractRequestId(res: Response): string {
 }
 
 /**
- * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with automatic
+ * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with retry +
+ * exponential backoff on transient primary failures, then automatic
  * Cloudflare Workers AI fallback when the primary backend is rate-limited or
  * out of quota. On fallback, swaps the auth header and rewrites `model` in
  * the JSON body to Cloudflare's catalog.
  */
 async function chatFetch(init: RequestInit): Promise<Response> {
-  const primary = await fetch(CHAT_COMPLETIONS_URL, init);
-  if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
+  const backendName = USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway";
+  let primary: Response | null = null;
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= PRIMARY_MAX_RETRIES; attempt++) {
+    try {
+      primary = await fetch(CHAT_COMPLETIONS_URL, init);
+    } catch (err) {
+      lastError = err;
+      console.error(
+        `[concierge] PRIMARY_NETWORK_ERROR backend=${backendName} attempt=${attempt + 1}/${PRIMARY_MAX_RETRIES + 1} error=${String((err as Error)?.message ?? err)}`
+      );
+      if (attempt < PRIMARY_MAX_RETRIES) {
+        const delay = backoffDelayMs(attempt, null);
+        console.warn(`[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1} delayMs=${delay} reason=network`);
+        await sleep(delay);
+        continue;
+      }
+      break;
+    }
+
+    if (primary.ok) {
+      if (attempt > 0) {
+        console.log(`[concierge] PRIMARY_RECOVERED backend=${backendName} attempt=${attempt + 1} status=${primary.status}`);
+      }
+      return primary;
+    }
+
+    if (attempt < PRIMARY_MAX_RETRIES && isRetryable(primary.status)) {
+      const reqId = extractRequestId(primary);
+      const retryAfter = primary.headers.get("retry-after");
+      const delay = backoffDelayMs(attempt, retryAfter);
+      console.warn(
+        `[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1}/${PRIMARY_MAX_RETRIES + 1} status=${primary.status} requestId=${reqId} retryAfter=${retryAfter ?? "none"} delayMs=${delay}`
+      );
+      try { await primary.body?.cancel(); } catch (_) { /* noop */ }
+      await sleep(delay);
+      continue;
+    }
+
+    // Non-retryable, or out of attempts
+    break;
+  }
+
+  if (!primary) {
+    // Total network failure across all retries — try Cloudflare if available
+    if (CLOUDFLARE_ENABLED) {
+      console.warn(`[concierge] PRIMARY_EXHAUSTED_NETWORK backend=${backendName} fallingBackToCloudflare=true`);
+    } else {
+      throw lastError ?? new Error("Primary backend unreachable");
+    }
+  } else if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
     return primary;
   }
 
-  const primaryReqId = extractRequestId(primary);
+  const primaryReqId = primary ? extractRequestId(primary) : "none";
+  const primaryStatus = primary?.status ?? 0;
   let errBody = "";
-  try {
-    errBody = await primary.clone().text();
-  } catch (_) { /* noop */ }
+  if (primary) {
+    try {
+      errBody = await primary.clone().text();
+    } catch (_) { /* noop */ }
+  }
 
   console.error(
-    `[concierge] PRIMARY_BACKEND_FAILURE backend=${USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway"} status=${primary.status} requestId=${primaryReqId} bodyPreview=${errBody.slice(0, 500).replace(/\s+/g, " ")}`
+    `[concierge] PRIMARY_BACKEND_FAILURE backend=${backendName} status=${primaryStatus} requestId=${primaryReqId} attempts=${PRIMARY_MAX_RETRIES + 1} bodyPreview=${errBody.slice(0, 500).replace(/\s+/g, " ")}`
   );
+
 
   let cfBodyStr: string;
   let originalModel = "unknown";
@@ -88,7 +174,7 @@ async function chatFetch(init: RequestInit): Promise<Response> {
   }
 
   console.warn(
-    `[concierge] CLOUDFLARE_FALLBACK_INIT originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primary.status} primaryRequestId=${primaryReqId}`
+    `[concierge] CLOUDFLARE_FALLBACK_INIT originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primaryStatus} primaryRequestId=${primaryReqId}`
   );
 
   const cfRes = await fetch(CLOUDFLARE_CHAT_URL, {
