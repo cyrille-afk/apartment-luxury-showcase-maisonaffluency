@@ -1490,6 +1490,15 @@ const TradeProductPage: React.FC = () => {
               Request Customisation
             </button>
 
+            {/* 3D model viewer (trade-only; renders when glb_url is set on trade_products) */}
+            {glbUrl && (
+              <Product3DViewer
+                url={glbUrl}
+                alt={`${product.title} — 3D model`}
+                poster={product.image_url}
+              />
+            )}
+
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
 
