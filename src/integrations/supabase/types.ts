@@ -1363,6 +1363,7 @@ export type Database = {
           embedding_source_hash: string | null
           gallery_images: string[] | null
           hover_image_url: string | null
+          hs_code: string | null
           id: string
           image_url: string
           is_hidden: boolean
@@ -1410,6 +1411,7 @@ export type Database = {
           embedding_source_hash?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
+          hs_code?: string | null
           id?: string
           image_url?: string
           is_hidden?: boolean
@@ -1457,6 +1459,7 @@ export type Database = {
           embedding_source_hash?: string | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
+          hs_code?: string | null
           id?: string
           image_url?: string
           is_hidden?: boolean
@@ -4798,6 +4801,7 @@ export type Database = {
           embedding_source_hash: string | null
           gallery_images: string[] | null
           glb_url: string | null
+          hs_code: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -4839,6 +4843,7 @@ export type Database = {
           embedding_source_hash?: string | null
           gallery_images?: string[] | null
           glb_url?: string | null
+          hs_code?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -4880,6 +4885,7 @@ export type Database = {
           embedding_source_hash?: string | null
           gallery_images?: string[] | null
           glb_url?: string | null
+          hs_code?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
