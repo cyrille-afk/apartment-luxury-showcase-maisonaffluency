@@ -85,83 +85,80 @@ function extractRequestId(res: Response): string {
   );
 }
 
-/**
- * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with retry +
- * exponential backoff on transient primary failures, then automatic
- * Cloudflare Workers AI fallback when the primary backend is rate-limited or
- * out of quota. On fallback, swaps the auth header and rewrites `model` in
- * the JSON body to Cloudflare's catalog.
- */
-async function chatFetch(init: RequestInit): Promise<Response> {
-  const backendName = USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway";
-  let primary: Response | null = null;
-  let lastError: unknown = null;
+// ============================================================
+// Circuit breaker for primary backend (Gemini / Lovable Gateway)
+// ------------------------------------------------------------
+// States:
+//  - closed:    primary is healthy; calls proceed normally.
+//  - open:      too many recent failures; skip primary entirely and route
+//               directly to Cloudflare Workers AI until cooldown elapses.
+//  - half-open: cooldown elapsed; allow ONE probe through to primary. Success
+//               closes the circuit; failure re-opens it (with a fresh cooldown).
+// ============================================================
+const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3");
+const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
-  for (let attempt = 0; attempt <= PRIMARY_MAX_RETRIES; attempt++) {
-    try {
-      primary = await fetch(CHAT_COMPLETIONS_URL, init);
-    } catch (err) {
-      lastError = err;
-      console.error(
-        `[concierge] PRIMARY_NETWORK_ERROR backend=${backendName} attempt=${attempt + 1}/${PRIMARY_MAX_RETRIES + 1} error=${String((err as Error)?.message ?? err)}`
-      );
-      if (attempt < PRIMARY_MAX_RETRIES) {
-        const delay = backoffDelayMs(attempt, null);
-        console.warn(`[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1} delayMs=${delay} reason=network`);
-        await sleep(delay);
-        continue;
+type BreakerState = "closed" | "open" | "half-open";
+const breaker = {
+  state: "closed" as BreakerState,
+  consecutiveFailures: 0,
+  openedAt: 0,
+  probeInFlight: false,
+};
+
+function breakerSnapshot(): string {
+  return `state=${breaker.state} fails=${breaker.consecutiveFailures} openedAt=${breaker.openedAt}`;
+}
+
+function breakerAllowsPrimary(): { allow: boolean; probe: boolean; reason: string } {
+  if (breaker.state === "closed") return { allow: true, probe: false, reason: "closed" };
+  if (breaker.state === "open") {
+    const elapsed = Date.now() - breaker.openedAt;
+    if (elapsed >= CB_COOLDOWN_MS) {
+      // Promote to half-open and let this caller send the probe
+      if (!breaker.probeInFlight) {
+        breaker.state = "half-open";
+        breaker.probeInFlight = true;
+        console.warn(`[concierge] CIRCUIT_HALF_OPEN backend=primary cooldownElapsedMs=${elapsed} sendingProbe=true`);
+        return { allow: true, probe: true, reason: "half-open-probe" };
       }
-      break;
+      // Another probe is in flight — keep routing to CF for now
+      return { allow: false, probe: false, reason: "half-open-probe-in-flight" };
     }
-
-    if (primary.ok) {
-      if (attempt > 0) {
-        console.log(`[concierge] PRIMARY_RECOVERED backend=${backendName} attempt=${attempt + 1} status=${primary.status}`);
-      }
-      return primary;
-    }
-
-    if (attempt < PRIMARY_MAX_RETRIES && isRetryable(primary.status)) {
-      const reqId = extractRequestId(primary);
-      const retryAfter = primary.headers.get("retry-after");
-      const delay = backoffDelayMs(attempt, retryAfter);
-      console.warn(
-        `[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1}/${PRIMARY_MAX_RETRIES + 1} status=${primary.status} requestId=${reqId} retryAfter=${retryAfter ?? "none"} delayMs=${delay}`
-      );
-      try { await primary.body?.cancel(); } catch (_) { /* noop */ }
-      await sleep(delay);
-      continue;
-    }
-
-    // Non-retryable, or out of attempts
-    break;
+    return { allow: false, probe: false, reason: `open-cooldown-remaining-${CB_COOLDOWN_MS - elapsed}ms` };
   }
+  // half-open: only the probe holder is allowed; everyone else short-circuits to CF
+  return { allow: false, probe: false, reason: "half-open-awaiting-probe" };
+}
 
-  if (!primary) {
-    // Total network failure across all retries — try Cloudflare if available
-    if (CLOUDFLARE_ENABLED) {
-      console.warn(`[concierge] PRIMARY_EXHAUSTED_NETWORK backend=${backendName} fallingBackToCloudflare=true`);
-    } else {
-      throw lastError ?? new Error("Primary backend unreachable");
-    }
-  } else if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
-    return primary;
+function breakerRecordSuccess(wasProbe: boolean): void {
+  const prevState = breaker.state;
+  breaker.consecutiveFailures = 0;
+  breaker.state = "closed";
+  breaker.openedAt = 0;
+  if (wasProbe) breaker.probeInFlight = false;
+  if (prevState !== "closed") {
+    console.log(`[concierge] CIRCUIT_CLOSED backend=primary previousState=${prevState} viaProbe=${wasProbe}`);
   }
+}
 
-  const primaryReqId = primary ? extractRequestId(primary) : "none";
-  const primaryStatus = primary?.status ?? 0;
-  let errBody = "";
-  if (primary) {
-    try {
-      errBody = await primary.clone().text();
-    } catch (_) { /* noop */ }
+function breakerRecordFailure(wasProbe: boolean, reason: string): void {
+  breaker.consecutiveFailures += 1;
+  if (wasProbe) {
+    breaker.probeInFlight = false;
+    breaker.state = "open";
+    breaker.openedAt = Date.now();
+    console.error(`[concierge] CIRCUIT_REOPENED backend=primary reason=${reason} fails=${breaker.consecutiveFailures} cooldownMs=${CB_COOLDOWN_MS}`);
+    return;
   }
+  if (breaker.state === "closed" && breaker.consecutiveFailures >= CB_FAILURE_THRESHOLD) {
+    breaker.state = "open";
+    breaker.openedAt = Date.now();
+    console.error(`[concierge] CIRCUIT_OPENED backend=primary threshold=${CB_FAILURE_THRESHOLD} fails=${breaker.consecutiveFailures} cooldownMs=${CB_COOLDOWN_MS} reason=${reason}`);
+  }
+}
 
-  console.error(
-    `[concierge] PRIMARY_BACKEND_FAILURE backend=${backendName} status=${primaryStatus} requestId=${primaryReqId} attempts=${PRIMARY_MAX_RETRIES + 1} bodyPreview=${errBody.slice(0, 500).replace(/\s+/g, " ")}`
-  );
-
-
+async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { status: number; requestId: string }): Promise<Response> {
   let cfBodyStr: string;
   let originalModel = "unknown";
   try {
@@ -174,7 +171,7 @@ async function chatFetch(init: RequestInit): Promise<Response> {
   }
 
   console.warn(
-    `[concierge] CLOUDFLARE_FALLBACK_INIT originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primaryStatus} primaryRequestId=${primaryReqId}`
+    `[concierge] CLOUDFLARE_FALLBACK_INIT reason=${reason} originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primaryCtx.status} primaryRequestId=${primaryCtx.requestId} breaker=${breakerSnapshot()}`
   );
 
   const cfRes = await fetch(CLOUDFLARE_CHAT_URL, {
@@ -186,13 +183,111 @@ async function chatFetch(init: RequestInit): Promise<Response> {
     body: cfBodyStr,
   });
 
-  const cfReqId = extractRequestId(cfRes);
   console.warn(
-    `[concierge] CLOUDFLARE_FALLBACK_RESULT status=${cfRes.status} ok=${cfRes.ok} requestId=${cfReqId}`
+    `[concierge] CLOUDFLARE_FALLBACK_RESULT status=${cfRes.status} ok=${cfRes.ok} requestId=${extractRequestId(cfRes)}`
   );
-
   return cfRes;
 }
+
+/**
+ * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with retry +
+ * exponential backoff on transient primary failures, a circuit breaker that
+ * short-circuits to Cloudflare during cooldowns, and Cloudflare Workers AI
+ * fallback when the primary is rate-limited or out of quota.
+ */
+async function chatFetch(init: RequestInit): Promise<Response> {
+  const backendName = USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway";
+
+  // 1) Circuit breaker short-circuit: route directly to Cloudflare when open
+  const gate = breakerAllowsPrimary();
+  if (!gate.allow) {
+    if (CLOUDFLARE_ENABLED) {
+      console.warn(`[concierge] CIRCUIT_SHORT_CIRCUIT backend=${backendName} reason=${gate.reason} routingTo=cloudflare`);
+      return callCloudflare(init, `circuit-${gate.reason}`, { status: 0, requestId: "skipped" });
+    }
+    // No fallback available — fall through and try primary anyway as a best effort
+    console.warn(`[concierge] CIRCUIT_OPEN_NO_FALLBACK backend=${backendName} reason=${gate.reason} attemptingPrimaryAnyway=true`);
+  }
+
+  const isProbe = gate.probe;
+  let primary: Response | null = null;
+  let lastError: unknown = null;
+  // When probing, skip retries — a single shot determines if primary recovered
+  const maxRetries = isProbe ? 0 : PRIMARY_MAX_RETRIES;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      primary = await fetch(CHAT_COMPLETIONS_URL, init);
+    } catch (err) {
+      lastError = err;
+      console.error(
+        `[concierge] PRIMARY_NETWORK_ERROR backend=${backendName} attempt=${attempt + 1}/${maxRetries + 1} probe=${isProbe} error=${String((err as Error)?.message ?? err)}`
+      );
+      if (attempt < maxRetries) {
+        const delay = backoffDelayMs(attempt, null);
+        console.warn(`[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1} delayMs=${delay} reason=network`);
+        await sleep(delay);
+        continue;
+      }
+      break;
+    }
+
+    if (primary.ok) {
+      if (attempt > 0) {
+        console.log(`[concierge] PRIMARY_RECOVERED backend=${backendName} attempt=${attempt + 1} status=${primary.status}`);
+      }
+      breakerRecordSuccess(isProbe);
+      return primary;
+    }
+
+    if (attempt < maxRetries && isRetryable(primary.status)) {
+      const reqId = extractRequestId(primary);
+      const retryAfter = primary.headers.get("retry-after");
+      const delay = backoffDelayMs(attempt, retryAfter);
+      console.warn(
+        `[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1}/${maxRetries + 1} status=${primary.status} requestId=${reqId} retryAfter=${retryAfter ?? "none"} delayMs=${delay}`
+      );
+      try { await primary.body?.cancel(); } catch (_) { /* noop */ }
+      await sleep(delay);
+      continue;
+    }
+    break;
+  }
+
+  // Primary exhausted or returned a non-retryable error
+  if (!primary) {
+    if (CLOUDFLARE_ENABLED) {
+      breakerRecordFailure(isProbe, "network-exhausted");
+      console.warn(`[concierge] PRIMARY_EXHAUSTED_NETWORK backend=${backendName} fallingBackToCloudflare=true breaker=${breakerSnapshot()}`);
+      return callCloudflare(init, "primary-network-exhausted", { status: 0, requestId: "none" });
+    }
+    breakerRecordFailure(isProbe, "network-exhausted-no-fallback");
+    throw lastError ?? new Error("Primary backend unreachable");
+  }
+
+  if (!CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
+    // Non-fallback failure (e.g. 4xx caller error) — don't trip the breaker
+    if (!primary.ok && isProbe) {
+      // Probe failed but isn't fallback-eligible; still treat as failure to re-open
+      breakerRecordFailure(true, `probe-status-${primary.status}`);
+    }
+    return primary;
+  }
+
+  // Fallback-eligible failure → trip breaker accounting and route to CF
+  breakerRecordFailure(isProbe, `status-${primary.status}`);
+
+  const primaryReqId = extractRequestId(primary);
+  let errBody = "";
+  try { errBody = await primary.clone().text(); } catch (_) { /* noop */ }
+
+  console.error(
+    `[concierge] PRIMARY_BACKEND_FAILURE backend=${backendName} status=${primary.status} requestId=${primaryReqId} attempts=${maxRetries + 1} probe=${isProbe} breaker=${breakerSnapshot()} bodyPreview=${errBody.slice(0, 500).replace(/\s+/g, " ")}`
+  );
+
+  return callCloudflare(init, `primary-status-${primary.status}`, { status: primary.status, requestId: primaryReqId });
+}
+
 
 console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}; cloudflare-fallback: ${CLOUDFLARE_ENABLED ? "on" : "off"}`);
 
