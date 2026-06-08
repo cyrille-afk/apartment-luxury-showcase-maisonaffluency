@@ -1244,7 +1244,7 @@ async function classifySentiment(
           method: "POST",
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: SENTIMENT_MODEL,
+            model: aiModel(SENTIMENT_MODEL),
             max_completion_tokens: SENTIMENT_MAX_TOKENS,
             messages: [
               {
@@ -1361,7 +1361,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
           method: "POST",
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: SENTIMENT_MODEL,
+            model: aiModel(SENTIMENT_MODEL),
             max_completion_tokens: 400,
             messages: [
               {
@@ -2102,7 +2102,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: chosenModel,
+          model: aiModel(chosenModel),
           messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
           tools: finalTools,
           tool_choice: forceToolCall ? "required" : "auto",
@@ -2587,7 +2587,7 @@ serve(async (req) => {
                   method: "POST",
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    model: modelFor("balanced"),
+                    model: aiModel(modelFor("balanced")),
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -2700,7 +2700,7 @@ serve(async (req) => {
                   method: "POST",
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    model: modelFor("balanced"),
+                    model: aiModel(modelFor("balanced")),
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -2781,7 +2781,7 @@ serve(async (req) => {
                   method: "POST",
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    model: modelFor("balanced"),
+                    model: aiModel(modelFor("balanced")),
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -2972,7 +2972,7 @@ serve(async (req) => {
               method: "POST",
               headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: modelFor("balanced"),
+                model: aiModel(modelFor("balanced")),
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
                   { role: "system", content: followupSystem },
