@@ -413,7 +413,14 @@ const VariantSelectors: React.FC<{
         ) : null;
       })()}
 
-      {/* Material / finish dropdown(s) */}
+      {/* Material / finish dropdown(s) — preceded by the materials_description paragraph */}
+      {product.materials_description?.trim() && (
+        <ExpandableSpec
+          icon={specIcon("⬗")}
+          text={product.materials_description.trim()}
+          emphasized
+        />
+      )}
       {isDualAxis ? (
         <>
           <ExpandableSpec
