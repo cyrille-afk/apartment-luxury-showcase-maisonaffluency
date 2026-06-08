@@ -614,7 +614,33 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         className="text-xs"
                       />
                     </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground">HS code <span className="italic">(customs)</span></label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={(pick as any).hs_code || ""}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/[^0-9.]/g, "").slice(0, 14);
+                            updateField(pick.id, "hs_code" as any, v || null);
+                          }}
+                          placeholder="9405.10"
+                          className="text-xs"
+                          inputMode="numeric"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-[10px] h-8 whitespace-nowrap"
+                          onClick={() => applyFieldToAll("hs_code" as any, (pick as any).hs_code || null)}
+                          title="Copy this HS code to all picks for this designer"
+                        >
+                          Apply to all
+                        </Button>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   <div>
