@@ -161,7 +161,7 @@ function useTradeProductBySlug(
       if (tradeProductIdParam) {
         const { data: tradeProduct } = await supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url")
+          .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url")
           .eq("id", tradeProductIdParam)
           .eq("is_active", true)
           .maybeSingle();
