@@ -1,0 +1,2 @@
+ALTER TABLE public.trade_products ADD COLUMN IF NOT EXISTS glb_url TEXT;
+COMMENT ON COLUMN public.trade_products.glb_url IS 'Public URL of a GLB/GLTF 3D model (e.g. from Meshy). When set, renders a <model-viewer> on the trade product page.';

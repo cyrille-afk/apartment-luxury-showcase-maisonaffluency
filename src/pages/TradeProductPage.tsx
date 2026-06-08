@@ -26,6 +26,7 @@ import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
+import Product3DViewer from "@/components/trade/Product3DViewer";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -148,6 +149,7 @@ type TradeProductResult = {
   pricing: TradePricing | null;
   relatedPicks: ProductRow[];
   tradeProductId: string | null;
+  glbUrl?: string | null;
 };
 
 function useTradeProductBySlug(
@@ -161,7 +163,7 @@ function useTradeProductBySlug(
       if (tradeProductIdParam) {
         const { data: tradeProduct } = await supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url")
+          .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url")
           .eq("id", tradeProductIdParam)
           .eq("is_active", true)
           .maybeSingle();
@@ -254,6 +256,7 @@ function useTradeProductBySlug(
           pricing: pricing.rrp_price_cents || pricing.trade_price_cents || pricing.size_variants ? pricing : null,
           relatedPicks,
           tradeProductId: (tradeProduct as any).id,
+          glbUrl: ((tradeProduct as any).glb_url as string | null) || null,
         } satisfies TradeProductResult;
       }
 
@@ -309,7 +312,7 @@ function useTradeProductBySlug(
       // Pull trade pricing + extra images from trade_products
       let tradeQuery = supabase
         .from("trade_products")
-        .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, dimensions, materials, lead_time, origin, description")
+        .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, dimensions, materials, lead_time, origin, description, glb_url")
         .eq("product_name", (product as any).title)
         .eq("is_active", true)
         .limit(1);
@@ -383,6 +386,7 @@ function useTradeProductBySlug(
         pricing,
         relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
         tradeProductId: tradeProduct?.id || null,
+        glbUrl: (tradeProduct?.glb_url as string | null) || null,
       };
     },
     enabled: !!tradeProductIdParam || (!!designerSlug && !!productSlug),
@@ -676,7 +680,7 @@ const TradeProductPage: React.FC = () => {
     );
   }
 
-  const { product, designer, relatedPicks, pricing, tradeProductId } = data;
+  const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
   const designerDisplay = designer.name.includes(" - ")
     ? designer.name.split(" - ")[0].trim()
@@ -1485,6 +1489,15 @@ const TradeProductPage: React.FC = () => {
               <Wand2 size={13} />
               Request Customisation
             </button>
+
+            {/* 3D model viewer (trade-only; renders when glb_url is set on trade_products) */}
+            {glbUrl && (
+              <Product3DViewer
+                url={glbUrl}
+                alt={`${product.title} — 3D model`}
+                poster={product.image_url}
+              />
+            )}
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />

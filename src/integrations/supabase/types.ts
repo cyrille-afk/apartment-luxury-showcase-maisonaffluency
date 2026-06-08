@@ -4797,6 +4797,7 @@ export type Database = {
           embedding: string | null
           embedding_source_hash: string | null
           gallery_images: string[] | null
+          glb_url: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -4837,6 +4838,7 @@ export type Database = {
           embedding?: string | null
           embedding_source_hash?: string | null
           gallery_images?: string[] | null
+          glb_url?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -4877,6 +4879,7 @@ export type Database = {
           embedding?: string | null
           embedding_source_hash?: string | null
           gallery_images?: string[] | null
+          glb_url?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
