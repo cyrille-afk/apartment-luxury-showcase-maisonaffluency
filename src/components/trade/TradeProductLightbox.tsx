@@ -595,6 +595,13 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   )}
                 </>
               )}
+              {product.materials_description?.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;
