@@ -155,7 +155,16 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
 
     // Mode 1: Scheduled run — process all active configs
+    // Requires X-Cron-Secret header to prevent anonymous abuse of paid Firecrawl credits.
     if (body.scheduled === true) {
+      const cronSecret = Deno.env.get("CRON_SECRET");
+      const provided = req.headers.get("x-cron-secret");
+      if (!cronSecret || provided !== cronSecret) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data: configs } = await serviceClient
         .from("scrape_configs")
         .select("*")
