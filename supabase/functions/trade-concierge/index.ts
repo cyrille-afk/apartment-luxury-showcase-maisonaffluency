@@ -44,19 +44,13 @@ function shouldFallback(status: number): boolean {
 }
 
 /**
- * Chat completion fetch with automatic Cloudflare Workers AI fallback when
- * the primary backend is rate-limited or out of quota. Uses OpenAI-compatible
- * request shape; model id is swapped for Cloudflare's catalog on fallback.
+ * Drop-in replacement for `fetch(CHAT_COMPLETIONS_URL, init)` with automatic
+ * Cloudflare Workers AI fallback when the primary backend is rate-limited or
+ * out of quota. On fallback, swaps the auth header and rewrites `model` in
+ * the JSON body to Cloudflare's catalog.
  */
-async function chatFetch(body: Record<string, unknown>, lovableKey: string): Promise<Response> {
-  const primary = await fetch(CHAT_COMPLETIONS_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${aiAuthKey(lovableKey)}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+async function chatFetch(init: RequestInit): Promise<Response> {
+  const primary = await fetch(CHAT_COMPLETIONS_URL, init);
   if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
     return primary;
   }
@@ -64,14 +58,21 @@ async function chatFetch(body: Record<string, unknown>, lovableKey: string): Pro
     const errText = await primary.clone().text();
     console.warn(`[concierge] primary ${primary.status}; falling back to Cloudflare Workers AI. err=${errText.slice(0, 300)}`);
   } catch (_) { /* noop */ }
-  const cfBody = { ...body, model: CLOUDFLARE_FALLBACK_MODEL };
+  let cfBodyStr: string;
+  try {
+    const parsed = JSON.parse(String(init.body ?? "{}"));
+    parsed.model = CLOUDFLARE_FALLBACK_MODEL;
+    cfBodyStr = JSON.stringify(parsed);
+  } catch (_) {
+    cfBodyStr = String(init.body ?? "{}");
+  }
   return await fetch(CLOUDFLARE_CHAT_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${CLOUDFLARE_WORKERS_AI_TOKEN}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(cfBody),
+    body: cfBodyStr,
   });
 }
 
