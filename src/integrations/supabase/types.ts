@@ -5692,6 +5692,15 @@ export type Database = {
           quote_users: number
         }[]
       }
+      get_recent_scrape_failures: {
+        Args: { since_minutes?: number }
+        Returns: {
+          body: string
+          created: string
+          id: number
+          status_code: number
+        }[]
+      }
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
