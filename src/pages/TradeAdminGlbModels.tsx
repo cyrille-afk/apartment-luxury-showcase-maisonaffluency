@@ -238,6 +238,19 @@ const TradeAdminGlbModels: React.FC = () => {
                     <span className="font-body text-sm">
                       {uploading ? "Uploading…" : selected.glb_url ? "Replace 3D model" : "Upload .glb or .gltf"}
                     </span>
+                    {uploading && (
+                      <div className="w-full max-w-[200px]">
+                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-foreground transition-all duration-200"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                        <div className="text-center font-body text-[10px] text-muted-foreground mt-1">
+                          {uploadProgress}%
+                        </div>
+                      </div>
+                    )}
                     <span className="font-body text-[11px] text-muted-foreground">Max {MAX_MB} MB</span>
                     <input
                       ref={inputRef}
