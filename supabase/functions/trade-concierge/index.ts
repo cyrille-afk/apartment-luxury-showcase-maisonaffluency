@@ -174,7 +174,7 @@ async function chatFetch(init: RequestInit): Promise<Response> {
   }
 
   console.warn(
-    `[concierge] CLOUDFLARE_FALLBACK_INIT originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primary.status} primaryRequestId=${primaryReqId}`
+    `[concierge] CLOUDFLARE_FALLBACK_INIT originalModel=${originalModel} fallbackModel=${CLOUDFLARE_FALLBACK_MODEL} primaryStatus=${primaryStatus} primaryRequestId=${primaryReqId}`
   );
 
   const cfRes = await fetch(CLOUDFLARE_CHAT_URL, {
