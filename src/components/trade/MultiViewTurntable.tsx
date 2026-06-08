@@ -241,6 +241,9 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
             </p>
           </div>
 
+          {/* Lightweight camera-angle preview overlay */}
+          <CameraAnglePreview views={views} sourceImageUrl={sourceImageUrl ?? null} />
+
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">
               N = {views.length} · grid {views.length === 4 ? "2×2" : views.length === 6 ? "3×2" : `${views.length}×1`}
