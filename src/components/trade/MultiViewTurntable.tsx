@@ -242,7 +242,11 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
           </div>
 
           {/* Lightweight camera-angle preview overlay */}
-          <CameraAnglePreview views={views} sourceImageUrl={sourceImageUrl ?? null} />
+          <CameraAnglePreview
+            views={views}
+            sourceImageUrl={sourceImageUrl ?? null}
+            onChange={(i, patch) => updateView(i, patch)}
+          />
 
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">
