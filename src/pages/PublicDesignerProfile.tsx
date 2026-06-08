@@ -908,7 +908,7 @@ const PublicDesignerProfile = () => {
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
-                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                          sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
                             "absolute inset-0 w-full h-full transition-all duration-700 rounded-xl object-cover",
@@ -921,7 +921,7 @@ const PublicDesignerProfile = () => {
                             <img
                               src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
                               srcSet={pickSrcSet(pick.hover_image_url)}
-                              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                          sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} alternate finish`}
                               className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                               style={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
