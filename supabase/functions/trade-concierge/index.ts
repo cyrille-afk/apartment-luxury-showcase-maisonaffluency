@@ -17,9 +17,9 @@ const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
 // to use the Lovable Gateway via `_shared/aiEmbeddings.ts`.
 const GOOGLE_AI_STUDIO_API_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
 const USE_GEMINI_DIRECT = !!GOOGLE_AI_STUDIO_API_KEY;
-const CHAT_COMPLETIONS_URL = USE_GEMINI_DIRECT
-  ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-  : CHAT_COMPLETIONS_URL;
+const GEMINI_CHAT_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+const LOVABLE_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const CHAT_COMPLETIONS_URL = USE_GEMINI_DIRECT ? GEMINI_CHAT_URL : LOVABLE_CHAT_URL;
 function aiAuthKey(lovableKey: string): string {
   return USE_GEMINI_DIRECT ? GOOGLE_AI_STUDIO_API_KEY! : lovableKey;
 }
@@ -28,7 +28,54 @@ function aiAuthKey(lovableKey: string): string {
 function aiModel(m: string): string {
   return USE_GEMINI_DIRECT ? m.replace(/^google\//, "") : m;
 }
-console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}`);
+
+// Cloudflare Workers AI fallback (10k free requests/day). Used when Gemini
+// returns a rate-limit / quota error.
+const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+const CLOUDFLARE_WORKERS_AI_TOKEN = Deno.env.get("CLOUDFLARE_WORKERS_AI_TOKEN");
+const CLOUDFLARE_ENABLED = !!(CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_WORKERS_AI_TOKEN);
+const CLOUDFLARE_CHAT_URL = CLOUDFLARE_ENABLED
+  ? `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/chat/completions`
+  : "";
+const CLOUDFLARE_FALLBACK_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+
+function shouldFallback(status: number): boolean {
+  return status === 429 || status === 402 || status === 403;
+}
+
+/**
+ * Chat completion fetch with automatic Cloudflare Workers AI fallback when
+ * the primary backend is rate-limited or out of quota. Uses OpenAI-compatible
+ * request shape; model id is swapped for Cloudflare's catalog on fallback.
+ */
+async function chatFetch(body: Record<string, unknown>, lovableKey: string): Promise<Response> {
+  const primary = await fetch(CHAT_COMPLETIONS_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${aiAuthKey(lovableKey)}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (primary.ok || !CLOUDFLARE_ENABLED || !shouldFallback(primary.status)) {
+    return primary;
+  }
+  try {
+    const errText = await primary.clone().text();
+    console.warn(`[concierge] primary ${primary.status}; falling back to Cloudflare Workers AI. err=${errText.slice(0, 300)}`);
+  } catch (_) { /* noop */ }
+  const cfBody = { ...body, model: CLOUDFLARE_FALLBACK_MODEL };
+  return await fetch(CLOUDFLARE_CHAT_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${CLOUDFLARE_WORKERS_AI_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(cfBody),
+  });
+}
+
+console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}; cloudflare-fallback: ${CLOUDFLARE_ENABLED ? "on" : "off"}`);
 
 
 
