@@ -459,6 +459,26 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               )}
               {axes.hasVariants && axes.isDualAxis ? (
                 <>
+                  {hasDualSize && (
+                    <ExpandableSpec
+                      icon={specIcon("📐")}
+                      text={withImperialPerLine(axes.dualSizeOptions.join("\n"))}
+                      placeholder="Select your size"
+                      emphasized
+                      value={sizeIdx}
+                      onChange={(idx) => {
+                        if (idx < 0) {
+                          clearAllDualSelections();
+                          return;
+                        }
+                        const nextSize = axes.dualSizeOptions[idx] ?? null;
+                        if (nextSize && selectedBase && !variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, nextSize))) setBaseIdx(null);
+                        if (nextSize && selectedTop && !variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, nextSize))) setTopIdx(null);
+                        setSizeIdx(idx);
+                      }}
+                      disabledIndices={disabledDualSizeIdx}
+                    />
+                  )}
                   <ExpandableSpec
                     icon={specIcon("⬗")}
                     text={withImperialPerLine(axes.baseOptions.join("\n"))}
@@ -523,26 +543,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     }}
                     disabledIndices={disabledTopIdx}
                   />
-                  {hasDualSize && (
-                    <ExpandableSpec
-                      icon={specIcon("📐")}
-                      text={withImperialPerLine(axes.dualSizeOptions.join("\n"))}
-                      placeholder="Select your size"
-                      emphasized
-                      value={sizeIdx}
-                      onChange={(idx) => {
-                        if (idx < 0) {
-                          clearAllDualSelections();
-                          return;
-                        }
-                        const nextSize = axes.dualSizeOptions[idx] ?? null;
-                        if (nextSize && selectedBase && !variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, nextSize))) setBaseIdx(null);
-                        if (nextSize && selectedTop && !variantsList.some((v) => matchesDual(v, selectedBase, selectedTop, nextSize))) setTopIdx(null);
-                        setSizeIdx(idx);
-                      }}
-                      disabledIndices={disabledDualSizeIdx}
-                    />
-                  )}
                 </>
               ) : axes.hasVariants && axes.isBaseOnly ? (
                 <ExpandableSpec
@@ -556,20 +556,20 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : axes.hasVariants && axes.hasSingleAxisSplit ? (
                 <>
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
-                    text={axes.singleMaterialOptions.join("\n")}
-                    placeholder="Select your finish"
-                    emphasized
-                    value={singleSplitMatIdx}
-                    onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
-                  />
-                  <ExpandableSpec
                     icon={specIcon("📐")}
                     text={withImperialPerLine(axes.singleSizeOptions.join("\n"))}
                     placeholder="Select your size"
                     emphasized
                     value={singleSplitSizeIdx}
                     onChange={(idx) => setSingleSplitSizeIdx(idx < 0 ? null : idx)}
+                  />
+                  <ExpandableSpec
+                    icon={specIcon("⬗")}
+                    text={axes.singleMaterialOptions.join("\n")}
+                    placeholder="Select your finish"
+                    emphasized
+                    value={singleSplitMatIdx}
+                    onChange={(idx) => setSingleSplitMatIdx(idx < 0 ? null : idx)}
                   />
                 </>
               ) : axes.hasVariants ? (
@@ -583,14 +583,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 />
               ) : (
                 <>
-                  {product.materials && (
-                    <ExpandableSpec
-                      icon={specIcon("⬗")}
-                      text={product.materials}
-                      placeholder="Select your finish"
-                      autoSplit
-                    />
-                  )}
                   {product.dimensions && looksLikeDimension(product.dimensions) && (
                     <ExpandableSpec
                       icon={specIcon("📐")}
@@ -598,6 +590,14 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                       secondaryText={formatImperialDimensions(product.dimensions)}
                       emphasized
                       placeholder="Select your size"
+                    />
+                  )}
+                  {product.materials && (
+                    <ExpandableSpec
+                      icon={specIcon("⬗")}
+                      text={product.materials}
+                      placeholder="Select your finish"
+                      autoSplit
                     />
                   )}
                 </>
