@@ -853,11 +853,11 @@ const PublicDesignerProfile = () => {
 
               {(() => {
                  const forceTwoCol = designer.slug === "adrien-messie";
-                 const effectiveDesktopCols = forceTwoCol ? 2 : Math.min(gridCols, 4);
-                 const desktopColsClass = forceTwoCol ? "md:grid-cols-2" : effectiveDesktopCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4";
-                 const effectiveMobileCols = forceTwoCol ? 2 : mobileCols;
+                 const gridClass = forceTwoCol
+                   ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-2"
+                   : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
                  return (
-              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", effectiveMobileCols === 1 ? "grid-cols-1" : "grid-cols-2", desktopColsClass)}>
+              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridClass)}>
 
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
