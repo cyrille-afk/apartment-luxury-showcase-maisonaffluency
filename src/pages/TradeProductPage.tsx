@@ -1175,6 +1175,13 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
+              {!isRugSqmActive && product.materials_description?.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
