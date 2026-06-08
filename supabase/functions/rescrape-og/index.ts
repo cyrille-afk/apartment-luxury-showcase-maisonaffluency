@@ -68,10 +68,23 @@ const ALL_OG_PATHS: string[] = [
 // This uses the file list baked into the function at deploy time
 const SITE_BASE = "https://www.maisonaffluency.com";
 
+import { requireAdmin } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Require admin (or service-role bearer via shared helper) — prevents
+  // anonymous abuse of Meta's scrape API under our app token.
+  const auth = await requireAdmin(req, "rescrape-og");
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
 
   const META_APP_ID = Deno.env.get("META_APP_ID");
   const META_APP_SECRET = Deno.env.get("META_APP_SECRET");
