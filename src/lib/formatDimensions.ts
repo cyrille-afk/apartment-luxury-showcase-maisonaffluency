@@ -29,8 +29,11 @@ const cmToInches = (value: string): string => {
   return `${(n / 2.54).toFixed(1)}\"`;
 };
 
+const CM_RE = /(?:\b|\d)cm\b/i;
+const CM_RE_G = /\s*cm\b/gi;
+
 const stripVariantPrefix = (part: string): string => {
-  const cmIdx = part.search(/\bcm\b/i);
+  const cmIdx = part.search(CM_RE);
   if (cmIdx < 0) return part;
 
   const beforeCm = part.slice(0, cmIdx);
@@ -44,14 +47,15 @@ const stripVariantPrefix = (part: string): string => {
 };
 
 const toImperialLine = (line: string): string | null => {
-  if (!/\bcm\b/i.test(line)) return null;
+  if (!CM_RE.test(line)) return null;
   const converted = line
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
-      if (!/\bcm\b/i.test(part)) return part;
+      if (!CM_RE.test(part)) return part;
       return stripVariantPrefix(part)
-        .replace(/\s*cm\b/gi, "")
+        .replace(CM_RE_G, "")
         .replace(/\d+(?:[.,]\d+)?/g, cmToInches);
+
     })
     .join("")
     .replace(/\s+/g, " ")
