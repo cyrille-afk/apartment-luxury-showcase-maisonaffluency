@@ -26,6 +26,7 @@ import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inb
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
+import { MultiViewTurntable } from "@/components/trade/MultiViewTurntable";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
@@ -1854,6 +1855,7 @@ const TradeAxonometric = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
+                  <MultiViewTurntable sourceImageUrl={result?.storedUrl || result?.imageUrl} />
                   {result && (
                     <Button
                       variant={lockedLayoutUrl ? "default" : "outline"}
