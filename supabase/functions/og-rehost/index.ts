@@ -119,6 +119,15 @@ Deno.serve(async (req) => {
     return new Response("method not allowed", { status: 405, headers: corsHeaders });
   }
 
+  // Require admin (or service-role bearer, accepted by requireAdmin via shared helper).
+  const auth = await requireAdmin(req, "og-rehost");
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
     const sourceUrl: string = body.sourceUrl;
