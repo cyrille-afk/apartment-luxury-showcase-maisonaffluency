@@ -326,14 +326,6 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
-      {product.materials_description?.trim() && (
-        <ExpandableSpec
-          icon={specIcon("⬗")}
-          text={product.materials_description.trim()}
-          emphasized
-        />
-      )}
-
       {/* Size dropdown — shown FIRST so users pick dimensions before finishes */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
