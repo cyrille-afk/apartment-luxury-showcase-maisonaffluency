@@ -19,7 +19,6 @@ const MAX_MB = 50;
 
 const TradeAdminGlbModels: React.FC = () => {
   const { isAdmin, loading } = useAuth();
-  const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [search, setSearch] = useState("");
@@ -28,6 +27,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
 
   // Load products that already have a GLB
@@ -69,19 +69,16 @@ const TradeAdminGlbModels: React.FC = () => {
     if (!selected) return;
     const name = file.name.toLowerCase();
     if (!(name.endsWith(".glb") || name.endsWith(".gltf"))) {
-      toast({ title: "Wrong file type", description: "Please upload a .glb or .gltf model.", variant: "destructive" });
+      toast.error("Please upload a .glb or .gltf model.");
       return;
     }
     if (file.size > MAX_MB * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: `${(file.size / 1024 / 1024).toFixed(1)} MB — max is ${MAX_MB} MB.`,
-        variant: "destructive",
-      });
+      toast.error(`${(file.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
       return;
     }
 
     setUploading(true);
+    setUploadProgress(0);
     try {
       const ext = name.endsWith(".gltf") ? "gltf" : "glb";
       const contentType = ext === "glb" ? "model/gltf-binary" : "model/gltf+json";
@@ -89,7 +86,15 @@ const TradeAdminGlbModels: React.FC = () => {
 
       const { error: upErr } = await supabase.storage
         .from("assets")
-        .upload(path, file, { contentType, cacheControl: "31536000", upsert: false });
+        .upload(path, file, {
+          contentType,
+          cacheControl: "31536000",
+          upsert: false,
+          onUploadProgress: (evt) => {
+            const pct = Math.round(((evt.loaded || 0) / (evt.total || file.size)) * 100);
+            setUploadProgress(pct);
+          },
+        });
       if (upErr) throw upErr;
 
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
@@ -101,13 +106,14 @@ const TradeAdminGlbModels: React.FC = () => {
         .eq("id", selected.id);
       if (updErr) throw updErr;
 
-      toast({ title: "3D model saved", description: selected.product_name });
+      toast.success(`3D model saved for "${selected.product_name}"`);
       setSelected({ ...selected, glb_url: publicUrl });
       setReloadKey((k) => k + 1);
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e?.message || String(e), variant: "destructive" });
+      toast.error(e?.message || "Upload failed");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
       if (inputRef.current) inputRef.current.value = "";
     }
   };
@@ -119,10 +125,10 @@ const TradeAdminGlbModels: React.FC = () => {
       .update({ glb_url: null })
       .eq("id", row.id);
     if (error) {
-      toast({ title: "Could not remove", description: error.message, variant: "destructive" });
+      toast.error(error.message);
       return;
     }
-    toast({ title: "Removed" });
+    toast.success("3D model removed");
     if (selected?.id === row.id) setSelected({ ...row, glb_url: null });
     setReloadKey((k) => k + 1);
   };
