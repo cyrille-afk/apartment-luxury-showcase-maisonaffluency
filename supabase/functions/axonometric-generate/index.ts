@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { logAiUsage } from "../_shared/aiUsage.ts";
+import { withCache } from "../_shared/aiCache.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -512,7 +513,17 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
     // come from real depth inference instead of the hatched-line prompt-hack.
     let depthMapUrl: string | null = null;
     if (useDepthMap && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
-      depthMapUrl = await generateDepthMap(imageUrl);
+      const cached = await withCache(
+        { feature: "axonometric_depth_map", model: "depth-anything-v2", prompt: `depth:${imageUrl}`, ttlSec: 60 * 60 * 24 * 7 },
+        async () => {
+          const url = await generateDepthMap(imageUrl);
+          return { value: url };
+        }
+      );
+      depthMapUrl = cached.value;
+      if (cached.cached) {
+        console.log("[axo-gen] depth map cache hit");
+      }
       if (depthMapUrl) {
         const depthNote = `\n\nDEPTH MAP REFERENCE (provided as an additional image at the end of the image list): A monocular depth estimation of the input drawing is provided. Brighter pixels = closer to camera / taller geometry, darker pixels = farther / lower. Use this depth map as the AUTHORITATIVE source for: (a) wall positions and partition extents, (b) room boundaries and floor footprint, (c) relative heights of furniture and architectural elements, (d) where openings and voids exist. The depth map overrides any ambiguity from the hatched 2D linework — trust the depth signal for geometry. Do NOT render the depth map itself; use it only as a 3D scaffold for the final photoreal output.`;
         content[0].text = (content[0].text || "") + depthNote;
