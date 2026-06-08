@@ -68,7 +68,7 @@ Deno.test("cooldown elapsed → half-open issues exactly one probe", () => {
   for (const g of gates.slice(1)) {
     assertEquals(g.allow, false, "extra callers must not probe");
     assertEquals(g.probe, false);
-    assertEquals(g.reason, "half-open-probe-in-flight");
+    assertEquals(g.reason, "half-open-awaiting-probe");
   }
 });
 
