@@ -679,7 +679,7 @@ const TradeProductPage: React.FC = () => {
     );
   }
 
-  const { product, designer, relatedPicks, pricing, tradeProductId } = data;
+  const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
   const designerDisplay = designer.name.includes(" - ")
     ? designer.name.split(" - ")[0].trim()
