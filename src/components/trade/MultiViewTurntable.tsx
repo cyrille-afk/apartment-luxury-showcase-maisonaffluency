@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Loader2, Orbit, Download, Plus, Trash2 } from "lucide-react";
+import { Loader2, Orbit, Download, Plus, Trash2, Undo2, Redo2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,32 @@ interface MultiViewTurntableProps {
 
 export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View" }: MultiViewTurntableProps) {
   const [open, setOpen] = useState(false);
-  const [views, setViews] = useState<View[]>(PRESETS[0].views);
+
+  // Undo/redo history stack
+  const [history, setHistory] = useState<View[][]>([PRESETS[0].views]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const views = history[historyIndex];
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  const pushHistory = (nextViews: View[]) => {
+    setHistory((prev) => {
+      const trimmed = prev.slice(0, historyIndex + 1);
+      // avoid duplicate states
+      const last = trimmed[trimmed.length - 1];
+      if (last && JSON.stringify(last) === JSON.stringify(nextViews)) return trimmed;
+      return [...trimmed, nextViews];
+    });
+    setHistoryIndex((i) => i + 1);
+  };
+
+  const setViews = (nextViews: View[]) => pushHistory(nextViews.map((v) => ({ ...v })));
+
+  const undo = () => setHistoryIndex((i) => Math.max(0, i - 1));
+  const redo = () => setHistoryIndex((i) => Math.min(history.length - 1, i + 1));
+  const reset = () => setViews(PRESETS[0].views);
+
   const [loading, setLoading] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
 
@@ -73,16 +98,16 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
   };
 
   const updateView = (i: number, patch: Partial<View>) => {
-    setViews((prev) => prev.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
+    setViews(views.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
   };
 
   const addView = () => {
     if (views.length >= 6) return;
-    setViews((prev) => [...prev, { label: `View ${prev.length + 1}`, azimuth: 45, elevation: 30 }]);
+    setViews([...views, { label: `View ${views.length + 1}`, azimuth: 45, elevation: 30 }]);
   };
 
   const removeView = (i: number) => {
-    setViews((prev) => prev.filter((_, idx) => idx !== i));
+    setViews(views.filter((_, idx) => idx !== i));
   };
 
   const generate = async () => {
@@ -165,11 +190,11 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
             consistent across views.
           </p>
 
-          {/* Preset quick-fill */}
+          {/* Preset quick-fill + undo/redo/reset */}
           <div className="flex items-center gap-2">
             <Label className="text-xs text-muted-foreground whitespace-nowrap">Preset</Label>
             <Select onValueChange={applyPreset}>
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs flex-1">
                 <SelectValue placeholder="Load a preset…" />
               </SelectTrigger>
               <SelectContent>
@@ -180,6 +205,40 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
                 ))}
               </SelectContent>
             </Select>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={undo}
+                disabled={!canUndo}
+                aria-label="Undo"
+                title="Undo"
+              >
+                <Undo2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={redo}
+                disabled={!canRedo}
+                aria-label="Redo"
+                title="Redo"
+              >
+                <Redo2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={reset}
+                aria-label="Reset to default"
+                title="Reset to default"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
 
           {/* Editable view list */}
