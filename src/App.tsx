@@ -463,6 +463,7 @@ const App = () => {
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
                     <Route path="admin/tiers" element={<TradeAdminTiers />} />
                     <Route path="admin/cad-assets" element={<TradeAdminCadAssets />} />
+                    <Route path="admin/glb-models" element={<TradeAdminGlbModels />} />
                     <Route path="admin/og-pipeline" element={<TradeAdminOgPipeline />} />
                     <Route path="admin/onboarding" element={<TradeAdminOnboarding />} />
                     <Route path="admin/onboarding-funnel" element={<TradeAdminOnboardingFunnel />} />
