@@ -241,6 +241,9 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
             </p>
           </div>
 
+          {/* Lightweight camera-angle preview overlay */}
+          <CameraAnglePreview views={views} sourceImageUrl={sourceImageUrl ?? null} />
+
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">
               N = {views.length} · grid {views.length === 4 ? "2×2" : views.length === 6 ? "3×2" : `${views.length}×1`}
@@ -280,5 +283,114 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * Lightweight top-down + side preview of the selected camera angles.
+ * Pure SVG, no 3D engine. Subject sits at the center; each view is a
+ * labeled camera dot positioned by azimuth (top-down) and elevation (side).
+ */
+function CameraAnglePreview({
+  views,
+  sourceImageUrl,
+}: {
+  views: View[];
+  sourceImageUrl: string | null;
+}) {
+  const size = 200;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size / 2 - 24;
+
+  const toXY = (azimuthDeg: number, elevationDeg: number) => {
+    // Azimuth 0° = north (up); elevation pulls the camera toward the center.
+    const rad = ((azimuthDeg - 90) * Math.PI) / 180;
+    const r = radius * (1 - clampInt(elevationDeg, 0, 90) / 120); // 0° → full radius, 90° → ~25%
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  };
+
+  return (
+    <div className="rounded-md border border-border/60 bg-muted/10 p-3">
+      <div className="flex items-center justify-between mb-2">
+        <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
+          Camera placement preview
+        </Label>
+        <span className="text-[10px] text-muted-foreground">Top-down · subject centered</span>
+      </div>
+      <div className="grid grid-cols-[200px_1fr] gap-3 items-start">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="bg-background rounded">
+          {/* compass rings */}
+          <circle cx={cx} cy={cy} r={radius} fill="none" stroke="hsl(var(--border))" strokeDasharray="3 3" />
+          <circle cx={cx} cy={cy} r={radius * 0.5} fill="none" stroke="hsl(var(--border))" strokeDasharray="2 4" opacity={0.6} />
+          {/* compass labels */}
+          <text x={cx} y={14} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">N 0°</text>
+          <text x={size - 4} y={cy + 3} textAnchor="end" fontSize="9" fill="hsl(var(--muted-foreground))">E 90°</text>
+          <text x={cx} y={size - 4} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">S 180°</text>
+          <text x={4} y={cy + 3} fontSize="9" fill="hsl(var(--muted-foreground))">W 270°</text>
+          {/* subject thumbnail */}
+          {sourceImageUrl ? (
+            <image
+              href={sourceImageUrl}
+              x={cx - 18}
+              y={cy - 18}
+              width={36}
+              height={36}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="circle(18px at 18px 18px)"
+            />
+          ) : (
+            <circle cx={cx} cy={cy} r={10} fill="hsl(var(--primary))" opacity={0.7} />
+          )}
+          {/* camera dots */}
+          {views.map((v, i) => {
+            const { x, y } = toXY(v.azimuth, v.elevation);
+            const opacity = 0.45 + (1 - clampInt(v.elevation, 0, 90) / 90) * 0.55;
+            return (
+              <g key={i}>
+                <line x1={cx} y1={cy} x2={x} y2={y} stroke="hsl(var(--primary))" strokeWidth={0.8} opacity={0.35} />
+                <circle cx={x} cy={y} r={7} fill="hsl(var(--primary))" opacity={opacity} />
+                <text x={x} y={y + 3} textAnchor="middle" fontSize="9" fontWeight={600} fill="hsl(var(--primary-foreground))">
+                  {i + 1}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Legend + side-elevation strip */}
+        <div className="space-y-2">
+          <div className="space-y-1 max-h-[150px] overflow-y-auto pr-1">
+            {views.map((v, i) => (
+              <div key={i} className="flex items-center gap-2 text-[11px]">
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold shrink-0">
+                  {i + 1}
+                </span>
+                <span className="truncate flex-1">{v.label || `View ${i + 1}`}</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {clampInt(v.azimuth, 0, 360)}° · {clampInt(v.elevation, 0, 90)}°↑
+                </span>
+              </div>
+            ))}
+          </div>
+          {/* side-elevation strip: shows tilt height */}
+          <svg width="100%" height="36" viewBox="0 0 200 36" className="bg-background rounded border border-border/40">
+            <line x1={0} y1={30} x2={200} y2={30} stroke="hsl(var(--border))" />
+            <text x={2} y={10} fontSize="8" fill="hsl(var(--muted-foreground))">elevation</text>
+            {views.map((v, i) => {
+              const x = 20 + (i * 160) / Math.max(1, views.length - 1);
+              const y = 30 - (clampInt(v.elevation, 0, 90) / 90) * 22;
+              return (
+                <g key={i}>
+                  <line x1={x} y1={30} x2={x} y2={y} stroke="hsl(var(--primary))" strokeWidth={0.8} opacity={0.5} />
+                  <circle cx={x} cy={y} r={4} fill="hsl(var(--primary))" />
+                  <text x={x} y={y - 6} textAnchor="middle" fontSize="8" fill="hsl(var(--muted-foreground))">{i + 1}</text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+    </div>
   );
 }
