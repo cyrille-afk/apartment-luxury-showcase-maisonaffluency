@@ -257,7 +257,6 @@ const PublicDesignerProfile = () => {
   useEffect(() => {
     if (gridColsTouched) return;
     if (designer?.slug === "alpange") setGridCols(3);
-    else if (designer?.slug === "emmanuel-levet-stenne") setGridCols(3);
   }, [designer?.slug, gridColsTouched]);
 
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
