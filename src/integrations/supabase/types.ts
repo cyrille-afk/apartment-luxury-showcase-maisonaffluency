@@ -1324,6 +1324,27 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_http_call_log: {
+        Row: {
+          created_at: string
+          jobname: string
+          request_id: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          jobname: string
+          request_id: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          jobname?: string
+          request_id?: number
+          url?: string
+        }
+        Relationships: []
+      }
       designer_curator_picks: {
         Row: {
           base_axis_label: string | null
