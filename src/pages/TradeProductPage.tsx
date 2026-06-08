@@ -26,6 +26,7 @@ import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
+import Product3DViewer from "@/components/trade/Product3DViewer";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
