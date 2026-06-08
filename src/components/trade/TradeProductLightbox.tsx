@@ -450,13 +450,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             </div>
 
             <div className="flex flex-col">
-              {product.materials_description?.trim() && (
-                <ExpandableSpec
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                  emphasized
-                />
-              )}
               {axes.hasVariants && axes.isDualAxis ? (
                 <>
                   {hasDualSize && (
