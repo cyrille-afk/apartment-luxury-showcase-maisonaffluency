@@ -41,12 +41,22 @@ function titlesAreNearTwins(a: string, b: string): boolean {
   const an = normalizeLoose(a);
   const bn = normalizeLoose(b);
   if (!an || !bn) return false;
-  if (an === bn || an.includes(bn) || bn.includes(an)) return true;
+  // Require both titles to be at least 4 chars before allowing the substring shortcut.
+  // Prevents stubs like "P", "Pa", "Pal" matching every product in the brand.
+  if (an.length >= 4 && bn.length >= 4 && (an === bn || an.includes(bn) || bn.includes(an))) {
+    // Still require at least one shared non-generic token
+    const aTokens = titleTokens(a);
+    const bTokens = titleTokens(b);
+    if (aTokens.some((t) => bTokens.includes(t))) return true;
+  }
   const aTokens = titleTokens(a);
   const bTokens = titleTokens(b);
+  if (!aTokens.length || !bTokens.length) return false;
   const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
   const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
-  return shorter.length > 0 && shorter.every((token) => longer.includes(token));
+  // Require at least one shared non-generic token AND every shorter token included.
+  const shared = shorter.filter((token) => longer.includes(token));
+  return shared.length > 0 && shared.length === shorter.length;
 }
 
 async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClient>, row: any) {
