@@ -365,8 +365,32 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       } else {
         throw new Error("Scene edit requires either a mask (erase areas) or product placements");
       }
+    } else if (mode === "multi_view") {
+      // Single-call N-angle "turntable": ask the model to render ONE composite
+      // contact sheet so all views share the same furniture, materials, and lighting.
+      const views = (body.views as { label: string; azimuth: number; elevation: number }[] | undefined) || [];
+      if (!views.length) throw new Error("multi_view requires a non-empty `views` array");
+      if (views.length > 6) throw new Error("multi_view supports up to 6 views per call");
+      const gridLayout = (body.gridLayout as string) ||
+        (views.length === 4 ? "2x2" : views.length <= 2 ? `${views.length}x1` : `${views.length}x1`);
+      const viewList = views
+        .map((v, i) => `  ${i + 1}. "${v.label}" — azimuth ${v.azimuth}°, elevation ${v.elevation}°`)
+        .join("\n");
+      prompt = `You are given ONE source interior render. Produce ONE SQUARE composite contact sheet arranged as a ${gridLayout} grid that shows the SAME scene from ${views.length} different camera angles:
+${viewList}
+
+ABSOLUTE CONSISTENCY RULES (any violation = total failure):
+- Every cell must show the EXACT SAME room layout, the EXACT SAME furniture pieces (same shapes, same colors, same materials, same finishes, same positions), the EXACT SAME architectural shell, and the EXACT SAME lighting setup (same key-light direction, same warmth, same shadow softness, same ambient occlusion).
+- Do NOT add, remove, swap, recolor, or restyle any furniture between views. A green velvet sofa in cell 1 must be the SAME green velvet sofa in cells 2, 3 and 4 — only the camera moves.
+- Treat all views as frames of ONE 3D scene rendered from different camera positions in a SINGLE render session — never as independent generations.
+- Each cell must be a clean rectangular crop separated by a thin neutral hairline, with a small white-on-dark label in the top-left corner of every cell carrying its view name (e.g. "${views[0]?.label}").
+- The whole composite must be a single 1:1 square image at the highest resolution available, with no extra header, watermark, or background outside the grid.
+
+Source render fidelity: preserve the exact materials, finishes, and palette of the source image — this is the locked appearance reference for every cell.
+
+Style: ${defaultStyle}. Quality must match a single Corona/V-Ray turntable batch.`;
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle, multi_view");
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
