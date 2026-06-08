@@ -39,12 +39,72 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const REPLICATE_API_KEY = Deno.env.get("REPLICATE_API_KEY");
 
     const body = await req.json();
     const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier, lightingStrength } = body;
     // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
+    const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
+
+    // ---- Depth map helper (Replicate Depth Anything V2 via Lovable gateway) ----
+    // Returns a public depth-map URL for the given input image, or null on failure.
+    async function generateDepthMap(srcUrl: string): Promise<string | null> {
+      if (!REPLICATE_API_KEY) {
+        console.warn("[axo-gen] REPLICATE_API_KEY not set — skipping depth map");
+        return null;
+      }
+      const GW = "https://connector-gateway.lovable.dev/replicate/v1";
+      const headers = {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": REPLICATE_API_KEY,
+        "Content-Type": "application/json",
+      };
+      try {
+        const createRes = await fetch(`${GW}/models/chenxwh/depth-anything-v2/predictions`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ input: { image: srcUrl } }),
+        });
+        if (!createRes.ok) {
+          console.warn("[axo-gen] depth create failed", createRes.status, await createRes.text().catch(() => ""));
+          return null;
+        }
+        const created = await createRes.json();
+        const id = created.id;
+        if (!id) return null;
+        // Poll (depth is fast — usually <5s)
+        for (let i = 0; i < 40; i++) {
+          await new Promise((r) => setTimeout(r, i < 4 ? 1000 : 2000));
+          const pollRes = await fetch(`${GW}/predictions/${id}`, { headers });
+          if (!pollRes.ok) continue;
+          const p = await pollRes.json();
+          if (p.status === "succeeded") {
+            const out = Array.isArray(p.output) ? p.output[0] : p.output;
+            if (typeof out === "string") {
+              console.log("[axo-gen] depth map ready");
+              return out;
+            }
+            // Some Depth Anything variants return { grey_depth, color_depth } — prefer grey
+            if (out && typeof out === "object") {
+              return out.grey_depth || out.color_depth || out.depth || null;
+            }
+            return null;
+          }
+          if (p.status === "failed" || p.status === "canceled") {
+            console.warn("[axo-gen] depth prediction failed", p.error);
+            return null;
+          }
+        }
+        console.warn("[axo-gen] depth prediction timed out");
+        return null;
+      } catch (err) {
+        console.warn("[axo-gen] depth helper error", err);
+        return null;
+      }
+    }
+
 
     // Creative brief fields from request form
     const briefRoomType = body.roomType as string | undefined;
@@ -446,12 +506,30 @@ Style: ${buildStyle()}. The output must look like the SAME render session as the
 
     // Build message content
     const content: any[] = [{ type: "text", text: prompt }];
+
+    // Pre-compute monocular depth map for elevation/section modes — gives Gemini
+    // explicit geometric grounding so wall thickness, room depth and floor extents
+    // come from real depth inference instead of the hatched-line prompt-hack.
+    let depthMapUrl: string | null = null;
+    if (useDepthMap && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
+      depthMapUrl = await generateDepthMap(imageUrl);
+      if (depthMapUrl) {
+        const depthNote = `\n\nDEPTH MAP REFERENCE (provided as an additional image at the end of the image list): A monocular depth estimation of the input drawing is provided. Brighter pixels = closer to camera / taller geometry, darker pixels = farther / lower. Use this depth map as the AUTHORITATIVE source for: (a) wall positions and partition extents, (b) room boundaries and floor footprint, (c) relative heights of furniture and architectural elements, (d) where openings and voids exist. The depth map overrides any ambiguity from the hatched 2D linework — trust the depth signal for geometry. Do NOT render the depth map itself; use it only as a 3D scaffold for the final photoreal output.`;
+        content[0].text = (content[0].text || "") + depthNote;
+      }
+    }
+
     if ((mode === "elevation_to_axo" || mode === "section_to_axo") && referenceImageUrl) {
       content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
       content.push({ type: "image_url", image_url: { url: imageUrl } });
     } else {
       content.push({ type: "image_url", image_url: { url: imageUrl } });
     }
+
+    if (depthMapUrl) {
+      content.push({ type: "image_url", image_url: { url: depthMapUrl } });
+    }
+
 
     // Add replacement product images for product_swap mode
     if (mode === "product_swap") {
