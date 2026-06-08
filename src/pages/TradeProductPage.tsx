@@ -385,6 +385,7 @@ function useTradeProductBySlug(
         pricing,
         relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
         tradeProductId: tradeProduct?.id || null,
+        glbUrl: (tradeProduct?.glb_url as string | null) || null,
       };
     },
     enabled: !!tradeProductIdParam || (!!designerSlug && !!productSlug),
