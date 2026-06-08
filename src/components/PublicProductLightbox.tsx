@@ -537,16 +537,74 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             <div className="flex flex-col">
               {(() => {
-                // When an explicit product legend is set, render it as a plain
-                // description with the Layers icon (no dropdown / no parsing).
-                if (product.materials_description && product.materials_description.trim()) {
+                if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
                   return (
-                      <ExpandableSpec
-                        icon={specIcon("⬗")}
-                      text={product.materials_description.trim()}
-                        emphasized
+                    <ExpandableSpec
+                      icon={specIcon("📐")}
+                      text={withImperialPerLine(singleSplitSizes.join("\n"))}
+                      emphasized
+                      placeholder="Select your size"
+                      value={selectedSingleSizeIdx ?? null}
+                      onChange={(idx) => setSelectedSingleSizeIdx(idx < 0 ? null : idx)}
                     />
                   );
+                }
+                const sv = product.size_variants || [];
+                const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
+                const dualSizeOptions = isDualAxis
+                  ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
+                  : [];
+                if (isDualAxis && dualSizeOptions.length > 0) {
+                  const single = dualSizeOptions.length === 1;
+                  return (
+                    <ExpandableSpec
+                      icon={specIcon("📐")}
+                      text={single ? formatDimensionsMultiline(dualSizeOptions[0]) : withImperialPerLine(dualSizeOptions.join("\n"))}
+                      secondaryText={single ? formatImperialDimensions(dualSizeOptions[0]) : undefined}
+                      emphasized
+                      placeholder="Select your size"
+                    />
+                  );
+                }
+                // Single-axis variants (label + price only) — surface labels as size dropdown.
+                if (!isDualAxis && sv.length > 1) {
+                  const labels = Array.from(
+                    new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
+                  ).filter(looksLikeDimension);
+                  if (labels.length > 1) {
+                    return (
+                      <ExpandableSpec
+                        icon={specIcon("📐")}
+                        text={withImperialPerLine(labels.join("\n"))}
+                        emphasized
+                        placeholder="Select your size"
+                      />
+                    );
+                  }
+                }
+                return product.dimensions && looksLikeDimension(product.dimensions) ? (
+                  <ExpandableSpec
+                    icon={specIcon("📐")}
+                    text={formatDimensionsMultiline(product.dimensions)}
+                    secondaryText={formatImperialDimensions(product.dimensions)}
+                    emphasized
+                    placeholder="Select your size"
+                  />
+                ) : null;
+              })()}
+              {product.materials_description && product.materials_description.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
+              {(() => {
+                // When materials_description is present we already rendered it
+                // above as the finish paragraph; skip the finish dropdowns to
+                // avoid duplicating the same information.
+                if (product.materials_description && product.materials_description.trim()) {
+                  return null;
                 }
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
@@ -636,62 +694,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   );
                 }
                 return null;
-              })()}
-              {(() => {
-                if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
-                  return (
-                    <ExpandableSpec
-                      icon={specIcon("📐")}
-                      text={withImperialPerLine(singleSplitSizes.join("\n"))}
-                      emphasized
-                      placeholder="Select your size"
-                      value={selectedSingleSizeIdx ?? null}
-                      onChange={(idx) => setSelectedSingleSizeIdx(idx < 0 ? null : idx)}
-                    />
-                  );
-                }
-                const sv = product.size_variants || [];
-                const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-                const dualSizeOptions = isDualAxis
-                  ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
-                  : [];
-                if (isDualAxis && dualSizeOptions.length > 0) {
-                  const single = dualSizeOptions.length === 1;
-                  return (
-                    <ExpandableSpec
-                      icon={specIcon("📐")}
-                      text={single ? formatDimensionsMultiline(dualSizeOptions[0]) : withImperialPerLine(dualSizeOptions.join("\n"))}
-                      secondaryText={single ? formatImperialDimensions(dualSizeOptions[0]) : undefined}
-                      emphasized
-                      placeholder="Select your size"
-                    />
-                  );
-                }
-                // Single-axis variants (label + price only) — surface labels as size dropdown.
-                if (!isDualAxis && sv.length > 1) {
-                  const labels = Array.from(
-                    new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
-                  ).filter(looksLikeDimension);
-                  if (labels.length > 1) {
-                    return (
-                      <ExpandableSpec
-                        icon={specIcon("📐")}
-                        text={withImperialPerLine(labels.join("\n"))}
-                        emphasized
-                        placeholder="Select your size"
-                      />
-                    );
-                  }
-                }
-                return product.dimensions && looksLikeDimension(product.dimensions) ? (
-                  <ExpandableSpec
-                    icon={specIcon("📐")}
-                    text={formatDimensionsMultiline(product.dimensions)}
-                    secondaryText={formatImperialDimensions(product.dimensions)}
-                    emphasized
-                    placeholder="Select your size"
-                  />
-                ) : null;
               })()}
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
