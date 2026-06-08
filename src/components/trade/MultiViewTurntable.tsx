@@ -190,11 +190,11 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
             consistent across views.
           </p>
 
-          {/* Preset quick-fill */}
+          {/* Preset quick-fill + undo/redo/reset */}
           <div className="flex items-center gap-2">
             <Label className="text-xs text-muted-foreground whitespace-nowrap">Preset</Label>
             <Select onValueChange={applyPreset}>
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs flex-1">
                 <SelectValue placeholder="Load a preset…" />
               </SelectTrigger>
               <SelectContent>
@@ -205,6 +205,40 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
                 ))}
               </SelectContent>
             </Select>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={undo}
+                disabled={!canUndo}
+                aria-label="Undo"
+                title="Undo"
+              >
+                <Undo2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={redo}
+                disabled={!canRedo}
+                aria-label="Redo"
+                title="Redo"
+              >
+                <Redo2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={reset}
+                aria-label="Reset to default"
+                title="Reset to default"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
 
           {/* Editable view list */}
