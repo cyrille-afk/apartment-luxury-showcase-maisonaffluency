@@ -88,75 +88,26 @@ function extractRequestId(res: Response): string {
 // ============================================================
 // Circuit breaker for primary backend (Gemini / Lovable Gateway)
 // ------------------------------------------------------------
-// States:
-//  - closed:    primary is healthy; calls proceed normally.
-//  - open:      too many recent failures; skip primary entirely and route
-//               directly to Cloudflare Workers AI until cooldown elapses.
-//  - half-open: cooldown elapsed; allow ONE probe through to primary. Success
-//               closes the circuit; failure re-opens it (with a fresh cooldown).
+// See ./_breaker.ts for the state machine. Tests live in
+// ./breaker_test.ts and use a fake clock to verify cooldown,
+// half-open probing, and immediate-fallback behavior.
 // ============================================================
+import { createBreaker } from "./_breaker.ts";
+
 const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3");
 const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
-type BreakerState = "closed" | "open" | "half-open";
-const breaker = {
-  state: "closed" as BreakerState,
-  consecutiveFailures: 0,
-  openedAt: 0,
-  probeInFlight: false,
-};
+const breaker = createBreaker({
+  threshold: CB_FAILURE_THRESHOLD,
+  cooldownMs: CB_COOLDOWN_MS,
+});
 
-function breakerSnapshot(): string {
-  return `state=${breaker.state} fails=${breaker.consecutiveFailures} openedAt=${breaker.openedAt}`;
-}
+const breakerSnapshot = () => breaker.snapshot();
+const breakerAllowsPrimary = () => breaker.allowsPrimary();
+const breakerRecordSuccess = (wasProbe: boolean) => breaker.recordSuccess(wasProbe);
+const breakerRecordFailure = (wasProbe: boolean, reason: string) =>
+  breaker.recordFailure(wasProbe, reason);
 
-function breakerAllowsPrimary(): { allow: boolean; probe: boolean; reason: string } {
-  if (breaker.state === "closed") return { allow: true, probe: false, reason: "closed" };
-  if (breaker.state === "open") {
-    const elapsed = Date.now() - breaker.openedAt;
-    if (elapsed >= CB_COOLDOWN_MS) {
-      // Promote to half-open and let this caller send the probe
-      if (!breaker.probeInFlight) {
-        breaker.state = "half-open";
-        breaker.probeInFlight = true;
-        console.warn(`[concierge] CIRCUIT_HALF_OPEN backend=primary cooldownElapsedMs=${elapsed} sendingProbe=true`);
-        return { allow: true, probe: true, reason: "half-open-probe" };
-      }
-      // Another probe is in flight — keep routing to CF for now
-      return { allow: false, probe: false, reason: "half-open-probe-in-flight" };
-    }
-    return { allow: false, probe: false, reason: `open-cooldown-remaining-${CB_COOLDOWN_MS - elapsed}ms` };
-  }
-  // half-open: only the probe holder is allowed; everyone else short-circuits to CF
-  return { allow: false, probe: false, reason: "half-open-awaiting-probe" };
-}
-
-function breakerRecordSuccess(wasProbe: boolean): void {
-  const prevState = breaker.state;
-  breaker.consecutiveFailures = 0;
-  breaker.state = "closed";
-  breaker.openedAt = 0;
-  if (wasProbe) breaker.probeInFlight = false;
-  if (prevState !== "closed") {
-    console.log(`[concierge] CIRCUIT_CLOSED backend=primary previousState=${prevState} viaProbe=${wasProbe}`);
-  }
-}
-
-function breakerRecordFailure(wasProbe: boolean, reason: string): void {
-  breaker.consecutiveFailures += 1;
-  if (wasProbe) {
-    breaker.probeInFlight = false;
-    breaker.state = "open";
-    breaker.openedAt = Date.now();
-    console.error(`[concierge] CIRCUIT_REOPENED backend=primary reason=${reason} fails=${breaker.consecutiveFailures} cooldownMs=${CB_COOLDOWN_MS}`);
-    return;
-  }
-  if (breaker.state === "closed" && breaker.consecutiveFailures >= CB_FAILURE_THRESHOLD) {
-    breaker.state = "open";
-    breaker.openedAt = Date.now();
-    console.error(`[concierge] CIRCUIT_OPENED backend=primary threshold=${CB_FAILURE_THRESHOLD} fails=${breaker.consecutiveFailures} cooldownMs=${CB_COOLDOWN_MS} reason=${reason}`);
-  }
-}
 
 async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { status: number; requestId: string }): Promise<Response> {
   let cfBodyStr: string;
