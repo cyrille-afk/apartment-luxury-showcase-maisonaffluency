@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Loader2, Orbit, Download, Plus, Trash2, Undo2, Redo2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -61,13 +61,47 @@ interface MultiViewTurntableProps {
   triggerLabel?: string;
 }
 
+const LS_KEY = "ma_multiViewTurntable";
+
+function loadPersisted(): { history: View[][]; index: number } | null {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      Array.isArray(parsed.history) &&
+      typeof parsed.index === "number" &&
+      parsed.index >= 0 &&
+      parsed.index < parsed.history.length
+    ) {
+      return { history: parsed.history as View[][], index: parsed.index };
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return null;
+}
+
+function savePersisted(history: View[][], index: number) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({ history, index }));
+  } catch {
+    // ignore quota errors
+  }
+}
+
 export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View" }: MultiViewTurntableProps) {
   const [open, setOpen] = useState(false);
 
-  // Undo/redo history stack
-  const [history, setHistory] = useState<View[][]>([PRESETS[0].views]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  // Undo/redo history stack (with localStorage hydration)
+  const persisted = loadPersisted();
+  const [history, setHistory] = useState<View[][]>(persisted?.history ?? [PRESETS[0].views]);
+  const [historyIndex, setHistoryIndex] = useState(persisted?.index ?? 0);
   const views = history[historyIndex];
+
+  useEffect(() => {
+    savePersisted(history, historyIndex);
+  }, [history, historyIndex]);
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
@@ -75,7 +109,6 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
   const pushHistory = (nextViews: View[]) => {
     setHistory((prev) => {
       const trimmed = prev.slice(0, historyIndex + 1);
-      // avoid duplicate states
       const last = trimmed[trimmed.length - 1];
       if (last && JSON.stringify(last) === JSON.stringify(nextViews)) return trimmed;
       return [...trimmed, nextViews];
@@ -87,7 +120,9 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
 
   const undo = () => setHistoryIndex((i) => Math.max(0, i - 1));
   const redo = () => setHistoryIndex((i) => Math.min(history.length - 1, i + 1));
-  const reset = () => setViews(PRESETS[0].views);
+  const reset = () => {
+    setViews(PRESETS[0].views);
+  };
 
   const [loading, setLoading] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
