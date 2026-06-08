@@ -254,6 +254,7 @@ function useTradeProductBySlug(
           pricing: pricing.rrp_price_cents || pricing.trade_price_cents || pricing.size_variants ? pricing : null,
           relatedPicks,
           tradeProductId: (tradeProduct as any).id,
+          glbUrl: ((tradeProduct as any).glb_url as string | null) || null,
         } satisfies TradeProductResult;
       }
 
