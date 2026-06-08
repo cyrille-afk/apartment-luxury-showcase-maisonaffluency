@@ -1,48 +1,88 @@
 import { useState } from "react";
-import { Loader2, Orbit, Download } from "lucide-react";
+import { Loader2, Orbit, Download, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-type View = { id: string; label: string; azimuth: number; elevation: number };
+type View = { label: string; azimuth: number; elevation: number };
 
-// Curated angle presets. Each angle is sent verbatim to the model and rendered
-// as one cell of a single composite contact sheet, so all cells share the
-// exact same furniture, materials and lighting.
-const PRESET_VIEWS: View[] = [
-  { id: "front-left", label: "Front-Left", azimuth: 45, elevation: 30 },
-  { id: "front-right", label: "Front-Right", azimuth: 135, elevation: 30 },
-  { id: "back-right", label: "Back-Right", azimuth: 225, elevation: 30 },
-  { id: "back-left", label: "Back-Left", azimuth: 315, elevation: 30 },
-  { id: "top-down", label: "Top-Down", azimuth: 0, elevation: 85 },
-  { id: "eye-level", label: "Eye-Level", azimuth: 45, elevation: 5 },
+// Quick-fill presets. Selecting one replaces the current list with its angles.
+const PRESETS: { id: string; name: string; views: View[] }[] = [
+  {
+    id: "4-corners",
+    name: "4 corners (default)",
+    views: [
+      { label: "Front-Left", azimuth: 45, elevation: 30 },
+      { label: "Front-Right", azimuth: 135, elevation: 30 },
+      { label: "Back-Right", azimuth: 225, elevation: 30 },
+      { label: "Back-Left", azimuth: 315, elevation: 30 },
+    ],
+  },
+  {
+    id: "3-hero",
+    name: "3 hero angles",
+    views: [
+      { label: "Hero", azimuth: 45, elevation: 30 },
+      { label: "Top-Down", azimuth: 0, elevation: 85 },
+      { label: "Eye-Level", azimuth: 45, elevation: 5 },
+    ],
+  },
+  {
+    id: "6-orbit",
+    name: "6-step orbit",
+    views: [
+      { label: "0°", azimuth: 0, elevation: 30 },
+      { label: "60°", azimuth: 60, elevation: 30 },
+      { label: "120°", azimuth: 120, elevation: 30 },
+      { label: "180°", azimuth: 180, elevation: 30 },
+      { label: "240°", azimuth: 240, elevation: 30 },
+      { label: "300°", azimuth: 300, elevation: 30 },
+    ],
+  },
+  {
+    id: "2-compare",
+    name: "2-up compare",
+    views: [
+      { label: "Front", azimuth: 45, elevation: 30 },
+      { label: "Top-Down", azimuth: 0, elevation: 85 },
+    ],
+  },
 ];
 
-const DEFAULT_SELECTED = new Set(["front-left", "front-right", "back-right", "back-left"]);
+const clampInt = (v: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, Math.round(Number.isFinite(v) ? v : min)));
 
 interface MultiViewTurntableProps {
-  /** Source render the turntable should match (storedUrl or imageUrl). */
   sourceImageUrl: string | null | undefined;
-  /** Optional custom trigger button content. */
   triggerLabel?: string;
 }
 
 export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View" }: MultiViewTurntableProps) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<Set<string>>(new Set(DEFAULT_SELECTED));
+  const [views, setViews] = useState<View[]>(PRESETS[0].views);
   const [loading, setLoading] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
 
-  const toggle = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const applyPreset = (id: string) => {
+    const p = PRESETS.find((x) => x.id === id);
+    if (p) setViews(p.views.map((v) => ({ ...v })));
+  };
+
+  const updateView = (i: number, patch: Partial<View>) => {
+    setViews((prev) => prev.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
+  };
+
+  const addView = () => {
+    if (views.length >= 6) return;
+    setViews((prev) => [...prev, { label: `View ${prev.length + 1}`, azimuth: 45, elevation: 30 }]);
+  };
+
+  const removeView = (i: number) => {
+    setViews((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const generate = async () => {
@@ -50,20 +90,28 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
       toast({ title: "No source render", description: "Generate a base scene first.", variant: "destructive" });
       return;
     }
-    const views = PRESET_VIEWS.filter((v) => selected.has(v.id));
     if (views.length < 2) {
-      toast({ title: "Pick at least 2 angles", variant: "destructive" });
+      toast({ title: "Need at least 2 views", variant: "destructive" });
+      return;
+    }
+    if (views.length > 6) {
+      toast({ title: "Maximum 6 views per call", variant: "destructive" });
       return;
     }
     setLoading(true);
     setResultUrl(null);
     try {
-      const gridLayout = views.length === 4 ? "2x2" : views.length === 6 ? "3x2" : `${views.length}x1`;
+      const n = views.length;
+      const gridLayout = n === 4 ? "2x2" : n === 6 ? "3x2" : `${n}x1`;
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
           mode: "multi_view",
           imageUrl: sourceImageUrl,
-          views: views.map(({ label, azimuth, elevation }) => ({ label, azimuth, elevation })),
+          views: views.map((v) => ({
+            label: v.label.trim() || `View`,
+            azimuth: clampInt(v.azimuth, 0, 360),
+            elevation: clampInt(v.elevation, 0, 90),
+          })),
           gridLayout,
           qualityTier: "standard",
         },
@@ -106,37 +154,96 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
           {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Multi-View Turntable</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <p className="text-xs text-muted-foreground">
-            Renders all selected angles in a single batched call so furniture, materials and lighting stay
+            All selected angles are rendered in a single batched call to keep furniture, materials and lighting
             consistent across views.
           </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {PRESET_VIEWS.map((v) => (
-              <label
-                key={v.id}
-                className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 cursor-pointer hover:bg-muted/30"
-              >
-                <Checkbox checked={selected.has(v.id)} onCheckedChange={() => toggle(v.id)} />
-                <div className="flex-1">
-                  <div className="text-sm">{v.label}</div>
-                  <div className="text-[10px] text-muted-foreground">
-                    az {v.azimuth}° · el {v.elevation}°
-                  </div>
-                </div>
-              </label>
+          {/* Preset quick-fill */}
+          <div className="flex items-center gap-2">
+            <Label className="text-xs text-muted-foreground whitespace-nowrap">Preset</Label>
+            <Select onValueChange={applyPreset}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Load a preset…" />
+              </SelectTrigger>
+              <SelectContent>
+                {PRESETS.map((p) => (
+                  <SelectItem key={p.id} value={p.id} className="text-xs">
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Editable view list */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_88px_88px_32px] gap-2 text-[10px] uppercase tracking-wide text-muted-foreground px-1">
+              <span>Label</span>
+              <span>Azimuth °</span>
+              <span>Elevation °</span>
+              <span />
+            </div>
+            {views.map((v, i) => (
+              <div key={i} className="grid grid-cols-[1fr_88px_88px_32px] gap-2 items-center">
+                <Input
+                  value={v.label}
+                  onChange={(e) => updateView(i, { label: e.target.value })}
+                  className="h-8 text-xs"
+                  placeholder={`View ${i + 1}`}
+                />
+                <Input
+                  type="number"
+                  min={0}
+                  max={360}
+                  value={v.azimuth}
+                  onChange={(e) => updateView(i, { azimuth: Number(e.target.value) })}
+                  className="h-8 text-xs"
+                />
+                <Input
+                  type="number"
+                  min={0}
+                  max={90}
+                  value={v.elevation}
+                  onChange={(e) => updateView(i, { elevation: Number(e.target.value) })}
+                  className="h-8 text-xs"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => removeView(i)}
+                  disabled={views.length <= 2}
+                  aria-label="Remove view"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
             ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addView}
+              disabled={views.length >= 6}
+              className="w-full"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              Add view ({views.length}/6)
+            </Button>
+            <p className="text-[10px] text-muted-foreground px-1">
+              Azimuth = compass rotation (0–360°). Elevation = camera tilt (0° eye-level, 90° top-down).
+            </p>
           </div>
 
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">
-              {selected.size} angle{selected.size === 1 ? "" : "s"} selected
+              N = {views.length} · grid {views.length === 4 ? "2×2" : views.length === 6 ? "3×2" : `${views.length}×1`}
             </Label>
             <div className="flex gap-2">
               {resultUrl && (
@@ -162,7 +269,7 @@ export function MultiViewTurntable({ sourceImageUrl, triggerLabel = "Multi-View"
             {loading ? (
               <div className="text-xs text-muted-foreground flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Batching {selected.size} consistent views…
+                Batching {views.length} consistent views…
               </div>
             ) : resultUrl ? (
               <img src={resultUrl} alt="Multi-view turntable" className="w-full h-full object-contain" />
