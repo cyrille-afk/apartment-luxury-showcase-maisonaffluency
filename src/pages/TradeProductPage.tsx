@@ -148,6 +148,7 @@ type TradeProductResult = {
   pricing: TradePricing | null;
   relatedPicks: ProductRow[];
   tradeProductId: string | null;
+  glbUrl?: string | null;
 };
 
 function useTradeProductBySlug(
