@@ -71,6 +71,15 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Ownership check: prevent IDOR — only the quote owner (or admins, who would
+    // normally use a different flow) can trigger an admin notification.
+    if (quote.user_id !== user.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
     const userName = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : user.email;
     const company = profile?.company || "N/A";

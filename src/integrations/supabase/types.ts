@@ -5638,29 +5638,14 @@ export type Database = {
       get_board_by_token: {
         Args: { _token: string }
         Returns: {
-          client_email: string | null
           client_name: string
-          created_at: string
           hide_maison_branding: boolean
           id: string
-          project_id: string | null
-          share_token: string
           status: string
-          studio_id: string | null
-          studio_logo_url: string | null
-          studio_name: string | null
+          studio_logo_url: string
+          studio_name: string
           title: string
-          token_expires_at: string | null
-          token_rotated_at: string | null
-          updated_at: string
-          user_id: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "client_boards"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_board_comments_by_token: {
         Args: { _token: string }
@@ -5671,33 +5656,19 @@ export type Database = {
           created_at: string
           id: string
           is_client: boolean
-          item_id: string | null
+          item_id: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "client_board_comments"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_board_items_by_token: {
         Args: { _token: string }
         Returns: {
-          approval_status: string
           board_id: string
           created_at: string
           id: string
-          notes: string | null
+          notes: string
           product_id: string
           sort_order: number
-          subfolder: string | null
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "client_board_items"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_brand_engagement_users: {
         Args: { _brand_name: string; _since: string }

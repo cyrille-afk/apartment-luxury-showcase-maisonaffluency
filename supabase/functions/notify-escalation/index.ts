@@ -94,7 +94,10 @@ serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (RESEND_API_KEY) {
       const lines = (excerpt || [])
-        .map((m) => `<p style="margin:6px 0"><strong>${m.role}:</strong> ${escapeHtml(m.content || "")}</p>`)
+        .map((m) => {
+          const role = m.role === "assistant" || m.role === "user" ? m.role : "message";
+          return `<p style="margin:6px 0"><strong>${escapeHtml(role)}:</strong> ${escapeHtml(m.content || "")}</p>`;
+        })
         .join("");
       const html = `
         <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1a2820;max-width:600px">

@@ -22,6 +22,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { requireAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -116,6 +117,15 @@ Deno.serve(async (req) => {
   }
   if (req.method !== "POST") {
     return new Response("method not allowed", { status: 405, headers: corsHeaders });
+  }
+
+  // Require admin (or service-role bearer, accepted by requireAdmin via shared helper).
+  const auth = await requireAdmin(req, "og-rehost");
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
