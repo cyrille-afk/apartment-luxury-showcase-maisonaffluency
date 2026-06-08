@@ -12,6 +12,25 @@ const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
 const CHAT_MAX_TOKENS = tokenBudget("chat");
 const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
 
+// Route chat completions to Google AI Studio (Gemini direct) when a key is
+// present; otherwise fall back to the Lovable AI Gateway. Embeddings continue
+// to use the Lovable Gateway via `_shared/aiEmbeddings.ts`.
+const GOOGLE_AI_STUDIO_API_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
+const USE_GEMINI_DIRECT = !!GOOGLE_AI_STUDIO_API_KEY;
+const CHAT_COMPLETIONS_URL = USE_GEMINI_DIRECT
+  ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+  : CHAT_COMPLETIONS_URL;
+function aiAuthKey(lovableKey: string): string {
+  return USE_GEMINI_DIRECT ? GOOGLE_AI_STUDIO_API_KEY! : lovableKey;
+}
+// Lovable Gateway model IDs are prefixed `google/`; Google AI Studio expects
+// the bare model name (e.g. `gemini-3-flash-preview`).
+function aiModel(m: string): string {
+  return USE_GEMINI_DIRECT ? m.replace(/^google\//, "") : m;
+}
+console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}`);
+
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -1221,11 +1240,11 @@ async function classifySentiment(
         ttlSec: 60 * 60 * 24 * 14, // 14d — intents are stable
       },
       async () => {
-        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const resp = await fetch(CHAT_COMPLETIONS_URL, {
           method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: SENTIMENT_MODEL,
+            model: aiModel(SENTIMENT_MODEL),
             max_completion_tokens: SENTIMENT_MAX_TOKENS,
             messages: [
               {
@@ -1338,11 +1357,11 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
         ttlSec: 60 * 60 * 24 * 7,
       },
       async () => {
-        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const resp = await fetch(CHAT_COMPLETIONS_URL, {
           method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: SENTIMENT_MODEL,
+            model: aiModel(SENTIMENT_MODEL),
             max_completion_tokens: 400,
             messages: [
               {
@@ -2075,15 +2094,15 @@ serve(async (req) => {
     const chosenModel = pickModel(lastUserMsg, includePieces);
 
     const upstream = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      CHAT_COMPLETIONS_URL,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: chosenModel,
+          model: aiModel(chosenModel),
           messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
           tools: finalTools,
           tool_choice: forceToolCall ? "required" : "auto",
@@ -2564,11 +2583,11 @@ serve(async (req) => {
                     content: JSON.stringify(result),
                   },
                 ];
-                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                const resp = await fetch(CHAT_COMPLETIONS_URL, {
                   method: "POST",
-                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    model: modelFor("balanced"),
+                    model: aiModel(modelFor("balanced")),
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -2677,11 +2696,11 @@ serve(async (req) => {
                     content: JSON.stringify(toolPayload),
                   },
                 ];
-                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                const resp = await fetch(CHAT_COMPLETIONS_URL, {
                   method: "POST",
-                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    model: modelFor("balanced"),
+                    model: aiModel(modelFor("balanced")),
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -2758,11 +2777,11 @@ serve(async (req) => {
                     content: JSON.stringify(result),
                   },
                 ];
-                const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                const resp = await fetch(CHAT_COMPLETIONS_URL, {
                   method: "POST",
-                  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+                  headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    model: modelFor("balanced"),
+                    model: aiModel(modelFor("balanced")),
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -2949,11 +2968,11 @@ serve(async (req) => {
           ].join("\n");
 
           try {
-            const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            const resp = await fetch(CHAT_COMPLETIONS_URL, {
               method: "POST",
-              headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+              headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: modelFor("balanced"),
+                model: aiModel(modelFor("balanced")),
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
                   { role: "system", content: followupSystem },
