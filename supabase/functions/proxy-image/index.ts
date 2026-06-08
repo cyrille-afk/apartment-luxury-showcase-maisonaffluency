@@ -115,10 +115,17 @@ Deno.serve(async (req) => {
 
   // Require admin/super_admin/trade_user — prevents arbitrary signed-up
   // accounts from polluting the public assets bucket.
-  const userId = (auth as any).user?.id ?? (auth as any).userId ?? (auth as any).claims?.sub;
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
+  const userId = auth.userId;
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  const allowed = roles?.some((r: any) =>
+    ["admin", "super_admin", "trade_user"].includes(r.role),
+  );
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
