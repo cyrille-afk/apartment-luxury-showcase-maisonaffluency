@@ -5806,6 +5806,7 @@ export type Database = {
         Returns: string
       }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
+      sanitize_biography_citations: { Args: { input: string }; Returns: string }
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
         Returns: number
