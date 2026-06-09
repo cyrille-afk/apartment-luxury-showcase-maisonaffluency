@@ -1,68 +1,52 @@
-# FurniMesh Integration Plan
+# CC-Tapis designer cleanup
 
-Goal: turn any product image into a textured `.glb`, store it alongside existing CAD assets, and let trade + public users orbit/AR-view it in the browser.
+## What changes
 
-## 1. Secret + schema prep
+**1. Biographies — fill the 52 empty profiles**
 
-- Add `FURNIMESH_API_KEY` via the secrets tool (user provides it).
-- Extend the existing `trade_product_cad_assets.file_format` check constraint to allow `'glb'`, `'gltf'`, `'usdz'`.
-- Add two nullable columns:
-  - `source_image_url text` — image sent to FurniMesh.
-  - `generation_status text` (`pending|ready|failed`) + `generation_job_id text`.
-- Storage: create a public bucket `product-3d` for generated GLB/USDZ (small files, served with long cache). RLS: public read, service-role write.
+For every `*-cc-tapis` designer with an empty `biography`, generate a 3–5 paragraph editorial bio covering:
+- Studio origin, training, geography
+- Design language and material vocabulary
+- The specific CC-Tapis collaboration (collections, techniques — Tibetan/Himalayan hand-knot, Nepalese ateliers, materials like NZ wool, Chinese silk, hemp, allo)
+- Recognition / context within contemporary collectible rug design
+- Closing line on what the partnership represents
 
-## 2. Edge functions
+Rules:
+- English, no source URLs, no markdown citation links (per the new sanitizer)
+- Standalone media URLs allowed, but I won't add any — text only
+- ~1500–2200 characters each, matching the tone of existing CC-Tapis bios (Alex Proba, De Troupe, Damien Ajavon)
+- Don't touch the 12 designers who already have bios
 
-- **`furnimesh-generate`** (POST, JWT-verified, admin only)
-  Input: `{ product_id, image_url, variant_label? }`.
-  Flow: insert a `pending` row in `trade_product_cad_assets`, call FurniMesh API with the image URL, store returned `job_id`. Returns the row id.
-- **`furnimesh-webhook`** (public, signature-verified)
-  On `job.completed`: download the `.glb` (and `.usdz` if returned), upload to `product-3d` bucket under `{product_id}/{asset_id}.glb`, update the row to `ready` with `file_url`, `file_size_bytes`. On failure: mark `failed` with error message.
-  *Fallback if FurniMesh has no webhook*: a `furnimesh-poll` cron job that scans `pending` rows every minute.
-- **USDZ derivation**: if FurniMesh returns only GLB, queue a second job using their GLB→USDZ converter; otherwise skip (iOS Quick Look will fall back to GLB via model-viewer's auto-conversion not being available — see step 4 note).
+Run as bulk DB update via `update_memory`-safe data migration (UPDATE statements on `designers`).
 
-## 3. Admin UI — generation entry point
+**2. Portraits — verify, don't replace**
 
-In `src/pages/TradeAdminCadAssets.tsx` (and inline on `TradeProductPage` admin tools):
-- "Generate 3D from image" button next to each product image. Opens a small dialog: pick which image, optional variant label, submit → calls `furnimesh-generate`.
-- Status badge on the asset row (`pending` spinner, `ready` ✓, `failed` ✗ with retry).
+Only `cristian-mohaded-cc-tapis` is missing `image_url`. I'll flag it for you to upload manually (per your answer to question 2). All other 63 portraits already exist — no action.
 
-## 4. Viewer — `<model-viewer>` embed
+**3. Hero images — leave alone**
 
-- Add `@google/model-viewer` (web component, ~80 KB gz, lazy-loaded only on product pages that have a `.glb`).
-- New component `src/components/trade/Product3DViewer.tsx`:
-  ```
-  <model-viewer src={glb.url} ios-src={usdz?.url} ar ar-modes="webxr scene-viewer quick-look"
-                camera-controls auto-rotate shadow-intensity="1" exposure="1" />
-  ```
-- Mounted on `TradeProductPage.tsx` as a new tab/section "3D & AR" — visible whenever an active `glb` row exists for the product (or current variant).
-- Public product page (`/product/...`) gets the same viewer (no pricing implications). Trade discount logic unaffected.
-- USDZ note: if no `.usdz` exists, AR still works on Android via Scene Viewer; iOS Quick Look needs USDZ — show "AR available on Android, generating iOS version…" until USDZ row lands.
+Per your answer, the 62 missing hero fields stay empty. You'll upload in-situ shots through the admin. The profile page already falls back gracefully when `hero_image_url` is null.
 
-## 5. Variant awareness
+**4. Share icons — remove from all designer cards**
 
-Reuse the existing variant-image map: when the user picks a finish/variant on the product page that has a matching `variant_label` GLB, swap the `src` on `<model-viewer>`. Falls back to the default (no-variant) GLB.
+In `src/components/DesignersDirectory.tsx`, remove three Share buttons:
+- Line ~496: grid-view card share
+- Line ~564: parent-brand sub-card share
+- Line ~584: alternate variant share
 
-## 6. Cleanup of leftover OBJ scaffolding
+Keep the section-level Share buttons (lines ~1602, ~1620) — those are the hero-area shares on the directory page itself.
 
-- Drop `'obj'` from the format check constraint (no production rows use it — confirm with a `select count(*)` first; if any exist, keep it).
-- Leave `cad-parse-product-asset` + DXF spatial-fit page intact (still useful for floor plans).
+The designer profile hero Share button lives in a different file (`DesignerProfile.tsx` / its hero subcomponent) and is untouched.
 
-## 7. Out of scope (explicit)
+Also delete now-dead helpers (`handleDesignerShare`, the inner `handleShare`, `buildShareUrl`) if no longer referenced after the removals, plus the `Share2` import if unused.
 
-- No re-introduction of AI concierge tools for 3D. Viewer is pure UI.
-- No client-side mesh editing.
-- No mobile-app code (React Native / Flutter) — web only for now; the same `.glb` URLs will work later if you build a native app.
+## Out of scope
+- No image generation, no Firecrawl scraping
+- No edits to existing 12 bios
+- No schema changes
+- No changes to share buttons outside DesignersDirectory cards
 
-## Technical details
-
-- FurniMesh API: assumed REST endpoint `POST /v1/jobs` with `{ image_url, output: ['glb','usdz'] }` returning `{ job_id }`, plus webhook `POST <our-url>` with `{ job_id, status, assets: [{format,url}] }`. Exact paths confirmed against FurniMesh docs at implementation time; if the API is sync-only, collapse step 2 into a single function.
-- Storage path: `product-3d/{product_id}/{asset_id}.{glb|usdz}`. CDN URL stored directly in `file_url`.
-- model-viewer loaded via dynamic `import('@google/model-viewer')` to keep the main bundle untouched.
-- Edge functions follow project rules: `supabase.auth.getClaims`, CORS headers from `npm:@supabase/supabase-js@2/cors`, Zod validation on inputs.
-
-## Open questions before build
-
-1. Do you already have a FurniMesh account + API key, or should I add the secret request after you sign up?
-2. Should generation be **admin-triggered only** (manual button per product), or **auto-batched** across the catalog (cron that picks N products/day)?
-3. Should the 3D viewer appear on the **public** product page too, or **trade-only** for now?
+## Technical notes
+- Bios written via a single `supabase--insert` UPDATE … WHERE slug IN (…) AND (biography IS NULL OR biography = '').
+- The `content_audit_log` trigger on `designers` will capture every change automatically — rollback is possible per row.
+- After removing share buttons, run `bun run` build implicitly (harness does it) to catch unused-import errors.
