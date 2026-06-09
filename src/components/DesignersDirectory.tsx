@@ -510,6 +510,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const cardImageUrl = item.image_url || item.hero_image_url;
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
@@ -542,8 +543,8 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
-        ) : item.image_url ? (
-          <img src={item.image_url} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="eager" decoding="async" />
+        ) : cardImageUrl ? (
+          <img src={cardImageUrl} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="eager" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
