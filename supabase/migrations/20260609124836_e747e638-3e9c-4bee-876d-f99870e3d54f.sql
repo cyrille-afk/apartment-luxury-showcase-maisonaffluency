@@ -1,0 +1,1 @@
+UPDATE public.designers SET name = 'Atelier BdM', founder = NULL WHERE slug = 'bruno-de-maistre';
