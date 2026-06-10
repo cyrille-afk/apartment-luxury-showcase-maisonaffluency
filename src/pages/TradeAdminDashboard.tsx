@@ -57,7 +57,7 @@ const aiGroup: AdminCard[] = [
 const systemGroup: AdminCard[] = [
   { title: "Axonometric Studio", description: "Manage 3D visualisation requests and gallery", url: "/trade/axonometric", icon: Box },
   { title: "Instagram Audit", description: "Map and verify all designer Instagram accounts", url: "/trade/designers/instagram", icon: Instagram },
-  { title: "OG & Social Previews", description: "Re-scrape Open Graph metadata for social sharing", url: "/trade/admin", icon: Globe },
+  { title: "Product Sheet Audit", description: "Compare Public + Trade product sheets side-by-side in synced iframes", url: "/trade/admin/product-audit", icon: Search },
   { title: "Section Heroes", description: "Manage hero banner images across the portal", url: "/trade/admin", icon: Image },
   { title: "Taxonomy Audit", description: "Find curator picks with non-canonical or mismatched categories", url: "/trade/admin/taxonomy-audit", icon: Layers },
   { title: "Sync Status", description: "Compare Designer Editor vs trade products — flag mismatches", url: "/trade/admin/sync-status", icon: AlertCircle },
