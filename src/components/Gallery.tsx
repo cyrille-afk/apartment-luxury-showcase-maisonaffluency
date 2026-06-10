@@ -383,8 +383,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const toggleFullscreen = useCallback(async () => {
     try {
       if (!document.fullscreenElement) {
-        const el = lightboxContentRef.current;
-        if (el?.requestFullscreen) await el.requestFullscreen();
+        // Fullscreen the page root, NOT the Radix DialogContent — putting Radix's
+        // focus-trap / scroll-lock node into fullscreen causes it to re-mount and flicker.
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
       } else if (document.exitFullscreen) {
         await document.exitFullscreen();
       }
