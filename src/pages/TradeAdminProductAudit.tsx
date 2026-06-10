@@ -1,7 +1,7 @@
 /**
  * Side-by-side audit of Public vs Trade product sheets.
- * Embeds both pages directly for fast UI/UX inspection, with popup/tab
- * actions kept as fallbacks for browser-specific preview issues.
+ * Embeds both pages directly when possible, with a top-level split-window
+ * renderer for the Lovable editor where nested iframes go blank.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -12,6 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { ExternalLink, LayoutPanelLeft, RefreshCw, X } from "lucide-react";
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 function slugify(s: string) {
   return (s || "")
@@ -36,10 +45,7 @@ export default function TradeAdminProductAudit() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(params.get("id"));
   const [reloadKey, setReloadKey] = useState(0);
-  const popupsRef = useRef<{ left: Window | null; right: Window | null }>({
-    left: null,
-    right: null,
-  });
+  const splitWindowRef = useRef<Window | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["audit-picks"],
@@ -79,8 +85,14 @@ export default function TradeAdminProductAudit() {
   );
 
   useEffect(() => {
-    if (selectedId) setParams({ id: selectedId }, { replace: true });
-  }, [selectedId, setParams]);
+    const currentId = params.get("id");
+    if (selectedId === currentId) return;
+
+    const next = new URLSearchParams(params);
+    if (selectedId) next.set("id", selectedId);
+    else next.delete("id");
+    setParams(next, { replace: true });
+  }, [params, selectedId, setParams]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
