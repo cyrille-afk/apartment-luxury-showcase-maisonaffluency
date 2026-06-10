@@ -1,16 +1,18 @@
 /**
  * Side-by-side audit of Public vs Trade product sheets.
- * Lets admins pick any curator pick and view both renditions in iframes to
- * verify UI/UX parity.
+ * Opens both pages as two popup windows positioned side-by-side so admins
+ * can compare UI/UX parity. Iframes were unreliable inside the Lovable
+ * preview sandbox, so popups are the source of truth.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ExternalLink, RefreshCw } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { ExternalLink, LayoutPanelLeft, RefreshCw, X } from "lucide-react";
 
 function slugify(s: string) {
   return (s || "")
@@ -34,7 +36,10 @@ export default function TradeAdminProductAudit() {
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(params.get("id"));
-  const [nonce, setNonce] = useState(0);
+  const popupsRef = useRef<{ left: Window | null; right: Window | null }>({
+    left: null,
+    right: null,
+  });
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["audit-picks"],
@@ -77,25 +82,67 @@ export default function TradeAdminProductAudit() {
     if (selectedId) setParams({ id: selectedId }, { replace: true });
   }, [selectedId, setParams]);
 
-  // Preserve Lovable preview token so iframed routes boot with the same session.
-  // Also append a cache-busting nonce so "Reload frames" actually refetches.
-  const appendQs = (path: string) => {
-    if (typeof window === "undefined") return path;
-    const token = new URLSearchParams(window.location.search).get("__lovable_token");
-    const qs = new URLSearchParams();
-    if (token) qs.set("__lovable_token", token);
-    qs.set("_n", String(nonce));
-    return `${path}?${qs.toString()}`;
-  };
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   const publicUrl = selected?.designerSlug
-    ? appendQs(`/designers/${selected.designerSlug}/${selected.productSlug}`)
+    ? `${origin}/designers/${selected.designerSlug}/${selected.productSlug}`
     : null;
   const tradeUrl = selected?.designerSlug
-    ? appendQs(`/trade/products/${selected.designerSlug}/${selected.productSlug}`)
+    ? `${origin}/trade/products/${selected.designerSlug}/${selected.productSlug}`
     : selected
-    ? appendQs(`/trade/products/${selected.id}`)
+    ? `${origin}/trade/products/${selected.id}`
     : null;
+
+  const openSideBySide = () => {
+    if (!publicUrl || !tradeUrl) return;
+
+    // Close existing popups if still open
+    try { popupsRef.current.left?.close(); } catch { /* noop */ }
+    try { popupsRef.current.right?.close(); } catch { /* noop */ }
+
+    const screenW = window.screen.availWidth || window.innerWidth;
+    const screenH = window.screen.availHeight || window.innerHeight;
+    const screenLeft = (window.screen as any).availLeft ?? 0;
+    const screenTop = (window.screen as any).availTop ?? 0;
+    const w = Math.floor(screenW / 2);
+    const h = screenH;
+
+    const features = (left: number) =>
+      `popup=yes,noopener=no,width=${w},height=${h},left=${left},top=${screenTop},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`;
+
+    const leftWin = window.open(publicUrl, "audit-public", features(screenLeft));
+    const rightWin = window.open(tradeUrl, "audit-trade", features(screenLeft + w));
+
+    popupsRef.current.left = leftWin;
+    popupsRef.current.right = rightWin;
+
+    if (!leftWin || !rightWin) {
+      toast({
+        title: "Popups blocked",
+        description:
+          "Allow pop-ups for this site so both audit windows can open side by side.",
+        variant: "destructive",
+      });
+    } else {
+      // Pull both windows to the front
+      try { leftWin.focus(); } catch { /* noop */ }
+      try { rightWin.focus(); } catch { /* noop */ }
+    }
+  };
+
+  const reload = () => {
+    try { popupsRef.current.left?.location.reload(); } catch { /* noop */ }
+    try { popupsRef.current.right?.location.reload(); } catch { /* noop */ }
+  };
+
+  const closeAll = () => {
+    try { popupsRef.current.left?.close(); } catch { /* noop */ }
+    try { popupsRef.current.right?.close(); } catch { /* noop */ }
+    popupsRef.current = { left: null, right: null };
+  };
+
+  // Close popups if user navigates away from the audit page
+  useEffect(() => () => closeAll(), []);
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -103,17 +150,22 @@ export default function TradeAdminProductAudit() {
         <div>
           <h1 className="text-2xl font-light tracking-tight">Product Sheet Audit</h1>
           <p className="text-sm text-muted-foreground">
-            Side-by-side review of Public vs Trade product pages.
+            Open the Public and Trade product sheets as two popup windows positioned
+            side by side for visual diff.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setNonce((n) => n + 1)}
-          disabled={!selected}
-        >
-          <RefreshCw className="mr-2 h-4 w-4" /> Reload frames
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={openSideBySide} disabled={!selected || !publicUrl || !tradeUrl}>
+            <LayoutPanelLeft className="mr-2 h-4 w-4" />
+            Open side-by-side
+          </Button>
+          <Button variant="outline" size="sm" onClick={reload} disabled={!selected}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Reload popups
+          </Button>
+          <Button variant="ghost" size="sm" onClick={closeAll} disabled={!selected}>
+            <X className="mr-2 h-4 w-4" /> Close popups
+          </Button>
+        </div>
       </div>
 
       <Card className="mb-4 p-3">
@@ -144,7 +196,8 @@ export default function TradeAdminProductAudit() {
 
       {!selected ? (
         <Card className="p-12 text-center text-muted-foreground">
-          Pick a product above to compare its Public and Trade sheets side by side.
+          Pick a product above, then click <strong>Open side-by-side</strong> to launch
+          both views.
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -152,39 +205,36 @@ export default function TradeAdminProductAudit() {
             { label: "Public view", url: publicUrl, tone: "Public sees 'Price on Request'" },
             { label: "Trade view", url: tradeUrl, tone: "Trade sees pricing & spec sheets" },
           ].map((pane) => (
-            <Card key={pane.label} className="overflow-hidden">
-              <div className="flex items-center justify-between border-b bg-muted/40 px-3 py-2">
-                <div>
+            <Card key={pane.label} className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <div className="text-sm font-medium">{pane.label}</div>
                   <div className="text-xs text-muted-foreground">{pane.tone}</div>
+                  {pane.url && (
+                    <div className="mt-2 break-all text-[11px] text-muted-foreground/80">
+                      {pane.url}
+                    </div>
+                  )}
                 </div>
                 {pane.url && (
                   <a
                     href={pane.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    className="inline-flex shrink-0 items-center gap-1 text-xs text-primary hover:underline"
                   >
-                    Open <ExternalLink className="h-3 w-3" />
+                    Open tab <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
               </div>
-              {pane.url ? (
-                <iframe
-                  key={`${pane.label}-${nonce}-${pane.url}`}
-                  src={pane.url}
-                  title={pane.label}
-                  className="h-[calc(100vh-220px)] w-full bg-white"
-                />
-              ) : (
-                <div className="p-8 text-center text-sm text-muted-foreground">
-                  Designer slug missing — cannot build URL.
-                </div>
-              )}
             </Card>
           ))}
         </div>
       )}
+
+      <p className="mt-4 text-xs text-muted-foreground">
+        Tip: if popups don't appear, allow pop-ups for this domain in your browser address bar.
+      </p>
     </div>
   );
 }
