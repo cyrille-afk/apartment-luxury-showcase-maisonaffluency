@@ -145,15 +145,28 @@ export default function TradeAdminProductAudit() {
   // Close popups if user navigates away from the audit page
   useEffect(() => () => closeAll(), []);
 
+  // Detect being framed inside the Lovable editor — nested same-origin iframes
+  // are blocked there, so embedded previews go blank. We force users to open
+  // the audit in its own top-level tab where the iframes render normally.
+  const isFramed =
+    typeof window !== "undefined" && window.self !== window.top;
+  const standaloneAuditUrl =
+    typeof window !== "undefined"
+      ? `${window.location.pathname}${window.location.search}`
+      : "";
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-2xl font-light tracking-tight">Product Sheet Audit</h1>
           <p className="text-sm text-muted-foreground">
-            Inspect the Public and Trade product sheets side by side in-page.
+            {isFramed
+              ? "Open this page in its own tab to see Public & Trade side-by-side (nested iframes are blocked inside the editor)."
+              : "Inspect the Public and Trade product sheets side by side in-page."}
           </p>
         </div>
+
         <div className="flex flex-wrap items-center gap-2">
           <a
             href={publicUrl || "#"}
