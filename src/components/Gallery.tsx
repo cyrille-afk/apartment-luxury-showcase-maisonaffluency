@@ -4,7 +4,7 @@ import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin, Plus, Minus, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Expand, Shrink, Instagram, Copy, MapPin, Plus, Minus, Share2 } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
@@ -377,6 +377,33 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const lightboxContentRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        const el = lightboxContentRef.current;
+        if (el?.requestFullscreen) await el.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.warn('Fullscreen toggle failed', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!lightboxOpen && document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  }, [lightboxOpen]);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<GalleryGridCols>(3);
@@ -1315,12 +1342,14 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         onOpenChange={(open) => { if (!open) closeLightbox(); }}
       >
         <DialogContent
+          ref={lightboxContentRef}
           hideClose
           className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
           aria-describedby={undefined}
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft") goToPrevious();
             if (e.key === "ArrowRight") goToNext();
+            if (e.key.toLowerCase() === "f") toggleFullscreen();
           }}
         >
           <VisuallyHidden>
@@ -1365,13 +1394,20 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </div>
                   </div>
                   {/* Close button — mobile bottom-left */}
-                  <div className="absolute bottom-2 left-3 z-50">
+                  <div className="absolute bottom-2 left-3 z-50 flex gap-2">
                     <button
                       onClick={closeLightbox}
                       className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
                       aria-label="Close lightbox"
                     >
                       <X className="h-4 w-4 text-white" />
+                    </button>
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
+                      aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+                    >
+                      {isFullscreen ? <Shrink className="h-4 w-4 text-white" /> : <Expand className="h-4 w-4 text-white" />}
                     </button>
                   </div>
                 </div>
@@ -1429,14 +1465,22 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
-                      {/* Close button — desktop near image */}
-                      <div className={`hidden md:flex absolute z-50 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
+                      {/* Close + fullscreen buttons — desktop near image */}
+                      <div className={`hidden md:flex flex-col gap-2 absolute z-50 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
                         <button
                           onClick={closeLightbox}
                           className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
                           aria-label="Close lightbox"
                         >
                           <X className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={toggleFullscreen}
+                          className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+                          title={isFullscreen ? "Exit full screen (F)" : "Full screen (F)"}
+                        >
+                          {isFullscreen ? <Shrink className="h-5 w-5" /> : <Expand className="h-5 w-5" />}
                         </button>
                       </div>
                       {/* Maximize / Minimize icon — z-50 to stay above PinchZoomImage overlay */}
