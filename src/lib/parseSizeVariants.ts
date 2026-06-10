@@ -180,6 +180,11 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
   // non-letter garbage (stray digits/punctuation like "5Calacatta…") so a
   // clean duplicate of a polluted value collapses into one option. We keep
   // the cleanest spelling.
+  const sortAlpha = (vals: string[]): string[] =>
+    [...vals].sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
+    );
+
   const dedupeMaterialOptions = (vals: string[]): string[] => {
     const map = new Map<string, string>();
     for (const raw of vals) {
@@ -192,7 +197,7 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
         map.set(key, cleaned || v);
       }
     }
-    return Array.from(map.values());
+    return sortAlpha(Array.from(map.values()));
   };
 
   const baseOptions = isDualAxis || isBaseOnly
@@ -202,19 +207,19 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
     ? dedupeMaterialOptions(variants.map((v) => v.top || ""))
     : [];
   const dualSizeOptions = isDualAxis
-    ? Array.from(new Set(variants.map((v) => (v.label || "").trim()).filter(Boolean)))
+    ? sortAlpha(Array.from(new Set(variants.map((v) => (v.label || "").trim()).filter(Boolean))))
     : [];
 
   const singleAxisParsed: ParsedSingleAxis[] =
     !isDualAxis && hasVariants
       ? variants.map((v) => ({ ...parseSingleAxisLabel(v.label || ""), variant: v }))
       : [];
-  const singleSizeOptions = Array.from(
+  const singleSizeOptions = sortAlpha(Array.from(
     new Set(singleAxisParsed.map((p) => p.size).filter(Boolean))
-  );
-  const singleMaterialOptions = Array.from(
+  ));
+  const singleMaterialOptions = sortAlpha(Array.from(
     new Set(singleAxisParsed.map((p) => p.material).filter(Boolean))
-  );
+  ));
   const hasSingleAxisSplit =
     !isDualAxis &&
     hasVariants &&
