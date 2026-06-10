@@ -377,6 +377,33 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const lightboxContentRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        const el = lightboxContentRef.current;
+        if (el?.requestFullscreen) await el.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.warn('Fullscreen toggle failed', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!lightboxOpen && document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  }, [lightboxOpen]);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<GalleryGridCols>(3);
