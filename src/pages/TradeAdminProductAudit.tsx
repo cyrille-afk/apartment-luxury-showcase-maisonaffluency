@@ -77,13 +77,24 @@ export default function TradeAdminProductAudit() {
     if (selectedId) setParams({ id: selectedId }, { replace: true });
   }, [selectedId, setParams]);
 
+  // Preserve Lovable preview token so iframed routes boot with the same session.
+  // Also append a cache-busting nonce so "Reload frames" actually refetches.
+  const appendQs = (path: string) => {
+    if (typeof window === "undefined") return path;
+    const token = new URLSearchParams(window.location.search).get("__lovable_token");
+    const qs = new URLSearchParams();
+    if (token) qs.set("__lovable_token", token);
+    qs.set("_n", String(nonce));
+    return `${path}?${qs.toString()}`;
+  };
+
   const publicUrl = selected?.designerSlug
-    ? `/designers/${selected.designerSlug}/${selected.productSlug}`
+    ? appendQs(`/designers/${selected.designerSlug}/${selected.productSlug}`)
     : null;
   const tradeUrl = selected?.designerSlug
-    ? `/trade/products/${selected.designerSlug}/${selected.productSlug}`
+    ? appendQs(`/trade/products/${selected.designerSlug}/${selected.productSlug}`)
     : selected
-    ? `/trade/products/${selected.id}`
+    ? appendQs(`/trade/products/${selected.id}`)
     : null;
 
   return (
