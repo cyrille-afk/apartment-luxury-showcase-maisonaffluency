@@ -311,7 +311,10 @@ const Journal = () => {
           )}
         </div>
       </div>
-      <DesignerIndexLinks />
+      {/* SEO-only: crawlable A–Z designer index for crawl-depth flattening. Visually hidden from human users via sr-only; remains in DOM for bots. */}
+      <div className="sr-only" aria-hidden="true">
+        <DesignerIndexLinks />
+      </div>
     </>
   );
 };
