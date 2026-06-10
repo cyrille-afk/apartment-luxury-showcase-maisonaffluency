@@ -3907,6 +3907,13 @@ export type Database = {
             referencedRelation: "featured_studios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "studio_lead_events_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "featured_studios_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       studio_members: {
@@ -5543,6 +5550,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      featured_studios_public: {
+        Row: {
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          disciplines: string[] | null
+          founded_year: number | null
+          gallery_images: string[] | null
+          hero_image_url: string | null
+          id: string | null
+          instagram_handle: string | null
+          is_featured: boolean | null
+          is_published: boolean | null
+          location: string | null
+          logo_url: string | null
+          name: string | null
+          notable_projects: string | null
+          project_types: string[] | null
+          slug: string | null
+          sort_order: number | null
+          tagline: string | null
+          team_size: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          disciplines?: string[] | null
+          founded_year?: number | null
+          gallery_images?: string[] | null
+          hero_image_url?: string | null
+          id?: string | null
+          instagram_handle?: string | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notable_projects?: string | null
+          project_types?: string[] | null
+          slug?: string | null
+          sort_order?: number | null
+          tagline?: string | null
+          team_size?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          disciplines?: string[] | null
+          founded_year?: number | null
+          gallery_images?: string[] | null
+          hero_image_url?: string | null
+          id?: string | null
+          instagram_handle?: string | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notable_projects?: string | null
+          project_types?: string[] | null
+          slug?: string | null
+          sort_order?: number | null
+          tagline?: string | null
+          team_size?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
