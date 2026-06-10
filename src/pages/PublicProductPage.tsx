@@ -108,10 +108,17 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       if (!picks || picks.length === 0) return null;
 
-      const product = picks.find((p: any) => {
+      // Prefer exact matches (full title+subtitle or title alone) before the
+      // prefix fallback, otherwise "Byron Bar Stool" (byron-bar-stool) would
+      // greedily match the "Byron" chair (byron-) which appears earlier.
+      const exact = picks.find((p: any) => {
         const titleSlug = slugify(p.title);
         const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-        return fullSlug === productSlug || titleSlug === productSlug || productSlug.startsWith(`${titleSlug}-`);
+        return fullSlug === productSlug || titleSlug === productSlug;
+      });
+      const product = exact || picks.find((p: any) => {
+        const titleSlug = slugify(p.title);
+        return productSlug.startsWith(`${titleSlug}-`);
       });
 
       if (!product) return null;
