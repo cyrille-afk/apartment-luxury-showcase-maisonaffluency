@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { RefreshCw, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 function isDev(): boolean {
   if (import.meta.env.DEV) return true;
@@ -7,72 +7,80 @@ function isDev(): boolean {
   return false;
 }
 
+function hardReload() {
+  try {
+    window.location.replace(
+      window.location.pathname + window.location.search + window.location.hash,
+    );
+  } catch {
+    window.location.reload();
+  }
+}
+
 /**
- * Floating "Reload to latest" banner.
+ * Silent auto-update on next navigation, with a discreet toast fallback
+ * for users who stay on the same page.
  *
- * Listens for the `app:build-update-available` event dispatched by
- * `buildVersionWatcher` whenever a newer deployed build id is detected,
- * and gives the user a one-click action to hard-reload immediately
- * (bypassing bfcache). The banner is dismissible — if the user dismisses
- * it, it will reappear on the next detected build change.
+ * - Listens for `app:build-update-available` from buildVersionWatcher.
+ * - Reloads automatically on the next route change (pushState/replaceState/popstate)
+ *   so the user never sees an "update available" prompt mid-flow.
+ * - Shows a single sonner toast with a "Refresh now" action as a fallback.
  */
 export default function BuildUpdateBanner() {
-  const [available, setAvailable] = useState(false);
-  const [reloading, setReloading] = useState(false);
+  const armed = useRef(false);
 
   useEffect(() => {
     if (isDev()) return;
-    const onAvailable = () => setAvailable(true);
+
+    // Patch history methods once so we can detect SPA navigations.
+    const w = window as unknown as { __mafBuildNavPatched?: boolean };
+    if (!w.__mafBuildNavPatched) {
+      w.__mafBuildNavPatched = true;
+      const fire = () => window.dispatchEvent(new Event("app:spa-navigation"));
+      const origPush = history.pushState;
+      const origReplace = history.replaceState;
+      history.pushState = function (...args) {
+        const r = origPush.apply(this, args as Parameters<typeof origPush>);
+        fire();
+        return r;
+      };
+      history.replaceState = function (...args) {
+        const r = origReplace.apply(this, args as Parameters<typeof origReplace>);
+        fire();
+        return r;
+      };
+      window.addEventListener("popstate", fire);
+    }
+
+    const onNav = () => {
+      if (!armed.current) return;
+      // Reload on next macrotask so the navigation commits first.
+      setTimeout(hardReload, 0);
+    };
+
+    const onAvailable = () => {
+      if (armed.current) return;
+      armed.current = true;
+
+      // Discreet toast fallback (no centered black pill).
+      toast("A new version is available", {
+        description: "It will load on your next page change.",
+        duration: 12_000,
+        action: {
+          label: "Refresh now",
+          onClick: hardReload,
+        },
+      });
+
+      window.addEventListener("app:spa-navigation", onNav);
+    };
+
     window.addEventListener("app:build-update-available", onAvailable);
-    return () =>
+    return () => {
       window.removeEventListener("app:build-update-available", onAvailable);
+      window.removeEventListener("app:spa-navigation", onNav);
+    };
   }, []);
 
-  if (!available) return null;
-
-  const reload = () => {
-    setReloading(true);
-    // Hard reload, busting any HTTP cache.
-    try {
-      // Replace so the back button doesn't bring back the stale page.
-      window.location.replace(
-        window.location.pathname + window.location.search + window.location.hash,
-      );
-    } catch {
-      window.location.reload();
-    }
-  };
-
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 rounded-full border border-border bg-background/95 backdrop-blur shadow-2xl px-4 py-2.5 print:hidden animate-fade-in"
-    >
-      <span className="font-body text-sm text-foreground">
-        A new version of Maison Affluency is available.
-      </span>
-      <button
-        type="button"
-        onClick={reload}
-        disabled={reloading}
-        className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-3 py-1.5 font-body text-xs uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60"
-      >
-        <RefreshCw
-          className={`h-3.5 w-3.5 ${reloading ? "animate-spin" : ""}`}
-          aria-hidden="true"
-        />
-        Reload to latest
-      </button>
-      <button
-        type="button"
-        onClick={() => setAvailable(false)}
-        className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
-        aria-label="Dismiss"
-        title="Dismiss"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
+  return null;
 }
