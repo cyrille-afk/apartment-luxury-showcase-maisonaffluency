@@ -1236,7 +1236,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, []);
 
 
-  const { data: fullPicks = [] } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory));
+  const { data: fullPicks = [], isLoading: fullPicksLoading, isFetching: fullPicksFetching } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory));
+  const picksLoading = fullPicksLoading || (fullPicksFetching && fullPicks.length === 0);
 
   // In "products" mode, when a filter is active we switch to a product grid view.
   // In "designers" mode (default, used on /designers), filteredPicks is always
@@ -1720,7 +1721,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           {/* Results count */}
           {(searchQuery || selectedCategory) && (
             <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
-              {filteredPicks
+              {mode === "products" && picksLoading
+                ? "Loading pieces…"
+                : filteredPicks
                 ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
                 : `${totalCount} designer${totalCount !== 1 ? 's' : ''} found`}
               {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
