@@ -151,14 +151,10 @@ html,body{margin:0;height:100%;background:#f7f4ee;color:#1f1b16;font-family:ui-s
   useEffect(() => () => closeAll(), []);
 
   // Detect being framed inside the Lovable editor — nested same-origin iframes
-  // are blocked there, so embedded previews go blank. We force users to open
-  // the audit in its own top-level tab where the iframes render normally.
+  // can go blank there, so the main action opens a generated top-level split
+  // inspector instead of re-opening the same empty audit route.
   const isFramed =
     typeof window !== "undefined" && window.self !== window.top;
-  const standaloneAuditUrl =
-    typeof window !== "undefined"
-      ? `${window.location.pathname}${window.location.search}`
-      : "";
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -167,21 +163,22 @@ html,body{margin:0;height:100%;background:#f7f4ee;color:#1f1b16;font-family:ui-s
           <h1 className="text-2xl font-light tracking-tight">Product Sheet Audit</h1>
           <p className="text-sm text-muted-foreground">
             {isFramed
-              ? "Open this page in its own tab to see Public & Trade side-by-side (nested iframes are blocked inside the editor)."
+              ? "Open a generated split inspector for Public & Trade. It does not reload this audit route."
               : "Inspect the Public and Trade product sheets side by side in-page."}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {isFramed && (
-            <a
-              href={standaloneAuditUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90"
+            <Button
+              type="button"
+              size="sm"
+              onClick={openSideBySide}
+              disabled={!selected}
+              className="gap-2"
             >
-              <LayoutPanelLeft className="h-4 w-4" /> Open side-by-side in own tab
-            </a>
+              <LayoutPanelLeft className="h-4 w-4" /> Open split inspector
+            </Button>
           )}
           <a
             href={publicUrl || "#"}
