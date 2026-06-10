@@ -1721,11 +1721,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           {/* Results count */}
           {(searchQuery || selectedCategory) && (
             mode === "products" && picksLoading ? (
-              <div className="flex items-center gap-2 mb-4" aria-label="Loading pieces count">
-                <div className="h-3 w-24 rounded bg-muted animate-pulse" />
-                {(selectedCategory || selectedSubcategory) && (
-                  <div className="h-3 w-32 rounded bg-muted animate-pulse" />
-                )}
+              <div className="flex items-center gap-2 mb-4 w-64" aria-label="Loading pieces count">
+                <div className="h-3 w-56 rounded bg-muted animate-pulse" />
               </div>
             ) : (
               <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
