@@ -405,9 +405,6 @@ const VariantSelectors: React.FC<{
             onChange={(idx) => {
               const s = labels[idx] ?? null;
               setSelSize(s);
-              // Map back to the full variant label so variant_image_map lookups
-              // (which key on the normalized label) resolve through the
-              // single-axis fallback in resolveVariantImageIndex.
               const variant = s
                 ? singleAxisParsed.find((p) => p.size === s)?.variant
                 : null;
@@ -419,6 +416,11 @@ const VariantSelectors: React.FC<{
           <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
         ) : null;
       })()}
+      {/* No-variant fallback: dimensions must always appear BEFORE the materials/finish row */}
+      {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
+        <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
+      )}
+
 
       {/* Material / finish dropdown(s) — preceded by the materials_description paragraph */}
       {product.materials_description?.trim() && (
@@ -565,12 +567,10 @@ const VariantSelectors: React.FC<{
         })()
       ) : null}
 
-      {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
-      )}
     </>
   );
 };
+
 
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
