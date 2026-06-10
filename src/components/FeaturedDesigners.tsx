@@ -1888,7 +1888,8 @@ const FeaturedDesigners = () => {
   const navigate = useNavigate();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
-  const { data: dbPicks } = useDbCuratorPicks();
+  const { data: dbPicks, isLoading: dbPicksLoading, isFetching: dbPicksFetching } = useDbCuratorPicks();
+  const picksLoading = dbPicksLoading || (dbPicksFetching && !dbPicks);
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [designerGridCols, setDesignerGridCols] = useState<3 | 5>(3);
@@ -2347,13 +2348,20 @@ const FeaturedDesigners = () => {
 
 
         {(searchQuery || (selectedCategory && !selectedSubcategory)) && (
-          <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
-            {filteredPicks
-              ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
-              : `${filteredDesigners.length} designer${filteredDesigners.length !== 1 ? 's' : ''} found`}
-            {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
-          </p>
+          picksLoading ? (
+            <div className="flex items-center gap-2 mb-4 w-64" aria-label="Loading pieces count">
+              <div className="h-3 w-56 rounded bg-muted animate-pulse" />
+            </div>
+          ) : (
+            <p className="text-left text-[10px] text-muted-foreground mb-4 font-body tracking-wider">
+              {filteredPicks
+                ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
+                : `${filteredDesigners.length} designer${filteredDesigners.length !== 1 ? 's' : ''} found`}
+              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+            </p>
+          )
         )}
+
 
         {/* Filter + Grid toggle + search — single row above grid */}
         <div className="hidden md:flex items-center gap-2 mb-4">
