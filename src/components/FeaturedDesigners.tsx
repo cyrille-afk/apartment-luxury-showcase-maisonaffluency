@@ -1888,7 +1888,8 @@ const FeaturedDesigners = () => {
   const navigate = useNavigate();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
-  const { data: dbPicks } = useDbCuratorPicks();
+  const { data: dbPicks, isLoading: dbPicksLoading, isFetching: dbPicksFetching } = useDbCuratorPicks();
+  const picksLoading = dbPicksLoading || (dbPicksFetching && !dbPicks);
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [designerGridCols, setDesignerGridCols] = useState<3 | 5>(3);
