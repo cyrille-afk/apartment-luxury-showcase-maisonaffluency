@@ -437,6 +437,7 @@ const App = () => {
                     <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
+                    <Route path="admin/product-audit" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminProductAudit /></Suspense>} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
                     <Route path="products/:id" element={<TradeProductPage />} />
