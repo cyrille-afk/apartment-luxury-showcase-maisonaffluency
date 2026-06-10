@@ -1394,13 +1394,20 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </div>
                   </div>
                   {/* Close button — mobile bottom-left */}
-                  <div className="absolute bottom-2 left-3 z-50">
+                  <div className="absolute bottom-2 left-3 z-50 flex gap-2">
                     <button
                       onClick={closeLightbox}
                       className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
                       aria-label="Close lightbox"
                     >
                       <X className="h-4 w-4 text-white" />
+                    </button>
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
+                      aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+                    >
+                      {isFullscreen ? <Shrink className="h-4 w-4 text-white" /> : <Expand className="h-4 w-4 text-white" />}
                     </button>
                   </div>
                 </div>
