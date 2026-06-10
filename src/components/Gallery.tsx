@@ -835,28 +835,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return flat + currentItemIndex;
   }, [currentSectionIndex, currentItemIndex]);
 
-  
-
-  const shareLightboxImage = useCallback(() => {
-    const title = currentSectionItems[currentItemIndex]?.title || '';
-    const titleSlug = slugify(title);
-    const designerSlug = filterDesigner ? slugify(filterDesigner) : '';
-    const urlPath = designerSlug
-      ? `gallery/${designerSlug}/${titleSlug}.html`
-      : `gallery/${titleSlug}.html`;
-    const url = `https://www.maisonaffluency.com/${urlPath}`;
-    const parts = ['Maison Affluency', 'Interactive Gallery'];
-    if (filterDesigner) parts.push(filterDesigner);
-    if (title) parts.push(title);
-    const text = parts.join(' · ');
-    const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobileDevice) {
-      window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-    } else {
-      navigator.clipboard.writeText(`${text} — ${url}`);
-      import('sonner').then(({ toast }) => toast.success('Link copied'));
-    }
-  }, [currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
 
   const goToPrevious = () => {
     if (currentItemIndex > 0) {
@@ -1396,16 +1374,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       <X className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  {/* Share button — mobile top-left */}
-                  <div className="absolute top-2 left-3 z-50">
-                    <button
-                      onClick={shareLightboxImage}
-                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
-                      aria-label="Share this image"
-                    >
-                      <Share2 className="h-4 w-4 text-white" />
-                    </button>
-                  </div>
                 </div>
 
                 {/* Section label */}
@@ -1461,16 +1429,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
-                      {/* Share button — desktop top-right */}
-                      <div className="hidden md:flex absolute top-3 right-3 z-50">
-                        <button
-                          onClick={shareLightboxImage}
-                          className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
-                          aria-label="Share this image"
-                        >
-                          <Share2 className="h-5 w-5" />
-                        </button>
-                      </div>
                       {/* Close button — desktop near image */}
                       <div className={`hidden md:flex absolute z-50 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
                         <button
