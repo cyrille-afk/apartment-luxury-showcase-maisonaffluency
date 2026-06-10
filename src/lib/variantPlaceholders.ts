@@ -20,7 +20,7 @@ export interface VariantPlaceholderInput {
   top_axis_label?: string | null;
 }
 
-const DEFAULT_BASE_PLACEHOLDER = "Select your finish";
+const DEFAULT_BASE_PLACEHOLDER = "Select your base finish";
 const DEFAULT_TOP_PLACEHOLDER = "Select your top finish";
 const DEFAULT_MATERIAL_PLACEHOLDER = "Select your finish";
 
