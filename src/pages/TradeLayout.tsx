@@ -69,10 +69,155 @@ const TRADE_GATE_COPY: Record<string, { title: string; description: string; h1: 
     h1: "Maison Affluency Trade Portal",
     description: "Access project folders, trade pricing, spec sheets, quoting tools, FF&E schedules and white-label client documentation for interior design professionals.",
   },
+  "/trade/dashboard": {
+    title: "Trade Dashboard | Maison Affluency",
+    h1: "Trade Dashboard",
+    description: "Manage your projects, quotes, and client folders from the Maison Affluency trade dashboard.",
+  },
   "/trade/designers": {
     title: "Trade Designers Directory | Maison Affluency",
     h1: "Trade Designers Directory",
     description: "Browse Maison Affluency designers and ateliers for trade projects, with materials, collections, spec sheets and project-folder tools available after sign-in.",
+  },
+  "/trade/gallery": {
+    title: "Trade Gallery | Maison Affluency",
+    h1: "Trade Gallery",
+    description: "Explore the full trade product gallery with pricing, spec sheets and project-folder tools available to signed-in trade members.",
+  },
+  "/trade/quotes": {
+    title: "Trade Quotes | Maison Affluency",
+    h1: "Trade Quotes",
+    description: "Build and manage trade quotes, pricing requests and client proposals. Sign in to access your quote history.",
+  },
+  "/trade/documents": {
+    title: "Trade Documents | Maison Affluency",
+    h1: "Trade Documents",
+    description: "Access white-label client documentation, spec sheets and project exports. Sign in to view your trade documents.",
+  },
+  "/trade/showroom": {
+    title: "Trade Showroom | Maison Affluency",
+    h1: "Trade Showroom",
+    description: "Browse curated showroom collections with trade pricing and project tools available after sign-in.",
+  },
+  "/trade/samples": {
+    title: "Trade Samples | Maison Affluency",
+    h1: "Trade Samples",
+    description: "Request material and finish samples for your projects. Sign in to manage your sample orders.",
+  },
+  "/trade/favorites": {
+    title: "Trade Favorites | Maison Affluency",
+    h1: "Trade Favorites",
+    description: "View your saved products and curated collections. Sign in to access your favorites and project folders.",
+  },
+  "/trade/projects": {
+    title: "Trade Projects | Maison Affluency",
+    h1: "Trade Projects",
+    description: "Manage your client projects, FF&E schedules and order timelines. Sign in to view your project workspace.",
+  },
+  "/trade/boards": {
+    title: "Project Folders | Maison Affluency",
+    h1: "Project Folders",
+    description: "Organize products into client project folders and share curated selections. Sign in to access your boards.",
+  },
+  "/trade/presentations": {
+    title: "Trade Presentations | Maison Affluency",
+    h1: "Trade Presentations",
+    description: "Create and share white-label client presentations. Sign in to build and manage your trade presentations.",
+  },
+  "/trade/tearsheets": {
+    title: "Tearsheet Builder | Maison Affluency",
+    h1: "Tearsheet Builder",
+    description: "Generate product tearsheets and spec exports for your projects. Sign in to access the tearsheet builder.",
+  },
+  "/trade/order-timeline": {
+    title: "Order Timeline | Maison Affluency",
+    h1: "Order Timeline",
+    description: "Track order status, lead times and delivery schedules. Sign in to view your trade order timeline.",
+  },
+  "/trade/ffe-schedule": {
+    title: "FF&E Schedule | Maison Affluency",
+    h1: "FF&E Schedule",
+    description: "Build and export FF&E schedules for your projects. Sign in to manage your fixtures, furnishings and equipment.",
+  },
+  "/trade/mood-boards": {
+    title: "Mood Boards | Maison Affluency",
+    h1: "Mood Boards",
+    description: "Create visual mood boards and material palettes for client presentations. Sign in to access your mood boards.",
+  },
+  "/trade/clients": {
+    title: "Client Address Book | Maison Affluency",
+    h1: "Client Address Book",
+    description: "Manage your client contacts and project associations. Sign in to access your trade client list.",
+  },
+  "/trade/media": {
+    title: "Media Library | Maison Affluency",
+    h1: "Media Library",
+    description: "Browse and download high-resolution product images and CAD assets. Sign in to access the trade media library.",
+  },
+  "/trade/insights": {
+    title: "Trade Insights | Maison Affluency",
+    h1: "Trade Insights",
+    description: "Explore market insights, provenance reports and design intelligence. Sign in for full trade insights access.",
+  },
+  "/trade/journal": {
+    title: "Trade Journal | Maison Affluency",
+    h1: "Trade Journal",
+    description: "Read design stories, atelier profiles and industry features from the Maison Affluency editorial team.",
+  },
+  "/trade/provenance": {
+    title: "Provenance | Maison Affluency",
+    h1: "Provenance",
+    description: "Discover the stories, craftsmanship and heritage behind Maison Affluency collections. Sign in for extended provenance data.",
+  },
+  "/trade/tools": {
+    title: "Trade Tools | Maison Affluency",
+    h1: "Trade Tools",
+    description: "Access spatial fit audits, product comparators and other trade utilities. Sign in to use your trade tools.",
+  },
+  "/trade/currency-converter": {
+    title: "Currency Converter | Maison Affluency",
+    h1: "Currency Converter",
+    description: "Convert trade pricing across currencies with real-time rates. Sign in to access the trade currency converter.",
+  },
+  "/trade/lead-time-calendar": {
+    title: "Lead Time Calendar | Maison Affluency",
+    h1: "Lead Time Calendar",
+    description: "View production lead times and plan your project schedules. Sign in to access the trade lead time calendar.",
+  },
+  "/trade/materials": {
+    title: "Material Library | Maison Affluency",
+    h1: "Material Library",
+    description: "Browse materials, finishes and swatches for your trade projects. Sign in to access the full material library.",
+  },
+  "/trade/shipping-tracker": {
+    title: "Shipping Tracker | Maison Affluency",
+    h1: "Shipping Tracker",
+    description: "Track shipments and delivery status for your trade orders. Sign in to view your shipping tracker.",
+  },
+  "/trade/budget": {
+    title: "Budget Tracker | Maison Affluency",
+    h1: "Budget Tracker",
+    description: "Monitor project budgets and spend across your trade orders. Sign in to access the budget tracker.",
+  },
+  "/trade/reorder": {
+    title: "Reorder | Maison Affluency",
+    h1: "Reorder",
+    description: "Quickly reorder products from your trade history. Sign in to view and manage your reorders.",
+  },
+  "/trade/cpd": {
+    title: "CPD & Education | Maison Affluency",
+    h1: "CPD & Education",
+    description: "Access continuing professional development resources for interior design professionals. Sign in for full CPD access.",
+  },
+  "/trade/comparator": {
+    title: "Product Comparator | Maison Affluency",
+    h1: "Product Comparator",
+    description: "Compare products side-by-side with detailed specifications. Sign in to use the trade product comparator.",
+  },
+  "/trade/me": {
+    title: "My Dashboard | Maison Affluency",
+    h1: "My Dashboard",
+    description: "View your account, saved items and activity. Sign in to access your personal trade dashboard.",
   },
 };
 
