@@ -1,0 +1,1 @@
+UPDATE public.trade_products SET product_name = btrim(product_name) WHERE product_name <> btrim(product_name);
