@@ -1,7 +1,7 @@
 /**
  * Side-by-side audit of Public vs Trade product sheets.
- * Embeds both pages directly for fast UI/UX inspection, with popup/tab
- * actions kept as fallbacks for browser-specific preview issues.
+ * Embeds both pages directly when possible, with a top-level split-window
+ * renderer for the Lovable editor where nested iframes go blank.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -11,7 +11,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { ExternalLink, LayoutPanelLeft, RefreshCw, X } from "lucide-react";
+import { ExternalLink, LayoutPanelLeft, RefreshCw } from "lucide-react";
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 function slugify(s: string) {
   return (s || "")
@@ -36,10 +45,7 @@ export default function TradeAdminProductAudit() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(params.get("id"));
   const [reloadKey, setReloadKey] = useState(0);
-  const popupsRef = useRef<{ left: Window | null; right: Window | null }>({
-    left: null,
-    right: null,
-  });
+  const splitWindowRef = useRef<Window | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["audit-picks"],
@@ -79,8 +85,14 @@ export default function TradeAdminProductAudit() {
   );
 
   useEffect(() => {
-    if (selectedId) setParams({ id: selectedId }, { replace: true });
-  }, [selectedId, setParams]);
+    const currentId = params.get("id");
+    if (selectedId === currentId) return;
+
+    const next = new URLSearchParams(params);
+    if (selectedId) next.set("id", selectedId);
+    else next.delete("id");
+    setParams(next, { replace: true });
+  }, [params, selectedId, setParams]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -96,64 +108,53 @@ export default function TradeAdminProductAudit() {
   const openSideBySide = () => {
     if (!publicUrl || !tradeUrl) return;
 
-    // Close existing popups if still open
-    try { popupsRef.current.left?.close(); } catch { /* noop */ }
-    try { popupsRef.current.right?.close(); } catch { /* noop */ }
+    try { splitWindowRef.current?.close(); } catch { /* noop */ }
 
-    const screenW = window.screen.availWidth || window.innerWidth;
-    const screenH = window.screen.availHeight || window.innerHeight;
-    const screenLeft = (window.screen as any).availLeft ?? 0;
-    const screenTop = (window.screen as any).availTop ?? 0;
-    const w = Math.floor(screenW / 2);
-    const h = screenH;
+    const splitWin = window.open("", "audit-split-inspector", "popup=yes,noopener=no,width=1600,height=1000,menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes");
+    splitWindowRef.current = splitWin;
 
-    const features = (left: number) =>
-      `popup=yes,noopener=no,width=${w},height=${h},left=${left},top=${screenTop},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`;
-
-    const leftWin = window.open(publicUrl, "audit-public", features(screenLeft));
-    const rightWin = window.open(tradeUrl, "audit-trade", features(screenLeft + w));
-
-    popupsRef.current.left = leftWin;
-    popupsRef.current.right = rightWin;
-
-    if (!leftWin || !rightWin) {
+    if (!splitWin) {
       toast({
         title: "Popups blocked",
         description:
-          "Allow pop-ups for this site so both audit windows can open side by side.",
+          "Allow pop-ups for this site so the split inspector can open.",
         variant: "destructive",
       });
-    } else {
-      // Pull both windows to the front
-      try { leftWin.focus(); } catch { /* noop */ }
-      try { rightWin.focus(); } catch { /* noop */ }
+      return;
     }
+
+    const title = selected ? `${selected.designerName} — ${selected.title}` : "Product Sheet Audit";
+    splitWin.document.open();
+    splitWin.document.write(`<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)} · Split inspector</title>
+<style>
+html,body{margin:0;height:100%;background:#f7f4ee;color:#1f1b16;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}.bar{height:48px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 16px;border-bottom:1px solid rgba(31,27,22,.14);background:#fffdf8}.title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;gap:8px;flex-shrink:0}a,button{height:30px;border:1px solid rgba(31,27,22,.18);background:#fffdf8;color:#1f1b16;padding:0 10px;border-radius:6px;font:inherit;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;cursor:pointer}.grid{height:calc(100% - 48px);display:grid;grid-template-columns:1fr 1fr}.pane{min-width:0;border-right:1px solid rgba(31,27,22,.14);display:flex;flex-direction:column}.pane:last-child{border-right:0}.pane-head{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid rgba(31,27,22,.1);font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:#efe8dc}.pane-head span:last-child{text-transform:none;letter-spacing:0;color:#6f675d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}iframe{width:100%;height:calc(100% - 34px);border:0;background:white}@media(max-width:900px){.grid{grid-template-columns:1fr}.pane{height:70vh;border-right:0;border-bottom:1px solid rgba(31,27,22,.14)}}
+</style></head><body>
+<div class="bar"><div class="title">${escapeHtml(title)}</div><div class="actions"><button onclick="location.reload()">Reload</button><a href="${escapeHtml(publicUrl)}" target="_blank" rel="noreferrer">Public tab</a><a href="${escapeHtml(tradeUrl)}" target="_blank" rel="noreferrer">Trade tab</a></div></div>
+<main class="grid"><section class="pane"><div class="pane-head"><span>Public</span><span>${escapeHtml(publicUrl)}</span></div><iframe src="${escapeHtml(publicUrl)}" title="Public view"></iframe></section><section class="pane"><div class="pane-head"><span>Trade</span><span>${escapeHtml(tradeUrl)}</span></div><iframe src="${escapeHtml(tradeUrl)}" title="Trade view"></iframe></section></main>
+</body></html>`);
+    splitWin.document.close();
+    try { splitWin.focus(); } catch { /* noop */ }
   };
 
   const reload = () => {
     setReloadKey((key) => key + 1);
-    try { popupsRef.current.left?.location.reload(); } catch { /* noop */ }
-    try { popupsRef.current.right?.location.reload(); } catch { /* noop */ }
+    try { splitWindowRef.current?.location.reload(); } catch { /* noop */ }
   };
 
   const closeAll = () => {
-    try { popupsRef.current.left?.close(); } catch { /* noop */ }
-    try { popupsRef.current.right?.close(); } catch { /* noop */ }
-    popupsRef.current = { left: null, right: null };
+    try { splitWindowRef.current?.close(); } catch { /* noop */ }
+    splitWindowRef.current = null;
   };
 
   // Close popups if user navigates away from the audit page
   useEffect(() => () => closeAll(), []);
 
   // Detect being framed inside the Lovable editor — nested same-origin iframes
-  // are blocked there, so embedded previews go blank. We force users to open
-  // the audit in its own top-level tab where the iframes render normally.
+  // can go blank there, so the main action opens a generated top-level split
+  // inspector instead of re-opening the same empty audit route.
   const isFramed =
     typeof window !== "undefined" && window.self !== window.top;
-  const standaloneAuditUrl =
-    typeof window !== "undefined"
-      ? `${window.location.pathname}${window.location.search}`
-      : "";
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -162,21 +163,22 @@ export default function TradeAdminProductAudit() {
           <h1 className="text-2xl font-light tracking-tight">Product Sheet Audit</h1>
           <p className="text-sm text-muted-foreground">
             {isFramed
-              ? "Open this page in its own tab to see Public & Trade side-by-side (nested iframes are blocked inside the editor)."
+              ? "Open a generated split inspector for Public & Trade. It does not reload this audit route."
               : "Inspect the Public and Trade product sheets side by side in-page."}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {isFramed && (
-            <a
-              href={standaloneAuditUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90"
+            <Button
+              type="button"
+              size="sm"
+              onClick={openSideBySide}
+              disabled={!selected}
+              className="gap-2"
             >
-              <LayoutPanelLeft className="h-4 w-4" /> Open side-by-side in own tab
-            </a>
+              <LayoutPanelLeft className="h-4 w-4" /> Open split inspector
+            </Button>
           )}
           <a
             href={publicUrl || "#"}
