@@ -1,8 +1,7 @@
 /**
  * Side-by-side audit of Public vs Trade product sheets.
- * Opens both pages as two popup windows positioned side-by-side so admins
- * can compare UI/UX parity. Iframes were unreliable inside the Lovable
- * preview sandbox, so popups are the source of truth.
+ * Embeds both pages directly for fast UI/UX inspection, with popup/tab
+ * actions kept as fallbacks for browser-specific preview issues.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -36,6 +35,7 @@ export default function TradeAdminProductAudit() {
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(params.get("id"));
+  const [reloadKey, setReloadKey] = useState(0);
   const popupsRef = useRef<{ left: Window | null; right: Window | null }>({
     left: null,
     right: null,
@@ -131,6 +131,7 @@ export default function TradeAdminProductAudit() {
   };
 
   const reload = () => {
+    setReloadKey((key) => key + 1);
     try { popupsRef.current.left?.location.reload(); } catch { /* noop */ }
     try { popupsRef.current.right?.location.reload(); } catch { /* noop */ }
   };
@@ -150,17 +151,16 @@ export default function TradeAdminProductAudit() {
         <div>
           <h1 className="text-2xl font-light tracking-tight">Product Sheet Audit</h1>
           <p className="text-sm text-muted-foreground">
-            Open the Public and Trade product sheets as two popup windows positioned
-            side by side for visual diff.
+            Inspect the Public and Trade product sheets side by side in-page.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={openSideBySide} disabled={!selected || !publicUrl || !tradeUrl}>
+          <Button variant="outline" onClick={openSideBySide} disabled={!selected || !publicUrl || !tradeUrl}>
             <LayoutPanelLeft className="mr-2 h-4 w-4" />
-            Open side-by-side
+            Open popups
           </Button>
           <Button variant="outline" size="sm" onClick={reload} disabled={!selected}>
-            <RefreshCw className="mr-2 h-4 w-4" /> Reload popups
+            <RefreshCw className="mr-2 h-4 w-4" /> Reload previews
           </Button>
           <Button variant="ghost" size="sm" onClick={closeAll} disabled={!selected}>
             <X className="mr-2 h-4 w-4" /> Close popups
@@ -196,8 +196,7 @@ export default function TradeAdminProductAudit() {
 
       {!selected ? (
         <Card className="p-12 text-center text-muted-foreground">
-          Pick a product above, then click <strong>Open side-by-side</strong> to launch
-          both views.
+          Pick a product above to load both views side by side.
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -205,8 +204,8 @@ export default function TradeAdminProductAudit() {
             { label: "Public view", url: publicUrl, tone: "Public sees 'Price on Request'" },
             { label: "Trade view", url: tradeUrl, tone: "Trade sees pricing & spec sheets" },
           ].map((pane) => (
-            <Card key={pane.label} className="p-4">
-              <div className="flex items-start justify-between gap-3">
+            <Card key={pane.label} className="overflow-hidden">
+              <div className="flex items-start justify-between gap-3 border-b border-border p-4">
                 <div className="min-w-0">
                   <div className="text-sm font-medium">{pane.label}</div>
                   <div className="text-xs text-muted-foreground">{pane.tone}</div>
@@ -227,13 +226,21 @@ export default function TradeAdminProductAudit() {
                   </a>
                 )}
               </div>
+              {pane.url && (
+                <iframe
+                  key={`${pane.label}-${pane.url}-${reloadKey}`}
+                  src={pane.url}
+                  title={pane.label}
+                  className="h-[calc(100vh-230px)] min-h-[720px] w-full bg-background"
+                />
+              )}
             </Card>
           ))}
         </div>
       )}
 
       <p className="mt-4 text-xs text-muted-foreground">
-        Tip: if popups don't appear, allow pop-ups for this domain in your browser address bar.
+        Tip: use Open popups only if your browser blocks an embedded preview interaction.
       </p>
     </div>
   );
