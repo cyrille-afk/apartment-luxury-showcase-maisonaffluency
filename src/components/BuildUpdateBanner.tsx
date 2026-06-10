@@ -32,24 +32,28 @@ export default function BuildUpdateBanner() {
   useEffect(() => {
     if (isDev()) return;
 
-    // Patch history methods once so we can detect SPA navigations.
+    // Patch history.pushState once so we can detect real SPA navigations.
+    // We deliberately skip replaceState (used for in-page query-param updates
+    // like filters/selections) and only treat path changes as navigations —
+    // otherwise pages that sync state into the URL would reload mid-interaction.
     const w = window as unknown as { __mafBuildNavPatched?: boolean };
     if (!w.__mafBuildNavPatched) {
       w.__mafBuildNavPatched = true;
-      const fire = () => window.dispatchEvent(new Event("app:spa-navigation"));
+      let lastPath = window.location.pathname;
+      const fireIfPathChanged = () => {
+        const p = window.location.pathname;
+        if (p !== lastPath) {
+          lastPath = p;
+          window.dispatchEvent(new Event("app:spa-navigation"));
+        }
+      };
       const origPush = history.pushState;
-      const origReplace = history.replaceState;
       history.pushState = function (...args) {
         const r = origPush.apply(this, args as Parameters<typeof origPush>);
-        fire();
+        fireIfPathChanged();
         return r;
       };
-      history.replaceState = function (...args) {
-        const r = origReplace.apply(this, args as Parameters<typeof origReplace>);
-        fire();
-        return r;
-      };
-      window.addEventListener("popstate", fire);
+      window.addEventListener("popstate", fireIfPathChanged);
     }
 
     const onNav = () => {
