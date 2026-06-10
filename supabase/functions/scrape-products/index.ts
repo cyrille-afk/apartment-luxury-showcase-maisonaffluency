@@ -177,26 +177,38 @@ Deno.serve(async (req) => {
         });
       }
 
-      const allResults = [];
-      for (const config of configs) {
-        const result = await runScrape(
-          serviceClient, firecrawlKey,
-          config.urls, config.brand_name, config.category, config.extract_prompt
-        );
-        allResults.push(result);
+      // Run scrapes in the background so the cron HTTP call returns immediately
+      // (pg_net has a 5s default timeout; Firecrawl runs can take minutes).
+      const backgroundWork = (async () => {
+        const allResults = [];
+        for (const config of configs) {
+          try {
+            const result = await runScrape(
+              serviceClient, firecrawlKey,
+              config.urls, config.brand_name, config.category, config.extract_prompt
+            );
+            allResults.push(result);
+            await serviceClient.from("scrape_configs").update({
+              last_run_at: new Date().toISOString(),
+              last_run_result: result,
+              updated_at: new Date().toISOString(),
+            }).eq("id", config.id);
+          } catch (e) {
+            console.error("[scrape-products] config failed", config.id, e);
+          }
+        }
+        console.log("[scrape-products] background run complete", { count: allResults.length });
+      })();
 
-        // Update last_run
-        await serviceClient.from("scrape_configs").update({
-          last_run_at: new Date().toISOString(),
-          last_run_result: result,
-          updated_at: new Date().toISOString(),
-        }).eq("id", config.id);
-      }
+      // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+      try { EdgeRuntime.waitUntil(backgroundWork); } catch { /* noop */ }
 
-      return new Response(JSON.stringify({ success: true, results: allResults }), {
+      return new Response(JSON.stringify({ success: true, accepted: configs.length, mode: "background" }), {
+        status: 202,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     // Mode 2: Manual run — requires auth
     const authHeader = req.headers.get("Authorization");
