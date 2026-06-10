@@ -37,7 +37,13 @@ export function formatVariantAxisLabel(label: string | null | undefined): string
 }
 
 function placeholderFromAxisLabel(label: string): string {
-  return `Select your ${formatVariantAxisLabel(label)!.toLowerCase()}`;
+  const formatted = formatVariantAxisLabel(label)!;
+  const lower = formatted.toLowerCase();
+  // Append "finish" unless the label already ends with finish/fabric/material/size/colour/color
+  const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather|upholstery)$/i.test(lower);
+  return skipSuffix
+    ? `Select your ${lower}`
+    : `Select your ${lower} finish`;
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
