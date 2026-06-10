@@ -567,12 +567,10 @@ const VariantSelectors: React.FC<{
         })()
       ) : null}
 
-      {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={formatDimensionsMultiline(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions)} />
-      )}
     </>
   );
 };
+
 
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
