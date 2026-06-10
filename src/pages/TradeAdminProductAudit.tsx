@@ -168,6 +168,16 @@ export default function TradeAdminProductAudit() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {isFramed && (
+            <a
+              href={standaloneAuditUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90"
+            >
+              <LayoutPanelLeft className="h-4 w-4" /> Open side-by-side in own tab
+            </a>
+          )}
           <a
             href={publicUrl || "#"}
             target="_blank"
@@ -192,6 +202,7 @@ export default function TradeAdminProductAudit() {
             <RefreshCw className="mr-2 h-4 w-4" /> Reload previews
           </Button>
         </div>
+
 
       </div>
 
