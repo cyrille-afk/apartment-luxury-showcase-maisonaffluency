@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
@@ -57,22 +57,70 @@ async function saveDescription(productId: string, source: Source, description: s
   if (error) throw error;
 }
 
+const PERSIST_KEY = "trade-description-writer:v1";
+
+type PersistedState = {
+  mode: Mode;
+  source: Source;
+  tone: Tone;
+  bulkDesigner: string;
+  skipExisting: boolean;
+  bulkRows: BulkRow[];
+  bulkProgress: { done: number; total: number };
+};
+
+function loadPersisted(): Partial<PersistedState> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(PERSIST_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as PersistedState;
+  } catch {
+    return {};
+  }
+}
+
 export default function TradeDescriptionWriter() {
   const { isAdmin, loading } = useAuth();
-  const [mode, setMode] = useState<Mode>("single");
-  const [source, setSource] = useState<Source>("curator_picks");
+  const persisted = useRef<Partial<PersistedState>>(loadPersisted()).current;
+
+  const [mode, setMode] = useState<Mode>(persisted.mode ?? "single");
+  const [source, setSource] = useState<Source>(persisted.source ?? "curator_picks");
   const [productId, setProductId] = useState("");
-  const [tone, setTone] = useState<Tone>("editorial");
+  const [tone, setTone] = useState<Tone>(persisted.tone ?? "editorial");
   const [result, setResult] = useState("");
   const [copied, setCopied] = useState(false);
 
   // Bulk state
-  const [bulkDesigner, setBulkDesigner] = useState<string>("");
-  const [skipExisting, setSkipExisting] = useState(true);
-  const [bulkRows, setBulkRows] = useState<BulkRow[]>([]);
+  const [bulkDesigner, setBulkDesigner] = useState<string>(persisted.bulkDesigner ?? "");
+  const [skipExisting, setSkipExisting] = useState(persisted.skipExisting ?? true);
+  const [bulkRows, setBulkRows] = useState<BulkRow[]>(() => {
+    // Any rows mid-flight when we left are considered failed (interrupted)
+    return (persisted.bulkRows ?? []).map((r) =>
+      r.status === "generating" ? { ...r, status: "pending" as RowStatus } : r,
+    );
+  });
   const [bulkRunning, setBulkRunning] = useState(false);
-  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
+  const [bulkProgress, setBulkProgress] = useState(persisted.bulkProgress ?? { done: 0, total: 0 });
   const [cancelRequested, setCancelRequested] = useState(false);
+
+  // Persist bulk session so navigating away & back doesn't wipe progress
+  useEffect(() => {
+    try {
+      const payload: PersistedState = {
+        mode, source, tone, bulkDesigner, skipExisting, bulkRows, bulkProgress,
+      };
+      sessionStorage.setItem(PERSIST_KEY, JSON.stringify(payload));
+    } catch { /* quota — ignore */ }
+  }, [mode, source, tone, bulkDesigner, skipExisting, bulkRows, bulkProgress]);
+
+  // Warn if the user tries to close/reload while a bulk run is active
+  useEffect(() => {
+    if (!bulkRunning) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [bulkRunning]);
 
   // Fetch curator picks
   const { data: curatorPicks = [] } = useQuery({
