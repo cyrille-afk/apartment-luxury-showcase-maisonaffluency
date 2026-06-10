@@ -155,17 +155,31 @@ export default function TradeAdminProductAudit() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={openSideBySide} disabled={!selected || !publicUrl || !tradeUrl}>
-            <LayoutPanelLeft className="mr-2 h-4 w-4" />
-            Open popups
-          </Button>
+          <a
+            href={publicUrl || "#"}
+            target="_blank"
+            rel="noreferrer"
+            aria-disabled={!publicUrl}
+            onClick={(e) => { if (!publicUrl) e.preventDefault(); }}
+            className={`inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent ${!publicUrl ? "pointer-events-none opacity-50" : ""}`}
+          >
+            <ExternalLink className="h-4 w-4" /> Open Public tab
+          </a>
+          <a
+            href={tradeUrl || "#"}
+            target="_blank"
+            rel="noreferrer"
+            aria-disabled={!tradeUrl}
+            onClick={(e) => { if (!tradeUrl) e.preventDefault(); }}
+            className={`inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent ${!tradeUrl ? "pointer-events-none opacity-50" : ""}`}
+          >
+            <ExternalLink className="h-4 w-4" /> Open Trade tab
+          </a>
           <Button variant="outline" size="sm" onClick={reload} disabled={!selected}>
             <RefreshCw className="mr-2 h-4 w-4" /> Reload previews
           </Button>
-          <Button variant="ghost" size="sm" onClick={closeAll} disabled={!selected}>
-            <X className="mr-2 h-4 w-4" /> Close popups
-          </Button>
         </div>
+
       </div>
 
       <Card className="mb-4 p-3">
