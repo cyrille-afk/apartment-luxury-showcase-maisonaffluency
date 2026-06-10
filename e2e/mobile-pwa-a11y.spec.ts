@@ -207,6 +207,9 @@ test.describe("Mobile PWA & accessibility", () => {
   test("header respects safe-area-inset-top", async ({ page }) => {
     await page.goto("/");
     await waitForAppReady(page);
+    // The homepage Navigation is lazy-loaded (code-split chunk mounted after an
+    // effect) — wait for it to attach or the evaluate below races an empty DOM.
+    await page.locator("header, nav").first().waitFor({ state: "attached", timeout: 15_000 });
     // Force a non-zero safe-area inset to simulate notch devices.
     await page.addStyleTag({
       content: `:root { --sat: 47px; } 
