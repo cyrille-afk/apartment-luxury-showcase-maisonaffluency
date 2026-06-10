@@ -810,7 +810,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
                   </button>
                   {/* Persistent badge — always visible to test conversion lift */}
-                  <div ref={magazineBadgeRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50">
+                  <div ref={magazineBadgeRef} className={cn("absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 transition-opacity duration-150", megaMenuOpen && "opacity-0 pointer-events-none")}>
                     <button
                       type="button"
                       onClick={() => {
