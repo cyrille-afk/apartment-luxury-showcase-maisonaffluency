@@ -108,50 +108,43 @@ export default function TradeAdminProductAudit() {
   const openSideBySide = () => {
     if (!publicUrl || !tradeUrl) return;
 
-    // Close existing popups if still open
-    try { popupsRef.current.left?.close(); } catch { /* noop */ }
-    try { popupsRef.current.right?.close(); } catch { /* noop */ }
+    try { splitWindowRef.current?.close(); } catch { /* noop */ }
 
-    const screenW = window.screen.availWidth || window.innerWidth;
-    const screenH = window.screen.availHeight || window.innerHeight;
-    const screenLeft = (window.screen as any).availLeft ?? 0;
-    const screenTop = (window.screen as any).availTop ?? 0;
-    const w = Math.floor(screenW / 2);
-    const h = screenH;
+    const splitWin = window.open("", "audit-split-inspector", "popup=yes,noopener=no,width=1600,height=1000,menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes");
+    splitWindowRef.current = splitWin;
 
-    const features = (left: number) =>
-      `popup=yes,noopener=no,width=${w},height=${h},left=${left},top=${screenTop},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`;
-
-    const leftWin = window.open(publicUrl, "audit-public", features(screenLeft));
-    const rightWin = window.open(tradeUrl, "audit-trade", features(screenLeft + w));
-
-    popupsRef.current.left = leftWin;
-    popupsRef.current.right = rightWin;
-
-    if (!leftWin || !rightWin) {
+    if (!splitWin) {
       toast({
         title: "Popups blocked",
         description:
-          "Allow pop-ups for this site so both audit windows can open side by side.",
+          "Allow pop-ups for this site so the split inspector can open.",
         variant: "destructive",
       });
-    } else {
-      // Pull both windows to the front
-      try { leftWin.focus(); } catch { /* noop */ }
-      try { rightWin.focus(); } catch { /* noop */ }
+      return;
     }
+
+    const title = selected ? `${selected.designerName} — ${selected.title}` : "Product Sheet Audit";
+    splitWin.document.open();
+    splitWin.document.write(`<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)} · Split inspector</title>
+<style>
+html,body{margin:0;height:100%;background:#f7f4ee;color:#1f1b16;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}.bar{height:48px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 16px;border-bottom:1px solid rgba(31,27,22,.14);background:#fffdf8}.title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;gap:8px;flex-shrink:0}a,button{height:30px;border:1px solid rgba(31,27,22,.18);background:#fffdf8;color:#1f1b16;padding:0 10px;border-radius:6px;font:inherit;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;cursor:pointer}.grid{height:calc(100% - 48px);display:grid;grid-template-columns:1fr 1fr}.pane{min-width:0;border-right:1px solid rgba(31,27,22,.14);display:flex;flex-direction:column}.pane:last-child{border-right:0}.pane-head{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid rgba(31,27,22,.1);font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:#efe8dc}.pane-head span:last-child{text-transform:none;letter-spacing:0;color:#6f675d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}iframe{width:100%;height:calc(100% - 34px);border:0;background:white}@media(max-width:900px){.grid{grid-template-columns:1fr}.pane{height:70vh;border-right:0;border-bottom:1px solid rgba(31,27,22,.14)}}
+</style></head><body>
+<div class="bar"><div class="title">${escapeHtml(title)}</div><div class="actions"><button onclick="location.reload()">Reload</button><a href="${escapeHtml(publicUrl)}" target="_blank" rel="noreferrer">Public tab</a><a href="${escapeHtml(tradeUrl)}" target="_blank" rel="noreferrer">Trade tab</a></div></div>
+<main class="grid"><section class="pane"><div class="pane-head"><span>Public</span><span>${escapeHtml(publicUrl)}</span></div><iframe src="${escapeHtml(publicUrl)}" title="Public view"></iframe></section><section class="pane"><div class="pane-head"><span>Trade</span><span>${escapeHtml(tradeUrl)}</span></div><iframe src="${escapeHtml(tradeUrl)}" title="Trade view"></iframe></section></main>
+</body></html>`);
+    splitWin.document.close();
+    try { splitWin.focus(); } catch { /* noop */ }
   };
 
   const reload = () => {
     setReloadKey((key) => key + 1);
-    try { popupsRef.current.left?.location.reload(); } catch { /* noop */ }
-    try { popupsRef.current.right?.location.reload(); } catch { /* noop */ }
+    try { splitWindowRef.current?.location.reload(); } catch { /* noop */ }
   };
 
   const closeAll = () => {
-    try { popupsRef.current.left?.close(); } catch { /* noop */ }
-    try { popupsRef.current.right?.close(); } catch { /* noop */ }
-    popupsRef.current = { left: null, right: null };
+    try { splitWindowRef.current?.close(); } catch { /* noop */ }
+    splitWindowRef.current = null;
   };
 
   // Close popups if user navigates away from the audit page
