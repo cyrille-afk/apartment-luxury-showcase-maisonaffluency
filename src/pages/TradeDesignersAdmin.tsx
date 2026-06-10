@@ -755,6 +755,34 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                         variant="ghost"
                         size="sm"
                         className="h-6 text-[10px]"
+                        title="Copy one price to every variant row (use when finishes share the same price)"
+                        onClick={() => {
+                          const current = pick.size_variants || [];
+                          if (current.length === 0) {
+                            toast({ title: "No rows", description: "Add variant rows first.", variant: "destructive" });
+                            return;
+                          }
+                          const firstPriced = current.find((v) => v.price_cents && v.price_cents > 0)?.price_cents || 0;
+                          const seedUsd = firstPriced ? (firstPriced / 100).toString() : "";
+                          const input = window.prompt("Apply this price (in major units, e.g. 5000) to all variant rows:", seedUsd);
+                          if (input === null) return;
+                          const num = parseFloat(input);
+                          if (!Number.isFinite(num) || num < 0) {
+                            toast({ title: "Invalid price", variant: "destructive" });
+                            return;
+                          }
+                          const cents = Math.round(num * 100);
+                          const next = current.map((v) => ({ ...v, price_cents: cents }));
+                          updateField(pick.id, "size_variants", next as any);
+                          toast({ title: "Price applied", description: `${current.length} rows set to ${num.toLocaleString()}` });
+                        }}
+                      >
+                        Apply price to all
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[10px]"
                         title="Auto-fill all Base × Top combinations from rows that have only Base or only Top set"
                         onClick={() => {
                           const current = pick.size_variants || [];
