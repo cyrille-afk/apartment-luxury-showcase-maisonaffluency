@@ -235,7 +235,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
-  const { data: dbPicks } = useDbCuratorPicks();
+  const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
