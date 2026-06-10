@@ -340,7 +340,9 @@ RULES:
     const cachePrompt = `[${tone}]\n${systemPrompt}\n---\n${productContext}`;
     const cached = await withSemanticCache<{ description: string; usage?: any }>(
       {
-        feature: `product-description-writer:${tone}`,
+        // Scope cache to (tone, product_id) so different products with similar
+        // brand-biography blocks can never collide via semantic similarity.
+        feature: `product-description-writer:${tone}:${source}:${product_id}`,
         model: DESCRIPTION_MODEL,
         prompt: cachePrompt,
         apiKey: LOVABLE_API_KEY,
