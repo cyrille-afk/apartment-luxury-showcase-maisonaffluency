@@ -235,7 +235,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
-  const { data: dbPicks } = useDbCuratorPicks();
+  const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -475,12 +475,18 @@ function singularizeSub(s: string): string {
               {filterLabel}
             </h2>
             <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-              {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
-                filterSource === 'collectibles' ? 'Collectible Design'
-                : filterSource === 'brands' ? 'all Ateliers'
-                : filterSource === 'designers' ? 'all Designers'
-                : 'all collections'
-              }
+              {dbPicksLoading && !dbPicks ? (
+                <span className="opacity-60">Loading pieces…</span>
+              ) : (
+                <>
+                  {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
+                    filterSource === 'collectibles' ? 'Collectible Design'
+                    : filterSource === 'brands' ? 'all Ateliers'
+                    : filterSource === 'designers' ? 'all Designers'
+                    : 'all collections'
+                  }
+                </>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
