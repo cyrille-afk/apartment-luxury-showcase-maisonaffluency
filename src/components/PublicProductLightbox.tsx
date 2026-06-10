@@ -147,11 +147,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       !propProduct.variant_image_map ||
       !propProduct.materials_description ||
       !propProduct.origin ||
-      !propProduct.lead_time;
+      !propProduct.lead_time ||
+      !propProduct.dimensions;
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -174,8 +175,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       materials_description: propProduct.materials_description ?? variantPayload.materials_description ?? null,
       origin: propProduct.origin ?? variantPayload.origin ?? null,
       lead_time: propProduct.lead_time ?? variantPayload.lead_time ?? null,
+      dimensions: propProduct.dimensions ?? variantPayload.dimensions ?? null,
     };
   }, [propProduct, variantPayload]);
+
 
   // Resolve canonical designer slug (same hook used by product pages)
   const designerDisplayName = product
