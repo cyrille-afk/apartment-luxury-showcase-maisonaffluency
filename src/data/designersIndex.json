@@ -61,7 +61,7 @@
   },
   {
     "slug": "bruno-de-maistre",
-    "name": "Atelier BdM - Bruno de Maistre"
+    "name": "Atelier BdM"
   },
   {
     "slug": "atelier-demichelis",
@@ -136,10 +136,6 @@
     "name": "Charles Kalpakian"
   },
   {
-    "slug": "felix-agostini",
-    "name": "Charles Paris - Felix Agostini"
-  },
-  {
     "slug": "charles-antoine-chappuis-cc-tapis",
     "name": "Charles-Antoine Chappuis"
   },
@@ -170,10 +166,6 @@
   {
     "slug": "cluzel-pluchon",
     "name": "Cluzel Pluchon"
-  },
-  {
-    "slug": "cocorico-paris",
-    "name": "Cocorico Paris"
   },
   {
     "slug": "collection-particuliere",
@@ -222,6 +214,10 @@
   {
     "slug": "atelier-de-troupe-cc-tapis",
     "name": "De Troupe"
+  },
+  {
+    "slug": "delcourt-collection",
+    "name": "Delcourt Collection"
   },
   {
     "slug": "destroyers-builders-cc-tapis",
@@ -304,6 +300,10 @@
     "name": "Federico Peri"
   },
   {
+    "slug": "felix-agostini",
+    "name": "Felix Agostini"
+  },
+  {
     "slug": "felix-aublet",
     "name": "Félix Aublet"
   },
@@ -336,11 +336,11 @@
     "name": "Fredie Jochimek"
   },
   {
-    "slug": "gaelle-lauriot-prevost-dominique-perrault-cc-tapis",
+    "slug": "gaelle-lauriot-prevost",
     "name": "Gaëlle Lauriot-Prévost & Dominique Perrault"
   },
   {
-    "slug": "gaelle-lauriot-prevost",
+    "slug": "gaelle-lauriot-prevost-dominique-perrault-cc-tapis",
     "name": "Gaëlle Lauriot-Prévost & Dominique Perrault"
   },
   {
@@ -1108,11 +1108,11 @@
     "name": "Wendy Andreu"
   },
   {
-    "slug": "yabu-pushelberg-cc-tapis",
+    "slug": "yabu-pushelberg",
     "name": "Yabu Pushelberg"
   },
   {
-    "slug": "yabu-pushelberg",
+    "slug": "yabu-pushelberg-cc-tapis",
     "name": "Yabu Pushelberg"
   },
   {
