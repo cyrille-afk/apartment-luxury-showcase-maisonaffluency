@@ -192,7 +192,8 @@ function useTradeProductBySlug(
             .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
-          curatorPick = (picks || []).find((p: any) => p.title === (tradeProduct as any).product_name) || null;
+          const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
+          curatorPick = (picks || []).find((p: any) => (p.title || "").trim().toLowerCase() === tradeName) || null;
           relatedPicks = ((picks || []) as unknown as ProductRow[]).filter((p) => p.id !== curatorPick?.id);
         }
 
