@@ -109,8 +109,7 @@ const TradeGallery = () => {
     // prices from there in the gallery views.
     const { data: cpData } = await supabase
       .from("designer_curator_picks")
-      .select("title, trade_price_cents, currency, price_prefix")
-      .not("trade_price_cents", "is", null);
+      .select("title, trade_price_cents, currency, price_prefix, size_variants");
 
     const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null }>();
     const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null }[] = [];
@@ -126,6 +125,19 @@ const TradeGallery = () => {
     for (const p of cpData ?? []) {
       if (p.trade_price_cents) {
         addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix);
+        continue;
+      }
+      // Fallback: derive a "from" price from size_variants when the row-level
+      // trade_price_cents wasn't filled in but per-variant prices exist
+      // (e.g. Niko Sofa where each size has its own price).
+      const variants = Array.isArray((p as any).size_variants) ? ((p as any).size_variants as any[]) : [];
+      const variantPrices = variants
+        .map((v) => Number(v?.price_cents))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      if (variantPrices.length > 0) {
+        const minPrice = Math.min(...variantPrices);
+        const prefix = variantPrices.length > 1 ? (p.price_prefix || "from") : p.price_prefix;
+        addEntry(p.title, minPrice, p.currency, undefined, prefix);
       }
     }
 
