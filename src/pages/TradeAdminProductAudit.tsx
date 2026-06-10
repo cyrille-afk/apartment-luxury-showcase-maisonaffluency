@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { ExternalLink, LayoutPanelLeft, RefreshCw, X } from "lucide-react";
+import { ExternalLink, LayoutPanelLeft, RefreshCw } from "lucide-react";
 
 function escapeHtml(value: string) {
   return value
