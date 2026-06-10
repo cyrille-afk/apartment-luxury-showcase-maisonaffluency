@@ -475,12 +475,18 @@ function singularizeSub(s: string): string {
               {filterLabel}
             </h2>
             <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-              {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
-                filterSource === 'collectibles' ? 'Collectible Design'
-                : filterSource === 'brands' ? 'all Ateliers'
-                : filterSource === 'designers' ? 'all Designers'
-                : 'all collections'
-              }
+              {dbPicksLoading && !dbPicks ? (
+                <span className="opacity-60">Loading pieces…</span>
+              ) : (
+                <>
+                  {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
+                    filterSource === 'collectibles' ? 'Collectible Design'
+                    : filterSource === 'brands' ? 'all Ateliers'
+                    : filterSource === 'designers' ? 'all Designers'
+                    : 'all collections'
+                  }
+                </>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
