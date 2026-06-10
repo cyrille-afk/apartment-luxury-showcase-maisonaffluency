@@ -7,9 +7,8 @@
  *      (e.g. "Plinth" → "Select your plinth choice")
  *   3. Generic per-axis default — Base: "Select your base finish",
  *                                 Top:  "Select your top finish".
- *      We avoid the meta-words "base"/"top" alone (e.g. "Select your base choice")
- *      because they read awkwardly to end users; "finish" reads naturally for
- *      furniture/lighting variants which is the dominant use case.
+ *      Both axes mirror each other for clarity ("base finish" / "top finish").
+
  *
  * All string inputs are trimmed and treated as missing if empty/whitespace.
  */
