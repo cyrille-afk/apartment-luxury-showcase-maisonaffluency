@@ -254,7 +254,7 @@ export default function TradeAdminProductAudit() {
       )}
 
       <p className="mt-4 text-xs text-muted-foreground">
-        Tip: use Open popups only if your browser blocks an embedded preview interaction.
+        Tip: if an embedded preview looks blank (auth gate on Trade), use Open Trade tab.
       </p>
     </div>
   );
