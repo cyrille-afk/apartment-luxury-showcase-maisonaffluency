@@ -474,20 +474,24 @@ function singularizeSub(s: string): string {
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}
             </h2>
-            <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-              {dbPicksLoading && !dbPicks ? (
-                <span className="opacity-60">Loading pieces…</span>
-              ) : (
-                <>
-                  {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
-                    filterSource === 'collectibles' ? 'Collectible Design'
-                    : filterSource === 'brands' ? 'all Ateliers'
-                    : filterSource === 'designers' ? 'all Designers'
-                    : 'all collections'
-                  }
-                </>
-              )}
-            </p>
+            {dbPicksLoading && !dbPicks ? (
+              <span
+                className="inline-flex items-center gap-2 mt-1 w-64 align-middle"
+                aria-label="Loading pieces count"
+              >
+                <span className="block h-3 w-56 rounded bg-muted animate-pulse" />
+              </span>
+            ) : (
+              <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
+                {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
+                  filterSource === 'collectibles' ? 'Collectible Design'
+                  : filterSource === 'brands' ? 'all Ateliers'
+                  : filterSource === 'designers' ? 'all Designers'
+                  : 'all collections'
+                }
+              </p>
+            )}
+
           </div>
           <div className="flex items-center gap-3">
             {/* Grid columns toggle — desktop only */}
