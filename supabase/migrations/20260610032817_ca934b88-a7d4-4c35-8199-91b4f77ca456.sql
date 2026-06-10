@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET description = NULL WHERE id IN ('dce5f7d0-fb49-41f7-8bc5-176ff32fceae','f4a518e8-d096-4f7a-8cb7-cbca3080c3e1');
