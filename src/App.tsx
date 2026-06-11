@@ -17,6 +17,7 @@ const LazyHelmetProvider = lazy(() =>
 const NotFound = lazy(() => import("./pages/NotFound"));
 const MobilePreviewShareButton = lazy(() => import("./components/MobilePreviewShareButton"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
+const DesignerUpload = lazy(() => import("./pages/DesignerUpload"));
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
@@ -391,6 +392,8 @@ const App = () => {
                   
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
                   <Route path="/new-in" element={<Suspense fallback={<PageLoadingSkeleton />}><NewIn /></Suspense>} />
+                  <Route path="/designer-upload/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerUpload /></Suspense>} />
+
                   <Route path="/journal" element={<Suspense fallback={<PageLoadingSkeleton />}><Journal /></Suspense>} />
                   <Route path="/journal/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><JournalArticle /></Suspense>} />
                   <Route path="/spec-sheets/:slug" element={<Suspense fallback={null}><SpecSheetRedirect /></Suspense>} />
