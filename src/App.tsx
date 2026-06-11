@@ -18,6 +18,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const MobilePreviewShareButton = lazy(() => import("./components/MobilePreviewShareButton"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const DesignerUpload = lazy(() => import("./pages/DesignerUpload"));
+const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
