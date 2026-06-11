@@ -178,6 +178,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       origin: propProduct.origin ?? variantPayload.origin ?? null,
       lead_time: propProduct.lead_time ?? variantPayload.lead_time ?? null,
       dimensions: propProduct.dimensions ?? variantPayload.dimensions ?? null,
+      gallery_captions: propProduct.gallery_captions ?? variantPayload.gallery_captions ?? null,
     };
   }, [propProduct, variantPayload]);
 
