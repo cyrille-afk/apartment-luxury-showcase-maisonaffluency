@@ -54,6 +54,8 @@ export interface TradeProductLightboxItem {
   /** Optional: full gallery + variant→image map so changing finish dropdowns swaps the displayed image. */
   gallery_images?: string[] | null;
   variant_image_map?: Record<string, number> | null;
+  /** Per-image captions keyed by gallery_images index. */
+  gallery_captions?: Record<string, number> | null;
 }
 
 interface TradeProductLightboxProps {

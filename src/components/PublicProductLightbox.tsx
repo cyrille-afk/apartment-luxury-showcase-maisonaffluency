@@ -59,6 +59,8 @@ export interface PublicLightboxItem {
   gallery_images?: string[] | null;
   /** Maps normalized finish labels → gallery_images index. */
   variant_image_map?: Record<string, number> | null;
+  /** Per-image captions keyed by gallery_images index. */
+  gallery_captions?: Record<string, string> | null;
 }
 
 interface Props {
