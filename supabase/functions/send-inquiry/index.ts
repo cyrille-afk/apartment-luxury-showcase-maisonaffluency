@@ -27,11 +27,7 @@ function isRateLimited(ip: string): boolean {
   return entry.count > RATE_LIMIT;
 }
 
-// HTML escape to prevent injection in email templates
-const escapeHtml = (text: string): string =>
-  text.replace(/[&<>"']/g, (char) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] || char)
-  );
+// HTML escape no longer required — templates render via React Email and escape props automatically.
 
 // Input validation schema
 const InquirySchema = z.object({
