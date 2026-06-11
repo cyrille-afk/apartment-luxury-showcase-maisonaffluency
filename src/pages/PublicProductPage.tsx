@@ -413,12 +413,12 @@ const VariantSelectors: React.FC<{
             }}
           />
         ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions) ? null : null} />
+          <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
         ) : null;
       })()}
       {/* No-variant fallback: dimensions must always appear BEFORE the materials/finish row */}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} secondaryText={formatImperialDimensions(product.dimensions) ? null : null} />
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
 
 
