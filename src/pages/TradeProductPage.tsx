@@ -123,6 +123,7 @@ interface ProductRow {
   top_axis_label: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_image_map: Record<string, number> | null;
+  gallery_captions?: Record<string, string> | null;
   edition: string | null;
   edition_number: string | null;
   edition_signing: string | null;
@@ -189,7 +190,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -273,7 +274,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -999,6 +1000,7 @@ const TradeProductPage: React.FC = () => {
               activeIndex={galleryActiveIndex}
               activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
+              caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
               firstImageBadge={
                 (() => {
                   const editionLabel = formatEditionLabel(product);

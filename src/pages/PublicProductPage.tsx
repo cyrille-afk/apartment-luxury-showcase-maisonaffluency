@@ -82,6 +82,7 @@ interface ProductRow {
   base_axis_label: string | null;
   top_axis_label: string | null;
   variant_image_map: Record<string, number> | null;
+  gallery_captions?: Record<string, string> | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -98,7 +99,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -876,6 +877,7 @@ const PublicProductPage: React.FC = () => {
                 activeIndex={galleryActiveIndex}
                 activeIndexNonce={galleryJumpNonce}
                 onIndexChange={setGalleryActiveIndex}
+                caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 firstImageBadge={
                   (() => {
                     const editionLabel = formatEditionLabel(product as any);

@@ -22,9 +22,11 @@ interface ProductImageGalleryProps {
   activeIndexNonce?: number;
   /** Notifies the parent whenever the active index changes (thumbnail click, arrow nav, dot, etc.) so parent state stays in sync. */
   onIndexChange?: (index: number) => void;
+  /** Optional caption displayed below the active image. */
+  caption?: string | null;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption }) => {
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
   // Sync with external controlled index. Re-runs whenever the index *or* the
@@ -274,17 +276,24 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         )}
 
         {/* Dot indicators (desktop only — mobile uses the thumb strip below) */}
-        <SliderDots
-          count={images.length}
-          activeIndex={activeIndex}
-          onSelect={goTo}
-          variant="light"
-          ariaPrefix="View image"
-          className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
-        />
-      </div>
+          <SliderDots
+            count={images.length}
+            activeIndex={activeIndex}
+            onSelect={goTo}
+            variant="light"
+            ariaPrefix="View image"
+            className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
+          />
+        </div>
 
-      {/* Mobile horizontal thumb strip — Sotheby's-style peek carousel:
+        {/* Caption */}
+        {caption && (
+          <p className="font-body text-xs text-muted-foreground text-center px-2 -mt-1">
+            {caption}
+          </p>
+        )}
+
+        {/* Mobile horizontal thumb strip — Sotheby's-style peek carousel:
           ~4 visible landscape thumbs, edges clipped (peek), with overlaid
           prev/next arrows. */}
       {images.length > 1 && (

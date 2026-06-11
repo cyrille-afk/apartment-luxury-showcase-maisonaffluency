@@ -54,6 +54,8 @@ export interface TradeProductLightboxItem {
   /** Optional: full gallery + variant→image map so changing finish dropdowns swaps the displayed image. */
   gallery_images?: string[] | null;
   variant_image_map?: Record<string, number> | null;
+  /** Per-image captions keyed by gallery_images index. */
+  gallery_captions?: Record<string, string> | null;
 }
 
 interface TradeProductLightboxProps {
@@ -361,6 +363,19 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <span className="font-body text-sm text-muted-foreground">No image</span>
               </div>
             )}
+
+            {/* Image caption */}
+            {(() => {
+              const idx = variantImageIdx ?? 0;
+              const cap = product.gallery_captions?.[String(idx)];
+              return cap ? (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 max-w-[85%]">
+                  <span className="font-body text-[11px] text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/30 block text-center whitespace-nowrap overflow-hidden text-ellipsis">
+                    {cap}
+                  </span>
+                </div>
+              ) : null;
+            })()}
 
             {/* Description overlay on image */}
             <div className="absolute top-3 right-3 z-20">

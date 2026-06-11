@@ -1361,6 +1361,7 @@ export type Database = {
           embedded_at: string | null
           embedding: string | null
           embedding_source_hash: string | null
+          gallery_captions: Json | null
           gallery_images: string[] | null
           hover_image_url: string | null
           hs_code: string | null
@@ -1409,6 +1410,7 @@ export type Database = {
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
+          gallery_captions?: Json | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           hs_code?: string | null
@@ -1457,6 +1459,7 @@ export type Database = {
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
+          gallery_captions?: Json | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           hs_code?: string | null
@@ -5420,6 +5423,7 @@ export type Database = {
           edition: string | null
           edition_number: string | null
           edition_signing: string | null
+          gallery_captions: Json | null
           gallery_images: string[] | null
           hover_image_url: string | null
           id: string | null
@@ -5462,6 +5466,7 @@ export type Database = {
           edition?: string | null
           edition_number?: string | null
           edition_signing?: string | null
+          gallery_captions?: Json | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string | null
@@ -5504,6 +5509,7 @@ export type Database = {
           edition?: string | null
           edition_number?: string | null
           edition_signing?: string | null
+          gallery_captions?: Json | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
           id?: string | null
