@@ -334,7 +334,9 @@ const PublicDesignerProfile = () => {
     return () => window.clearTimeout(timer);
   }, [scrollToSection, picks.length]);
 
-  const isDesignerProfile = false;
+  const isDesignerProfile = isChildDesigner;
+  // Force full-width hero layout for ALL designer profiles (parent or child)
+  const useChildHeroLayout = false;
 
   if (isLoading) {
     return (
