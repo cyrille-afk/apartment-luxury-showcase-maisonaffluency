@@ -335,6 +335,8 @@ const PublicDesignerProfile = () => {
   }, [scrollToSection, picks.length]);
 
   const isDesignerProfile = isChildDesigner;
+  // Force full-width hero layout for ALL designer profiles (parent or child)
+  const useChildHeroLayout = false;
 
   if (isLoading) {
     return (
@@ -717,7 +719,7 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {isDesignerProfile ? (
+          {useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
               <motion.div
