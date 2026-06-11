@@ -330,13 +330,16 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center cursor-pointer disabled:opacity-50"
-            >
-              {isSubmitting ? "Sending..." : "Submit Inquiry"}
-            </button>
+            <div className="flex flex-col items-start md:items-end gap-3">
+              <Turnstile onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+              <button
+                type="submit"
+                disabled={isSubmitting || !turnstileToken}
+                className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "Sending..." : "Submit Inquiry"}
+              </button>
+            </div>
           </div>
         </form>
       </DialogContent>
