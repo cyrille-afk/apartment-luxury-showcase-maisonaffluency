@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement, trackForm } from "@/lib/analytics";
 
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
+import Turnstile from "@/components/Turnstile";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -28,6 +29,7 @@ interface QuoteRequestDialogProps {
 const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: QuoteRequestDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const inferredCountryRef = useRef<string>("");
   const [form, setForm] = useState({
     email: "",
@@ -70,6 +72,15 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       return;
     }
 
+    if (!turnstileToken) {
+      toast({
+        title: "Verification required",
+        description: "Please complete the bot check before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -89,6 +100,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
         ]
           .filter(Boolean)
           .join("\n"),
+        turnstileToken,
       };
 
       // Send to backend (fire-and-forget, don't block mailto)

@@ -12,6 +12,7 @@ import { trackCTA } from "@/lib/analytics";
 import { inferCountryFromBrowser } from "@/lib/inferCountry";
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
 import { z } from "zod";
+import Turnstile from "@/components/Turnstile";
 
 type PickerStudio = {
   id: string;
@@ -54,6 +55,7 @@ const ContactInquiry = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const EMPTY_FORM = { name: "", firm: "", email: "", phone: "", message: "" };
   const [formData, setFormData] = useState(EMPTY_FORM);
   // Phone placeholder reflects the visitor's likely region (e.g. "+44 …" for UK)
@@ -159,11 +161,20 @@ const ContactInquiry = () => {
       return;
     }
 
+    if (!turnstileToken) {
+      toast({
+        title: "Verification required",
+        description: "Please complete the bot check before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { data, error } = await supabase.functions.invoke("send-inquiry", {
-        body: result.data
+        body: { ...result.data, turnstileToken }
       });
 
       if (error) throw error;
@@ -328,11 +339,12 @@ const ContactInquiry = () => {
             {errors.message && <p className="font-body text-[10px] text-destructive mt-1">{errors.message}</p>}
           </div>
 
-          <div className="flex justify-center pt-4">
+          <div className="flex flex-col items-center pt-4 gap-4">
+            <Turnstile onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
             <Button
               type="submit"
               size="lg"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !turnstileToken}
               className="bg-white px-12 py-6 font-body text-sm uppercase tracking-widest text-foreground transition-all hover:bg-white/90 disabled:opacity-50 border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] rounded-full"
             >
               {isSubmitting ? "Sending..." : "Submit Inquiry"}
