@@ -18,6 +18,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const MobilePreviewShareButton = lazy(() => import("./components/MobilePreviewShareButton"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const DesignerUpload = lazy(() => import("./pages/DesignerUpload"));
+const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
@@ -440,6 +441,7 @@ const App = () => {
                     <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
+                    <Route path="admin/purge-cache" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePurgeCache /></Suspense>} />
                     <Route path="admin/product-audit" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminProductAudit /></Suspense>} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
