@@ -48,7 +48,7 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
       {/* Dimensions — each variant on its own line (per content rule) */}
       {p.dimensions && (
         <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
-          {preventOrphans(formatDimensionsMultiline(p.dimensions))}
+          {preventOrphans(withImperialPerLine(p.dimensions))}
         </p>
       )}
 
