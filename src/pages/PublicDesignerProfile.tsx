@@ -334,7 +334,7 @@ const PublicDesignerProfile = () => {
     return () => window.clearTimeout(timer);
   }, [scrollToSection, picks.length]);
 
-  const isDesignerProfile = isChildDesigner;
+  const isDesignerProfile = false;
 
   if (isLoading) {
     return (
