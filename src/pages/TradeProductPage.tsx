@@ -123,6 +123,7 @@ interface ProductRow {
   top_axis_label: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_image_map: Record<string, number> | null;
+  gallery_captions?: Record<string, string> | null;
   edition: string | null;
   edition_number: string | null;
   edition_signing: string | null;
