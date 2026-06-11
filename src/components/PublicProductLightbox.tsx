@@ -637,8 +637,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     <ExpandableSpec
                       key="top"
                       icon={specIcon(topIsDim ? "📐" : "⬗")}
-                      text={topIsDim ? formatDimensionsMultiline(topOptions[0]) : withImperialPerLine(topOptions.join("\n"))}
-                      secondaryText={topIsDim ? formatImperialDimensions(topOptions[0]) : undefined}
+                      text={withImperialPerLine(topOptions.join("\n"))}
                       placeholder={getTopPlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
                       emphasized
