@@ -877,6 +877,7 @@ const PublicProductPage: React.FC = () => {
                 activeIndex={galleryActiveIndex}
                 activeIndexNonce={galleryJumpNonce}
                 onIndexChange={setGalleryActiveIndex}
+                caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 firstImageBadge={
                   (() => {
                     const editionLabel = formatEditionLabel(product as any);
