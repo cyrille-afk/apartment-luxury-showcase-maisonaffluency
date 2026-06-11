@@ -285,8 +285,7 @@ const ProductPage = () => {
                   looksLikeDimension(product.materials) ? (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={formatDimensionsMultiline(product.materials)}
-                      secondaryText={formatImperialDimensions(product.materials)}
+                      text={withImperialPerLine(product.materials)}
                     />
                   ) : (
                     <ExpandableSpec
@@ -301,8 +300,7 @@ const ProductPage = () => {
                 {product.dimensions && looksLikeDimension(product.dimensions) && (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={formatDimensionsMultiline(product.dimensions)}
-                    secondaryText={formatImperialDimensions(product.dimensions)}
+                    text={withImperialPerLine(product.dimensions)}
                   />
                 )}
                 {product.lead_time && (
