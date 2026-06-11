@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET gallery_captions = '{"0": "Image shows Mocca Ash, Polished Brass and Elephant Leather"}'::jsonb WHERE id = '16010f94-53d1-403d-b98a-fa951c3fa07d';
