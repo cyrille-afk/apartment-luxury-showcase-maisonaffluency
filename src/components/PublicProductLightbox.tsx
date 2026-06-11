@@ -562,8 +562,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   return (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={single ? formatDimensionsMultiline(dualSizeOptions[0]) : withImperialPerLine(dualSizeOptions.join("\n"))}
-                      secondaryText={single ? formatImperialDimensions(dualSizeOptions[0]) : undefined}
+                      text={withImperialPerLine(dualSizeOptions.join("\n"))}
                       emphasized
                       placeholder="Select your size"
                     />
@@ -588,8 +587,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 return product.dimensions && looksLikeDimension(product.dimensions) ? (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={formatDimensionsMultiline(product.dimensions)}
-                    secondaryText={formatImperialDimensions(product.dimensions)}
+                    text={withImperialPerLine(product.dimensions)}
                     emphasized
                     placeholder="Select your size"
                   />
@@ -621,8 +619,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     <ExpandableSpec
                       key="base"
                       icon={specIcon(baseIsDim ? "📐" : "⬗")}
-                      text={baseIsDim ? formatDimensionsMultiline(baseOptions[0]) : withImperialPerLine(baseOptions.join("\n"))}
-                      secondaryText={baseIsDim ? formatImperialDimensions(baseOptions[0]) : undefined}
+                      text={withImperialPerLine(baseOptions.join("\n"))}
                       placeholder={getBasePlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                       emphasized
@@ -640,8 +637,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     <ExpandableSpec
                       key="top"
                       icon={specIcon(topIsDim ? "📐" : "⬗")}
-                      text={topIsDim ? formatDimensionsMultiline(topOptions[0]) : withImperialPerLine(topOptions.join("\n"))}
-                      secondaryText={topIsDim ? formatImperialDimensions(topOptions[0]) : undefined}
+                      text={withImperialPerLine(topOptions.join("\n"))}
                       placeholder={getTopPlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
                       emphasized
@@ -671,8 +667,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     return (
                       <ExpandableSpec
                         icon={specIcon("📐")}
-                        text={formatDimensionsMultiline(materialOptions[0])}
-                        secondaryText={formatImperialDimensions(materialOptions[0])}
+                        text={withImperialPerLine(materialOptions[0])}
                         emphasized
                         singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
                       />

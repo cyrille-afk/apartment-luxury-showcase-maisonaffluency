@@ -10,7 +10,7 @@ import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import SpecGlyph from "@/components/product/SpecGlyph";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { looksLikeDimension } from "@/lib/rugPricing";
 
 const specIcon = (symbol: string, className = "") => (
@@ -285,8 +285,7 @@ const ProductPage = () => {
                   looksLikeDimension(product.materials) ? (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={formatDimensionsMultiline(product.materials)}
-                      secondaryText={formatImperialDimensions(product.materials)}
+                      text={withImperialPerLine(product.materials)}
                     />
                   ) : (
                     <ExpandableSpec
@@ -301,8 +300,7 @@ const ProductPage = () => {
                 {product.dimensions && looksLikeDimension(product.dimensions) && (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={formatDimensionsMultiline(product.dimensions)}
-                    secondaryText={formatImperialDimensions(product.dimensions)}
+                    text={withImperialPerLine(product.dimensions)}
                   />
                 )}
                 {product.lead_time && (

@@ -579,8 +579,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   {product.dimensions && looksLikeDimension(product.dimensions) && (
                     <ExpandableSpec
                       icon={specIcon("📐")}
-                      text={formatDimensionsMultiline(product.dimensions)}
-                      secondaryText={formatImperialDimensions(product.dimensions)}
+                      text={withImperialPerLine(product.dimensions)}
                       emphasized
                       placeholder="Select your size"
                     />

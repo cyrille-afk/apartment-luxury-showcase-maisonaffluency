@@ -18,7 +18,7 @@ import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
-import { formatDimensionsMultiline } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -892,7 +892,7 @@ function singularizeSub(s: string): string {
                     )}
                     {currentItem.pick.dimensions && (
                       <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
-                        {formatDimensionsMultiline(currentItem.pick.dimensions)}
+                        {withImperialPerLine(currentItem.pick.dimensions)}
                       </p>
                     )}
                   </div>
