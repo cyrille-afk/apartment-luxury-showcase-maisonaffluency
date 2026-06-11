@@ -587,8 +587,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 return product.dimensions && looksLikeDimension(product.dimensions) ? (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={formatDimensionsMultiline(product.dimensions)}
-                    secondaryText={formatImperialDimensions(product.dimensions)}
+                    text={withImperialPerLine(product.dimensions)}
                     emphasized
                     placeholder="Select your size"
                   />
