@@ -22,6 +22,8 @@ interface ProductImageGalleryProps {
   activeIndexNonce?: number;
   /** Notifies the parent whenever the active index changes (thumbnail click, arrow nav, dot, etc.) so parent state stays in sync. */
   onIndexChange?: (index: number) => void;
+  /** Optional caption displayed below the active image. */
+  caption?: string | null;
 }
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange }) => {
