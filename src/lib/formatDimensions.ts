@@ -101,7 +101,7 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
         i++;
       }
       const trimmedImp = impWords.slice(i).join(" ").trim();
-      return trimmedImp ? `${t}  (${trimmedImp})` : t;
+      return trimmedImp ? `${t} | ${trimmedImp}` : t;
     })
     .join("\n");
 };
