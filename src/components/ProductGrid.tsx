@@ -892,7 +892,7 @@ function singularizeSub(s: string): string {
                     )}
                     {currentItem.pick.dimensions && (
                       <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
-                        {formatDimensionsMultiline(currentItem.pick.dimensions)}
+                        {withImperialPerLine(currentItem.pick.dimensions)}
                       </p>
                     )}
                   </div>
