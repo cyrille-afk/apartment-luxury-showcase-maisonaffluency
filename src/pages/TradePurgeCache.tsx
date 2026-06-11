@@ -34,10 +34,11 @@ export default function TradePurgeCache() {
   const load = async () => {
     setLoading(true);
     try {
+      const client = supabase as any;
       const [d, j, s] = await Promise.all([
-        supabase.from("designers").select("slug").not("slug", "is", null),
-        supabase.from("journal_articles").select("slug").eq("published", true).not("slug", "is", null),
-        supabase.from("studios").select("slug").not("slug", "is", null),
+        client.from("designers").select("slug").not("slug", "is", null),
+        client.from("journal_articles").select("slug").eq("published", true).not("slug", "is", null),
+        client.from("studios").select("slug").not("slug", "is", null),
       ]);
       setDesignerSlugs(((d.data as any[]) || []).map((r) => r.slug).filter(Boolean));
       setJournalSlugs(((j.data as any[]) || []).map((r) => r.slug).filter(Boolean));
