@@ -1335,9 +1335,8 @@ const TradeProductPage: React.FC = () => {
                 const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions);
                 if (!showDims && !handcrafted) return null;
                 const dimLines = showDims
-                  ? formatDimensionsMultiline(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
+                  ? withImperialPerLine(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
                   : [];
-                const dimImperial = showDims ? formatImperialDimensions(product.dimensions!) : null;
                 const [primaryDim, ...secondaryDims] = dimLines;
                 let originLine = handcrafted || "";
                 let leadLine: string | null = null;
@@ -1361,10 +1360,8 @@ const TradeProductPage: React.FC = () => {
                         {specIcon("📐", "mt-0.5")}
                         <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                           <div>{primaryDim}</div>
-                          {dimImperial ? (
-                            <div className="mt-0.5 text-muted-foreground/70">{dimImperial}</div>
-                          ) : secondaryDims.length > 0 && (
-                            <div className="mt-0.5 text-muted-foreground/70">{secondaryDims.join(" · ")}</div>
+                          {secondaryDims.length > 0 && (
+                            <div className="mt-0.5">{secondaryDims.join(" · ")}</div>
                           )}
                         </div>
                       </div>
