@@ -276,17 +276,24 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         )}
 
         {/* Dot indicators (desktop only — mobile uses the thumb strip below) */}
-        <SliderDots
-          count={images.length}
-          activeIndex={activeIndex}
-          onSelect={goTo}
-          variant="light"
-          ariaPrefix="View image"
-          className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
-        />
-      </div>
+          <SliderDots
+            count={images.length}
+            activeIndex={activeIndex}
+            onSelect={goTo}
+            variant="light"
+            ariaPrefix="View image"
+            className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
+          />
+        </div>
 
-      {/* Mobile horizontal thumb strip — Sotheby's-style peek carousel:
+        {/* Caption */}
+        {caption && (
+          <p className="font-body text-xs text-muted-foreground text-center px-2 -mt-1">
+            {caption}
+          </p>
+        )}
+
+        {/* Mobile horizontal thumb strip — Sotheby's-style peek carousel:
           ~4 visible landscape thumbs, edges clipped (peek), with overlaid
           prev/next arrows. */}
       {images.length > 1 && (
