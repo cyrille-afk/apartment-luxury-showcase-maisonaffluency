@@ -1,9 +1,29 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
-function isDev(): boolean {
+function shouldSkipUpdateUi(): boolean {
   if (import.meta.env.DEV) return true;
   if (typeof window === "undefined") return true;
+
+  const host = window.location.hostname;
+  const isLovablePreview =
+    host.startsWith("id-preview--") ||
+    host.startsWith("preview--") ||
+    host === "lovableproject.com" ||
+    host.endsWith(".lovableproject.com") ||
+    host === "lovableproject-dev.com" ||
+    host.endsWith(".lovableproject-dev.com") ||
+    host === "beta.lovable.dev" ||
+    host.endsWith(".beta.lovable.dev");
+
+  if (isLovablePreview) return true;
+
+  try {
+    if (window.self !== window.top) return true;
+  } catch {
+    return true;
+  }
+
   return false;
 }
 
@@ -30,7 +50,7 @@ export default function BuildUpdateBanner() {
   const armed = useRef(false);
 
   useEffect(() => {
-    if (isDev()) return;
+    if (shouldSkipUpdateUi()) return;
 
     // Patch history.pushState once so we can detect real SPA navigations.
     // We deliberately skip replaceState (used for in-page query-param updates
