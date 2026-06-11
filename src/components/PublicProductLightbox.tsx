@@ -154,7 +154,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -465,6 +465,19 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             ) : (
               <span className="font-body text-sm text-muted-foreground">No image</span>
             )}
+
+            {/* Image caption */}
+            {(() => {
+              const idx = finishImageIdx ?? 0;
+              const cap = product.gallery_captions?.[String(idx)];
+              return cap ? (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 max-w-[85%]">
+                  <span className="font-body text-[11px] text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-border/30 block text-center whitespace-nowrap overflow-hidden text-ellipsis">
+                    {cap}
+                  </span>
+                </div>
+              ) : null;
+            })()}
 
             {/* Description overlay on image — mirrors Trade lightbox */}
             <div className="absolute top-3 right-3 z-20">
