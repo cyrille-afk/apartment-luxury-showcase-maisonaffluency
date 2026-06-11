@@ -391,6 +391,8 @@ const App = () => {
                   
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
                   <Route path="/new-in" element={<Suspense fallback={<PageLoadingSkeleton />}><NewIn /></Suspense>} />
+                  <Route path="/designer-upload/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerUpload /></Suspense>} />
+
                   <Route path="/journal" element={<Suspense fallback={<PageLoadingSkeleton />}><Journal /></Suspense>} />
                   <Route path="/journal/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><JournalArticle /></Suspense>} />
                   <Route path="/spec-sheets/:slug" element={<Suspense fallback={null}><SpecSheetRedirect /></Suspense>} />
