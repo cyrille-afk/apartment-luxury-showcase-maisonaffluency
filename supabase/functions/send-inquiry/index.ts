@@ -40,7 +40,33 @@ const InquirySchema = z.object({
   phone: z.string().trim().max(30).optional().default(""),
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000),
   subject: z.string().trim().max(200).optional(),
+  turnstileToken: z.string().trim().min(10).max(4096).optional(),
 });
+
+async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
+  const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
+  if (!secret) {
+    console.warn("TURNSTILE_SECRET_KEY not configured — skipping verification");
+    return true;
+  }
+  if (!token) return false;
+  try {
+    const form = new FormData();
+    form.append("secret", secret);
+    form.append("response", token);
+    if (ip && ip !== "unknown") form.append("remoteip", ip);
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: form,
+    });
+    const data = await res.json();
+    if (!data.success) console.warn("Turnstile verification failed:", data["error-codes"]);
+    return !!data.success;
+  } catch (err) {
+    console.error("Turnstile verify error:", err);
+    return false;
+  }
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -68,7 +94,16 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { name, firm, company, email, phone, message, subject } = parsed.data;
+    const { name, firm, company, email, phone, message, subject, turnstileToken } = parsed.data;
+
+    const turnstileOk = await verifyTurnstile(turnstileToken, clientIp);
+    if (!turnstileOk) {
+      return new Response(
+        JSON.stringify({ error: "Bot check failed. Please retry." }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const companyName = firm || company || "";
 
     // Sanitize all user inputs before embedding in HTML

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackEngagement, trackForm } from "@/lib/analytics";
 
 import { getPhonePlaceholder } from "@/lib/phonePlaceholder";
+import Turnstile from "@/components/Turnstile";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -28,6 +29,7 @@ interface QuoteRequestDialogProps {
 const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: QuoteRequestDialogProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const inferredCountryRef = useRef<string>("");
   const [form, setForm] = useState({
     email: "",
@@ -70,6 +72,15 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       return;
     }
 
+    if (!turnstileToken) {
+      toast({
+        title: "Verification required",
+        description: "Please complete the bot check before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -89,6 +100,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
         ]
           .filter(Boolean)
           .join("\n"),
+        turnstileToken,
       };
 
       // Send to backend (fire-and-forget, don't block mailto)
@@ -318,13 +330,16 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center cursor-pointer disabled:opacity-50"
-            >
-              {isSubmitting ? "Sending..." : "Submit Inquiry"}
-            </button>
+            <div className="flex flex-col items-start md:items-end gap-3">
+              <Turnstile onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+              <button
+                type="submit"
+                disabled={isSubmitting || !turnstileToken}
+                className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "Sending..." : "Submit Inquiry"}
+              </button>
+            </div>
           </div>
         </form>
       </DialogContent>
