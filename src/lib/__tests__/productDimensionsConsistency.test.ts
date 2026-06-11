@@ -40,14 +40,13 @@ describe("dimensions render consistency", () => {
     );
   });
 
-  it("both surfaces render dimensions with the same helper pair (metric + imperial)", () => {
+  it("both surfaces render dimensions with the inline metric|imperial helper", () => {
     for (const rel of [
       "src/components/PublicProductLightbox.tsx",
       "src/pages/PublicProductPage.tsx",
     ]) {
       const src = read(rel);
-      expect(src).toMatch(/formatDimensionsMultiline\(product\.dimensions\)/);
-      expect(src).toMatch(/formatImperialDimensions\(product\.dimensions\)/);
+      expect(src).toMatch(/withImperialPerLine\(product\.dimensions\)/);
     }
   });
 });
