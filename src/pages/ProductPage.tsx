@@ -10,7 +10,7 @@ import { trackCTA } from "@/lib/analytics";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import SpecGlyph from "@/components/product/SpecGlyph";
-import { formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { looksLikeDimension } from "@/lib/rugPricing";
 
 const specIcon = (symbol: string, className = "") => (
