@@ -1133,8 +1133,7 @@ const TradeProductPage: React.FC = () => {
                 return (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={sizeText}
-                    secondaryText={formatImperialDimensions(sizeText)}
+                    text={withImperialPerLine(sizeText)}
                     emphasized
                     placeholder={interactive ? "Select your size" : undefined}
                     value={interactive ? selectedVariantIdx : undefined}
