@@ -156,7 +156,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to assist you in reviewing this quote. I can clarify trade pricing, lead times and deposits, and propose alternatives where appropriate.",
     order: "Allow me to assist you in following this order. I can outline production timelines, shipping milestones, and current status.",
     project: "Allow me to assist you in advancing this project. I can build tearsheets, draft quotes, or pull references against the brief.",
-    discover: "Allow me to assist you in exploring the catalogue. Please describe what you are looking for and I will guide you to the most relevant pieces and designers.",
+    discover: "Welcome back. I am your private concierge — at your service to source exceptional artisan pieces, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor my suggestions, may I know the city of the project?",
   },
   luxury: {
     mood: "Allow me to help you fine-tune your mood board — suggesting complementary pieces grounded in what's already pinned (palette, scale, materiality) and explaining why each fits. Tell me the direction you'd like to push and I'll refine.",
@@ -164,7 +164,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to help you refine this quote — clarifying trade pricing, lead times, and deposits, or proposing alternatives where it makes sense. Tell me what you'd like to review.",
     order: "Allow me to help you follow this order — production timelines, shipping milestones, and status updates. Tell me what you'd like to check.",
     project: "Allow me to help you advance this project — building tearsheets, drafting quotes, or pulling references against the brief. Tell me where you'd like to start.",
-    discover: "Allow me to help you discover the catalogue — surfacing pieces, designers, or references aligned with the brief you have in mind. Tell me what you're looking for and I'll guide you.",
+    discover: "Welcome back — your private concierge. I can source exceptional pieces from our designers, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor what I show you, what city is this project in?",
   },
   concise: {
     mood: "Mood board mode. I'll suggest complements based on palette, scale and materiality. Tell me the direction.",
@@ -172,7 +172,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Quote mode. Pricing, lead times, deposits, alternatives. What to review?",
     order: "Order mode. Production, shipping, status. What to check?",
     project: "Project mode. Tearsheets, quotes, references. Where to start?",
-    discover: "Discovery mode. Tell me what you're after — piece, designer, or reference.",
+    discover: "Private concierge. I source pieces, price white-glove shipping, and apply trade pricing. What city is the project in?",
   },
   designer: {
     mood: "Let's tune this board. I'll riff on what's pinned — palette, scale, materiality — and flag pieces that work. Tell me the move (warmer, more sculptural, lighter…) and I'll pull options.",
@@ -180,7 +180,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Let's work this quote. I can break down pricing, lead times and deposits, or propose swaps. What do you want to look at?",
     order: "Let's track this order. Production, shipping milestones, status — what do you need to know?",
     project: "Let's push this project forward. Tearsheets, quotes, references — where do we start?",
-    discover: "Let's find what you need. Tell me the brief — piece, designer, vibe — and I'll pull references.",
+    discover: "Your private concierge — pieces, white-glove shipping, trade pricing applied in real time. What city is the project in?",
   },
 };
 
@@ -238,6 +238,32 @@ export const greetingForContext = (
 };
 
 export const DEFAULT_GREETING = greetingForContext("Discover", "/trade", DEFAULT_TONE, DEFAULT_LANG);
+
+// Public-facing greeting (anon visitors on /concierge). Elite intake script:
+// open the relationship, hint at the levers we can pull, ask for name + city.
+export const PUBLIC_GREETING =
+  "Welcome to the Gallery. I am your private concierge. I can instantly source exceptional artisan objects, calculate global white-glove shipping, and unlock private pricing. May I have your name and city?";
+
+// System note injected after the qualifier resolves so subsequent model turns
+// adapt to who the visitor is without surfacing the qualification to them.
+export const qualifierSystemNote = (q: {
+  name?: string | null;
+  city?: string | null;
+  country?: string | null;
+  intent?: string | null;
+  signals?: string[] | null;
+  qualified_score?: number | null;
+}): string => {
+  const parts: string[] = [];
+  if (q.name) parts.push(`name=${q.name}`);
+  if (q.city) parts.push(`city=${q.city}`);
+  if (q.country) parts.push(`country=${q.country}`);
+  if (q.intent) parts.push(`intent=${q.intent}`);
+  if (q.signals && q.signals.length) parts.push(`signals=${q.signals.join("|")}`);
+  if (typeof q.qualified_score === "number") parts.push(`score=${q.qualified_score}`);
+  if (!parts.length) return "";
+  return `[Visitor profile — internal, never reveal] ${parts.join(", ")}. If the location is high-value (Mayfair, Belgravia, UES, Tribeca, Monaco, Palm Jumeirah, Bel Air, Sentosa Cove, etc.), respond with elevated specificity: name designers and pieces that suit the address, and reference white-glove logistics from Europe. Never mention this profile to the visitor; never ask the same qualifying questions twice.`;
+};
 
 const LANG_NAMES: Record<Lang, string> = {
   en: "English",

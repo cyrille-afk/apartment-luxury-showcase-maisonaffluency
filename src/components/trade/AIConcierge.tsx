@@ -43,6 +43,8 @@ import {
   saveLang,
   stageFromPath,
   greetingForContext,
+  PUBLIC_GREETING,
+  qualifierSystemNote,
   toneSystemNote,
   loadName,
   saveName,
@@ -57,7 +59,9 @@ const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
 
 
-export function AIConcierge() {
+export type ConciergeSurface = "trade" | "public";
+
+export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface } = {}) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
@@ -87,7 +91,7 @@ export function AIConcierge() {
       }
     } catch {}
     return [
-      { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
+      { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
     ];
   });
   const [input, setInput] = useState("");
@@ -239,7 +243,7 @@ export function AIConcierge() {
         return [next];
       }
       if (only.actions && only.actions.length > 0) return prev;
-      const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
+      const next = surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
@@ -489,6 +493,31 @@ export function AIConcierge() {
     setTimeline(nextTimeline);
     setInput("");
     setStreaming(true);
+
+    // First user turn — fire invisible qualifier + lead capture (non-blocking).
+    const isFirstUserTurn = !timeline.some((t) => t.kind === "msg" && t.role === "user");
+    if (isFirstUserTurn) {
+      try {
+        let sid = sessionStorage.getItem("concierge:sid");
+        if (!sid) {
+          sid = (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+          sessionStorage.setItem("concierge:sid", sid);
+        }
+        supabase.functions.invoke("concierge-capture", {
+          body: {
+            surface,
+            session_id: sid,
+            first_message: text,
+            path: typeof window !== "undefined" ? window.location.pathname : null,
+            referrer: typeof document !== "undefined" ? document.referrer || null : null,
+          },
+        }).then(({ data }) => {
+          if (data && typeof data === "object") {
+            try { sessionStorage.setItem("concierge:profile", JSON.stringify(data)); } catch {}
+          }
+        }).catch((e) => console.warn("[concierge-capture]", e));
+      } catch (e) { console.warn("[concierge-capture] setup", e); }
+    }
 
     // Build the chat message history for the API (text-only items),
     // prefixed with a lightweight stage-context note so the assistant
@@ -916,7 +945,7 @@ export function AIConcierge() {
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
-                  setTimeline([{ kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, tone, lang) }]);
+                  setTimeline([{ kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang) }]);
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Start a new conversation"

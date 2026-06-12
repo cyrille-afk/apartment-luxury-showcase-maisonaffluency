@@ -1,52 +1,74 @@
-# CC-Tapis designer cleanup
+# Elite Concierge: Greeting + Invisible Qualifier + Lead Capture
 
-## What changes
+## 1. New greeting (public + trade)
 
-**1. Biographies — fill the 52 empty profiles**
+Replace the current "Allow me to help you discover…" opener with the elite intake script, adapted per surface:
 
-For every `*-cc-tapis` designer with an empty `biography`, generate a 3–5 paragraph editorial bio covering:
-- Studio origin, training, geography
-- Design language and material vocabulary
-- The specific CC-Tapis collaboration (collections, techniques — Tibetan/Himalayan hand-knot, Nepalese ateliers, materials like NZ wool, Chinese silk, hemp, allo)
-- Recognition / context within contemporary collectible rug design
-- Closing line on what the partnership represents
+**Public (`/concierge` — new AI chat surface, see §2):**
+> "Welcome to the Gallery. I am your private concierge. I can instantly source exceptional artisan objects, calculate global white-glove shipping, and unlock private pricing. May I have your name and city?"
 
-Rules:
-- English, no source URLs, no markdown citation links (per the new sanitizer)
-- Standalone media URLs allowed, but I won't add any — text only
-- ~1500–2200 characters each, matching the tone of existing CC-Tapis bios (Alex Proba, De Troupe, Damien Ajavon)
-- Don't touch the 12 designers who already have bios
+**Trade (`AIConcierge.tsx`, Discover intent only):**
+> "Welcome back{, [first name]}. Your private concierge — I can source exceptional pieces, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor results, what city is this project in?"
 
-Run as bulk DB update via `update_memory`-safe data migration (UPDATE statements on `designers`).
+Other intents (mood / tearsheet / quote / order / project) keep their existing greetings — they already have context, no intake needed.
 
-**2. Portraits — verify, don't replace**
+## 2. Public concierge becomes a real AI chat
 
-Only `cristian-mohaded-cc-tapis` is missing `image_url`. I'll flag it for you to upload manually (per your answer to question 2). All other 63 portraits already exist — no action.
+Today `/concierge` is just a prefilled contact form. Replace the body with the AI chat (reusing `AIConcierge.tsx` under the hood, public mode flag) so the elite greeting + qualifier actually run. The existing contact form stays as a fallback link ("Prefer email? Send a written brief →").
 
-**3. Hero images — leave alone**
+## 3. Invisible qualifier (intent tagging)
 
-Per your answer, the 62 missing hero fields stay empty. You'll upload in-situ shots through the admin. The profile page already falls back gracefully when `hero_image_url` is null.
+After the user's first reply, a lightweight server-side extraction call (Lovable AI Gateway, `google/gemini-3-flash-preview`, JSON output) parses:
+- `name` (string, optional)
+- `city` (string, optional)
+- `country` (string, optional, inferred from city)
+- `intent` (one of: `sourcing`, `bespoke`, `project_ffe`, `general`)
+- `signals` (array: `high_value_location`, `named_designer`, `room_type:<x>`, `budget_hint`)
+- `qualified_score` (0–100, heuristic)
 
-**4. Share icons — remove from all designer cards**
+High-value locations (hardcoded list: London Mayfair/Belgravia/Knightsbridge/Kensington/Chelsea, NYC UES/UWS/Tribeca/SoHo, Paris 7e/8e/16e, Monaco, Singapore Districts 9/10/11, Hong Kong Peak/Mid-Levels, Dubai Palm/Emirates Hills, LA Bel Air/Beverly Hills, Miami, Aspen) auto-flag `high_value_location`.
 
-In `src/components/DesignersDirectory.tsx`, remove three Share buttons:
-- Line ~496: grid-view card share
-- Line ~564: parent-brand sub-card share
-- Line ~584: alternate variant share
+Result is stored in the session and injected as a system note for subsequent turns so the model can adapt tone/proposals without the user seeing the qualifier.
 
-Keep the section-level Share buttons (lines ~1602, ~1620) — those are the hero-area shares on the directory page itself.
+## 4. Lead capture (DB)
 
-The designer profile hero Share button lives in a different file (`DesignerProfile.tsx` / its hero subcomponent) and is untouched.
+New table `public.concierge_leads`:
+- `id`, `created_at`, `updated_at`
+- `surface` ('public' | 'trade')
+- `user_id` (nullable — anon public visitors have none)
+- `session_id` (text, client-generated UUID stored in sessionStorage)
+- `name`, `city`, `country` (text)
+- `first_message` (text)
+- `intent`, `signals` (jsonb), `qualified_score` (int)
+- `path` (text — where they started)
+- `user_agent`, `referrer`
+- RLS: anon INSERT allowed; SELECT admin-only
 
-Also delete now-dead helpers (`handleDesignerShare`, the inner `handleShare`, `buildShareUrl`) if no longer referenced after the removals, plus the `Share2` import if unused.
+Inserted by a new edge function `concierge-lead-capture` (service role, validates payload, dedupes by session_id within 24h).
 
-## Out of scope
-- No image generation, no Firecrawl scraping
-- No edits to existing 12 bios
-- No schema changes
-- No changes to share buttons outside DesignersDirectory cards
+## 5. Email notification to gallery inbox
+
+Same edge function: after insert, if `qualified_score >= 60` or `high_value_location` is set, send a branded HTML email (Resend, existing infra) to the gallery inbox with name, city, intent, signals, first message, and a deep link to the lead row in admin.
+
+## 6. Admin view
+
+Minimal admin page `/trade/admin/concierge-leads` (admin role gate) listing leads with filters by surface / qualified_score / city. Reuses existing admin table styling.
 
 ## Technical notes
-- Bios written via a single `supabase--insert` UPDATE … WHERE slug IN (…) AND (biography IS NULL OR biography = '').
-- The `content_audit_log` trigger on `designers` will capture every change automatically — rollback is possible per row.
-- After removing share buttons, run `bun run` build implicitly (harness does it) to catch unused-import errors.
+
+- **Files touched**:
+  - `src/components/trade/conciergeGreeting.ts` — new opener strings for `discover` intent across all four tones; add `publicDiscover` variant.
+  - `src/components/trade/AIConcierge.tsx` — accept `surface: 'public' | 'trade'` prop; on first user message, fire qualifier + lead-capture; render greeting accordingly.
+  - `src/pages/ConciergePage.tsx` — replace ContactInquiry with `<AIConcierge surface="public" />` (keep contact form behind a collapsed "Prefer email?" link).
+  - New: `supabase/functions/concierge-lead-capture/index.ts`
+  - New: `supabase/functions/concierge-qualify/index.ts` (Gemini Flash JSON extract)
+  - New migration: `concierge_leads` table + RLS + grants
+  - New: `src/pages/TradeAdminConciergeLeads.tsx` + route
+- **No changes** to trade-concierge streaming endpoint, RAG, or tearsheet logic.
+- **Memory**: add `mem://features/elite-concierge-intake` documenting greeting script + qualifier rules.
+
+## Risk
+
+- AIConcierge is 1,204 lines and central to trade UX. I will only add a `surface` prop + first-message hook, not refactor.
+- Qualifier call adds ~300ms to first turn; fired async, non-blocking on the streaming reply.
+- Public AI chat is anon — credits could be abused. Add per-session-id rate limit (10 messages / hour) in the streaming endpoint when `surface=public`.
