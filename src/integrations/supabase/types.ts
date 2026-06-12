@@ -5840,6 +5840,7 @@ export type Database = {
       }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
+      scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
         Returns: number
