@@ -162,9 +162,35 @@ const ConciergePage: React.FC = () => {
             </div>
           </section>
 
-          {/* Form — reuses ContactInquiry, fed via URL params */}
-          <section className="mt-20 border-t border-border/60 pt-4">
-            <ContactInquiry />
+          {/* Private AI concierge — mounted and auto-opened on this route. */}
+          <section className="mt-16 max-w-3xl mx-auto px-6 md:px-8 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
+                btn?.click();
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 shadow-sm hover:opacity-90 transition-all font-body text-[11px] uppercase tracking-[0.2em]"
+            >
+              Speak with the Concierge
+            </button>
+            <p className="font-body text-[11px] text-muted-foreground mt-4">
+              Instant, private, English-speaking. Replies in seconds.
+            </p>
+          </section>
+          <AutoOpenConcierge />
+          <PublicConciergeMount />
+
+          {/* Written brief fallback */}
+          <section className="mt-16 border-t border-border/60 pt-4">
+            <details className="max-w-3xl mx-auto px-6 md:px-8">
+              <summary className="font-body text-[11px] uppercase tracking-[0.2em] text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                Prefer to send a written brief?
+              </summary>
+              <div className="mt-6">
+                <ContactInquiry />
+              </div>
+            </details>
           </section>
 
           {/* Footer line */}
