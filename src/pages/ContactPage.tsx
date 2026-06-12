@@ -15,7 +15,7 @@ const ContactPage = () => {
         <title>Contact — Maison Affluency</title>
         <meta
           name="description"
-          content="Visit Maison Affluency by appointment in Singapore. Contact our concierge for bespoke inquiries, custom specifications, and design collaborations."
+          content="Contact Maison Affluency in Singapore — by-appointment concierge for bespoke inquiries, custom specs, and designer collaborations."
         />
         <link rel="canonical" href="https://maisonaffluency.com/contact" />
         <meta property="og:type" content="website" />

@@ -48,7 +48,7 @@ const PublicGallery = () => {
         <title>Interactive Gallery — Maison Affluency</title>
         <meta
           name="description"
-          content="Explore our curated Singapore gallery — room-by-room interiors with collectible furniture, bespoke lighting, and artisan rugs from world-renowned designers."
+          content="Explore our Singapore gallery — room-by-room interiors with collectible furniture, bespoke lighting, and artisan rugs by world-renowned designers."
         />
         <link rel="canonical" href="https://maisonaffluency.com/gallery" />
         <meta property="og:type" content="website" />

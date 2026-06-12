@@ -343,7 +343,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         <title>Trade Program — Maison Affluency</title>
         <meta
           name="description"
-          content="Join Maison Affluency's Trade Program for architects and interior designers — exclusive pricing, dedicated advisors, custom sourcing, and insured shipping."
+          content="Trade Program for architects & interior designers — exclusive pricing, dedicated advisors, custom sourcing, and consolidated insured shipping."
         />
         <meta property="og:title" content="Trade Program — Maison Affluency" />
         <meta property="og:type" content="website" />
