@@ -57,7 +57,9 @@ const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
 
 
-export function AIConcierge() {
+export type ConciergeSurface = "trade" | "public";
+
+export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface } = {}) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
