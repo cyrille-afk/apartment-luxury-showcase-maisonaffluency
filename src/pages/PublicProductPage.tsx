@@ -560,6 +560,14 @@ const VariantSelectors: React.FC<{
         })()
       ) : null}
 
+      {/* Materials description paragraph — shown AFTER all dropdowns, before Handcrafted */}
+      {product.materials_description?.trim() && (
+        <ExpandableSpec
+          icon={specIcon("⬗")}
+          text={product.materials_description.trim()}
+          emphasized
+        />
+      )}
     </>
   );
 };
