@@ -248,6 +248,7 @@ export default function TradeInsights() {
             <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
             <TabsTrigger value="video" className="text-xs">Video Analytics</TabsTrigger>
             <TabsTrigger value="competitive" className="text-xs">Competitive Intelligence</TabsTrigger>
+            <TabsTrigger value="cron" className="text-xs">Cron Jobs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="video">
@@ -257,6 +258,11 @@ export default function TradeInsights() {
           <TabsContent value="competitive">
             <CompetitiveAnalysis />
           </TabsContent>
+
+          <TabsContent value="cron">
+            <CronRunHistory />
+          </TabsContent>
+
 
           <TabsContent value="overview" className="space-y-8">
 
