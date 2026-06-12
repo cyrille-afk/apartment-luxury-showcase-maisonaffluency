@@ -62,6 +62,79 @@ function clientIp(req: Request): string {
   );
 }
 
+// ---- Input validation helpers ----
+
+function isGibberish(text: string): boolean {
+  // Repeated single character (>50% same char)
+  const chars = [...text.replace(/\s/g, "")];
+  if (chars.length === 0) return true;
+  const freq = new Map<string, number>();
+  for (const c of chars) freq.set(c, (freq.get(c) || 0) + 1);
+  const maxFreq = Math.max(...freq.values());
+  if (maxFreq / chars.length > 0.5) return true;
+
+  // Same short word repeated 4+ times consecutively
+  const words = text.toLowerCase().match(/\b\w{2,}\b/g) || [];
+  let repeatStreak = 1;
+  for (let i = 1; i < words.length; i++) {
+    if (words[i] === words[i - 1]) repeatStreak++;
+    else repeatStreak = 1;
+    if (repeatStreak >= 4) return true;
+  }
+
+  // Excessive non-alphanumeric (>35%)
+  const nonAlphaNum = (text.match(/[^\p{L}\p{N}\s]/gu) || []).length;
+  if (nonAlphaNum / text.length > 0.35) return true;
+
+  // Excessive ALL CAPS (>70% of alphabetic chars)
+  const alpha = text.replace(/[^a-zA-Z]/g, "");
+  if (alpha.length > 5) {
+    const upper = (alpha.match(/[A-Z]/g) || []).length;
+    if (upper / alpha.length > 0.7) return true;
+  }
+
+  return false;
+}
+
+function countUrls(text: string): number {
+  return (text.match(/https?:\/\//gi) || []).length;
+}
+
+const SPAM_KEYWORDS = [
+  "casino", "viagra", "cialis", "crypto giveaway", "free nft", "airdrop",
+  "click here", "earn money fast", "make money online", "work from home",
+  "lose weight fast", "debt relief", "loan approval", "credit repair",
+  "hot singles", "adult site", "porn", "escort", "lottery winner",
+  "claim your prize", "inheritance fund", "wire transfer", "bank account verify",
+  "seo services", "web traffic", "buy followers",
+];
+
+function hasSpamPattern(text: string): boolean {
+  const lc = text.toLowerCase();
+  for (const kw of SPAM_KEYWORDS) {
+    if (lc.includes(kw)) return true;
+  }
+  return false;
+}
+
+interface ValidationResult {
+  ok: boolean;
+  reason?: string;
+}
+
+function validateMessage(text: string): ValidationResult {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return { ok: false, reason: "Message is empty." };
+  if (trimmed.length < 3) return { ok: false, reason: "Message too short." };
+  if (trimmed.length > 4000) return { ok: false, reason: "Message too long." };
+  if (countUrls(trimmed) > 2) return { ok: false, reason: "Too many URLs." };
+  if (isGibberish(trimmed)) return { ok: false, reason: "Message appears to be gibberish or low-quality input." };
+  if (hasSpamPattern(trimmed)) return { ok: false, reason: "Message matches spam patterns." };
+  return { ok: true };
+}
+
+// -----------------------------------
+
 const SYSTEM_PROMPT = `You are the private concierge for Maison Affluency — a collectible-design gallery representing world-class designers (Andrée Putman, Pierre Yovanovitch, Man of Parts, India Mahdavi, Alexander Lamont and many others). You speak to discerning private collectors and interior designers.
 
 Voice: warm, confident, elite, never sycophantic. Short paragraphs. British English. Never reveal you are an AI or expose internal notes/profiles.
@@ -123,6 +196,17 @@ serve(async (req) => {
     role: m?.role === "assistant" ? "assistant" : "user",
     content: typeof m?.content === "string" ? m.content.slice(0, 4000) : "",
   })).filter((m: any) => m.content);
+
+  // Validate the latest user message (the one that just arrived).
+  const latestUser = trimmed.slice().reverse().find((m: any) => m.role === "user");
+  if (latestUser) {
+    const v = validateMessage(latestUser.content);
+    if (!v.ok) {
+      return new Response(JSON.stringify({ error: v.reason }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
 
   const upstream = await fetch(LOVABLE_CHAT_URL, {
     method: "POST",
