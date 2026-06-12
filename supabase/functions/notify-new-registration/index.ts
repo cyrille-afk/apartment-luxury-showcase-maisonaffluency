@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -15,15 +14,42 @@ const ADMIN_EMAILS = [
   "gregoire@maisonaffluency.com",
 ];
 
+/** Escape HTML special characters to prevent injection in admin email bodies. */
+function escapeHtml(input: unknown): string {
+  if (input === null || input === undefined) return "";
+  return String(input)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require service-role bearer (the database trigger that legitimately calls
+  // this function passes it). Blocks unauthenticated callers from spamming
+  // admins or injecting HTML through the registration notification path.
+  const authHeader = req.headers.get("Authorization") || "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const { email, first_name, last_name, company } = await req.json();
 
-    const displayName = [first_name, last_name].filter(Boolean).join(" ") || "Unknown";
+    const displayNameRaw = [first_name, last_name].filter(Boolean).join(" ") || "Unknown";
+    const displayName = escapeHtml(displayNameRaw);
+    const emailSafe = escapeHtml(email || "N/A");
+    const companySafe = company ? escapeHtml(company) : "";
+    const subjectName = String(displayNameRaw).replace(/[\r\n]+/g, " ").slice(0, 120);
 
     const html = `
       <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #faf9f7;">
@@ -36,8 +62,8 @@ serve(async (req) => {
           </p>
           <table style="width: 100%; font-size: 14px; color: #333; line-height: 1.8;">
             <tr><td style="font-weight: 600; width: 100px; vertical-align: top;">Name</td><td>${displayName}</td></tr>
-            <tr><td style="font-weight: 600; vertical-align: top;">Email</td><td>${email || "N/A"}</td></tr>
-            ${company ? `<tr><td style="font-weight: 600; vertical-align: top;">Company</td><td>${company}</td></tr>` : ""}
+            <tr><td style="font-weight: 600; vertical-align: top;">Email</td><td>${emailSafe}</td></tr>
+            ${companySafe ? `<tr><td style="font-weight: 600; vertical-align: top;">Company</td><td>${companySafe}</td></tr>` : ""}
           </table>
         </div>
         <p style="font-size: 11px; color: #999; margin-top: 24px; text-align: center;">
@@ -51,7 +77,7 @@ serve(async (req) => {
         resend.emails.send({
           from: "Maison Affluency <noreply@notify.www.maisonaffluency.com>",
           to: adminEmail,
-          subject: `New Registration: ${displayName}`,
+          subject: `New Registration: ${subjectName}`,
           html,
         })
       )
