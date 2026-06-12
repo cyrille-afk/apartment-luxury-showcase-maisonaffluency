@@ -44,9 +44,6 @@ Allow: /
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
-Disallow: /trade/login
-Disallow: /trade/register
-Disallow: /studios/submit
 Disallow: /spec-sheets/
 Disallow: /*-og.html$
 Disallow: /*-og-v2.html$
