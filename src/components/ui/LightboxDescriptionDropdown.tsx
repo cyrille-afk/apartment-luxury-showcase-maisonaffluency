@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   description: string | null | undefined;
+  ariaDescribedBy?: string;
 }
 
 const LightboxDescriptionDropdown = ({ description }: Props) => {
