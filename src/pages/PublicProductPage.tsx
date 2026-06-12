@@ -1053,24 +1053,23 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* SEO long-form: full description + crawlable internal links.
-              Same source as the lightbox "Creation" pill (product.description) —
-              rendered inline so Google indexes it and users see it without a click. */}
+          {/* SEO crawlable internal links — description itself lives in the
+              "Creation" pill above (in DOM, indexable). The pill is the single
+              source of truth on desktop, mobile and PWA; we avoid duplicating
+              the paragraph below it. */}
           {product.description && product.description.trim().length > 0 && (
             <section
-              aria-labelledby="about-product-heading"
+              aria-label="Related links"
               className="mt-16 pt-8 border-t border-border max-w-3xl"
             >
-              <h2
-                id="about-product-heading"
-                className="font-display text-2xl md:text-3xl mb-5"
-              >
-                About the {product.title}
-              </h2>
-              <div className="font-body text-[15px] leading-relaxed text-foreground/85 whitespace-pre-line">
-                {product.description}
+              {/* Visually hidden full description for crawlers that don't
+                  expand collapsed regions. Keeps the page free of visible
+                  duplication while preserving SEO coverage. */}
+              <div className="sr-only">
+                <h2>About the {product.title}</h2>
+                <p>{product.description}</p>
               </div>
-              <p className="font-body text-sm text-muted-foreground mt-6">
+              <p className="font-body text-sm text-muted-foreground">
                 <Link
                   to={`/designers/${designer.slug}`}
                   onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
