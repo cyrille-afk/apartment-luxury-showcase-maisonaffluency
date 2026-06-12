@@ -17,9 +17,10 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   description: string | null | undefined;
+  ariaDescribedBy?: string;
 }
 
-const LightboxDescriptionDropdown = ({ description }: Props) => {
+const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) => {
   const [expanded, setExpanded] = useState(false);
 
   const reactId = useId();
@@ -68,7 +69,8 @@ const LightboxDescriptionDropdown = ({ description }: Props) => {
         type="button"
         onClick={handleToggle}
         aria-expanded={expanded}
-        aria-controls={panelId}
+        aria-controls={expanded ? panelId : undefined}
+        aria-describedby={ariaDescribedBy}
         aria-label={expanded ? "Hide product description" : "Read product description"}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5",

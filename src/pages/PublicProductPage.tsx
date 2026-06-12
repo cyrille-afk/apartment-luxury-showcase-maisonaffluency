@@ -891,7 +891,10 @@ const PublicProductPage: React.FC = () => {
                 overlay={
                   product.description ? (
                     <div className="flex flex-col items-end gap-2">
-                      <LightboxDescriptionDropdown description={product.description} />
+                      <LightboxDescriptionDropdown
+                        description={product.description}
+                        ariaDescribedBy="product-description-hidden"
+                      />
                     </div>
                   ) : null
                 }
@@ -1065,7 +1068,7 @@ const PublicProductPage: React.FC = () => {
               {/* Visually hidden full description for crawlers that don't
                   expand collapsed regions. Keeps the page free of visible
                   duplication while preserving SEO coverage. */}
-              <div className="sr-only">
+              <div className="sr-only" id="product-description-hidden">
                 <h2>About the {product.title}</h2>
                 <p>{product.description}</p>
               </div>
