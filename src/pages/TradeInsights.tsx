@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CompetitiveAnalysis from "@/components/trade/CompetitiveAnalysis";
 import VideoAnalytics from "@/components/trade/VideoAnalytics";
+import CronRunHistory from "@/components/trade/CronRunHistory";
 
 interface PlatformStats {
   totalProducts: number;
