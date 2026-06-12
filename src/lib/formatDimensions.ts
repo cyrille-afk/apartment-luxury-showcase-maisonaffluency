@@ -26,7 +26,7 @@ export const formatDimensionsMultiline = (raw: string | null | undefined): strin
 const cmToInches = (value: string): string => {
   const n = Number(value.replace(",", "."));
   if (!Number.isFinite(n)) return value;
-  return `${(n / 2.54).toFixed(1)}\"`;
+  return `${(n / 2.54).toFixed(1)}`;
 };
 
 const CM_RE = /(?:\b|\d)cm\b/i;
