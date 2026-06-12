@@ -172,7 +172,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Quote mode. Pricing, lead times, deposits, alternatives. What to review?",
     order: "Order mode. Production, shipping, status. What to check?",
     project: "Project mode. Tearsheets, quotes, references. Where to start?",
-    discover: "Discovery mode. Tell me what you're after — piece, designer, or reference.",
+    discover: "Private concierge. I source pieces, price white-glove shipping, and apply trade pricing. What city is the project in?",
   },
   designer: {
     mood: "Let's tune this board. I'll riff on what's pinned — palette, scale, materiality — and flag pieces that work. Tell me the move (warmer, more sculptural, lighter…) and I'll pull options.",
