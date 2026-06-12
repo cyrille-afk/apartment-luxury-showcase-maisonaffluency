@@ -35,10 +35,11 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: `Bearer ${token}` } } }
     );
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    const { data: claimsData, error: authError } = await supabaseClient.auth.getClaims(token);
+    const claims = claimsData?.claims as { sub?: string } | undefined;
+    const user = claims?.sub ? { id: claims.sub } : null;
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
