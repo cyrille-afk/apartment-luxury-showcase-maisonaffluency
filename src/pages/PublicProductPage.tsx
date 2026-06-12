@@ -1053,6 +1053,46 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
+          {/* SEO long-form: full description + crawlable internal links.
+              Same source as the lightbox "Creation" pill (product.description) —
+              rendered inline so Google indexes it and users see it without a click. */}
+          {product.description && product.description.trim().length > 0 && (
+            <section
+              aria-labelledby="about-product-heading"
+              className="mt-16 pt-8 border-t border-border max-w-3xl"
+            >
+              <h2
+                id="about-product-heading"
+                className="font-display text-2xl md:text-3xl mb-5"
+              >
+                About the {product.title}
+              </h2>
+              <div className="font-body text-[15px] leading-relaxed text-foreground/85 whitespace-pre-line">
+                {product.description}
+              </div>
+              <p className="font-body text-sm text-muted-foreground mt-6">
+                <Link
+                  to={`/designers/${designer.slug}`}
+                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                  className="underline underline-offset-2 hover:text-foreground transition-colors"
+                >
+                  More by {designerDisplay}
+                </Link>
+                {product.category && (
+                  <>
+                    {" · "}
+                    <Link
+                      to={categoryUrl(product.category, product.subcategory)}
+                      className="underline underline-offset-2 hover:text-foreground transition-colors"
+                    >
+                      Explore {product.subcategory || product.category}
+                    </Link>
+                  </>
+                )}
+              </p>
+            </section>
+          )}
+
           {relatedPicks.length > 0 && (
             <div className="mt-16 pt-8 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
