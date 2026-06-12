@@ -1325,6 +1325,16 @@ const TradeProductPage: React.FC = () => {
                 </>
               )}
 
+              {!isRugSqmActive && product.materials_description?.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
+
+
+
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions);
