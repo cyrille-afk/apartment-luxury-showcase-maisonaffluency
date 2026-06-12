@@ -56,6 +56,10 @@ function variantLabel(v: any) {
   return [v?.base, v?.top, v?.size, v?.label].filter(Boolean).join(" · ") || "Variant";
 }
 
+function variantLabelWithImperial(v: any) {
+  return withImperialPerLine(variantLabel(v));
+}
+
 type Row = {
   id: string;
   title: string;
@@ -160,7 +164,7 @@ function AuditPane({
                     const cents = isTrade && v?.price_cents ? Math.round(v.price_cents * (1 - TRADE_DISCOUNT)) : null;
                     return (
                       <div key={`${variantLabel(v)}-${idx}`} className="flex items-start justify-between gap-3 border-b border-border px-3 py-2 last:border-0">
-                        <span className="text-sm">{variantLabel(v)}</span>
+                        <span className="text-sm">{variantLabelWithImperial(v)}</span>
                         <span className="shrink-0 text-sm text-muted-foreground">{isTrade ? money(cents, currency) : "Price on Request"}</span>
                       </div>
                     );
