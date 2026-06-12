@@ -609,21 +609,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   />
                 ) : null;
               })()}
-              {product.materials_description && product.materials_description.trim() && (
-                <ExpandableSpec
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                  emphasized
-                />
-              )}
               {(() => {
-                // When materials_description is present we already rendered it
-                // above as the finish paragraph; skip the finish dropdowns to
-                // avoid duplicating the same information.
-                if (product.materials_description && product.materials_description.trim()) {
-                  return null;
-                }
-                if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
                   // Detect which axis (if any) is actually carrying a dimension
                   // string vs a finish/material — collapsed single-value axes
