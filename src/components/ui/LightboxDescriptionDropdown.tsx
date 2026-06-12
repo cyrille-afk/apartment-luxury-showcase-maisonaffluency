@@ -20,7 +20,7 @@ interface Props {
   ariaDescribedBy?: string;
 }
 
-const LightboxDescriptionDropdown = ({ description }: Props) => {
+const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) => {
   const [expanded, setExpanded] = useState(false);
 
   const reactId = useId();
