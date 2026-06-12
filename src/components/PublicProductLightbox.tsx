@@ -610,6 +610,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 ) : null;
               })()}
               {(() => {
+                if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
                   // Detect which axis (if any) is actually carrying a dimension
                   // string vs a finish/material — collapsed single-value axes
