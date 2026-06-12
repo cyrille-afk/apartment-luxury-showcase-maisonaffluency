@@ -1166,6 +1166,66 @@ export type Database = {
           },
         ]
       }
+      concierge_leads: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          first_message: string | null
+          id: string
+          intent: string | null
+          name: string | null
+          notified_at: string | null
+          path: string | null
+          qualified_score: number
+          referrer: string | null
+          session_id: string
+          signals: Json
+          surface: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          first_message?: string | null
+          id?: string
+          intent?: string | null
+          name?: string | null
+          notified_at?: string | null
+          path?: string | null
+          qualified_score?: number
+          referrer?: string | null
+          session_id: string
+          signals?: Json
+          surface: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          first_message?: string | null
+          id?: string
+          intent?: string | null
+          name?: string | null
+          notified_at?: string | null
+          path?: string | null
+          qualified_score?: number
+          referrer?: string | null
+          session_id?: string
+          signals?: Json
+          surface?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       concierge_rag_traces: {
         Row: {
           context_text: string | null
