@@ -189,7 +189,12 @@ export async function streamConcierge({
   });
 
   if (!resp.ok) {
-    const body = await resp.json().catch(() => ({ error: "Request failed" }));
+    let body: any;
+    try { body = await resp.json(); } catch { body = { error: "Request failed" }; }
+    if (resp.status === 429 && body.retry_in != null) {
+      onError(`RATE_LIMIT:${body.retry_in}`);
+      return;
+    }
     onError(body.error || `Error ${resp.status}`);
     return;
   }
