@@ -142,35 +142,35 @@ function designerSeoDescription(args: { name: string; founder?: string | null; s
   const genericAffiliation = /^designer\s+for\s+.+\.?$/i.test(rawBio);
   const usableBio = rawBio && !genericAffiliation ? rawBio : "";
 
-  const suffixChild = cleanFounder ? ` Curated by Maison Affluency Singapore — collectible design, furniture and limited editions for ${cleanFounder}.` : "";
-  const suffixSolo = ` Discover collectible furniture, lighting and limited editions curated by Maison Affluency Singapore.`;
-  const suffix = (args.isChildDesigner && suffixChild) || suffixSolo;
+  // Helper: trim to ≤160 at a word boundary, ending with "…" if cut.
+  const clamp160 = (s: string) => {
+    const clean = s.replace(/\s+/g, " ").trim();
+    if (clean.length <= 160) return clean;
+    const cut = clean.slice(0, 159);
+    const lastSpace = cut.lastIndexOf(" ");
+    return (lastSpace > 80 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:\s]+$/, "") + "…";
+  };
 
-  let base = usableBio || (args.specialty ? `${cleanName} — ${args.specialty}.` : `${cleanName}.`);
-  // Compose: base + suffix, then clamp to 160 at a word boundary.
-  let composed = `${base} ${suffix}`.replace(/\s+/g, " ").trim();
-  if (composed.length > 160) {
-    // Trim base so the whole string lands ≤ 160, preferably ≥ 140.
-    const room = 160 - suffix.length - 1;
-    if (room > 40) {
-      const cut = base.slice(0, room);
-      const lastSpace = cut.lastIndexOf(" ");
-      base = (lastSpace > 40 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:\s]+$/, "") + "…";
-      composed = `${base} ${suffix}`.trim();
-    } else {
-      composed = composed.slice(0, 157).replace(/\s+\S*$/, "") + "…";
-    }
+  // Rich biography → let it stand alone. The first 160 chars of a real bio
+  // are unique per designer, which is exactly what duplicate-description
+  // scanners look for. No shared marketing suffix.
+  if (usableBio.length >= 140) {
+    return clamp160(usableBio);
   }
-  // Pad short descriptions toward 140 by appending the alt suffix when distinct.
-  if (composed.length < 140) {
-    const padding = suffix === suffixSolo ? ` Personally curated for designers, architects and collectors.` : suffixSolo;
-    const tryComposed = `${composed} ${padding.trim()}`.replace(/\s+/g, " ").trim();
-    composed = tryComposed.length <= 160 ? tryComposed : composed;
-  }
-  if (composed.length < 140) {
-    composed = `${composed} Maison Affluency Singapore.`.trim();
-  }
-  return composed.slice(0, 160);
+
+  // Thin/missing bio → build a per-designer sentence that still varies
+  // by name, specialty and (when applicable) founder.
+  const specialty = args.specialty?.trim().replace(/\.$/, "");
+  const lead = usableBio
+    || (specialty
+      ? (args.isChildDesigner && cleanFounder
+        ? `${cleanName} designs ${specialty.toLowerCase()} for ${cleanFounder}.`
+        : `${cleanName} — ${specialty}.`)
+      : `${cleanName}.`);
+  const tail = args.isChildDesigner && cleanFounder
+    ? ` Collectible pieces curated by Maison Affluency, Singapore.`
+    : ` Collectible furniture, lighting and limited editions — Maison Affluency, Singapore.`;
+  return clamp160(`${lead}${tail}`);
 }
 
 // Visible fallback paragraph to lift designer pages out of "thin content" when
