@@ -113,11 +113,45 @@ async function pool<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>): Prom
   return out;
 }
 
+import { requireAdmin } from "../_shared/auth.ts";
+
+// Allowed base hosts for ?base= override — prevents using this endpoint as
+// a force-multiplying SSRF proxy against arbitrary targets.
+const ALLOWED_BASE_HOSTS = new Set([
+  "www.maisonaffluency.com",
+  "maisonaffluency.com",
+  "apartment-luxury-showcase-maisonaffluency.lovable.app",
+]);
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
+  // Admin-only: fans out 24+ concurrent fetches per call, so any caller-controlled
+  // base URL would be an SSRF amplifier. Also limit to canonical site hosts.
+  const auth = await requireAdmin(req, "seo-audit");
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...cors, "content-type": "application/json" },
+    });
+  }
+
   const url = new URL(req.url);
-  const base = (url.searchParams.get("base") ?? DEFAULT_BASE).replace(/\/$/, "");
+  const baseParam = (url.searchParams.get("base") ?? DEFAULT_BASE).replace(/\/$/, "");
+  let base: string;
+  try {
+    const parsed = new URL(baseParam);
+    if (!ALLOWED_BASE_HOSTS.has(parsed.host) || !/^https?:$/.test(parsed.protocol)) {
+      return new Response(JSON.stringify({ error: "base host not allowed" }), {
+        status: 400, headers: { ...cors, "content-type": "application/json" },
+      });
+    }
+    base = `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return new Response(JSON.stringify({ error: "invalid base URL" }), {
+      status: 400, headers: { ...cors, "content-type": "application/json" },
+    });
+  }
   const sample = Math.max(1, parseInt(url.searchParams.get("sample") ?? "30", 10));
   const includeProducts = url.searchParams.get("products") === "1";
 

@@ -118,8 +118,20 @@ function analyze(parsed: ReturnType<typeof parseHead>) {
   return { issues, warnings };
 }
 
+import { requireAdmin } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+
+  // Admin-only: this function fetches arbitrary caller-supplied URLs and
+  // would otherwise be an open SSRF proxy reachable from the public internet.
+  const auth = await requireAdmin(req, "og-preview-check");
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...cors, "content-type": "application/json" },
+    });
+  }
 
   let target = "";
   try {
