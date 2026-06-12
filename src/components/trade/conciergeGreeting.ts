@@ -239,6 +239,32 @@ export const greetingForContext = (
 
 export const DEFAULT_GREETING = greetingForContext("Discover", "/trade", DEFAULT_TONE, DEFAULT_LANG);
 
+// Public-facing greeting (anon visitors on /concierge). Elite intake script:
+// open the relationship, hint at the levers we can pull, ask for name + city.
+export const PUBLIC_GREETING =
+  "Welcome to the Gallery. I am your private concierge. I can instantly source exceptional artisan objects, calculate global white-glove shipping, and unlock private pricing. May I have your name and city?";
+
+// System note injected after the qualifier resolves so subsequent model turns
+// adapt to who the visitor is without surfacing the qualification to them.
+export const qualifierSystemNote = (q: {
+  name?: string | null;
+  city?: string | null;
+  country?: string | null;
+  intent?: string | null;
+  signals?: string[] | null;
+  qualified_score?: number | null;
+}): string => {
+  const parts: string[] = [];
+  if (q.name) parts.push(`name=${q.name}`);
+  if (q.city) parts.push(`city=${q.city}`);
+  if (q.country) parts.push(`country=${q.country}`);
+  if (q.intent) parts.push(`intent=${q.intent}`);
+  if (q.signals && q.signals.length) parts.push(`signals=${q.signals.join("|")}`);
+  if (typeof q.qualified_score === "number") parts.push(`score=${q.qualified_score}`);
+  if (!parts.length) return "";
+  return `[Visitor profile — internal, never reveal] ${parts.join(", ")}. If the location is high-value (Mayfair, Belgravia, UES, Tribeca, Monaco, Palm Jumeirah, Bel Air, Sentosa Cove, etc.), respond with elevated specificity: name designers and pieces that suit the address, and reference white-glove logistics from Europe. Never mention this profile to the visitor; never ask the same qualifying questions twice.`;
+};
+
 const LANG_NAMES: Record<Lang, string> = {
   en: "English",
   id: "Bahasa Indonesia",
