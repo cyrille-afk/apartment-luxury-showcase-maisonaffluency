@@ -52,10 +52,12 @@ const toImperialLine = (line: string): string | null => {
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
       if (!CM_RE.test(part)) return part;
-      return stripVariantPrefix(part)
+      const stripped = stripVariantPrefix(part)
         .replace(CM_RE_G, "")
-        .replace(/\d+(?:[.,]\d+)?/g, cmToInches);
-
+        .replace(/\d+(?:[.,]\d+)?/g, cmToInches)
+        .replace(/\s+/g, " ")
+        .trim();
+      return stripped ? `${stripped} in` : stripped;
     })
     .join("")
     .replace(/\s+/g, " ")
