@@ -3,8 +3,11 @@
 // Does NOT expose catalog tools, RAG, or user-scoped data — those live on
 // the authenticated /trade-concierge endpoint.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const LOVABLE_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3-flash-preview";
 
@@ -14,20 +17,41 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-concierge-surface, x-concierge-sid",
 };
 
-// In-memory rate limiter (per edge-instance, best-effort).
-const buckets = new Map<string, { count: number; resetAt: number }>();
-function rateLimit(key: string, limit: number, windowMs: number) {
+const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+
+// In-memory fallback (only used if the DB rate-limit RPC errors out).
+const memBuckets = new Map<string, { count: number; resetAt: number }>();
+function memFallback(key: string, limit: number, windowMs: number) {
   const now = Date.now();
-  const b = buckets.get(key);
+  const b = memBuckets.get(key);
   if (!b || b.resetAt <= now) {
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    memBuckets.set(key, { count: 1, resetAt: now + windowMs });
     return { ok: true } as const;
   }
-  if (b.count >= limit) {
-    return { ok: false, retryInSec: Math.ceil((b.resetAt - now) / 1000) } as const;
-  }
+  if (b.count >= limit) return { ok: false, retryInSec: Math.ceil((b.resetAt - now) / 1000) } as const;
   b.count++;
   return { ok: true } as const;
+}
+
+// Persistent DB-backed rate limiter. Survives cold starts, prevents
+// per-instance IP rotation, and enforces a true global cap.
+async function rateLimit(key: string, limit: number, windowSeconds: number) {
+  try {
+    const { data, error } = await sb.rpc("concierge_check_rate_limit", {
+      _key: key,
+      _limit: limit,
+      _window_seconds: windowSeconds,
+    });
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row && row.allowed === false) {
+      return { ok: false, retryInSec: row.retry_in ?? windowSeconds } as const;
+    }
+    return { ok: true } as const;
+  } catch (e) {
+    console.warn("[concierge-public-stream] rate-limit DB error, falling back to memory", e);
+    return memFallback(key, limit, windowSeconds * 1000);
+  }
 }
 
 function clientIp(req: Request): string {
@@ -56,9 +80,16 @@ serve(async (req) => {
     });
   }
 
-  // Rate limit by IP (60/hr) and by client-supplied session id (15/hr).
+  // Rate limit by IP (60/hr), by client-supplied session id (15/hr),
+  // and a global cap (2000/hr across all visitors) so the bill stays bounded.
+  const globalRl = await rateLimit("pub-global", 2000, 3600);
+  if (!globalRl.ok) {
+    return new Response(JSON.stringify({ error: "Concierge is at capacity. Please try again shortly.", retry_in: globalRl.retryInSec }), {
+      status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
   const ip = clientIp(req);
-  const ipRl = rateLimit(`pub-ip:${ip}`, 60, 60 * 60_000);
+  const ipRl = await rateLimit(`pub-ip:${ip}`, 60, 3600);
   if (!ipRl.ok) {
     return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: ipRl.retryInSec }), {
       status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -66,7 +97,7 @@ serve(async (req) => {
   }
   const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128);
   if (sid) {
-    const sidRl = rateLimit(`pub-sid:${sid}`, 15, 60 * 60_000);
+    const sidRl = await rateLimit(`pub-sid:${sid}`, 15, 3600);
     if (!sidRl.ok) {
       return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: sidRl.retryInSec }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
