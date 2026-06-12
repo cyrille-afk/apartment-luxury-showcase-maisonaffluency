@@ -494,6 +494,31 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     setInput("");
     setStreaming(true);
 
+    // First user turn — fire invisible qualifier + lead capture (non-blocking).
+    const isFirstUserTurn = !timeline.some((t) => t.kind === "msg" && t.role === "user");
+    if (isFirstUserTurn) {
+      try {
+        let sid = sessionStorage.getItem("concierge:sid");
+        if (!sid) {
+          sid = (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+          sessionStorage.setItem("concierge:sid", sid);
+        }
+        supabase.functions.invoke("concierge-capture", {
+          body: {
+            surface,
+            session_id: sid,
+            first_message: text,
+            path: typeof window !== "undefined" ? window.location.pathname : null,
+            referrer: typeof document !== "undefined" ? document.referrer || null : null,
+          },
+        }).then(({ data }) => {
+          if (data && typeof data === "object") {
+            try { sessionStorage.setItem("concierge:profile", JSON.stringify(data)); } catch {}
+          }
+        }).catch((e) => console.warn("[concierge-capture]", e));
+      } catch (e) { console.warn("[concierge-capture] setup", e); }
+    }
+
     // Build the chat message history for the API (text-only items),
     // prefixed with a lightweight stage-context note so the assistant
     // always references the user's current workflow stage.
