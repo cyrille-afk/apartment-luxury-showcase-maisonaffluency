@@ -156,7 +156,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to assist you in reviewing this quote. I can clarify trade pricing, lead times and deposits, and propose alternatives where appropriate.",
     order: "Allow me to assist you in following this order. I can outline production timelines, shipping milestones, and current status.",
     project: "Allow me to assist you in advancing this project. I can build tearsheets, draft quotes, or pull references against the brief.",
-    discover: "Allow me to assist you in exploring the catalogue. Please describe what you are looking for and I will guide you to the most relevant pieces and designers.",
+    discover: "Welcome back. I am your private concierge — at your service to source exceptional artisan pieces, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor my suggestions, may I know the city of the project?",
   },
   luxury: {
     mood: "Allow me to help you fine-tune your mood board — suggesting complementary pieces grounded in what's already pinned (palette, scale, materiality) and explaining why each fits. Tell me the direction you'd like to push and I'll refine.",
