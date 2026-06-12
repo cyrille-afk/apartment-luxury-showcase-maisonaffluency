@@ -422,15 +422,7 @@ const VariantSelectors: React.FC<{
         <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
 
-
-      {/* Material / finish dropdown(s) — preceded by the materials_description paragraph */}
-      {product.materials_description?.trim() && (
-        <ExpandableSpec
-          icon={specIcon("⬗")}
-          text={product.materials_description.trim()}
-          emphasized
-        />
-      )}
+      {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
           <ExpandableSpec
