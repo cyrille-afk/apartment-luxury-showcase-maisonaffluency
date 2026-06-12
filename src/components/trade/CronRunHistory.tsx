@@ -65,30 +65,55 @@ export default function CronRunHistory() {
   const [summary, setSummary] = useState<Summary[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
+    // Ensure auth session is restored before calling SECURITY DEFINER RPCs
+    // that depend on auth.uid() (otherwise PostgREST hits the endpoint as anon).
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setError("Not authenticated. Please sign in as an admin.");
+      setLoading(false);
+      return;
+    }
     const [s, r] = await Promise.all([
       supabase.rpc("get_cron_jobs_summary"),
       supabase.rpc("get_cron_run_history", { _limit: 50 }),
     ]);
+    if (s.error || r.error) {
+      setError(s.error?.message || r.error?.message || "Failed to load cron history.");
+    }
     setSummary((s.data as Summary[]) || []);
     setRuns((r.data as Run[]) || []);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "INITIAL_SESSION") return;
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") load();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   if (loading) {
     return <div className="p-6 text-xs text-muted-foreground font-body">Loading cron history…</div>;
   }
 
-  if (!summary.length) {
+  if (error || !summary.length) {
     return (
-      <Card className="p-6">
+      <Card className="p-6 space-y-3">
         <p className="font-body text-xs text-muted-foreground">
-          No cron job data visible. This view is admin-only.
+          {error
+            ? error
+            : "No cron job data visible. This view is admin-only — confirm your account has the admin role."}
         </p>
+        <Button size="sm" variant="outline" onClick={load} className="text-xs gap-1.5">
+          <RefreshCw className="w-3 h-3" /> Retry
+        </Button>
       </Card>
     );
   }
