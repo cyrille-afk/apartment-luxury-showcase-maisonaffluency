@@ -653,7 +653,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         },
         onDone: () => setStreaming(false),
         onError: (msg) => {
-          toast.error(msg);
+          if (msg.startsWith("RATE_LIMIT:")) {
+            const retrySec = parseInt(msg.split(":")[1], 10);
+            const mins = Math.ceil(retrySec / 60);
+            const timeText = mins < 1 ? `${retrySec} seconds` : `${mins} minute${mins === 1 ? "" : "s"}`;
+            setTimeline((prev) => [
+              ...prev,
+              {
+                kind: "msg",
+                role: "assistant",
+                content: `I'm afraid our concierge is currently at capacity. To ensure every visitor receives attentive service, we limit the number of messages per session. Please try again in ${timeText}, or contact us directly if your request is urgent.`,
+              },
+            ]);
+          } else {
+            toast.error(msg);
+          }
           setStreaming(false);
         },
         signal: controller.signal,
