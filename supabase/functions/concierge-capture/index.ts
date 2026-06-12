@@ -21,12 +21,81 @@ const corsHeaders = {
 const BodySchema = z.object({
   surface: z.enum(["public", "trade"]),
   session_id: z.string().min(8).max(128),
-  first_message: z.string().trim().min(1).max(4000),
+  first_message: z.string().trim().min(3).max(4000),
   name: z.string().trim().max(120).optional().nullable(),
   city: z.string().trim().max(120).optional().nullable(),
   path: z.string().max(500).optional().nullable(),
   referrer: z.string().max(500).optional().nullable(),
 });
+
+// ---- Input validation helpers ----
+
+function isGibberish(text: string): boolean {
+  const chars = [...text.replace(/\s/g, "")];
+  if (chars.length === 0) return true;
+  const freq = new Map<string, number>();
+  for (const c of chars) freq.set(c, (freq.get(c) || 0) + 1);
+  const maxFreq = Math.max(...freq.values());
+  if (maxFreq / chars.length > 0.5) return true;
+
+  const words = text.toLowerCase().match(/\b\w{2,}\b/g) || [];
+  let repeatStreak = 1;
+  for (let i = 1; i < words.length; i++) {
+    if (words[i] === words[i - 1]) repeatStreak++;
+    else repeatStreak = 1;
+    if (repeatStreak >= 4) return true;
+  }
+
+  const nonAlphaNum = (text.match(/[^\p{L}\p{N}\s]/gu) || []).length;
+  if (nonAlphaNum / text.length > 0.35) return true;
+
+  const alpha = text.replace(/[^a-zA-Z]/g, "");
+  if (alpha.length > 5) {
+    const upper = (alpha.match(/[A-Z]/g) || []).length;
+    if (upper / alpha.length > 0.7) return true;
+  }
+
+  return false;
+}
+
+function countUrls(text: string): number {
+  return (text.match(/https?:\/\//gi) || []).length;
+}
+
+const SPAM_KEYWORDS = [
+  "casino", "viagra", "cialis", "crypto giveaway", "free nft", "airdrop",
+  "click here", "earn money fast", "make money online", "work from home",
+  "lose weight fast", "debt relief", "loan approval", "credit repair",
+  "hot singles", "adult site", "porn", "escort", "lottery winner",
+  "claim your prize", "inheritance fund", "wire transfer", "bank account verify",
+  "seo services", "web traffic", "buy followers",
+];
+
+function hasSpamPattern(text: string): boolean {
+  const lc = text.toLowerCase();
+  for (const kw of SPAM_KEYWORDS) {
+    if (lc.includes(kw)) return true;
+  }
+  return false;
+}
+
+interface ValidationResult {
+  ok: boolean;
+  reason?: string;
+}
+
+function validateMessage(text: string): ValidationResult {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return { ok: false, reason: "Message is empty." };
+  if (trimmed.length < 3) return { ok: false, reason: "Message too short." };
+  if (trimmed.length > 4000) return { ok: false, reason: "Message too long." };
+  if (countUrls(trimmed) > 2) return { ok: false, reason: "Too many URLs." };
+  if (isGibberish(trimmed)) return { ok: false, reason: "Message appears to be gibberish or low-quality input." };
+  if (hasSpamPattern(trimmed)) return { ok: false, reason: "Message matches spam patterns." };
+  return { ok: true };
+}
+
+// -----------------------------------
 
 const HIGH_VALUE_AREAS: { needle: string; city: string; country: string }[] = [
   // London
@@ -210,6 +279,14 @@ serve(async (req) => {
     });
   }
   const body = parsed.data;
+
+  // Reject low-quality / spam input before running heuristic + AI enrichment.
+  const v = validateMessage(body.first_message);
+  if (!v.ok) {
+    return new Response(JSON.stringify({ ok: false, rejected: true, reason: v.reason }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
