@@ -40,9 +40,15 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: authErr } = await supabaseClient.auth.getUser(token);
-    const user = userData?.user;
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    const { data: claimsData, error: authErr } = await anonClient.auth.getClaims(token);
+    const claims = claimsData?.claims as { sub?: string; email?: string } | undefined;
+    const user = claims?.sub && claims.email ? { id: claims.sub, email: claims.email } : null;
     if (authErr || !user?.email) throw new Error("User not authenticated");
 
     const { quoteId, paymentType = "deposit", shippingCents = 0 } = await req.json();

@@ -152,20 +152,20 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!isUrlAllowed(url) && (!fallbackUrl || !isUrlAllowed(fallbackUrl))) {
+    const candidateUrls = [...new Set(
+      [url, fallbackUrl]
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0)
+        .filter((value) => isUrlAllowed(value)),
+    )];
+
+    if (candidateUrls.length === 0) {
       return new Response(JSON.stringify({ error: "URL host not allowed" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-
-    const candidateUrls = [...new Set(
-      [url, fallbackUrl]
-        .filter((value): value is string => typeof value === "string")
-        .map((value) => value.trim())
-        .filter((value) => value.length > 0),
-    )];
 
     let selectedUrl: string | null = null;
     let downloaded: { blob: Blob; contentType: string } | null = null;

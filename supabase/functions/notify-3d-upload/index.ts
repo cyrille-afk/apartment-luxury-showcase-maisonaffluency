@@ -29,10 +29,11 @@ serve(async (req: Request) => {
     const userClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: `Bearer ${token}` } } }
     );
 
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    const { data: claimsData, error: authError } = await userClient.auth.getClaims(token);
+    const claims = claimsData?.claims as { sub?: string } | undefined;
+    const user = claims?.sub ? { id: claims.sub } : null;
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,

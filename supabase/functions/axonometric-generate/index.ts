@@ -25,10 +25,10 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const {
-      data: { user },
-      error: authErr,
-    } = await sb.auth.getUser();
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: claimsData, error: authErr } = await sb.auth.getClaims(token);
+    const claims = claimsData?.claims as { sub?: string; email?: string } | undefined;
+    const user = claims?.sub ? { id: claims.sub, email: claims.email ?? null } : null;
     if (authErr || !user) throw new Error("Unauthorized");
 
     // Check admin role
