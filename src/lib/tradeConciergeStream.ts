@@ -175,7 +175,8 @@ export async function streamConcierge({
     } catch { /* ignore */ }
   }
 
-  const resp = await fetch(CHAT_URL, {
+  const endpoint = surface === "public" ? PUBLIC_CHAT_URL : CHAT_URL;
+  const resp = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
