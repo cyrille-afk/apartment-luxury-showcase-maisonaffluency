@@ -1262,6 +1262,27 @@ export type Database = {
         }
         Relationships: []
       }
+      concierge_rate_limits: {
+        Row: {
+          count: number
+          key: string
+          reset_at: string
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          key: string
+          reset_at: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          key?: string
+          reset_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       content_audit_log: {
         Row: {
           changed_by: string | null
@@ -5672,6 +5693,13 @@ export type Database = {
       can_view_studio: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
+      }
+      concierge_check_rate_limit: {
+        Args: { _key: string; _limit: number; _window_seconds: number }
+        Returns: {
+          allowed: boolean
+          retry_in: number
+        }[]
       }
       current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {
