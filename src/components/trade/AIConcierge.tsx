@@ -560,10 +560,33 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const nameNote = nameSystemNote(name);
     const identityContext: ChatMessage[] = nameNote ? [{ role: "user", content: nameNote }] : [];
 
+    // Turn 2+: inject the invisible visitor profile captured on turn 1 so
+    // the model adapts tone/proposals (high-value city, intent) without
+    // re-asking qualifying questions. Stored by concierge-capture above.
+    const profileContext: ChatMessage[] = [];
+    if (!isFirstUserTurn) {
+      try {
+        const raw = sessionStorage.getItem("concierge:profile");
+        if (raw) {
+          const q = JSON.parse(raw);
+          const note = qualifierSystemNote({
+            name: q.name ?? null,
+            city: q.city ?? null,
+            country: q.country ?? null,
+            intent: q.intent ?? null,
+            signals: Array.isArray(q.signals) ? q.signals : null,
+            qualified_score: typeof q.qualified_score === "number" ? q.qualified_score : null,
+          });
+          if (note) profileContext.push({ role: "user", content: note });
+        }
+      } catch { /* ignore */ }
+    }
+
     const messagesForApi: ChatMessage[] = [
       stageContext,
       toneContext,
       ...identityContext,
+      ...profileContext,
       ...proposalContext,
       ...nextTimeline
         .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
