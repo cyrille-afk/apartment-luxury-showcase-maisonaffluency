@@ -88,6 +88,15 @@ export default function TradeSpecSheet() {
     ? `View the ${product} spec sheet from ${brand}: dimensions, finishes, materials and downloadable product documentation.`
     : "View Maison Affluency trade product spec sheets, including dimensions, materials, finishes and downloadable documentation for registered users.";
 
+  const canonicalUrl = useMemo(() => {
+    const base = "https://maisonaffluency.com/trade/spec-sheet";
+    if (!product) return base;
+    const qs = new URLSearchParams();
+    if (params.get("brand")) qs.set("brand", params.get("brand")!);
+    qs.set("product", product);
+    return `${base}?${qs.toString()}`;
+  }, [product, params]);
+
   useEffect(() => {
     if (!product || !user) { setLoading(false); return; }
 
@@ -183,8 +192,8 @@ export default function TradeSpecSheet() {
         <Helmet>
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
-          <meta name="robots" content="noindex, nofollow" />
-          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
         <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
           <div className="flex flex-col items-center text-center gap-6">
@@ -280,8 +289,8 @@ export default function TradeSpecSheet() {
         <Helmet>
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
-          <meta name="robots" content="noindex, nofollow" />
-          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
 
         <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -316,8 +325,8 @@ export default function TradeSpecSheet() {
         <Helmet>
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
-          <meta name="robots" content="noindex, nofollow" />
-          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
       <div className="w-full h-[calc(100vh-4rem)]">
         <h1 className="sr-only">{pageTitle}</h1>

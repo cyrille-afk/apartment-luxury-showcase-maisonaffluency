@@ -36,7 +36,8 @@ Allow: /
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
-Disallow: /trade/spec-sheet
+# /trade/spec-sheet is crawlable — gated PDF, but the page renders rich
+# editorial copy + per-product title/description for unauthenticated crawlers.
 Disallow: /trade/login
 Disallow: /trade/register
 Disallow: /studios/submit
