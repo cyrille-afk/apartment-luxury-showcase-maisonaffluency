@@ -1,6 +1,14 @@
 # Allow social preview crawlers full access to OG bridge pages.
 # These crawlers ignore robots meta tags and need the static OG markup
 # in *-og.html / *-card.html / *-share.html bridges to render rich link previews.
+User-agent: Googlebot
+Allow: /
+Allow: /trade/spec-sheet
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /trade/spec-sheet
+
 User-agent: facebookexternalhit
 Allow: /
 
@@ -33,12 +41,9 @@ Allow: /
 # so they don't compete with the real React routes for canonical selection.
 User-agent: *
 Allow: /
-Allow: /trade/spec-sheet
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
-# /trade/spec-sheet is crawlable — gated PDF, but the page renders rich
-# editorial copy + per-product title/description for unauthenticated crawlers.
 Disallow: /trade/login
 Disallow: /trade/register
 Disallow: /studios/submit
