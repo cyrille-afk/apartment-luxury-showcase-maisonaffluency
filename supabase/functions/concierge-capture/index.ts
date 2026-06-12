@@ -280,6 +280,14 @@ serve(async (req) => {
   }
   const body = parsed.data;
 
+  // Reject low-quality / spam input before running heuristic + AI enrichment.
+  const v = validateMessage(body.first_message);
+  if (!v.ok) {
+    return new Response(JSON.stringify({ ok: false, rejected: true, reason: v.reason }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
