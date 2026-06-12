@@ -4,6 +4,19 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ContactInquiry from "@/components/ContactInquiry";
+import { AIConcierge } from "@/components/trade/AIConcierge";
+
+const PublicConciergeMount: React.FC = () => <AIConcierge surface="public" />;
+const AutoOpenConcierge: React.FC = () => {
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
+      btn?.click();
+    }, 600);
+    return () => clearTimeout(t);
+  }, []);
+  return null;
+};
 
 /**
  * Dedicated landing page for bespoke / concierge inquiries.
