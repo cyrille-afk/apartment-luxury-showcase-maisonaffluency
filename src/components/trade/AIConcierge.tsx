@@ -91,7 +91,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
     } catch {}
     return [
-      { kind: "msg", role: "assistant", content: greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
+      { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
     ];
   });
   const [input, setInput] = useState("");
