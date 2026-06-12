@@ -33,6 +33,7 @@ Allow: /
 # so they don't compete with the real React routes for canonical selection.
 User-agent: *
 Allow: /
+Allow: /trade/spec-sheet
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
