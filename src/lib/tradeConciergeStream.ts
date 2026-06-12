@@ -134,10 +134,12 @@ export type QuoteLinePreview = {
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
+const PUBLIC_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/concierge-public-stream`;
 
 export async function streamConcierge({
   messages,
   projectId,
+  surface,
   onDelta,
   onProposal,
   onEscalation,
@@ -148,6 +150,8 @@ export async function streamConcierge({
   messages: ChatMessage[];
   /** Active trade project id (from session storage / URL) — gives the agent project + studio context. */
   projectId?: string | null;
+  /** "public" for anon /concierge visitors; "trade" (default) for signed-in trade users. */
+  surface?: "public" | "trade";
   onDelta: (text: string) => void;
   onProposal?: (proposal: ConciergeProposal) => void;
   onEscalation?: (event: EscalationEvent) => void;
@@ -159,14 +163,28 @@ export async function streamConcierge({
   const { data: sess } = await supabase.auth.getSession();
   const bearer = sess.session?.access_token || (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string);
 
-  const resp = await fetch(CHAT_URL, {
+  // Stable per-session id for anon rate limiting on the public surface.
+  let publicSid: string | null = null;
+  if (surface === "public") {
+    try {
+      publicSid = sessionStorage.getItem("concierge:sid");
+      if (!publicSid) {
+        publicSid = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        sessionStorage.setItem("concierge:sid", publicSid);
+      }
+    } catch { /* ignore */ }
+  }
+
+  const endpoint = surface === "public" ? PUBLIC_CHAT_URL : CHAT_URL;
+  const resp = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${bearer}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+      ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
     },
-    body: JSON.stringify({ messages, project_id: projectId ?? null }),
+    body: JSON.stringify({ messages, project_id: projectId ?? null, surface: surface ?? "trade" }),
     signal,
   });
 
