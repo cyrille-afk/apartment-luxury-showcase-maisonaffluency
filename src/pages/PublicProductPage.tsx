@@ -1068,7 +1068,7 @@ const PublicProductPage: React.FC = () => {
               {/* Visually hidden full description for crawlers that don't
                   expand collapsed regions. Keeps the page free of visible
                   duplication while preserving SEO coverage. */}
-              <div className="sr-only">
+              <div className="sr-only" id="product-description-hidden">
                 <h2>About the {product.title}</h2>
                 <p>{product.description}</p>
               </div>
