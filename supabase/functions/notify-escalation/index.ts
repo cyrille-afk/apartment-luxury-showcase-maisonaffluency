@@ -31,9 +31,11 @@ serve(async (req) => {
     let userName = "A trade user";
     let company = "";
     if (token) {
-      const { data: u } = await supabase.auth.getUser(token);
-      userId = u?.user?.id || null;
-      userEmail = u?.user?.email || null;
+      // Project standard: validate JWTs via getClaims() (local verification),
+      // never getUser() (extra network round-trip + violates security memory).
+      const { data: claimsData } = await supabase.auth.getClaims(token);
+      userId = (claimsData?.claims?.sub as string | undefined) || null;
+      userEmail = (claimsData?.claims?.email as string | undefined) || null;
       if (userId) {
         const { data: p } = await supabase
           .from("profiles")
