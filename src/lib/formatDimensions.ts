@@ -26,7 +26,7 @@ export const formatDimensionsMultiline = (raw: string | null | undefined): strin
 const cmToInches = (value: string): string => {
   const n = Number(value.replace(",", "."));
   if (!Number.isFinite(n)) return value;
-  return `${(n / 2.54).toFixed(1)}\"`;
+  return `${(n / 2.54).toFixed(1)}`;
 };
 
 const CM_RE = /(?:\b|\d)cm\b/i;
@@ -52,10 +52,12 @@ const toImperialLine = (line: string): string | null => {
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
       if (!CM_RE.test(part)) return part;
-      return stripVariantPrefix(part)
+      const stripped = stripVariantPrefix(part)
         .replace(CM_RE_G, "")
-        .replace(/\d+(?:[.,]\d+)?/g, cmToInches);
-
+        .replace(/\d+(?:[.,]\d+)?/g, cmToInches)
+        .replace(/\s+/g, " ")
+        .trim();
+      return stripped ? `${stripped} in` : stripped;
     })
     .join("")
     .replace(/\s+/g, " ")
