@@ -1,6 +1,14 @@
 # Allow social preview crawlers full access to OG bridge pages.
 # These crawlers ignore robots meta tags and need the static OG markup
 # in *-og.html / *-card.html / *-share.html bridges to render rich link previews.
+User-agent: Googlebot
+Allow: /
+Allow: /trade/spec-sheet
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /trade/spec-sheet
+
 User-agent: facebookexternalhit
 Allow: /
 
