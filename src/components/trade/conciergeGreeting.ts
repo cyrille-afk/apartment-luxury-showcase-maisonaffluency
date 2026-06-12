@@ -180,7 +180,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Let's work this quote. I can break down pricing, lead times and deposits, or propose swaps. What do you want to look at?",
     order: "Let's track this order. Production, shipping milestones, status — what do you need to know?",
     project: "Let's push this project forward. Tearsheets, quotes, references — where do we start?",
-    discover: "Let's find what you need. Tell me the brief — piece, designer, vibe — and I'll pull references.",
+    discover: "Your private concierge — pieces, white-glove shipping, trade pricing applied in real time. What city is the project in?",
   },
 };
 
