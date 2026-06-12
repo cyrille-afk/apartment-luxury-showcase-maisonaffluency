@@ -134,6 +134,7 @@ export type QuoteLinePreview = {
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
+const PUBLIC_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/concierge-public-stream`;
 
 export async function streamConcierge({
   messages,
