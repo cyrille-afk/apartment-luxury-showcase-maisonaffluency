@@ -696,6 +696,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 return null;
               })()}
+              {product.materials_description && product.materials_description.trim() && (
+                <ExpandableSpec
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                  emphasized
+                />
+              )}
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;
