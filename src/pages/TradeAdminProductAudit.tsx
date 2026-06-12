@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { withImperialPerLine } from "@/lib/formatDimensions";
 
 const TRADE_DISCOUNT = 0.08;
 
@@ -146,7 +147,7 @@ function AuditPane({
 
             <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
               <div><dt className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Materials</dt><dd className="mt-1">{product.materials || tradeProduct?.materials || "—"}</dd></div>
-              <div><dt className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Dimensions</dt><dd className="mt-1 whitespace-pre-line">{product.dimensions || tradeProduct?.dimensions || variants.find((v: any) => v?.label)?.label || "—"}</dd></div>
+              <div><dt className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Dimensions</dt><dd className="mt-1 whitespace-pre-line">{withImperialPerLine(product.dimensions || tradeProduct?.dimensions || variants.find((v: any) => v?.label)?.label) || "—"}</dd></div>
               <div><dt className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Lead time</dt><dd className="mt-1">{product.lead_time || tradeProduct?.lead_time || "—"}</dd></div>
               <div><dt className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Origin</dt><dd className="mt-1">{product.origin || tradeProduct?.origin || "—"}</dd></div>
             </dl>
