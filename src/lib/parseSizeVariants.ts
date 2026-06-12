@@ -185,7 +185,46 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
       a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
     );
 
-  const dedupeMaterialOptions = (vals: string[]): string[] => {
+  // Sort options ascending by the minimum priced variant they appear in,
+  // so dropdowns read low → high price (e.g. Solid Teak < Burnt Oak <
+  // Blackened Ash). Options without any priced variant fall to the end
+  // and are alpha-sorted. Falls back to pure alpha when no option has any
+  // price information (legacy/un-priced products).
+  const sortByMinPrice = (
+    vals: string[],
+    minPriceFor: (v: string) => number | null,
+  ): string[] => {
+    const withPrice = vals.map((v) => ({ v, p: minPriceFor(v) }));
+    const hasAnyPrice = withPrice.some((x) => x.p != null && x.p > 0);
+    if (!hasAnyPrice) return sortAlpha(vals);
+    const priced = withPrice.filter((x) => x.p != null && x.p > 0);
+    const unpriced = withPrice.filter((x) => !(x.p != null && x.p > 0)).map((x) => x.v);
+    priced.sort((a, b) =>
+      (a.p! - b.p!) ||
+      a.v.localeCompare(b.v, undefined, { sensitivity: "base", numeric: true })
+    );
+    return [...priced.map((x) => x.v), ...sortAlpha(unpriced)];
+  };
+
+  const normKey = (s: string) =>
+    (s || "").replace(/^[^\p{L}]+/u, "").trim().toLocaleLowerCase();
+
+  const minPriceForField = (field: "base" | "top" | "label") => (val: string) => {
+    const key = normKey(val);
+    let min: number | null = null;
+    for (const v of variants) {
+      const raw = (v[field] as string | undefined) || "";
+      if (normKey(raw) !== key) continue;
+      const p = typeof v.price_cents === "number" ? v.price_cents : null;
+      if (p != null && p > 0 && (min == null || p < min)) min = p;
+    }
+    return min;
+  };
+
+  const dedupeMaterialOptions = (
+    vals: string[],
+    minPriceFor?: (v: string) => number | null,
+  ): string[] => {
     const map = new Map<string, string>();
     for (const raw of vals) {
       const v = raw.trim();
@@ -197,29 +236,45 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
         map.set(key, cleaned || v);
       }
     }
-    return sortAlpha(Array.from(map.values()));
+    const out = Array.from(map.values());
+    return minPriceFor ? sortByMinPrice(out, minPriceFor) : sortAlpha(out);
   };
 
   const baseOptions = isDualAxis || isBaseOnly
-    ? dedupeMaterialOptions(variants.map((v) => v.base || ""))
+    ? dedupeMaterialOptions(variants.map((v) => v.base || ""), minPriceForField("base"))
     : [];
   const topOptions = isDualAxis
-    ? dedupeMaterialOptions(variants.map((v) => v.top || ""))
+    ? dedupeMaterialOptions(variants.map((v) => v.top || ""), minPriceForField("top"))
     : [];
   const dualSizeOptions = isDualAxis
-    ? sortAlpha(Array.from(new Set(variants.map((v) => (v.label || "").trim()).filter(Boolean))))
+    ? sortByMinPrice(
+        Array.from(new Set(variants.map((v) => (v.label || "").trim()).filter(Boolean))),
+        minPriceForField("label"),
+      )
     : [];
 
   const singleAxisParsed: ParsedSingleAxis[] =
     !isDualAxis && hasVariants
       ? variants.map((v) => ({ ...parseSingleAxisLabel(v.label || ""), variant: v }))
       : [];
-  const singleSizeOptions = sortAlpha(Array.from(
-    new Set(singleAxisParsed.map((p) => p.size).filter(Boolean))
-  ));
-  const singleMaterialOptions = sortAlpha(Array.from(
-    new Set(singleAxisParsed.map((p) => p.material).filter(Boolean))
-  ));
+  const minPriceForSingle = (field: "size" | "material") => (val: string) => {
+    const key = val.toLocaleLowerCase();
+    let min: number | null = null;
+    for (const p of singleAxisParsed) {
+      if ((p[field] || "").toLocaleLowerCase() !== key) continue;
+      const price = typeof p.variant.price_cents === "number" ? p.variant.price_cents : null;
+      if (price != null && price > 0 && (min == null || price < min)) min = price;
+    }
+    return min;
+  };
+  const singleSizeOptions = sortByMinPrice(
+    Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean))),
+    minPriceForSingle("size"),
+  );
+  const singleMaterialOptions = sortByMinPrice(
+    Array.from(new Set(singleAxisParsed.map((p) => p.material).filter(Boolean))),
+    minPriceForSingle("material"),
+  );
   const hasSingleAxisSplit =
     !isDualAxis &&
     hasVariants &&
