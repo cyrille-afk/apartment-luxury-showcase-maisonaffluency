@@ -5689,6 +5689,32 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_cron_jobs_summary: {
+        Args: never
+        Returns: {
+          jobname: string
+          last_duration_ms: number
+          last_run_at: string
+          last_status: string
+          rows_30d: number
+          rows_7d: number
+          rows_label: string
+          schedule: string
+        }[]
+      }
+      get_cron_run_history: {
+        Args: { _limit?: number }
+        Returns: {
+          duration_ms: number
+          end_time: string
+          http_status_code: number
+          jobname: string
+          return_message: string
+          schedule: string
+          start_time: string
+          status: string
+        }[]
+      }
       get_designer_engagement: {
         Args: { _since: string }
         Returns: {
