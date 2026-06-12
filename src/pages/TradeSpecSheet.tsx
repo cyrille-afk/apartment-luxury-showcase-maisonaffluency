@@ -192,8 +192,8 @@ export default function TradeSpecSheet() {
         <Helmet>
           <title>{pageTitle} | Maison Affluency</title>
           <meta name="description" content={pageDescription} />
-          <meta name="robots" content="noindex, nofollow" />
-          <link rel="canonical" href="https://maisonaffluency.com/trade/spec-sheet" />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={canonicalUrl} />
         </Helmet>
         <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
           <div className="flex flex-col items-center text-center gap-6">
