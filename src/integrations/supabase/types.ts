@@ -5750,6 +5750,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      invoke_scrape_products_with_retry: { Args: never; Returns: undefined }
       is_client_trade_approved: {
         Args: { _client_id: string }
         Returns: {
