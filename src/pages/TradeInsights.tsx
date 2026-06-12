@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CompetitiveAnalysis from "@/components/trade/CompetitiveAnalysis";
 import VideoAnalytics from "@/components/trade/VideoAnalytics";
+import CronRunHistory from "@/components/trade/CronRunHistory";
 
 interface PlatformStats {
   totalProducts: number;
@@ -247,6 +248,7 @@ export default function TradeInsights() {
             <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
             <TabsTrigger value="video" className="text-xs">Video Analytics</TabsTrigger>
             <TabsTrigger value="competitive" className="text-xs">Competitive Intelligence</TabsTrigger>
+            <TabsTrigger value="cron" className="text-xs">Cron Jobs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="video">
@@ -256,6 +258,11 @@ export default function TradeInsights() {
           <TabsContent value="competitive">
             <CompetitiveAnalysis />
           </TabsContent>
+
+          <TabsContent value="cron">
+            <CronRunHistory />
+          </TabsContent>
+
 
           <TabsContent value="overview" className="space-y-8">
 
