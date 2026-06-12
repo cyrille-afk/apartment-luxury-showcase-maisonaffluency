@@ -243,7 +243,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         return [next];
       }
       if (only.actions && only.actions.length > 0) return prev;
-      const next = greetingForContext(stageFromPath(pathname), pathname, tone, lang);
+      const next = surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
