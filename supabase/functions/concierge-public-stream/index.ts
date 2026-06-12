@@ -80,9 +80,16 @@ serve(async (req) => {
     });
   }
 
-  // Rate limit by IP (60/hr) and by client-supplied session id (15/hr).
+  // Rate limit by IP (60/hr), by client-supplied session id (15/hr),
+  // and a global cap (2000/hr across all visitors) so the bill stays bounded.
+  const globalRl = await rateLimit("pub-global", 2000, 3600);
+  if (!globalRl.ok) {
+    return new Response(JSON.stringify({ error: "Concierge is at capacity. Please try again shortly.", retry_in: globalRl.retryInSec }), {
+      status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
   const ip = clientIp(req);
-  const ipRl = rateLimit(`pub-ip:${ip}`, 60, 60 * 60_000);
+  const ipRl = await rateLimit(`pub-ip:${ip}`, 60, 3600);
   if (!ipRl.ok) {
     return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: ipRl.retryInSec }), {
       status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -90,7 +97,7 @@ serve(async (req) => {
   }
   const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128);
   if (sid) {
-    const sidRl = rateLimit(`pub-sid:${sid}`, 15, 60 * 60_000);
+    const sidRl = await rateLimit(`pub-sid:${sid}`, 15, 3600);
     if (!sidRl.ok) {
       return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: sidRl.retryInSec }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
