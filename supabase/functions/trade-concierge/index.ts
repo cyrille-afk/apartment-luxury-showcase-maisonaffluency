@@ -2033,6 +2033,46 @@ function normalizeLoose(value: string | null | undefined): string {
     .trim();
 }
 
+type RequestedTypology = "dining_table" | "table";
+
+function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology | null {
+  const hay = normalizeLoose([
+    requestText,
+    brief.summary,
+    brief.room,
+    brief.style,
+    ...(brief.categories || []),
+  ].filter(Boolean).join(" "));
+  if (/\bdining\b/.test(hay) && /\btables?\b/.test(hay)) return "dining_table";
+  if (/\btables?\b/.test(hay)) return "table";
+  return null;
+}
+
+function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | null): boolean {
+  if (!typology) return true;
+  const title = normalizeLoose(row?.title || row?.product_name);
+  const category = normalizeLoose(row?.category);
+  const subcategory = normalizeLoose(row?.subcategory);
+  const hay = `${title} ${category} ${subcategory}`;
+  const isLightingOrLamp = /\b(table\s+lights?|table\s+lamps?|lamp|lamps|lighting|sconce|sconces|chandelier|chandeliers)\b/.test(hay);
+  if (isLightingOrLamp) return false;
+  if (typology === "dining_table") {
+    return /\bdining\b/.test(hay) && /\btables?\b/.test(hay);
+  }
+  return /\btables?\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
+}
+
+function typologyLabel(typology: RequestedTypology | null): string {
+  if (typology === "dining_table") return "dining table";
+  if (typology === "table") return "table";
+  return "piece";
+}
+
+function buildNoStrictTypologyReply(typology: RequestedTypology): string {
+  const label = typologyLabel(typology);
+  return `You're right — I won't present adjacent pieces as a ${label}. I don't have enough true ${label}s matching this brief in the Maison Affluency Curation to draft a credible edit; would you like me to expand the search through the designers' own collections using our Axonometric Studio archives and tools?`;
+}
+
 const LOCATION_ONLY_FOLLOWUPS = new Set([
   "london", "new york", "los angeles", "miami", "paris", "milan", "rome", "geneva", "zurich",
   "monaco", "dubai", "abu dhabi", "doha", "riyadh", "jeddah", "hong kong", "singapore",
