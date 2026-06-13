@@ -114,7 +114,7 @@ Tax: `automatic_tax: { enabled: true }` in both modes.
 **Phase 2 — in progress:**
 
 - ✅ **Commission statement emails on delivery** — `send-commission-statement` edge fn fires from the order-timeline kanban when status moves to `delivered`. Loads quote + items + payout account server-side, computes commission from `commission_pct`, invokes the `commission-statement` React-Email template via `send-transactional-email`. Idempotent via `order_timeline.commission_statement_sent_at`; silently no-ops for `net_buy`.
-- W-9 / VAT capture surfaced in the payout account form
+- ✅ **W-9 / VAT capture in payout account form** — `PayoutAccountsSection` exposes `tax_form_kind` (W9 / W8BEN / W8BEN-E / VAT_ID / TAX_ID / NONE), `tax_form_reference` and optional signed-PDF upload to the private `client-documents` bucket under `{studio}/tax-forms/`. Form type auto-defaults from country (US→W9, EU/UK→VAT_ID, Asia/MENA→TAX_ID, CA/MX→W8BEN-E). Each row shows a tax-status badge and a 60s signed-URL "View document" link; missing tax form is flagged in amber.
 - Multi-currency wires
 - 1099 / T5 reporting export
 
