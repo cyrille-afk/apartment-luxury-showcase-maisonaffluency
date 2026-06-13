@@ -2064,12 +2064,30 @@ function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | nul
 }
 
 function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
-  const seen = new Set<string>();
+  const seenTitleKey = new Set<string>();
+  const seenImageKey = new Set<string>();
   const kept: any[] = [];
+  // Helper — collapse scraper-injected variant noise like "Scala Dining Table",
+  // "Scala 3Dining Table", "Scala 300 Dining Table" into one canonical key.
+  const stripVariantNoise = (s: string) =>
+    s.replace(/\b\d+\b/g, " ")        // drop standalone numbers (size codes)
+     .replace(/(\d)([a-z])/gi, "$1 $2") // split "3Dining" → "3 Dining"
+     .replace(/([a-z])(\d)/gi, "$1 $2")
+     .replace(/\s+/g, " ")
+     .trim();
   for (const p of previewRaw || []) {
-    const key = `${normalizeLoose(p?.designer_name)}::${normalizeLoose(p?.title)}`;
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
+    const designerKey = normalizeLoose(p?.designer_name);
+    const rawTitleKey = normalizeLoose(p?.title);
+    const cleanTitleKey = normalizeLoose(stripVariantNoise(String(p?.title || "")));
+    const titleKey = `${designerKey}::${cleanTitleKey || rawTitleKey}`;
+    // Second guard: same brand + identical image_url ⇒ same product family
+    // even if the titles diverge ("Scala 30Dining Table" vs "Scala 300 Dining Table").
+    const imageKey = p?.image_url ? `${designerKey}::${String(p.image_url).split("?")[0]}` : "";
+    if (!titleKey) continue;
+    if (seenTitleKey.has(titleKey)) continue;
+    if (imageKey && seenImageKey.has(imageKey)) continue;
+    seenTitleKey.add(titleKey);
+    if (imageKey) seenImageKey.add(imageKey);
     kept.push(p);
   }
   const keptIds = new Set(kept.map((p: any) => p?.id).filter(Boolean));
@@ -3628,13 +3646,17 @@ serve(async (req) => {
             let previewRaw = await hydratePickPreview(supabase, pickIds);
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
-              ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
-              if (pickIds.length < 2) {
-                console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
-                const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
-                continue;
-              }
+            }
+            // Always dedupe — collapses scraper-injected variant noise
+            // (e.g. "Scala Dining Table" / "Scala 3Dining Table" /
+            // "Scala 300 Dining Table" sharing the same brand + image)
+            // regardless of whether a typology was inferred.
+            ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+            if (requestedTypology && pickIds.length < 2) {
+              console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
+              const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+              continue;
             }
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
