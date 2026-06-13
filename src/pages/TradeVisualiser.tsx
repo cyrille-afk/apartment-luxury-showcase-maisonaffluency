@@ -71,6 +71,29 @@ interface Pin {
   swatch?: Swatch;
 }
 
+const normalizeAssetKey = (url: string | null) => {
+  if (!url?.trim()) return "";
+  const clean = url.trim().split("?")[0];
+  const marker = "/image/upload/";
+  const markerIndex = clean.indexOf(marker);
+  if (markerIndex === -1) return clean.toLowerCase();
+  const prefix = clean.slice(0, markerIndex + marker.length);
+  const parts = clean.slice(markerIndex + marker.length).split("/").filter(Boolean);
+  while (parts.length > 1 && !/^v\d+$/i.test(parts[0]) && /(^|,)([a-z]_|ar_|q_auto|f_auto|c_|g_|w_|h_)/i.test(parts[0])) {
+    parts.shift();
+  }
+  return `${prefix}${parts.join("/")}`.toLowerCase();
+};
+
+const productLabelScore = (name: string | null | undefined) => {
+  const text = (name || "").trim();
+  let score = text.length;
+  if (/\bby\s+\S+/i.test(text)) score += 80;
+  if (/\b(rug|rugs|carpet|kilim|dhurrie)\b/i.test(text)) score += 25;
+  if (text.length < 5) score -= 100;
+  return score;
+};
+
 // ───────── Page ──────────────────────────────────────────────────────────────
 const TradeVisualiser = () => {
   const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
@@ -104,7 +127,11 @@ const TradeVisualiser = () => {
           .from("trade_products")
           .select("id, product_name, brand_name, image_url, category, subcategory, materials")
           .not("image_url", "is", null)
+          .neq("image_url", "")
+          .eq("is_active", true)
           .order("brand_name", { ascending: true })
+          .order("product_name", { ascending: true })
+          .order("id", { ascending: true })
           .range(from, from + pageSize - 1);
         if (error || !data || data.length === 0) break;
         all.push(...(data as Swatch[]));
@@ -112,15 +139,7 @@ const TradeVisualiser = () => {
         from += pageSize;
       }
       if (cancelled) return;
-      // Dedupe by image_url — many products are variants sharing one photo.
-      const seen = new Set<string>();
-      const deduped = all.filter((s) => {
-        const key = s.image_url || `${s.brand_name}|${s.product_name}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-      setAllSwatches(deduped);
+      setAllSwatches(all);
       setLoadingSwatches(false);
     })();
     return () => { cancelled = true; };
@@ -129,13 +148,22 @@ const TradeVisualiser = () => {
   // ─── Filter swatches for the active surface ──────────────────────────────
   const swatches = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return allSwatches
-      .filter((s) => {
+    const matching = allSwatches.filter((s) => {
         if (classifySwatchSurface(s) !== surface) return false;
         if (!q) return true;
         return `${s.product_name} ${s.brand_name || ""} ${s.category || ""} ${s.subcategory || ""}`.toLowerCase().includes(q);
-      })
-      .slice(0, 60);
+      });
+    const byAsset = new Map<string, Swatch>();
+    for (const s of matching) {
+      const assetKey = normalizeAssetKey(s.image_url) || `${s.brand_name}|${s.product_name}`;
+      const previous = byAsset.get(assetKey);
+      if (!previous || productLabelScore(s.product_name) > productLabelScore(previous.product_name)) {
+        byAsset.set(assetKey, s);
+      }
+    }
+    return Array.from(byAsset.values()).sort((a, b) =>
+      `${a.brand_name || ""} ${a.product_name}`.localeCompare(`${b.brand_name || ""} ${b.product_name}`)
+    );
   }, [allSwatches, surface, search]);
 
   // ─── Upload handling ─────────────────────────────────────────────────────
@@ -220,9 +248,9 @@ const TradeVisualiser = () => {
       if (!data?.image) throw new Error("No image returned");
       setRenderedImage(data.image);
       setRendered(true);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setRenderError(e?.message || "Render failed");
+      setRenderError(e instanceof Error ? e.message : "Render failed");
     } finally {
       setRendering(false);
     }
