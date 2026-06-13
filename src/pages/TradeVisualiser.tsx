@@ -137,20 +137,7 @@ const TradeVisualiser = () => {
         from += pageSize;
       }
       if (cancelled) return;
-      // Dedupe by the real image asset — Cloudinary transforms can make the
-      // same file look like different URLs, and scraped variants often share it.
-      const byAsset = new Map<string, Swatch>();
-      for (const s of all) {
-        const assetKey = normalizeAssetKey(s.image_url) || `${s.brand_name}|${s.product_name}`;
-        const previous = byAsset.get(assetKey);
-        if (!previous || productLabelScore(s.product_name) > productLabelScore(previous.product_name)) {
-          byAsset.set(assetKey, s);
-        }
-      }
-      const deduped = Array.from(byAsset.values()).sort((a, b) =>
-        `${a.brand_name || ""} ${a.product_name}`.localeCompare(`${b.brand_name || ""} ${b.product_name}`)
-      );
-      setAllSwatches(deduped);
+      setAllSwatches(all);
       setLoadingSwatches(false);
     })();
     return () => { cancelled = true; };
@@ -159,12 +146,22 @@ const TradeVisualiser = () => {
   // ─── Filter swatches for the active surface ──────────────────────────────
   const swatches = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return allSwatches
-      .filter((s) => {
+    const matching = allSwatches.filter((s) => {
         if (classifySwatchSurface(s) !== surface) return false;
         if (!q) return true;
         return `${s.product_name} ${s.brand_name || ""} ${s.category || ""} ${s.subcategory || ""}`.toLowerCase().includes(q);
       });
+    const byAsset = new Map<string, Swatch>();
+    for (const s of matching) {
+      const assetKey = normalizeAssetKey(s.image_url) || `${s.brand_name}|${s.product_name}`;
+      const previous = byAsset.get(assetKey);
+      if (!previous || productLabelScore(s.product_name) > productLabelScore(previous.product_name)) {
+        byAsset.set(assetKey, s);
+      }
+    }
+    return Array.from(byAsset.values()).sort((a, b) =>
+      `${a.brand_name || ""} ${a.product_name}`.localeCompare(`${b.brand_name || ""} ${b.product_name}`)
+    );
   }, [allSwatches, surface, search]);
 
   // ─── Upload handling ─────────────────────────────────────────────────────
