@@ -56,7 +56,8 @@ interface Swatch {
   brand_name: string | null;
   image_url: string | null;
   category: string | null;
-  subtitle: string | null;
+  subcategory: string | null;
+  materials: string | null;
 }
 
 interface Pin {
