@@ -14,7 +14,8 @@ import ClientPicker from "@/components/trade/ClientPicker";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import affluencyLogo from "@/assets/affluency-quote-logo.jpg";
 import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from "@/lib/procurementExcel";
-import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine } from "@/lib/quotePdf";
+import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
+import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import QuoteExtrasEditor from "@/components/trade/QuoteExtrasEditor";
@@ -284,6 +285,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
+  // Dual-billing meta (loaded async — drives the invoice/proforma button).
+  const [billingMeta, setBillingMeta] = useState<{
+    billing_mode: "agent_commission" | "net_buy";
+    net_discount_pct: number | null;
+    commission_pct: number | null;
+    end_client_billing: Record<string, string> | null;
+    resale_certificate_id: string | null;
+    studio_id: string | null;
+  } | null>(null);
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
+
+
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
   const isPriced = quoteStatus === "priced";
@@ -460,6 +473,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     };
     load();
   }, [quoteId, user, reloadKey]);
+
+  // Load dual-billing meta separately (additive — keeps the main loader untouched).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_quotes")
+        .select("billing_mode, net_discount_pct, commission_pct, end_client_billing, resale_certificate_id, studio_id")
+        .eq("id", quoteId)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setBillingMeta({
+        billing_mode: (data.billing_mode as any) ?? "agent_commission",
+        net_discount_pct: data.net_discount_pct as number | null,
+        commission_pct: data.commission_pct as number | null,
+        end_client_billing: (data.end_client_billing as Record<string, string> | null) ?? null,
+        resale_certificate_id: data.resale_certificate_id as string | null,
+        studio_id: data.studio_id as string | null,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [quoteId, reloadKey]);
+
 
   // Fetch products for the in-quote "Add product" picker.
   useEffect(() => {
@@ -1185,6 +1221,91 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     };
   };
 
+  const handleDownloadInvoice = async () => {
+    if (!billingMeta) {
+      toast({ title: "Loading billing details…", description: "Please retry in a moment.", variant: "destructive" });
+      return;
+    }
+    setInvoiceBusy(true);
+    try {
+      const base: QuotePdfArgs = await buildPdfArgs();
+      const isNet = billingMeta.billing_mode === "net_buy";
+      const mode: InvoiceMode = isNet ? "proforma_net_buy" : "tax_invoice";
+
+      // Resolve recipient: end-client (agent) or designer firm / studio (net).
+      let recipient: Parameters<typeof downloadInvoicePdf>[1]["recipient"];
+      if (!isNet) {
+        const ec = billingMeta.end_client_billing ?? {};
+        if (!ec.email && !ec.name) {
+          toast({ title: "End-client billing missing", description: "Capture the client's billing details on the quote before issuing a tax invoice.", variant: "destructive" });
+          setInvoiceBusy(false);
+          return;
+        }
+        recipient = {
+          company: ec.company ?? ec.name ?? null,
+          name: ec.name ?? null,
+          email: ec.email ?? null,
+          phone: ec.phone ?? null,
+          address: {
+            line1: ec.address1 ?? null,
+            line2: ec.address2 ?? null,
+            city: ec.city ?? null,
+            region: ec.state ?? null,
+            postalCode: ec.postal_code ?? null,
+            country: ec.country ?? null,
+          },
+        };
+      } else {
+        // Net-buy: pull designer firm from the user's studio.
+        let studio: { name?: string | null } | null = null;
+        if (billingMeta.studio_id) {
+          const { data } = await supabase.from("studios").select("name").eq("id", billingMeta.studio_id).maybeSingle();
+          studio = data as any;
+        }
+        recipient = {
+          company: studio?.name ?? clientCompany ?? null,
+          name: clientName ?? null,
+          email: clientApproval.email ?? null,
+          phone: null,
+          address: null,
+        };
+      }
+
+      // Look up the resale cert number for the FOR-RESALE stamp (net + US).
+      let resaleCertNumber: string | null = null;
+      if (isNet && billingMeta.resale_certificate_id) {
+        const { data } = await supabase
+          .from("studio_resale_certificates")
+          .select("certificate_number, state_code")
+          .eq("id", billingMeta.resale_certificate_id)
+          .maybeSingle();
+        if (data) {
+          resaleCertNumber = data.certificate_number
+            ? `${data.certificate_number} (${data.state_code})`
+            : `On file — ${data.state_code}`;
+        }
+      }
+
+      await downloadInvoicePdf(base, {
+        mode,
+        recipient,
+        resaleCertNumber,
+        netDiscountPct: isNet ? Number(billingMeta.net_discount_pct ?? 0) : 0,
+      });
+      toast({
+        title: isNet ? "Proforma downloaded" : "Tax invoice downloaded",
+        description: isNet
+          ? "Net-buy proforma saved. Issue your own client invoice on studio paper."
+          : "Tax invoice saved — addressed to the end client at full MSRP.",
+      });
+    } catch (err: any) {
+      toast({ title: "Invoice failed", description: err?.message || "Could not generate invoice.", variant: "destructive" });
+    } finally {
+      setInvoiceBusy(false);
+    }
+  };
+
+
   const handleDownloadPdf = async () => {
     try {
       const args = await buildPdfArgs();
@@ -1463,6 +1584,33 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="hidden sm:inline">Download PDF</span>
             <span className="sm:hidden">PDF</span>
           </button>
+          {(() => {
+            // Invoice / Proforma button — visible once the quote is confirmed.
+            // agent_commission → "Tax Invoice" (issued to end client at MSRP, requires end-client billing).
+            // net_buy          → "Proforma" (issued to designer firm at net, "For Resale" stamp).
+            const showInvoice =
+              !!billingMeta &&
+              (quoteStatus === "confirmed" || quoteStatus === "deposit_paid" || quoteStatus === "paid");
+            if (!showInvoice) return null;
+            const isNet = billingMeta!.billing_mode === "net_buy";
+            const label = isNet ? "Proforma" : "Tax Invoice";
+            const longLabel = isNet ? "Download Proforma" : "Download Tax Invoice";
+            const tip = isNet
+              ? "Net-buy proforma for your studio records (FOR RESALE stamp). Invoice your client on your own paper."
+              : "Tax invoice addressed to the end client at full MSRP. Maison Affluency is the seller of record.";
+            return (
+              <button
+                onClick={handleDownloadInvoice}
+                disabled={items.length === 0 || invoiceBusy}
+                className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+                title={tip}
+              >
+                {invoiceBusy ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Printer className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline">{longLabel}</span>
+                <span className="sm:hidden">{label}</span>
+              </button>
+            );
+          })()}
           {(() => {
             const hasClient = !!clientId;
             const hasEmail = !!clientApproval.email;

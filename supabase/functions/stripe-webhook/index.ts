@@ -80,12 +80,13 @@ serve(async (req) => {
       console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}, type: ${paymentType}`);
 
       if (paymentType === "deposit") {
-        // Deposit paid → move to deposit_paid
+        // Deposit paid → move to deposit_paid (allow from priced or confirmed,
+        // matching create-quote-payment which accepts both).
         const { error } = await supabase
           .from("trade_quotes")
           .update({ status: "deposit_paid", updated_at: new Date().toISOString() })
           .eq("id", quoteId)
-          .eq("status", "confirmed");
+          .in("status", ["priced", "confirmed"]);
 
         if (error) {
           console.error(`[STRIPE-WEBHOOK] Failed to update quote ${quoteId}:`, error);
