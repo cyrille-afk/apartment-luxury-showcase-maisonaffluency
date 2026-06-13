@@ -3897,7 +3897,17 @@ serve(async (req) => {
                 }
               }
             }
-            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            let previewRaw = await hydratePickPreview(supabase, pickIds);
+            if (requestedTypology) {
+              previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
+              pickIds = pickIds.filter((id) => previewRaw.some((p: any) => p?.id === id));
+              if (pickIds.length < 2) {
+                console.warn(`[concierge promise-recovery] blocked — insufficient true ${requestedTypology} picks after typology validation`);
+                const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+                return;
+              }
+            }
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
               if (!r) return p;
