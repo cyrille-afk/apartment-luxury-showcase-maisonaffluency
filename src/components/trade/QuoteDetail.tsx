@@ -1585,6 +1585,33 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <span className="sm:hidden">PDF</span>
           </button>
           {(() => {
+            // Invoice / Proforma button — visible once the quote is confirmed.
+            // agent_commission → "Tax Invoice" (issued to end client at MSRP, requires end-client billing).
+            // net_buy          → "Proforma" (issued to designer firm at net, "For Resale" stamp).
+            const showInvoice =
+              !!billingMeta &&
+              (quoteStatus === "confirmed" || quoteStatus === "deposit_paid" || quoteStatus === "paid");
+            if (!showInvoice) return null;
+            const isNet = billingMeta!.billing_mode === "net_buy";
+            const label = isNet ? "Proforma" : "Tax Invoice";
+            const longLabel = isNet ? "Download Proforma" : "Download Tax Invoice";
+            const tip = isNet
+              ? "Net-buy proforma for your studio records (FOR RESALE stamp). Invoice your client on your own paper."
+              : "Tax invoice addressed to the end client at full MSRP. Maison Affluency is the seller of record.";
+            return (
+              <button
+                onClick={handleDownloadInvoice}
+                disabled={items.length === 0 || invoiceBusy}
+                className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+                title={tip}
+              >
+                {invoiceBusy ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Printer className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline">{longLabel}</span>
+                <span className="sm:hidden">{label}</span>
+              </button>
+            );
+          })()}
+          {(() => {
             const hasClient = !!clientId;
             const hasEmail = !!clientApproval.email;
             const isApproved = clientApproval.approved;
