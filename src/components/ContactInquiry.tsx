@@ -116,9 +116,8 @@ const ContactInquiry = () => {
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase
-        .from("featured_studios")
+        .from("featured_studios_public")
         .select("id, name, tagline, location, country")
-        .eq("is_published", true)
         .order("is_featured", { ascending: false })
         .order("name", { ascending: true });
       if (!cancelled && !error && data) setStudios(data as PickerStudio[]);

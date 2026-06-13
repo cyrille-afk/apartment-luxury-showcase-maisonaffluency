@@ -46,9 +46,8 @@ d("RLS guard: featured_studios.contact_email is hidden from anon", () => {
 
   it("anon CAN still SELECT public columns (directory still works)", async () => {
     const { data, error } = await anon
-      .from("featured_studios")
+      .from("featured_studios_public")
       .select("id, name, slug, is_published")
-      .eq("is_published", true)
       .limit(1);
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);

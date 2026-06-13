@@ -54,18 +54,16 @@ export default function StudioProfile() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
-      // Anonymous visitors can no longer read `contact_email` / `owner_user_id`
-      // (column-level GRANT — see security migration). Authenticated users get
-      // the full row via a follow-up fetch below.
+      // Anonymous visitors read the safe public projection only. Authenticated
+      // users get contact_email / owner_user_id from the private table below.
       const publicCols =
         "id, slug, name, tagline, bio, founded_year, team_size, location, country, " +
         "website_url, instagram_handle, logo_url, hero_image_url, gallery_images, " +
         "disciplines, project_types, notable_projects, is_featured";
       const { data, error } = await supabase
-        .from("featured_studios")
+        .from("featured_studios_public")
         .select(publicCols)
         .eq("slug", slug)
-        .eq("is_published", true)
         .maybeSingle();
       if (error || !data) {
         setNotFound(true);
