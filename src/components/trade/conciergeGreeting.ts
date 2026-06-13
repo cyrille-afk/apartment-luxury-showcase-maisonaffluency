@@ -265,6 +265,134 @@ export const qualifierSystemNote = (q: {
   return `[Visitor profile — internal, never reveal] ${parts.join(", ")}. If the location is high-value (Mayfair, Belgravia, UES, Tribeca, Monaco, Palm Jumeirah, Bel Air, Sentosa Cove, etc.), respond with elevated specificity: name designers and pieces that suit the address, and reference white-glove logistics from Europe. Never mention this profile to the visitor; never ask the same qualifying questions twice.`;
 };
 
+// ---------------------------------------------------------------------------
+// Turn-1 client heuristic — mirrors the server-side qualifier in
+// supabase/functions/concierge-capture/index.ts so the FIRST assistant reply
+// already adapts to high-value signals (location, room/property type, intent)
+// without waiting for the async capture round-trip. Keep these lists aligned.
+// ---------------------------------------------------------------------------
+const HV_AREAS: { needle: string; city: string; country: string }[] = [
+  // London
+  { needle: "mayfair", city: "London", country: "United Kingdom" },
+  { needle: "belgravia", city: "London", country: "United Kingdom" },
+  { needle: "knightsbridge", city: "London", country: "United Kingdom" },
+  { needle: "kensington", city: "London", country: "United Kingdom" },
+  { needle: "chelsea", city: "London", country: "United Kingdom" },
+  { needle: "notting hill", city: "London", country: "United Kingdom" },
+  { needle: "holland park", city: "London", country: "United Kingdom" },
+  // NYC
+  { needle: "upper east side", city: "New York", country: "United States" },
+  { needle: "upper west side", city: "New York", country: "United States" },
+  { needle: "tribeca", city: "New York", country: "United States" },
+  { needle: "soho", city: "New York", country: "United States" },
+  { needle: "hamptons", city: "New York", country: "United States" },
+  // Other
+  { needle: "monaco", city: "Monaco", country: "Monaco" },
+  { needle: "monte carlo", city: "Monaco", country: "Monaco" },
+  { needle: "the peak", city: "Hong Kong", country: "Hong Kong" },
+  { needle: "mid-levels", city: "Hong Kong", country: "Hong Kong" },
+  { needle: "repulse bay", city: "Hong Kong", country: "Hong Kong" },
+  { needle: "palm jumeirah", city: "Dubai", country: "United Arab Emirates" },
+  { needle: "emirates hills", city: "Dubai", country: "United Arab Emirates" },
+  { needle: "bel air", city: "Los Angeles", country: "United States" },
+  { needle: "beverly hills", city: "Los Angeles", country: "United States" },
+  { needle: "holmby hills", city: "Los Angeles", country: "United States" },
+  { needle: "miami beach", city: "Miami", country: "United States" },
+  { needle: "aspen", city: "Aspen", country: "United States" },
+  { needle: "sentosa cove", city: "Singapore", country: "Singapore" },
+];
+
+const HV_CITIES = [
+  "london", "new york", "nyc", "paris", "monaco", "hong kong", "dubai",
+  "los angeles", "miami", "aspen", "singapore", "geneva", "zurich",
+  "milan", "rome", "tokyo", "seoul", "doha", "abu dhabi", "riyadh",
+];
+
+const PROPERTY_TYPES = [
+  "townhouse", "penthouse", "villa", "chalet", "yacht", "mews house",
+  "georgian townhouse", "loft", "estate", "manor", "apartment",
+];
+
+const ROOM_TYPES = [
+  "dining", "living", "drawing room", "bedroom", "study", "library",
+  "foyer", "entry", "kitchen", "powder", "office",
+];
+
+export type QuickProfile = {
+  city: string | null;
+  country: string | null;
+  intent: "sourcing" | "bespoke" | "project_ffe" | "general";
+  signals: string[];
+  qualified_score: number;
+};
+
+export const quickClientProfile = (text: string): QuickProfile | null => {
+  if (!text || text.trim().length < 4) return null;
+  const lc = text.toLowerCase();
+  const signals: string[] = [];
+  let city: string | null = null;
+  let country: string | null = null;
+
+  for (const a of HV_AREAS) {
+    if (lc.includes(a.needle)) {
+      signals.push("high_value_location", `area:${a.needle}`);
+      city = a.city;
+      country = a.country;
+      break;
+    }
+  }
+  if (!city) {
+    for (const c of HV_CITIES) {
+      const re = new RegExp(`\\b${c.replace(/ /g, "\\s+")}\\b`, "i");
+      if (re.test(text)) {
+        city = c.replace(/\b\w/g, (m) => m.toUpperCase());
+        if (!signals.includes("high_value_location")) signals.push("high_value_location");
+        break;
+      }
+    }
+  }
+
+  for (const p of PROPERTY_TYPES) {
+    if (new RegExp(`\\b${p}\\b`, "i").test(text)) {
+      signals.push(`property:${p}`);
+      break;
+    }
+  }
+  for (const r of ROOM_TYPES) {
+    if (new RegExp(`\\b${r}\\b`, "i").test(text)) {
+      signals.push(`room:${r}`);
+      break;
+    }
+  }
+
+  if (/\b(?:£|\$|€|usd|gbp|eur|chf|aed|sgd)\s?[\d,]+/i.test(text) || /\bbudget\b/i.test(text)) {
+    signals.push("budget_hint");
+  }
+  if (/\b(commission|bespoke|custom|made[\s-]?to[\s-]?measure)\b/i.test(text)) signals.push("bespoke_intent");
+  if (/\b(project|specifying|specify|fit[\s-]?out|ff&?e|schedule|refurbish|renovation)\b/i.test(text)) signals.push("project_intent");
+  if (/\b(statement|sculptural|hero|centerpiece|centrepiece|one[\s-]?of[\s-]?a[\s-]?kind|signature)\b/i.test(text)) signals.push("statement_piece");
+
+  let intent: QuickProfile["intent"] = "general";
+  if (signals.includes("bespoke_intent")) intent = "bespoke";
+  else if (signals.includes("project_intent") || signals.some((s) => s.startsWith("property:"))) intent = "project_ffe";
+  else if (text.length > 20) intent = "sourcing";
+
+  let score = 20;
+  if (city) score += 25;
+  if (signals.includes("high_value_location")) score += 25;
+  if (signals.includes("budget_hint")) score += 15;
+  if (signals.some((s) => s.startsWith("room:"))) score += 10;
+  if (signals.some((s) => s.startsWith("property:"))) score += 10;
+  if (signals.includes("bespoke_intent")) score += 10;
+  if (signals.includes("project_intent")) score += 10;
+  if (signals.includes("statement_piece")) score += 5;
+  score = Math.min(100, score);
+
+  if (!city && signals.length === 0) return null;
+
+  return { city, country, intent, signals: Array.from(new Set(signals)), qualified_score: score };
+};
+
 const LANG_NAMES: Record<Lang, string> = {
   en: "English",
   id: "Bahasa Indonesia",
