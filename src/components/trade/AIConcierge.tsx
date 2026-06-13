@@ -950,7 +950,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <div
                     role="dialog"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1 z-[110] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
+                    className="absolute right-0 top-full mt-1 z-[10010] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
                   >
                     <div className="font-display text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
                       {copy.nameDialogTitle}
@@ -1027,7 +1027,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <div
                     role="menu"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1 z-[110] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
+                    className="absolute right-0 top-full mt-1 z-[10010] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
                       {copy.tone}
@@ -1076,7 +1076,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <div
                     role="menu"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1 z-[110] w-52 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
+                    className="absolute right-0 top-full mt-1 z-[10010] w-52 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
                       {copy.language}
