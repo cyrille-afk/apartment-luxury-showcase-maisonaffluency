@@ -3418,6 +3418,7 @@ serve(async (req) => {
                     continue; // do not forward
                   }
                   if (contentDelta.trim().length > 0) forwardedAnyText = true;
+                  assistantTextBuf += contentDelta;
                 }
                 // Plain text delta — forward unchanged
                 controller.enqueue(encoder.encode(line + "\n"));
