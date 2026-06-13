@@ -28,6 +28,7 @@ import { labelForMode } from "@/lib/shippingEstimator";
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
+import BillingModeCard from "@/components/trade/BillingModeCard";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -2901,6 +2902,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </button>
             </div>
           </div>
+        )}
+
+        {/* Billing mode selector — show whenever the quote is editable or being paid */}
+        {(isDraft || isPriced) && (
+          <BillingModeCard
+            quoteId={quoteId}
+            shipToCountry={shipTo.country}
+            subtotalCents={subtotalCents}
+            currency={currency}
+            isEditable={isDraft || isPriced}
+          />
         )}
 
         {isPriced && (() => {
