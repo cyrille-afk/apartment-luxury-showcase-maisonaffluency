@@ -285,6 +285,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
+  // Dual-billing meta (loaded async — drives the invoice/proforma button).
+  const [billingMeta, setBillingMeta] = useState<{
+    billing_mode: "agent_commission" | "net_buy";
+    net_discount_pct: number | null;
+    commission_pct: number | null;
+    end_client_billing: Record<string, string> | null;
+    resale_certificate_id: string | null;
+    studio_id: string | null;
+  } | null>(null);
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
+
+
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
   const isPriced = quoteStatus === "priced";
