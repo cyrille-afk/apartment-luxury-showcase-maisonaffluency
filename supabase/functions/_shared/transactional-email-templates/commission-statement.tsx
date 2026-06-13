@@ -25,6 +25,10 @@ interface CommissionStatementProps {
   commissionPct?: number
   commissionFormatted?: string
   payoutMethod?: string | null
+  payoutCurrency?: string | null
+  commissionPayoutFormatted?: string | null
+  fxRate?: number | null
+  fxSource?: string | null
   expectedWireOn?: string
   items?: LineItem[]
 }
@@ -40,9 +44,15 @@ const CommissionStatementEmail = ({
   commissionPct = 0,
   commissionFormatted = '—',
   payoutMethod,
+  payoutCurrency,
+  commissionPayoutFormatted,
+  fxRate,
+  fxSource,
   expectedWireOn,
   items = [],
-}: CommissionStatementProps) => (
+}: CommissionStatementProps) => {
+  const showFx = !!(payoutCurrency && payoutCurrency.toUpperCase() !== currency.toUpperCase() && fxRate && commissionPayoutFormatted)
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Commission statement for order {quoteNumber} — {commissionFormatted} {currency}</Preview>
