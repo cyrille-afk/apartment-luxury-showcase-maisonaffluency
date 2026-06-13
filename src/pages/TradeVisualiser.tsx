@@ -71,6 +71,21 @@ interface Pin {
   swatch?: Swatch;
 }
 
+const normalizeAssetKey = (url: string | null) => {
+  if (!url?.trim()) return "";
+  const clean = url.trim().split("?")[0];
+  return clean.replace(/\/upload\/(?:[^/]+\/)*(v\d+\/.*)$/i, "/upload/$1").toLowerCase();
+};
+
+const productLabelScore = (name: string | null | undefined) => {
+  const text = (name || "").trim();
+  let score = text.length;
+  if (/\bby\s+\S+/i.test(text)) score += 80;
+  if (/\b(rug|rugs|carpet|kilim|dhurrie)\b/i.test(text)) score += 25;
+  if (text.length < 5) score -= 100;
+  return score;
+};
+
 // ───────── Page ──────────────────────────────────────────────────────────────
 const TradeVisualiser = () => {
   const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
