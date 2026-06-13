@@ -2722,6 +2722,20 @@ serve(async (req) => {
       ? { type: "function", function: { name: "propose_tearsheet" } }
       : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
 
+    if (forcePlannedTearsheet) {
+      const deterministicProposal = await buildDeterministicTearsheetProposal(
+        supabase,
+        Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+        effectiveBrief.brief,
+      );
+      if (deterministicProposal) {
+        return sseProposalThenTextResponse(
+          deterministicProposal,
+          "Here's a first edit — would you like me to refine this selection against your client's intentions?",
+        );
+      }
+    }
+
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
 
