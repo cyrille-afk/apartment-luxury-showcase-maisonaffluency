@@ -2903,6 +2903,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
+        {/* Billing mode selector — show whenever the quote is editable or being paid */}
+        {(isDraft || isPriced) && (
+          <BillingModeCard
+            quoteId={quoteId}
+            shipToCountry={shipTo.country}
+            subtotalCents={subtotalCents}
+            currency={currency}
+            isEditable={isDraft || isPriced}
+          />
+        )}
+
         {isPriced && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
           const withGst = gstEnabled && afterDiscount > 0 ? afterDiscount + Math.round(afterDiscount * gstRate / 100) : afterDiscount;
