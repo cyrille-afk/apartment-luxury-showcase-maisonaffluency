@@ -2305,8 +2305,10 @@ async function buildDeterministicTearsheetProposal(
   supabase: ReturnType<typeof createClient>,
   ragRows: any[],
   brief: ExtractedBrief["brief"],
+  requestText: string,
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const requestedTypology = inferRequestedTypology(brief, requestText);
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
@@ -2317,13 +2319,15 @@ async function buildDeterministicTearsheetProposal(
   };
   const pickIds = Array.from(new Set((ragRows || [])
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
+    .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
     .map((r: any) => r.id)
   )).slice(0, 8);
   if (pickIds.length < 2) return null;
   const previewRaw = await hydratePickPreview(supabase, pickIds);
   const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-  const finalIds = pickIds.filter((id) => validIds.has(id));
+  const previewById = new Map(previewRaw.map((p: any) => [p?.id, p]).filter(([id]) => !!id));
+  const finalIds = pickIds.filter((id) => validIds.has(id) && rowMatchesRequestedTypology(previewById.get(id), requestedTypology));
   if (finalIds.length < 2) return null;
   const rationaleMap: Record<string, { reason: string }> = {};
   for (const p of previewRaw) {
