@@ -3602,7 +3602,7 @@ serve(async (req) => {
             let previewRaw = await hydratePickPreview(supabase, pickIds);
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
-              pickIds = pickIds.filter((id) => previewRaw.some((p: any) => p?.id === id));
+              ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
               if (pickIds.length < 2) {
                 console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
                 const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
@@ -3917,7 +3917,7 @@ serve(async (req) => {
             let previewRaw = await hydratePickPreview(supabase, pickIds);
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
-              pickIds = pickIds.filter((id) => previewRaw.some((p: any) => p?.id === id));
+              ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
               if (pickIds.length < 2) {
                 console.warn(`[concierge promise-recovery] blocked — insufficient true ${requestedTypology} picks after typology validation`);
                 const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
