@@ -774,6 +774,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         messages: messagesForApi,
         projectId,
         surface,
+        lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onEscalation: (ev) => {
