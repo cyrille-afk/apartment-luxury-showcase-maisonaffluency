@@ -488,7 +488,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     />
                   )}
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
+                    icon={specIcon(((axes.baseOptions.length > 0 && axes.baseOptions.every(looksLikeDimension)) || ((product.base_axis_label || "").trim().toLowerCase() === "size")) ? "📐" : "⬗")}
                     text={withImperialPerLine(axes.baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
