@@ -264,7 +264,7 @@ export default function PayoutAccountsSection() {
             <Banknote className="h-5 w-5" /> Payout accounts
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Where agent-mode commissions are wired after delivery. Stripe Connect handles bank verification and KYC.
+            Where agent-mode commissions are wired after delivery. Stripe Connect handles bank verification and KYC. Commissions in a different currency are auto-converted at the ECB daily rate (frankfurter.app) and locked on the delivery date — the wired amount is final.
           </p>
         </div>
         {isAdmin && (
