@@ -204,6 +204,7 @@ export default function BillingModeCard({
       designer_payout_account_id:
         next.billing_mode === "agent_commission" ? next.designer_payout_account_id : null,
       resale_certificate_id: next.billing_mode === "net_buy" ? next.resale_certificate_id : null,
+      managed_freight_quote_id: next.billing_mode === "net_buy" ? next.managed_freight_quote_id : null,
     };
     const { error } = await supabase.from("trade_quotes").update(updates).eq("id", quoteId);
     setSaving(false);
