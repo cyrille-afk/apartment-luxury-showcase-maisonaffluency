@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { Banknote, CheckCircle2, AlertTriangle, Plus, Trash2, ExternalLink, Loader2, Star } from "lucide-react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { Banknote, CheckCircle2, AlertTriangle, Plus, Trash2, ExternalLink, Loader2, Star, FileText, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -28,6 +28,9 @@ type PayoutAccount = {
   bank_name: string | null;
   stripe_connect_account_id: string | null;
   stripe_connect_status: string;
+  tax_form_kind: string | null;
+  tax_form_reference: string | null;
+  tax_form_document_path: string | null;
 };
 
 const STATUS_META: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; tone: string }> = {
@@ -61,6 +64,23 @@ const COUNTRY_OPTIONS: { code: string; label: string; currency: string }[] = [
   { code: "AU", label: "Australia", currency: "AUD" },
 ];
 
+// Tax form catalog — drives the dropdown and the per-country default.
+const TAX_FORM_OPTIONS: { value: string; label: string; refLabel: string; refPlaceholder: string }[] = [
+  { value: "W9",      label: "W-9 (US person / entity)",                    refLabel: "EIN or SSN",        refPlaceholder: "12-3456789" },
+  { value: "W8BEN",   label: "W-8BEN (Non-US individual)",                  refLabel: "Foreign tax ID",    refPlaceholder: "Tax ID" },
+  { value: "W8BENE",  label: "W-8BEN-E (Non-US entity)",                    refLabel: "Foreign tax ID",    refPlaceholder: "Tax ID" },
+  { value: "VAT_ID",  label: "EU / UK VAT registration",                    refLabel: "VAT number",        refPlaceholder: "GB123456789" },
+  { value: "TAX_ID",  label: "Other tax / business registration",           refLabel: "Tax / company ID",  refPlaceholder: "Tax ID" },
+  { value: "NONE",    label: "Not registered (small business / exempt)",    refLabel: "Note",              refPlaceholder: "Optional note" },
+];
+
+function defaultTaxKindForCountry(code: string): string {
+  if (code === "US") return "W9";
+  if (code === "CA" || code === "MX") return "W8BENE";
+  if (["GB","FR","DE","IT","ES","NL","BE","IE","CH","NO","SE","DK"].includes(code)) return "VAT_ID";
+  return "TAX_ID";
+}
+
 export default function PayoutAccountsSection() {
   const { user } = useAuth();
   const { currentStudio, isAdmin } = useStudio();
@@ -72,6 +92,7 @@ export default function PayoutAccountsSection() {
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [taxDocBusyId, setTaxDocBusyId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     label: "Primary payout",
@@ -83,7 +104,15 @@ export default function PayoutAccountsSection() {
     ach_account_number: "",
     swift_bic: "",
     bank_name: "",
+    tax_form_kind: "W9",
+    tax_form_reference: "",
+    tax_form_file: null as File | null,
   });
+
+  const selectedTaxOption = useMemo(
+    () => TAX_FORM_OPTIONS.find((o) => o.value === form.tax_form_kind) ?? TAX_FORM_OPTIONS[0],
+    [form.tax_form_kind],
+  );
 
   const fetchAccounts = useCallback(async () => {
     if (!currentStudio) return;
