@@ -3472,6 +3472,11 @@ serve(async (req) => {
           //     (tearsheet → quote) holds without buffering SSE writes.
           backfillTearsheetIfNeeded();
           await flushProposal();
+          // (1b) Promise-without-delivery recovery: the model wrote prose like
+          //      "here's a draft tearsheet…" but never emitted propose_tearsheet
+          //      (and no quote/ffe either). Force a follow-up tool call so the
+          //      user actually sees the card they were promised.
+          await runTearsheetIfPromised();
           // (2) Reverse back-fill: tearsheet emitted but quote missing — forces a
           //     draft_quote follow-up and emits it after the tearsheet card.
           await runChainIfNeeded();
