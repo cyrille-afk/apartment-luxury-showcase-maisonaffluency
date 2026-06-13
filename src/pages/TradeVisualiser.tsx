@@ -94,14 +94,33 @@ const TradeVisualiser = () => {
     let cancelled = false;
     setLoadingSwatches(true);
     (async () => {
-      const { data } = await supabase
-        .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, subcategory, materials")
-        .not("image_url", "is", null)
-        .order("brand_name", { ascending: true })
-        .limit(800);
+      // Paginate through all products — single query is capped at 1000.
+      const pageSize = 1000;
+      let from = 0;
+      const all: Swatch[] = [];
+      // hard safety cap
+      for (let i = 0; i < 10; i++) {
+        const { data, error } = await supabase
+          .from("trade_products")
+          .select("id, product_name, brand_name, image_url, category, subcategory, materials")
+          .not("image_url", "is", null)
+          .order("brand_name", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (error || !data || data.length === 0) break;
+        all.push(...(data as Swatch[]));
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
       if (cancelled) return;
-      setAllSwatches((data || []) as Swatch[]);
+      // Dedupe by image_url — many products are variants sharing one photo.
+      const seen = new Set<string>();
+      const deduped = all.filter((s) => {
+        const key = s.image_url || `${s.brand_name}|${s.product_name}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      setAllSwatches(deduped);
       setLoadingSwatches(false);
     })();
     return () => { cancelled = true; };
