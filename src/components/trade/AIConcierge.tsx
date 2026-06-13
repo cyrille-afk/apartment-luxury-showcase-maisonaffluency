@@ -1188,8 +1188,29 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
+                const atts = item.role === "user" ? item.attachments : undefined;
                 return (
                   <div key={i} className={cn("flex flex-col gap-2", item.role === "user" ? "items-end" : "items-start")}>
+                    {atts && atts.length > 0 && (
+                      <div className={cn("flex flex-wrap justify-end gap-2", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
+                        {atts.map((a, ai) => (
+                          a.kind === "image" && a.previewUrl ? (
+                            <img
+                              key={ai}
+                              src={a.previewUrl}
+                              alt={a.name}
+                              className="max-h-48 max-w-[220px] rounded-2xl rounded-br-md object-cover border border-border"
+                            />
+                          ) : (
+                            <div key={ai} className="rounded-2xl rounded-br-md px-3 py-2 bg-foreground text-background font-body text-xs inline-flex items-center gap-2 max-w-[220px]">
+                              <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{a.name}</span>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {item.content && (
                     <div
                       className={cn(
                         "rounded-2xl px-4 py-3 font-body text-sm leading-relaxed",
@@ -1225,6 +1246,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         <span className="whitespace-pre-wrap">{item.content}</span>
                       )}
                     </div>
+                    )}
                     {item.role === "assistant" && item.actions && item.actions.length > 0 && (
                       <div className={cn("flex flex-wrap gap-1.5", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
                         {item.actions.map((a, idx) => (
