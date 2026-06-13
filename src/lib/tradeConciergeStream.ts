@@ -158,6 +158,7 @@ export async function streamConcierge({
   messages,
   projectId,
   surface,
+  lang,
   onDelta,
   onProposal,
   onEscalation,
@@ -170,6 +171,8 @@ export async function streamConcierge({
   projectId?: string | null;
   /** "public" for anon /concierge visitors; "trade" (default) for signed-in trade users. */
   surface?: "public" | "trade";
+  /** UI language code (en/id/th/zh). Forwarded to the edge function so the model's reply language matches the picker. */
+  lang?: string | null;
   onDelta: (text: string) => void;
   onProposal?: (proposal: ConciergeProposal) => void;
   onEscalation?: (event: EscalationEvent) => void;
@@ -202,7 +205,7 @@ export async function streamConcierge({
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
       ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
     },
-    body: JSON.stringify({ messages, project_id: projectId ?? null, surface: surface ?? "trade" }),
+    body: JSON.stringify({ messages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null }),
     signal,
   });
 

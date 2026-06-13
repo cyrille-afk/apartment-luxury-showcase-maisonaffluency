@@ -136,9 +136,18 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     // the payload to a slim system note + the last few turns. Cap ~16k chars
     // (~4k tokens) to leave headroom for the completion.
     const CF_CHAR_CAP = 16000;
+    // Preserve the REPLY LANGUAGE directive from the upstream system prompt
+    // so the Cloudflare fallback honours the user's language picker even
+    // though we strip the long catalogue system prompt.
+    const firstSystem = (Array.isArray(parsed.messages) ? parsed.messages : [])
+      .find((m: any) => m && m.role === "system");
+    const firstSysText = typeof firstSystem?.content === "string" ? firstSystem.content : "";
+    const langBlockMatch = firstSysText.match(/## ABSOLUTE RULE — REPLY LANGUAGE[\s\S]*?(?=\n##|\n\n[A-Z]|$)/);
+    const langBlock = langBlockMatch ? langBlockMatch[0].trim() + "\n\n" : "";
     const slimSystem = {
       role: "system",
       content:
+        langBlock +
         "You are Felix, the Maison Affluency concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and warmly, acknowledging the user's last message specifically. Never re-ask atmosphere, palette, material, room type, or seating capacity if already stated in the conversation. If spatial context is missing, invite the user to attach a room plan, photo, or PDF via the paperclip and send it here. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
     };
     const original = Array.isArray(parsed.messages) ? parsed.messages : [];
@@ -2293,8 +2302,21 @@ serve(async (req) => {
       });
     }
 
-    const { messages, project_id: bodyProjectId } = await req.json();
+    const { messages, project_id: bodyProjectId, lang: bodyLang } = await req.json();
     const activeProjectId: string | null = typeof bodyProjectId === "string" ? bodyProjectId : null;
+    // Reply-language directive — the UI exposes a language picker (en/id/th/zh).
+    // Without this the long English system prompt drowns out the user-message
+    // language note and the model defaults to English even when the greeting
+    // is in Bahasa/Thai/Chinese. Inject as a hard prefix on the system prompt.
+    const LANG_NAME_MAP: Record<string, string> = {
+      en: "English",
+      id: "Bahasa Indonesia",
+      th: "Thai",
+      zh: "Simplified Chinese",
+    };
+    const langCode = typeof bodyLang === "string" && LANG_NAME_MAP[bodyLang] ? bodyLang : "en";
+    const langName = LANG_NAME_MAP[langCode];
+    const languageDirective = `## ABSOLUTE RULE — REPLY LANGUAGE\nReply ENTIRELY in ${langName}, regardless of the language of these instructions or the language the user writes in. The user has selected ${langName} in the concierge language picker. Every sentence — greetings, questions, mirroring, tearsheet captions, "Next:" footers — MUST be in ${langName}. The only exceptions are proper nouns (designer names, brand names, product titles, city names) and UUIDs. Do not switch to English even if the system prompt or catalogue context below is written in English.\n\n`;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
@@ -2533,7 +2555,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: aiModel(chosenModel),
-        messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
+        messages: [{ role: "system", content: languageDirective + systemPrompt }, ...trimmedMessages],
         tools: finalTools,
         tool_choice: toolChoice,
         max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
@@ -3526,9 +3548,9 @@ serve(async (req) => {
                 model: aiModel(modelFor("balanced")),
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
-                  { role: "system", content: systemPrompt },
+                  { role: "system", content: languageDirective + systemPrompt },
                   ...trimmedMessages,
-                  { role: "system", content: nudge },
+                  { role: "system", content: languageDirective + nudge },
                 ],
                 tools: TOOLS.filter((t: any) => t.function?.name === "propose_tearsheet"),
                 tool_choice: { type: "function", function: { name: "propose_tearsheet" } },
