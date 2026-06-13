@@ -391,9 +391,34 @@ const TradeVisualiser = () => {
                 </Button>
               </div>
 
+              {renderError && (
+                <p className="mt-3 font-body text-xs text-destructive">
+                  {renderError}
+                </p>
+              )}
+
+              {rendered && renderedImage && !rendering && (
+                <div className="mt-3 flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setRendered(false); setRenderedImage(null); }}
+                  >
+                    Show original
+                  </Button>
+                  <a
+                    href={renderedImage}
+                    download="visualiser-render.png"
+                    className="text-xs font-body underline text-muted-foreground hover:text-foreground"
+                  >
+                    Download render
+                  </a>
+                </div>
+              )}
+
               <p className="mt-3 font-body text-[11px] text-muted-foreground italic">
-                Beta preview — the AI render engine ships next. Today, this builds the surface selection and
-                finish library; render output is a mocked overlay.
+                Beta — AI render powered by Lovable AI. The model preserves room geometry and swaps only the
+                marked surfaces with the selected catalogue finishes.
               </p>
             </div>
 
