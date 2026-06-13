@@ -2664,6 +2664,7 @@ serve(async (req) => {
           plan: ["propose_tearsheet"],
         }
       : extractedBrief;
+    const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
