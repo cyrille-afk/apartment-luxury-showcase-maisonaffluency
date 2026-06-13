@@ -101,6 +101,7 @@ export default function BillingModeCard({
   const [tierPct, setTierPct] = useState(0.08); // default 8% baseline (commission == net discount until tier override)
   const [accounts, setAccounts] = useState<PayoutAccount[]>([]);
   const [certs, setCerts] = useState<ResaleCert[]>([]);
+  const [freightQuotes, setFreightQuotes] = useState<FreightQuote[]>([]);
 
   // End-client billing form state (mirrors JSONB)
   const [ecName, setEcName] = useState("");
