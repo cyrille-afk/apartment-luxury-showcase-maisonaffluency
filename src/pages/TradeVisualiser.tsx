@@ -246,9 +246,9 @@ const TradeVisualiser = () => {
       if (!data?.image) throw new Error("No image returned");
       setRenderedImage(data.image);
       setRendered(true);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setRenderError(e?.message || "Render failed");
+      setRenderError(e instanceof Error ? e.message : "Render failed");
     } finally {
       setRendering(false);
     }
