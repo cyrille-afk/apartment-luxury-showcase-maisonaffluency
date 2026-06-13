@@ -54,21 +54,39 @@ export default function StudioProfile() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
+      // Anonymous visitors can no longer read `contact_email` / `owner_user_id`
+      // (column-level GRANT — see security migration). Authenticated users get
+      // the full row via a follow-up fetch below.
+      const publicCols =
+        "id, slug, name, tagline, bio, founded_year, team_size, location, country, " +
+        "website_url, instagram_handle, logo_url, hero_image_url, gallery_images, " +
+        "disciplines, project_types, notable_projects, is_featured";
       const { data, error } = await supabase
         .from("featured_studios")
-        .select("*")
+        .select(publicCols)
         .eq("slug", slug)
         .eq("is_published", true)
         .maybeSingle();
       if (error || !data) {
         setNotFound(true);
-      } else {
-        setStudio(data as Studio);
-        logStudioEvent({ studioId: data.id, eventType: "profile_view" });
+        setLoading(false);
+        return;
       }
+      let merged: Studio = { ...(data as any), contact_email: null, owner_user_id: null };
+      // Authenticated users (trade members, admins, owners) can see contact_email.
+      if (user) {
+        const { data: priv } = await supabase
+          .from("featured_studios")
+          .select("contact_email, owner_user_id")
+          .eq("id", (data as any).id)
+          .maybeSingle();
+        if (priv) merged = { ...merged, ...(priv as any) };
+      }
+      setStudio(merged);
+      logStudioEvent({ studioId: (data as any).id, eventType: "profile_view" });
       setLoading(false);
     })();
-  }, [slug]);
+  }, [slug, user]);
 
   const canViewInsights =
     !!studio && (isAdmin || (!!user && studio.owner_user_id === user.id));
