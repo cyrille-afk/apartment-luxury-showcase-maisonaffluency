@@ -219,12 +219,24 @@ export default function TradeOrderTimeline() {
   });
 
   const moveMutation = useMutation({
-    mutationFn: async ({ id, newStatus, updates }: { id: string; newStatus: string; updates: Record<string, any> }) => {
+    mutationFn: async ({ id, newStatus, updates, quoteId }: { id: string; newStatus: string; updates: Record<string, any>; quoteId: string }) => {
       const { error } = await supabase
         .from("order_timeline")
         .update({ kanban_status: newStatus, ...updates, updated_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Phase 2: fire commission statement on delivery. Edge function is
+      // strictly idempotent and silently skips net_buy orders.
+      if (newStatus === "delivered") {
+        try {
+          await supabase.functions.invoke("send-commission-statement", {
+            body: { quote_id: quoteId },
+          });
+        } catch (e) {
+          console.warn("send-commission-statement invoke failed", e);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["order-timelines"] });
@@ -266,7 +278,7 @@ export default function TradeOrderTimeline() {
       updates.actual_delivery_at = now;
     }
 
-    moveMutation.mutate({ id: order.id, newStatus: nextStatus, updates });
+    moveMutation.mutate({ id: order.id, newStatus: nextStatus, updates, quoteId: order.quote_id });
   };
 
   if (loading) return null;
