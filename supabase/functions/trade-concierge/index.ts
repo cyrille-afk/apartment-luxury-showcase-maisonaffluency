@@ -411,7 +411,7 @@ const TOOLS = [
     function: {
       name: "propose_tearsheet",
       description:
-        "Draft a NEW tearsheet (client board) for the trade user. Only call this when the user clearly asks to assemble, save, group, or share a NEW selection. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
+        "Draft a NEW tearsheet (client board) for the trade user. REQUIRED whenever the user asks to propose, suggest, recommend, curate, show, pull, reinterpret, or assemble a selection of pieces. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
       parameters: {
         type: "object",
         properties: {
