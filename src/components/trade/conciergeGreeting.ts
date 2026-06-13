@@ -164,7 +164,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to help you refine this quote — clarifying trade pricing, lead times, and deposits, or proposing alternatives where it makes sense. Tell me what you'd like to review.",
     order: "Allow me to help you follow this order — production timelines, shipping milestones, and status updates. Tell me what you'd like to check.",
     project: "Allow me to help you advance this project — building tearsheets, drafting quotes, or pulling references against the brief. Tell me where you'd like to start.",
-    discover: "Welcome back — your private concierge. I can source exceptional pieces from our designers, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor what I show you, what city is this project in?",
+    discover: "Welcome back — your private concierge. I can source exceptional pieces from our designers, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor what I'm about to show you, may I know in what city your project is located?",
   },
   concise: {
     mood: "Mood board mode. I'll suggest complements based on palette, scale and materiality. Tell me the direction.",
