@@ -19,32 +19,39 @@ import { cn } from "@/lib/utils";
 // ───────── Surfaces ──────────────────────────────────────────────────────────
 type Surface = "walls" | "floors" | "upholstery" | "curtains";
 
-const SURFACES: { id: Surface; label: string; hint: string; subcatRe: RegExp }[] = [
+const SURFACES: { id: Surface; label: string; hint: string }[] = [
   {
     id: "walls",
     label: "Walls",
     hint: "Lacquer · plaster · wallcovering",
-    subcatRe: /wallcover|wallpaper|lacquer panel|plaster|panelling|boiserie/i,
   },
   {
     id: "floors",
     label: "Floors",
     hint: "Rugs · carpets",
-    subcatRe: /rug|carpet|kilim|dhurrie/i,
   },
   {
     id: "upholstery",
     label: "Upholstery",
     hint: "Fabrics · leathers",
-    subcatRe: /fabric|textile|leather|upholstery/i,
   },
   {
     id: "curtains",
     label: "Curtains",
     hint: "Drapery · sheers",
-    subcatRe: /curtain|drape|sheer|voile|drapery/i,
   },
 ];
+
+const classifySwatchSurface = (s: Swatch): Surface | null => {
+  const text = `${s.category || ""} ${s.subcategory || ""} ${s.product_name || ""}`;
+
+  if (/\b(rugs?|carpets?|kilims?|dhurries?)\b/i.test(text)) return "floors";
+  if (/\b(curtains?|drapes?|drapery|sheers?|voiles?)\b/i.test(text)) return "curtains";
+  if (/\b(wallcovers?|wallcoverings?|wallpapers?|plasters?|boiserie|panell?ing|wall panels?|lacquer panels?)\b/i.test(text)) return "walls";
+  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return "upholstery";
+
+  return null;
+};
 
 interface Swatch {
   id: string;
@@ -102,14 +109,12 @@ const TradeVisualiser = () => {
 
   // ─── Filter swatches for the active surface ──────────────────────────────
   const swatches = useMemo(() => {
-    const sdef = SURFACES.find((s) => s.id === surface)!;
     const q = search.trim().toLowerCase();
     return allSwatches
       .filter((s) => {
-        const subcat = s.subcategory || "";
-        if (!sdef.subcatRe.test(subcat)) return false;
+        if (classifySwatchSurface(s) !== surface) return false;
         if (!q) return true;
-        return `${s.product_name} ${s.brand_name || ""}`.toLowerCase().includes(q);
+        return `${s.product_name} ${s.brand_name || ""} ${s.category || ""} ${s.subcategory || ""}`.toLowerCase().includes(q);
       })
       .slice(0, 60);
   }, [allSwatches, surface, search]);
@@ -163,10 +168,12 @@ const TradeVisualiser = () => {
   // ─── Apply a swatch to the active pin ────────────────────────────────────
   const applySwatch = useCallback((sw: Swatch) => {
     if (!activePinId) return;
+    const activePin = pins.find((pin) => pin.id === activePinId);
+    if (!activePin || classifySwatchSurface(sw) !== activePin.surface) return;
     setPins((p) => p.map((pin) => (pin.id === activePinId ? { ...pin, swatch: sw } : pin)));
     setRendered(false);
     setRenderedImage(null);
-  }, [activePinId]);
+  }, [activePinId, pins]);
 
   // ─── Render (live AI) ────────────────────────────────────────────────────
   const canRender = pins.some((p) => p.swatch);
