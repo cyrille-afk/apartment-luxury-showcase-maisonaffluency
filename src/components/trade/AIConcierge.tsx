@@ -656,8 +656,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     // model regenerates a fresh selection on every follow-up turn, which
     // looks like it "forgets" the user's edits.
     const lastProposal = [...timeline].reverse().find((t): t is Extract<TimelineItem, { kind: "proposal" }> => t.kind === "proposal");
+    const currentTextLower = text.toLowerCase();
+    const isFreshOpeningBrief = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(currentTextLower);
+    const referencesCurrentDraft = /\b(refine|replace|swap|remove|keep|kept|add|another|more|alternative|option|selection|tearsheet|draft|edit|these|this|that|same|board)\b/.test(currentTextLower);
     const proposalContext: ChatMessage[] = [];
-    if (lastProposal) {
+    if (lastProposal && !isFreshOpeningBrief && referencesCurrentDraft) {
       const excludedSet = new Set(lastProposal.excluded || []);
       const kept = lastProposal.proposal.preview.filter((p) => !excludedSet.has(p.id));
       const removed = lastProposal.proposal.preview.filter((p) => excludedSet.has(p.id));
