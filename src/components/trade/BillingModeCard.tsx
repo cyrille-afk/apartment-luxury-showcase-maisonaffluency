@@ -431,15 +431,74 @@ export default function BillingModeCard({
             </p>
           )}
 
-          <div className="flex items-start gap-2 text-sm pt-2 border-t border-border">
-            <Truck className="h-4 w-4 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="font-medium text-sm">Managed door-to-drayage freight included</div>
-              <p className="text-xs text-muted-foreground">
-                Customs brokerage and ocean freight to your receiving warehouse are handled by Maison Affluency. Freight is quoted live during the production window and reflected on the balance invoice.
-              </p>
+          {/* Managed freight — mandatory, locked at checkout */}
+          <div className="pt-3 border-t border-border space-y-2">
+            <div className="flex items-start gap-2">
+              <Truck className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm">Managed door-to-drayage freight (required)</div>
+                <p className="text-xs text-muted-foreground">
+                  Customs brokerage + ocean freight to your receiving warehouse, handled by Maison Affluency. Lock a freight estimate here — the figure is fixed when you pay the deposit.
+                </p>
+              </div>
             </div>
+
+            {(() => {
+              const matching = freightQuotes.filter(
+                (f) => (f.currency || "").toUpperCase() === (currency || "").toUpperCase(),
+              );
+              const locked = freightQuotes.find((f) => f.id === billing.managed_freight_quote_id);
+              return (
+                <>
+                  {matching.length === 0 ? (
+                    <p className="text-xs text-amber-700">
+                      No freight estimate in {currency.toUpperCase()} yet.{" "}
+                      <Link to={`/trade/shipping-estimator?quote=${quoteId}`} className="underline">
+                        Create one <ExternalLink className="inline h-3 w-3" />
+                      </Link>
+                    </p>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={billing.managed_freight_quote_id ?? ""}
+                        onValueChange={(v) => persist({ managed_freight_quote_id: v })}
+                        disabled={!isEditable || saving}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select a managed freight quote to lock" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {matching.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.origin_city || f.origin_country} → {f.dest_city || f.dest_country} ·{" "}
+                              {f.selected_carrier || f.selected_mode || "freight"} ·{" "}
+                              {fmtCents(f.total_cents, f.currency)} {f.status === "estimate" ? "(est.)" : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {locked && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                    </div>
+                  )}
+                  {locked && (
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      Locked freight: <strong>{fmtCents(locked.total_cents, locked.currency)}</strong>
+                      {locked.valid_until ? ` · valid until ${new Date(locked.valid_until).toLocaleDateString()}` : ""}
+                    </p>
+                  )}
+                  {matching.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Need a different lane?{" "}
+                      <Link to={`/trade/shipping-estimator?quote=${quoteId}`} className="underline">
+                        Create a new freight estimate <ExternalLink className="inline h-3 w-3" />
+                      </Link>
+                    </p>
+                  )}
+                </>
+              );
+            })()}
           </div>
+
 
           <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
             You invoice your end-client on your own studio paper. Maison Affluency never sees or generates the end-client invoice.
