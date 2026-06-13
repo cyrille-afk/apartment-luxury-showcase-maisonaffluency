@@ -615,8 +615,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   // Detect which axis (if any) is actually carrying a dimension
                   // string vs a finish/material — collapsed single-value axes
                   // with dimensions should render with 📐 + imperial below.
-                  const baseIsDim = baseOptions.length === 1 && looksLikeDimension(baseOptions[0]);
-                  const topIsDim = topOptions.length === 1 && looksLikeDimension(topOptions[0]);
+                  // Treat an axis as the "dimensions" axis whenever EVERY value
+                  // looks like a dimension string, OR the curator labelled the
+                  // axis as "Size" — so a multi-value base/top like
+                  // "Scala 220 - W 220 x D 135 x H 76.5 cm" / "Scala 300 - …"
+                  // still renders with 📐 instead of the default ⬗.
+                  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
+                  const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
+                  const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
 
                   const baseNode = (
                     <ExpandableSpec
