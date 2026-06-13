@@ -3653,7 +3653,7 @@ serve(async (req) => {
           const promisedByPlan =
             effectiveBrief.plan.includes("propose_tearsheet") ||
             effectiveBrief.plan.includes("add_to_tearsheet");
-          const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "") || hasProseList;
+          const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "") || hasProseList();
           if (!promisedByPlan && !promisedByText) return;
 
           try {
