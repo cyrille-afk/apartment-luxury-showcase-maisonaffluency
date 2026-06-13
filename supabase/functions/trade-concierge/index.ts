@@ -3626,7 +3626,15 @@ serve(async (req) => {
         // tearsheet…", "curated pieces below", "review and amend") but no
         // tool call (tearsheet / quote / ffe) was emitted, force a follow-up
         // `propose_tearsheet` call so the card actually appears.
-        const TEARSHEET_PROMISE_RE = /(draft\s+tearsheet|here'?s\s+a\s+(draft\s+)?tearsheet|curated\s+(pieces?|selection)\s+(below|that|with)|review\s+and\s+amend|tearsheet\s+with\s+some\s+curated)/i;
+        const TEARSHEET_PROMISE_RE = /(draft\s+tearsheet|here'?s\s+a\s+(draft\s+)?tearsheet|curated\s+(pieces?|selection)\s+(below|that|with)|review\s+and\s+amend|tearsheet\s+with\s+some\s+curated|i(?:'d| would)?\s+recommend\s+the\s+following|recommend\s+the\s+following\s+(bespoke\s+)?(options?|pieces?|tables?|chairs?|sofas?|lamps?|sconces?|rugs?|consoles?)|here\s+are\s+(?:some|a\s+few)\s+(options?|pieces?|suggestions?)|consider\s+the\s+following|following\s+(bespoke\s+)?(options?|pieces?|suggestions?))/i;
+        // Detect a prose "list" of 2+ named pieces (e.g. "Brand X's Oak Table: ...\n\nBrand Y's Walnut Table: ...")
+        const PROSE_LIST_RE = /(^|\n)\s*(?:[-*•]\s+|\d+[.)]\s+|)([A-Z][A-Za-z'’&. ]{2,60}(?:Table|Chair|Sofa|Lamp|Sconce|Rug|Console|Cabinet|Sideboard|Bed|Mirror|Bench|Stool|Pendant|Chandelier|Desk|Shelf|Shelving|Bookcase|Armchair|Daybed)[A-Za-z'’ ]*)\s*:\s/g;
+        const hasProseList = (() => {
+          const t = assistantTextBuf || "";
+          let m, n = 0;
+          while ((m = PROSE_LIST_RE.exec(t)) !== null) { n++; if (n >= 2) return true; }
+          return false;
+        })();
         const runTearsheetIfPromised = async () => {
           const buffers = Array.from(toolCallBuffers.values());
           const hasAnyDeliverable = buffers.some((b) =>
@@ -3640,7 +3648,7 @@ serve(async (req) => {
           const promisedByPlan =
             effectiveBrief.plan.includes("propose_tearsheet") ||
             effectiveBrief.plan.includes("add_to_tearsheet");
-          const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "");
+          const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "") || hasProseList;
           if (!promisedByPlan && !promisedByText) return;
 
           try {
