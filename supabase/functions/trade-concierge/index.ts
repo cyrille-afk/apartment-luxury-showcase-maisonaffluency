@@ -1192,11 +1192,17 @@ async function loadOpenQuotes(
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — only `draft_quote` is available.)";
+  // Keep only quotes that are either (a) bound to a project, or (b) recently
+  // touched (<14d). One-off client pricing requests with no project binding
+  // age out so they don't bleed into Discover as if they were active briefs.
+  const RECENT_DAYS = 14;
+  const cutoff = new Date(Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const { data: quotes } = await supabase
     .from("trade_quotes")
     .select("id, currency, notes, updated_at, project_id, projects:project_id(name)")
     .eq("user_id", userId)
     .eq("status", "draft")
+    .or(`project_id.not.is.null,updated_at.gte.${cutoff}`)
     .order("updated_at", { ascending: false })
     .limit(20);
   if (!quotes || quotes.length === 0) {
@@ -1204,7 +1210,7 @@ async function loadOpenQuotes(
   }
   return quotes
     .map((q: any) => {
-      const project = q.projects?.name ? ` for "${q.projects.name}"` : "";
+      const project = q.projects?.name ? ` for "${q.projects.name}"` : " (standalone pricing request — not an active brief)";
       const label = (q.notes || "Untitled draft").toString().slice(0, 60);
       return `- "${label}"${project} (${q.currency}) [quote_id: ${q.id}]`;
     })
