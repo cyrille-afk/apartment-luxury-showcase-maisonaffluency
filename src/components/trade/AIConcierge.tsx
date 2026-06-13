@@ -689,15 +689,39 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       } catch { /* ignore */ }
     }
 
+    // Build chat-completions messages. The current user turn becomes
+    // multimodal (text + image_url / file parts) when files are attached.
+    // Prior turns are kept text-only — we never carry image bytes forward
+    // because (a) tokens explode, (b) the model already "saw" them once.
+    const priorMsgs = nextTimeline
+      .slice(0, -1)
+      .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
+      .map((t) => ({ role: t.role, content: t.content as string | ChatContentPart[] }));
+
+    let currentUserMsg: ChatMessage;
+    if (sendingAttachments.length > 0) {
+      const parts: ChatContentPart[] = [];
+      parts.push({ type: "text", text: text || "Please review the attached file(s) and tell me what details would help refine your curation." });
+      for (const a of sendingAttachments) {
+        if (a.kind === "image") {
+          parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
+        } else {
+          parts.push({ type: "file", file: { filename: a.name, file_data: a.dataUrl } });
+        }
+      }
+      currentUserMsg = { role: "user", content: parts };
+    } else {
+      currentUserMsg = { role: "user", content: text };
+    }
+
     const messagesForApi: ChatMessage[] = [
       stageContext,
       toneContext,
       ...identityContext,
       ...profileContext,
       ...proposalContext,
-      ...nextTimeline
-        .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
-        .map((t) => ({ role: t.role, content: t.content })),
+      ...priorMsgs,
+      currentUserMsg,
     ];
 
     let assistantSoFar = "";
