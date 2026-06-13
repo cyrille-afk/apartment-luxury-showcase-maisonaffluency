@@ -45,6 +45,7 @@ import {
   greetingForContext,
   PUBLIC_GREETING,
   qualifierSystemNote,
+  quickClientProfile,
   toneSystemNote,
   loadName,
   saveName,
