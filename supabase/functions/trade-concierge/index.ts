@@ -2251,7 +2251,28 @@ serve(async (req) => {
       );
     }
 
-    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
+    // Messages may be multimodal: content can be a string or an array of
+    // typed parts (text / image_url / file). For all heuristics below we
+    // need plain text — extract the concatenated text from the last user
+    // message, but leave the original message intact when we forward to the
+    // gateway so image/PDF parts reach the vision model.
+    const extractText = (content: any): string => {
+      if (typeof content === "string") return content;
+      if (!Array.isArray(content)) return "";
+      return content
+        .filter((p) => p && p.type === "text" && typeof p.text === "string")
+        .map((p) => p.text)
+        .join(" ");
+    };
+    const lastUserMsg = extractText(
+      [...messages].reverse().find((m: any) => m.role === "user")?.content,
+    );
+    const hasAttachments = [...messages].some(
+      (m: any) =>
+        m?.role === "user" &&
+        Array.isArray(m.content) &&
+        m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
+    );
 
     // Ultra-fast deterministic path for one-word location follow-ups like
     // "London". These were going through the full RAG/planner/main-model
