@@ -84,6 +84,7 @@ const TradeComparator = lazy(() => import("./pages/TradeComparator"));
 const TradeTools = lazy(() => import("./pages/TradeTools"));
 const TradeFloorPlanFFE = lazy(() => import("./pages/TradeFloorPlanFFE"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
+const TradeVisualiser = lazy(() => import("./pages/TradeVisualiser"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
 const TradeProvenance = lazy(() => import("./pages/TradeProvenance"));
