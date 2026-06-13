@@ -110,8 +110,152 @@ serve(async (req) => {
     }
   }
 
+  // ---------------------------------------------------------------------
+  // Connect transfer & payment failure handling for the dual-billing flow.
+  // We notify every admin of the affected studio so they can take action.
+  // ---------------------------------------------------------------------
+  if (
+    event.type === "payment_intent.payment_failed" ||
+    event.type === "transfer.failed" ||
+    event.type === "transfer.reversed" ||
+    event.type === "account.updated"
+  ) {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    try {
+      let studioId: string | null = null;
+      let quoteId: string | null = null;
+      let title = "Payout issue";
+      let message = "Stripe reported an issue with a recent payout.";
+      let type = "payout_alert";
+      let link: string | null = null;
+      const metadata: Record<string, unknown> = { stripe_event: event.type, stripe_event_id: event.id };
+
+      if (event.type === "payment_intent.payment_failed") {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        quoteId = (pi.metadata?.quote_id as string) || null;
+        const reason = pi.last_payment_error?.message || "Payment was declined.";
+        title = "Quote payment failed";
+        message = `Stripe declined the ${pi.metadata?.payment_type ?? "deposit"} payment: ${reason}`;
+        type = "quote_payment_failed";
+        metadata.last_payment_error = pi.last_payment_error || null;
+        metadata.amount = pi.amount;
+        metadata.currency = pi.currency;
+        if (quoteId) {
+          const { data: q } = await supabase
+            .from("trade_quotes").select("studio_id").eq("id", quoteId).maybeSingle();
+          studioId = (q?.studio_id as string) || null;
+          link = `/trade/quotes?quote=${quoteId}`;
+        }
+      } else if (event.type === "transfer.failed" || event.type === "transfer.reversed") {
+        const tr = event.data.object as Stripe.Transfer;
+        const destinationAccount = typeof tr.destination === "string" ? tr.destination : tr.destination?.id ?? null;
+        title = event.type === "transfer.failed" ? "Designer payout failed" : "Designer payout reversed";
+        message =
+          event.type === "transfer.failed"
+            ? "A commission transfer to your Stripe Connect account did not go through. Please review your account in Studio Settings → Payouts."
+            : "A commission transfer to your Stripe Connect account was reversed.";
+        type = "payout_failed";
+        metadata.destination_account = destinationAccount;
+        metadata.amount = tr.amount;
+        metadata.currency = tr.currency;
+        if (destinationAccount) {
+          const { data: payout } = await supabase
+            .from("studio_payout_accounts")
+            .select("studio_id")
+            .eq("stripe_connect_account_id", destinationAccount)
+            .maybeSingle();
+          studioId = (payout?.studio_id as string) || null;
+          link = "/trade/studio/settings#payouts";
+        }
+      } else if (event.type === "account.updated") {
+        const acct = event.data.object as Stripe.Account;
+        // Sync our cached connect status whenever Stripe pushes a change.
+        const status =
+          acct.charges_enabled && acct.payouts_enabled
+            ? "verified"
+            : acct.requirements?.disabled_reason
+              ? "restricted"
+              : "onboarding";
+
+        const { data: payout } = await supabase
+          .from("studio_payout_accounts")
+          .select("id, studio_id, stripe_connect_status")
+          .eq("stripe_connect_account_id", acct.id)
+          .maybeSingle();
+
+        if (payout) {
+          studioId = payout.studio_id as string;
+          if (payout.stripe_connect_status !== status) {
+            await supabase
+              .from("studio_payout_accounts")
+              .update({ stripe_connect_status: status, updated_at: new Date().toISOString() })
+              .eq("id", payout.id);
+          }
+
+          // Only notify on degradations (restricted) or first verification.
+          if (status === "restricted") {
+            title = "Stripe account needs attention";
+            message =
+              acct.requirements?.disabled_reason
+                ? `Stripe restricted your payout account: ${acct.requirements.disabled_reason}. Resolve in Studio Settings → Payouts.`
+                : "Stripe restricted your payout account. Please review the requirements in Studio Settings → Payouts.";
+            type = "payout_account_restricted";
+            link = "/trade/studio/settings#payouts";
+            metadata.requirements = acct.requirements ?? null;
+          } else if (status === "verified" && payout.stripe_connect_status !== "verified") {
+            title = "Payout account verified";
+            message = "Your Stripe Connect account is ready to receive commissions.";
+            type = "payout_account_verified";
+            link = "/trade/studio/settings#payouts";
+          } else {
+            // No-op notification — silent sync only.
+            return new Response(JSON.stringify({ received: true, synced: true }), {
+              headers: { "Content-Type": "application/json" }, status: 200,
+            });
+          }
+        }
+      }
+
+      if (studioId) {
+        // Notify every admin of the studio.
+        const { data: admins } = await supabase
+          .from("studio_members")
+          .select("user_id")
+          .eq("studio_id", studioId)
+          .eq("role", "admin");
+
+        const recipients = (admins ?? []).map((a: any) => a.user_id as string).filter(Boolean);
+        if (recipients.length > 0) {
+          const rows = recipients.map((uid) => ({
+            user_id: uid,
+            type,
+            title,
+            message,
+            link,
+            is_read: false,
+            metadata: { ...metadata, quote_id: quoteId, studio_id: studioId },
+          }));
+          const { error: notifErr } = await supabase.from("notifications").insert(rows);
+          if (notifErr) console.error("[STRIPE-WEBHOOK] Failed to insert notifications:", notifErr);
+          else console.log(`[STRIPE-WEBHOOK] Notified ${recipients.length} admin(s) for studio ${studioId} (${type})`);
+        } else {
+          console.warn(`[STRIPE-WEBHOOK] Studio ${studioId} has no admins to notify (${type})`);
+        }
+      } else {
+        console.warn(`[STRIPE-WEBHOOK] Could not resolve studio for event ${event.type} ${event.id}`);
+      }
+    } catch (err) {
+      console.error("[STRIPE-WEBHOOK] Failure handler error:", err);
+    }
+  }
+
   return new Response(JSON.stringify({ received: true }), {
     headers: { "Content-Type": "application/json" },
     status: 200,
   });
 });
+
