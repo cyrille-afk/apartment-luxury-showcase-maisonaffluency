@@ -2697,7 +2697,19 @@ serve(async (req) => {
       loadProductCadAssets(supabase),
     ]);
 
-    const effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length
+    // Selection verbs must appear in the LATEST user message to authorize a
+    // tearsheet proposal. Otherwise the turn is treated as discovery — the
+    // model must ask clarifying questions instead of jumping straight to a
+    // curated edit. This prevents both (a) one-line opening briefs like
+    // "I'm looking for a statement dining table for my Belgravia townhouse"
+    // from auto-proposing, and (b) sticky-fact context from PRIOR turns or
+    // semantic-cache hits from leaking a stale "selection" plan into a new
+    // exploratory turn.
+    const lastUserMsgLower = lastUserMsg.toLowerCase();
+    const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have)\b/.test(lastUserMsgLower);
+    const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
+
+    let effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length && hasExplicitSelectionVerb
       ? {
           intent: "selection",
           brief: {
@@ -2712,6 +2724,19 @@ serve(async (req) => {
           plan: ["propose_tearsheet"],
         }
       : extractedBrief;
+
+    // DISCOVERY GATE — strip any auto-proposed tearsheet/quote plan when the
+    // latest user message is an opening brief without an explicit selection
+    // verb. Forces the concierge to ask clarifying questions on turn 1
+    // instead of inferring intent from an earlier conversation.
+    if (
+      !hasExplicitSelectionVerb &&
+      opensWithLookingFor &&
+      effectiveBrief.plan.some((t) => t === "propose_tearsheet" || t === "add_to_tearsheet" || t === "draft_quote")
+    ) {
+      console.log("[concierge discovery-gate] stripping plan — opening brief without selection verb", { lastUserMsg, originalPlan: effectiveBrief.plan });
+      effectiveBrief = { ...effectiveBrief, intent: "discovery", plan: [] };
+    }
     const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
