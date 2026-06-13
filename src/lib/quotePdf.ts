@@ -155,6 +155,12 @@ export interface QuotePdfArgs {
   ukDdpPage?: UkDdpPageArgs | null;
   /** Weighted deposit fraction (0..1). Defaults to 0.6. When 1, balance row is hidden. */
   depositPct?: number;
+  /** Document kind — drives the header title. Defaults to "quote". */
+  documentKind?: "quote" | "tax_invoice" | "proforma_net_buy";
+  /** Render a "FOR RESALE — NOT FOR RESALE TO END CONSUMERS" notice on page 1 (net_buy). */
+  forResaleNotice?: boolean;
+  /** Resale certificate reference shown in the meta block (net_buy, US). */
+  resaleCertNumber?: string | null;
 }
 
 
@@ -224,6 +230,26 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   drawHeader(doc, args, pageW, M, logo);
 
   let y = 168;
+
+  // FOR-RESALE notice (net_buy only) — small stamp under the header.
+  if (args.forResaleNotice) {
+    doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
+    doc.setLineWidth(0.6);
+    doc.setFillColor(245, 248, 246);
+    doc.roundedRect(M, y - 4, contentW, 30, 4, 4, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+    doc.text("FOR RESALE — NOT FOR RESALE TO END CONSUMERS", M + 12, y + 9);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    const certLine = args.resaleCertNumber
+      ? `Sold to designer firm for resale. Resale certificate on file: ${args.resaleCertNumber}.`
+      : "Sold to designer firm for resale under verified resale certificate on file.";
+    doc.text(certLine, M + 12, y + 21);
+    y += 40;
+  }
 
   // ---- Company address block (left) + meta (right)
   y = drawCompanyAndMeta(doc, args, M, y, contentW);
@@ -476,10 +502,14 @@ function drawHeader(
   doc.text("Curated furniture, lighting and objects for trade", textX, 72);
   doc.text("Affluency Etc Pte. Ltd. - Singapore", textX, 86);
 
-  // Right side: Quote ref + status
+  // Right side: doc title + ref
+  const title =
+    args.documentKind === "tax_invoice" ? "TAX INVOICE"
+    : args.documentKind === "proforma_net_buy" ? "PROFORMA INVOICE"
+    : "QUOTE";
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("QUOTE", pageW - M, 50, { align: "right" });
+  doc.setFontSize(title.length > 6 ? 16 : 20);
+  doc.text(title, pageW - M, 50, { align: "right" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
