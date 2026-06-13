@@ -2494,7 +2494,10 @@ serve(async (req) => {
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
     const finalTools = availableTools.length > 0 ? availableTools : TOOLS;
-    const forceToolCall = isExplicitQuoteIntent || stageForcesQuote;
+    const forcePlannedTearsheet = effectiveBrief.plan.includes("propose_tearsheet") && !stageForcesQuote && !isExplicitQuoteIntent;
+    const toolChoice: any = forcePlannedTearsheet
+      ? { type: "function", function: { name: "propose_tearsheet" } }
+      : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
 
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
@@ -2509,7 +2512,7 @@ serve(async (req) => {
         model: aiModel(chosenModel),
         messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
         tools: finalTools,
-        tool_choice: forceToolCall ? "required" : "auto",
+        tool_choice: toolChoice,
         max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
         stream: true,
         stream_options: { include_usage: true },
