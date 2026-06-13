@@ -262,6 +262,10 @@ Deno.serve(async (req) => {
     sent: true,
     recipient: designerEmail,
     commission_cents: commissionCents,
+    commission_payout_cents: commissionPayoutCents,
+    payout_currency: payoutCurrencyOut,
+    fx_rate: fxRate,
+    fx_source: fxSource,
   }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
