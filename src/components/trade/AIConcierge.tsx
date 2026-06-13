@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type TearsheetProposal, type QuoteProposal, type FfeProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
