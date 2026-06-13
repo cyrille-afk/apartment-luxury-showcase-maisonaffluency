@@ -3532,7 +3532,7 @@ serve(async (req) => {
             }
             const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x));
+            let pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x));
             if (pickIds.length === 0) {
               console.warn(`[concierge] dropping ${tc.name} — no valid UUID pick_ids (got: ${JSON.stringify(rawPickIds).slice(0, 200)})`);
               const fallback = "Forgive me — I caught myself reaching for placeholders rather than actual pieces. Tell me a little more about the room or the mood you have in mind, and I'll pull from the Maison Affluency Curation properly.";
@@ -3551,7 +3551,17 @@ serve(async (req) => {
                 }
               }
             }
-            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            let previewRaw = await hydratePickPreview(supabase, pickIds);
+            if (requestedTypology) {
+              previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
+              pickIds = pickIds.filter((id) => previewRaw.some((p: any) => p?.id === id));
+              if (pickIds.length < 2) {
+                console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
+                const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+                continue;
+              }
+            }
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
               if (!r) return p;
