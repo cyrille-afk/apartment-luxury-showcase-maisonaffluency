@@ -3336,6 +3336,112 @@ serve(async (req) => {
           }
         };
 
+        // ----- Promise-without-delivery recovery -----
+        // If the assistant's prose announced a tearsheet (e.g. "here's a draft
+        // tearsheet…", "curated pieces below", "review and amend") but no
+        // tool call (tearsheet / quote / ffe) was emitted, force a follow-up
+        // `propose_tearsheet` call so the card actually appears.
+        const TEARSHEET_PROMISE_RE = /(draft\s+tearsheet|here'?s\s+a\s+(draft\s+)?tearsheet|curated\s+(pieces?|selection)\s+(below|that|with)|review\s+and\s+amend|tearsheet\s+with\s+some\s+curated)/i;
+        const runTearsheetIfPromised = async () => {
+          const buffers = Array.from(toolCallBuffers.values());
+          const hasAnyDeliverable = buffers.some((b) =>
+            b.name === "propose_tearsheet" ||
+            b.name === "add_to_tearsheet" ||
+            b.name === "draft_quote" ||
+            b.name === "add_to_quote" ||
+            b.name === "propose_ffe_rows"
+          );
+          if (hasAnyDeliverable) return;
+          const promisedByPlan =
+            extractedBrief.plan.includes("propose_tearsheet") ||
+            extractedBrief.plan.includes("add_to_tearsheet");
+          const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "");
+          if (!promisedByPlan && !promisedByText) return;
+
+          try {
+            const nudge = [
+              "You just told the user you would draft a tearsheet, but you did NOT call the propose_tearsheet tool.",
+              "Call `propose_tearsheet` NOW with 4-8 pick_ids drawn ONLY from the CATALOG PIECES section of the system prompt (exact UUIDs in square brackets).",
+              "Include a short `title`, `pick_rationales` (one short reason per pick_id), and optional `note`.",
+              "Do not output any prose — only the tool call.",
+            ].join("\n");
+            const resp = await chatFetch({
+              method: "POST",
+              headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: aiModel(modelFor("balanced")),
+                max_completion_tokens: CHAT_MAX_TOKENS,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  ...trimmedMessages,
+                  { role: "system", content: nudge },
+                ],
+                tools: TOOLS.filter((t: any) => t.function?.name === "propose_tearsheet"),
+                tool_choice: { type: "function", function: { name: "propose_tearsheet" } },
+              }),
+            });
+            if (!resp.ok) { console.error("[concierge promise-recovery] http", resp.status); return; }
+            const data = await resp.json();
+            if (data?.usage) {
+              logAiUsage({
+                feature: "trade-concierge-promise-recovery",
+                model: modelFor("balanced"),
+                usage: data.usage,
+                userId,
+              }).catch(() => {});
+            }
+            const argsStr = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+            if (!argsStr) return;
+            const parsed = JSON.parse(argsStr);
+            const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+            const pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x)).slice(0, 16);
+            if (pickIds.length === 0) {
+              console.warn("[concierge promise-recovery] no valid pick_ids returned");
+              return;
+            }
+            const rationaleMap: Record<string, { reason: string; detail?: string }> = {};
+            if (Array.isArray(parsed.pick_rationales)) {
+              for (const r of parsed.pick_rationales) {
+                if (r && typeof r.id === "string" && typeof r.reason === "string") {
+                  rationaleMap[r.id] = {
+                    reason: r.reason.trim(),
+                    detail: typeof r.detail === "string" && r.detail.trim() ? r.detail.trim() : undefined,
+                  };
+                }
+              }
+            }
+            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            const preview = previewRaw.map((p: any) => {
+              const r = p && rationaleMap[p.id];
+              if (!r) return p;
+              return { ...p, rationale: r.reason, rationale_detail: r.detail || null };
+            });
+            const proposal = {
+              tool: "propose_tearsheet",
+              tool_call_id: crypto.randomUUID(),
+              args: {
+                title: typeof parsed.title === "string" && parsed.title.trim() ? parsed.title : "Curated selection",
+                pick_ids: pickIds,
+                note: typeof parsed.note === "string" ? parsed.note : null,
+                pick_rationales: rationaleMap,
+              },
+              preview,
+            };
+            // Register the synthesized buffer so chained-quote recovery can see it.
+            const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
+            toolCallBuffers.set(maxIdx + 1, {
+              id: proposal.tool_call_id,
+              name: "propose_tearsheet",
+              argsText: JSON.stringify(proposal.args),
+            });
+            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+            console.log(`[concierge promise-recovery] emitted propose_tearsheet (${pickIds.length} picks)`);
+          } catch (e) {
+            console.error("[concierge promise-recovery] failed:", e);
+          }
+        };
+
         let sawDone = false;
         // Some fallback models (notably Cloudflare Llama) do NOT emit native
         // `tool_calls`; they stringify the JSON envelope into `delta.content`.
@@ -3345,6 +3451,7 @@ serve(async (req) => {
         let suspectedToolCallText = false;
         let suppressedTextBuf = "";
         let forwardedAnyText = false;
+        let assistantTextBuf = "";
         const looksLikeToolEnvelopeStart = (s: string) => {
           const t = s.trimStart();
           if (!t.startsWith("{")) return false;
@@ -3417,6 +3524,7 @@ serve(async (req) => {
                     continue; // do not forward
                   }
                   if (contentDelta.trim().length > 0) forwardedAnyText = true;
+                  assistantTextBuf += contentDelta;
                 }
                 // Plain text delta — forward unchanged
                 controller.enqueue(encoder.encode(line + "\n"));
@@ -3470,6 +3578,11 @@ serve(async (req) => {
           //     (tearsheet → quote) holds without buffering SSE writes.
           backfillTearsheetIfNeeded();
           await flushProposal();
+          // (1b) Promise-without-delivery recovery: the model wrote prose like
+          //      "here's a draft tearsheet…" but never emitted propose_tearsheet
+          //      (and no quote/ffe either). Force a follow-up tool call so the
+          //      user actually sees the card they were promised.
+          await runTearsheetIfPromised();
           // (2) Reverse back-fill: tearsheet emitted but quote missing — forces a
           //     draft_quote follow-up and emits it after the tearsheet card.
           await runChainIfNeeded();
