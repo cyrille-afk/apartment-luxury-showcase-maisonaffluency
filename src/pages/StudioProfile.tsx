@@ -86,7 +86,7 @@ export default function StudioProfile() {
       logStudioEvent({ studioId: (data as any).id, eventType: "profile_view" });
       setLoading(false);
     })();
-  }, [slug]);
+  }, [slug, user]);
 
   const canViewInsights =
     !!studio && (isAdmin || (!!user && studio.owner_user_id === user.id));
