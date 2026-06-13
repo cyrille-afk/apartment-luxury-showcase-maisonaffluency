@@ -3269,6 +3269,19 @@ serve(async (req) => {
         };
 
         let sawDone = false;
+        // Some fallback models (notably Cloudflare Llama) do NOT emit native
+        // `tool_calls`; they stringify the JSON envelope into `delta.content`.
+        // If the very first content chunk looks like a tool-call envelope, we
+        // suppress all text output for this turn and attempt to recover a
+        // structured tool call at stream end.
+        let suspectedToolCallText = false;
+        let suppressedTextBuf = "";
+        const looksLikeToolEnvelopeStart = (s: string) => {
+          const t = s.trimStart();
+          if (!t.startsWith("{")) return false;
+          // Common Llama patterns we've observed
+          return /^\{\s*"(type|name|function|parameters|arguments|tool|tool_call)"\s*:/.test(t);
+        };
         try {
           while (true) {
             const { done, value } = await reader.read();
@@ -3318,6 +3331,17 @@ serve(async (req) => {
                   // Don't forward raw tool_call deltas to the client; we emit a proposal event instead.
                   continue;
                 }
+                // Inspect plain-text content for stringified tool-call envelopes
+                const contentDelta = typeof delta?.content === "string" ? delta.content : null;
+                if (contentDelta !== null) {
+                  if (!suspectedToolCallText && suppressedTextBuf === "" && looksLikeToolEnvelopeStart(contentDelta)) {
+                    suspectedToolCallText = true;
+                  }
+                  if (suspectedToolCallText) {
+                    suppressedTextBuf += contentDelta;
+                    continue; // do not forward
+                  }
+                }
                 // Plain text delta — forward unchanged
                 controller.enqueue(encoder.encode(line + "\n"));
               } catch {
@@ -3326,6 +3350,43 @@ serve(async (req) => {
               }
             }
           }
+          // If we suppressed content that looked like a tool envelope, try to
+          // recover it into a real tool_call. Otherwise, release the buffered
+          // text so the user still sees a reply.
+          if (suspectedToolCallText && suppressedTextBuf.trim().length > 0) {
+            let recovered = false;
+            try {
+              // Strip code fences if present
+              let raw = suppressedTextBuf.trim();
+              const fence = raw.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+              if (fence) raw = fence[1].trim();
+              const parsed = JSON.parse(raw);
+              const name = parsed?.name ?? parsed?.function?.name ?? parsed?.tool ?? parsed?.tool_call?.name;
+              const params = parsed?.parameters ?? parsed?.arguments ?? parsed?.function?.arguments ?? parsed?.tool_call?.arguments ?? {};
+              const KNOWN = new Set([
+                "propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote",
+                "propose_ffe_rows", "estimate_shipping", "check_spatial_fit",
+                "check_spatial_fit_batch", "log_spatial_fit_edit",
+              ]);
+              if (typeof name === "string" && KNOWN.has(name)) {
+                const argsText = typeof params === "string" ? params : JSON.stringify(params);
+                toolCallBuffers.set(0, { id: crypto.randomUUID(), name, argsText });
+                console.warn(`[concierge] recovered stringified tool_call from fallback model: ${name}`);
+                recovered = true;
+              }
+            } catch (e) {
+              console.warn("[concierge] failed to parse suspected tool envelope:", (e as Error).message);
+            }
+            if (!recovered) {
+              // Not a real tool envelope — release the text to the client so the
+              // user isn't left with an empty assistant turn.
+              const releaseFrame = {
+                choices: [{ delta: { content: suppressedTextBuf } }],
+              };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+            }
+          }
+
           // Stream fully consumed.
           // (1) Symmetric back-fill: if the model emitted ONLY a quote but the planner
           //     also expected a tearsheet, synthesize a propose_tearsheet buffer from
