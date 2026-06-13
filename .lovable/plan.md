@@ -32,7 +32,7 @@ New columns on `trade_quotes` (and mirrored on the resulting order):
 - `end_client_billing` JSONB (only when agent mode) ✅ migrated
 - `designer_payout_account_id` FK → `studio_payout_accounts` ✅ migrated
 - `resale_certificate_id` FK → `studio_resale_certificates` (gates `net_buy` for US studios, per ship-to state) ✅ migrated
-- `managed_freight_quote_id` FK → existing `shipping_quotes` (mandatory in `net_buy` so the door-to-drayage cost is locked at checkout) — **add in next migration**
+- `managed_freight_quote_id` FK → existing `shipping_quotes` (mandatory in `net_buy` so the door-to-drayage cost is locked at checkout) ✅ migrated
 
 New tables already in place: `studio_payout_accounts`, `studio_resale_certificates`.
 
